@@ -66,6 +66,14 @@ public class DialogMessage extends ModelObject {
 	private boolean	manuallySent;
 
 	/**
+	 * The seconds a {@link Participant} viewed the presented media content (if
+	 * integrated in the {@link InterventionMessage})
+	 */
+	@Getter
+	@Setter
+	private int		secondsMediaContentViewed;
+
+	/**
 	 * Marker showing if a response to a {@link DialogMessage} can not be
 	 * automatically processed by the system
 	 */

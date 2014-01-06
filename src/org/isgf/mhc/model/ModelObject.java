@@ -30,13 +30,16 @@ public abstract class ModelObject {
 	@Getter
 	private Oid					id;
 
+	/**
+	 * {@link ObjectMapper} required for JSON generation
+	 */
 	@JsonIgnore
 	private static ObjectMapper	objectMapper	= new ObjectMapper();
 
 	/**
 	 * Creates a JSON string of the current {@link ModelObject}
 	 * 
-	 * @return
+	 * @return JSON string
 	 */
 	@JsonIgnore
 	public String toJSONString() {
