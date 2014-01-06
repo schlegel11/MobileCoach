@@ -10,7 +10,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Andreas Filler
  */
 @Log4j2
-public class MHCContextListener implements ServletContextListener {
+public class ContextListener implements ServletContextListener {
 	@Getter
 	private static boolean	ready	= false;
 
@@ -23,7 +23,7 @@ public class MHCContextListener implements ServletContextListener {
 	public void contextInitialized(final ServletContextEvent arg0) {
 		// TODO Context initialization
 
-		MHCContextListener.ready = true;
+		ContextListener.ready = true;
 
 		log.info("Context initialized.");
 	}

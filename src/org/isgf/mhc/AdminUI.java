@@ -8,9 +8,12 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
+/**
+ * @author Andreas Filler
+ */
 @SuppressWarnings("serial")
 @Theme("mhc")
-public class MHCAdminUI extends UI {
+public class AdminUI extends UI {
 	@Override
 	protected void init(final VaadinRequest request) {
 		final VerticalLayout layout = new VerticalLayout();

@@ -9,7 +9,7 @@
 		<session-timeout>120</session-timeout>
 	</session-config>
 	<listener>
-		<listener-class>org.isgf.mhc.MHCContextListener</listener-class>
+		<listener-class>org.isgf.mhc.ContextListener</listener-class>
 	</listener>
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>

@@ -9,11 +9,14 @@ import lombok.extern.log4j.Log4j2;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.VaadinServlet;
 
+/**
+ * @author Andreas Filler
+ */
 @SuppressWarnings("serial")
 @WebServlet(value = "/*", asyncSupported = true, loadOnStartup = 1)
-@VaadinServletConfiguration(productionMode = Constants.PRODUCTION_MODE, ui = MHCAdminUI.class)
+@VaadinServletConfiguration(productionMode = Constants.PRODUCTION_MODE, ui = AdminUI.class)
 @Log4j2
-public class MHCAdminServlet extends VaadinServlet {
+public class AdminServlet extends VaadinServlet {
 
 	/*
 	 * (non-Javadoc)
@@ -23,9 +26,9 @@ public class MHCAdminServlet extends VaadinServlet {
 	@Override
 	public void init(final ServletConfig servletConfig) throws ServletException {
 		// Only start servlet if context is ready
-		if (!MHCContextListener.isReady()) {
+		if (!ContextListener.isReady()) {
 			log.error("Servlet {} can't be started. Context is not ready!",
-					MHCAdminServlet.class);
+					AdminServlet.class);
 			throw new ServletException("Context is not ready!");
 		}
 
