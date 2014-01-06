@@ -23,6 +23,13 @@
 		<conf name="nodeploy" />
 	</configurations>
 	<dependencies defaultconf="default" defaultconfmapping="default->default">
+		<!-- Log4j with all extension to route other logging frameworks -->	
+		<dependency org="org.apache.logging.log4j" name="log4j-api" rev="&log4j.version;"/>
+		<dependency org="org.apache.logging.log4j" name="log4j-core" rev="&log4j.version;"/>
+		<dependency org="org.apache.logging.log4j" name="log4j-1.2-api" rev="&log4j.version;"/>
+		<dependency org="org.apache.logging.log4j" name="log4j-jcl" rev="&log4j.version;"/>
+		<dependency org="org.apache.logging.log4j" name="log4j-slf4j-impl" rev="&log4j.version;"/>
+	
 		<!-- The core server part of Vaadin -->
 		<dependency org="com.vaadin" name="vaadin-server" rev="&vaadin.version;" />
 
@@ -53,13 +60,6 @@
 
 		<!-- JENA -->	
 		<dependency org="org.apache.jena" name="apache-jena-libs" rev="&jena.version;"/>
-
-		<!-- Log4j with all extension to route other logging frameworks -->	
-		<dependency org="org.apache.logging.log4j" name="log4j-api" rev="&log4j.version;"/>
-		<dependency org="org.apache.logging.log4j" name="log4j-core" rev="&log4j.version;"/>
-		<dependency org="org.apache.logging.log4j" name="log4j-1.2-api" rev="&log4j.version;"/>
-		<dependency org="org.apache.logging.log4j" name="log4j-jcl" rev="&log4j.version;"/>
-		<dependency org="org.apache.logging.log4j" name="log4j-slf4j-impl" rev="&log4j.version;"/>
 
 		<!-- Javaluator -->	
 		<dependency org="com.fathzer" name="javaluator" rev="&javaluator.version;"/>

@@ -6,7 +6,7 @@ import java.io.StringWriter;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 
 import org.jongo.Oid;
 import org.jongo.marshall.jackson.oid.Id;
@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * 
  * @author Andreas Filler
  */
-@Log4j
+@Log4j2
 @RequiredArgsConstructor
 public abstract class ModelObject {
 	/**
@@ -48,7 +48,7 @@ public abstract class ModelObject {
 		try {
 			objectMapper.writeValue(stringWriter, this);
 		} catch (final IOException e) {
-			log.warn("Could not create JSON of " + this.getClass());
+			log.warn("Could not create JSON of {}!", this.getClass());
 			return "{ \"Error\" : \"JSON object could not be serialized\" }";
 		}
 
