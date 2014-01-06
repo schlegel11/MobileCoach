@@ -13,7 +13,7 @@ import org.jongo.Oid;
  * Variables belong to the referenced {@link Intervention} and consist of a name
  * and a value.
  * 
- * @author Andreas Filler <andreas@filler.name>
+ * @author Andreas Filler
  */
 public class InterventionVariableValue extends AbstractVariableValue {
 	/**

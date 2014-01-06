@@ -17,7 +17,7 @@ import org.jongo.Oid;
  * that it stores the result of the rule in a variable and/or if it shall send a
  * message.
  * 
- * @author Andreas Filler <andreas@filler.name>
+ * @author Andreas Filler
  */
 public class InterventionRule extends AbstractRule {
 	/**

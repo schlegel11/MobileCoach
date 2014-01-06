@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Basic class for model objects that should be stored in the database or
  * serialized as JSON objects
  * 
- * @author Andreas Filler <andreas@filler.name>
+ * @author Andreas Filler
  */
 @Log4j
 @RequiredArgsConstructor

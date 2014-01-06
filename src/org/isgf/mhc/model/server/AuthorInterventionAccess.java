@@ -13,7 +13,7 @@ import org.jongo.Oid;
  * The {@link AuthorInterventionAccess} describes, which {@link Author} is
  * allowed to administrate a specific {@link Intervention}.
  * 
- * @author Andreas Filler <andreas@filler.name>
+ * @author Andreas Filler
  */
 @AllArgsConstructor
 public class AuthorInterventionAccess extends ModelObject {

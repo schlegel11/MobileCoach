@@ -15,7 +15,7 @@ import org.jongo.Oid;
  * be contacted. Several {@link DialogOption}s can exist for one
  * {@link Participant}.
  * 
- * @author Andreas Filler <andreas@filler.name>
+ * @author Andreas Filler
  */
 @AllArgsConstructor
 public class DialogOption extends ModelObject {

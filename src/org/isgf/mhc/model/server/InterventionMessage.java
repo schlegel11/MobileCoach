@@ -14,7 +14,7 @@ import org.jongo.Oid;
  * an {@link Intervention}. {@link InterventionMessage}s are grouped in
  * {@link InterventionMessageGroup}s.
  * 
- * @author Andreas Filler <andreas@filler.name>
+ * @author Andreas Filler
  */
 @AllArgsConstructor
 public class InterventionMessage extends ModelObject {

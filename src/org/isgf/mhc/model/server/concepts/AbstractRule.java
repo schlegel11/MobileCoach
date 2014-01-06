@@ -14,7 +14,7 @@ import org.isgf.mhc.model.types.EquationSignTypes;
  * comparison term. The rule can be evaluated and checked against the comparison
  * term based on the equation sign.
  * 
- * @author Andreas Filler <andreas@filler.name>
+ * @author Andreas Filler
  */
 @AllArgsConstructor
 public abstract class AbstractRule extends ModelObject {

@@ -11,7 +11,7 @@ import org.isgf.mhc.model.ModelObject;
  * 
  * A variable has a unique name and a value
  * 
- * @author Andreas Filler <andreas@filler.name>
+ * @author Andreas Filler
  */
 @AllArgsConstructor
 public abstract class AbstractVariableValue extends ModelObject {

@@ -13,7 +13,7 @@ import org.isgf.mhc.model.ModelObject;
  * {@link ScreeningSurvey}, {@link InterventionRule}s and {@link Participant}s.
  * It's the heart of the whole system.
  * 
- * @author Andreas Filler <andreas@filler.name>
+ * @author Andreas Filler
  */
 @AllArgsConstructor
 public class Intervention extends ModelObject {

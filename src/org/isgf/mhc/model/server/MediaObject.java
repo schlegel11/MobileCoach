@@ -14,7 +14,7 @@ import org.isgf.mhc.model.types.MediaObjectTypes;
  * integrated in messages. They consist of a type description and a file
  * reference.
  * 
- * @author Andreas Filler <andreas@filler.name>
+ * @author Andreas Filler
  */
 @AllArgsConstructor
 public class MediaObject extends ModelObject {

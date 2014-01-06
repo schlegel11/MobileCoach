@@ -12,7 +12,7 @@ import org.isgf.mhc.model.ModelObject;
  * Authors are the backend users of the system. They can be normal authors or
  * administrators.
  * 
- * @author Andreas Filler <andreas@filler.name>
+ * @author Andreas Filler
  */
 @AllArgsConstructor
 public class Author extends ModelObject {

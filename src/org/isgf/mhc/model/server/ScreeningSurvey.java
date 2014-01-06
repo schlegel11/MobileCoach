@@ -17,7 +17,7 @@ import org.jongo.Oid;
  * are collected as well as used to calculate the next
  * {@link ScreeningSurveySlide}s.
  * 
- * @author Andreas Filler <andreas@filler.name>
+ * @author Andreas Filler
  */
 @AllArgsConstructor
 public class ScreeningSurvey extends ModelObject {

@@ -15,7 +15,7 @@ import org.jongo.Oid;
  * which are presented to a {@link Participant} in a dynamic order. The order
  * can be defined by using the rules or by defining a default next slide.
  * 
- * @author Andreas Filler <andreas@filler.name>
+ * @author Andreas Filler
  */
 @AllArgsConstructor
 public class ScreeningSurveySlide extends ModelObject {
@@ -56,7 +56,7 @@ public class ScreeningSurveySlide extends ModelObject {
 	private String								titleWithPlaceholders;
 
 	/**
-	 * <strong>OPTIONAL:</string> A {@link MediaObject} can be linked to be
+	 * <strong>OPTIONAL:</strong> A {@link MediaObject} can be linked to be
 	 * presented on the {@link ScreeningSurveySlide}
 	 */
 	@Getter
@@ -80,7 +80,7 @@ public class ScreeningSurveySlide extends ModelObject {
 	private ScreeningSurveySlideQuestionTypes	questionType;
 
 	/**
-	 * <strong>OPTIONAL:</string> The answers presented to the
+	 * <strong>OPTIONAL:</strong> The answers presented to the
 	 * {@link Participant} for selection
 	 */
 	@Getter
@@ -88,7 +88,7 @@ public class ScreeningSurveySlide extends ModelObject {
 	private String[]							answersWithPlaceholders;
 
 	/**
-	 * <strong>OPTIONAL:</string> The return values of the answers presented to
+	 * <strong>OPTIONAL:</strong> The return values of the answers presented to
 	 * the {@link Participant} for selection; the selected answer value can be
 	 * stored
 	 */
@@ -97,7 +97,7 @@ public class ScreeningSurveySlide extends ModelObject {
 	private String[]							answerValues;
 
 	/**
-	 * <strong>OPTIONAL:</string> The answer that is preselected when the
+	 * <strong>OPTIONAL:</strong> The answer that is preselected when the
 	 * {@link Participant} comes to the {@link ScreeningSurveySlide}
 	 */
 	@Getter
@@ -105,7 +105,7 @@ public class ScreeningSurveySlide extends ModelObject {
 	private int									preSelectedAnswer;
 
 	/**
-	 * <strong>OPTIONAL:</string> The name of the variable in which the value of
+	 * <strong>OPTIONAL:</strong> The name of the variable in which the value of
 	 * the answer which was selected by the {@link Participant} should be stored
 	 */
 	@Getter

@@ -16,7 +16,7 @@ import org.jongo.Oid;
  * next rule in the order is perfomed, if no redirect to another
  * {@link ScreeningSurveySlide} happens.
  * 
- * @author Andreas Filler <andreas@filler.name>
+ * @author Andreas Filler
  */
 public class ScreeningSurveySlideRule extends AbstractRule {
 	/**
@@ -55,7 +55,7 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 	private int	order;
 
 	/**
-	 * <strong>OPTIONAL:</string> If the rule result is <strong>true</strong>
+	 * <strong>OPTIONAL:</strong> If the rule result is <strong>true</strong>
 	 * the {@link Participant} will be redirected to the given
 	 * {@link ScreeningSurveySlide}
 	 */
@@ -64,7 +64,7 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 	private Oid	nextScreeningSurveySlideWhenTrue;
 
 	/**
-	 * <strong>OPTIONAL:</string> If the rule result is <strong>false</strong>
+	 * <strong>OPTIONAL:</strong> If the rule result is <strong>false</strong>
 	 * the {@link Participant} will be redirected to the given
 	 * {@link ScreeningSurveySlide}
 	 */

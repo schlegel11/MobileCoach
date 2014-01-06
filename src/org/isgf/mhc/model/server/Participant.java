@@ -15,7 +15,7 @@ import org.jongo.Oid;
  * name. It furthermore stores if the {@link Participant} already performed the
  * screening survey and if the messaging is active for her/him.
  * 
- * @author Andreas Filler <andreas@filler.name>
+ * @author Andreas Filler
  */
 @AllArgsConstructor
 public class Participant extends ModelObject {

@@ -10,7 +10,7 @@ import org.jongo.Oid;
 /**
  * {@link ModelObject} to represent an {@link DialogMessage}
  * 
- * @author Andreas Filler <andreas@filler.name>
+ * @author Andreas Filler
  */
 @AllArgsConstructor
 public class DialogMessage extends ModelObject {

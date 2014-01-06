@@ -14,7 +14,7 @@ import org.jongo.Oid;
  * {@link InterventionMessage}s that will be sent to {@link Participant}s during
  * an {@link Intervention}.
  * 
- * @author Andreas Filler <andreas@filler.name>
+ * @author Andreas Filler
  */
 @AllArgsConstructor
 public class InterventionMessageGroup extends ModelObject {
