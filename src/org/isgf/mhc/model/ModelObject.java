@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.io.StringWriter;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
-import org.jongo.Oid;
+import org.bson.types.ObjectId;
+import org.jongo.Jongo;
+import org.jongo.MongoCollection;
 import org.jongo.marshall.jackson.oid.Id;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -21,20 +23,32 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Andreas Filler
  */
 @Log4j2
-@RequiredArgsConstructor
 public abstract class ModelObject {
 	/**
 	 * The id of the {@link ModelObject}
 	 */
 	@Id
 	@Getter
-	private Oid					id;
+	@Setter
+	private ObjectId			id;
 
 	/**
 	 * {@link ObjectMapper} required for JSON generation
 	 */
 	@JsonIgnore
 	private static ObjectMapper	objectMapper	= new ObjectMapper();
+
+	/**
+	 * {@link Jongo} object required for database access
+	 */
+	@JsonIgnore
+	private static Jongo		db;
+
+	@JsonIgnore
+	public static void configure(final ObjectMapper objectMapper, final Jongo db) {
+		ModelObject.objectMapper = objectMapper;
+		ModelObject.db = db;
+	}
 
 	/**
 	 * Creates a JSON string of the current {@link ModelObject}
@@ -64,5 +78,16 @@ public abstract class ModelObject {
 	@Override
 	public String toString() {
 		return this.toJSONString();
+	}
+
+	/**
+	 * Saves {@link ModelObject} to database
+	 */
+	public void save() {
+		final MongoCollection collection = db.getCollection(this.getClass()
+				.getSimpleName());
+		collection.save(this);
+		log.debug("Saved {} with id {}", this.getClass().getSimpleName(),
+				this.id);
 	}
 }
