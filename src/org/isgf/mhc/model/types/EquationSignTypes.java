@@ -6,5 +6,5 @@ package org.isgf.mhc.model.types;
  * @author Andreas Filler
  */
 public enum EquationSignTypes {
-	IS_EQUAL, IS_BIGGER_THAN, IS_SMALLER_THAN, STARTS_WITH, ENDS_WITH, CONTAINS
+	IS_SMALLER_THAN, IS_SMALLER_OR_EQUAL_THAN, EQUALS, IS_BIGGER_OR_EQUAL_THAN, IS_BIGGER_THAN
 }

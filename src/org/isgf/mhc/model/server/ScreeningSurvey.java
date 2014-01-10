@@ -15,7 +15,7 @@ import org.isgf.mhc.model.ModelObject;
  * Before a {@link Participant} can participate in an {@link Intervention}
  * she/he has to perform one of the {@link ScreeningSurvey}s belonging to an
  * Intervention. In this {@link ScreeningSurvey}, which consist of several
- * {@link ScreeningSurveySlide}s, the basic {@link ParticipantVariableValue}s
+ * {@link ScreeningSurveySlide}s, the basic {@link ParticipantVariableWithValue}s
  * are collected as well as used to calculate the next
  * {@link ScreeningSurveySlide}s.
  * 

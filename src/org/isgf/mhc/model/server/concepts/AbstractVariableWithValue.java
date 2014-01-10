@@ -17,7 +17,7 @@ import org.isgf.mhc.model.ModelObject;
  */
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class AbstractVariableValue extends ModelObject {
+public abstract class AbstractVariableWithValue extends ModelObject {
 	/**
 	 * Name of the variable
 	 */

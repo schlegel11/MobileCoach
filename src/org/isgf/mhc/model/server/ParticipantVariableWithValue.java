@@ -7,10 +7,10 @@ import lombok.Setter;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
-import org.isgf.mhc.model.server.concepts.AbstractVariableValue;
+import org.isgf.mhc.model.server.concepts.AbstractVariableWithValue;
 
 /**
- * {@link ModelObject} to represent an {@link ParticipantVariableValue}
+ * {@link ModelObject} to represent an {@link ParticipantVariableWithValue}
  * 
  * Variables belong to the referenced {@link Participant} and consist of a name
  * and a value.
@@ -18,11 +18,11 @@ import org.isgf.mhc.model.server.concepts.AbstractVariableValue;
  * @author Andreas Filler
  */
 @NoArgsConstructor
-public class ParticipantVariableValue extends AbstractVariableValue {
+public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 	/**
 	 * Default constructor
 	 */
-	public ParticipantVariableValue(final ObjectId participant,
+	public ParticipantVariableWithValue(final ObjectId participant,
 			final String name, final String value) {
 		super(name, value);
 

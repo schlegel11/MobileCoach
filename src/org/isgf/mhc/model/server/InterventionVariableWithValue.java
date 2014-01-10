@@ -7,10 +7,10 @@ import lombok.Setter;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
-import org.isgf.mhc.model.server.concepts.AbstractVariableValue;
+import org.isgf.mhc.model.server.concepts.AbstractVariableWithValue;
 
 /**
- * {@link ModelObject} to represent an {@link InterventionVariableValue}
+ * {@link ModelObject} to represent an {@link InterventionVariableWithValue}
  * 
  * Variables belong to the referenced {@link Intervention} and consist of a name
  * and a value.
@@ -18,11 +18,11 @@ import org.isgf.mhc.model.server.concepts.AbstractVariableValue;
  * @author Andreas Filler
  */
 @NoArgsConstructor
-public class InterventionVariableValue extends AbstractVariableValue {
+public class InterventionVariableWithValue extends AbstractVariableWithValue {
 	/**
 	 * Default constructor
 	 */
-	public InterventionVariableValue(final ObjectId intervention,
+	public InterventionVariableWithValue(final ObjectId intervention,
 			final String name, final String value) {
 		super(name, value);
 
