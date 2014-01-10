@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
-import org.jongo.Oid;
 
 /**
  * {@link ModelObject} to represent an {@link ScreeningSurvey}
@@ -26,14 +26,14 @@ public class ScreeningSurvey extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private Oid		intervention;
+	private ObjectId	intervention;
 
 	/**
 	 * The name of the {@link ScreeningSurvey} as displayed in the backend
 	 */
 	@Getter
 	@Setter
-	private String	name;
+	private String		name;
 
 	/**
 	 * <strong>OPTIONAL:</strong> The password required to participate in the
@@ -41,7 +41,7 @@ public class ScreeningSurvey extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private String	password;
+	private String		password;
 
 	/**
 	 * Defines if the {@link ScreeningSurvey} is open for new
@@ -49,5 +49,5 @@ public class ScreeningSurvey extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private boolean	active;
+	private boolean		active;
 }

@@ -3,10 +3,10 @@ package org.isgf.mhc.model.server;
 import lombok.Getter;
 import lombok.Setter;
 
+import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.server.concepts.AbstractRule;
 import org.isgf.mhc.model.types.EquationSignTypes;
-import org.jongo.Oid;
 
 /**
  * {@link ModelObject} to represent an {@link InterventionRule}
@@ -23,7 +23,8 @@ public class InterventionRule extends AbstractRule {
 	/**
 	 * Default constructor
 	 */
-	public InterventionRule(final Oid isSubInterventionRuleOfInterventionRule,
+	public InterventionRule(
+			final ObjectId isSubInterventionRuleOfInterventionRule,
 			final int order, final String storeValueToVariableWithName,
 			final boolean sendMessageIfTrue, final String ruleWithPlaceholders,
 			final EquationSignTypes ruleEquationSign,
@@ -44,7 +45,7 @@ public class InterventionRule extends AbstractRule {
 	 */
 	@Getter
 	@Setter
-	private Oid		isSubInterventionRuleOfInterventionRule;
+	private ObjectId	isSubInterventionRuleOfInterventionRule;
 
 	/**
 	 * The position of the {@link InterventionRule} compared to all other
@@ -52,7 +53,7 @@ public class InterventionRule extends AbstractRule {
 	 */
 	@Getter
 	@Setter
-	private int		order;
+	private int			order;
 
 	/**
 	 * <strong>OPTIONAL:</strong> If the result of the {@link InterventionRule}
@@ -60,7 +61,7 @@ public class InterventionRule extends AbstractRule {
 	 */
 	@Getter
 	@Setter
-	private String	storeValueToVariableWithName;
+	private String		storeValueToVariableWithName;
 
 	/**
 	 * <strong>OPTIONAL:</strong> If the result of the {@link InterventionRule}
@@ -69,5 +70,5 @@ public class InterventionRule extends AbstractRule {
 	 */
 	@Getter
 	@Setter
-	private boolean	sendMessageIfTrue;
+	private boolean		sendMessageIfTrue;
 }

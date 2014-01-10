@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
-import org.jongo.Oid;
 
 /**
  * {@link ModelObject} to represent an {@link Participant}
@@ -24,21 +24,21 @@ public class Participant extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private Oid		intervention;
+	private ObjectId	intervention;
 
 	/**
 	 * The timestamp when the {@link Participant} has been created
 	 */
 	@Getter
 	@Setter
-	private long	created;
+	private long		created;
 
 	/**
 	 * The nickname of the {@link Participant}
 	 */
 	@Getter
 	@Setter
-	private String	nickname;
+	private String		nickname;
 
 	/**
 	 * Stores if the {@link Participant} already performed a
@@ -46,7 +46,7 @@ public class Participant extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private boolean	performedScreeningSurvey;
+	private boolean		performedScreeningSurvey;
 
 	/**
 	 * Stores if the {@link Participant} is activated for the rule-based
@@ -56,7 +56,7 @@ public class Participant extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private boolean	activeForMessaging;
+	private boolean		activeForMessaging;
 
 	/**
 	 * The organization the {@link Participant} belongs to; can e.g. be used for
@@ -64,7 +64,7 @@ public class Participant extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private String	organization;
+	private String		organization;
 
 	/**
 	 * The organization unit the {@link Participant} belongs to; can e.g. be
@@ -72,5 +72,5 @@ public class Participant extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private String	organizationUnit;
+	private String		organizationUnit;
 }

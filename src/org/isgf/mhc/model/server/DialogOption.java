@@ -4,9 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.types.DialogOptionTypes;
-import org.jongo.Oid;
 
 /**
  * {@link ModelObject} to represent an {@link DialogOption}
@@ -24,7 +24,7 @@ public class DialogOption extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private Oid					participant;
+	private ObjectId			participant;
 
 	/**
 	 * The {@link DialogOptionTypes} which describes this {@link DialogOption}

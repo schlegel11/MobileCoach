@@ -4,9 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.types.ScreeningSurveySlideQuestionTypes;
-import org.jongo.Oid;
 
 /**
  * {@link ModelObject} to represent an {@link ScreeningSurveySlide}
@@ -24,7 +24,7 @@ public class ScreeningSurveySlide extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private Oid									screeningSurvey;
+	private ObjectId							screeningSurvey;
 
 	/**
 	 * The position of the {@link ScreeningSurveySlide} compared to all other
@@ -61,7 +61,7 @@ public class ScreeningSurveySlide extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private Oid									linkedMediaObject;
+	private ObjectId							linkedMediaObject;
 
 	/**
 	 * The question presented to the {@link Participant} containing placeholders

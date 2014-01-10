@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
-import org.jongo.Oid;
 
 /**
  * {@link ModelObject} to represent an {@link InterventionMessageGroup}
@@ -23,14 +23,14 @@ public class InterventionMessageGroup extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private Oid		intervention;
+	private ObjectId	intervention;
 
 	/**
 	 * The name of the {@link InterventionMessageGroup} as shown in the backend
 	 */
 	@Getter
 	@Setter
-	private String	name;
+	private String		name;
 
 	/**
 	 * Defines if the {@link InterventionMessage}s in the group will be sent in
@@ -39,5 +39,5 @@ public class InterventionMessageGroup extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private boolean	sendInRandomOrder;
+	private boolean		sendInRandomOrder;
 }

@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
-import org.jongo.Oid;
 
 /**
  * {@link ModelObject} to represent an {@link AuthorInterventionAccess}
@@ -22,12 +22,12 @@ public class AuthorInterventionAccess extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private Oid	author;
+	private ObjectId	author;
 
 	/**
 	 * {@link Intervention} that can be administrated by the {@link Author}
 	 */
 	@Getter
 	@Setter
-	private Oid	intervention;
+	private ObjectId	intervention;
 }

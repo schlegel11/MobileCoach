@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
-import org.jongo.Oid;
 
 /**
  * {@link ModelObject} to represent an {@link InterventionMessage}
@@ -24,14 +24,14 @@ public class InterventionMessage extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private Oid		interventionMessageGroup;
+	private ObjectId	interventionMessageGroup;
 
 	/**
 	 * The message text containing placeholders for variables
 	 */
 	@Getter
 	@Setter
-	private String	textWithPlaceholders;
+	private String		textWithPlaceholders;
 
 	/**
 	 * <strong>OPTIONAL:</strong> The {@link MediaObject} used/presented in this
@@ -39,7 +39,7 @@ public class InterventionMessage extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private Oid		linkedMediaObject;
+	private ObjectId	linkedMediaObject;
 
 	/**
 	 * <strong>OPTIONAL:</strong> If the result of the
@@ -48,5 +48,5 @@ public class InterventionMessage extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private String	storeValueToVariableWithName;
+	private String		storeValueToVariableWithName;
 }

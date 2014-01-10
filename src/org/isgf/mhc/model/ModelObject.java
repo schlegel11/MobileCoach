@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 
 import lombok.Getter;
-import lombok.Setter;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
@@ -29,7 +28,6 @@ public abstract class ModelObject {
 	 */
 	@Id
 	@Getter
-	@Setter
 	private ObjectId			id;
 
 	/**

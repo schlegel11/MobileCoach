@@ -3,9 +3,9 @@ package org.isgf.mhc.model.server;
 import lombok.Getter;
 import lombok.Setter;
 
+import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.server.concepts.AbstractVariableValue;
-import org.jongo.Oid;
 
 /**
  * {@link ModelObject} to represent an {@link ParticipantVariableValue}
@@ -19,8 +19,8 @@ public class ParticipantVariableValue extends AbstractVariableValue {
 	/**
 	 * Default constructor
 	 */
-	public ParticipantVariableValue(final Oid participant, final String name,
-			final String value) {
+	public ParticipantVariableValue(final ObjectId participant,
+			final String name, final String value) {
 		super(name, value);
 
 		this.participant = participant;
@@ -31,5 +31,5 @@ public class ParticipantVariableValue extends AbstractVariableValue {
 	 */
 	@Getter
 	@Setter
-	private Oid	participant;
+	private ObjectId	participant;
 }

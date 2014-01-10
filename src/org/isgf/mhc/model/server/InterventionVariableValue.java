@@ -3,9 +3,9 @@ package org.isgf.mhc.model.server;
 import lombok.Getter;
 import lombok.Setter;
 
+import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.server.concepts.AbstractVariableValue;
-import org.jongo.Oid;
 
 /**
  * {@link ModelObject} to represent an {@link InterventionVariableValue}
@@ -19,8 +19,8 @@ public class InterventionVariableValue extends AbstractVariableValue {
 	/**
 	 * Default constructor
 	 */
-	public InterventionVariableValue(final Oid intervention, final String name,
-			final String value) {
+	public InterventionVariableValue(final ObjectId intervention,
+			final String name, final String value) {
 		super(name, value);
 
 		this.intervention = intervention;
@@ -31,5 +31,5 @@ public class InterventionVariableValue extends AbstractVariableValue {
 	 */
 	@Getter
 	@Setter
-	private Oid	intervention;
+	private ObjectId	intervention;
 }

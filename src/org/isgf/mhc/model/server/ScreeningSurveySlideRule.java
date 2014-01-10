@@ -3,10 +3,10 @@ package org.isgf.mhc.model.server;
 import lombok.Getter;
 import lombok.Setter;
 
+import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.server.concepts.AbstractRule;
 import org.isgf.mhc.model.types.EquationSignTypes;
-import org.jongo.Oid;
 
 /**
  * {@link ModelObject} to represent an {@link ScreeningSurveySlideRule}
@@ -22,9 +22,10 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 	/**
 	 * Default constructor
 	 */
-	public ScreeningSurveySlideRule(final Oid belongingScreeningSurveySlide,
-			final int order, final Oid nextScreeningSurveySlideWhenTrue,
-			final Oid nextScreeningSurveySlideWhenFalse,
+	public ScreeningSurveySlideRule(
+			final ObjectId belongingScreeningSurveySlide, final int order,
+			final ObjectId nextScreeningSurveySlideWhenTrue,
+			final ObjectId nextScreeningSurveySlideWhenFalse,
 			final String ruleWithPlaceholders,
 			final EquationSignTypes ruleEquationSign,
 			final String ruleComparisonTermWithPlaceholders) {
@@ -42,7 +43,7 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 	 */
 	@Getter
 	@Setter
-	private Oid	belongingScreeningSurveySlide;
+	private ObjectId	belongingScreeningSurveySlide;
 
 	/**
 	 * The position of the {@link ScreeningSurveySlideRule} compared to all
@@ -52,7 +53,7 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 	 */
 	@Getter
 	@Setter
-	private int	order;
+	private int			order;
 
 	/**
 	 * <strong>OPTIONAL:</strong> If the rule result is <strong>true</strong>
@@ -61,7 +62,7 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 	 */
 	@Getter
 	@Setter
-	private Oid	nextScreeningSurveySlideWhenTrue;
+	private ObjectId	nextScreeningSurveySlideWhenTrue;
 
 	/**
 	 * <strong>OPTIONAL:</strong> If the rule result is <strong>false</strong>
@@ -70,5 +71,5 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 	 */
 	@Getter
 	@Setter
-	private Oid	nextScreeningSurveySlideWhenFalse;
+	private ObjectId	nextScreeningSurveySlideWhenFalse;
 }
