@@ -2,6 +2,7 @@ package org.isgf.mhc.model.server;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import org.bson.types.ObjectId;
@@ -17,6 +18,7 @@ import org.isgf.mhc.model.types.ScreeningSurveySlideQuestionTypes;
  * 
  * @author Andreas Filler
  */
+@NoArgsConstructor
 @AllArgsConstructor
 public class ScreeningSurveySlide extends ModelObject {
 	/**

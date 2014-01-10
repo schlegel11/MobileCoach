@@ -2,6 +2,7 @@ package org.isgf.mhc.model.server.concepts;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import org.isgf.mhc.model.ModelObject;
@@ -16,6 +17,7 @@ import org.isgf.mhc.model.types.EquationSignTypes;
  * 
  * @author Andreas Filler
  */
+@NoArgsConstructor
 @AllArgsConstructor
 public abstract class AbstractRule extends ModelObject {
 	/**

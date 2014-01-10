@@ -1,6 +1,7 @@
 package org.isgf.mhc.model.server;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import org.bson.types.ObjectId;
@@ -18,6 +19,7 @@ import org.isgf.mhc.model.types.EquationSignTypes;
  * 
  * @author Andreas Filler
  */
+@NoArgsConstructor
 public class ScreeningSurveySlideRule extends AbstractRule {
 	/**
 	 * Default constructor

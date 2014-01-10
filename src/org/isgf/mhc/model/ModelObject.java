@@ -34,7 +34,7 @@ public abstract class ModelObject {
 	 * {@link ObjectMapper} required for JSON generation
 	 */
 	@JsonIgnore
-	private static ObjectMapper	objectMapper	= new ObjectMapper();
+	private static ObjectMapper	objectMapper;
 
 	/**
 	 * {@link Jongo} object required for database access
@@ -75,17 +75,149 @@ public abstract class ModelObject {
 	@JsonIgnore
 	@Override
 	public String toString() {
-		return this.toJSONString();
+		return "[{" + this.getClass().getSimpleName() + "} id: " + this.id
+				+ ", content: " + this.toJSONString() + "]";
 	}
 
 	/**
 	 * Saves {@link ModelObject} to database
 	 */
+	@JsonIgnore
 	public void save() {
 		final MongoCollection collection = db.getCollection(this.getClass()
 				.getSimpleName());
+
 		collection.save(this);
-		log.debug("Saved {} with id {}", this.getClass().getSimpleName(),
-				this.id);
+
+		log.debug("Saved {} with id {}: {}", this.getClass().getSimpleName(),
+				this.id, this);
+	}
+
+	/**
+	 * Load {@link ModelObject} from database
+	 * 
+	 * @param clazz
+	 *            The {@link ModelObject} subclass to retrieve
+	 * @param id
+	 *            The {@link ObjectId} of the {@link ModelObject}
+	 * @return The retrieved {@link ModelObject} subclass object or
+	 *         <code>null</code> if not
+	 *         found
+	 */
+	@JsonIgnore
+	public static final <ModelObjectSubclass extends ModelObject> ModelObjectSubclass get(
+			final Class<ModelObjectSubclass> clazz, final ObjectId id) {
+		final MongoCollection collection = db.getCollection(clazz
+				.getSimpleName());
+
+		ModelObjectSubclass modelObject = null;
+		try {
+			modelObject = collection.findOne(id).as(clazz);
+			log.debug("Retrieved {} with id {}: {}", clazz.getSimpleName(), id,
+					modelObject);
+		} catch (final Exception e) {
+			log.warn("Could not retrieve {} with id {}: {}",
+					clazz.getSimpleName(), id, e.getMessage());
+		}
+
+		return modelObject;
+	}
+
+	/**
+	 * Remove {@link ModelObject} from database
+	 * 
+	 * @param clazz
+	 *            The {@link ModelObject} subclass to remove
+	 * @param id
+	 *            The {@link ObjectId} of the {@link ModelObject}
+	 */
+	@JsonIgnore
+	public static final void remove(final Class<? extends ModelObject> clazz,
+			final ObjectId id) {
+		final MongoCollection collection = db.getCollection(clazz
+				.getSimpleName());
+
+		try {
+			collection.remove(id);
+			log.debug("Removed {} with id {}", clazz.getSimpleName(), id);
+		} catch (final Exception e) {
+			log.warn("Could not retrieve {} with id {}: {}",
+					clazz.getSimpleName(), id, e.getMessage());
+		}
+	}
+
+	/**
+	 * Find and load {@link ModelObject}s from database
+	 * 
+	 * @param clazz
+	 *            The {@link ModelObject} subclass to retrieve
+	 * @param query
+	 *            The query to find the appropriate {@link ModelObject}
+	 * @parameters The parameters to fill the query
+	 * @return The retrieved {@link ModelObject} subclass objects as
+	 *         {@link Iterable} or <code>null</code> if not
+	 *         found
+	 */
+	@JsonIgnore
+	public static final <ModelObjectSubclass extends ModelObject> ModelObjectSubclass findOne(
+			final Class<ModelObjectSubclass> clazz, final String query,
+			final Object... parameters) {
+		final MongoCollection collection = db.getCollection(clazz
+				.getSimpleName());
+
+		ModelObjectSubclass modelObject = null;
+		try {
+			if (parameters != null && parameters.length > 0) {
+				modelObject = collection.findOne(query, parameters).as(clazz);
+			} else {
+				modelObject = collection.findOne(query).as(clazz);
+			}
+			log.debug(
+					"Retrieved {} with find one query {} and parameters {}: {}",
+					clazz.getSimpleName(), query, parameters, modelObject);
+		} catch (final Exception e) {
+			log.warn(
+					"Could not retrieve {} with find one query {} and parameters {}: {}",
+					clazz.getSimpleName(), query, parameters, e.getMessage());
+		}
+
+		return modelObject;
+	}
+
+	/**
+	 * Find and load {@link ModelObject}s from database
+	 * 
+	 * @param clazz
+	 *            The {@link ModelObject} subclass to retrieve
+	 * @param query
+	 *            The query to find the appropriate {@link ModelObject}
+	 * @parameters The parameters to fill the query
+	 * @return The retrieved {@link ModelObject} subclass objects as
+	 *         {@link Iterable} or <code>null</code> if not
+	 *         found
+	 */
+	@JsonIgnore
+	public static final <ModelObjectSubclass extends ModelObject> Iterable<ModelObjectSubclass> find(
+			final Class<ModelObjectSubclass> clazz, final String query,
+			final Object... parameters) {
+		final MongoCollection collection = db.getCollection(clazz
+				.getSimpleName());
+
+		Iterable<ModelObjectSubclass> iteratable = null;
+		try {
+			if (parameters != null && parameters.length > 0) {
+				iteratable = collection.find(query, parameters).as(clazz);
+			} else {
+				iteratable = collection.find(query).as(clazz);
+			}
+			log.debug("Retrieved {} with find query {} and parameters {}",
+					clazz.getSimpleName(), query, parameters);
+		} catch (final Exception e) {
+			log.warn(
+					"Could not retrieve {} with find query {} and parameters {}: {}",
+					clazz.getSimpleName(), query, parameters, e.getMessage());
+		}
+
+		return iteratable;
 	}
 }
