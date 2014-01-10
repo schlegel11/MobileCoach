@@ -3,6 +3,7 @@ package org.isgf.mhc.model.server;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Setter;
 
 import org.bson.types.ObjectId;
@@ -26,6 +27,7 @@ public class InterventionMessage extends ModelObject {
 	 */
 	@Getter
 	@Setter
+	@NonNull
 	private ObjectId	interventionMessageGroup;
 
 	/**
@@ -33,6 +35,7 @@ public class InterventionMessage extends ModelObject {
 	 */
 	@Getter
 	@Setter
+	@NonNull
 	private String		textWithPlaceholders;
 
 	/**

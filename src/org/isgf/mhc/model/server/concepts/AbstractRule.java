@@ -3,6 +3,7 @@ package org.isgf.mhc.model.server.concepts;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Setter;
 
 import org.isgf.mhc.model.ModelObject;
@@ -25,6 +26,7 @@ public abstract class AbstractRule extends ModelObject {
 	 */
 	@Getter
 	@Setter
+	@NonNull
 	private String				ruleWithPlaceholders;
 
 	/**
@@ -32,6 +34,7 @@ public abstract class AbstractRule extends ModelObject {
 	 */
 	@Getter
 	@Setter
+	@NonNull
 	private EquationSignTypes	ruleEquationSign;
 
 	/**
@@ -39,5 +42,6 @@ public abstract class AbstractRule extends ModelObject {
 	 */
 	@Getter
 	@Setter
+	@NonNull
 	private String				ruleComparisonTermWithPlaceholders;
 }

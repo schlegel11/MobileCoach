@@ -3,6 +3,7 @@ package org.isgf.mhc.model.server;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Setter;
 
 import org.bson.types.ObjectId;
@@ -21,6 +22,7 @@ public class DialogMessage extends ModelObject {
 	 */
 	@Getter
 	@Setter
+	@NonNull
 	private ObjectId	participant;
 
 	/**
@@ -29,6 +31,7 @@ public class DialogMessage extends ModelObject {
 	 */
 	@Getter
 	@Setter
+	@NonNull
 	private ObjectId	intervention;
 
 	/**
@@ -36,6 +39,7 @@ public class DialogMessage extends ModelObject {
 	 */
 	@Getter
 	@Setter
+	@NonNull
 	private ObjectId	message;
 
 	/**
@@ -50,6 +54,7 @@ public class DialogMessage extends ModelObject {
 	 */
 	@Getter
 	@Setter
+	@NonNull
 	private String		response;
 
 	/**

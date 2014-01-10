@@ -2,6 +2,7 @@ package org.isgf.mhc.model.server;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Setter;
 
 import org.bson.types.ObjectId;
@@ -33,5 +34,6 @@ public class ParticipantVariableValue extends AbstractVariableValue {
 	 */
 	@Getter
 	@Setter
+	@NonNull
 	private ObjectId	participant;
 }

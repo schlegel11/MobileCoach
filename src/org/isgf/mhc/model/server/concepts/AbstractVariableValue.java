@@ -3,6 +3,7 @@ package org.isgf.mhc.model.server.concepts;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Setter;
 
 import org.isgf.mhc.model.ModelObject;
@@ -22,6 +23,7 @@ public abstract class AbstractVariableValue extends ModelObject {
 	 */
 	@Getter
 	@Setter
+	@NonNull
 	private String	name;
 
 	/**
@@ -29,5 +31,6 @@ public abstract class AbstractVariableValue extends ModelObject {
 	 */
 	@Getter
 	@Setter
+	@NonNull
 	private String	value;
 }

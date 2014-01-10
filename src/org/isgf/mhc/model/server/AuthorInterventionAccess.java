@@ -3,6 +3,7 @@ package org.isgf.mhc.model.server;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Setter;
 
 import org.bson.types.ObjectId;
@@ -24,6 +25,7 @@ public class AuthorInterventionAccess extends ModelObject {
 	 */
 	@Getter
 	@Setter
+	@NonNull
 	private ObjectId	author;
 
 	/**
@@ -31,5 +33,6 @@ public class AuthorInterventionAccess extends ModelObject {
 	 */
 	@Getter
 	@Setter
+	@NonNull
 	private ObjectId	intervention;
 }

@@ -3,6 +3,7 @@ package org.isgf.mhc.model.server;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Setter;
 
 import org.isgf.mhc.model.ModelObject;
@@ -25,6 +26,7 @@ public class MediaObject extends ModelObject {
 	 */
 	@Getter
 	@Setter
+	@NonNull
 	private MediaObjectTypes	type;
 
 	/**
@@ -32,5 +34,6 @@ public class MediaObject extends ModelObject {
 	 */
 	@Getter
 	@Setter
+	@NonNull
 	private String				file;
 }

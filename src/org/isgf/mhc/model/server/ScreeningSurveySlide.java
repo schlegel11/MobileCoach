@@ -3,6 +3,7 @@ package org.isgf.mhc.model.server;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Setter;
 
 import org.bson.types.ObjectId;
@@ -26,6 +27,7 @@ public class ScreeningSurveySlide extends ModelObject {
 	 */
 	@Getter
 	@Setter
+	@NonNull
 	private ObjectId							screeningSurvey;
 
 	/**
@@ -41,11 +43,11 @@ public class ScreeningSurveySlide extends ModelObject {
 
 	/**
 	 * Defines the layout of the {@link ScreeningSurveySlide}
-	 * 
-	 * @TODO Not solved how to do this! Are CSS classes enough? Would be good.
 	 */
+	// TODO Not solved how to do this! Are CSS classes enough? Would be good.
 	@Getter
 	@Setter
+	@NonNull
 	private String								layout;
 
 	/**
@@ -55,6 +57,7 @@ public class ScreeningSurveySlide extends ModelObject {
 	 */
 	@Getter
 	@Setter
+	@NonNull
 	private String								titleWithPlaceholders;
 
 	/**
@@ -71,6 +74,7 @@ public class ScreeningSurveySlide extends ModelObject {
 	 */
 	@Getter
 	@Setter
+	@NonNull
 	private String								questionWithPlaceholders;
 
 	/**
@@ -79,6 +83,7 @@ public class ScreeningSurveySlide extends ModelObject {
 	 */
 	@Getter
 	@Setter
+	@NonNull
 	private ScreeningSurveySlideQuestionTypes	questionType;
 
 	/**

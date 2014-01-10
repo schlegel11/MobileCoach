@@ -2,6 +2,7 @@ package org.isgf.mhc.model.server;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Setter;
 
 import org.bson.types.ObjectId;
@@ -45,6 +46,7 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 	 */
 	@Getter
 	@Setter
+	@NonNull
 	private ObjectId	belongingScreeningSurveySlide;
 
 	/**
