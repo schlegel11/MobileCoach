@@ -12,7 +12,30 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class StringValidator {
 	/**
-	 * Check if a string is a valid variable name
+	 * Check if a {@link String} is a valid rule
+	 * 
+	 * @param rule
+	 * @return
+	 */
+	public static boolean isValidRule(final String rule) {
+		log.debug("Testing if {} is a valid rule", rule);
+
+		// Check null or empty
+		if (rule == null || rule.equals("")) {
+			return true;
+		}
+
+		// Check letters
+		final String pattern = "^[\\$a-zA-Z0-9_\\+\\-\\%\\*\\/\\^\\(\\)\\.]*$";
+		if (!Pattern.matches(pattern, rule)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check if a {@link String} is a valid variable name
 	 * 
 	 * @param name
 	 *            The name to test
