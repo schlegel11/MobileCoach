@@ -22,15 +22,18 @@ public class StringValidator {
 
 		// Check null or empty
 		if (rule == null || rule.equals("")) {
+			log.debug("Yes");
 			return true;
 		}
 
 		// Check letters
-		final String pattern = "^[\\$a-zA-Z0-9_\\+\\-\\%\\*\\/\\^\\(\\)\\.]*$";
+		final String pattern = "^[\\$a-zA-Z0-9_\\+\\-%*/^().,]*$";
 		if (!Pattern.matches(pattern, rule)) {
+			log.debug("No");
 			return false;
 		}
 
+		log.debug("Yes");
 		return true;
 	}
 
@@ -46,15 +49,18 @@ public class StringValidator {
 
 		// Check null or empty
 		if (name == null || name.equals("")) {
+			log.debug("No");
 			return false;
 		}
 
 		// Check letters
 		final String pattern = "^\\$[a-zA-Z_]*$";
 		if (!Pattern.matches(pattern, name)) {
+			log.debug("No");
 			return false;
 		}
 
+		log.debug("Yes");
 		return true;
 	}
 }
