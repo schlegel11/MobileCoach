@@ -37,6 +37,9 @@ public class ContextListener implements ServletContextListener {
 	public void contextInitialized(final ServletContextEvent event) {
 		boolean noErrorsOccured = true;
 
+		log.info("Setting basic configuration...");
+		Messages.setLocale(Constants.SYSTEM_LOCALE);
+
 		log.info("Starting up base services...");
 		try {
 			this.databaseManagerService = DatabaseManagerService.start();

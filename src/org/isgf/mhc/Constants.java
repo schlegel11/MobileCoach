@@ -1,5 +1,7 @@
 package org.isgf.mhc;
 
+import java.util.Locale;
+
 public class Constants {
 	/**
 	 * Debugging is only activated when PRODUCTION_MODE is false, but it should
@@ -15,4 +17,9 @@ public class Constants {
 	public static final String	DATABASE_USER		= "mhc";
 	public static final String	DATABASE_PASSWORD	= "mhc";
 	public static final String	DATABASE_NAME		= "mhc";
+
+	/**
+	 * Basic configuration
+	 */
+	public static final Locale	SYSTEM_LOCALE		= Locale.ENGLISH;
 }
