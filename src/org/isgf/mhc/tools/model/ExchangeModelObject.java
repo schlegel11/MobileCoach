@@ -15,6 +15,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
+import org.isgf.mhc.tools.CustomObjectMapper;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -62,20 +63,19 @@ public class ExchangeModelObject {
 	@NonNull
 	private String							content;
 
+	/**
+	 * The set methods required to adjust the {@link ObjectId}s accordingly
+	 * after import in another system
+	 */
 	@Getter
 	@NonNull
-	private final Hashtable<String, String>	objectIdsWithContainingVariable	= new Hashtable<String, String>();
+	private final Hashtable<String, String>	objectIdSetMethodsWithAppropriateValues	= new Hashtable<String, String>();
 
 	/**
 	 * {@link ObjectMapper} required for JSON generation
 	 */
 	@JsonIgnore
-	private static ObjectMapper				objectMapper;
-
-	@JsonIgnore
-	public static void configure(final ObjectMapper objectMapper) {
-		ExchangeModelObject.objectMapper = objectMapper;
-	}
+	private static ObjectMapper				objectMapper							= new CustomObjectMapper();
 
 	/**
 	 * Creates a JSON String of the current {@link ExchangeModelObject}
@@ -126,17 +126,23 @@ public class ExchangeModelObject {
 	 * @return Newly created {@link ModelObject}
 	 */
 	@JsonIgnore
-	public ModelObject getContainedModelObject() {
+	public ModelObject getContainedModelObjectWithoutOriginalId() {
 		ModelObject modelObject;
 
+		// Set object id to null
+		final String contentToConvert = this.content.replaceFirst(
+				"\"_id\":\"[^\"]+\"", "\"_id\":null");
+
 		try {
-			modelObject = (ModelObject) objectMapper.readValue(this.content,
-					Class.forName(this.packageAndClazz));
+			modelObject = (ModelObject) objectMapper.readValue(
+					contentToConvert, Class.forName(this.packageAndClazz));
 		} catch (final Exception e) {
 			log.warn("Could not create model object from JSON: {} (JSON: {})",
-					e.getMessage(), this.content);
+					e.getMessage(), contentToConvert);
 			return null;
 		}
+		log.debug("Created model object {} from JSON {}", modelObject,
+				contentToConvert);
 
 		return modelObject;
 	}

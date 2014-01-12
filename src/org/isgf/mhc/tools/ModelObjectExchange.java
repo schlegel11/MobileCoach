@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,16 +35,59 @@ public class ModelObjectExchange {
 	public static File exportModelObjects(final List<ModelObject> modelObjects) {
 		val exchangeModelObjects = new ArrayList<ExchangeModelObject>();
 
+		log.debug("Exporting model objects...");
+
 		for (val modelObject : modelObjects) {
+			log.debug("Exporting model object {}", modelObject);
+
 			final ExchangeModelObject exchangeModelObject = new ExchangeModelObject(
 					modelObject.getClass().getSimpleName(), modelObject
 							.getClass().getName(), modelObject.getId()
 							.toString(), modelObject.toJSONString());
 
-			// TODO
+			// Determine which methods set object ids and store there values
+			// separately for adaption after import into other system
+			for (val method : modelObject.getClass().getMethods()) {
+				if (method.getName().startsWith("set")
+						&& method.getParameterTypes().length == 1
+						&& method.getParameterTypes()[0].getName().equals(
+								ObjectId.class.getName())) {
+					Method appropriateGetMethod;
+					final String objectIdString;
+					try {
+						appropriateGetMethod = modelObject.getClass()
+								.getMethod(
+										method.getName().replaceFirst("set",
+												"get"));
+						final ObjectId objectId = (ObjectId) appropriateGetMethod
+								.invoke(modelObject);
+
+						if (objectId == null) {
+							continue;
+						}
+
+						objectIdString = objectId.toString();
+					} catch (final Exception e) {
+						log.error(
+								"Could not determine references object id: {}",
+								e.getMessage());
+						return null;
+					}
+					log.debug(
+							"Method {} contains object id {} in model object {} with object id {}",
+							method.getName(), objectIdString, modelObject
+									.getClass().getSimpleName(), modelObject
+									.getId());
+					exchangeModelObject
+							.getObjectIdSetMethodsWithAppropriateValues().put(
+									method.getName(), objectIdString);
+				}
+			}
 
 			exchangeModelObjects.add(exchangeModelObject);
 		}
+
+		log.debug("Export done.");
 
 		return createZipFile(exchangeModelObjects);
 	}
@@ -54,17 +98,99 @@ public class ModelObjectExchange {
 	 * 
 	 * @param zipFile
 	 *            The zip-file to import
+	 * @throws FileNotFoundException
+	 * @throws SecurityException
+	 * @throws NoSuchMethodException
 	 */
-	public static void importModelObjects(final File zipFile) {
-		try {
-			val exchangeModelObjects = readZipFile(new ZipFile(zipFile));
-		} catch (final FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (final IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	public static void importModelObjects(final File zipFile)
+			throws FileNotFoundException, IOException {
+		val modelObjects = new ArrayList<ModelObject>();
+
+		val exchangeModelObjects = readZipFile(new ZipFile(zipFile));
+
+		log.debug("Importing model objects...");
+
+		// Collect all model objects
+		for (val exchangeModelObject : exchangeModelObjects) {
+			final ModelObject modelObject = exchangeModelObject
+					.getContainedModelObjectWithoutOriginalId();
+
+			modelObjects.add(modelObject);
 		}
+
+		// Create all model objects in the database
+		for (val modelObject : modelObjects) {
+			modelObject.save();
+		}
+
+		// Adjust all relevant id references
+		for (val modelObjectToCheckIfIsReferenced : modelObjects) {
+			// Collect relevant information
+			final ObjectId modelObjectToCheckIfIsReferencedNewObjectId = modelObjectToCheckIfIsReferenced
+					.getId();
+			final ExchangeModelObject exchangeModelObjectOfModelObjectToCheckIfIsReferenced = exchangeModelObjects
+					.get(modelObjects.indexOf(modelObjectToCheckIfIsReferenced));
+			final String modelObjectToCheckIfIsReferencedOldObjectId = exchangeModelObjectOfModelObjectToCheckIfIsReferenced
+					.getObjectId();
+
+			// Check all exchange model objects for references
+			for (val toCheckExchangeModelObject : exchangeModelObjects) {
+				// for (val methodAndObjectIdEntrySet :
+				// toCheckExchangeModelObject
+				// .getObjectIdSetMethodsWithAppropriateValues().keys()) {
+				for (val methodName : toCheckExchangeModelObject
+						.getObjectIdSetMethodsWithAppropriateValues().keySet()) {
+					final String oldObjectId = toCheckExchangeModelObject
+							.getObjectIdSetMethodsWithAppropriateValues().get(
+									methodName);
+					if (!oldObjectId.equals("")
+							&& oldObjectId
+									.equals(modelObjectToCheckIfIsReferencedOldObjectId)) {
+						toCheckExchangeModelObject
+								.getObjectIdSetMethodsWithAppropriateValues()
+								.put(methodName, "");
+
+						// Get appropriate model object
+						final ModelObject modelObjectToAdjust = modelObjects
+								.get(exchangeModelObjects
+										.indexOf(toCheckExchangeModelObject));
+						// Find appropriate method to call to set object id
+						final Method methodToAdjustObjectIdReference;
+						try {
+							methodToAdjustObjectIdReference = modelObjectToAdjust
+									.getClass().getMethod(methodName,
+											ObjectId.class);
+						} catch (final Exception e) {
+							log.error(
+									"Could not find method to adapt reference on object {}: {}",
+									toCheckExchangeModelObject
+											.getPackageAndClazz(), e
+											.getMessage());
+							continue;
+						}
+
+						// Set object id as reference
+						try {
+							methodToAdjustObjectIdReference
+									.invoke(modelObjectToAdjust,
+											modelObjectToCheckIfIsReferencedNewObjectId);
+						} catch (final Exception e) {
+							log.error(
+									"Could not adjust referenced object id on object {}: {}",
+									toCheckExchangeModelObject
+											.getPackageAndClazz(), e
+											.getMessage());
+							continue;
+						}
+
+						// Save changes
+						modelObjectToAdjust.save();
+					}
+				}
+			}
+		}
+
+		log.debug("Import done.");
 	}
 
 	/**
@@ -78,6 +204,9 @@ public class ModelObjectExchange {
 	@SneakyThrows
 	private static File createZipFile(
 			final List<ExchangeModelObject> exchangeModelObjects) {
+
+		log.debug("Writing exchange model objects to zip file");
+
 		File zipFile = null;
 		try {
 			zipFile = File.createTempFile("MHC_", ".mhc", null);

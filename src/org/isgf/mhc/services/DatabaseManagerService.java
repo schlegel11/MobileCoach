@@ -8,10 +8,8 @@ import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.Constants;
 import org.isgf.mhc.model.ModelObject;
-import org.isgf.mhc.tools.model.ExchangeModelObject;
 import org.jongo.Jongo;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
@@ -22,8 +20,6 @@ public class DatabaseManagerService {
 
 	private MongoClient						mongoClient;
 	private Jongo							jongo;
-
-	private final ObjectMapper				objectMapper;
 
 	private DatabaseManagerService() throws Exception {
 		log.info("Starting service...");
@@ -54,10 +50,8 @@ public class DatabaseManagerService {
 					+ e.getMessage());
 		}
 
-		// Create Jackson JSON mapper
-		this.objectMapper = new ObjectMapper();
-		ModelObject.configure(this.objectMapper, this.jongo);
-		ExchangeModelObject.configure(this.objectMapper);
+		// Give Jongo object to model object
+		ModelObject.configure(this.jongo);
 
 		log.info("Started.");
 	}
