@@ -8,6 +8,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.Constants;
 import org.isgf.mhc.model.ModelObject;
+import org.isgf.mhc.tools.model.ExchangeModelObject;
 import org.jongo.Jongo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,7 +29,6 @@ public class DatabaseManagerService {
 		log.info("Starting service...");
 		try {
 			// Creating MongoDB driver object
-
 			final List<MongoCredential> mongoCredentials = new ArrayList<MongoCredential>();
 			mongoCredentials.add(MongoCredential.createMongoCRCredential(
 					Constants.DATABASE_NAME, Constants.DATABASE_NAME,
@@ -48,7 +48,8 @@ public class DatabaseManagerService {
 			// users.ensureIndex(Constants.COLL_USERS_INDEX_1);
 			// users.ensureIndex(Constants.COLL_USERS_INDEX_2);
 		} catch (final UnknownHostException e) {
-			log.error("Error at creating MongoDB connection: " + e.getMessage());
+			log.error("Error at creating MongoDB connection: {}",
+					e.getMessage());
 			throw new Exception("Error at creating MongoDB connection: "
 					+ e.getMessage());
 		}
@@ -56,6 +57,7 @@ public class DatabaseManagerService {
 		// Create Jackson JSON mapper
 		this.objectMapper = new ObjectMapper();
 		ModelObject.configure(this.objectMapper, this.jongo);
+		ExchangeModelObject.configure(this.objectMapper);
 
 		log.info("Started.");
 	}
