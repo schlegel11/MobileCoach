@@ -98,11 +98,12 @@ public class ModelObjectExchange {
 	 * 
 	 * @param zipFile
 	 *            The zip-file to import
+	 * @return Imported {@link ModelObject}s
 	 * @throws FileNotFoundException
 	 * @throws SecurityException
 	 * @throws NoSuchMethodException
 	 */
-	public static void importModelObjects(final File zipFile)
+	public static List<ModelObject> importModelObjects(final File zipFile)
 			throws FileNotFoundException, IOException {
 		val modelObjects = new ArrayList<ModelObject>();
 
@@ -191,6 +192,8 @@ public class ModelObjectExchange {
 		}
 
 		log.debug("Import done.");
+
+		return modelObjects;
 	}
 
 	/**
