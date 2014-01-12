@@ -64,7 +64,7 @@ public class ExchangeModelObject {
 
 	@Getter
 	@NonNull
-	private final Hashtable<String, String>	variablesWithObjectIds	= new Hashtable<String, String>();
+	private final Hashtable<String, String>	objectIdsWithContainingVariable	= new Hashtable<String, String>();
 
 	/**
 	 * {@link ObjectMapper} required for JSON generation
@@ -78,7 +78,7 @@ public class ExchangeModelObject {
 	}
 
 	/**
-	 * Creates a JSON string of the current {@link ModelObject}
+	 * Creates a JSON String of the current {@link ExchangeModelObject}
 	 * 
 	 * @return JSON string
 	 */
@@ -94,5 +94,50 @@ public class ExchangeModelObject {
 		}
 
 		return stringWriter.toString();
+	}
+
+	/**
+	 * Create a {@link ExchangeModelObject} from the given JSON String
+	 * 
+	 * @param jsonString
+	 *            The String to create a {@link ExchangeModelObject} from
+	 * @return The created {@link ExchangeModelObject}
+	 */
+	@JsonIgnore
+	public static ExchangeModelObject fromJSONString(final String jsonString) {
+		ExchangeModelObject exchangeModelObject;
+
+		try {
+			exchangeModelObject = objectMapper.readValue(jsonString,
+					ExchangeModelObject.class);
+		} catch (final Exception e) {
+			log.warn(
+					"Could not create exchange model object from JSON: {} (JSON: {})",
+					e.getMessage(), jsonString);
+			return null;
+		}
+
+		return exchangeModelObject;
+	}
+
+	/**
+	 * Creates a new {@link ModelObject} from the contained content
+	 * 
+	 * @return Newly created {@link ModelObject}
+	 */
+	@JsonIgnore
+	public ModelObject getContainedModelObject() {
+		ModelObject modelObject;
+
+		try {
+			modelObject = (ModelObject) objectMapper.readValue(this.content,
+					Class.forName(this.packageAndClazz));
+		} catch (final Exception e) {
+			log.warn("Could not create model object from JSON: {} (JSON: {})",
+					e.getMessage(), this.content);
+			return null;
+		}
+
+		return modelObject;
 	}
 }
