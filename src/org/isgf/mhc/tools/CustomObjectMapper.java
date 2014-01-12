@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 @SuppressWarnings("serial")
 public class CustomObjectMapper extends ObjectMapper {
 	public CustomObjectMapper() {
-		final SimpleModule module = new SimpleModule("ObjectIdmodule");
+		final SimpleModule module = new SimpleModule("ObjectIdModule");
 		module.addSerializer(ObjectId.class, new ObjectIdSerializer());
 		this.registerModule(module);
 	}
