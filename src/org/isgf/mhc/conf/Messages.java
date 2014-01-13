@@ -15,37 +15,63 @@ import org.isgf.mhc.tools.UTF8Control;
  */
 @Log4j2
 public class Messages {
-	private static final String		BUNDLE_NAME		= "org.isgf.mhc.conf.messages"; //$NON-NLS-1$
+	private static final String		BUNDLE_NAME							= "org.isgf.mhc.conf.messages"; //$NON-NLS-1$
 
-	private static ResourceBundle	RESOURCE_BUNDLE	= null;
+	private static ResourceBundle	ADMIN_RESOURCE_BUNDLE				= null;
+	private static ResourceBundle	SCREENING_SURVEY_RESOURCE_BUNDLE	= null;
 
 	/**
-	 * Set {@link Messages} class to a specific locale or fallback to default
+	 * Set {@link Messages} class to a specific locales or fallback to default
 	 * (English)
 	 */
-	public static void setLocale(final Locale locale) {
+	public static void setLocales(final Locale adminLocale,
+			final Locale screeningSurveyLocale) {
+		// Loading admin messages
 		try {
-			RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME, locale,
-					new UTF8Control());
-			Locale.setDefault(locale);
-			log.debug("Set locale to {}", locale);
+			ADMIN_RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME,
+					adminLocale, new UTF8Control());
+			log.debug("Set admin locale to {}", adminLocale);
 		} catch (final Exception e) {
-			RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME,
+			ADMIN_RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME,
 					new UTF8Control());
-			Locale.setDefault(Locale.ENGLISH);
-			log.debug("Set locale to {}", Locale.ENGLISH);
+			log.debug("Set admin locale to {}", Locale.ENGLISH);
+		}
+
+		// Loading screening survey messages
+		try {
+			SCREENING_SURVEY_RESOURCE_BUNDLE = ResourceBundle.getBundle(
+					BUNDLE_NAME, screeningSurveyLocale, new UTF8Control());
+			log.debug("Set screening survey locale to {}", adminLocale);
+		} catch (final Exception e) {
+			SCREENING_SURVEY_RESOURCE_BUNDLE = ResourceBundle.getBundle(
+					BUNDLE_NAME, new UTF8Control());
+			log.debug("Set screening survey locale to {}", Locale.ENGLISH);
 		}
 	}
 
 	/**
-	 * Return {@link String} in currently set locale
+	 * Return {@link String} in currently set admin locale
 	 * 
 	 * @param key
 	 * @return
 	 */
-	public static String getString(final String key) {
+	public static String getAdminString(final String key) {
 		try {
-			return RESOURCE_BUNDLE.getString(key);
+			return ADMIN_RESOURCE_BUNDLE.getString(key);
+		} catch (final MissingResourceException e) {
+			return '!' + key + '!';
+		}
+	}
+
+	/**
+	 * Return {@link String} in currently set screening survey locale
+	 * 
+	 * @param key
+	 * @return
+	 */
+	public static String getScreeningSurveyString(final String key) {
+		try {
+			return SCREENING_SURVEY_RESOURCE_BUNDLE.getString(key);
 		} catch (final MissingResourceException e) {
 			return '!' + key + '!';
 		}

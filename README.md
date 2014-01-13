@@ -2,6 +2,8 @@
 
 ## How to use MHC?
 
+Mustache template engine http://mustache.github.io/mustache.5.html
+
 ## How to improve or extend MHC?
 
 Eclipse specific:

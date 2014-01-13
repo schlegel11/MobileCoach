@@ -17,17 +17,17 @@ import org.isgf.mhc.services.FileStorageManagerService;
 @Log4j2
 public class MHC implements ServletContextListener {
 	@Getter
-	private static MHC	instance;
+	private static MHC			instance;
 
 	@Getter
-	private boolean					ready	= false;
+	private boolean				ready	= false;
 
 	// Services
 	@Getter
-	DatabaseManagerService			databaseManagerService;
+	DatabaseManagerService		databaseManagerService;
 
 	@Getter
-	FileStorageManagerService		fileStorageManagerService;
+	FileStorageManagerService	fileStorageManagerService;
 
 	@Override
 	public void contextDestroyed(final ServletContextEvent event) {
@@ -50,7 +50,8 @@ public class MHC implements ServletContextListener {
 		instance = this;
 
 		log.info("Setting basic configuration...");
-		Messages.setLocale(Constants.SYSTEM_LOCALE);
+		Messages.setLocales(Constants.ADMIN_LOCALE,
+				Constants.SCREENING_SURVEY_LOCALE);
 
 		log.info("Starting up base services...");
 		try {
