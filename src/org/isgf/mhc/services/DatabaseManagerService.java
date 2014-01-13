@@ -7,7 +7,7 @@ import java.util.List;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
-import org.isgf.mhc.Constants;
+import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.model.ModelObject;
 import org.jongo.Jongo;
 

@@ -1,4 +1,4 @@
-package org.isgf.mhc;
+package org.isgf.mhc.conf;
 
 import java.util.Locale;
 import java.util.MissingResourceException;
@@ -15,7 +15,7 @@ import org.isgf.mhc.tools.UTF8Control;
  */
 @Log4j2
 public class Messages {
-	private static final String		BUNDLE_NAME		= "org.isgf.mhc.messages";	//$NON-NLS-1$
+	private static final String		BUNDLE_NAME		= "org.isgf.mhc.conf.messages"; //$NON-NLS-1$
 
 	private static ResourceBundle	RESOURCE_BUNDLE	= null;
 

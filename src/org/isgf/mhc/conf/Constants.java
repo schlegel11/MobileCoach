@@ -1,4 +1,4 @@
-package org.isgf.mhc;
+package org.isgf.mhc.conf;
 
 import java.util.Locale;
 
