@@ -8,6 +8,7 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.conf.Constants;
+import org.isgf.mhc.model.Indices;
 import org.isgf.mhc.model.ModelObject;
 import org.jongo.Jongo;
 
@@ -47,11 +48,20 @@ public class DatabaseManagerService {
 					this.mongoClient.getDB(Constants.DATABASE_NAME));
 
 			// Ensure indices
-			// TODO Ensure indices
-			// final MongoCollection users = this.jongo
-			// .getCollection(Constants.COLL_USERS);
-			// users.ensureIndex(Constants.COLL_USERS_INDEX_1);
-			// users.ensureIndex(Constants.COLL_USERS_INDEX_2);
+			log.debug("Creating/ensuring indices: ");
+			val indicesHashtable = Indices.getIndices();
+			val indicesHashtableKeys = indicesHashtable.keys();
+			while (indicesHashtableKeys.hasMoreElements()) {
+				val clazz = indicesHashtableKeys.nextElement();
+				final String[] indices = indicesHashtable.get(clazz);
+				val collection = this.jongo
+						.getCollection(clazz.getSimpleName());
+				for (final String index : indices) {
+					log.debug("Creating/ensuring index {} on collection {}",
+							index, clazz.getSimpleName());
+					collection.ensureIndex(index);
+				}
+			}
 		} catch (final UnknownHostException e) {
 			log.error("Error at creating MongoDB connection: {}",
 					e.getMessage());

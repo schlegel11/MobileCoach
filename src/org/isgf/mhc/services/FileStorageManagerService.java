@@ -8,9 +8,9 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.lang.RandomStringUtils;
-import org.isgf.mhc.Querys;
 import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.model.ModelObject;
+import org.isgf.mhc.model.Querys;
 import org.isgf.mhc.model.server.MediaObject;
 
 import com.google.gwt.thirdparty.guava.common.io.Files;
