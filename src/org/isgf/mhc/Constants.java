@@ -10,6 +10,12 @@ public class Constants {
 	public static final boolean	PRODUCTION_MODE		= false;
 
 	/**
+	 * Basic configuration
+	 */
+	public static final Locale	SYSTEM_LOCALE		= Locale.ENGLISH;
+	public static final String	STORAGE_FOLDER		= "/mhc_data/FileStorage";
+
+	/**
 	 * Database configuration
 	 */
 	public static final String	DATABASE_HOST		= "127.0.0.1";
@@ -18,8 +24,4 @@ public class Constants {
 	public static final String	DATABASE_PASSWORD	= "mhc";
 	public static final String	DATABASE_NAME		= "mhc";
 
-	/**
-	 * Basic configuration
-	 */
-	public static final Locale	SYSTEM_LOCALE		= Locale.ENGLISH;
 }

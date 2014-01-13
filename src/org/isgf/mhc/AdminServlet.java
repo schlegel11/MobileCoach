@@ -26,7 +26,7 @@ public class AdminServlet extends VaadinServlet {
 	@Override
 	public void init(final ServletConfig servletConfig) throws ServletException {
 		// Only start servlet if context is ready
-		if (!ContextListener.isReady()) {
+		if (!MHC.getInstance().isReady()) {
 			log.error("Servlet {} can't be started. Context is not ready!",
 					AdminServlet.class);
 			throw new ServletException("Context is not ready!");

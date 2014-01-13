@@ -30,10 +30,18 @@ public class MediaObject extends ModelObject {
 	private MediaObjectTypes	type;
 
 	/**
+	 * The file name shown to the user
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private String				name;
+
+	/**
 	 * The reference to the file on the server
 	 */
 	@Getter
 	@Setter
 	@NonNull
-	private String				file;
+	private String				fileReference;
 }

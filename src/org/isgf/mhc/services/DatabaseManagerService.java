@@ -4,6 +4,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.Constants;
@@ -32,6 +33,14 @@ public class DatabaseManagerService {
 			this.mongoClient = new MongoClient(new ServerAddress(
 					Constants.DATABASE_HOST, Constants.DATABASE_PORT),
 					mongoCredentials);
+
+			// Checking connection
+			log.debug("Existing collections in database {}: ",
+					Constants.DATABASE_NAME);
+			for (final val collection : this.mongoClient.getDB(
+					Constants.DATABASE_NAME).getCollectionNames()) {
+				log.debug(" {}", collection);
+			}
 
 			// Creating Jongo object
 			this.jongo = new Jongo(
@@ -71,6 +80,11 @@ public class DatabaseManagerService {
 		log.info("Stopped.");
 	}
 
+	/**
+	 * Returns {@link Jongo} object
+	 * 
+	 * @return
+	 */
 	public Jongo getDB() {
 		return this.jongo;
 	}

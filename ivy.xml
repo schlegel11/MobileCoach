@@ -7,6 +7,7 @@
 	<!ENTITY log4j.version "2.0-beta9">
 	<!ENTITY javaluator.version "2.0.0">
 	<!ENTITY lombok.version "1.12.2">
+	<!ENTITY commons-lang.version "2.6">
 ]>
 <ivy-module version="2.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -66,5 +67,8 @@
 		
 		<!-- Lombok -->
 		<dependency org="org.projectlombok" name="lombok" rev="&lombok.version;"/>
+		
+		<!-- Apache Commons lang -->
+		<dependency org="commons-lang" name="commons-lang" rev="&commons-lang.version;"/>
 	</dependencies>
 </ivy-module>

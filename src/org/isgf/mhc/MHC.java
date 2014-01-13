@@ -7,18 +7,25 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.services.DatabaseManagerService;
+import org.isgf.mhc.services.FileStorageManagerService;
 
 /**
  * @author Andreas Filler
  */
 @Log4j2
-public class ContextListener implements ServletContextListener {
+public class MHC implements ServletContextListener {
 	@Getter
-	private static boolean	ready	= false;
+	private static MHC	instance;
+
+	@Getter
+	private boolean					ready	= false;
 
 	// Services
 	@Getter
-	DatabaseManagerService	databaseManagerService;
+	DatabaseManagerService			databaseManagerService;
+
+	@Getter
+	FileStorageManagerService		fileStorageManagerService;
 
 	@Override
 	public void contextDestroyed(final ServletContextEvent event) {
@@ -26,6 +33,7 @@ public class ContextListener implements ServletContextListener {
 
 		try {
 			this.databaseManagerService.stop();
+			this.fileStorageManagerService.stop();
 		} catch (final Exception e) {
 			log.warn("Error at stopping {}: {}", this.databaseManagerService, e);
 		}
@@ -35,7 +43,9 @@ public class ContextListener implements ServletContextListener {
 
 	@Override
 	public void contextInitialized(final ServletContextEvent event) {
-		boolean noErrorsOccured = true;
+		boolean noErrorsOccurred = true;
+
+		instance = this;
 
 		log.info("Setting basic configuration...");
 		Messages.setLocale(Constants.SYSTEM_LOCALE);
@@ -43,15 +53,16 @@ public class ContextListener implements ServletContextListener {
 		log.info("Starting up base services...");
 		try {
 			this.databaseManagerService = DatabaseManagerService.start();
+			this.fileStorageManagerService = FileStorageManagerService.start();
 		} catch (final Exception e) {
-			noErrorsOccured = false;
+			noErrorsOccurred = false;
 			log.error("Error at starting {}: {}", this.databaseManagerService,
 					e);
 		}
 
 		// Only set to true if all relevant services started probably
-		if (noErrorsOccured) {
-			ContextListener.ready = true;
+		if (noErrorsOccurred) {
+			this.ready = true;
 
 			log.info("Base services started.");
 		} else {
