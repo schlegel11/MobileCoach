@@ -1,9 +1,6 @@
 package org.isgf.mhc.tools;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -55,7 +52,7 @@ public class RuleEvaluator {
 						rule.getRuleComparisonTermWithPlaceholders(),
 						variablesWithValues);
 				ruleEvaluationResult
-						.setRuleComparisionTermValue(ruleComparisonTermResult);
+						.setRuleComparisonTermValue(ruleComparisonTermResult);
 			} catch (final Exception e) {
 				throw new Exception("Could not parse rule comparision term: "
 						+ e.getMessage());
@@ -125,39 +122,9 @@ public class RuleEvaluator {
 
 		log.debug("Preparing rule {}", rule);
 
-		// Find variables in rule
-		final String variableFindPatternString = "\\$[a-zA-Z_]+";
-		val variableFindPattern = Pattern.compile(variableFindPatternString);
-		final Matcher variableFindMatcher = variableFindPattern.matcher(rule);
-
-		val variablesFoundInRule = new ArrayList<String>();
-		while (variableFindMatcher.find()) {
-			variablesFoundInRule.add(variableFindMatcher.group());
-			log.debug("Found variable {} in rule {}",
-					variableFindMatcher.group(), rule);
-		}
-
-		// Find variable values and put value into rule
-		for (final String variable : variablesFoundInRule) {
-			for (val variableWithValue : variablesWithValues) {
-				if (variable.equals(variableWithValue.getName())) {
-					String value = variableWithValue.getValue();
-
-					// Correct value
-					if (value == null || value.equals("")) {
-						value = "0";
-					}
-
-					// Replace variable with value in rule
-					rule = rule.replace(variable, "(" + value + ")");
-					log.debug("Replaced {} with {}", variable, value);
-					break;
-				}
-			}
-			// Variable not found so replace with "(0)"
-			rule = rule.replace(variable, "(0)");
-			log.debug("Replaced not found variable {} with (0)", variable);
-		}
+		// Replace variables with their according values
+		rule = VariableStringReplacer.findVariablesAndReplaceWithValues(rule,
+				variablesWithValues, "(0)");
 
 		// Evaluate rule
 		log.debug("Evaluating rule {}", rule);
