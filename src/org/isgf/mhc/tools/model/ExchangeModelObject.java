@@ -64,6 +64,20 @@ public class ExchangeModelObject {
 	private String							content;
 
 	/**
+	 * File reference if the {@link ModelObject} has one
+	 */
+	@Getter
+	@Setter
+	private String							fileReference;
+
+	/**
+	 * Method to set the new file reference after import
+	 */
+	@Getter
+	@Setter
+	private String							fileReferenceSetMethod;
+
+	/**
 	 * The set methods required to adjust the {@link ObjectId}s accordingly
 	 * after import in another system
 	 */
@@ -84,7 +98,7 @@ public class ExchangeModelObject {
 	 */
 	@JsonIgnore
 	public String toJSONString() {
-		final val stringWriter = new StringWriter();
+		val stringWriter = new StringWriter();
 
 		try {
 			objectMapper.writeValue(stringWriter, this);

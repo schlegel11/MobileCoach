@@ -35,7 +35,7 @@ public class RuleEvaluator {
 	 */
 	public static RuleEvaluationResult evaluateRule(final AbstractRule rule,
 			final List<AbstractVariableWithValue> variablesWithValues) {
-		final val ruleEvaluationResult = new RuleEvaluationResult();
+		val ruleEvaluationResult = new RuleEvaluationResult();
 
 		try {
 			// Evaluate rule
@@ -127,11 +127,10 @@ public class RuleEvaluator {
 
 		// Find variables in rule
 		final String variableFindPatternString = "\\$[a-zA-Z_]+";
-		final val variableFindPattern = Pattern
-				.compile(variableFindPatternString);
+		val variableFindPattern = Pattern.compile(variableFindPatternString);
 		final Matcher variableFindMatcher = variableFindPattern.matcher(rule);
 
-		final val variablesFoundInRule = new ArrayList<String>();
+		val variablesFoundInRule = new ArrayList<String>();
 		while (variableFindMatcher.find()) {
 			variablesFoundInRule.add(variableFindMatcher.group());
 			log.debug("Found variable {} in rule {}",
@@ -140,7 +139,7 @@ public class RuleEvaluator {
 
 		// Find variable values and put value into rule
 		for (final String variable : variablesFoundInRule) {
-			for (final val variableWithValue : variablesWithValues) {
+			for (val variableWithValue : variablesWithValues) {
 				if (variable.equals(variableWithValue.getName())) {
 					String value = variableWithValue.getValue();
 
@@ -162,9 +161,9 @@ public class RuleEvaluator {
 
 		// Evaluate rule
 		log.debug("Evaluating rule {}", rule);
-		final val doubleEvaluator = new DoubleEvaluator();
+		val doubleEvaluator = new DoubleEvaluator();
 
-		final val result = doubleEvaluator.evaluate(rule);
+		val result = doubleEvaluator.evaluate(rule);
 		log.debug("Result of rule {} is {}", rule, result);
 
 		return result;

@@ -2,11 +2,16 @@ package org.isgf.mhc.services;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 
+import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.isgf.mhc.Constants;
+import org.isgf.mhc.Querys;
+import org.isgf.mhc.model.ModelObject;
+import org.isgf.mhc.model.server.MediaObject;
 
 import com.google.gwt.thirdparty.guava.common.io.Files;
 
@@ -19,11 +24,39 @@ public class FileStorageManagerService {
 	private FileStorageManagerService() throws Exception {
 		log.info("Starting service...");
 
+		log.info("Using storage folder {}", Constants.STORAGE_FOLDER);
 		this.storageFolder = new File(Constants.STORAGE_FOLDER);
 		this.storageFolder.mkdirs();
 
-		// TODO Z: IDEA: Could test for existing files here and remove files
-		// with no model object reference
+		// Checking for file consistency in both ways:
+		// a) Check if all required files exist
+		// a) Delete unused files
+		val requiredFileRefernces = new HashSet<String>();
+
+		log.info("Checking media objects and storage folder for consistency:");
+		val mediaObjects = ModelObject.find(MediaObject.class, Querys.ALL);
+
+		for (val mediaObject : mediaObjects) {
+			final String fileReference = mediaObject.getFileReference();
+			requiredFileRefernces.add(fileReference.split("/")[0]);
+			if (this.getFile(fileReference) == null) {
+				log.warn("Media object {} contains missing file reference {}",
+						mediaObject.getId(), mediaObject.getFileReference());
+			}
+		}
+
+		for (val file : this.storageFolder.listFiles()) {
+			if (file.isDirectory() && file.getName().startsWith("MHC_")
+					&& !requiredFileRefernces.contains(file.getName())) {
+				log.debug("Deleting unused resource {}", file.getAbsolutePath());
+				for (val nestedFile : file.listFiles()) {
+					nestedFile.delete();
+				}
+				file.delete();
+			}
+		}
+
+		log.info("Check done.");
 
 		log.info("Started.");
 	}
@@ -83,10 +116,10 @@ public class FileStorageManagerService {
 			fileName = "file.unknown";
 		}
 
-		String folderName = RandomStringUtils.randomAlphabetic(40);
+		String folderName = "MHC_" + RandomStringUtils.randomAlphabetic(40);
 		File folder = new File(this.storageFolder, folderName);
 		while (folder.exists()) {
-			folderName = RandomStringUtils.randomAlphabetic(40);
+			folderName = "MHC_" + RandomStringUtils.randomAlphabetic(40);
 			folder = new File(this.storageFolder, folderName);
 		}
 		folder.mkdirs();

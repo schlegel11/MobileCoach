@@ -55,7 +55,7 @@ public abstract class ModelObject {
 	 */
 	@JsonIgnore
 	public String toJSONString() {
-		final val stringWriter = new StringWriter();
+		val stringWriter = new StringWriter();
 
 		try {
 			objectMapper.writeValue(stringWriter, this);

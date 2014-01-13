@@ -37,7 +37,7 @@ public class DatabaseManagerService {
 			// Checking connection
 			log.debug("Existing collections in database {}: ",
 					Constants.DATABASE_NAME);
-			for (final val collection : this.mongoClient.getDB(
+			for (val collection : this.mongoClient.getDB(
 					Constants.DATABASE_NAME).getCollectionNames()) {
 				log.debug(" {}", collection);
 			}

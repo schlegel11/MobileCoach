@@ -1,6 +1,7 @@
 package org.isgf.mhc.tools;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -8,6 +9,7 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -18,8 +20,11 @@ import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
+import org.isgf.mhc.MHC;
 import org.isgf.mhc.model.ModelObject;
+import org.isgf.mhc.model.server.MediaObject;
 import org.isgf.mhc.tools.model.ExchangeModelObject;
 
 @Log4j2
@@ -44,6 +49,18 @@ public class ModelObjectExchange {
 					modelObject.getClass().getSimpleName(), modelObject
 							.getClass().getName(), modelObject.getId()
 							.toString(), modelObject.toJSONString());
+
+			// Determine if the model object contains also files that need to be
+			// exported
+			if (modelObject instanceof MediaObject) {
+				final MediaObject mediaObject = (MediaObject) modelObject;
+				if (mediaObject.getFileReference() != null) {
+					exchangeModelObject.setFileReference(mediaObject
+							.getFileReference());
+					exchangeModelObject
+							.setFileReferenceSetMethod("setFileReference");
+				}
+			}
 
 			// Determine which methods set object ids and store there values
 			// separately for adaption after import into other system
@@ -115,6 +132,24 @@ public class ModelObjectExchange {
 		for (val exchangeModelObject : exchangeModelObjects) {
 			final ModelObject modelObject = exchangeModelObject
 					.getContainedModelObjectWithoutOriginalId();
+
+			// Adjust file reference
+			if (exchangeModelObject.getFileReference() != null) {
+				try {
+					log.debug(
+							"Setting new file reference {} to model object {}",
+							exchangeModelObject.getFileReference(), modelObject);
+					final Method method = modelObject.getClass().getMethod(
+							exchangeModelObject.getFileReferenceSetMethod(),
+							String.class);
+					method.invoke(modelObject,
+							exchangeModelObject.getFileReference());
+				} catch (final Exception e) {
+					log.error(
+							"Could not set new file reference {} to model object {}",
+							exchangeModelObject.getFileReference(), modelObject);
+				}
+			}
 
 			modelObjects.add(modelObject);
 		}
@@ -224,9 +259,31 @@ public class ModelObjectExchange {
 		final ZipOutputStream zipOutputStream = new ZipOutputStream(
 				new FileOutputStream(zipFile));
 
-		for (final val exchangeModelObject : exchangeModelObjects) {
-			final String uniqueZipName = exchangeModelObject.getClazz() + " "
-					+ exchangeModelObject.getObjectId();
+		for (val exchangeModelObject : exchangeModelObjects) {
+			// Care for linked files
+			if (exchangeModelObject.getFileReference() != null) {
+				final String uniqueFileZipName = "F "
+						+ exchangeModelObject.getFileReference();
+				final File referencedFile = MHC.getInstance()
+						.getFileStorageManagerService()
+						.getFile(exchangeModelObject.getFileReference());
+				log.debug("Adding referenced file {} as {} to zip file",
+						referencedFile, uniqueFileZipName);
+
+				final ZipEntry fileZipEntry = new ZipEntry(uniqueFileZipName);
+
+				fileZipEntry.setSize(referencedFile.length());
+				zipOutputStream.putNextEntry(fileZipEntry);
+				@Cleanup
+				final FileInputStream fileInputStream = new FileInputStream(
+						referencedFile);
+				IOUtils.copy(fileInputStream, zipOutputStream);
+				zipOutputStream.closeEntry();
+			}
+
+			// Care for exchange model object itself
+			final String uniqueZipName = "M " + exchangeModelObject.getClazz()
+					+ " " + exchangeModelObject.getObjectId();
 			log.debug("Adding model object {} to zip file", uniqueZipName);
 			final ZipEntry zipEntry = new ZipEntry(uniqueZipName);
 
@@ -258,21 +315,63 @@ public class ModelObjectExchange {
 		log.debug("Loading exchange model objects from zip file {}",
 				zipFile.getName());
 
+		val oldToNewFileReferencesHashtable = new Hashtable<String, String>();
 		for (val zipEntry : Collections.list(zipFile.entries())) {
 			log.debug("Reading entry {}", zipEntry.getName());
 
-			final byte[] exchangeModelObjectBytes = new byte[(int) zipEntry
-					.getSize()];
+			if (zipEntry.getName().startsWith("F ")) {
+				// Extracting file
+				String fileExtension;
+				if (zipEntry.getName().lastIndexOf(".") > -1) {
+					fileExtension = zipEntry.getName().substring(
+							zipEntry.getName().lastIndexOf("."));
+				} else {
+					fileExtension = ".unknown";
+				}
 
-			@Cleanup
-			final InputStream zipEntryInputStream = zipFile
-					.getInputStream(zipEntry);
-			zipEntryInputStream.read(exchangeModelObjectBytes);
+				final File temporaryFile = File.createTempFile("MHC_", ".temp"
+						+ fileExtension);
+				@Cleanup
+				final FileOutputStream fileOutputStream = new FileOutputStream(
+						temporaryFile);
+				@Cleanup
+				final InputStream zipEntryInputStream = zipFile
+						.getInputStream(zipEntry);
+				IOUtils.copy(zipEntryInputStream, fileOutputStream);
 
-			final ExchangeModelObject exchangeModelObject = ExchangeModelObject
-					.fromJSONString(new String(exchangeModelObjectBytes,
-							"UTF-8"));
-			exchangeModelObjects.add(exchangeModelObject);
+				final String newFileReference = MHC.getInstance()
+						.getFileStorageManagerService()
+						.storeFile(temporaryFile);
+
+				temporaryFile.delete();
+
+				final String oldFileReference = zipEntry.getName().split(" ")[1];
+
+				oldToNewFileReferencesHashtable.put(oldFileReference,
+						newFileReference);
+			} else {
+				// Extracting exchange model object
+				final byte[] exchangeModelObjectBytes = new byte[(int) zipEntry
+						.getSize()];
+
+				@Cleanup
+				final InputStream zipEntryInputStream = zipFile
+						.getInputStream(zipEntry);
+				zipEntryInputStream.read(exchangeModelObjectBytes);
+
+				final ExchangeModelObject exchangeModelObject = ExchangeModelObject
+						.fromJSONString(new String(exchangeModelObjectBytes,
+								"UTF-8"));
+
+				// Adjusting file reference from old to new
+				if (exchangeModelObject.getFileReference() != null) {
+					exchangeModelObject
+							.setFileReference(oldToNewFileReferencesHashtable
+									.get(exchangeModelObject.getFileReference()));
+				}
+
+				exchangeModelObjects.add(exchangeModelObject);
+			}
 		}
 
 		return exchangeModelObjects;
