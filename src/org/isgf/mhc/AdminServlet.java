@@ -2,6 +2,7 @@ package org.isgf.mhc;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
 
 import lombok.extern.log4j.Log4j2;
@@ -15,7 +16,7 @@ import com.vaadin.server.VaadinServlet;
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
-@WebServlet(displayName = "Admin UI", value = { "/admin/*", "/VAADIN/*" }, asyncSupported = true, loadOnStartup = 1)
+@WebServlet(displayName = "Admin UI", value = { "/admin/*", "/VAADIN/*" }, initParams = { @WebInitParam(name = "pushmode", value = "automatic") }, asyncSupported = true, loadOnStartup = 1)
 @VaadinServletConfiguration(productionMode = Constants.PRODUCTION_MODE, ui = AdminUI.class)
 @Log4j2
 public class AdminServlet extends VaadinServlet {
