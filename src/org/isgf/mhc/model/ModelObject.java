@@ -80,6 +80,16 @@ public abstract class ModelObject {
 	}
 
 	/**
+	 * Will automatically be called before deletion to enable recursive deletion
+	 * of
+	 * other objects
+	 */
+	@JsonIgnore
+	public void performOnRemove() {
+		// Nothing, but can be overwritten
+	}
+
+	/**
 	 * Saves {@link ModelObject} to database
 	 */
 	@JsonIgnore
@@ -138,10 +148,19 @@ public abstract class ModelObject {
 				.getSimpleName());
 
 		try {
+			final ModelObject objectToRemove = get(clazz, id);
+			if (objectToRemove != null) {
+				objectToRemove.performOnRemove();
+			}
+		} catch (final Exception e) {
+			log.warn("Model object {} does not exist (before removal)");
+		}
+
+		try {
 			collection.remove(id);
 			log.debug("Removed {} with id {}", clazz.getSimpleName(), id);
 		} catch (final Exception e) {
-			log.warn("Could not retrieve {} with id {}: {}",
+			log.warn("Could not remove {} with id {}: {}",
 					clazz.getSimpleName(), id, e.getMessage());
 		}
 	}

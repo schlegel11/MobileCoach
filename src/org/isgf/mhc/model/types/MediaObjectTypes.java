@@ -6,5 +6,5 @@ package org.isgf.mhc.model.types;
  * @author Andreas Filler
  */
 public enum MediaObjectTypes {
-	IMAGE, AUDIO, VIDEO
+	HTML_TEXT, IMAGE, AUDIO, VIDEO
 }

@@ -142,4 +142,17 @@ public class FileStorageManagerService {
 
 		return fileReference;
 	}
+
+	public void deleteFile(final String fileReference) {
+		final File fileToDelete = this.getFile(fileReference);
+
+		if (fileToDelete != null && fileToDelete.exists()) {
+			final File folderToDelete = fileToDelete.getParentFile();
+			fileToDelete.delete();
+			folderToDelete.delete();
+			log.debug("File deleted");
+		} else {
+			log.warn("File not found for deletion");
+		}
+	}
 }
