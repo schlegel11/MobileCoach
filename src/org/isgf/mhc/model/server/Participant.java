@@ -61,7 +61,7 @@ public class Participant extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private boolean		activeForMessaging;
+	private boolean		messagingActive;
 
 	/**
 	 * The organization the {@link Participant} belongs to; can e.g. be used for
