@@ -1,4 +1,4 @@
-package org.isgf.mhc;
+package org.isgf.mhc.servlets;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -7,7 +7,9 @@ import javax.servlet.annotation.WebServlet;
 
 import lombok.extern.log4j.Log4j2;
 
+import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.Constants;
+import org.isgf.mhc.ui.AdminUI;
 
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.VaadinServlet;

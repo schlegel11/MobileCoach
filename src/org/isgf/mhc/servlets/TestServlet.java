@@ -1,4 +1,4 @@
-package org.isgf.mhc;
+package org.isgf.mhc.servlets;
 
 import java.io.File;
 import java.io.FileOutputStream;

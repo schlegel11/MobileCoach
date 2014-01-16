@@ -1,4 +1,4 @@
-package org.isgf.mhc;
+package org.isgf.mhc.ui;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.server.VaadinRequest;

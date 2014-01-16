@@ -1,4 +1,4 @@
-package org.isgf.mhc;
+package org.isgf.mhc.servlets;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -17,6 +17,7 @@ import lombok.Cleanup;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.Constants;
 
 import com.github.mustachejava.DefaultMustacheFactory;

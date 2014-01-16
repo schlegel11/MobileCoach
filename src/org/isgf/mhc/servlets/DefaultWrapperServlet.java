@@ -1,4 +1,4 @@
-package org.isgf.mhc;
+package org.isgf.mhc.servlets;
 
 import java.io.IOException;
 
@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
+
+import org.isgf.mhc.MHC;
 
 import lombok.extern.log4j.Log4j2;
 
