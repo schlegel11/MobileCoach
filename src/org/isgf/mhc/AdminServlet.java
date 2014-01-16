@@ -20,7 +20,6 @@ import com.vaadin.server.VaadinServlet;
 @VaadinServletConfiguration(productionMode = Constants.PRODUCTION_MODE, ui = AdminUI.class)
 @Log4j2
 public class AdminServlet extends VaadinServlet {
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -31,7 +30,7 @@ public class AdminServlet extends VaadinServlet {
 		// Only start servlet if context is ready
 		if (!MHC.getInstance().isReady()) {
 			log.error("Servlet {} can't be started. Context is not ready!",
-					AdminServlet.class);
+					this.getClass());
 			throw new ServletException("Context is not ready!");
 		}
 

@@ -29,5 +29,4 @@ public class Constants {
 	public static final String	DATABASE_USER				= "mhc";
 	public static final String	DATABASE_PASSWORD			= "mhc";
 	public static final String	DATABASE_NAME				= "mhc";
-
 }

@@ -53,7 +53,7 @@ public class VariableStringReplacer {
 		}
 
 		// Find variable values and put value into rule
-		for (final String variable : variablesFoundInRule) {
+		variableSearchLoop: for (final String variable : variablesFoundInRule) {
 			for (val variableWithValue : variablesWithValues) {
 				if (variable.equals(variableWithValue.getName())) {
 					String value = variableWithValue.getValue();
@@ -67,7 +67,7 @@ public class VariableStringReplacer {
 					stringWithVariables = stringWithVariables.replace(variable,
 							"(" + value + ")");
 					log.debug("Replaced {} with {}", variable, value);
-					break;
+					continue variableSearchLoop;
 				}
 			}
 			// Variable not found so replace with a specific value
