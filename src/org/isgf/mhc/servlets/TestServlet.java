@@ -19,6 +19,7 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
+import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.server.Author;
 import org.isgf.mhc.model.server.AuthorInterventionAccess;
@@ -41,11 +42,23 @@ import org.isgf.mhc.tools.StringValidator;
 @WebServlet(displayName = "Testing Interface", value = "/self-test", asyncSupported = true, loadOnStartup = 2)
 @Log4j2
 public class TestServlet extends HttpServlet {
-	private ServletOutputStream	servletOutputStream;
+	private ServletOutputStream	servletOutputStream	= null;
 
 	@Override
 	public void init(final ServletConfig servletConfig) throws ServletException {
 		log.info("Initializing servlet...");
+
+		if (Constants.RUN_TESTS_AT_STARTUP) {
+			// Perform tests
+			log.debug("STARTING TEST...");
+			try {
+				this.completeDataTestcase();
+			} catch (final Exception e) {
+				log.error("ERROR at running testcase: " + e.getMessage());
+				log.error(e.getStackTrace().toString());
+			}
+			log.debug("TEST DONE.");
+		}
 
 		log.info("Servlet initialized.");
 		super.init(servletConfig);
@@ -76,7 +89,6 @@ public class TestServlet extends HttpServlet {
 		} catch (final Exception e) {
 			this.logToWeb("ERROR at running testcase: " + e.getMessage());
 			this.logToWeb(e.getStackTrace().toString());
-			throw new ServletException("Stop everything");
 		}
 		this.logToWeb("TEST DONE.");
 	}
@@ -193,11 +205,13 @@ public class TestServlet extends HttpServlet {
 	}
 
 	private void logToWeb(final String logMessage) {
-		try {
-			this.servletOutputStream.print(logMessage + "\n");
-			this.servletOutputStream.flush();
-		} catch (final IOException e) {
-			// Do nothing
+		if (this.servletOutputStream != null) {
+			try {
+				this.servletOutputStream.print(logMessage + "\n");
+				this.servletOutputStream.flush();
+			} catch (final IOException e) {
+				// Do nothing
+			}
 		}
 		log.debug(logMessage);
 	}

@@ -10,6 +10,11 @@ public class Constants {
 	public static final boolean	PRODUCTION_MODE				= false;
 
 	/**
+	 * Basic debugging configuration
+	 */
+	public static final boolean	RUN_TESTS_AT_STARTUP		= true;
+
+	/**
 	 * Admin configuration
 	 */
 	public static final Locale	ADMIN_LOCALE				= Locale.ENGLISH;
@@ -29,4 +34,5 @@ public class Constants {
 	public static final String	DATABASE_USER				= "mhc";
 	public static final String	DATABASE_PASSWORD			= "mhc";
 	public static final String	DATABASE_NAME				= "mhc";
+
 }

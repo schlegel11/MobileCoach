@@ -35,13 +35,6 @@ public class ScreeningSurveyServlet extends HttpServlet {
 	private MustacheFactory	mustacheFactory;
 
 	/**
-	 * @see HttpServlet#HttpServlet()
-	 */
-	public ScreeningSurveyServlet() {
-		super();
-	}
-
-	/**
 	 * @see Servlet#init(ServletConfig)
 	 */
 	@Override
