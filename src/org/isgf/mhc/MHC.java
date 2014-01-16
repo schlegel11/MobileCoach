@@ -8,8 +8,11 @@ import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.conf.Messages;
+import org.isgf.mhc.services.CommunicationManagerService;
 import org.isgf.mhc.services.DatabaseManagerService;
 import org.isgf.mhc.services.FileStorageManagerService;
+import org.isgf.mhc.services.InterventionManagerService;
+import org.isgf.mhc.services.ScreeningSurveyManagerService;
 
 /**
  * @author Andreas Filler
@@ -17,31 +20,26 @@ import org.isgf.mhc.services.FileStorageManagerService;
 @Log4j2
 public class MHC implements ServletContextListener {
 	@Getter
-	private static MHC			instance;
+	private static MHC				instance;
 
 	@Getter
-	private boolean				ready	= false;
+	private boolean					ready	= false;
 
 	// Services
 	@Getter
-	DatabaseManagerService		databaseManagerService;
+	DatabaseManagerService			databaseManagerService;
 
 	@Getter
-	FileStorageManagerService	fileStorageManagerService;
+	FileStorageManagerService		fileStorageManagerService;
 
-	@Override
-	public void contextDestroyed(final ServletContextEvent event) {
-		log.info("Stopping base services...");
+	@Getter
+	CommunicationManagerService		communicationManagerService;
 
-		try {
-			this.databaseManagerService.stop();
-			this.fileStorageManagerService.stop();
-		} catch (final Exception e) {
-			log.warn("Error at stopping {}: {}", this.databaseManagerService, e);
-		}
+	@Getter
+	InterventionManagerService		interventionManagerService;
 
-		log.info("Base services stopped.");
-	}
+	@Getter
+	ScreeningSurveyManagerService	screeningSurveyManagerService;
 
 	@Override
 	public void contextInitialized(final ServletContextEvent event) {
@@ -57,10 +55,15 @@ public class MHC implements ServletContextListener {
 		try {
 			this.databaseManagerService = DatabaseManagerService.start();
 			this.fileStorageManagerService = FileStorageManagerService.start();
+			this.communicationManagerService = CommunicationManagerService
+					.start();
+			this.interventionManagerService = InterventionManagerService
+					.start();
+			this.screeningSurveyManagerService = ScreeningSurveyManagerService
+					.start();
 		} catch (final Exception e) {
 			noErrorsOccurred = false;
-			log.error("Error at starting {}: {}", this.databaseManagerService,
-					e);
+			log.error("Error at starting services: {}", e);
 		}
 
 		// Only set to true if all relevant services started probably
@@ -71,5 +74,22 @@ public class MHC implements ServletContextListener {
 		} else {
 			log.error("Not all base services could be started.");
 		}
+	}
+
+	@Override
+	public void contextDestroyed(final ServletContextEvent event) {
+		log.info("Stopping base services...");
+
+		try {
+			this.databaseManagerService.stop();
+			this.fileStorageManagerService.stop();
+			this.communicationManagerService.stop();
+			this.interventionManagerService.stop();
+			this.screeningSurveyManagerService.stop();
+		} catch (final Exception e) {
+			log.warn("Error at stopping services: {}", e);
+		}
+
+		log.info("Base services stopped.");
 	}
 }
