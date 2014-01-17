@@ -1,2 +1,4 @@
 eclipse.preferences.version=1
-encoding//src/org/isgf/mhc/conf/messages.properties=UTF-8
+encoding//src/org/isgf/mhc/conf/admin-messages.properties=UTF-8
+encoding//src/org/isgf/mhc/conf/screening-survey-messages.properties=UTF-8
+encoding//src/org/isgf/mhc/conf/screening-survey-messages_de.properties=UTF-8

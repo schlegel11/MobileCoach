@@ -1,6 +1,12 @@
 package org.isgf.mhc.services;
 
+import java.util.HashMap;
+
+import javax.servlet.http.HttpSession;
+
 import lombok.extern.log4j.Log4j2;
+
+import org.bson.types.ObjectId;
 
 @Log4j2
 public class ScreeningSurveyManagerService {
@@ -23,5 +29,14 @@ public class ScreeningSurveyManagerService {
 		log.info("Stopping service...");
 
 		log.info("Stopped.");
+	}
+
+	public HashMap<String, Object> getAppropriateSlide(
+			final ObjectId participantId, final ObjectId screeningSurveyId,
+			final String resultValue, final HttpSession session) {
+
+		// TODO a lot (not forget to set session values)
+
+		return null;
 	}
 }

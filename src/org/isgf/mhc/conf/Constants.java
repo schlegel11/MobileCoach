@@ -35,4 +35,17 @@ public class Constants {
 	public static final String	DATABASE_PASSWORD			= "mhc";
 	public static final String	DATABASE_NAME				= "mhc";
 
+	/**
+	 * Session variables
+	 */
+	public static final String	SESSION_PARTICIPANT_ID		= "ParticipantId";
+	public static final String	SESSION_SCREENING_SURVEY_ID	= "ScreeningSurveyId";
+
+	/**
+	 * Screening survey slide template variables
+	 */
+	public static final String	SSS_TEMPLATE_RESULT_VALUE	= "result";
+	public static final String	SSS_TEMPLATE_STEP			= "step";
+	public static final Object	SSS_TEMPLATE_STEPS_ERROR	= "error";
+	public static final String	SSS_TEMPLATE_GLOBAL_MESSAGE	= "global_message";
 }

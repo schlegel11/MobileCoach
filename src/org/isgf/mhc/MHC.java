@@ -50,6 +50,7 @@ public class MHC implements ServletContextListener {
 		log.info("Setting basic configuration...");
 		Messages.setLocales(Constants.ADMIN_LOCALE,
 				Constants.SCREENING_SURVEY_LOCALE);
+		Messages.checkForMissingLocales();
 
 		log.info("Starting up base services...");
 		try {

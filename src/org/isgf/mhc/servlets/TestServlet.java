@@ -19,6 +19,7 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
+import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.server.Author;
@@ -46,6 +47,13 @@ public class TestServlet extends HttpServlet {
 
 	@Override
 	public void init(final ServletConfig servletConfig) throws ServletException {
+		// Only start servlet if context is ready
+		if (!MHC.getInstance().isReady()) {
+			log.error("Servlet {} can't be started. Context is not ready!",
+					this.getClass());
+			throw new ServletException("Context is not ready!");
+		}
+
 		log.info("Initializing servlet...");
 
 		if (Constants.RUN_TESTS_AT_STARTUP) {

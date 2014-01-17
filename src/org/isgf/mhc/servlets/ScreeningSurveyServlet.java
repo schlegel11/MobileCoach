@@ -17,8 +17,11 @@ import lombok.Cleanup;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.bson.types.ObjectId;
 import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.Constants;
+import org.isgf.mhc.conf.Messages;
+import org.isgf.mhc.conf.ScreeningSurveyMessageStrings;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.MustacheFactory;
@@ -62,16 +65,61 @@ public class ScreeningSurveyServlet extends HttpServlet {
 	protected void doGet(final HttpServletRequest request,
 			final HttpServletResponse response) throws ServletException,
 			IOException {
+
+		// TODO ADD LOG MESSAGES
+
 		// Set header information (e.g. for no caching)
 		response.setHeader("Pragma", "No-cache");
 		response.setHeader("Cache-Control", "no-cache,no-store,max-age=0");
 		response.setDateHeader("Expires", 1);
 		response.setContentType("text/html");
 
-		// TODO Logic has to decide how the map has to be filled. The map also
-		// has to include the information for the step of the template etc.
-		val scopes = new HashMap<String, Object>();
-		scopes.put("name", "Mustache");
+		// Get information from session
+		val session = request.getSession(true);
+		ObjectId participantId;
+		ObjectId screeningSurveyId;
+		try {
+			participantId = (ObjectId) session
+					.getAttribute(Constants.SESSION_PARTICIPANT_ID);
+		} catch (final Exception e) {
+			participantId = null;
+		}
+		try {
+			screeningSurveyId = (ObjectId) session
+					.getAttribute(Constants.SESSION_SCREENING_SURVEY_ID);
+		} catch (final Exception e) {
+			screeningSurveyId = null;
+		}
+
+		// Get question result if available
+		String resultValue;
+		try {
+			resultValue = (String) request
+					.getAttribute(Constants.SSS_TEMPLATE_RESULT_VALUE);
+		} catch (final Exception e) {
+			resultValue = null;
+		}
+
+		// Decide which slide should be send to the participant
+		HashMap<String, Object> templateVariables;
+		try {
+			templateVariables = MHC
+					.getInstance()
+					.getScreeningSurveyManagerService()
+					.getAppropriateSlide(participantId, screeningSurveyId,
+							resultValue, session);
+
+			if (templateVariables == null) {
+				throw new NullPointerException();
+			}
+		} catch (final Exception e) {
+			templateVariables = new HashMap<String, Object>();
+			templateVariables.put(Constants.SSS_TEMPLATE_STEP,
+					Constants.SSS_TEMPLATE_STEPS_ERROR);
+			templateVariables
+					.put(Constants.SSS_TEMPLATE_GLOBAL_MESSAGE,
+							Messages.getScreeningSurveyString(ScreeningSurveyMessageStrings.UNKNOWN_ERROR));
+		}
 
 		// Fill template
 		@Cleanup
@@ -80,14 +128,14 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				.getResource(Constants.SCREENING_SURVEY_TEMPLATE).openStream(),
 				"UTF-8");
 		val mustache = this.mustacheFactory.compile(templateInputStreamReader,
-				"test");
+				"mustache.template");
 
 		@Cleanup
 		val responseOutputStreamWriter = new OutputStreamWriter(
 				response.getOutputStream());
 
 		// Send template
-		mustache.execute(responseOutputStreamWriter, scopes);
+		mustache.execute(responseOutputStreamWriter, templateVariables);
 	}
 
 	/**
