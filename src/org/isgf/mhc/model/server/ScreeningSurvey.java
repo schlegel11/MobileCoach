@@ -15,7 +15,8 @@ import org.isgf.mhc.model.ModelObject;
  * Before a {@link Participant} can participate in an {@link Intervention}
  * she/he has to perform one of the {@link ScreeningSurvey}s belonging to an
  * Intervention. In this {@link ScreeningSurvey}, which consist of several
- * {@link ScreeningSurveySlide}s, the basic {@link ParticipantVariableWithValue}s
+ * {@link ScreeningSurveySlide}s, the basic {@link ParticipantVariableWithValue}
+ * s
  * are collected as well as used to calculate the next
  * {@link ScreeningSurveySlide}s.
  * 
@@ -39,6 +40,14 @@ public class ScreeningSurvey extends ModelObject {
 	@Setter
 	@NonNull
 	private String		name;
+
+	/**
+	 * The path of the template for the {@link ScreeningSurveySlide}s
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private String		templatePath;
 
 	/**
 	 * <strong>OPTIONAL:</strong> The password required to participate in the

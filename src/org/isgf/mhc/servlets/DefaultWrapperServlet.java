@@ -12,9 +12,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
-import org.isgf.mhc.MHC;
-
 import lombok.extern.log4j.Log4j2;
+
+import org.isgf.mhc.MHC;
 
 /**
  * Servlet to map all files in the "static"-folder to the /static/ URL path
@@ -54,7 +54,7 @@ public class DefaultWrapperServlet extends HttpServlet {
 	public void doGet(final HttpServletRequest request,
 			final HttpServletResponse response) throws ServletException,
 			IOException {
-		final RequestDispatcher rd = this.getServletContext()
+		final RequestDispatcher requestDispatcher = this.getServletContext()
 				.getNamedDispatcher("default");
 
 		final HttpServletRequest wrapped = new HttpServletRequestWrapper(
@@ -65,6 +65,6 @@ public class DefaultWrapperServlet extends HttpServlet {
 			}
 		};
 
-		rd.forward(wrapped, response);
+		requestDispatcher.forward(wrapped, response);
 	}
 }

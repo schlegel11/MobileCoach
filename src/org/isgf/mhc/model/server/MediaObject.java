@@ -11,7 +11,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.MHC;
 import org.isgf.mhc.model.ModelObject;
-import org.isgf.mhc.model.types.MediaObjectTypes;
+import org.isgf.mhc.model.server.types.MediaObjectTypes;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

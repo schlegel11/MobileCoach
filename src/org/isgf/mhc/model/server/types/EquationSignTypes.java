@@ -1,4 +1,4 @@
-package org.isgf.mhc.model.types;
+package org.isgf.mhc.model.server.types;
 
 /**
  * Supported {@link EquationSignTypes}

@@ -8,7 +8,7 @@ import lombok.Setter;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
-import org.isgf.mhc.model.types.ScreeningSurveySlideQuestionTypes;
+import org.isgf.mhc.model.server.types.ScreeningSurveySlideQuestionTypes;
 
 /**
  * {@link ModelObject} to represent an {@link ScreeningSurveySlide}
@@ -42,15 +42,6 @@ public class ScreeningSurveySlide extends ModelObject {
 	private int									order;
 
 	/**
-	 * Defines the layout of the {@link ScreeningSurveySlide}
-	 */
-	// TODO Not solved how to do this! Are CSS classes enough? Would be good.
-	@Getter
-	@Setter
-	@NonNull
-	private String								layout;
-
-	/**
 	 * The title of the {@link ScreeningSurveySlide} presented to the
 	 * {@link Participant} containing placeholders
 	 * for variables
@@ -59,6 +50,14 @@ public class ScreeningSurveySlide extends ModelObject {
 	@Setter
 	@NonNull
 	private String								titleWithPlaceholders;
+
+	/**
+	 * Enables to add an optional layout attribute for the template generation
+	 * in addition to the template set by the question type
+	 */
+	@Getter
+	@Setter
+	private String								optionalLayoutAttribute;
 
 	/**
 	 * <strong>OPTIONAL:</strong> A {@link MediaObject} can be linked to be

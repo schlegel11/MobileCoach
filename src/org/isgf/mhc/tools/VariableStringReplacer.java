@@ -26,7 +26,9 @@ public class VariableStringReplacer {
 	 * @param variablesWithValues
 	 *            The variables that can be used for the replacement process
 	 * @param notFoundReplacer
-	 *            The replacement String if a variable value could not be found
+	 *            The replacement {@link String} if a variable value could not
+	 *            be found, or null if the variable should not be replaced if no
+	 *            variable with the appropriate name could be found
 	 * @return The String filled with variable values
 	 */
 	public static String findVariablesAndReplaceWithValues(
@@ -70,11 +72,15 @@ public class VariableStringReplacer {
 					continue variableSearchLoop;
 				}
 			}
-			// Variable not found so replace with a specific value
-			stringWithVariables = stringWithVariables.replace(variable,
-					notFoundReplacer);
-			log.debug("Replaced not found variable {} with {}", variable,
-					notFoundReplacer);
+			if (notFoundReplacer != null) {
+				// Variable not found so replace with a specific value
+				stringWithVariables = stringWithVariables.replace(variable,
+						notFoundReplacer);
+				log.debug("Replaced not found variable {} with {}", variable,
+						notFoundReplacer);
+			} else {
+				log.debug("Do not replace not found variable {}", variable);
+			}
 		}
 
 		return stringWithVariables;

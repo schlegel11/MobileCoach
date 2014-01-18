@@ -7,7 +7,7 @@ import lombok.NonNull;
 import lombok.Setter;
 
 import org.isgf.mhc.model.ModelObject;
-import org.isgf.mhc.model.types.EquationSignTypes;
+import org.isgf.mhc.model.server.types.EquationSignTypes;
 
 /**
  * {@link ModelObject} to represent a rule

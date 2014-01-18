@@ -111,8 +111,7 @@ public abstract class ModelObject {
 	 * @param id
 	 *            The {@link ObjectId} of the {@link ModelObject}
 	 * @return The retrieved {@link ModelObject} subclass object or
-	 *         <code>null</code> if not
-	 *         found
+	 *         <code>null</code> if not found
 	 */
 	@JsonIgnore
 	public static final <ModelObjectSubclass extends ModelObject> ModelObjectSubclass get(

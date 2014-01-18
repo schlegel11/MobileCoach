@@ -8,7 +8,7 @@ import lombok.Setter;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
-import org.isgf.mhc.model.types.DialogOptionTypes;
+import org.isgf.mhc.model.server.types.DialogOptionTypes;
 
 /**
  * {@link ModelObject} to represent an {@link DialogOption}

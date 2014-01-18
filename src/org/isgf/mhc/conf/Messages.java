@@ -16,18 +16,15 @@ import org.isgf.mhc.tools.UTF8Control;
  */
 @Log4j2
 public class Messages {
-	private static final String		ADMIN_BUNDLE_NAME					= "org.isgf.mhc.conf.admin-messages";				//$NON-NLS-1$
-	private static final String		SCREENING_SURVEY_BUNDLE_NAME		= "org.isgf.mhc.conf.screening-survey-messages";	//$NON-NLS-1$
+	private static final String		ADMIN_BUNDLE_NAME		= "org.isgf.mhc.conf.admin-messages";	//$NON-NLS-1$
 
-	private static ResourceBundle	ADMIN_RESOURCE_BUNDLE				= null;
-	private static ResourceBundle	SCREENING_SURVEY_RESOURCE_BUNDLE	= null;
+	private static ResourceBundle	ADMIN_RESOURCE_BUNDLE	= null;
 
 	/**
 	 * Set {@link Messages} class to a specific locales or fallback to default
 	 * (English)
 	 */
-	public static void setLocales(final Locale adminLocale,
-			final Locale screeningSurveyLocale) {
+	public static void setLocale(final Locale adminLocale) {
 		// Loading admin messages
 		try {
 			ADMIN_RESOURCE_BUNDLE = ResourceBundle.getBundle(ADMIN_BUNDLE_NAME,
@@ -37,18 +34,6 @@ public class Messages {
 			ADMIN_RESOURCE_BUNDLE = ResourceBundle.getBundle(ADMIN_BUNDLE_NAME,
 					new UTF8Control());
 			log.debug("Set admin locale to {}", Locale.ENGLISH);
-		}
-
-		// Loading screening survey messages
-		try {
-			SCREENING_SURVEY_RESOURCE_BUNDLE = ResourceBundle.getBundle(
-					SCREENING_SURVEY_BUNDLE_NAME, screeningSurveyLocale,
-					new UTF8Control());
-			log.debug("Set screening survey locale to {}", adminLocale);
-		} catch (final Exception e) {
-			SCREENING_SURVEY_RESOURCE_BUNDLE = ResourceBundle.getBundle(
-					SCREENING_SURVEY_BUNDLE_NAME, new UTF8Control());
-			log.debug("Set screening survey locale to {}", Locale.ENGLISH);
 		}
 	}
 
@@ -60,15 +45,6 @@ public class Messages {
 	 */
 	public static void checkForMissingLocales() {
 		log.info("Checking for missing localization strings in the selected language...");
-		for (final val field : ScreeningSurveyMessageStrings.values()) {
-			try {
-				SCREENING_SURVEY_RESOURCE_BUNDLE.getString(field.toString());
-
-			} catch (final Exception e) {
-				log.error("Screening survey message string {} is missing!",
-						field.toString());
-			}
-		}
 		for (final val field : AdminMessageStrings.values()) {
 			try {
 				ADMIN_RESOURCE_BUNDLE.getString(field.toString());
@@ -90,21 +66,6 @@ public class Messages {
 	public static String getAdminString(final AdminMessageStrings key) {
 		try {
 			return ADMIN_RESOURCE_BUNDLE.getString(key.toString());
-		} catch (final MissingResourceException e) {
-			return '!' + key.toString() + '!';
-		}
-	}
-
-	/**
-	 * Return {@link String} in currently set screening survey locale
-	 * 
-	 * @param key
-	 * @return
-	 */
-	public static String getScreeningSurveyString(
-			final ScreeningSurveyMessageStrings key) {
-		try {
-			return SCREENING_SURVEY_RESOURCE_BUNDLE.getString(key.toString());
 		} catch (final MissingResourceException e) {
 			return '!' + key.toString() + '!';
 		}

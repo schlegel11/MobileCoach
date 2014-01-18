@@ -1,9 +1,11 @@
 package org.isgf.mhc.services;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashSet;
 
+import lombok.Getter;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
@@ -21,12 +23,25 @@ public class FileStorageManagerService {
 
 	private final File							storageFolder;
 
+	@Getter
+	private final File							templatesFolder;
+
 	private FileStorageManagerService() throws Exception {
 		log.info("Starting service...");
 
 		log.info("Using storage folder {}", Constants.STORAGE_FOLDER);
 		this.storageFolder = new File(Constants.STORAGE_FOLDER);
 		this.storageFolder.mkdirs();
+		if (!this.storageFolder.exists()) {
+			throw new FileNotFoundException();
+		}
+
+		log.info("Using templates folder {}", Constants.TEMPLATES_FOLDER);
+		this.templatesFolder = new File(Constants.TEMPLATES_FOLDER);
+		this.templatesFolder.mkdirs();
+		if (!this.templatesFolder.exists()) {
+			throw new FileNotFoundException();
+		}
 
 		// Checking for file consistency in both ways:
 		// a) Check if all required files exist

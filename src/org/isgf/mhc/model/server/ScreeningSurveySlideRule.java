@@ -8,7 +8,7 @@ import lombok.Setter;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.server.concepts.AbstractRule;
-import org.isgf.mhc.model.types.EquationSignTypes;
+import org.isgf.mhc.model.server.types.EquationSignTypes;
 
 /**
  * {@link ModelObject} to represent an {@link ScreeningSurveySlideRule}
