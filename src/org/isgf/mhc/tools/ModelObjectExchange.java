@@ -329,6 +329,7 @@ public class ModelObjectExchange {
 					fileExtension = ".unknown";
 				}
 
+				@Cleanup("delete")
 				final File temporaryFile = File.createTempFile("MHC_", ".temp"
 						+ fileExtension);
 				@Cleanup
@@ -342,8 +343,6 @@ public class ModelObjectExchange {
 				final String newFileReference = MHC.getInstance()
 						.getFileStorageManagerService()
 						.storeFile(temporaryFile);
-
-				temporaryFile.delete();
 
 				final String oldFileReference = zipEntry.getName().split(" ")[1];
 

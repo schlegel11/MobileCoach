@@ -11,8 +11,10 @@ import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.services.CommunicationManagerService;
 import org.isgf.mhc.services.DatabaseManagerService;
 import org.isgf.mhc.services.FileStorageManagerService;
-import org.isgf.mhc.services.InterventionManagerService;
-import org.isgf.mhc.services.ScreeningSurveyManagerService;
+import org.isgf.mhc.services.InterventionAdministrationManagerService;
+import org.isgf.mhc.services.InterventionExecutionManagerService;
+import org.isgf.mhc.services.ScreeningSurveyAdministrationManagerService;
+import org.isgf.mhc.services.ScreeningSurveyExecutionManagerService;
 
 /**
  * @author Andreas Filler
@@ -20,26 +22,32 @@ import org.isgf.mhc.services.ScreeningSurveyManagerService;
 @Log4j2
 public class MHC implements ServletContextListener {
 	@Getter
-	private static MHC				instance;
+	private static MHC							instance;
 
 	@Getter
-	private boolean					ready	= false;
+	private boolean								ready	= false;
 
 	// Services
 	@Getter
-	DatabaseManagerService			databaseManagerService;
+	DatabaseManagerService						databaseManagerService;
 
 	@Getter
-	FileStorageManagerService		fileStorageManagerService;
+	FileStorageManagerService					fileStorageManagerService;
 
 	@Getter
-	CommunicationManagerService		communicationManagerService;
+	CommunicationManagerService					communicationManagerService;
 
 	@Getter
-	InterventionManagerService		interventionManagerService;
+	InterventionAdministrationManagerService	interventionAdministrationManagerService;
 
 	@Getter
-	ScreeningSurveyManagerService	screeningSurveyManagerService;
+	ScreeningSurveyAdministrationManagerService	screeningSurveyAdministrationManagerService;
+
+	@Getter
+	InterventionExecutionManagerService			interventionExecutionManagerService;
+
+	@Getter
+	ScreeningSurveyExecutionManagerService		screeningSurveyExecutionManagerService;
 
 	@Override
 	public void contextInitialized(final ServletContextEvent event) {
@@ -57,9 +65,13 @@ public class MHC implements ServletContextListener {
 			this.fileStorageManagerService = FileStorageManagerService.start();
 			this.communicationManagerService = CommunicationManagerService
 					.start();
-			this.interventionManagerService = InterventionManagerService
+			this.interventionAdministrationManagerService = InterventionAdministrationManagerService
 					.start();
-			this.screeningSurveyManagerService = ScreeningSurveyManagerService
+			this.screeningSurveyAdministrationManagerService = ScreeningSurveyAdministrationManagerService
+					.start();
+			this.interventionExecutionManagerService = InterventionExecutionManagerService
+					.start();
+			this.screeningSurveyExecutionManagerService = ScreeningSurveyExecutionManagerService
 					.start();
 		} catch (final Exception e) {
 			noErrorsOccurred = false;
@@ -84,8 +96,10 @@ public class MHC implements ServletContextListener {
 			this.databaseManagerService.stop();
 			this.fileStorageManagerService.stop();
 			this.communicationManagerService.stop();
-			this.interventionManagerService.stop();
-			this.screeningSurveyManagerService.stop();
+			this.interventionAdministrationManagerService.stop();
+			this.screeningSurveyAdministrationManagerService.stop();
+			this.interventionExecutionManagerService.stop();
+			this.screeningSurveyExecutionManagerService.stop();
 		} catch (final Exception e) {
 			log.warn("Error at stopping services: {}", e);
 		}

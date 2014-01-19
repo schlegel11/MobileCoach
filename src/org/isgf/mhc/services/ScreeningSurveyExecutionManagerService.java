@@ -14,18 +14,18 @@ import org.isgf.mhc.model.server.ScreeningSurvey;
 import org.isgf.mhc.model.web.types.ScreeningSurveySlideTemplateLayoutTypes;
 
 @Log4j2
-public class ScreeningSurveyManagerService {
-	private static ScreeningSurveyManagerService	instance	= null;
+public class ScreeningSurveyExecutionManagerService {
+	private static ScreeningSurveyExecutionManagerService	instance	= null;
 
-	private ScreeningSurveyManagerService() throws Exception {
+	private ScreeningSurveyExecutionManagerService() throws Exception {
 		log.info("Starting service...");
 
 		log.info("Started.");
 	}
 
-	public static ScreeningSurveyManagerService start() throws Exception {
+	public static ScreeningSurveyExecutionManagerService start() throws Exception {
 		if (instance == null) {
-			instance = new ScreeningSurveyManagerService();
+			instance = new ScreeningSurveyExecutionManagerService();
 		}
 		return instance;
 	}

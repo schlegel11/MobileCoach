@@ -104,13 +104,13 @@ public class TestServlet extends HttpServlet {
 	private void completeDataTestcase() throws Exception {
 		// Object creation
 		this.logToWeb("TESTING OBJECT CREATION");
-		final Author author = new Author(false, "Author", BCrypt.hashpw("abc",
+		val author = new Author(false, "Author", BCrypt.hashpw("abc",
 				BCrypt.gensalt()));
 		author.save();
-		final Intervention intervention = new Intervention("Testintervention",
+		val intervention = new Intervention("Testintervention",
 				System.currentTimeMillis(), false, false, 16, 10);
 		intervention.save();
-		final AuthorInterventionAccess authorInterventionAccess = new AuthorInterventionAccess(
+		val authorInterventionAccess = new AuthorInterventionAccess(
 				author.getId(), intervention.getId());
 		authorInterventionAccess.save();
 
@@ -118,11 +118,11 @@ public class TestServlet extends HttpServlet {
 		this.logToWeb("TESTING MEDIA OBJECT CREATION");
 		final MediaObject mediaObject;
 		try {
-			final File tempFile = File.createTempFile("MHC_TEST_", ".txt");
+			@Cleanup("delete")
+			val tempFile = File.createTempFile("MHC_TEST_", ".txt");
 			try {
 				@Cleanup
-				final FileOutputStream fileOutputStream = new FileOutputStream(
-						tempFile);
+				val fileOutputStream = new FileOutputStream(tempFile);
 				fileOutputStream.write("This is a testcase!".getBytes("UTF-8"));
 
 				mediaObject = new MediaObject(MediaObjectTypes.HTML_TEXT,
@@ -130,8 +130,6 @@ public class TestServlet extends HttpServlet {
 				mediaObject.save();
 			} catch (final Exception e) {
 				throw e;
-			} finally {
-				tempFile.delete();
 			}
 
 			// Rule and variable validation
@@ -147,14 +145,13 @@ public class TestServlet extends HttpServlet {
 
 			// Rule evaluation
 			this.logToWeb("TESTING RULE EVALUATION");
-			final InterventionRule interventionRule = new InterventionRule(
-					null, 0, null, false, ruleString,
-					EquationSignTypes.IS_BIGGER_OR_EQUAL_THAN, "");
+			val interventionRule = new InterventionRule(null, 0, null, false,
+					ruleString, EquationSignTypes.IS_BIGGER_OR_EQUAL_THAN, "");
 			val variableList = new ArrayList<AbstractVariableWithValue>();
-			final ParticipantVariableWithValue variableWithValue1 = new ParticipantVariableWithValue(
+			val variableWithValue1 = new ParticipantVariableWithValue(
 					new ObjectId(), "$test", "5");
 			variableList.add(variableWithValue1);
-			final ParticipantVariableWithValue variableWithValue2 = new ParticipantVariableWithValue(
+			val variableWithValue2 = new ParticipantVariableWithValue(
 					new ObjectId(), "$anonymous", "2");
 			variableList.add(variableWithValue2);
 			val ruleEvaluationResult = RuleEvaluator.evaluateRule(
@@ -173,14 +170,12 @@ public class TestServlet extends HttpServlet {
 			modelObjectsToExport.add(intervention);
 			modelObjectsToExport.add(authorInterventionAccess);
 			modelObjectsToExport.add(mediaObject);
+			@Cleanup("delete")
 			File exportTempFile = null;
 			try {
 				exportTempFile = ModelObjectExchange
 						.exportModelObjects(modelObjectsToExport);
 			} catch (final Exception e) {
-				if (exportTempFile != null) {
-					exportTempFile.delete();
-				}
 				throw e;
 			}
 
@@ -195,8 +190,6 @@ public class TestServlet extends HttpServlet {
 				}
 			} catch (final Exception e) {
 				throw e;
-			} finally {
-				exportTempFile.delete();
 			}
 
 			// Object deletion

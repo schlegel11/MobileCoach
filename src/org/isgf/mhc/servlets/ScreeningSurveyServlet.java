@@ -215,7 +215,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		if (Constants.LIST_OPEN_SCREENING_SURVEYS_ON_BASE_URL) {
 			// Get all active screening surveys
 			val activeScreeningSurveys = MHC.getInstance()
-					.getScreeningSurveyManagerService()
+					.getScreeningSurveyExecutionManagerService()
 					.getActiveScreeningSurveys();
 
 			if (activeScreeningSurveys != null) {
@@ -307,7 +307,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		try {
 			templateVariables = MHC
 					.getInstance()
-					.getScreeningSurveyManagerService()
+					.getScreeningSurveyExecutionManagerService()
 					.getAppropriateSlide(participantId, screeningSurveyId,
 							resultValue, session);
 
@@ -320,7 +320,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 
 			templateVariables = MHC
 					.getInstance()
-					.getScreeningSurveyManagerService()
+					.getScreeningSurveyExecutionManagerService()
 					.setLayoutTo(null,
 							ScreeningSurveySlideTemplateLayoutTypes.ERROR);
 		}
