@@ -210,33 +210,38 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		response.setDateHeader("Expires", 1);
 		response.setContentType("text/html");
 
-		// Get all active screening surveys
-		val activeScreeningSurveys = MHC.getInstance()
-				.getScreeningSurveyManagerService().getActiveScreeningSurveys();
-
 		val templateVariables = new HashMap<String, Object>();
 
-		if (activeScreeningSurveys != null) {
-			templateVariables.put("title", "Active surveys:");
+		if (Constants.LIST_OPEN_SCREENING_SURVEYS_ON_BASE_URL) {
+			// Get all active screening surveys
+			val activeScreeningSurveys = MHC.getInstance()
+					.getScreeningSurveyManagerService()
+					.getActiveScreeningSurveys();
 
-			val surveysData = new ArrayList<HashMap<String, String>>();
+			if (activeScreeningSurveys != null) {
+				templateVariables.put("title", "Active surveys:");
 
-			String baseURL = request.getRequestURL().toString();
-			if (!baseURL.endsWith("/")) {
-				baseURL += "/";
+				val surveysData = new ArrayList<HashMap<String, String>>();
+
+				String baseURL = request.getRequestURL().toString();
+				if (!baseURL.endsWith("/")) {
+					baseURL += "/";
+				}
+
+				for (val screeningSurvey : activeScreeningSurveys) {
+					val screeningSurveyData = new HashMap<String, String>();
+					screeningSurveyData.put("name", screeningSurvey.getName());
+					screeningSurveyData.put("url",
+							baseURL + screeningSurvey.getId() + "/");
+					surveysData.add(screeningSurveyData);
+				}
+
+				templateVariables.put("surveys", surveysData);
+			} else {
+				templateVariables.put("title", "No survey active.");
 			}
-
-			for (val screeningSurvey : activeScreeningSurveys) {
-				val screeningSurveyData = new HashMap<String, String>();
-				screeningSurveyData.put("name", screeningSurvey.getName());
-				screeningSurveyData.put("url",
-						baseURL + screeningSurvey.getId() + "/");
-				surveysData.add(screeningSurveyData);
-			}
-
-			templateVariables.put("surveys", surveysData);
 		} else {
-			templateVariables.put("title", "No survey active.");
+			templateVariables.put("title", "Listing not active.");
 		}
 
 		@Cleanup
