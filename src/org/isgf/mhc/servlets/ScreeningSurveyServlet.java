@@ -32,6 +32,7 @@ import org.isgf.mhc.model.web.types.ScreeningSurveySlideTemplateFields;
 import org.isgf.mhc.model.web.types.SessionAttributes;
 
 import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
 /**
@@ -60,8 +61,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		log.info("Initializing servlet...");
 
 		log.debug("Initializing mustache template engine");
-		this.mustacheFactory = new DefaultMustacheFactory(MHC.getInstance()
-				.getFileStorageManagerService().getTemplatesFolder());
+		this.mustacheFactory = this.createMustacheFactory();
 
 		log.info("Servlet initialized.");
 		super.init(servletConfig);
@@ -115,6 +115,18 @@ public class ScreeningSurveyServlet extends HttpServlet {
 					request.getRequestURI(), e.getMessage());
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
+	 *      response)
+	 */
+	@Override
+	protected void doPost(final HttpServletRequest request,
+			final HttpServletResponse response) throws ServletException,
+			IOException {
+		log.debug("Redirecting POST request to GET request");
+		this.doGet(request, response);
 	}
 
 	/**
@@ -335,6 +347,14 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				ScreeningSurveySlideTemplateFields.BASE_URL.toVariable(),
 				baseURL);
 
+		// Create new Mustache template factory on non-production system
+		if (!Constants.IS_LIVE_SYSTEM) {
+			log.debug("Initializing NEW mustache template engine");
+			synchronized (this.mustacheFactory) {
+				this.mustacheFactory = this.createMustacheFactory();
+			}
+		}
+
 		// Get template folder
 		final String templateFolder = (String) templateVariables
 				.get(ScreeningSurveySlideTemplateFields.TEMPLATE_FOLDER
@@ -345,27 +365,35 @@ public class ScreeningSurveyServlet extends HttpServlet {
 
 		// Fill template
 		log.debug("Filling template in folder {}", templateFolder);
-		val mustache = this.mustacheFactory.compile(templateFolder
-				+ "/index.html");
+		Mustache mustache;
+		synchronized (this.mustacheFactory) {
+			mustache = this.mustacheFactory.compile(templateFolder
+					+ "/index.html");
+		}
 
 		@Cleanup
 		val responseOutputStreamWriter = new OutputStreamWriter(
 				response.getOutputStream());
 
 		// Send template
-		log.debug("Sending filled template");
-		mustache.execute(responseOutputStreamWriter, templateVariables);
+		log.debug("Executing and sending template");
+		try {
+			mustache.execute(responseOutputStreamWriter, templateVariables);
+		} catch (final Exception e) {
+			log.error("There seems to be a problem with the template: {}",
+					e.getMessage());
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			return;
+		}
 	}
 
 	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
-	 *      response)
+	 * Creates a Mustache factory
+	 * 
+	 * @return The newly created Mustache factory
 	 */
-	@Override
-	protected void doPost(final HttpServletRequest request,
-			final HttpServletResponse response) throws ServletException,
-			IOException {
-		log.debug("Redirecting POST request to GET request");
-		this.doGet(request, response);
+	private MustacheFactory createMustacheFactory() {
+		return new DefaultMustacheFactory(MHC.getInstance()
+				.getFileStorageManagerService().getTemplatesFolder());
 	}
 }

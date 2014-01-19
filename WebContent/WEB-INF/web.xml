@@ -28,6 +28,7 @@
 			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
 		</user-data-constraint>
 	</security-constraint>
+	<!-- Additional file formats -->
 	<mime-mapping>
 		<extension>md</extension>
 		<mime-type>text/plain</mime-type>
@@ -35,5 +36,71 @@
 	<mime-mapping>
 		<extension>json</extension>
 		<mime-type>application/json</mime-type>
+	</mime-mapping>
+	<!-- HTML 5 audio formats -->
+	<mime-mapping>
+		<extension>aac</extension>
+		<mime-type>audio/aac</mime-type>
+	</mime-mapping>
+	<mime-mapping>
+		<extension>mp4</extension>
+		<mime-type>audio/mp4</mime-type>
+	</mime-mapping>
+	<mime-mapping>
+		<extension>m4a</extension>
+		<mime-type>audio/mp4</mime-type>
+	</mime-mapping>
+	<mime-mapping>
+		<extension>mp1</extension>
+		<mime-type>audio/mpeg</mime-type>
+	</mime-mapping>
+	<mime-mapping>
+		<extension>mp2</extension>
+		<mime-type>audio/mpeg</mime-type>
+	</mime-mapping>
+	<mime-mapping>
+		<extension>mp3</extension>
+		<mime-type>audio/mpeg</mime-type>
+	</mime-mapping>
+	<mime-mapping>
+		<extension>mpg</extension>
+		<mime-type>audio/mpeg</mime-type>
+	</mime-mapping>
+	<mime-mapping>
+		<extension>mpeg</extension>
+		<mime-type>audio/mpeg</mime-type>
+	</mime-mapping>
+	<mime-mapping>
+		<extension>oga</extension>
+		<mime-type>audio/ogg</mime-type>
+	</mime-mapping>
+	<mime-mapping>
+		<extension>ogg</extension>
+		<mime-type>audio/ogg</mime-type>
+	</mime-mapping>
+	<mime-mapping>
+		<extension>wav</extension>
+		<mime-type>audio/wav</mime-type>
+	</mime-mapping>
+	<mime-mapping>
+		<extension>webm</extension>
+		<mime-type>audio/webm</mime-type>
+	</mime-mapping>
+	<!-- HTML 5 video formats -->
+	<mime-mapping>
+		<extension>mp4</extension>
+		<mime-type>video/mp4</mime-type>
+	</mime-mapping>
+	<mime-mapping>
+		<extension>m4v</extension>
+		<mime-type>video/mp4</mime-type>
+	</mime-mapping>
+	<mime-mapping>
+		<extension>ogv</extension>
+		<mime-type>video/ogg</mime-type>
+	</mime-mapping>
+	<mime-mapping>
+		<extension>webm</extension>
+		<mime-type>video/webm</mime-type>
 	</mime-mapping>
 </web-app>

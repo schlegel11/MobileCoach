@@ -90,7 +90,7 @@ public enum ScreeningSurveySlideTemplateFields {
 	 * @return The appropriate variable name
 	 */
 	public String toVariable() {
-		return this.toString().toLowerCase();
+		return this.toString();
 	}
 
 	/*
@@ -100,6 +100,6 @@ public enum ScreeningSurveySlideTemplateFields {
 	 */
 	@Override
 	public String toString() {
-		return this.toVariable();
+		return super.toString().toLowerCase();
 	}
 }

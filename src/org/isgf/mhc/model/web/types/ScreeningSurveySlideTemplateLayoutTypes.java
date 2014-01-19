@@ -13,9 +13,9 @@ public enum ScreeningSurveySlideTemplateLayoutTypes {
 	/**
 	 * Can all be used as boolean checks if the current layout is active:
 	 * 
-	 * <code>{{#error}}This text will only be displayed on the error slide{{/error}}</code>
+	 * <code>{{#closed}}This text will only be displayed on the error slide{{/closed}}</code>
 	 */
-	CLOSED, PASSWORD_INPUT, TEXT_ONLY, SELECT_ONE, SELECT_MANY, NUMBER_INPUT, TEXT_INPUT, MULTILINE_TEXT_INPUT;
+	CLOSED, PASSWORD_INPUT, TEXT_ONLY, SELECT_ONE, SELECT_MANY, NUMBER_INPUT, TEXT_INPUT, MULTILINE_TEXT_INPUT, DONE;
 
 	/**
 	 * Creates the appropriate variable name of the
@@ -24,7 +24,7 @@ public enum ScreeningSurveySlideTemplateLayoutTypes {
 	 * @return The appropriate variable name
 	 */
 	public String toVariable() {
-		return this.toString().toLowerCase();
+		return this.toString();
 	}
 
 	/*
@@ -34,6 +34,6 @@ public enum ScreeningSurveySlideTemplateLayoutTypes {
 	 */
 	@Override
 	public String toString() {
-		return this.toVariable();
+		return super.toString().toLowerCase();
 	}
 }

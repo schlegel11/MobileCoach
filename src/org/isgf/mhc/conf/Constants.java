@@ -7,10 +7,10 @@ import java.util.Locale;
  */
 public class Constants {
 	/**
-	 * Debugging is only activated when PRODUCTION_MODE is false, but it should
+	 * Debugging is only activated when IS_LIVE_SYSTEM is false, but it should
 	 * never be false on a live system!
 	 */
-	public static final boolean	PRODUCTION_MODE							= false;
+	public static final boolean	IS_LIVE_SYSTEM							= false;
 
 	/**
 	 * Basic debugging configuration

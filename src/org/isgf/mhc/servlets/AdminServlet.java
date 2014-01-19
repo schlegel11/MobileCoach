@@ -19,7 +19,7 @@ import com.vaadin.server.VaadinServlet;
  */
 @SuppressWarnings("serial")
 @WebServlet(displayName = "Admin UI", value = { "/admin/*", "/VAADIN/*" }, initParams = { @WebInitParam(name = "pushmode", value = "automatic") }, asyncSupported = true, loadOnStartup = 1)
-@VaadinServletConfiguration(productionMode = Constants.PRODUCTION_MODE, ui = AdminUI.class)
+@VaadinServletConfiguration(productionMode = Constants.IS_LIVE_SYSTEM, ui = AdminUI.class)
 @Log4j2
 public class AdminServlet extends VaadinServlet {
 	/*
