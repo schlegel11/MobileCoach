@@ -8,7 +8,9 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
-import org.isgf.mhc.model.web.types.ScreeningSurveySlideTemplateFields;
+import org.isgf.mhc.model.ModelObject;
+import org.isgf.mhc.model.Queries;
+import org.isgf.mhc.model.server.ScreeningSurvey;
 import org.isgf.mhc.model.web.types.ScreeningSurveySlideTemplateLayoutTypes;
 
 @Log4j2
@@ -49,20 +51,53 @@ public class ScreeningSurveyManagerService {
 			final String resultValue, final HttpSession session) {
 		// Check if
 
-		return this.createErrorMessage();
+		return this.setLayoutTo(null,
+				ScreeningSurveySlideTemplateLayoutTypes.ERROR);
 
 		// TODO a lot (not forget to set session values)
 
 		// return null;
 	}
 
-	private HashMap<String, Object> createErrorMessage() {
-		val templateVariables = new HashMap<String, Object>();
+	/**
+	 * Sets the given layout to <code>true</code> and all other available
+	 * layouts to <code>false</code>
+	 * 
+	 * @param templateVariables
+	 *            The {@link HashMap} to extend with the layout information or
+	 *            <code>null</code> if a new one shall be created
+	 * @param slideTemplateLayout
+	 *            The {@link ScreeningSurveySlideTemplateLayoutTypes} to set as
+	 *            <code>true</code>
+	 * @return
+	 */
+	public HashMap<String, Object> setLayoutTo(
+			HashMap<String, Object> templateVariables,
+			final ScreeningSurveySlideTemplateLayoutTypes slideTemplateLayout) {
+		if (templateVariables == null) {
+			templateVariables = new HashMap<String, Object>();
+		}
 
-		templateVariables.put(
-				ScreeningSurveySlideTemplateFields.SLIDE_LAYOUT.toVariable(),
-				ScreeningSurveySlideTemplateLayoutTypes.ERROR.toVariable());
+		for (final val availableSlideLayoutType : ScreeningSurveySlideTemplateLayoutTypes
+				.values()) {
+			if (slideTemplateLayout == availableSlideLayoutType) {
+				templateVariables.put(slideTemplateLayout.toVariable(), true);
+			} else {
+				templateVariables.put(slideTemplateLayout.toVariable(), true);
+			}
+		}
 
 		return templateVariables;
+	}
+
+	/**
+	 * Returns all active screening surveys or <code>null</code> if non has been
+	 * found
+	 * 
+	 * @return
+	 */
+	public Iterable<ScreeningSurvey> getActiveScreeningSurveys() {
+		return ModelObject.find(ScreeningSurvey.class,
+				Queries.SCREENING_SURVEYS_OPEN);
 	}
 }

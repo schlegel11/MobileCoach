@@ -10,7 +10,7 @@ import org.isgf.mhc.model.server.types.ScreeningSurveySlideQuestionTypes;
  * @author Andreas Filler
  */
 public enum ScreeningSurveySlideTemplateFields {
-	BASE_URL, SLIDE_LAYOUT;
+	BASE_URL;
 
 	/**
 	 * The variable name of the {@link ScreeningSurveySlideTemplateLayoutTypes}

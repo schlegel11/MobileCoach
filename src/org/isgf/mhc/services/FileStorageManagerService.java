@@ -12,7 +12,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.RandomStringUtils;
 import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.model.ModelObject;
-import org.isgf.mhc.model.Querys;
+import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.server.MediaObject;
 
 import com.google.gwt.thirdparty.guava.common.io.Files;
@@ -49,7 +49,7 @@ public class FileStorageManagerService {
 		val requiredFileRefernces = new HashSet<String>();
 
 		log.info("Checking media objects and storage folder for consistency:");
-		val mediaObjects = ModelObject.find(MediaObject.class, Querys.ALL);
+		val mediaObjects = ModelObject.find(MediaObject.class, Queries.ALL);
 
 		for (val mediaObject : mediaObjects) {
 			final String fileReference = mediaObject.getFileReference();

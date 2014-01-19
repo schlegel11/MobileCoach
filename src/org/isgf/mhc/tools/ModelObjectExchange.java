@@ -256,8 +256,9 @@ public class ModelObjectExchange {
 		log.debug("Temporary file {} created", zipFile.getAbsoluteFile());
 
 		@Cleanup
-		final ZipOutputStream zipOutputStream = new ZipOutputStream(
-				new FileOutputStream(zipFile));
+		val fileOutputStream = new FileOutputStream(zipFile);
+		@Cleanup
+		val zipOutputStream = new ZipOutputStream(fileOutputStream);
 
 		for (val exchangeModelObject : exchangeModelObjects) {
 			// Care for linked files
@@ -275,8 +276,7 @@ public class ModelObjectExchange {
 				fileZipEntry.setSize(referencedFile.length());
 				zipOutputStream.putNextEntry(fileZipEntry);
 				@Cleanup
-				final FileInputStream fileInputStream = new FileInputStream(
-						referencedFile);
+				val fileInputStream = new FileInputStream(referencedFile);
 				IOUtils.copy(fileInputStream, zipOutputStream);
 				zipOutputStream.closeEntry();
 			}

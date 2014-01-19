@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="utf-8">
+<title>Active surveys</title>
+<style type="text/css">
+body {
+	font-family: Arial, Tahoma, sans-serif;
+	text-align: center;
+	padding-top: 50px;
+}
+</style>
+</head>
+
+<body>
+	<h1>{{title}}</h1>
+	{{#surveys}}
+	<p>
+		<a href="{{url}}">{{name}}</a>
+	</p>
+	{{/surveys}}
+</body>
+
+</html>

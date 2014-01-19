@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.servlet.Servlet;
@@ -82,18 +83,21 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			// Determine request type
 			val pathParts = path.split("/");
 			switch (pathParts.length) {
-				case 0:
-					// Empty request
-					this.listOpenScreeningSurveys(request, response);
-					return;
 				case 1:
+					if (pathParts[0].equals("")) {
+						// Empty request
+						this.listActiveScreeningSurveys(request, response);
+						return;
+					}
+
 					// Only object id
 					if (ObjectId.isValid(pathParts[0])) {
 						this.handleTemplateRequest(request, response,
 								new ObjectId(pathParts[0]));
 						return;
+					} else {
+						throw new Exception("Invalid id");
 					}
-					break;
 				default:
 					// Object id and file request
 					if (ObjectId.isValid(pathParts[0])) {
@@ -101,8 +105,9 @@ public class ScreeningSurveyServlet extends HttpServlet {
 								pathParts[0]),
 								path.substring(path.indexOf("/") + 1));
 						return;
+					} else {
+						throw new Exception("Invalid id");
 					}
-					break;
 			}
 		} catch (final Exception e) {
 			log.warn("Request {} could not be fulfilled: {}",
@@ -186,21 +191,68 @@ public class ScreeningSurveyServlet extends HttpServlet {
 	}
 
 	/**
-	 * Return list of all currently open {@link ScreeningSurvey}s
+	 * Return list of all currently active {@link ScreeningSurvey}s
 	 * 
 	 * @param request
 	 * @param response
 	 * @throws ServletException
 	 * @throws IOException
 	 */
-	private void listOpenScreeningSurveys(final HttpServletRequest request,
+	private void listActiveScreeningSurveys(final HttpServletRequest request,
 			final HttpServletResponse response) throws ServletException,
 			IOException {
 		log.debug("Handling request for all open screening surveys");
 
-		// TODO get open surveys from manager
+		log.debug("Setting no-cache headers");
+		// Set header information (e.g. for no caching)
+		response.setHeader("Pragma", "No-cache");
+		response.setHeader("Cache-Control", "no-cache,no-store,max-age=0");
+		response.setDateHeader("Expires", 1);
+		response.setContentType("text/html");
 
-		response.getOutputStream().print("ABC");
+		// Get all active screening surveys
+		val activeScreeningSurveys = MHC.getInstance()
+				.getScreeningSurveyManagerService().getActiveScreeningSurveys();
+
+		val templateVariables = new HashMap<String, Object>();
+
+		if (activeScreeningSurveys != null) {
+			templateVariables.put("title", "Active surveys:");
+
+			val surveysData = new ArrayList<HashMap<String, String>>();
+
+			String baseURL = request.getRequestURL().toString();
+			if (!baseURL.endsWith("/")) {
+				baseURL += "/";
+			}
+
+			for (val screeningSurvey : activeScreeningSurveys) {
+				val screeningSurveyData = new HashMap<String, String>();
+				screeningSurveyData.put("name", screeningSurvey.getName());
+				screeningSurveyData.put("url",
+						baseURL + screeningSurvey.getId() + "/");
+				surveysData.add(screeningSurveyData);
+			}
+
+			templateVariables.put("surveys", surveysData);
+		} else {
+			templateVariables.put("title", "No survey active.");
+		}
+
+		@Cleanup
+		val templateInputStream = this.getServletContext().getResourceAsStream(
+				"ActiveScreeningSurveysList.template.html");
+		@Cleanup
+		val templateInputStreamReader = new InputStreamReader(
+				templateInputStream, "UTF-8");
+		val mustache = this.mustacheFactory.compile(templateInputStreamReader,
+				"mustache.template");
+
+		@Cleanup
+		val responseOutputStreamWriter = new OutputStreamWriter(
+				response.getOutputStream());
+
+		mustache.execute(responseOutputStreamWriter, templateVariables);
 	}
 
 	/**
@@ -261,11 +313,11 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			log.warn("An error occurred while getting appropriate slide: {}",
 					e.getMessage());
 
-			templateVariables = new HashMap<String, Object>();
-			templateVariables.put(
-					ScreeningSurveySlideTemplateFields.SLIDE_LAYOUT
-							.toVariable(),
-					ScreeningSurveySlideTemplateLayoutTypes.ERROR.toVariable());
+			templateVariables = MHC
+					.getInstance()
+					.getScreeningSurveyManagerService()
+					.setLayoutTo(null,
+							ScreeningSurveySlideTemplateLayoutTypes.ERROR);
 		}
 
 		// Add essential variables to template variables
@@ -280,9 +332,13 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		// Fill template
 		log.debug("Filling template");
 		@Cleanup
-		final BufferedReader bufferedFileInputStreamReader = new BufferedReader(
-				new InputStreamReader(new FileInputStream(new File(
-						"/mhc_data/templates/basic-template/index.html"))));
+		val fileInputStream = new FileInputStream(new File(
+				"/mhc_data/templates/basic-template/index.html"));
+		@Cleanup
+		val fileInputStreamReader = new InputStreamReader(fileInputStream);
+		@Cleanup
+		val bufferedFileInputStreamReader = new BufferedReader(
+				fileInputStreamReader);
 		val mustache = this.mustacheFactory.compile(
 				bufferedFileInputStreamReader, "mustache.template");
 
