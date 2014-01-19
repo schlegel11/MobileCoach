@@ -2,6 +2,9 @@ package org.isgf.mhc.conf;
 
 import java.util.Locale;
 
+/**
+ * @author Andreas Filler
+ */
 public class Constants {
 	/**
 	 * Debugging is only activated when PRODUCTION_MODE is false, but it should

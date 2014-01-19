@@ -1,6 +1,5 @@
 package org.isgf.mhc.servlets;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -30,7 +29,6 @@ import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.server.ScreeningSurvey;
 import org.isgf.mhc.model.server.ScreeningSurveySlide;
 import org.isgf.mhc.model.web.types.ScreeningSurveySlideTemplateFields;
-import org.isgf.mhc.model.web.types.ScreeningSurveySlideTemplateLayoutTypes;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.MustacheFactory;
@@ -60,7 +58,9 @@ public class ScreeningSurveyServlet extends HttpServlet {
 
 		log.info("Initializing servlet...");
 
-		this.mustacheFactory = new DefaultMustacheFactory();
+		log.debug("Initializing mustache template engine");
+		this.mustacheFactory = new DefaultMustacheFactory(MHC.getInstance()
+				.getFileStorageManagerService().getTemplatesFolder());
 
 		log.info("Servlet initialized.");
 		super.init(servletConfig);
@@ -112,7 +112,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		} catch (final Exception e) {
 			log.warn("Request {} could not be fulfilled: {}",
 					request.getRequestURI(), e.getMessage());
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -135,7 +135,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				ScreeningSurvey.class, screeningSurveyId);
 
 		if (screeningSurvey == null) {
-			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
 
@@ -148,7 +148,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				basicTemplateFolder.getAbsolutePath())
 				|| !requestedFile.exists()) {
 			log.warn("Requested a file outside the 'sandbox' of the template folder or a file that does not exist");
-			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
 
@@ -160,7 +160,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		if (mimeType == null) {
 			log.warn("Could not get MIME type of file '{}'",
 					requestedFile.getAbsolutePath());
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return;
 		}
 
@@ -274,13 +274,6 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		log.debug("Handling template request for screening survey {}",
 				screeningSurveyId);
 
-		log.debug("Setting no-cache headers");
-		// Set header information (e.g. for no caching)
-		response.setHeader("Pragma", "No-cache");
-		response.setHeader("Cache-Control", "no-cache,no-store,max-age=0");
-		response.setDateHeader("Expires", 1);
-		response.setContentType("text/html");
-
 		// Get information from session
 		val session = request.getSession(true);
 		ObjectId participantId;
@@ -311,19 +304,26 @@ public class ScreeningSurveyServlet extends HttpServlet {
 					.getAppropriateSlide(participantId, screeningSurveyId,
 							resultValue, session);
 
-			if (templateVariables == null) {
+			if (templateVariables == null
+					|| !templateVariables
+							.containsKey(ScreeningSurveySlideTemplateFields.TEMPLATE_FOLDER
+									.toVariable())) {
 				throw new NullPointerException();
 			}
 		} catch (final Exception e) {
 			log.warn("An error occurred while getting appropriate slide: {}",
 					e.getMessage());
 
-			templateVariables = MHC
-					.getInstance()
-					.getScreeningSurveyExecutionManagerService()
-					.setLayoutTo(null,
-							ScreeningSurveySlideTemplateLayoutTypes.ERROR);
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			return;
 		}
+
+		log.debug("Setting no-cache headers");
+		// Set header information (e.g. for no caching)
+		response.setHeader("Pragma", "No-cache");
+		response.setHeader("Cache-Control", "no-cache,no-store,max-age=0");
+		response.setDateHeader("Expires", 1);
+		response.setContentType("text/html");
 
 		// Add essential variables to template variables
 		String baseURL = request.getRequestURL().toString();
@@ -334,18 +334,18 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				ScreeningSurveySlideTemplateFields.BASE_URL.toVariable(),
 				baseURL);
 
+		// Get template folder
+		final String templateFolder = (String) templateVariables
+				.get(ScreeningSurveySlideTemplateFields.TEMPLATE_FOLDER
+						.toVariable());
+		templateVariables
+				.remove(ScreeningSurveySlideTemplateFields.TEMPLATE_FOLDER
+						.toVariable());
+
 		// Fill template
-		log.debug("Filling template");
-		@Cleanup
-		val fileInputStream = new FileInputStream(new File(
-				"/mhc_data/templates/basic-template/index.html"));
-		@Cleanup
-		val fileInputStreamReader = new InputStreamReader(fileInputStream);
-		@Cleanup
-		val bufferedFileInputStreamReader = new BufferedReader(
-				fileInputStreamReader);
-		val mustache = this.mustacheFactory.compile(
-				bufferedFileInputStreamReader, "mustache.template");
+		log.debug("Filling template in folder {}", templateFolder);
+		val mustache = this.mustacheFactory.compile(templateFolder
+				+ "/index.html");
 
 		@Cleanup
 		val responseOutputStreamWriter = new OutputStreamWriter(

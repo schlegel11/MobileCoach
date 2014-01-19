@@ -11,6 +11,7 @@ import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.server.ScreeningSurvey;
+import org.isgf.mhc.model.web.types.ScreeningSurveySlideTemplateFields;
 import org.isgf.mhc.model.web.types.ScreeningSurveySlideTemplateLayoutTypes;
 
 @Log4j2
@@ -23,7 +24,8 @@ public class ScreeningSurveyExecutionManagerService {
 		log.info("Started.");
 	}
 
-	public static ScreeningSurveyExecutionManagerService start() throws Exception {
+	public static ScreeningSurveyExecutionManagerService start()
+			throws Exception {
 		if (instance == null) {
 			instance = new ScreeningSurveyExecutionManagerService();
 		}
@@ -51,12 +53,17 @@ public class ScreeningSurveyExecutionManagerService {
 			final String resultValue, final HttpSession session) {
 		// Check if
 
-		return this.setLayoutTo(null,
-				ScreeningSurveySlideTemplateLayoutTypes.ERROR);
-
 		// TODO a lot (not forget to set session values)
 
-		// return null;
+		val templateVariables = new HashMap<String, Object>();
+		this.setLayoutTo(templateVariables,
+				ScreeningSurveySlideTemplateLayoutTypes.SELECT_ONE);
+
+		templateVariables
+				.put(ScreeningSurveySlideTemplateFields.TEMPLATE_FOLDER
+						.toVariable(), "basic-template");
+
+		return templateVariables;
 	}
 
 	/**
