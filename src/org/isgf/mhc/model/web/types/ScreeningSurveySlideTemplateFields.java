@@ -92,4 +92,14 @@ public enum ScreeningSurveySlideTemplateFields {
 	public String toVariable() {
 		return this.toString().toLowerCase();
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Enum#toString()
+	 */
+	@Override
+	public String toString() {
+		return this.toVariable();
+	}
 }

@@ -29,6 +29,7 @@ import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.server.ScreeningSurvey;
 import org.isgf.mhc.model.server.ScreeningSurveySlide;
 import org.isgf.mhc.model.web.types.ScreeningSurveySlideTemplateFields;
+import org.isgf.mhc.model.web.types.SessionAttributes;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.MustacheFactory;
@@ -279,7 +280,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		ObjectId participantId;
 		try {
 			participantId = (ObjectId) session
-					.getAttribute(Constants.SESSION_PARTICIPANT_ID);
+					.getAttribute(SessionAttributes.PARTICIPANT_ID.toString());
 		} catch (final Exception e) {
 			participantId = null;
 		}
