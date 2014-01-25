@@ -186,7 +186,8 @@ public abstract class ModelObject {
 	 *            The {@link ModelObject} subclass to retrieve
 	 * @param query
 	 *            The query to find the appropriate {@link ModelObject}
-	 * @parameters The parameters to fill the query
+	 * @param parameters
+	 *            The parameters to fill the query
 	 * @return The retrieved {@link ModelObject} subclass objects as
 	 *         {@link Iterable} or <code>null</code> if not
 	 *         found
@@ -224,7 +225,8 @@ public abstract class ModelObject {
 	 *            The {@link ModelObject} subclass to retrieve
 	 * @param query
 	 *            The query to find the appropriate {@link ModelObject}
-	 * @parameters The parameters to fill the query
+	 * @param parameters
+	 *            The parameters to fill the query
 	 * @return The retrieved {@link ModelObject} subclass objects as
 	 *         {@link Iterable} or <code>null</code> if not
 	 *         found

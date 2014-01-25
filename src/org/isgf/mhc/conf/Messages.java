@@ -38,8 +38,7 @@ public class Messages {
 	}
 
 	/**
-	 * Checks if all {@link AdminMessageStrings}
-	 * {@link ScreeningSurveyMessageStrings} are available
+	 * Checks if all {@link AdminMessageStrings} are available
 	 * 
 	 * @throws Exception
 	 */
