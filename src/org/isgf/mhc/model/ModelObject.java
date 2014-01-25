@@ -3,11 +3,13 @@ package org.isgf.mhc.model;
 import java.io.IOException;
 import java.io.StringWriter;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
+import org.isgf.mhc.services.FileStorageManagerService;
 import org.isgf.mhc.tools.CustomObjectMapper;
 import org.jongo.Jongo;
 import org.jongo.MongoCollection;
@@ -29,23 +31,36 @@ public abstract class ModelObject {
 	 */
 	@Id
 	@Getter
-	private ObjectId			id;
+	private ObjectId							id;
 
 	/**
 	 * {@link ObjectMapper} required for JSON generation
 	 */
 	@JsonIgnore
-	private static ObjectMapper	objectMapper	= new CustomObjectMapper();
+	private static ObjectMapper					objectMapper	= new CustomObjectMapper();
 
 	/**
 	 * {@link Jongo} object required for database access
 	 */
 	@JsonIgnore
-	private static Jongo		db;
+	private static Jongo						db;
+
+	/**
+	 * {@link FileStorageManagerService} object required for file management
+	 */
+	@JsonIgnore
+	@Getter(value = AccessLevel.PROTECTED)
+	private static FileStorageManagerService	fileStorageManagerService;
 
 	@JsonIgnore
-	public static void configure(final Jongo db) {
+	protected static void configure(final Jongo db) {
 		ModelObject.db = db;
+	}
+
+	@JsonIgnore
+	public static void configure(
+			final FileStorageManagerService fileStorageManagerService) {
+		ModelObject.fileStorageManagerService = fileStorageManagerService;
 	}
 
 	/**
@@ -85,7 +100,7 @@ public abstract class ModelObject {
 	 * other objects
 	 */
 	@JsonIgnore
-	public void performOnRemove() {
+	protected void performOnRemove() {
 		// Nothing, but can be overwritten
 	}
 
@@ -93,7 +108,7 @@ public abstract class ModelObject {
 	 * Saves {@link ModelObject} to database
 	 */
 	@JsonIgnore
-	public void save() {
+	protected void save() {
 		final MongoCollection collection = db.getCollection(this.getClass()
 				.getSimpleName());
 
@@ -114,7 +129,7 @@ public abstract class ModelObject {
 	 *         <code>null</code> if not found
 	 */
 	@JsonIgnore
-	public static final <ModelObjectSubclass extends ModelObject> ModelObjectSubclass get(
+	protected static final <ModelObjectSubclass extends ModelObject> ModelObjectSubclass get(
 			final Class<ModelObjectSubclass> clazz, final ObjectId id) {
 		final MongoCollection collection = db.getCollection(clazz
 				.getSimpleName());
@@ -141,8 +156,8 @@ public abstract class ModelObject {
 	 *            The {@link ObjectId} of the {@link ModelObject}
 	 */
 	@JsonIgnore
-	public static final void remove(final Class<? extends ModelObject> clazz,
-			final ObjectId id) {
+	protected static final void remove(
+			final Class<? extends ModelObject> clazz, final ObjectId id) {
 		final MongoCollection collection = db.getCollection(clazz
 				.getSimpleName());
 
@@ -177,7 +192,7 @@ public abstract class ModelObject {
 	 *         found
 	 */
 	@JsonIgnore
-	public static final <ModelObjectSubclass extends ModelObject> ModelObjectSubclass findOne(
+	protected static final <ModelObjectSubclass extends ModelObject> ModelObjectSubclass findOne(
 			final Class<ModelObjectSubclass> clazz, final String query,
 			final Object... parameters) {
 		final MongoCollection collection = db.getCollection(clazz
@@ -215,7 +230,7 @@ public abstract class ModelObject {
 	 *         found
 	 */
 	@JsonIgnore
-	public static final <ModelObjectSubclass extends ModelObject> Iterable<ModelObjectSubclass> find(
+	protected static final <ModelObjectSubclass extends ModelObject> Iterable<ModelObjectSubclass> find(
 			final Class<ModelObjectSubclass> clazz, final String query,
 			final Object... parameters) {
 		final MongoCollection collection = db.getCollection(clazz

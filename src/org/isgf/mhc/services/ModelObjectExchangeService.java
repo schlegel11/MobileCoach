@@ -1,4 +1,4 @@
-package org.isgf.mhc.tools;
+package org.isgf.mhc.services;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,13 +22,53 @@ import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
-import org.isgf.mhc.MHC;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.server.MediaObject;
 import org.isgf.mhc.tools.model.ExchangeModelObject;
 
+/**
+ * @author Andreas Filler
+ */
 @Log4j2
-public class ModelObjectExchange {
+public class ModelObjectExchangeService {
+	private static ModelObjectExchangeService	instance	= null;
+
+	private final DatabaseManagerService		databaseManagerService;
+	private final FileStorageManagerService		fileStorageManagerService;
+
+	private ModelObjectExchangeService(
+			final DatabaseManagerService databaseManagerService,
+			final FileStorageManagerService fileStorageManagerService)
+			throws Exception {
+		log.info("Starting service...");
+
+		this.databaseManagerService = databaseManagerService;
+		this.fileStorageManagerService = fileStorageManagerService;
+
+		log.info("Started.");
+	}
+
+	public static ModelObjectExchangeService start(
+			final DatabaseManagerService databaseManagerService,
+			final FileStorageManagerService fileStorageManagerService)
+			throws Exception {
+		if (instance == null) {
+			instance = new ModelObjectExchangeService(databaseManagerService,
+					fileStorageManagerService);
+		}
+		return instance;
+	}
+
+	public void stop() throws Exception {
+		log.info("Stopping service...");
+
+		log.info("Stopped.");
+	}
+
+	/*
+	 * Class methods
+	 */
+
 	/**
 	 * Exports the given {@link ModelObject}s to a zip-file
 	 * 
@@ -37,7 +77,7 @@ public class ModelObjectExchange {
 	 * @return The zip-file containing the {@link ModelObject}s with meta data
 	 *         for import into another system
 	 */
-	public static File exportModelObjects(final List<ModelObject> modelObjects) {
+	public File exportModelObjects(final List<ModelObject> modelObjects) {
 		val exchangeModelObjects = new ArrayList<ExchangeModelObject>();
 
 		log.debug("Exporting model objects...");
@@ -106,7 +146,7 @@ public class ModelObjectExchange {
 
 		log.debug("Export done.");
 
-		return createZipFile(exchangeModelObjects);
+		return this.createZipFile(exchangeModelObjects);
 	}
 
 	/**
@@ -120,11 +160,11 @@ public class ModelObjectExchange {
 	 * @throws SecurityException
 	 * @throws NoSuchMethodException
 	 */
-	public static List<ModelObject> importModelObjects(final File zipFile)
+	public List<ModelObject> importModelObjects(final File zipFile)
 			throws FileNotFoundException, IOException {
 		val modelObjects = new ArrayList<ModelObject>();
 
-		val exchangeModelObjects = readZipFile(new ZipFile(zipFile));
+		val exchangeModelObjects = this.readZipFile(new ZipFile(zipFile));
 
 		log.debug("Importing model objects...");
 
@@ -156,7 +196,7 @@ public class ModelObjectExchange {
 
 		// Create all model objects in the database
 		for (val modelObject : modelObjects) {
-			modelObject.save();
+			this.databaseManagerService.saveModelObject(modelObject);
 		}
 
 		// Adjust all relevant id references
@@ -220,7 +260,8 @@ public class ModelObjectExchange {
 						}
 
 						// Save changes
-						modelObjectToAdjust.save();
+						this.databaseManagerService
+								.saveModelObject(modelObjectToAdjust);
 					}
 				}
 			}
@@ -240,7 +281,7 @@ public class ModelObjectExchange {
 	 * @return The zip-file containing all {@link ExchangeModelObject}s
 	 */
 	@SneakyThrows
-	private static File createZipFile(
+	private File createZipFile(
 			final List<ExchangeModelObject> exchangeModelObjects) {
 
 		log.debug("Writing exchange model objects to zip file");
@@ -265,9 +306,9 @@ public class ModelObjectExchange {
 			if (exchangeModelObject.getFileReference() != null) {
 				final String uniqueFileZipName = "F "
 						+ exchangeModelObject.getFileReference();
-				final File referencedFile = MHC.getInstance()
-						.getFileStorageManagerService()
-						.getFile(exchangeModelObject.getFileReference());
+				final File referencedFile = this.fileStorageManagerService
+						.getFileByReference(exchangeModelObject
+								.getFileReference());
 				log.debug("Adding referenced file {} as {} to zip file",
 						referencedFile, uniqueFileZipName);
 
@@ -308,7 +349,7 @@ public class ModelObjectExchange {
 	 *         {@link ZipFile}
 	 * @throws IOException
 	 */
-	private static List<ExchangeModelObject> readZipFile(final ZipFile zipFile)
+	private List<ExchangeModelObject> readZipFile(final ZipFile zipFile)
 			throws IOException {
 		val exchangeModelObjects = new ArrayList<ExchangeModelObject>();
 
@@ -340,8 +381,7 @@ public class ModelObjectExchange {
 						.getInputStream(zipEntry);
 				IOUtils.copy(zipEntryInputStream, fileOutputStream);
 
-				final String newFileReference = MHC.getInstance()
-						.getFileStorageManagerService()
+				final String newFileReference = this.fileStorageManagerService
 						.storeFile(temporaryFile);
 
 				final String oldFileReference = zipEntry.getName().split(" ")[1];

@@ -13,6 +13,7 @@ import org.isgf.mhc.services.DatabaseManagerService;
 import org.isgf.mhc.services.FileStorageManagerService;
 import org.isgf.mhc.services.InterventionAdministrationManagerService;
 import org.isgf.mhc.services.InterventionExecutionManagerService;
+import org.isgf.mhc.services.ModelObjectExchangeService;
 import org.isgf.mhc.services.ScreeningSurveyAdministrationManagerService;
 import org.isgf.mhc.services.ScreeningSurveyExecutionManagerService;
 
@@ -27,25 +28,20 @@ public class MHC implements ServletContextListener {
 	@Getter
 	private boolean								ready	= false;
 
-	// Services
-	@Getter
+	// Internal services
 	DatabaseManagerService						databaseManagerService;
-
-	@Getter
 	FileStorageManagerService					fileStorageManagerService;
 
-	@Getter
 	CommunicationManagerService					communicationManagerService;
+	ModelObjectExchangeService					modelObjectExchangeService;
 
+	// Controller services
 	@Getter
 	InterventionAdministrationManagerService	interventionAdministrationManagerService;
-
 	@Getter
 	ScreeningSurveyAdministrationManagerService	screeningSurveyAdministrationManagerService;
-
 	@Getter
 	InterventionExecutionManagerService			interventionExecutionManagerService;
-
 	@Getter
 	ScreeningSurveyExecutionManagerService		screeningSurveyExecutionManagerService;
 
@@ -62,17 +58,27 @@ public class MHC implements ServletContextListener {
 		log.info("Starting up base services...");
 		try {
 			this.databaseManagerService = DatabaseManagerService.start();
-			this.fileStorageManagerService = FileStorageManagerService.start();
+			this.fileStorageManagerService = FileStorageManagerService
+					.start(this.databaseManagerService);
 			this.communicationManagerService = CommunicationManagerService
 					.start();
+			this.modelObjectExchangeService = ModelObjectExchangeService
+					.start(this.databaseManagerService,
+							this.fileStorageManagerService);
 			this.interventionAdministrationManagerService = InterventionAdministrationManagerService
-					.start();
+					.start(this.databaseManagerService,
+							this.fileStorageManagerService,
+							this.modelObjectExchangeService);
 			this.screeningSurveyAdministrationManagerService = ScreeningSurveyAdministrationManagerService
-					.start();
+					.start(this.databaseManagerService,
+							this.fileStorageManagerService,
+							this.modelObjectExchangeService);
 			this.interventionExecutionManagerService = InterventionExecutionManagerService
-					.start();
+					.start(this.databaseManagerService,
+							this.fileStorageManagerService);
 			this.screeningSurveyExecutionManagerService = ScreeningSurveyExecutionManagerService
-					.start();
+					.start(this.databaseManagerService,
+							this.fileStorageManagerService);
 		} catch (final Exception e) {
 			noErrorsOccurred = false;
 			log.error("Error at starting services: {}", e);
@@ -96,6 +102,7 @@ public class MHC implements ServletContextListener {
 			this.databaseManagerService.stop();
 			this.fileStorageManagerService.stop();
 			this.communicationManagerService.stop();
+			this.modelObjectExchangeService.stop();
 			this.interventionAdministrationManagerService.stop();
 			this.screeningSurveyAdministrationManagerService.stop();
 			this.interventionExecutionManagerService.stop();

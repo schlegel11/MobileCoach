@@ -1,5 +1,6 @@
 package org.isgf.mhc.services;
 
+import java.io.File;
 import java.util.HashMap;
 
 import javax.servlet.http.HttpSession;
@@ -8,7 +9,6 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
-import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.server.ScreeningSurvey;
 import org.isgf.mhc.model.web.types.ScreeningSurveySlideTemplateFields;
@@ -18,16 +18,28 @@ import org.isgf.mhc.model.web.types.ScreeningSurveySlideTemplateLayoutTypes;
 public class ScreeningSurveyExecutionManagerService {
 	private static ScreeningSurveyExecutionManagerService	instance	= null;
 
-	private ScreeningSurveyExecutionManagerService() throws Exception {
+	private final DatabaseManagerService					databaseManagerService;
+	private final FileStorageManagerService					fileStorageManagerService;
+
+	private ScreeningSurveyExecutionManagerService(
+			final DatabaseManagerService databaseManagerService,
+			final FileStorageManagerService fileStorageManagerService)
+			throws Exception {
 		log.info("Starting service...");
+
+		this.databaseManagerService = databaseManagerService;
+		this.fileStorageManagerService = fileStorageManagerService;
 
 		log.info("Started.");
 	}
 
-	public static ScreeningSurveyExecutionManagerService start()
+	public static ScreeningSurveyExecutionManagerService start(
+			final DatabaseManagerService databaseManagerService,
+			final FileStorageManagerService fileStorageManagerService)
 			throws Exception {
 		if (instance == null) {
-			instance = new ScreeningSurveyExecutionManagerService();
+			instance = new ScreeningSurveyExecutionManagerService(
+					databaseManagerService, fileStorageManagerService);
 		}
 		return instance;
 	}
@@ -37,6 +49,10 @@ public class ScreeningSurveyExecutionManagerService {
 
 		log.info("Stopped.");
 	}
+
+	/*
+	 * Class methods
+	 */
 
 	/**
 	 * Returns the appropriate {@link HashMap} to fill the template or
@@ -104,7 +120,16 @@ public class ScreeningSurveyExecutionManagerService {
 	 * @return
 	 */
 	public Iterable<ScreeningSurvey> getActiveScreeningSurveys() {
-		return ModelObject.find(ScreeningSurvey.class,
+		return this.databaseManagerService.findModelObjects(ScreeningSurvey.class,
 				Queries.SCREENING_SURVEYS_OPEN);
+	}
+
+	/**
+	 * Returns the path containing the templates
+	 * 
+	 * @return
+	 */
+	public File getTemplatePath() {
+		return this.fileStorageManagerService.getTemplatesFolder();
 	}
 }

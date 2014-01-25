@@ -25,7 +25,6 @@ import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.Constants;
-import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.server.ScreeningSurvey;
 import org.isgf.mhc.model.server.ScreeningSurveySlide;
 import org.isgf.mhc.model.web.types.ScreeningSurveySlideTemplateFields;
@@ -144,8 +143,9 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		log.debug("Handling file request '{}' for screening survey {}",
 				fileRequest, screeningSurveyId);
 
-		final ScreeningSurvey screeningSurvey = ModelObject.get(
-				ScreeningSurvey.class, screeningSurveyId);
+		final ScreeningSurvey screeningSurvey = MHC.getInstance()
+				.getScreeningSurveyAdministrationManagerService()
+				.getScreeningSurvey(screeningSurveyId);
 
 		if (screeningSurvey == null) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -153,7 +153,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		}
 
 		final File basicTemplateFolder = new File(MHC.getInstance()
-				.getFileStorageManagerService().getTemplatesFolder(),
+				.getScreeningSurveyExecutionManagerService().getTemplatePath(),
 				screeningSurvey.getTemplatePath());
 		final File requestedFile = new File(basicTemplateFolder, fileRequest);
 
@@ -394,6 +394,6 @@ public class ScreeningSurveyServlet extends HttpServlet {
 	 */
 	private MustacheFactory createMustacheFactory() {
 		return new DefaultMustacheFactory(MHC.getInstance()
-				.getFileStorageManagerService().getTemplatesFolder());
+				.getScreeningSurveyExecutionManagerService().getTemplatePath());
 	}
 }

@@ -26,7 +26,9 @@ public class FileStorageManagerService {
 	@Getter
 	private final File							templatesFolder;
 
-	private FileStorageManagerService() throws Exception {
+	private FileStorageManagerService(
+			final DatabaseManagerService databaseManagerService)
+			throws Exception {
 		log.info("Starting service...");
 
 		log.info("Using storage folder {}", Constants.STORAGE_FOLDER);
@@ -49,12 +51,13 @@ public class FileStorageManagerService {
 		val requiredFileRefernces = new HashSet<String>();
 
 		log.info("Checking media objects and storage folder for consistency:");
-		val mediaObjects = ModelObject.find(MediaObject.class, Queries.ALL);
+		val mediaObjects = databaseManagerService.findModelObjects(MediaObject.class,
+				Queries.ALL);
 
 		for (val mediaObject : mediaObjects) {
 			final String fileReference = mediaObject.getFileReference();
 			requiredFileRefernces.add(fileReference.split("/")[0]);
-			if (this.getFile(fileReference) == null) {
+			if (this.getFileByReference(fileReference) == null) {
 				log.warn("Media object {} contains missing file reference {}",
 						mediaObject.getId(), mediaObject.getFileReference());
 			}
@@ -73,12 +76,17 @@ public class FileStorageManagerService {
 
 		log.info("Check done.");
 
+		// Give this instance to model object
+		ModelObject.configure(this);
+
 		log.info("Started.");
 	}
 
-	public static FileStorageManagerService start() throws Exception {
+	public static FileStorageManagerService start(
+			final DatabaseManagerService databaseManagerService)
+			throws Exception {
 		if (instance == null) {
-			instance = new FileStorageManagerService();
+			instance = new FileStorageManagerService(databaseManagerService);
 		}
 		return instance;
 	}
@@ -89,6 +97,10 @@ public class FileStorageManagerService {
 		log.info("Stopped.");
 	}
 
+	/*
+	 * Class methods
+	 */
+
 	/**
 	 * Returns the {@link File} fitting to the given file reference
 	 * 
@@ -96,7 +108,7 @@ public class FileStorageManagerService {
 	 *            The reference of the file to retrieve
 	 * @return The required file or <code>null</code> if an error occurred
 	 */
-	public File getFile(final String fileReference) {
+	public File getFileByReference(final String fileReference) {
 		log.debug("Returning file with reference {}", fileReference);
 		final String[] fileReferenceParts = fileReference.split("/");
 		final File folder = new File(this.storageFolder, fileReferenceParts[0]);
@@ -159,7 +171,7 @@ public class FileStorageManagerService {
 	}
 
 	public void deleteFile(final String fileReference) {
-		final File fileToDelete = this.getFile(fileReference);
+		final File fileToDelete = this.getFileByReference(fileReference);
 
 		if (fileToDelete != null && fileToDelete.exists()) {
 			final File folderToDelete = fileToDelete.getParentFile();

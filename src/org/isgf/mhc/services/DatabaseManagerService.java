@@ -8,8 +8,8 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.conf.Constants;
+import org.isgf.mhc.model.AbstractModelObjectAccessService;
 import org.isgf.mhc.model.Indices;
-import org.isgf.mhc.model.ModelObject;
 import org.jongo.Jongo;
 
 import com.mongodb.MongoClient;
@@ -17,7 +17,7 @@ import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 
 @Log4j2
-public class DatabaseManagerService {
+public class DatabaseManagerService extends AbstractModelObjectAccessService {
 	private static DatabaseManagerService	instance	= null;
 
 	private MongoClient						mongoClient;
@@ -70,7 +70,7 @@ public class DatabaseManagerService {
 		}
 
 		// Give Jongo object to model object
-		ModelObject.configure(this.jongo);
+		this.configure(this.jongo);
 
 		log.info("Started.");
 	}
@@ -90,12 +90,16 @@ public class DatabaseManagerService {
 		log.info("Stopped.");
 	}
 
+	/*
+	 * Class methods
+	 */
+
 	/**
 	 * Returns {@link Jongo} object
 	 * 
 	 * @return
 	 */
-	public Jongo getDB() {
-		return this.jongo;
-	}
+	// public Jongo getDB() {
+	// return this.jongo;
+	// }
 }
