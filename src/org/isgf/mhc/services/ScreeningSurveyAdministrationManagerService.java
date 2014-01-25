@@ -2,9 +2,9 @@ package org.isgf.mhc.services;
 
 import lombok.extern.log4j.Log4j2;
 
-import org.bson.types.ObjectId;
-import org.isgf.mhc.model.Queries;
-import org.isgf.mhc.model.server.ScreeningSurvey;
+import org.isgf.mhc.services.internal.DatabaseManagerService;
+import org.isgf.mhc.services.internal.FileStorageManagerService;
+import org.isgf.mhc.services.internal.ModelObjectExchangeService;
 
 @Log4j2
 public class ScreeningSurveyAdministrationManagerService {
@@ -51,13 +51,7 @@ public class ScreeningSurveyAdministrationManagerService {
 	 * Class methods
 	 */
 
-	public Iterable<ScreeningSurvey> getActiveScreeningSurveys() {
-		return this.databaseManagerService.findModelObjects(ScreeningSurvey.class,
-				Queries.SCREENING_SURVEYS_OPEN);
-	}
-
-	public ScreeningSurvey getScreeningSurvey(final ObjectId screeningSurveyId) {
-		return this.databaseManagerService.getModelObjectById(
-				ScreeningSurvey.class, screeningSurveyId);
-	}
+	/*
+	 * Getter methods
+	 */
 }

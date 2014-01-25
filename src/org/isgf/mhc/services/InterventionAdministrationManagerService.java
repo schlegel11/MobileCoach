@@ -2,6 +2,10 @@ package org.isgf.mhc.services;
 
 import lombok.extern.log4j.Log4j2;
 
+import org.isgf.mhc.services.internal.DatabaseManagerService;
+import org.isgf.mhc.services.internal.FileStorageManagerService;
+import org.isgf.mhc.services.internal.ModelObjectExchangeService;
+
 /**
  * @author Andreas Filler
  * 
@@ -49,5 +53,9 @@ public class InterventionAdministrationManagerService {
 
 	/*
 	 * Class methods
+	 */
+
+	/*
+	 * Getter methods
 	 */
 }

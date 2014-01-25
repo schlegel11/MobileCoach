@@ -144,8 +144,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				fileRequest, screeningSurveyId);
 
 		final ScreeningSurvey screeningSurvey = MHC.getInstance()
-				.getScreeningSurveyAdministrationManagerService()
-				.getScreeningSurvey(screeningSurveyId);
+				.getScreeningSurveyExecutionManagerService()
+				.getScreeningSurveyById(screeningSurveyId);
 
 		if (screeningSurvey == null) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);

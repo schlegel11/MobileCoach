@@ -2,6 +2,9 @@ package org.isgf.mhc.services;
 
 import lombok.extern.log4j.Log4j2;
 
+import org.isgf.mhc.services.internal.DatabaseManagerService;
+import org.isgf.mhc.services.internal.FileStorageManagerService;
+
 @Log4j2
 public class InterventionExecutionManagerService {
 	private static InterventionExecutionManagerService	instance	= null;
@@ -42,4 +45,7 @@ public class InterventionExecutionManagerService {
 	 * Class methods
 	 */
 
+	/*
+	 * Getter methods
+	 */
 }

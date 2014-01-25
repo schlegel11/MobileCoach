@@ -1,4 +1,4 @@
-package org.isgf.mhc.services;
+package org.isgf.mhc.services.internal;
 
 import lombok.extern.log4j.Log4j2;
 

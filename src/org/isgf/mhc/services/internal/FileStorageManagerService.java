@@ -1,4 +1,4 @@
-package org.isgf.mhc.services;
+package org.isgf.mhc.services.internal;
 
 import java.io.File;
 import java.io.FileNotFoundException;

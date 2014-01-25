@@ -13,6 +13,8 @@ import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.server.ScreeningSurvey;
 import org.isgf.mhc.model.web.types.ScreeningSurveySlideTemplateFields;
 import org.isgf.mhc.model.web.types.ScreeningSurveySlideTemplateLayoutTypes;
+import org.isgf.mhc.services.internal.DatabaseManagerService;
+import org.isgf.mhc.services.internal.FileStorageManagerService;
 
 @Log4j2
 public class ScreeningSurveyExecutionManagerService {
@@ -113,15 +115,32 @@ public class ScreeningSurveyExecutionManagerService {
 		return templateVariables;
 	}
 
+	/*
+	 * Getter methods
+	 */
+
 	/**
-	 * Returns all active screening surveys or <code>null</code> if non has been
+	 * Get a specific {@link ScreeningSurvey} by {@link ObjectId}
+	 * 
+	 * @param screeningSurveyId
+	 * @return
+	 */
+	public ScreeningSurvey getScreeningSurveyById(
+			final ObjectId screeningSurveyId) {
+		return this.databaseManagerService.getModelObjectById(
+				ScreeningSurvey.class, screeningSurveyId);
+	}
+
+	/**
+	 * Returns all active {@link ScreeningSurvey}s or <code>null</code> if non
+	 * has been
 	 * found
 	 * 
 	 * @return
 	 */
 	public Iterable<ScreeningSurvey> getActiveScreeningSurveys() {
-		return this.databaseManagerService.findModelObjects(ScreeningSurvey.class,
-				Queries.SCREENING_SURVEYS_OPEN);
+		return this.databaseManagerService.findModelObjects(
+				ScreeningSurvey.class, Queries.SCREENING_SURVEYS_OPEN);
 	}
 
 	/**
@@ -132,4 +151,5 @@ public class ScreeningSurveyExecutionManagerService {
 	public File getTemplatePath() {
 		return this.fileStorageManagerService.getTemplatesFolder();
 	}
+
 }

@@ -1,4 +1,4 @@
-package org.isgf.mhc.services;
+package org.isgf.mhc.services.internal;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -93,13 +93,4 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 	/*
 	 * Class methods
 	 */
-
-	/**
-	 * Returns {@link Jongo} object
-	 * 
-	 * @return
-	 */
-	// public Jongo getDB() {
-	// return this.jongo;
-	// }
 }

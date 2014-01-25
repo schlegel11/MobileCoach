@@ -8,14 +8,14 @@ import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.conf.Messages;
-import org.isgf.mhc.services.CommunicationManagerService;
-import org.isgf.mhc.services.DatabaseManagerService;
-import org.isgf.mhc.services.FileStorageManagerService;
 import org.isgf.mhc.services.InterventionAdministrationManagerService;
 import org.isgf.mhc.services.InterventionExecutionManagerService;
-import org.isgf.mhc.services.ModelObjectExchangeService;
 import org.isgf.mhc.services.ScreeningSurveyAdministrationManagerService;
 import org.isgf.mhc.services.ScreeningSurveyExecutionManagerService;
+import org.isgf.mhc.services.internal.CommunicationManagerService;
+import org.isgf.mhc.services.internal.DatabaseManagerService;
+import org.isgf.mhc.services.internal.FileStorageManagerService;
+import org.isgf.mhc.services.internal.ModelObjectExchangeService;
 
 /**
  * @author Andreas Filler
@@ -55,8 +55,9 @@ public class MHC implements ServletContextListener {
 		Messages.setLocale(Constants.ADMIN_LOCALE);
 		Messages.checkForMissingLocales();
 
-		log.info("Starting up base services...");
+		log.info("Starting up services...");
 		try {
+			// Internal services
 			this.databaseManagerService = DatabaseManagerService.start();
 			this.fileStorageManagerService = FileStorageManagerService
 					.start(this.databaseManagerService);
@@ -65,6 +66,8 @@ public class MHC implements ServletContextListener {
 			this.modelObjectExchangeService = ModelObjectExchangeService
 					.start(this.databaseManagerService,
 							this.fileStorageManagerService);
+
+			// Controller services
 			this.interventionAdministrationManagerService = InterventionAdministrationManagerService
 					.start(this.databaseManagerService,
 							this.fileStorageManagerService,
@@ -88,15 +91,15 @@ public class MHC implements ServletContextListener {
 		if (noErrorsOccurred) {
 			this.ready = true;
 
-			log.info("Base services started.");
+			log.info("Services started.");
 		} else {
-			log.error("Not all base services could be started.");
+			log.error("Not all services could be started.");
 		}
 	}
 
 	@Override
 	public void contextDestroyed(final ServletContextEvent event) {
-		log.info("Stopping base services...");
+		log.info("Stopping services...");
 
 		try {
 			this.databaseManagerService.stop();
@@ -111,6 +114,6 @@ public class MHC implements ServletContextListener {
 			log.warn("Error at stopping services: {}", e);
 		}
 
-		log.info("Base services stopped.");
+		log.info("Services stopped.");
 	}
 }

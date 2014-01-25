@@ -9,7 +9,7 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
-import org.isgf.mhc.services.FileStorageManagerService;
+import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.tools.CustomObjectMapper;
 import org.jongo.Jongo;
 import org.jongo.MongoCollection;
