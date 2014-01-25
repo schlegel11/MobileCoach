@@ -27,8 +27,8 @@ import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.model.server.ScreeningSurvey;
 import org.isgf.mhc.model.server.ScreeningSurveySlide;
-import org.isgf.mhc.model.web.types.ScreeningSurveySlideTemplateFields;
-import org.isgf.mhc.model.web.types.SessionAttributes;
+import org.isgf.mhc.services.types.ScreeningSurveySlideTemplateFieldTypes;
+import org.isgf.mhc.services.types.SessionAttributeTypes;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
@@ -292,7 +292,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		ObjectId participantId;
 		try {
 			participantId = (ObjectId) session
-					.getAttribute(SessionAttributes.PARTICIPANT_ID.toString());
+					.getAttribute(SessionAttributeTypes.PARTICIPANT_ID.toString());
 		} catch (final Exception e) {
 			participantId = null;
 		}
@@ -319,7 +319,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 
 			if (templateVariables == null
 					|| !templateVariables
-							.containsKey(ScreeningSurveySlideTemplateFields.TEMPLATE_FOLDER
+							.containsKey(ScreeningSurveySlideTemplateFieldTypes.TEMPLATE_FOLDER
 									.toVariable())) {
 				throw new NullPointerException();
 			}
@@ -344,7 +344,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			baseURL += "/";
 		}
 		templateVariables.put(
-				ScreeningSurveySlideTemplateFields.BASE_URL.toVariable(),
+				ScreeningSurveySlideTemplateFieldTypes.BASE_URL.toVariable(),
 				baseURL);
 
 		// Create new Mustache template factory on non-production system
@@ -357,10 +357,10 @@ public class ScreeningSurveyServlet extends HttpServlet {
 
 		// Get template folder
 		final String templateFolder = (String) templateVariables
-				.get(ScreeningSurveySlideTemplateFields.TEMPLATE_FOLDER
+				.get(ScreeningSurveySlideTemplateFieldTypes.TEMPLATE_FOLDER
 						.toVariable());
 		templateVariables
-				.remove(ScreeningSurveySlideTemplateFields.TEMPLATE_FOLDER
+				.remove(ScreeningSurveySlideTemplateFieldTypes.TEMPLATE_FOLDER
 						.toVariable());
 
 		// Fill template

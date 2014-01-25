@@ -11,10 +11,10 @@ import lombok.extern.log4j.Log4j2;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.server.ScreeningSurvey;
-import org.isgf.mhc.model.web.types.ScreeningSurveySlideTemplateFields;
-import org.isgf.mhc.model.web.types.ScreeningSurveySlideTemplateLayoutTypes;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
+import org.isgf.mhc.services.types.ScreeningSurveySlideTemplateFieldTypes;
+import org.isgf.mhc.services.types.ScreeningSurveySlideTemplateLayoutTypes;
 
 @Log4j2
 public class ScreeningSurveyExecutionManagerService {
@@ -78,7 +78,7 @@ public class ScreeningSurveyExecutionManagerService {
 				ScreeningSurveySlideTemplateLayoutTypes.SELECT_ONE);
 
 		templateVariables
-				.put(ScreeningSurveySlideTemplateFields.TEMPLATE_FOLDER
+				.put(ScreeningSurveySlideTemplateFieldTypes.TEMPLATE_FOLDER
 						.toVariable(), "basic-template");
 
 		return templateVariables;

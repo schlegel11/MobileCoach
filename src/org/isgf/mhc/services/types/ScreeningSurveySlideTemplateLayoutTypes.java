@@ -1,4 +1,4 @@
-package org.isgf.mhc.model.web.types;
+package org.isgf.mhc.services.types;
 
 import org.isgf.mhc.model.server.ScreeningSurveySlide;
 import org.isgf.mhc.model.server.types.ScreeningSurveySlideQuestionTypes;

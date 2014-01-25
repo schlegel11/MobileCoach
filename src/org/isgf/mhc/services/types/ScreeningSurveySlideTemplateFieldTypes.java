@@ -1,4 +1,4 @@
-package org.isgf.mhc.model.web.types;
+package org.isgf.mhc.services.types;
 
 import org.isgf.mhc.model.server.ScreeningSurveySlide;
 
@@ -16,7 +16,7 @@ import org.isgf.mhc.model.server.ScreeningSurveySlide;
  * 
  * @author Andreas Filler
  */
-public enum ScreeningSurveySlideTemplateFields {
+public enum ScreeningSurveySlideTemplateFieldTypes {
 	/**
 	 * Contains the base URL of the website:
 	 * 
@@ -85,7 +85,7 @@ public enum ScreeningSurveySlideTemplateFields {
 
 	/**
 	 * Creates the appropriate variable name of the
-	 * {@link ScreeningSurveySlideTemplateFields}
+	 * {@link ScreeningSurveySlideTemplateFieldTypes}
 	 * 
 	 * @return The appropriate variable name
 	 */
