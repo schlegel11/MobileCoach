@@ -86,6 +86,14 @@ public class ScreeningSurveySlide extends ModelObject {
 	private ScreeningSurveySlideQuestionTypes	questionType;
 
 	/**
+	 * Slide presentation stops after this slide and {@link ScreeningSurvey} is
+	 * marked as performed by {@link Participant}
+	 */
+	@Getter
+	@Setter
+	private boolean								isLastSlide;
+
+	/**
 	 * <strong>OPTIONAL:</strong> The answers presented to the
 	 * {@link Participant} for selection
 	 */
