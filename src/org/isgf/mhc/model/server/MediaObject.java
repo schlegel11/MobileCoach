@@ -83,12 +83,12 @@ public class MediaObject extends ModelObject {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.isgf.mhc.model.ModelObject#performOnRemove()
+	 * @see org.isgf.mhc.model.ModelObject#performOnDelete()
 	 */
 	@Override
 	@JsonIgnore
-	protected void performOnRemove() {
-		log.debug("Removing file with reference {}", this.fileReference);
+	protected void performOnDelete() {
+		log.debug("Deleting file with reference {}", this.fileReference);
 		try {
 			getFileStorageManagerService().deleteFile(this.fileReference);
 		} catch (final Exception e) {
@@ -97,6 +97,6 @@ public class MediaObject extends ModelObject {
 					this.fileReference, e.getMessage());
 		}
 
-		super.performOnRemove();
+		super.performOnDelete();
 	}
 }

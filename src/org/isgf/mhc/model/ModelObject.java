@@ -100,7 +100,7 @@ public abstract class ModelObject {
 	 * other objects
 	 */
 	@JsonIgnore
-	protected void performOnRemove() {
+	protected void performOnDelete() {
 		// Nothing, but can be overwritten
 	}
 
@@ -148,33 +148,33 @@ public abstract class ModelObject {
 	}
 
 	/**
-	 * Remove {@link ModelObject} from database
+	 * Deletes {@link ModelObject} from database
 	 * 
 	 * @param clazz
-	 *            The {@link ModelObject} subclass to remove
+	 *            The {@link ModelObject} subclass to delete
 	 * @param id
 	 *            The {@link ObjectId} of the {@link ModelObject}
 	 */
 	@JsonIgnore
-	protected static final void remove(
+	protected static final void delete(
 			final Class<? extends ModelObject> clazz, final ObjectId id) {
 		final MongoCollection collection = db.getCollection(clazz
 				.getSimpleName());
 
 		try {
-			final ModelObject objectToRemove = get(clazz, id);
-			if (objectToRemove != null) {
-				objectToRemove.performOnRemove();
+			final ModelObject objectToDelete = get(clazz, id);
+			if (objectToDelete != null) {
+				objectToDelete.performOnDelete();
 			}
 		} catch (final Exception e) {
-			log.warn("Model object {} does not exist (before removal)");
+			log.warn("Model object {} does not exist (before delete)");
 		}
 
 		try {
 			collection.remove(id);
 			log.debug("Removed {} with id {}", clazz.getSimpleName(), id);
 		} catch (final Exception e) {
-			log.warn("Could not remove {} with id {}: {}",
+			log.warn("Could not delete {} with id {}: {}",
 					clazz.getSimpleName(), id, e.getMessage());
 		}
 	}

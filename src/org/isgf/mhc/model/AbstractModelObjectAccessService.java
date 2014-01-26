@@ -29,9 +29,9 @@ public abstract class AbstractModelObjectAccessService {
 	}
 
 	/**
-	 * @see ModelObject#remove(Class, ObjectId)
+	 * @see ModelObject#delete(Class, ObjectId)
 	 */
-	public void removeModelObject(final Class<? extends ModelObject> clazz,
+	public void deleteModelObject(final Class<? extends ModelObject> clazz,
 			final ObjectId id) {
 	}
 
