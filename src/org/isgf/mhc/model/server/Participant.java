@@ -35,7 +35,7 @@ public class Participant extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private long		created;
+	private long		createdTimestamp;
 
 	/**
 	 * The nickname of the {@link Participant}
