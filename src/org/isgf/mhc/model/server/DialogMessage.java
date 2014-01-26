@@ -47,7 +47,7 @@ public class DialogMessage extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private long		messageSent;
+	private long		messageSentTimestamp;
 
 	/**
 	 * The response retrieved from the {@link Participant}
@@ -62,7 +62,7 @@ public class DialogMessage extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private long		responseRetrieved;
+	private long		responseRetrievedTimestamp;
 
 	/**
 	 * Marker showing if the {@link DialogMessage} has been sent manually by an

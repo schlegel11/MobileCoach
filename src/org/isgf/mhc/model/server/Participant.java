@@ -64,6 +64,13 @@ public class Participant extends ModelObject {
 	private String		assignedScreeningSurveyGlobalUniqueId;
 
 	/**
+	 * Timestamp when the user finished the {@link ScreeningSurvey}
+	 */
+	@Getter
+	@Setter
+	private long		screeningSurveyPerformedTimestamp;
+
+	/**
 	 * Stores if the {@link Participant} is activated for the rule-based
 	 * messaging; If a {@link Participant} should never participate in the
 	 * {@link Intervention} based on this results from the
