@@ -54,6 +54,16 @@ public class Participant extends ModelObject {
 	private boolean		performedScreeningSurvey;
 
 	/**
+	 * Stores the reference to the {@link ScreeningSurvey} started by the
+	 * {@link Participant} in an independent way; This enables to reference a
+	 * {@link ScreeningSurvey} also after independent export/import to/from
+	 * another system
+	 */
+	@Getter
+	@Setter
+	private String		assignedScreeningSurveyGlobalUniqueId;
+
+	/**
 	 * Stores if the {@link Participant} is activated for the rule-based
 	 * messaging; If a {@link Participant} should never participate in the
 	 * {@link Intervention} based on this results from the

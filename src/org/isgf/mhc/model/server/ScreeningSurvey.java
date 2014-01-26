@@ -26,12 +26,33 @@ import org.isgf.mhc.model.ModelObject;
 @AllArgsConstructor
 public class ScreeningSurvey extends ModelObject {
 	/**
+	 * A absolutely unique Id to enable to reference a {@link ScreeningSurvey}
+	 * also after independent export/import to/from
+	 * another system
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private String		globalUniqueId;
+
+	/**
 	 * The {@link Intervention} the {@link ScreeningSurvey} belongs to
 	 */
 	@Getter
 	@Setter
 	@NonNull
 	private ObjectId	intervention;
+
+	/**
+	 * Stores the reference to the {@link Intervention} in an independent way;
+	 * This enables to reference a {@link Intervention} also after independent
+	 * export/import to/from
+	 * another system
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private String		assignedInterventionGlobalUniqueId;
 
 	/**
 	 * The name of the {@link ScreeningSurvey} as displayed in the backend
