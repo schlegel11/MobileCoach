@@ -1,28 +1,37 @@
 package org.isgf.mhc.ui.views;
 
+import lombok.extern.log4j.Log4j2;
+
+import org.isgf.mhc.ui.AdminNavigatorUI;
+
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 
-/**
- * @author Andreas Filler
- */
 @SuppressWarnings("serial")
+@Log4j2
 public class MainView extends AbstractView implements View {
+	private MainViewComponent	mainViewComponent;
+
 	@Override
 	public void enter(final ViewChangeEvent event) {
+		log.debug("Entered view {}", AdminNavigatorUI.VIEWS.MAIN);
+
 		this.setSizeFull();
-		this.setColumns(1);
-		this.setRows(1);
 
-		final Button button = new Button("Logout", new Button.ClickListener() {
-			@Override
-			public void buttonClick(final ClickEvent event) {
-				MainView.this.getAdminUI().logout();
-			}
-		});
+		this.mainViewComponent = new MainViewComponent();
+		this.mainViewComponent.getLogoutButton().addClickListener(
+				new LogoutButtonListener());
 
-		this.addComponent(button, 0, 0);
+		this.addComponent(this.mainViewComponent);
+	}
+
+	private class LogoutButtonListener implements ClickListener {
+		@Override
+		public void buttonClick(final ClickEvent event) {
+			MainView.this.getAdminUI().logout();
+		}
+
 	}
 }

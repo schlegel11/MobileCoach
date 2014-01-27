@@ -6,10 +6,10 @@ import org.isgf.mhc.ui.AdminNavigatorUI;
 import org.isgf.mhc.ui.UISession;
 
 import com.vaadin.navigator.View;
-import com.vaadin.ui.GridLayout;
+import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
-public abstract class AbstractView extends GridLayout implements View {
+public abstract class AbstractView extends VerticalLayout implements View {
 
 	@Synchronized
 	protected UISession getUISession() {
@@ -27,4 +27,5 @@ public abstract class AbstractView extends GridLayout implements View {
 	protected AdminNavigatorUI getAdminUI() {
 		return (AdminNavigatorUI) this.getUI();
 	}
+
 }
