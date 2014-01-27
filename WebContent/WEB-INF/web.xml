@@ -6,7 +6,7 @@
 	<display-name>MHC</display-name>
 	<description>Mobile Health Coach</description>
 	<session-config>
-		<session-timeout>120</session-timeout>
+		<session-timeout>30</session-timeout>
 	</session-config>
 	<listener>
 		<listener-class>org.isgf.mhc.MHC</listener-class>

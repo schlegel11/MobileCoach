@@ -2,6 +2,7 @@ package org.isgf.mhc.ui;
 
 import lombok.Synchronized;
 import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Constants;
@@ -12,6 +13,7 @@ import org.isgf.mhc.ui.views.MainView;
 import com.vaadin.annotations.Theme;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.UI;
 
@@ -20,6 +22,7 @@ import com.vaadin.ui.UI;
  */
 @SuppressWarnings("serial")
 @Theme("mhc")
+@Log4j2
 public class AdminNavigatorUI extends UI {
 	/**
 	 * Contains all available admin views
@@ -44,6 +47,21 @@ public class AdminNavigatorUI extends UI {
 		this.setLocale(Constants.ADMIN_LOCALE);
 		this.getPage().setTitle(
 				Messages.getAdminString(AdminMessageStrings.ADMIN_UI_NAME));
+
+		// Configure the error handler for the UI
+		this.setErrorHandler(new DefaultErrorHandler() {
+			@Override
+			public void error(final com.vaadin.server.ErrorEvent event) {
+				log.warn("An error occurred in the UI: {}",
+						event.getThrowable());
+
+				// Create new session
+				AdminNavigatorUI.this.clearSession();
+
+				// Reload page
+				AdminNavigatorUI.this.getPage().reload();
+			}
+		});
 
 		// Create a navigator to control the views
 		new Navigator(this, this);
@@ -93,12 +111,16 @@ public class AdminNavigatorUI extends UI {
 		});
 	}
 
+	protected void clearSession() {
+		this.getSession().setAttribute(UISession.class, new UISession());
+	}
+
 	/**
 	 * Set new empty session and redirect to login page
 	 */
 	@Synchronized
 	public void logout() {
-		this.getSession().setAttribute(UISession.class, new UISession());
+		this.clearSession();
 
 		this.getNavigator().navigateTo(VIEWS.LOGIN.getLowerCase());
 	}
