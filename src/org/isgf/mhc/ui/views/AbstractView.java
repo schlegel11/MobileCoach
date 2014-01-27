@@ -6,10 +6,11 @@ import org.isgf.mhc.ui.AdminNavigatorUI;
 import org.isgf.mhc.ui.UISession;
 
 import com.vaadin.navigator.View;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.GridLayout;
 
 @SuppressWarnings("serial")
-public abstract class AbstractView extends VerticalLayout implements View {
+public abstract class AbstractView extends GridLayout implements View {
+
 	@Synchronized
 	protected UISession getUISession() {
 		UISession uiSession = this.getUI().getSession()

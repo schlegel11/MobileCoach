@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Context>
-	<!-- Unescape if session should be stored also when Tomcat restarts -->
-	<!-- <Manager pathname="" /> -->
+	<!-- Escape if session should be stored also when Tomcat restarts -->
+	<Manager pathname="" />
 </Context>

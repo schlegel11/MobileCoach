@@ -1,12 +1,35 @@
 /* Import the reindeer theme.*/
+
 /* This only allows us to use the mixins defined in it and does not add any styles by itself. */
+
 @import "../reindeer/reindeer.scss";
 
 /* This contains all of your theme.*/
-/* If somebody wants to extend the theme she will include this mixin. */
-@mixin mhc {
-  /* Include all the styles from the reindeer theme */
-  @include reindeer;
 
-  /* Insert your theme rules here */
+/* If somebody wants to extend the theme she will include this mixin. */
+
+@mixin mhc {
+    /* Include all the styles from the reindeer theme */
+    @include reindeer;
+    /* Insert your theme rules here */
+    .login-view {
+        background-color: darkgray;
+    }
+    .login-view .v-panel {
+        background: #fff;
+        -webkit-border-radius: 4px;
+        -moz-border-radius: 4px;
+        border-radius: 4px;
+        -webkit-box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        -moz-box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        padding: 1em 1em 2em;
+    }
+    .login-view .v-panel-content,
+    .login-view .v-panel-deco {
+        border: 0px;
+    }
+    .bold {
+        font-weight: bold;
+    }
 }

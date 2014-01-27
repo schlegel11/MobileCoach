@@ -4,7 +4,6 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.HorizontalLayout;
 
 /**
  * @author Andreas Filler
@@ -14,10 +13,8 @@ public class MainView extends AbstractView implements View {
 	@Override
 	public void enter(final ViewChangeEvent event) {
 		this.setSizeFull();
-
-		// Layout with menu on left and view area on right
-		final HorizontalLayout hLayout = new HorizontalLayout();
-		hLayout.setSizeFull();
+		this.setColumns(1);
+		this.setRows(1);
 
 		final Button button = new Button("Logout", new Button.ClickListener() {
 			@Override
@@ -25,7 +22,7 @@ public class MainView extends AbstractView implements View {
 				MainView.this.getAdminUI().logout();
 			}
 		});
-		this.addComponent(button);
-	}
 
+		this.addComponent(button, 0, 0);
+	}
 }
