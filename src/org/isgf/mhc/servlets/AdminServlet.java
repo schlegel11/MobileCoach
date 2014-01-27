@@ -9,9 +9,14 @@ import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.Constants;
-import org.isgf.mhc.ui.AdminUI;
+import org.isgf.mhc.ui.AdminNavigatorUI;
 
 import com.vaadin.annotations.VaadinServletConfiguration;
+import com.vaadin.server.ServiceException;
+import com.vaadin.server.SessionDestroyEvent;
+import com.vaadin.server.SessionDestroyListener;
+import com.vaadin.server.SessionInitEvent;
+import com.vaadin.server.SessionInitListener;
 import com.vaadin.server.VaadinServlet;
 
 /**
@@ -19,9 +24,10 @@ import com.vaadin.server.VaadinServlet;
  */
 @SuppressWarnings("serial")
 @WebServlet(displayName = "Admin UI", value = { "/admin/*", "/VAADIN/*" }, initParams = { @WebInitParam(name = "pushmode", value = "automatic") }, asyncSupported = true, loadOnStartup = 1)
-@VaadinServletConfiguration(productionMode = Constants.IS_LIVE_SYSTEM, ui = AdminUI.class)
+@VaadinServletConfiguration(productionMode = Constants.IS_LIVE_SYSTEM, ui = AdminNavigatorUI.class)
 @Log4j2
-public class AdminServlet extends VaadinServlet {
+public class AdminServlet extends VaadinServlet implements SessionInitListener,
+		SessionDestroyListener {
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -48,6 +54,22 @@ public class AdminServlet extends VaadinServlet {
 	@Override
 	protected void servletInitialized() throws ServletException {
 		super.servletInitialized();
+
+		// Session listeners
+		this.getService().addSessionInitListener(this);
+		this.getService().addSessionDestroyListener(this);
+
 		log.info("Servlet initialized.");
+	}
+
+	@Override
+	public void sessionInit(final SessionInitEvent event)
+			throws ServiceException {
+		log.debug("Session opened");
+	}
+
+	@Override
+	public void sessionDestroy(final SessionDestroyEvent event) {
+		log.debug("Session closed");
 	}
 }
