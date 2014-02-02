@@ -19,22 +19,24 @@ public class LoginView extends AbstractView implements View {
 	public void enter(final ViewChangeEvent event) {
 		log.debug("Entered view {}", AdminNavigatorUI.VIEWS.LOGIN);
 
-		this.setSizeFull();
+		setSizeFull();
 
-		this.loginViewComponent = new LoginViewComponent();
-		this.loginViewComponent.getLoginButton().addClickListener(
+		// Create view and listeners
+		loginViewComponent = new LoginViewComponent();
+		loginViewComponent.getLoginButton().addClickListener(
 				new LoginButtonListener());
 
-		this.addComponent(this.loginViewComponent);
+		// Add view
+		this.addComponent(loginViewComponent);
 	}
 
 	private class LoginButtonListener implements ClickListener {
 		@Override
 		public void buttonClick(final ClickEvent event) {
-			LoginView.this.getUISession().setLoggedIn(true);
+			getUISession().setLoggedIn(true);
 
-			LoginView.this.getUI().getNavigator()
-					.navigateTo(AdminNavigatorUI.VIEWS.MAIN.getLowerCase());
+			getUI().getNavigator().navigateTo(
+					AdminNavigatorUI.VIEWS.MAIN.getLowerCase());
 		}
 
 	}

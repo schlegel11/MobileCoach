@@ -23,7 +23,7 @@ import com.vaadin.ui.UI;
 @SuppressWarnings("serial")
 @Theme("mhc")
 @Log4j2
-public class AdminNavigatorUI extends UI {
+public class AdminNavigatorUI extends UI implements ViewChangeListener {
 	/**
 	 * Contains all available admin views
 	 * 
@@ -78,36 +78,7 @@ public class AdminNavigatorUI extends UI {
 		}
 
 		// Redirect to appropriate view
-		getNavigator().addViewChangeListener(new ViewChangeListener() {
-			@Override
-			public boolean beforeViewChange(final ViewChangeEvent event) {
-				val session = AdminNavigatorUI.this.getSession().getAttribute(
-						UISession.class);
-
-				// Check if a user has logged in
-				final boolean isLoginView = event.getNewView() instanceof LoginView;
-
-				if (!session.isLoggedIn() && !isLoginView) {
-					// Redirect to login view always if a user has not yet
-					// logged in
-					AdminNavigatorUI.this.getNavigator().navigateTo(
-							VIEWS.LOGIN.getLowerCase());
-					return false;
-
-				} else if (session.isLoggedIn() && isLoginView) {
-					// If someone tries to access to login view while logged in,
-					// then cancel
-					return false;
-				}
-
-				return true;
-			}
-
-			@Override
-			public void afterViewChange(final ViewChangeEvent event) {
-				// do nothing
-			}
-		});
+		getNavigator().addViewChangeListener(this);
 	}
 
 	protected void clearSession() {
@@ -122,5 +93,34 @@ public class AdminNavigatorUI extends UI {
 		clearSession();
 
 		getNavigator().navigateTo(VIEWS.LOGIN.getLowerCase());
+	}
+
+	@Override
+	public boolean beforeViewChange(final ViewChangeEvent event) {
+		val session = AdminNavigatorUI.this.getSession().getAttribute(
+				UISession.class);
+
+		// Check if a user has logged in
+		final boolean isLoginView = event.getNewView() instanceof LoginView;
+
+		if (!session.isLoggedIn() && !isLoginView) {
+			// Redirect to login view always if a user has not yet
+			// logged in
+			AdminNavigatorUI.this.getNavigator().navigateTo(
+					VIEWS.LOGIN.getLowerCase());
+			return false;
+
+		} else if (session.isLoggedIn() && isLoginView) {
+			// If someone tries to access to login view while logged in,
+			// then cancel
+			return false;
+		}
+
+		return true;
+	}
+
+	@Override
+	public void afterViewChange(final ViewChangeEvent event) {
+		// do nothing
 	}
 }

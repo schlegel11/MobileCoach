@@ -13,6 +13,8 @@
     @include reindeer;
     /* Insert your theme rules here */
     /* Basics */
+    $active-color: #ebebeb;
+    $tab-color: $active-color;
     .bold {
         font-weight: bold;
     }
@@ -28,7 +30,69 @@
     .biggest {
         font-size: 20px;
     }
-    /* Styles */
+    .styled-border {
+        border-bottom-color: rgb(210, 211, 212);
+        border-bottom-left-radius: 3px;
+        border-bottom-right-radius: 3px;
+        border-bottom-style: solid;
+        border-bottom-width: 1px;
+        border-left-color: rgb(188, 189, 190);
+        border-left-style: solid;
+        border-left-width: 1px;
+        border-right-color: rgb(188, 189, 190);
+        border-right-style: solid;
+        border-right-width: 1px;
+        border-top-color: rgb(162, 163, 164);
+        border-top-left-radius: 3px;
+        border-top-right-radius: 3px;
+        border-top-style: solid;
+        border-top-width: 1px;
+        box-sizing: border-box;
+        color: rgb(34, 34, 34);
+    }
+    .styled-border-active {
+        border-bottom-color: rgb(92, 160, 223);
+        border-bottom-left-radius: 3px;
+        border-bottom-right-radius: 3px;
+        border-bottom-style: solid;
+        border-bottom-width: 1px;
+        border-left-color: rgb(91, 151, 208);
+        border-left-style: solid;
+        border-left-width: 1px;
+        border-right-color: rgb(91, 151, 208);
+        border-right-style: solid;
+        border-right-width: 1px;
+        border-top-color: rgb(79, 131, 180);
+        border-top-left-radius: 3px;
+        border-top-right-radius: 3px;
+        border-top-style: solid;
+        border-top-width: 1px;
+        box-sizing: border-box;
+        color: rgb(34, 34, 34);
+    }
+    /* Global styles */
+    .v-button,
+    .v-button .v-button-wrap {
+        background-image: none;
+    }
+    .v-button {
+        height: 26px;
+        @extend .styled-border;
+    }
+    .v-button:focus {
+        background-image: none;
+        @extend .styled-border-active;
+    }
+    .v-button:focus .v-button-wrap {
+        background-image: none;
+    }
+    .v-button:active,
+    .v-button.v-pressed {
+        background-image: none;
+        background-color: $active-color;
+        @extend .styled-border-active;
+    }
+    /* Own styles */
     /* login-view */
     .login-view {
         background: #c9c9c9;
@@ -48,41 +112,74 @@
         filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#c9c9c9', endColorstr='#7d7e7d', GradientType=1);
         /* IE6-9 fallback on horizontal gradient */
     }
-    .login-view .v-panel {
-        background: #fff;
-        -webkit-border-radius: 4px;
-        -moz-border-radius: 4px;
-        border-radius: 4px;
-        -webkit-box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        -moz-box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        padding: 1em 1em 2em;
+    .login-view {
+        .v-panel {
+            background: #fff;
+            -webkit-border-radius: 4px;
+            -moz-border-radius: 4px;
+            border-radius: 4px;
+            -webkit-box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            -moz-box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            padding: 1em 1em 2em;
+        }
+        .v-panel-content,
+        .v-panel-deco {
+            border: 0px;
+        }
+        .title-label {
+            @extend .bold;
+            @extend .right;
+            @extend .biggest;
+        }
     }
-    .login-view .v-panel-content,
-    .login-view .v-panel-deco {
-        border: 0px;
+    /* main-view */
+    .main-view {
+        .title-label {
+            @extend .bold;
+            @extend .center;
+            @extend .bigger;
+        }
+        .v-accordion-item-caption {
+            padding-bottom: 15px;
+            padding-top: 15px;
+            padding-left: 10px;
+            background-image: none;
+            background-color: $tab-color;
+        }
+        .v-accordion-item-caption .v-captiontext {
+            @extend .bigger;
+        }
+        .button-label {
+            @extend .center;
+            @extend .bigger;
+        }
+        .menu-button {
+            @extend .styled-border
+        }
+        .menu-button:focus {
+            @extend .styled-border-active;
+        }
+        .menu-button:active {
+            @extend .styled-border-active;
+            background-color: $active-color;
+        }
+        .active {
+            .menu-button {
+                @extend .styled-border-active;
+                background-color: $active-color;
+            }
+            .menu-button:focus {
+                @extend .styled-border-active;
+                background-color: $active-color;
+            }
+            .menu-button:active {
+                @extend .styled-border-active;
+                background-color: $active-color;
+            }
+        }
     }
-    .login-view .title-label {
-        @extend .bold;
-        @extend .right;
-        @extend .biggest;
-    }
-    /* login-view */
-    .main-view .title-label {
-        @extend .bold;
-        @extend .center;
-        @extend .bigger;
-    }
-    .main-view .v-accordion-item-caption {
-        padding-bottom: 15px;
-        padding-top: 15px;
-        padding-left: 10px;
-        background-image: none;
-    }
-    .main-view .v-accordion-item-caption .v-captiontext {
-        @extend .bigger;
-    }
-    /* login-view */
+    /* welcome-tab */
     .welcome-tab .welcome-label {
         @extend .bold;
         @extend .center;
