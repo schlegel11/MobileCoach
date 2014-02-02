@@ -3,6 +3,7 @@ package org.isgf.mhc.ui.views;
 import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.ui.AdminNavigatorUI;
+import org.isgf.mhc.ui.views.components.LoginViewComponent;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;

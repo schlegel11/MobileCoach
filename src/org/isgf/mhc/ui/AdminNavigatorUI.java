@@ -33,10 +33,10 @@ public class AdminNavigatorUI extends UI {
 		LOGIN, MAIN;
 
 		public String getLowerCase() {
-			if (this.equals(LOGIN)) {
+			if (equals(LOGIN)) {
 				return "";
 			} else {
-				return this.toString().toLowerCase();
+				return toString().toLowerCase();
 			}
 		}
 	};
@@ -44,12 +44,12 @@ public class AdminNavigatorUI extends UI {
 	@Override
 	protected void init(final VaadinRequest request) {
 		// Set basic settings
-		this.setLocale(Constants.ADMIN_LOCALE);
-		this.getPage().setTitle(
-				Messages.getAdminString(AdminMessageStrings.ADMIN_UI_NAME));
+		setLocale(Constants.ADMIN_LOCALE);
+		getPage().setTitle(
+				Messages.getAdminString(AdminMessageStrings.APPLICATION_NAME));
 
 		// Configure the error handler for the UI
-		this.setErrorHandler(new DefaultErrorHandler() {
+		setErrorHandler(new DefaultErrorHandler() {
 			@Override
 			public void error(final com.vaadin.server.ErrorEvent event) {
 				log.warn("An error occurred in the UI: {}",
@@ -67,19 +67,18 @@ public class AdminNavigatorUI extends UI {
 		new Navigator(this, this);
 
 		// Create and register the views
-		this.getNavigator()
-				.addView(VIEWS.LOGIN.getLowerCase(), LoginView.class);
-		this.getNavigator().addView(VIEWS.MAIN.getLowerCase(), MainView.class);
+		getNavigator().addView(VIEWS.LOGIN.getLowerCase(), LoginView.class);
+		getNavigator().addView(VIEWS.MAIN.getLowerCase(), MainView.class);
 
 		// Create session if none exists
-		UISession uiSession = this.getSession().getAttribute(UISession.class);
+		UISession uiSession = getSession().getAttribute(UISession.class);
 		if (uiSession == null) {
 			uiSession = new UISession();
-			this.getSession().setAttribute(UISession.class, uiSession);
+			getSession().setAttribute(UISession.class, uiSession);
 		}
 
 		// Redirect to appropriate view
-		this.getNavigator().addViewChangeListener(new ViewChangeListener() {
+		getNavigator().addViewChangeListener(new ViewChangeListener() {
 			@Override
 			public boolean beforeViewChange(final ViewChangeEvent event) {
 				val session = AdminNavigatorUI.this.getSession().getAttribute(
@@ -112,7 +111,7 @@ public class AdminNavigatorUI extends UI {
 	}
 
 	protected void clearSession() {
-		this.getSession().setAttribute(UISession.class, new UISession());
+		getSession().setAttribute(UISession.class, new UISession());
 	}
 
 	/**
@@ -120,8 +119,8 @@ public class AdminNavigatorUI extends UI {
 	 */
 	@Synchronized
 	public void logout() {
-		this.clearSession();
+		clearSession();
 
-		this.getNavigator().navigateTo(VIEWS.LOGIN.getLowerCase());
+		getNavigator().navigateTo(VIEWS.LOGIN.getLowerCase());
 	}
 }

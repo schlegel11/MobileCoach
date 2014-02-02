@@ -12,8 +12,41 @@
     /* Include all the styles from the reindeer theme */
     @include reindeer;
     /* Insert your theme rules here */
+    /* Basics */
+    .bold {
+        font-weight: bold;
+    }
+    .center {
+        text-align: center;
+    }
+    .right {
+        text-align: right;
+    }
+    .bigger {
+        font-size: 16px;
+    }
+    .biggest {
+        font-size: 20px;
+    }
+    /* Styles */
+    /* login-view */
     .login-view {
-        background-color: darkgray;
+        background: #c9c9c9;
+        /* Old browsers */
+        background: -moz-radial-gradient(center, ellipse cover, #c9c9c9 0%, #7d7e7d 100%);
+        /* FF3.6+ */
+        background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%, #c9c9c9), color-stop(100%, #7d7e7d));
+        /* Chrome,Safari4+ */
+        background: -webkit-radial-gradient(center, ellipse cover, #c9c9c9 0%, #7d7e7d 100%);
+        /* Chrome10+,Safari5.1+ */
+        background: -o-radial-gradient(center, ellipse cover, #c9c9c9 0%, #7d7e7d 100%);
+        /* Opera 12+ */
+        background: -ms-radial-gradient(center, ellipse cover, #c9c9c9 0%, #7d7e7d 100%);
+        /* IE10+ */
+        background: radial-gradient(ellipse at center, #c9c9c9 0%, #7d7e7d 100%);
+        /* W3C */
+        filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#c9c9c9', endColorstr='#7d7e7d', GradientType=1);
+        /* IE6-9 fallback on horizontal gradient */
     }
     .login-view .v-panel {
         background: #fff;
@@ -29,7 +62,30 @@
     .login-view .v-panel-deco {
         border: 0px;
     }
-    .bold {
-        font-weight: bold;
+    .login-view .title-label {
+        @extend .bold;
+        @extend .right;
+        @extend .biggest;
+    }
+    /* login-view */
+    .main-view .title-label {
+        @extend .bold;
+        @extend .center;
+        @extend .bigger;
+    }
+    .main-view .v-accordion-item-caption {
+        padding-bottom: 15px;
+        padding-top: 15px;
+        padding-left: 10px;
+        background-image: none;
+    }
+    .main-view .v-accordion-item-caption .v-captiontext {
+        @extend .bigger;
+    }
+    /* login-view */
+    .welcome-tab .welcome-label {
+        @extend .bold;
+        @extend .center;
+        @extend .biggest;
     }
 }

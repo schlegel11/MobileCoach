@@ -64,7 +64,8 @@ public class Messages {
 	 */
 	public static String getAdminString(final AdminMessageStrings key) {
 		try {
-			return ADMIN_RESOURCE_BUNDLE.getString(key.toString());
+			return ADMIN_RESOURCE_BUNDLE.getString(key.toString().toLowerCase()
+					.replace("_", "."));
 		} catch (final MissingResourceException e) {
 			return '!' + key.toString() + '!';
 		}
