@@ -48,7 +48,7 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener {
 	@Override
 	protected void init(final VaadinRequest request) {
 		// Set basic settings
-		setLocale(Constants.ADMIN_LOCALE);
+		setLocale(Constants.getAdminLocale());
 		getPage()
 				.setTitle(
 						Messages.getAdminString(AdminMessageStrings.APPLICATION__NAME_LONG));

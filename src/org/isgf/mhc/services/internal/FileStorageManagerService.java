@@ -31,17 +31,17 @@ public class FileStorageManagerService {
 			throws Exception {
 		log.info("Starting service...");
 
-		log.info("Using storage folder {}", Constants.STORAGE_FOLDER);
-		this.storageFolder = new File(Constants.STORAGE_FOLDER);
-		this.storageFolder.mkdirs();
-		if (!this.storageFolder.exists()) {
+		log.info("Using storage folder {}", Constants.getStorageFolder());
+		storageFolder = new File(Constants.getStorageFolder());
+		storageFolder.mkdirs();
+		if (!storageFolder.exists()) {
 			throw new FileNotFoundException();
 		}
 
-		log.info("Using templates folder {}", Constants.TEMPLATES_FOLDER);
-		this.templatesFolder = new File(Constants.TEMPLATES_FOLDER);
-		this.templatesFolder.mkdirs();
-		if (!this.templatesFolder.exists()) {
+		log.info("Using templates folder {}", Constants.getTemplatesFolder());
+		templatesFolder = new File(Constants.getTemplatesFolder());
+		templatesFolder.mkdirs();
+		if (!templatesFolder.exists()) {
 			throw new FileNotFoundException();
 		}
 
@@ -51,19 +51,19 @@ public class FileStorageManagerService {
 		val requiredFileRefernces = new HashSet<String>();
 
 		log.info("Checking media objects and storage folder for consistency:");
-		val mediaObjects = databaseManagerService.findModelObjects(MediaObject.class,
-				Queries.ALL);
+		val mediaObjects = databaseManagerService.findModelObjects(
+				MediaObject.class, Queries.ALL);
 
 		for (val mediaObject : mediaObjects) {
 			final String fileReference = mediaObject.getFileReference();
 			requiredFileRefernces.add(fileReference.split("/")[0]);
-			if (this.getFileByReference(fileReference) == null) {
+			if (getFileByReference(fileReference) == null) {
 				log.warn("Media object {} contains missing file reference {}",
 						mediaObject.getId(), mediaObject.getFileReference());
 			}
 		}
 
-		for (val file : this.storageFolder.listFiles()) {
+		for (val file : storageFolder.listFiles()) {
 			if (file.isDirectory() && file.getName().startsWith("MHC_")
 					&& !requiredFileRefernces.contains(file.getName())) {
 				log.debug("Deleting unused resource {}", file.getAbsolutePath());
@@ -111,7 +111,7 @@ public class FileStorageManagerService {
 	public File getFileByReference(final String fileReference) {
 		log.debug("Returning file with reference {}", fileReference);
 		final String[] fileReferenceParts = fileReference.split("/");
-		final File folder = new File(this.storageFolder, fileReferenceParts[0]);
+		final File folder = new File(storageFolder, fileReferenceParts[0]);
 		final File file = new File(folder, fileReferenceParts[1]);
 
 		if (!file.exists()) {
@@ -144,10 +144,10 @@ public class FileStorageManagerService {
 		}
 
 		String folderName = "MHC_" + RandomStringUtils.randomAlphabetic(40);
-		File folder = new File(this.storageFolder, folderName);
+		File folder = new File(storageFolder, folderName);
 		while (folder.exists()) {
 			folderName = "MHC_" + RandomStringUtils.randomAlphabetic(40);
-			folder = new File(this.storageFolder, folderName);
+			folder = new File(storageFolder, folderName);
 		}
 		folder.mkdirs();
 
@@ -171,7 +171,7 @@ public class FileStorageManagerService {
 	}
 
 	public void deleteFile(final String fileReference) {
-		final File fileToDelete = this.getFileByReference(fileReference);
+		final File fileToDelete = getFileByReference(fileReference);
 
 		if (fileToDelete != null && fileToDelete.exists()) {
 			final File folderToDelete = fileToDelete.getParentFile();

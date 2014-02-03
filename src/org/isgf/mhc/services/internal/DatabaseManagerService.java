@@ -32,22 +32,22 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 			// Creating MongoDB driver object
 			final List<MongoCredential> mongoCredentials = new ArrayList<MongoCredential>();
 			mongoCredentials.add(MongoCredential.createMongoCRCredential(
-					Constants.DATABASE_NAME, Constants.DATABASE_NAME,
-					Constants.DATABASE_PASSWORD.toCharArray()));
+					Constants.getDatabaseUser(), Constants.getDatabaseName(),
+					Constants.getDatabasePassword().toCharArray()));
 			mongoClient = new MongoClient(new ServerAddress(
-					Constants.DATABASE_HOST, Constants.DATABASE_PORT),
+					Constants.getDatabaseHost(), Constants.getDatabasePort()),
 					mongoCredentials);
 
 			// Checking connection
 			log.debug("Existing collections in database {}: ",
-					Constants.DATABASE_NAME);
-			for (val collection : mongoClient.getDB(Constants.DATABASE_NAME)
-					.getCollectionNames()) {
+					Constants.getDatabaseName());
+			for (val collection : mongoClient
+					.getDB(Constants.getDatabaseName()).getCollectionNames()) {
 				log.debug(" {}", collection);
 			}
 
 			// Creating Jongo object
-			jongo = new Jongo(mongoClient.getDB(Constants.DATABASE_NAME));
+			jongo = new Jongo(mongoClient.getDB(Constants.getDatabaseName()));
 
 			// Ensure indices
 			log.debug("Creating/ensuring indices: ");
@@ -79,10 +79,10 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 			// Create new admin account if none exists
 			log.warn(
 					"No admin account has been found! One will be created as '{}' with password '{}'",
-					Constants.DEFAULT_ADMIN_USERNAME,
-					Constants.DEFAULT_ADMIN_PASSWORD);
-			val author = new Author(true, Constants.DEFAULT_ADMIN_USERNAME,
-					BCrypt.hashpw(Constants.DEFAULT_ADMIN_PASSWORD,
+					Constants.getDefaultAdminUsername(),
+					Constants.getDefaultAdminPassword());
+			val author = new Author(true, Constants.getDefaultAdminUsername(),
+					BCrypt.hashpw(Constants.getDatabasePassword(),
 							BCrypt.gensalt()));
 			saveModelObject(author);
 		}

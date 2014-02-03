@@ -60,7 +60,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		log.info("Initializing servlet...");
 
 		log.debug("Initializing mustache template engine");
-		this.mustacheFactory = this.createMustacheFactory();
+		mustacheFactory = createMustacheFactory();
 
 		log.info("Servlet initialized.");
 		super.init(servletConfig);
@@ -86,14 +86,14 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				case 1:
 					if (pathParts[0].equals("")) {
 						// Empty request
-						this.listActiveScreeningSurveys(request, response);
+						listActiveScreeningSurveys(request, response);
 						return;
 					}
 
 					// Only object id
 					if (ObjectId.isValid(pathParts[0])) {
-						this.handleTemplateRequest(request, response,
-								new ObjectId(pathParts[0]));
+						handleTemplateRequest(request, response, new ObjectId(
+								pathParts[0]));
 						return;
 					} else {
 						throw new Exception("Invalid id");
@@ -101,7 +101,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				default:
 					// Object id and file request
 					if (ObjectId.isValid(pathParts[0])) {
-						this.handleFileRequest(request, response, new ObjectId(
+						handleFileRequest(request, response, new ObjectId(
 								pathParts[0]),
 								path.substring(path.indexOf("/") + 1));
 						return;
@@ -125,7 +125,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			final HttpServletResponse response) throws ServletException,
 			IOException {
 		log.debug("Redirecting POST request to GET request");
-		this.doGet(request, response);
+		doGet(request, response);
 	}
 
 	/**
@@ -168,7 +168,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		log.debug("Requested file is '{}'", requestedFile.getAbsolutePath());
 
 		// Get the MIME type of the requested file
-		final String mimeType = this.getServletContext().getMimeType(
+		final String mimeType = getServletContext().getMimeType(
 				requestedFile.getAbsolutePath());
 		if (mimeType == null) {
 			log.warn("Could not get MIME type of file '{}'",
@@ -225,7 +225,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 
 		val templateVariables = new HashMap<String, Object>();
 
-		if (Constants.LIST_OPEN_SCREENING_SURVEYS_ON_BASE_URL) {
+		if (Constants.isListOpenScreenSurveysOnBaseURL()) {
 			// Get all active screening surveys
 			val activeScreeningSurveys = MHC.getInstance()
 					.getScreeningSurveyExecutionManagerService()
@@ -258,12 +258,12 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		}
 
 		@Cleanup
-		val templateInputStream = this.getServletContext().getResourceAsStream(
+		val templateInputStream = getServletContext().getResourceAsStream(
 				"ActiveScreeningSurveysList.template.html");
 		@Cleanup
 		val templateInputStreamReader = new InputStreamReader(
 				templateInputStream, "UTF-8");
-		val mustache = this.mustacheFactory.compile(templateInputStreamReader,
+		val mustache = mustacheFactory.compile(templateInputStreamReader,
 				"mustache.template");
 
 		@Cleanup
@@ -292,7 +292,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		ObjectId participantId;
 		try {
 			participantId = (ObjectId) session
-					.getAttribute(SessionAttributeTypes.PARTICIPANT_ID.toString());
+					.getAttribute(SessionAttributeTypes.PARTICIPANT_ID
+							.toString());
 		} catch (final Exception e) {
 			participantId = null;
 		}
@@ -350,8 +351,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		// Create new Mustache template factory on non-production system
 		if (!Constants.IS_LIVE_SYSTEM) {
 			log.debug("Initializing NEW mustache template engine");
-			synchronized (this.mustacheFactory) {
-				this.mustacheFactory = this.createMustacheFactory();
+			synchronized (mustacheFactory) {
+				mustacheFactory = createMustacheFactory();
 			}
 		}
 
@@ -366,9 +367,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		// Fill template
 		log.debug("Filling template in folder {}", templateFolder);
 		Mustache mustache;
-		synchronized (this.mustacheFactory) {
-			mustache = this.mustacheFactory.compile(templateFolder
-					+ "/index.html");
+		synchronized (mustacheFactory) {
+			mustache = mustacheFactory.compile(templateFolder + "/index.html");
 		}
 
 		@Cleanup

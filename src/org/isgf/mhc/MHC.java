@@ -52,36 +52,34 @@ public class MHC implements ServletContextListener {
 		instance = this;
 
 		log.info("Setting basic configuration...");
-		Messages.setLocale(Constants.ADMIN_LOCALE);
+		Messages.setLocale(Constants.getAdminLocale());
 		Messages.checkForMissingLocales();
+
+		log.info("Logging folder:   {}", Constants.getLoggingFolder());
+		log.info("Storage folder:   {}", Constants.getStorageFolder());
+		log.info("Templates folder: {}", Constants.getTemplatesFolder());
 
 		log.info("Starting up services...");
 		try {
 			// Internal services
-			this.databaseManagerService = DatabaseManagerService.start();
-			this.fileStorageManagerService = FileStorageManagerService
-					.start(this.databaseManagerService);
-			this.communicationManagerService = CommunicationManagerService
-					.start();
-			this.modelObjectExchangeService = ModelObjectExchangeService
-					.start(this.databaseManagerService,
-							this.fileStorageManagerService);
+			databaseManagerService = DatabaseManagerService.start();
+			fileStorageManagerService = FileStorageManagerService
+					.start(databaseManagerService);
+			communicationManagerService = CommunicationManagerService.start();
+			modelObjectExchangeService = ModelObjectExchangeService.start(
+					databaseManagerService, fileStorageManagerService);
 
 			// Controller services
-			this.interventionAdministrationManagerService = InterventionAdministrationManagerService
-					.start(this.databaseManagerService,
-							this.fileStorageManagerService,
-							this.modelObjectExchangeService);
-			this.screeningSurveyAdministrationManagerService = ScreeningSurveyAdministrationManagerService
-					.start(this.databaseManagerService,
-							this.fileStorageManagerService,
-							this.modelObjectExchangeService);
-			this.interventionExecutionManagerService = InterventionExecutionManagerService
-					.start(this.databaseManagerService,
-							this.fileStorageManagerService);
-			this.screeningSurveyExecutionManagerService = ScreeningSurveyExecutionManagerService
-					.start(this.databaseManagerService,
-							this.fileStorageManagerService);
+			interventionAdministrationManagerService = InterventionAdministrationManagerService
+					.start(databaseManagerService, fileStorageManagerService,
+							modelObjectExchangeService);
+			screeningSurveyAdministrationManagerService = ScreeningSurveyAdministrationManagerService
+					.start(databaseManagerService, fileStorageManagerService,
+							modelObjectExchangeService);
+			interventionExecutionManagerService = InterventionExecutionManagerService
+					.start(databaseManagerService, fileStorageManagerService);
+			screeningSurveyExecutionManagerService = ScreeningSurveyExecutionManagerService
+					.start(databaseManagerService, fileStorageManagerService);
 		} catch (final Exception e) {
 			noErrorsOccurred = false;
 			log.error("Error at starting services: {}", e);
@@ -89,7 +87,7 @@ public class MHC implements ServletContextListener {
 
 		// Only set to true if all relevant services started probably
 		if (noErrorsOccurred) {
-			this.ready = true;
+			ready = true;
 
 			log.info("Services started.");
 		} else {
@@ -102,14 +100,14 @@ public class MHC implements ServletContextListener {
 		log.info("Stopping services...");
 
 		try {
-			this.databaseManagerService.stop();
-			this.fileStorageManagerService.stop();
-			this.communicationManagerService.stop();
-			this.modelObjectExchangeService.stop();
-			this.interventionAdministrationManagerService.stop();
-			this.screeningSurveyAdministrationManagerService.stop();
-			this.interventionExecutionManagerService.stop();
-			this.screeningSurveyExecutionManagerService.stop();
+			databaseManagerService.stop();
+			fileStorageManagerService.stop();
+			communicationManagerService.stop();
+			modelObjectExchangeService.stop();
+			interventionAdministrationManagerService.stop();
+			screeningSurveyAdministrationManagerService.stop();
+			interventionExecutionManagerService.stop();
+			screeningSurveyExecutionManagerService.stop();
 		} catch (final Exception e) {
 			log.warn("Error at stopping services: {}", e);
 		}

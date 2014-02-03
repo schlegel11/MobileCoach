@@ -40,7 +40,7 @@ public class TestServlet extends HttpServlet {
 			// Perform tests
 			log.debug("STARTING TEST...");
 			try {
-				this.runTestcases();
+				runTestcases();
 			} catch (final Exception e) {
 				log.error("ERROR at running testcase: " + e.getMessage());
 				log.error(e.getStackTrace().toString());
@@ -68,17 +68,17 @@ public class TestServlet extends HttpServlet {
 		response.setContentType("text/plain");
 
 		// Remember http servlet response output stream for logging
-		this.servletOutputStream = response.getOutputStream();
+		servletOutputStream = response.getOutputStream();
 
 		// Perform tests
-		this.logToWeb("STARTING TEST...");
+		logToWeb("STARTING TEST...");
 		try {
-			this.runTestcases();
+			runTestcases();
 		} catch (final Exception e) {
-			this.logToWeb("ERROR at running testcase: " + e.getMessage());
-			this.logToWeb(e.getStackTrace().toString());
+			logToWeb("ERROR at running testcase: " + e.getMessage());
+			logToWeb(e.getStackTrace().toString());
 		}
-		this.logToWeb("TEST DONE.");
+		logToWeb("TEST DONE.");
 	}
 
 	private void runTestcases() {
@@ -86,10 +86,10 @@ public class TestServlet extends HttpServlet {
 	}
 
 	private void logToWeb(final String logMessage) {
-		if (this.servletOutputStream != null) {
+		if (servletOutputStream != null) {
 			try {
-				this.servletOutputStream.print(logMessage + "\n");
-				this.servletOutputStream.flush();
+				servletOutputStream.print(logMessage + "\n");
+				servletOutputStream.flush();
 			} catch (final IOException e) {
 				// Do nothing
 			}

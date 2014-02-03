@@ -9,6 +9,9 @@
 		<session-timeout>30</session-timeout>
 	</session-config>
 	<listener>
+		<listener-class>org.isgf.mhc.FirstInitializations</listener-class>
+	</listener>
+	<listener>
 		<listener-class>org.isgf.mhc.MHC</listener-class>
 	</listener>
 	<welcome-file-list>
