@@ -8,15 +8,21 @@ import javax.servlet.annotation.WebServlet;
 import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.MHC;
+import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Constants;
+import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.ui.AdminNavigatorUI;
 
 import com.vaadin.annotations.VaadinServletConfiguration;
+import com.vaadin.server.CustomizedSystemMessages;
 import com.vaadin.server.ServiceException;
 import com.vaadin.server.SessionDestroyEvent;
 import com.vaadin.server.SessionDestroyListener;
 import com.vaadin.server.SessionInitEvent;
 import com.vaadin.server.SessionInitListener;
+import com.vaadin.server.SystemMessages;
+import com.vaadin.server.SystemMessagesInfo;
+import com.vaadin.server.SystemMessagesProvider;
 import com.vaadin.server.VaadinServlet;
 
 /**
@@ -58,8 +64,44 @@ public class AdminServlet extends VaadinServlet implements SessionInitListener,
 		super.servletInitialized();
 
 		// Session listeners
-		this.getService().addSessionInitListener(this);
-		this.getService().addSessionDestroyListener(this);
+		getService().addSessionInitListener(this);
+		getService().addSessionDestroyListener(this);
+
+		// Customized error messages
+		getService().setSystemMessagesProvider(new SystemMessagesProvider() {
+			@Override
+			public SystemMessages getSystemMessages(
+					final SystemMessagesInfo systemMessagesInfo) {
+				final CustomizedSystemMessages messages = new CustomizedSystemMessages();
+
+				messages.setSessionExpiredCaption(Messages
+						.getAdminString(AdminMessageStrings.SYSTEM_NOTIFICATION__SESSION_EXPIRED_CAPTION));
+				messages.setSessionExpiredMessage(Messages
+						.getAdminString(AdminMessageStrings.SYSTEM_NOTIFICATION__SESSION_EXPIRED_MESSAGE));
+
+				messages.setInternalErrorCaption(Messages
+						.getAdminString(AdminMessageStrings.SYSTEM_NOTIFICATION__INTERNAL_ERROR_CAPTION));
+				messages.setInternalErrorMessage(Messages
+						.getAdminString(AdminMessageStrings.SYSTEM_NOTIFICATION__INTERNAL_ERROR_MESSAGE));
+
+				messages.setCommunicationErrorCaption(Messages
+						.getAdminString(AdminMessageStrings.SYSTEM_NOTIFICATION__COMMUNICATION_ERROR_CAPTION));
+				messages.setCommunicationErrorMessage(Messages
+						.getAdminString(AdminMessageStrings.SYSTEM_NOTIFICATION__COMMUNICATION_ERROR_MESSAGE));
+
+				messages.setOutOfSyncCaption(Messages
+						.getAdminString(AdminMessageStrings.SYSTEM_NOTIFICATION__OUT_OF_SYNC_CAPTION));
+				messages.setOutOfSyncMessage(Messages
+						.getAdminString(AdminMessageStrings.SYSTEM_NOTIFICATION__OUT_OF_SYNC_MESSAGE));
+
+				messages.setCookiesDisabledCaption(Messages
+						.getAdminString(AdminMessageStrings.SYSTEM_NOTIFICATION__COOKIES_DISABLED_CAPTION));
+				messages.setCookiesDisabledMessage(Messages
+						.getAdminString(AdminMessageStrings.SYSTEM_NOTIFICATION__COOKIES_DISABLED_MESSAGE));
+
+				return messages;
+			}
+		});
 
 		log.info("Servlet initialized.");
 	}

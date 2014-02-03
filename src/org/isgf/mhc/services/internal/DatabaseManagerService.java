@@ -10,6 +10,9 @@ import lombok.extern.log4j.Log4j2;
 import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.model.AbstractModelObjectAccessService;
 import org.isgf.mhc.model.Indices;
+import org.isgf.mhc.model.Queries;
+import org.isgf.mhc.model.server.Author;
+import org.isgf.mhc.tools.BCrypt;
 import org.jongo.Jongo;
 
 import com.mongodb.MongoClient;
@@ -31,21 +34,20 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 			mongoCredentials.add(MongoCredential.createMongoCRCredential(
 					Constants.DATABASE_NAME, Constants.DATABASE_NAME,
 					Constants.DATABASE_PASSWORD.toCharArray()));
-			this.mongoClient = new MongoClient(new ServerAddress(
+			mongoClient = new MongoClient(new ServerAddress(
 					Constants.DATABASE_HOST, Constants.DATABASE_PORT),
 					mongoCredentials);
 
 			// Checking connection
 			log.debug("Existing collections in database {}: ",
 					Constants.DATABASE_NAME);
-			for (val collection : this.mongoClient.getDB(
-					Constants.DATABASE_NAME).getCollectionNames()) {
+			for (val collection : mongoClient.getDB(Constants.DATABASE_NAME)
+					.getCollectionNames()) {
 				log.debug(" {}", collection);
 			}
 
 			// Creating Jongo object
-			this.jongo = new Jongo(
-					this.mongoClient.getDB(Constants.DATABASE_NAME));
+			jongo = new Jongo(mongoClient.getDB(Constants.DATABASE_NAME));
 
 			// Ensure indices
 			log.debug("Creating/ensuring indices: ");
@@ -54,8 +56,7 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 			while (indicesHashtableKeys.hasMoreElements()) {
 				val clazz = indicesHashtableKeys.nextElement();
 				final String[] indices = indicesHashtable.get(clazz);
-				val collection = this.jongo
-						.getCollection(clazz.getSimpleName());
+				val collection = jongo.getCollection(clazz.getSimpleName());
 				for (final String index : indices) {
 					log.debug("Creating/ensuring index {} on collection {}",
 							index, clazz.getSimpleName());
@@ -70,7 +71,21 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 		}
 
 		// Give Jongo object to model object
-		this.configure(this.jongo);
+		configure(jongo);
+
+		// Checking for admin account
+		val authors = findModelObjects(Author.class, Queries.AUTHORS_ADMINS);
+		if (!authors.iterator().hasNext()) {
+			// Create new admin account if none exists
+			log.warn(
+					"No admin account has been found! One will be created as '{}' with password '{}'",
+					Constants.DEFAULT_ADMIN_USERNAME,
+					Constants.DEFAULT_ADMIN_PASSWORD);
+			val author = new Author(true, Constants.DEFAULT_ADMIN_USERNAME,
+					BCrypt.hashpw(Constants.DEFAULT_ADMIN_PASSWORD,
+							BCrypt.gensalt()));
+			saveModelObject(author);
+		}
 
 		log.info("Started.");
 	}
@@ -85,7 +100,7 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 	public void stop() throws Exception {
 		log.info("Stopping service...");
 
-		this.mongoClient.close();
+		mongoClient.close();
 
 		log.info("Stopped.");
 	}

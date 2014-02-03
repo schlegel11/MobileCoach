@@ -10,4 +10,7 @@ public class Queries {
 	public static final String	ALL						= "{}";
 
 	public static final String	SCREENING_SURVEYS_OPEN	= "{'active':true}";
+
+	public static final String	AUTHOR_BY_USERNAME		= "{'username':#}";
+	public static final String	AUTHORS_ADMINS			= "{'admin':true}";
 }

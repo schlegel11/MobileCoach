@@ -1,10 +1,14 @@
 package org.isgf.mhc.services;
 
+import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.isgf.mhc.model.Queries;
+import org.isgf.mhc.model.server.Author;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.ModelObjectExchangeService;
+import org.isgf.mhc.tools.BCrypt;
 
 /**
  * @author Andreas Filler
@@ -54,6 +58,22 @@ public class InterventionAdministrationManagerService {
 	/*
 	 * Class methods
 	 */
+	public Author authorAuthenticateAndReturn(final String username,
+			final String password) {
+		val author = databaseManagerService.findOneModelObject(Author.class,
+				Queries.AUTHOR_BY_USERNAME, username);
+
+		if (author == null) {
+			log.debug("Username '{}' not found.", username);
+			return null;
+		}
+
+		if (BCrypt.checkpw(password, author.getPasswordHash())) {
+			return author;
+		} else {
+			return null;
+		}
+	}
 
 	/*
 	 * Getter methods

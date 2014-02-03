@@ -4,6 +4,7 @@ import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.conf.Messages;
@@ -15,9 +16,12 @@ import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 
 /**
+ * Navigates between views and cares for session management (login/logout)
+ * 
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
@@ -45,8 +49,9 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener {
 	protected void init(final VaadinRequest request) {
 		// Set basic settings
 		setLocale(Constants.ADMIN_LOCALE);
-		getPage().setTitle(
-				Messages.getAdminString(AdminMessageStrings.APPLICATION_NAME));
+		getPage()
+				.setTitle(
+						Messages.getAdminString(AdminMessageStrings.APPLICATION__NAME_LONG));
 
 		// Configure the error handler for the UI
 		setErrorHandler(new DefaultErrorHandler() {
@@ -71,7 +76,7 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener {
 		getNavigator().addView(VIEWS.MAIN.getLowerCase(), MainView.class);
 
 		// Create session if none exists
-		UISession uiSession = getSession().getAttribute(UISession.class);
+		UISession uiSession = getUISession();
 		if (uiSession == null) {
 			uiSession = new UISession();
 			getSession().setAttribute(UISession.class, uiSession);
@@ -83,6 +88,46 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener {
 
 	protected void clearSession() {
 		getSession().setAttribute(UISession.class, new UISession());
+	}
+
+	public void showInformationNotification(final AdminMessageStrings message) {
+		Notification.show(Messages.getAdminString(message),
+				Notification.Type.HUMANIZED_MESSAGE);
+	}
+
+	public void showWarningNotification(final AdminMessageStrings message) {
+		Notification.show(Messages.getAdminString(message),
+				Notification.Type.WARNING_MESSAGE);
+	}
+
+	public void showErrorNotification(final AdminMessageStrings message) {
+		Notification.show(Messages.getAdminString(message),
+				Notification.Type.ERROR_MESSAGE);
+	}
+
+	/**
+	 * Login currentAuthorId if provided login information is correct
+	 * 
+	 * @param currentAuthorUsername
+	 * @param password
+	 */
+	public void login(final String username, final String password) {
+		val author = MHC.getInstance()
+				.getInterventionAdministrationManagerService()
+				.authorAuthenticateAndReturn(username, password);
+
+		if (author == null) {
+			showErrorNotification(AdminMessageStrings.NOTIFICATION__WRONG_LOGIN);
+		} else {
+			final UISession uiSession = getUISession();
+			uiSession.setLoggedIn(true);
+			uiSession.setAdmin(author.isAdmin());
+			uiSession.setCurrentAuthorId(author.getId());
+			uiSession.setCurrentAuthorUsername(author.getUsername());
+
+			getUI().getNavigator().navigateTo(
+					AdminNavigatorUI.VIEWS.MAIN.getLowerCase());
+		}
 	}
 
 	/**
@@ -97,8 +142,7 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener {
 
 	@Override
 	public boolean beforeViewChange(final ViewChangeEvent event) {
-		val session = AdminNavigatorUI.this.getSession().getAttribute(
-				UISession.class);
+		val session = getUISession();
 
 		// Check if a user has logged in
 		final boolean isLoginView = event.getNewView() instanceof LoginView;
@@ -122,5 +166,14 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener {
 	@Override
 	public void afterViewChange(final ViewChangeEvent event) {
 		// do nothing
+	}
+
+	/**
+	 * Returns the {@link UISession} of the current currentAuthorId
+	 * 
+	 * @return
+	 */
+	private UISession getUISession() {
+		return getSession().getAttribute(UISession.class);
 	}
 }

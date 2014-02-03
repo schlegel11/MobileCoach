@@ -25,7 +25,11 @@ public class Constants {
 	/**
 	 * Admin configuration
 	 */
+	public static final String	DEFAULT_ADMIN_USERNAME					= "admin";
+	public static final String	DEFAULT_ADMIN_PASSWORD					= "admin";
+
 	public static final Locale	ADMIN_LOCALE							= Locale.ENGLISH;
+
 	public static final String	STORAGE_FOLDER							= "/mhc_data/FileStorage";
 	public static final String	TEMPLATES_FOLDER						= "/mhc_data/templates";
 

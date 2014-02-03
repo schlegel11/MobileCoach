@@ -46,11 +46,12 @@ public class Messages {
 		log.info("Checking for missing localization strings in the selected language...");
 		for (final val field : AdminMessageStrings.values()) {
 			try {
-				ADMIN_RESOURCE_BUNDLE.getString(field.toString());
+				ADMIN_RESOURCE_BUNDLE.getString(field.toString().toLowerCase()
+						.replace("__", "."));
 
 			} catch (final Exception e) {
-				log.error("Admin message string {} is missing!",
-						field.toString());
+				log.error("Admin message string {} is missing!", field
+						.toString().toLowerCase().replace("__", "."));
 			}
 		}
 		log.info("Check done.");
@@ -65,9 +66,29 @@ public class Messages {
 	public static String getAdminString(final AdminMessageStrings key) {
 		try {
 			return ADMIN_RESOURCE_BUNDLE.getString(key.toString().toLowerCase()
-					.replace("_", "."));
+					.replace("__", "."));
 		} catch (final MissingResourceException e) {
-			return '!' + key.toString() + '!';
+			return "! " + key.toString().toLowerCase().replace("__", ".")
+					+ " !";
+		}
+	}
+
+	/**
+	 * Return {@link String} in currently set admin locale, filled with given
+	 * placeholders
+	 * 
+	 * @param key
+	 * @return
+	 */
+	public static String getAdminString(final AdminMessageStrings key,
+			final Object... values) {
+		try {
+			return String.format(
+					ADMIN_RESOURCE_BUNDLE.getString(key.toString()
+							.toLowerCase().replace("__", ".")), values);
+		} catch (final MissingResourceException e) {
+			return "! " + key.toString().toLowerCase().replace("__", ".")
+					+ " !";
 		}
 	}
 }

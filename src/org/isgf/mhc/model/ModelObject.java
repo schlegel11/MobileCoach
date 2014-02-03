@@ -90,8 +90,8 @@ public abstract class ModelObject {
 	@JsonIgnore
 	@Override
 	public String toString() {
-		return "[{" + this.getClass().getSimpleName() + "} id: " + this.id
-				+ ", content: " + this.toJSONString() + "]";
+		return "[{" + this.getClass().getSimpleName() + "} id: " + id
+				+ ", content: " + toJSONString() + "]";
 	}
 
 	/**
@@ -115,7 +115,7 @@ public abstract class ModelObject {
 		collection.save(this);
 
 		log.debug("Saved {} with id {}: {}", this.getClass().getSimpleName(),
-				this.id, this);
+				id, this);
 	}
 
 	/**
@@ -228,8 +228,7 @@ public abstract class ModelObject {
 	 * @param parameters
 	 *            The parameters to fill the query
 	 * @return The retrieved {@link ModelObject} subclass objects as
-	 *         {@link Iterable} or <code>null</code> if not
-	 *         found
+	 *         {@link Iterable} (which contains no items if none has been found)
 	 */
 	@JsonIgnore
 	protected static final <ModelObjectSubclass extends ModelObject> Iterable<ModelObjectSubclass> find(

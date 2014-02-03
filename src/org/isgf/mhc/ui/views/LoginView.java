@@ -2,6 +2,7 @@ package org.isgf.mhc.ui.views;
 
 import lombok.extern.log4j.Log4j2;
 
+import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.ui.AdminNavigatorUI;
 import org.isgf.mhc.ui.views.components.LoginViewComponent;
 
@@ -10,6 +11,11 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
+/**
+ * Provides login view and navigation in login view
+ * 
+ * @author Andreas Filler
+ */
 @SuppressWarnings("serial")
 @Log4j2
 public class LoginView extends AbstractView implements View {
@@ -33,11 +39,20 @@ public class LoginView extends AbstractView implements View {
 	private class LoginButtonListener implements ClickListener {
 		@Override
 		public void buttonClick(final ClickEvent event) {
-			getUISession().setLoggedIn(true);
+			if (!loginViewComponent.getUsernameField().isValid()) {
+				getAdminUI().showWarningNotification(
+						AdminMessageStrings.NOTIFICATION__NO_VALID_USERNAME);
+				return;
+			}
+			if (!loginViewComponent.getPasswordField().isValid()) {
+				getAdminUI().showWarningNotification(
+						AdminMessageStrings.NOTIFICATION__NO_VALID_PASSWORD);
+				return;
+			}
 
-			getUI().getNavigator().navigateTo(
-					AdminNavigatorUI.VIEWS.MAIN.getLowerCase());
+			getAdminUI().login(
+					loginViewComponent.getUsernameField().getValue(),
+					loginViewComponent.getPasswordField().getValue());
 		}
-
 	}
 }

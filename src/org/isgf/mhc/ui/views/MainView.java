@@ -6,6 +6,8 @@ import java.util.List;
 import lombok.Synchronized;
 import lombok.extern.log4j.Log4j2;
 
+import org.isgf.mhc.conf.AdminMessageStrings;
+import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.ui.AdminNavigatorUI;
 import org.isgf.mhc.ui.views.components.MainViewComponent;
 import org.isgf.mhc.ui.views.components.MenuButtonComponent;
@@ -18,16 +20,18 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.TabSheet.Tab;
 
+/**
+ * Provides main view and navigation in main view
+ * 
+ * @author Andreas Filler
+ */
 @SuppressWarnings("serial")
 @Log4j2
 public class MainView extends AbstractView implements View, LayoutClickListener {
 	private MainViewComponent				mainViewComponent;
 
 	private final List<MenuButtonComponent>	menuButtons	= new ArrayList<MenuButtonComponent>();
-	private final List<Tab>					activeTabs	= new ArrayList<TabSheet.Tab>();
 
 	private MenuButtonComponent				currentMenuButton;
 
@@ -44,17 +48,24 @@ public class MainView extends AbstractView implements View, LayoutClickListener 
 				new LogoutButtonListener());
 		mainViewComponent.getMenuButtonsLayout().addLayoutClickListener(this);
 
+		// Adjust view of non-admins
+		if (!getUISession().isAdmin()) {
+			mainViewComponent.getAccountButton().setVisible(false);
+		}
+
 		// Collect menu buttons
 		menuButtons.add(mainViewComponent.getWelcomeButton());
 		menuButtons.add(mainViewComponent.getInterventionsButton());
-		menuButtons.add(mainViewComponent.getUsersButton());
+		menuButtons.add(mainViewComponent.getAccessControlButton());
+		menuButtons.add(mainViewComponent.getAccountButton());
 		currentMenuButton = mainViewComponent.getWelcomeButton();
 		currentMenuButton.addStyleName("active");
 
-		// switchToWelcomeView();
-
 		// Add view
 		this.addComponent(mainViewComponent);
+
+		// Switch to welcome view
+		switchToWelcomeView();
 	}
 
 	private class LogoutButtonListener implements ClickListener {
@@ -91,12 +102,21 @@ public class MainView extends AbstractView implements View, LayoutClickListener 
 					}
 					break componentLoop;
 				case 2:
-					log.debug("USERS button clicked");
+					log.debug("ACCESS CONTROL button clicked");
 					if (clickedComponent != currentMenuButton) {
 						currentMenuButton.removeStyleName("active");
 						currentMenuButton = (MenuButtonComponent) clickedComponent;
 						currentMenuButton.addStyleName("active");
-						switchToUsersView();
+						switchToAccessControlView();
+					}
+					break componentLoop;
+				case 3:
+					log.debug("ACCOUNT button clicked");
+					if (clickedComponent != currentMenuButton) {
+						currentMenuButton.removeStyleName("active");
+						currentMenuButton = (MenuButtonComponent) clickedComponent;
+						currentMenuButton.addStyleName("active");
+						switchToAccountView();
 					}
 					break componentLoop;
 			}
@@ -106,10 +126,7 @@ public class MainView extends AbstractView implements View, LayoutClickListener 
 
 	@Synchronized
 	private void removeAllTabs() {
-		for (final Tab activeTab : activeTabs) {
-			mainViewComponent.getContentAccordion().removeTab(activeTab);
-		}
-		activeTabs.clear();
+		mainViewComponent.getContentAccordion().removeAllComponents();
 	}
 
 	/*
@@ -118,21 +135,36 @@ public class MainView extends AbstractView implements View, LayoutClickListener 
 	@Synchronized
 	private void switchToWelcomeView() {
 		removeAllTabs();
-		activeTabs.add(mainViewComponent.getContentAccordion().addTab(
-				new WelcomeTabComponent(), "Welcome!"));
+		mainViewComponent
+				.getContentAccordion()
+				.addTab(new WelcomeTabComponent(),
+						Messages.getAdminString(AdminMessageStrings.MAIN_VIEW__WELCOME_TAB));
 	}
 
 	@Synchronized
 	private void switchToInterventionsView() {
 		removeAllTabs();
-		activeTabs.add(mainViewComponent.getContentAccordion().addTab(
-				new WelcomeTabComponent(), "Interventions"));
+		mainViewComponent
+				.getContentAccordion()
+				.addTab(new WelcomeTabComponent(),
+						Messages.getAdminString(AdminMessageStrings.MAIN_VIEW__INTERVENTIONS_TAB));
 	}
 
 	@Synchronized
-	private void switchToUsersView() {
+	private void switchToAccessControlView() {
 		removeAllTabs();
-		activeTabs.add(mainViewComponent.getContentAccordion().addTab(
-				new WelcomeTabComponent(), "Users"));
+		mainViewComponent
+				.getContentAccordion()
+				.addTab(new WelcomeTabComponent(),
+						Messages.getAdminString(AdminMessageStrings.MAIN_VIEW__ACCESS_CONTROL_TAB));
+	}
+
+	@Synchronized
+	private void switchToAccountView() {
+		removeAllTabs();
+		mainViewComponent
+				.getContentAccordion()
+				.addTab(new WelcomeTabComponent(),
+						Messages.getAdminString(AdminMessageStrings.MAIN_VIEW__ACCOUNT_TAB));
 	}
 }
