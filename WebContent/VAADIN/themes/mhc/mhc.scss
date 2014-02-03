@@ -13,8 +13,10 @@
     @include reindeer;
     /* Insert your theme rules here */
     /* Basics */
-    $active-color: #ebebeb;
-    $tab-color: $active-color;
+    $selection-active-color: #ebebeb;
+    $link-active-color: #4e4e4e;
+    $link-color: #2a2a2a;
+    $tab-color: $selection-active-color;
     .bold {
         font-weight: bold;
     }
@@ -93,10 +95,43 @@
     .v-button:active,
     .v-button.v-pressed {
         background-image: none;
-        background-color: $active-color;
+        background-color: $selection-active-color;
         @extend .styled-border-active;
     }
+    .v-button-link,
+    .v-button-link:focus,
+    .v-button-link:active,
+    .v-button-link.v-pressed {
+        border: 0px;
+    }
+    .v-link a:hover {
+        color: $link-active-color;
+    }
+    .v-button-link span.v-button-caption,
+    .v-link a span,
+    .v-link a span:visited {
+        text-decoration: none;
+        color: $link-color;
+    }
+    .v-button-link span.v-button-caption:hover,
+    .v-link a:hover span {
+        text-decoration: underline;
+        color: $link-active-color;
+    }
     /* Own styles */
+    /* about-window */
+    .about-window .about-text {
+        padding-left: 15px;
+        padding-right: 15px;
+        a {
+            color: $link-color;
+        }
+        a:hover,
+        a:active,
+        a:visited {
+            color: $link-active-color;
+        }
+    }
     /* login-view */
     .login-view {
         background: #c9c9c9;
@@ -166,20 +201,20 @@
         }
         .menu-button:active {
             @extend .styled-border-active;
-            background-color: $active-color;
+            background-color: $selection-active-color;
         }
         .active {
             .menu-button {
                 @extend .styled-border-active;
-                background-color: $active-color;
+                background-color: $selection-active-color;
             }
             .menu-button:focus {
                 @extend .styled-border-active;
-                background-color: $active-color;
+                background-color: $selection-active-color;
             }
             .menu-button:active {
                 @extend .styled-border-active;
-                background-color: $active-color;
+                background-color: $selection-active-color;
             }
         }
     }
