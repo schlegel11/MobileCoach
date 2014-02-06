@@ -69,8 +69,10 @@ public class InterventionAdministrationManagerService {
 		}
 
 		if (BCrypt.checkpw(password, author.getPasswordHash())) {
+			log.debug("Author with fitting password found");
 			return author;
 		} else {
+			log.debug("Wrong password provided");
 			return null;
 		}
 	}

@@ -82,7 +82,7 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 					Constants.getDefaultAdminUsername(),
 					Constants.getDefaultAdminPassword());
 			val author = new Author(true, Constants.getDefaultAdminUsername(),
-					BCrypt.hashpw(Constants.getDatabasePassword(),
+					BCrypt.hashpw(Constants.getDefaultAdminPassword(),
 							BCrypt.gensalt()));
 			saveModelObject(author);
 		}
