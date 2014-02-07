@@ -1,8 +1,10 @@
 package org.isgf.mhc.conf;
 
 public enum AdminMessageStrings {
-	// General
+	// Application
 	APPLICATION__NAME, APPLICATION__NAME_SHORT, APPLICATION__NAME_LONG,
+	// General
+	GENERAL__OK, GENERAL__CANCEL,
 	// Welcome tab
 	WELCOME_TAB__WELCOME_MESSAGE,
 	// Login view
@@ -13,6 +15,8 @@ public enum AdminMessageStrings {
 	MAIN_VIEW__WELCOME_TAB, MAIN_VIEW__INTERVENTIONS_TAB, MAIN_VIEW__ACCESS_CONTROL_TAB, MAIN_VIEW__ACCOUNT_TAB,
 	// About window
 	ABOUT_WINDOW__TITLE, ABOUT_WINDOW__HTML_TEXT,
+	// Placeholder string editor
+	PLACEHOLDER_STRING_EDITOR__SELECT_VARIABLE,
 	// Notifications
 	NOTIFICATION__WRONG_LOGIN, NOTIFICATION__NO_VALID_USERNAME, NOTIFICATION__NO_VALID_PASSWORD,
 	// System notifications

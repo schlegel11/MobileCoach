@@ -6,7 +6,7 @@ import lombok.extern.log4j.Log4j2;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.ui.AdminNavigatorUI;
-import org.isgf.mhc.ui.views.components.AboutWindowComponent;
+import org.isgf.mhc.ui.views.components.AboutTextComponent;
 import org.isgf.mhc.ui.views.components.LoginViewComponent;
 
 import com.vaadin.navigator.View;
@@ -70,7 +70,7 @@ public class LoginView extends AbstractView implements View {
 			aboutWindow.setModal(true);
 			aboutWindow.setWidth("600px");
 			aboutWindow.setHeight("400px");
-			aboutWindow.setContent(new AboutWindowComponent());
+			aboutWindow.setContent(new AboutTextComponent());
 
 			getAdminUI().addWindow(aboutWindow);
 
