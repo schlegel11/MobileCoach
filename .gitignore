@@ -3,3 +3,4 @@ javadoc
 WebContent/VAADIN/widgetsets/org.isgf.mhc.ui.widgetset.MhcWidgetset
 src/org/isgf/mhc/ui/widgetset
 out
+WebContent/VAADIN/themes/mhc/styles.css
