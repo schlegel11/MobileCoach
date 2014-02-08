@@ -75,7 +75,6 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener {
 
 		// Create and register the views
 		getNavigator().addView(VIEWS.LOGIN.getLowerCase(), LoginView.class);
-		getNavigator().addView("error", ErrorView.class);
 		getNavigator().addView(VIEWS.MAIN.getLowerCase(), MainView.class);
 		getNavigator().setErrorView(ErrorView.class);
 
@@ -125,11 +124,8 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener {
 			uiSession.setCurrentAuthorId(author.getId());
 			uiSession.setCurrentAuthorUsername(author.getUsername());
 
-			getUI().getNavigator().navigateTo("error");
-			// TODO AAA
-			//
-			// getUI().getNavigator().navigateTo(
-			// AdminNavigatorUI.VIEWS.MAIN.getLowerCase());
+			getUI().getNavigator().navigateTo(
+					AdminNavigatorUI.VIEWS.MAIN.getLowerCase());
 		}
 	}
 

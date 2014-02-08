@@ -62,8 +62,8 @@ public class MenuButtonComponent extends AbstractCustomComponent {
 		// buttonIcon
 		buttonIcon = new Embedded();
 		buttonIcon.setImmediate(false);
-		buttonIcon.setWidth("-1px");
-		buttonIcon.setHeight("-1px");
+		buttonIcon.setWidth("32px");
+		buttonIcon.setHeight("32px");
 		buttonIcon.setSource(new ThemeResource("img/loading-icon.png"));
 		buttonIcon.setType(1);
 		buttonIcon.setMimeType("image/png");
