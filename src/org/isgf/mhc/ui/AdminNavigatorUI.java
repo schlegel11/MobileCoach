@@ -16,6 +16,8 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.DefaultErrorHandler;
+import com.vaadin.server.Page.BrowserWindowResizeEvent;
+import com.vaadin.server.Page.BrowserWindowResizeListener;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
@@ -78,6 +80,23 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener {
 		getNavigator().addView(VIEWS.MAIN.getLowerCase(), MainView.class);
 		getNavigator().setErrorView(ErrorView.class);
 
+		// Inform about too small window
+		getPage().addBrowserWindowResizeListener(
+				new BrowserWindowResizeListener() {
+					long	lastNotification	= 0;
+
+					@Override
+					public void browserWindowResized(
+							final BrowserWindowResizeEvent event) {
+						if ((event.getWidth() < 800 || event.getHeight() < 500)
+								&& System.currentTimeMillis()
+										- lastNotification > 10000) {
+							lastNotification = System.currentTimeMillis();
+							showWarningNotification(AdminMessageStrings.GENERAL__RESIZE_ERROR_MESSAGE);
+						}
+					}
+				});
+
 		// Always create new session
 		clearSession();
 
@@ -101,6 +120,24 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener {
 
 	public void showErrorNotification(final AdminMessageStrings message) {
 		Notification.show(Messages.getAdminString(message),
+				Notification.Type.ERROR_MESSAGE);
+	}
+
+	public void showInformationNotification(final AdminMessageStrings message,
+			final Object... values) {
+		Notification.show(Messages.getAdminString(message, values),
+				Notification.Type.HUMANIZED_MESSAGE);
+	}
+
+	public void showWarningNotification(final AdminMessageStrings message,
+			final Object... values) {
+		Notification.show(Messages.getAdminString(message, values),
+				Notification.Type.WARNING_MESSAGE);
+	}
+
+	public void showErrorNotification(final AdminMessageStrings message,
+			final Object... values) {
+		Notification.show(Messages.getAdminString(message, values),
 				Notification.Type.ERROR_MESSAGE);
 	}
 
