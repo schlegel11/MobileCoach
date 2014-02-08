@@ -236,6 +236,11 @@
             }
         }
     }
+    /* accordion */
+    .v-accordion-item-caption .v-icon {
+        margin-top: -10px;
+        margin-right: 10px;
+    }
     /* welcome-tab */
     .welcome-tab .welcome-label {
         @extend .bold;

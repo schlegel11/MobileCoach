@@ -7,7 +7,7 @@ import lombok.Synchronized;
 import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.conf.AdminMessageStrings;
-import org.isgf.mhc.conf.Messages;
+import org.isgf.mhc.conf.ThemeImageStrings;
 import org.isgf.mhc.ui.AdminNavigatorUI;
 import org.isgf.mhc.ui.views.components.access_control.AccessControlTabComponent;
 import org.isgf.mhc.ui.views.components.basics.MenuButtonComponent;
@@ -136,36 +136,40 @@ public class MainView extends AbstractView implements View, LayoutClickListener 
 	@Synchronized
 	private void switchToWelcomeView() {
 		removeAllTabs();
-		mainViewComponent
-				.getContentAccordion()
-				.addTab(new WelcomeTabComponent(),
-						Messages.getAdminString(AdminMessageStrings.MAIN_VIEW__WELCOME_TAB));
+
+		addTab(mainViewComponent.getContentAccordion(),
+				new WelcomeTabComponent(),
+				AdminMessageStrings.MAIN_VIEW__WELCOME_TAB,
+				ThemeImageStrings.WELCOME_ICON);
 	}
 
 	@Synchronized
 	private void switchToInterventionsView() {
 		removeAllTabs();
-		mainViewComponent
-				.getContentAccordion()
-				.addTab(new WelcomeTabComponent(),
-						Messages.getAdminString(AdminMessageStrings.MAIN_VIEW__INTERVENTIONS_TAB));
+
+		addTab(mainViewComponent.getContentAccordion(),
+				new WelcomeTabComponent(),
+				AdminMessageStrings.MAIN_VIEW__INTERVENTIONS_TAB,
+				ThemeImageStrings.INTERVENTIONS_ICON);
 	}
 
 	@Synchronized
 	private void switchToAccessControlView() {
 		removeAllTabs();
-		mainViewComponent
-				.getContentAccordion()
-				.addTab(new AccessControlTabComponent(),
-						Messages.getAdminString(AdminMessageStrings.MAIN_VIEW__ACCESS_CONTROL_TAB));
+
+		addTab(mainViewComponent.getContentAccordion(),
+				new AccessControlTabComponent(),
+				AdminMessageStrings.MAIN_VIEW__ACCESS_CONTROL_TAB,
+				ThemeImageStrings.ACCESS_CONTROL_ICON);
 	}
 
 	@Synchronized
 	private void switchToAccountView() {
 		removeAllTabs();
-		mainViewComponent
-				.getContentAccordion()
-				.addTab(new WelcomeTabComponent(),
-						Messages.getAdminString(AdminMessageStrings.MAIN_VIEW__ACCOUNT_TAB));
+
+		addTab(mainViewComponent.getContentAccordion(),
+				new WelcomeTabComponent(),
+				AdminMessageStrings.MAIN_VIEW__ACCOUNT_TAB,
+				ThemeImageStrings.ACCOUNT_ICON);
 	}
 }
