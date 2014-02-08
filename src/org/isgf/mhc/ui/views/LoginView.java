@@ -6,8 +6,8 @@ import lombok.extern.log4j.Log4j2;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.ui.AdminNavigatorUI;
-import org.isgf.mhc.ui.views.components.AboutTextComponent;
-import org.isgf.mhc.ui.views.components.LoginViewComponent;
+import org.isgf.mhc.ui.views.components.basics.AboutTextComponent;
+import org.isgf.mhc.ui.views.components.views.LoginViewComponent;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
