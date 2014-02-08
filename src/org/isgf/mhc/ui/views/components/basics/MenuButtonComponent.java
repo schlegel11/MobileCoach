@@ -1,4 +1,6 @@
-package org.isgf.mhc.ui.views.components;
+package org.isgf.mhc.ui.views.components.basics;
+
+import org.isgf.mhc.ui.views.components.AbstractCustomComponent;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

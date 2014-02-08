@@ -9,10 +9,10 @@ import lombok.extern.log4j.Log4j2;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.ui.AdminNavigatorUI;
-import org.isgf.mhc.ui.views.components.AccessControlTabComponent;
-import org.isgf.mhc.ui.views.components.MainViewComponent;
-import org.isgf.mhc.ui.views.components.MenuButtonComponent;
-import org.isgf.mhc.ui.views.components.WelcomeTabComponent;
+import org.isgf.mhc.ui.views.components.access_control.AccessControlTabComponent;
+import org.isgf.mhc.ui.views.components.basics.MenuButtonComponent;
+import org.isgf.mhc.ui.views.components.views.MainViewComponent;
+import org.isgf.mhc.ui.views.components.welcome.WelcomeTabComponent;
 
 import com.vaadin.event.LayoutEvents.LayoutClickEvent;
 import com.vaadin.event.LayoutEvents.LayoutClickListener;
