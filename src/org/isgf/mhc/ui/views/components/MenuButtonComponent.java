@@ -76,7 +76,7 @@ public class MenuButtonComponent extends AbstractCustomComponent {
 		buttonLabel.setImmediate(false);
 		buttonLabel.setWidth("100.0%");
 		buttonLabel.setHeight("100.0%");
-		buttonLabel.setValue("TITLE");
+		buttonLabel.setValue("!!! Button Title");
 		mainLayout.addComponent(buttonLabel, 0, 1);
 		mainLayout.setComponentAlignment(buttonLabel, new Alignment(48));
 

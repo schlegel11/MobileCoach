@@ -58,34 +58,24 @@ public class Messages {
 	}
 
 	/**
-	 * Return {@link String} in currently set admin locale
-	 * 
-	 * @param key
-	 * @return
-	 */
-	public static String getAdminString(final AdminMessageStrings key) {
-		try {
-			return ADMIN_RESOURCE_BUNDLE.getString(key.toString().toLowerCase()
-					.replace("__", "."));
-		} catch (final MissingResourceException e) {
-			return "! " + key.toString().toLowerCase().replace("__", ".")
-					+ " !";
-		}
-	}
-
-	/**
 	 * Return {@link String} in currently set admin locale, filled with given
-	 * placeholders
+	 * placeholders (if provided)
 	 * 
 	 * @param key
+	 * @param values
 	 * @return
 	 */
 	public static String getAdminString(final AdminMessageStrings key,
 			final Object... values) {
 		try {
-			return String.format(
-					ADMIN_RESOURCE_BUNDLE.getString(key.toString()
-							.toLowerCase().replace("__", ".")), values);
+			if (values == null || values.length == 0) {
+				return ADMIN_RESOURCE_BUNDLE.getString(key.toString()
+						.toLowerCase().replace("__", "."));
+			} else {
+				return String.format(
+						ADMIN_RESOURCE_BUNDLE.getString(key.toString()
+								.toLowerCase().replace("__", ".")), values);
+			}
 		} catch (final MissingResourceException e) {
 			return "! " + key.toString().toLowerCase().replace("__", ".")
 					+ " !";

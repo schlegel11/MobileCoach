@@ -88,9 +88,9 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener {
 					@Override
 					public void browserWindowResized(
 							final BrowserWindowResizeEvent event) {
-						if ((event.getWidth() < 800 || event.getHeight() < 500)
+						if ((event.getWidth() < 1000 || event.getHeight() < 500)
 								&& System.currentTimeMillis()
-										- lastNotification > 10000) {
+										- lastNotification > 5000) {
 							lastNotification = System.currentTimeMillis();
 							showWarningNotification(AdminMessageStrings.GENERAL__RESIZE_ERROR_MESSAGE);
 						}
@@ -106,21 +106,6 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener {
 
 	protected void clearSession() {
 		getSession().setAttribute(UISession.class, new UISession());
-	}
-
-	public void showInformationNotification(final AdminMessageStrings message) {
-		Notification.show(Messages.getAdminString(message),
-				Notification.Type.HUMANIZED_MESSAGE);
-	}
-
-	public void showWarningNotification(final AdminMessageStrings message) {
-		Notification.show(Messages.getAdminString(message),
-				Notification.Type.WARNING_MESSAGE);
-	}
-
-	public void showErrorNotification(final AdminMessageStrings message) {
-		Notification.show(Messages.getAdminString(message),
-				Notification.Type.ERROR_MESSAGE);
 	}
 
 	public void showInformationNotification(final AdminMessageStrings message,
