@@ -8,6 +8,7 @@ import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.conf.Messages;
+import org.isgf.mhc.ui.views.ErrorView;
 import org.isgf.mhc.ui.views.LoginView;
 import org.isgf.mhc.ui.views.MainView;
 
@@ -47,6 +48,7 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener {
 
 	@Override
 	protected void init(final VaadinRequest request) {
+		log.debug("Init admin navigator ui");
 		// Set basic settings
 		setLocale(Constants.getAdminLocale());
 		getPage()
@@ -73,14 +75,12 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener {
 
 		// Create and register the views
 		getNavigator().addView(VIEWS.LOGIN.getLowerCase(), LoginView.class);
+		getNavigator().addView("error", ErrorView.class);
 		getNavigator().addView(VIEWS.MAIN.getLowerCase(), MainView.class);
+		getNavigator().setErrorView(ErrorView.class);
 
-		// Create session if none exists
-		UISession uiSession = getUISession();
-		if (uiSession == null) {
-			uiSession = new UISession();
-			getSession().setAttribute(UISession.class, uiSession);
-		}
+		// Always create new session
+		clearSession();
 
 		// Redirect to appropriate view
 		getNavigator().addViewChangeListener(this);
@@ -125,8 +125,11 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener {
 			uiSession.setCurrentAuthorId(author.getId());
 			uiSession.setCurrentAuthorUsername(author.getUsername());
 
-			getUI().getNavigator().navigateTo(
-					AdminNavigatorUI.VIEWS.MAIN.getLowerCase());
+			getUI().getNavigator().navigateTo("error");
+			// TODO AAA
+			//
+			// getUI().getNavigator().navigateTo(
+			// AdminNavigatorUI.VIEWS.MAIN.getLowerCase());
 		}
 	}
 
@@ -145,16 +148,15 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener {
 		val session = getUISession();
 
 		// Check if a user has logged in
-		final boolean isLoginView = event.getNewView() instanceof LoginView;
+		final boolean newViewIsLoginView = event.getNewView() instanceof LoginView;
 
-		if (!session.isLoggedIn() && !isLoginView) {
+		if (!session.isLoggedIn() && !newViewIsLoginView) {
 			// Redirect to login view always if a user has not yet
 			// logged in
 			AdminNavigatorUI.this.getNavigator().navigateTo(
 					VIEWS.LOGIN.getLowerCase());
 			return false;
-
-		} else if (session.isLoggedIn() && isLoginView) {
+		} else if (session.isLoggedIn() && newViewIsLoginView) {
 			// If someone tries to access to login view while logged in,
 			// then cancel
 			return false;

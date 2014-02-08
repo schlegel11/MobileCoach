@@ -13,10 +13,28 @@
     @include reindeer;
     /* Insert your theme rules here */
     /* Basics */
-    $selection-active-color: #ebebeb;
-    $link-active-color: #4e4e4e;
-    $link-color: #2a2a2a;
-    $tab-color: $selection-active-color;
+    .radial-background {
+        background: #c9c9c9;
+        /* Old browsers */
+        background: -moz-radial-gradient(center, ellipse cover, #c9c9c9 0%, #7d7e7d 100%);
+        /* FF3.6+ */
+        background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%, #c9c9c9), color-stop(100%, #7d7e7d));
+        /* Chrome,Safari4+ */
+        background: -webkit-radial-gradient(center, ellipse cover, #c9c9c9 0%, #7d7e7d 100%);
+        /* Chrome10+,Safari5.1+ */
+        background: -o-radial-gradient(center, ellipse cover, #c9c9c9 0%, #7d7e7d 100%);
+        /* Opera 12+ */
+        background: -ms-radial-gradient(center, ellipse cover, #c9c9c9 0%, #7d7e7d 100%);
+        /* IE10+ */
+        background: radial-gradient(ellipse at center, #c9c9c9 0%, #7d7e7d 100%);
+        /* W3C */
+        filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#c9c9c9', endColorstr='#7d7e7d', GradientType=1);
+        /* IE6-9 fallback on horizontal gradient */
+    }
+    $selection-active-color:#ebebeb;
+    $link-active-color:#4e4e4e;
+    $link-color:#2a2a2a;
+    $tab-color:$selection-active-color;
     .bold {
         font-weight: bold;
     }
@@ -134,22 +152,7 @@
     }
     /* login-view */
     .login-view {
-        background: #c9c9c9;
-        /* Old browsers */
-        background: -moz-radial-gradient(center, ellipse cover, #c9c9c9 0%, #7d7e7d 100%);
-        /* FF3.6+ */
-        background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%, #c9c9c9), color-stop(100%, #7d7e7d));
-        /* Chrome,Safari4+ */
-        background: -webkit-radial-gradient(center, ellipse cover, #c9c9c9 0%, #7d7e7d 100%);
-        /* Chrome10+,Safari5.1+ */
-        background: -o-radial-gradient(center, ellipse cover, #c9c9c9 0%, #7d7e7d 100%);
-        /* Opera 12+ */
-        background: -ms-radial-gradient(center, ellipse cover, #c9c9c9 0%, #7d7e7d 100%);
-        /* IE10+ */
-        background: radial-gradient(ellipse at center, #c9c9c9 0%, #7d7e7d 100%);
-        /* W3C */
-        filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#c9c9c9', endColorstr='#7d7e7d', GradientType=1);
-        /* IE6-9 fallback on horizontal gradient */
+        @extend .radial-background;
     }
     .login-view {
         .v-panel {
@@ -169,6 +172,15 @@
         .title-label {
             @extend .bold;
             @extend .right;
+            @extend .biggest;
+        }
+    }
+    /* error-view */
+    .error-view {
+        @extend .radial-background;
+        .title-label {
+            @extend .bold;
+            @extend .center;
             @extend .biggest;
         }
     }
