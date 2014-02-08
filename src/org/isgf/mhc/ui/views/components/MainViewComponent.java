@@ -134,6 +134,7 @@ public class MainViewComponent extends AbstractCustomComponent {
 	private Panel buildMenuPanel() {
 		// common part: create layout
 		menuPanel = new Panel();
+		menuPanel.setStyleName("menu-panel");
 		menuPanel.setImmediate(false);
 		menuPanel.setWidth("220px");
 		menuPanel.setHeight("100.0%");
