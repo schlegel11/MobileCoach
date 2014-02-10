@@ -34,15 +34,15 @@ public class LoginView extends AbstractView implements View {
 		// Create view and listeners
 		loginViewComponent = new LoginViewComponent();
 		loginViewComponent.getLoginButton().addClickListener(
-				new LoginButtonListener());
+				new LoginButtonClickListener());
 		loginViewComponent.getAboutButton().addClickListener(
-				new AboutButtonListener());
+				new AboutButtonClickListener());
 
 		// Add view
 		this.addComponent(loginViewComponent);
 	}
 
-	private class LoginButtonListener implements ClickListener {
+	private class LoginButtonClickListener implements ClickListener {
 		@Override
 		public void buttonClick(final ClickEvent event) {
 			if (!loginViewComponent.getUsernameField().isValid()) {
@@ -56,13 +56,15 @@ public class LoginView extends AbstractView implements View {
 				return;
 			}
 
-			getAdminUI().login(
-					loginViewComponent.getUsernameField().getValue(),
-					loginViewComponent.getPasswordField().getValue());
+			// TODO DEBUG SETTING
+			getAdminUI().login("admin", "admin");
+			// getAdminUI().login(
+			// loginViewComponent.getUsernameField().getValue(),
+			// loginViewComponent.getPasswordField().getValue());
 		}
 	}
 
-	private class AboutButtonListener implements ClickListener {
+	private class AboutButtonClickListener implements ClickListener {
 		@Override
 		public void buttonClick(final ClickEvent event) {
 			val aboutWindow = new Window(

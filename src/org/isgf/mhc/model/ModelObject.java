@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.tools.CustomObjectMapper;
@@ -92,6 +93,17 @@ public abstract class ModelObject {
 	public String toString() {
 		return "[{" + this.getClass().getSimpleName() + "} id: " + id
 				+ ", content: " + toJSONString() + "]";
+	}
+
+	/**
+	 * Creates a {@link UIModelObject} of the current {@link ModelObject}
+	 * 
+	 * @return
+	 */
+	@JsonIgnore
+	public UIModelObject toUIModelObject() {
+		log.error("A model object should have been transformed to a UI model object, but the conversion is not implemented!");
+		throw new NotImplementedException(this.getClass());
 	}
 
 	/**

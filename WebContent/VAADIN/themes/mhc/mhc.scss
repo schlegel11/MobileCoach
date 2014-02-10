@@ -17,6 +17,7 @@
     min-height: 500px;
     overflow: auto;
     $selection-active-color: #ebebeb;
+    $selection-inactive-color: #ffffff;
     $link-active-color: #4e4e4e;
     $link-color: #2a2a2a;
     $tab-color: $selection-active-color;
@@ -99,16 +100,23 @@
         margin-top: 10px;
     }
     .v-button,
-    .v-button .v-button-wrap {
+    .v-button .v-button-wrap,
+    .v-disabled.v-button,
+    .v-disabled.v-button .v-button-wrap {
         background-image: none;
+        cursor: pointer;
     }
-    .v-button {
+    .v-button,
+    .v-disabled.v-button {
         height: 26px;
         @extend .styled-border;
     }
     .v-button:focus {
         background-image: none;
         @extend .styled-border-active;
+    }
+    .v-disabled.v-button:focus {
+        @extend .styled-border;
     }
     .v-button:focus .v-button-wrap {
         background-image: none;
@@ -118,6 +126,12 @@
         background-image: none;
         background-color: $selection-active-color;
         @extend .styled-border-active;
+    }
+    .v-disabled.v-button:active,
+    .v-disabled.v-button.v-pressed {
+        background-image: none;
+        background-color: $selection-inactive-color;
+        @extend .styled-border;
     }
     .v-button-link,
     .v-button-link:focus,
@@ -210,9 +224,11 @@
         .button-label {
             @extend .center;
             @extend .bigger;
+            cursor: pointer;
         }
         .menu-button {
-            @extend .styled-border
+            @extend .styled-border;
+            cursor: pointer;
         }
         .menu-button:focus {
             @extend .styled-border-active;

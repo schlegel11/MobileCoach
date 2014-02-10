@@ -3,12 +3,15 @@ package org.isgf.mhc.services;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.isgf.mhc.conf.AdminMessageStrings;
+import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.server.Author;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.ModelObjectExchangeService;
 import org.isgf.mhc.tools.BCrypt;
+import org.isgf.mhc.ui.NotificationMessageException;
 
 /**
  * @author Andreas Filler
@@ -77,7 +80,27 @@ public class InterventionAdministrationManagerService {
 		}
 	}
 
+	public void authorSetAdmin(final Author author) {
+		author.setAdmin(true);
+		databaseManagerService.saveModelObject(author);
+	}
+
+	public void authorSetAuthor(final Author author)
+			throws NotificationMessageException {
+		if (author.getUsername().equals(Constants.getDefaultAdminUsername())) {
+			throw new NotificationMessageException(
+					AdminMessageStrings.NOTIFICATION__MAIN_ADMIN_CANT_BE_SET_AS_AUTHOR);
+		}
+
+		author.setAdmin(false);
+		databaseManagerService.saveModelObject(author);
+	}
+
 	/*
 	 * Getter methods
 	 */
+	public Iterable<Author> getAllAuthors() {
+		return databaseManagerService.findModelObjects(Author.class,
+				Queries.ALL);
+	}
 }

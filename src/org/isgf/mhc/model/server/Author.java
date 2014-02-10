@@ -5,8 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.val;
 
+import org.isgf.mhc.conf.AdminMessageStrings;
+import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
+import org.isgf.mhc.model.UIModelObject;
+import org.isgf.mhc.model.ui.UIAuthor;
 
 /**
  * {@link ModelObject} to represent an {@link Author}
@@ -41,4 +46,18 @@ public class Author extends ModelObject {
 	@Setter
 	@NonNull
 	private String	passwordHash;
+
+	@Override
+	public UIModelObject toUIModelObject() {
+		final val author = new UIAuthor(
+				username,
+				admin ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__ADMINISTRATOR)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__AUTHOR));
+
+		author.setRelatedModelObject(this);
+
+		return author;
+	}
 }
