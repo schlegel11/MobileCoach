@@ -1,8 +1,5 @@
 package org.isgf.mhc.ui.views;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import lombok.Synchronized;
 import lombok.extern.log4j.Log4j2;
 
@@ -30,11 +27,9 @@ import com.vaadin.ui.Component;
 @SuppressWarnings("serial")
 @Log4j2
 public class MainView extends AbstractView implements View, LayoutClickListener {
-	private MainViewComponent				mainViewComponent;
+	private MainViewComponent	mainViewComponent;
 
-	private final List<MenuButtonComponent>	menuButtons	= new ArrayList<MenuButtonComponent>();
-
-	private MenuButtonComponent				currentMenuButton;
+	private MenuButtonComponent	currentMenuButton;
 
 	@Override
 	public void enter(final ViewChangeEvent event) {
@@ -51,14 +46,10 @@ public class MainView extends AbstractView implements View, LayoutClickListener 
 
 		// Adjust view of non-admins
 		if (!getUISession().isAdmin()) {
-			mainViewComponent.getAccountButton().setVisible(false);
+			mainViewComponent.getAccessControlButton().setVisible(false);
 		}
 
 		// Collect menu buttons
-		menuButtons.add(mainViewComponent.getWelcomeButton());
-		menuButtons.add(mainViewComponent.getInterventionsButton());
-		menuButtons.add(mainViewComponent.getAccessControlButton());
-		menuButtons.add(mainViewComponent.getAccountButton());
 		currentMenuButton = mainViewComponent.getWelcomeButton();
 		currentMenuButton.addStyleName("active");
 
@@ -83,43 +74,44 @@ public class MainView extends AbstractView implements View, LayoutClickListener 
 
 		// Go through component tree to find out which button has beend clicked
 		componentLoop: while (clickedComponent != null) {
-			switch (menuButtons.indexOf(clickedComponent)) {
-				case 0:
-					log.debug("WELCOME button clicked");
-					if (clickedComponent != currentMenuButton) {
-						currentMenuButton.removeStyleName("active");
-						currentMenuButton = (MenuButtonComponent) clickedComponent;
-						currentMenuButton.addStyleName("active");
-						switchToWelcomeView();
-					}
-					break componentLoop;
-				case 1:
-					log.debug("INTERVENTIONS button clicked");
-					if (clickedComponent != currentMenuButton) {
-						currentMenuButton.removeStyleName("active");
-						currentMenuButton = (MenuButtonComponent) clickedComponent;
-						currentMenuButton.addStyleName("active");
-						switchToInterventionsView();
-					}
-					break componentLoop;
-				case 2:
-					log.debug("ACCESS CONTROL button clicked");
-					if (clickedComponent != currentMenuButton) {
-						currentMenuButton.removeStyleName("active");
-						currentMenuButton = (MenuButtonComponent) clickedComponent;
-						currentMenuButton.addStyleName("active");
-						switchToAccessControlView();
-					}
-					break componentLoop;
-				case 3:
-					log.debug("ACCOUNT button clicked");
-					if (clickedComponent != currentMenuButton) {
-						currentMenuButton.removeStyleName("active");
-						currentMenuButton = (MenuButtonComponent) clickedComponent;
-						currentMenuButton.addStyleName("active");
-						switchToAccountView();
-					}
-					break componentLoop;
+			if (clickedComponent == mainViewComponent.getWelcomeButton()) {
+				log.debug("WELCOME button clicked");
+				if (clickedComponent != currentMenuButton) {
+					currentMenuButton.removeStyleName("active");
+					currentMenuButton = (MenuButtonComponent) clickedComponent;
+					currentMenuButton.addStyleName("active");
+					switchToWelcomeView();
+				}
+				break componentLoop;
+			} else if (clickedComponent == mainViewComponent
+					.getInterventionsButton()) {
+				log.debug("INTERVENTIONS button clicked");
+				if (clickedComponent != currentMenuButton) {
+					currentMenuButton.removeStyleName("active");
+					currentMenuButton = (MenuButtonComponent) clickedComponent;
+					currentMenuButton.addStyleName("active");
+					switchToInterventionsView();
+				}
+				break componentLoop;
+			} else if (clickedComponent == mainViewComponent
+					.getAccessControlButton()) {
+				log.debug("ACCESS CONTROL button clicked");
+				if (clickedComponent != currentMenuButton) {
+					currentMenuButton.removeStyleName("active");
+					currentMenuButton = (MenuButtonComponent) clickedComponent;
+					currentMenuButton.addStyleName("active");
+					switchToAccessControlView();
+				}
+				break componentLoop;
+			} else if (clickedComponent == mainViewComponent.getAccountButton()) {
+				log.debug("ACCOUNT button clicked");
+				if (clickedComponent != currentMenuButton) {
+					currentMenuButton.removeStyleName("active");
+					currentMenuButton = (MenuButtonComponent) clickedComponent;
+					currentMenuButton.addStyleName("active");
+					switchToAccountView();
+				}
+				break componentLoop;
 			}
 			clickedComponent = clickedComponent.getParent();
 		}

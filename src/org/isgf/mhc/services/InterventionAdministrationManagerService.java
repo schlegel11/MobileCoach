@@ -125,6 +125,25 @@ public class InterventionAdministrationManagerService {
 				authorToDelete.getId());
 	}
 
+	public void saveAuthor(final Author newAuthor) {
+		databaseManagerService.saveModelObject(newAuthor);
+	}
+
+	public void authorCheckValidAndUnique(final String newUsername)
+			throws NotificationMessageException {
+		if (newUsername.length() < 3) {
+			throw new NotificationMessageException(
+					AdminMessageStrings.NOTIFICATION__THE_GIVEN_USERNAME_IS_TOO_SHORT);
+		}
+
+		val authors = databaseManagerService.findModelObjects(Author.class,
+				Queries.AUTHOR_BY_USERNAME, newUsername);
+		if (authors.iterator().hasNext()) {
+			throw new NotificationMessageException(
+					AdminMessageStrings.NOTIFICATION__THE_GIVEN_USERNAME_IS_ALREADY_IN_USE);
+		}
+	}
+
 	/*
 	 * Getter methods
 	 */

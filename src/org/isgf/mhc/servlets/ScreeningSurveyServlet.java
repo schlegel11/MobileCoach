@@ -27,6 +27,7 @@ import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.model.server.ScreeningSurvey;
 import org.isgf.mhc.model.server.ScreeningSurveySlide;
+import org.isgf.mhc.services.ScreeningSurveyExecutionManagerService;
 import org.isgf.mhc.services.types.ScreeningSurveySlideTemplateFieldTypes;
 import org.isgf.mhc.services.types.SessionAttributeTypes;
 
@@ -43,7 +44,9 @@ import com.github.mustachejava.MustacheFactory;
 @WebServlet(displayName = "Screening Survey", value = "/*", asyncSupported = true, loadOnStartup = 1)
 @Log4j2
 public class ScreeningSurveyServlet extends HttpServlet {
-	private MustacheFactory	mustacheFactory;
+	private MustacheFactory							mustacheFactory;
+
+	private ScreeningSurveyExecutionManagerService	screeningSurveyExecutionManagerService;
 
 	/**
 	 * @see Servlet#init(ServletConfig)
@@ -56,6 +59,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 					this.getClass());
 			throw new ServletException("Context is not ready!");
 		}
+		screeningSurveyExecutionManagerService = MHC.getInstance()
+				.getScreeningSurveyExecutionManagerService();
 
 		log.info("Initializing servlet...");
 
@@ -143,8 +148,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		log.debug("Handling file request '{}' for screening survey {}",
 				fileRequest, screeningSurveyId);
 
-		final ScreeningSurvey screeningSurvey = MHC.getInstance()
-				.getScreeningSurveyExecutionManagerService()
+		final ScreeningSurvey screeningSurvey = screeningSurveyExecutionManagerService
 				.getScreeningSurveyById(screeningSurveyId);
 
 		if (screeningSurvey == null) {
@@ -152,8 +156,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			return;
 		}
 
-		final File basicTemplateFolder = new File(MHC.getInstance()
-				.getScreeningSurveyExecutionManagerService().getTemplatePath(),
+		final File basicTemplateFolder = new File(
+				screeningSurveyExecutionManagerService.getTemplatePath(),
 				screeningSurvey.getTemplatePath());
 		final File requestedFile = new File(basicTemplateFolder, fileRequest);
 
@@ -227,8 +231,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 
 		if (Constants.isListOpenScreenSurveysOnBaseURL()) {
 			// Get all active screening surveys
-			val activeScreeningSurveys = MHC.getInstance()
-					.getScreeningSurveyExecutionManagerService()
+			val activeScreeningSurveys = screeningSurveyExecutionManagerService
 					.getActiveScreeningSurveys();
 
 			if (activeScreeningSurveys != null) {
@@ -312,9 +315,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		// Decide which slide should be send to the participant
 		HashMap<String, Object> templateVariables;
 		try {
-			templateVariables = MHC
-					.getInstance()
-					.getScreeningSurveyExecutionManagerService()
+			templateVariables = screeningSurveyExecutionManagerService
 					.getAppropriateSlide(participantId, screeningSurveyId,
 							resultValue, session);
 
@@ -393,7 +394,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 	 * @return The newly created Mustache factory
 	 */
 	private MustacheFactory createMustacheFactory() {
-		return new DefaultMustacheFactory(MHC.getInstance()
-				.getScreeningSurveyExecutionManagerService().getTemplatePath());
+		return new DefaultMustacheFactory(
+				screeningSurveyExecutionManagerService.getTemplatePath());
 	}
 }

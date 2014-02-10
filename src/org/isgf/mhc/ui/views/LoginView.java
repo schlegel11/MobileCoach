@@ -56,11 +56,9 @@ public class LoginView extends AbstractView implements View {
 				return;
 			}
 
-			// TODO DEBUG SETTING
-			getAdminUI().login("admin", "admin");
-			// getAdminUI().login(
-			// loginViewComponent.getUsernameField().getValue(),
-			// loginViewComponent.getPasswordField().getValue());
+			getAdminUI().login(
+					loginViewComponent.getUsernameField().getValue(),
+					loginViewComponent.getPasswordField().getValue());
 		}
 	}
 

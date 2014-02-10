@@ -3,15 +3,19 @@ package org.isgf.mhc.ui.views.components.access_control;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
-import org.isgf.mhc.MHC;
+import org.apache.commons.lang.RandomStringUtils;
+import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.server.Author;
 import org.isgf.mhc.model.ui.UIAuthor;
+import org.isgf.mhc.tools.BCrypt;
 import org.isgf.mhc.ui.views.components.basics.PasswordEditComponent;
+import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -26,8 +30,10 @@ import com.vaadin.ui.Button.ClickEvent;
 public class AccessControlTabComponentWithController extends
 		AccessControlTabComponent {
 
-	private UIAuthor			selectedUIAuthor			= null;
-	private BeanItem<UIAuthor>	selectedUIAuthorBeanItem	= null;
+	private UIAuthor								selectedUIAuthor			= null;
+	private BeanItem<UIAuthor>						selectedUIAuthorBeanItem	= null;
+
+	private final BeanContainer<ObjectId, UIAuthor>	beanContainer;
 
 	public AccessControlTabComponentWithController() {
 		super();
@@ -39,11 +45,10 @@ public class AccessControlTabComponentWithController extends
 		accountsTable.setImmediate(true);
 
 		// table content
-		final val beanItemContainer = createBeanContainer(UIAuthor.class, MHC
-				.getInstance().getInterventionAdministrationManagerService()
-				.getAllAuthors());
+		beanContainer = createBeanContainerForModelObjects(UIAuthor.class,
+				getInterventionAdministrationManagerService().getAllAuthors());
 
-		accountsTable.setContainerDataSource(beanItemContainer);
+		accountsTable.setContainerDataSource(beanContainer);
 		accountsTable.setVisibleColumns(UIAuthor.getVisibleColumns());
 		accountsTable.setColumnHeaders(UIAuthor.getColumnHeaders());
 
@@ -107,7 +112,43 @@ public class AccessControlTabComponentWithController extends
 
 	public void createAccount() {
 		log.debug("Create account");
-		// TODO Auto-generated method stub
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_USERNAME_FOR_NEW_USER,
+				null, null, new ShortStringEditComponent(),
+				new ExtendableButtonClickListener() {
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						Author newAuthor;
+						try {
+							val newUsername = getStringValue();
+
+							// Validate username
+							getInterventionAdministrationManagerService()
+									.authorCheckValidAndUnique(newUsername);
+
+							// Create account with long random password
+							newAuthor = new Author(false, newUsername, BCrypt
+									.hashpw(RandomStringUtils
+											.randomAlphanumeric(128), BCrypt
+											.gensalt()));
+							getInterventionAdministrationManagerService()
+									.saveAuthor(newAuthor);
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						// Adapt UI
+						beanContainer.addItem(newAuthor.getId(), UIAuthor.class
+								.cast(newAuthor.toUIModelObject()));
+						getAccessControlEditComponent().getAccountsTable()
+								.select(newAuthor.getId());
+						getAdminUI()
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__ACCOUNT_CREATED);
+						closeWindow();
+					}
+				}, null);
 	}
 
 	public void deleteAccount() {
@@ -115,19 +156,20 @@ public class AccessControlTabComponentWithController extends
 		try {
 			val selectedAuthor = selectedUIAuthor
 					.getRelatedModelObject(Author.class);
-			MHC.getInstance()
-					.getInterventionAdministrationManagerService()
-					.deleteAuthor(getUISession().getCurrentAuthorId(),
-							selectedAuthor);
+
+			// Delete account
+			getInterventionAdministrationManagerService().deleteAuthor(
+					getUISession().getCurrentAuthorId(), selectedAuthor);
 		} catch (final Exception e) {
 			handleException(e);
 			return;
 		}
 
 		// Adapt UI
-		getStringItemProperty(selectedUIAuthorBeanItem, UIAuthor.TYPE)
-				.setValue(
-						Messages.getAdminString(AdminMessageStrings.UI_MODEL__AUTHOR));
+		getAccessControlEditComponent().getAccountsTable().removeItem(
+				selectedUIAuthor.getRelatedModelObject(Author.class).getId());
+		getAdminUI().showInformationNotification(
+				AdminMessageStrings.NOTIFICATION__ACCOUNT_DELETED);
 	}
 
 	public void setAccountPassword() {
@@ -141,8 +183,9 @@ public class AccessControlTabComponentWithController extends
 						try {
 							val selectedAuthor = selectedUIAuthor
 									.getRelatedModelObject(Author.class);
-							MHC.getInstance()
-									.getInterventionAdministrationManagerService()
+
+							// Change password
+							getInterventionAdministrationManagerService()
 									.authorChangePassword(selectedAuthor,
 											getStringValue());
 						} catch (final Exception e) {
@@ -163,8 +206,8 @@ public class AccessControlTabComponentWithController extends
 		try {
 			val selectedAuthor = selectedUIAuthor
 					.getRelatedModelObject(Author.class);
-			MHC.getInstance().getInterventionAdministrationManagerService()
-					.authorSetAuthor(selectedAuthor);
+			getInterventionAdministrationManagerService().authorSetAuthor(
+					selectedAuthor);
 		} catch (final Exception e) {
 			handleException(e);
 			return;
@@ -174,6 +217,8 @@ public class AccessControlTabComponentWithController extends
 		getStringItemProperty(selectedUIAuthorBeanItem, UIAuthor.TYPE)
 				.setValue(
 						Messages.getAdminString(AdminMessageStrings.UI_MODEL__AUTHOR));
+		getAdminUI().showInformationNotification(
+				AdminMessageStrings.NOTIFICATION__ACCOUNT_CHANGED_TO_AUTHOR);
 	}
 
 	public void makeAccountAdmin() {
@@ -181,8 +226,10 @@ public class AccessControlTabComponentWithController extends
 		try {
 			val selectedAuthor = selectedUIAuthor
 					.getRelatedModelObject(Author.class);
-			MHC.getInstance().getInterventionAdministrationManagerService()
-					.authorSetAdmin(selectedAuthor);
+
+			// Set admin
+			getInterventionAdministrationManagerService().authorSetAdmin(
+					selectedAuthor);
 		} catch (final Exception e) {
 			handleException(e);
 			return;
@@ -192,5 +239,7 @@ public class AccessControlTabComponentWithController extends
 		getStringItemProperty(selectedUIAuthorBeanItem, UIAuthor.TYPE)
 				.setValue(
 						Messages.getAdminString(AdminMessageStrings.UI_MODEL__ADMINISTRATOR));
+		getAdminUI().showInformationNotification(
+				AdminMessageStrings.NOTIFICATION__ACCOUNT_CHANGED_TO_ADMIN);
 	}
 }

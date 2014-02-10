@@ -7,10 +7,12 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
+import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.UIModelObject;
+import org.isgf.mhc.services.InterventionAdministrationManagerService;
 import org.isgf.mhc.ui.AdminNavigatorUI;
 import org.isgf.mhc.ui.NotificationMessageException;
 import org.isgf.mhc.ui.UISession;
@@ -36,6 +38,10 @@ import com.vaadin.ui.Window;
 @SuppressWarnings("serial")
 @Log4j2
 public abstract class AbstractCustomComponent extends CustomComponent {
+
+	protected InterventionAdministrationManagerService getInterventionAdministrationManagerService() {
+		return MHC.getInstance().getInterventionAdministrationManagerService();
+	}
 
 	protected UISession getUISession() {
 		return UI.getCurrent().getSession().getAttribute(UISession.class);
@@ -160,16 +166,16 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	 * @param iterableModelObjects
 	 * @return
 	 */
-	protected <UIModelObjectSubclass extends UIModelObject> BeanContainer<ObjectId, UIModelObjectSubclass> createBeanContainer(
-			final Class<UIModelObjectSubclass> modelObjectSubclass,
+	protected <UIModelObjectSubclass extends UIModelObject> BeanContainer<ObjectId, UIModelObjectSubclass> createBeanContainerForModelObjects(
+			final Class<UIModelObjectSubclass> uiModelObjectSubclass,
 			final Iterable<? extends ModelObject> iterableModelObjects) {
 
 		final BeanContainer<ObjectId, UIModelObjectSubclass> beanContainer = new BeanContainer<ObjectId, UIModelObjectSubclass>(
-				modelObjectSubclass);
+				uiModelObjectSubclass);
 
 		for (final ModelObject modelObject : iterableModelObjects) {
 			beanContainer.addItem(modelObject.getId(),
-					modelObjectSubclass.cast(modelObject.toUIModelObject()));
+					uiModelObjectSubclass.cast(modelObject.toUIModelObject()));
 		}
 
 		return beanContainer;

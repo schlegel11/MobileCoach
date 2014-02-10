@@ -33,6 +33,7 @@ public abstract class AbstractModelObjectAccessService {
 	 */
 	public void deleteModelObject(final Class<? extends ModelObject> clazz,
 			final ObjectId id) {
+		ModelObject.delete(clazz, id);
 	}
 
 	/**
