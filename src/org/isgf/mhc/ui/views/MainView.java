@@ -12,7 +12,7 @@ import org.isgf.mhc.ui.AdminNavigatorUI;
 import org.isgf.mhc.ui.views.components.access_control.AccessControlTabComponentWithController;
 import org.isgf.mhc.ui.views.components.basics.MenuButtonComponent;
 import org.isgf.mhc.ui.views.components.views.MainViewComponent;
-import org.isgf.mhc.ui.views.components.welcome.WelcomeTabComponent;
+import org.isgf.mhc.ui.views.components.welcome.WelcomeTabComponentWithController;
 
 import com.vaadin.event.LayoutEvents.LayoutClickEvent;
 import com.vaadin.event.LayoutEvents.LayoutClickListener;
@@ -138,7 +138,7 @@ public class MainView extends AbstractView implements View, LayoutClickListener 
 		removeAllTabs();
 
 		addTab(mainViewComponent.getContentAccordion(),
-				new WelcomeTabComponent(),
+				new WelcomeTabComponentWithController(),
 				AdminMessageStrings.MAIN_VIEW__WELCOME_TAB,
 				ThemeImageStrings.WELCOME_ICON);
 	}
@@ -148,7 +148,7 @@ public class MainView extends AbstractView implements View, LayoutClickListener 
 		removeAllTabs();
 
 		addTab(mainViewComponent.getContentAccordion(),
-				new WelcomeTabComponent(),
+				new WelcomeTabComponentWithController(),
 				AdminMessageStrings.MAIN_VIEW__INTERVENTIONS_TAB,
 				ThemeImageStrings.INTERVENTIONS_ICON);
 	}
@@ -168,7 +168,7 @@ public class MainView extends AbstractView implements View, LayoutClickListener 
 		removeAllTabs();
 
 		addTab(mainViewComponent.getContentAccordion(),
-				new WelcomeTabComponent(),
+				new WelcomeTabComponentWithController(),
 				AdminMessageStrings.MAIN_VIEW__ACCOUNT_TAB,
 				ThemeImageStrings.ACCOUNT_ICON);
 	}

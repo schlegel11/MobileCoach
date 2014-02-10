@@ -3,6 +3,7 @@ package org.isgf.mhc.services;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.model.Queries;
@@ -61,6 +62,7 @@ public class InterventionAdministrationManagerService {
 	/*
 	 * Class methods
 	 */
+	// Author
 	public Author authorAuthenticateAndReturn(final String username,
 			final String password) {
 		val author = databaseManagerService.findOneModelObject(Author.class,
@@ -89,11 +91,38 @@ public class InterventionAdministrationManagerService {
 			throws NotificationMessageException {
 		if (author.getUsername().equals(Constants.getDefaultAdminUsername())) {
 			throw new NotificationMessageException(
-					AdminMessageStrings.NOTIFICATION__MAIN_ADMIN_CANT_BE_SET_AS_AUTHOR);
+					AdminMessageStrings.NOTIFICATION__DEFAULT_ADMIN_CANT_BE_SET_AS_AUTHOR);
 		}
 
 		author.setAdmin(false);
 		databaseManagerService.saveModelObject(author);
+	}
+
+	public void authorChangePassword(final Author author,
+			final String newPassword) throws NotificationMessageException {
+		if (newPassword.length() < 5) {
+			throw new NotificationMessageException(
+					AdminMessageStrings.NOTIFICATION__THE_GIVEN_PASSWORD_IS_NOT_SAFE);
+		}
+
+		author.setPasswordHash(BCrypt.hashpw(newPassword, BCrypt.gensalt()));
+		databaseManagerService.saveModelObject(author);
+	}
+
+	public void deleteAuthor(final ObjectId currentAuthorId,
+			final Author authorToDelete) throws NotificationMessageException {
+		if (authorToDelete.getId().equals(currentAuthorId)) {
+			throw new NotificationMessageException(
+					AdminMessageStrings.NOTIFICATION__CANT_DELETE_YOURSELF);
+		}
+		if (authorToDelete.getUsername().equals(
+				Constants.getDefaultAdminUsername())) {
+			throw new NotificationMessageException(
+					AdminMessageStrings.NOTIFICATION__DEFAULT_ADMIN_CANT_BE_DELETED);
+		}
+
+		databaseManagerService.deleteModelObject(Author.class,
+				authorToDelete.getId());
 	}
 
 	/*

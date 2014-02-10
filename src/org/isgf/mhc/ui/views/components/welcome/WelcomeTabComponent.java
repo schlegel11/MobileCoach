@@ -19,7 +19,7 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class WelcomeTabComponent extends AbstractCustomComponent {
+public abstract class WelcomeTabComponent extends AbstractCustomComponent {
 
 	/*- VaadinEditorProperties={"grid":"RegularGrid,20","showGrid":true,"snapToGrid":true,"snapToObject":true,"movingGuides":false,"snappingDistance":10} */
 

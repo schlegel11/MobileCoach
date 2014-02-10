@@ -1,7 +1,5 @@
 package org.isgf.mhc.ui.views.components.access_control;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
@@ -10,6 +8,7 @@ import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.server.Author;
 import org.isgf.mhc.model.ui.UIAuthor;
+import org.isgf.mhc.ui.views.components.basics.PasswordEditComponent;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -24,8 +23,6 @@ import com.vaadin.ui.Button.ClickEvent;
  */
 @SuppressWarnings("serial")
 @Log4j2
-@Data
-@EqualsAndHashCode(callSuper = false)
 public class AccessControlTabComponentWithController extends
 		AccessControlTabComponent {
 
@@ -109,21 +106,60 @@ public class AccessControlTabComponentWithController extends
 	}
 
 	public void createAccount() {
-		log.debug("Create new account");
+		log.debug("Create account");
 		// TODO Auto-generated method stub
 	}
 
 	public void deleteAccount() {
-		// TODO Auto-generated method stub
+		log.debug("Delete account");
+		try {
+			val selectedAuthor = selectedUIAuthor
+					.getRelatedModelObject(Author.class);
+			MHC.getInstance()
+					.getInterventionAdministrationManagerService()
+					.deleteAuthor(getUISession().getCurrentAuthorId(),
+							selectedAuthor);
+		} catch (final Exception e) {
+			handleException(e);
+			return;
+		}
 
+		// Adapt UI
+		getStringItemProperty(selectedUIAuthorBeanItem, UIAuthor.TYPE)
+				.setValue(
+						Messages.getAdminString(AdminMessageStrings.UI_MODEL__AUTHOR));
 	}
 
 	public void setAccountPassword() {
-		// TODO Auto-generated method stub
+		log.debug("Set password");
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__SET_PASSWORD,
+				null, null, new PasswordEditComponent(),
+				new ExtendableButtonClickListener() {
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							val selectedAuthor = selectedUIAuthor
+									.getRelatedModelObject(Author.class);
+							MHC.getInstance()
+									.getInterventionAdministrationManagerService()
+									.authorChangePassword(selectedAuthor,
+											getStringValue());
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
 
+						getAdminUI()
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__PASSWORD_CHANGED);
+						closeWindow();
+					}
+				}, null);
 	}
 
 	public void makeAccountAuthor() {
+		log.debug("Set account author");
 		try {
 			val selectedAuthor = selectedUIAuthor
 					.getRelatedModelObject(Author.class);
@@ -141,15 +177,14 @@ public class AccessControlTabComponentWithController extends
 	}
 
 	public void makeAccountAdmin() {
+		log.debug("Set account admin");
 		try {
 			val selectedAuthor = selectedUIAuthor
 					.getRelatedModelObject(Author.class);
 			MHC.getInstance().getInterventionAdministrationManagerService()
 					.authorSetAdmin(selectedAuthor);
 		} catch (final Exception e) {
-			log.error(e.getMessage());
-			// TODO perfect message
-			// getAdminUI().showErrorNotification(message, values);
+			handleException(e);
 			return;
 		}
 
