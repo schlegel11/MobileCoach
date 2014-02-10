@@ -31,4 +31,8 @@ public class UIAuthor extends UIModelObject {
 				localize(AdminMessageStrings.UI_COLUMNS__ACCOUNT),
 				localize(AdminMessageStrings.UI_COLUMNS__ACCOUNT_TYPE) };
 	}
+
+	public static String getSortColumn() {
+		return USERNAME;
+	}
 }

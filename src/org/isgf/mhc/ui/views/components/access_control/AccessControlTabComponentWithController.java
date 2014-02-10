@@ -49,6 +49,7 @@ public class AccessControlTabComponentWithController extends
 				getInterventionAdministrationManagerService().getAllAuthors());
 
 		accountsTable.setContainerDataSource(beanContainer);
+		accountsTable.setSortContainerPropertyId(UIAuthor.getSortColumn());
 		accountsTable.setVisibleColumns(UIAuthor.getVisibleColumns());
 		accountsTable.setColumnHeaders(UIAuthor.getColumnHeaders());
 
