@@ -37,6 +37,14 @@ public abstract class AbstractModelObjectAccessService {
 	}
 
 	/**
+	 * @see ModelObject#delete(Class, ObjectId)
+	 */
+	public void deleteModelObject(final Class<? extends ModelObject> clazz,
+			final ModelObject modelObject) {
+		ModelObject.delete(clazz, modelObject.getId());
+	}
+
+	/**
 	 * @see ModelObject#findOne(Class, String, Object...)
 	 */
 	public <ModelObjectSubclass extends ModelObject> ModelObjectSubclass findOneModelObject(

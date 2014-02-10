@@ -140,7 +140,7 @@ public class ScreeningSurveyExecutionManagerService {
 	 */
 	public Iterable<ScreeningSurvey> getActiveScreeningSurveys() {
 		return this.databaseManagerService.findModelObjects(
-				ScreeningSurvey.class, Queries.SCREENING_SURVEYS_OPEN);
+				ScreeningSurvey.class, Queries.SCREENING_SURVEY__ACTIVE_TRUE);
 	}
 
 	/**

@@ -8,6 +8,7 @@ import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.server.Author;
+import org.isgf.mhc.model.server.AuthorInterventionAccess;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.ModelObjectExchangeService;
@@ -66,7 +67,7 @@ public class InterventionAdministrationManagerService {
 	public Author authorAuthenticateAndReturn(final String username,
 			final String password) {
 		val author = databaseManagerService.findOneModelObject(Author.class,
-				Queries.AUTHOR_BY_USERNAME, username);
+				Queries.AUTHOR__BY_USERNAME, username);
 
 		if (author == null) {
 			log.debug("Username '{}' not found.", username);
@@ -121,8 +122,15 @@ public class InterventionAdministrationManagerService {
 					AdminMessageStrings.NOTIFICATION__DEFAULT_ADMIN_CANT_BE_DELETED);
 		}
 
-		databaseManagerService.deleteModelObject(Author.class,
-				authorToDelete.getId());
+		val authorInterventionAccessToDelete = databaseManagerService
+				.findModelObjects(AuthorInterventionAccess.class,
+						Queries.AUTHOR_INTERVENTION_ACCESS__BY_AUTHOR,
+						authorToDelete.getId());
+		for (final AuthorInterventionAccess authorInterventionAccess : authorInterventionAccessToDelete) {
+			databaseManagerService.deleteModelObject(
+					AuthorInterventionAccess.class, authorInterventionAccess);
+		}
+		databaseManagerService.deleteModelObject(Author.class, authorToDelete);
 	}
 
 	public void saveAuthor(final Author newAuthor) {
@@ -137,7 +145,7 @@ public class InterventionAdministrationManagerService {
 		}
 
 		val authors = databaseManagerService.findModelObjects(Author.class,
-				Queries.AUTHOR_BY_USERNAME, newUsername);
+				Queries.AUTHOR__BY_USERNAME, newUsername);
 		if (authors.iterator().hasNext()) {
 			throw new NotificationMessageException(
 					AdminMessageStrings.NOTIFICATION__THE_GIVEN_USERNAME_IS_ALREADY_IN_USE);

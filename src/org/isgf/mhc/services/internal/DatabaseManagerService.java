@@ -74,7 +74,7 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 		configure(jongo);
 
 		// Checking for admin account
-		val authors = findModelObjects(Author.class, Queries.AUTHORS_ADMINS);
+		val authors = findModelObjects(Author.class, Queries.AUTHOR__ADMIN_TRUE);
 		if (!authors.iterator().hasNext()) {
 			// Create new admin account if none exists
 			log.warn(
