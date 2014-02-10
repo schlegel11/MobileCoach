@@ -71,5 +71,4 @@ public class WelcomeTabComponent extends AbstractCustomComponent {
 
 		return mainLayout;
 	}
-
 }

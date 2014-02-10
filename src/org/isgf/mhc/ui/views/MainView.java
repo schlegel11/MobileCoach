@@ -9,7 +9,7 @@ import lombok.extern.log4j.Log4j2;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.ThemeImageStrings;
 import org.isgf.mhc.ui.AdminNavigatorUI;
-import org.isgf.mhc.ui.views.components.access_control.AccessControlTabComponent;
+import org.isgf.mhc.ui.views.components.access_control.AccessControlTabComponentWithController;
 import org.isgf.mhc.ui.views.components.basics.MenuButtonComponent;
 import org.isgf.mhc.ui.views.components.views.MainViewComponent;
 import org.isgf.mhc.ui.views.components.welcome.WelcomeTabComponent;
@@ -158,7 +158,7 @@ public class MainView extends AbstractView implements View, LayoutClickListener 
 		removeAllTabs();
 
 		addTab(mainViewComponent.getContentAccordion(),
-				new AccessControlTabComponent(),
+				new AccessControlTabComponentWithController(),
 				AdminMessageStrings.MAIN_VIEW__ACCESS_CONTROL_TAB,
 				ThemeImageStrings.ACCESS_CONTROL_ICON);
 	}
