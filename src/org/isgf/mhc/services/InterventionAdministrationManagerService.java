@@ -188,6 +188,34 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(intervention);
 	}
 
+	public void interventionChangeHourOfDailyRuleExecution(
+			final Intervention intervention, final int value) {
+		intervention.setHourOfDailyRuleExecutionStart(value);
+
+		databaseManagerService.saveModelObject(intervention);
+	}
+
+	public void interventionChangeSecondsDelayBetweenParticipantsRuleExecution(
+			final Intervention intervention, final int value) {
+		intervention.setSecondsDelayBetweenParticipantsRuleExecution(value);
+
+		databaseManagerService.saveModelObject(intervention);
+	}
+
+	public void interventionSetActive(final Intervention intervention,
+			final boolean value) {
+		intervention.setActive(value);
+
+		databaseManagerService.saveModelObject(intervention);
+	}
+
+	public void interventionSetMessagingActive(final Intervention intervention,
+			final boolean value) {
+		intervention.setMessagingActive(value);
+
+		databaseManagerService.saveModelObject(intervention);
+	}
+
 	public void interventionDelete(final Intervention interventionToDelete)
 			throws NotificationMessageException {
 		// TODO delete also referenced objects

@@ -5,6 +5,8 @@ import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.model.server.Intervention;
 
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 
@@ -20,13 +22,16 @@ public class InterventionBasicSettingsTabComponentWithController extends
 
 	private final Intervention	intervention;
 
+	private boolean				lastInterventionMessagingActiveState	= false;
+
 	public InterventionBasicSettingsTabComponentWithController(
 			final Intervention intervention) {
 		super();
 
 		this.intervention = intervention;
+		lastInterventionMessagingActiveState = intervention.isMessagingActive();
 
-		// handle buttons
+		// Handle buttons
 		val interventionBasicSettingsComponent = getInterventionBasicSettingsComponent();
 
 		val buttonClickListener = new ButtonClickListener();
@@ -35,11 +40,42 @@ public class InterventionBasicSettingsTabComponentWithController extends
 		interventionBasicSettingsComponent.getSwitchMessagingButton()
 				.addClickListener(buttonClickListener);
 
-		// Handle sliders
-		// TODO slider listeners
-
-		// set start state
+		// Set start state
 		adjust();
+
+		// Handle sliders
+		val valueChangeListener = new SliderValueChangeListener();
+		getInterventionBasicSettingsComponent().getHourOfRuleExecutionSlider()
+				.addValueChangeListener(valueChangeListener);
+		getInterventionBasicSettingsComponent()
+				.getSecondsDelayBetweenEachParticipantSlider()
+				.addValueChangeListener(valueChangeListener);
+	}
+
+	private class SliderValueChangeListener implements ValueChangeListener {
+
+		@Override
+		public void valueChange(final ValueChangeEvent event) {
+			if (event.getProperty() == getInterventionBasicSettingsComponent()
+					.getHourOfRuleExecutionSlider()) {
+				log.debug("Change hour of daily rule execution");
+				getInterventionAdministrationManagerService()
+						.interventionChangeHourOfDailyRuleExecution(
+								intervention,
+								((Double) event.getProperty().getValue())
+										.intValue());
+			} else if (event.getProperty() == getInterventionBasicSettingsComponent()
+					.getSecondsDelayBetweenEachParticipantSlider()) {
+				log.debug("Change seconds delay between participants rule execution");
+				getInterventionAdministrationManagerService()
+						.interventionChangeSecondsDelayBetweenParticipantsRuleExecution(
+								intervention,
+								((Double) event.getProperty().getValue())
+										.intValue());
+			}
+
+			adjust();
+		}
 	}
 
 	private void adjust() {
@@ -48,9 +84,13 @@ public class InterventionBasicSettingsTabComponentWithController extends
 				intervention.getHourOfDailyRuleExecutionStart(),
 				intervention.getSecondsDelayBetweenParticipantsRuleExecution());
 
-		// TODO also all other accordion tabs have to be deactivated when
-		// messaging
-		// is switched to active
+		if (lastInterventionMessagingActiveState != intervention
+				.isMessagingActive() && intervention.isMessagingActive()) {
+			// Messaging has been activated, so disable all other tabs
+			// TODO disable all other tabs
+		}
+
+		lastInterventionMessagingActiveState = intervention.isMessagingActive();
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
@@ -71,15 +111,45 @@ public class InterventionBasicSettingsTabComponentWithController extends
 
 	public void switchIntervention() {
 		log.debug("Switch intervention");
-		// TODO Auto-generated method stub
+		showConfirmationWindow(new ExtendableButtonClickListener() {
 
-		adjust();
+			@Override
+			public void buttonClick(final ClickEvent event) {
+				try {
+					getInterventionAdministrationManagerService()
+							.interventionSetActive(intervention,
+									!intervention.isActive());
+				} catch (final Exception e) {
+					closeWindow();
+					handleException(e);
+					return;
+				}
+
+				adjust();
+				closeWindow();
+			}
+		}, null);
 	}
 
 	public void switchMessaging() {
 		log.debug("Switch messaging");
-		// TODO Auto-generated method stub
+		showConfirmationWindow(new ExtendableButtonClickListener() {
 
-		adjust();
+			@Override
+			public void buttonClick(final ClickEvent event) {
+				try {
+					getInterventionAdministrationManagerService()
+							.interventionSetMessagingActive(intervention,
+									!intervention.isMessagingActive());
+				} catch (final Exception e) {
+					closeWindow();
+					handleException(e);
+					return;
+				}
+
+				adjust();
+				closeWindow();
+			}
+		}, null);
 	}
 }
