@@ -65,7 +65,6 @@ public class PlaceholderStringEditComponent extends
 		localize(variableListSelect,
 				AdminMessageStrings.PLACEHOLDER_STRING_EDITOR__SELECT_VARIABLE);
 
-		stringTextArea.setValue(getStringValue());
 		stringTextArea.focus();
 	}
 
@@ -187,8 +186,12 @@ public class PlaceholderStringEditComponent extends
 	}
 
 	@Override
+	public void setStringValue(final String value) {
+		stringTextArea.setValue(value);
+	}
+
+	@Override
 	public String getStringValue() {
 		return stringTextArea.getValue();
 	}
-
 }

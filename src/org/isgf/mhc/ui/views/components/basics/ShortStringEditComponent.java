@@ -53,7 +53,6 @@ public class ShortStringEditComponent extends AbstractStringValueEditComponent {
 		localize(okButton, AdminMessageStrings.GENERAL__OK);
 		localize(cancelButton, AdminMessageStrings.GENERAL__CANCEL);
 
-		stringTextField.setValue(getStringValue());
 		stringTextField.focus();
 	}
 
@@ -129,6 +128,11 @@ public class ShortStringEditComponent extends AbstractStringValueEditComponent {
 		buttonLayout.setComponentAlignment(okButton, new Alignment(9));
 
 		return buttonLayout;
+	}
+
+	@Override
+	public void setStringValue(final String value) {
+		stringTextField.setValue(value);
 	}
 
 	@Override

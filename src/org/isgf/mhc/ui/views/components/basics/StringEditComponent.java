@@ -53,7 +53,6 @@ public class StringEditComponent extends AbstractStringValueEditComponent {
 		localize(okButton, AdminMessageStrings.GENERAL__OK);
 		localize(cancelButton, AdminMessageStrings.GENERAL__CANCEL);
 
-		stringTextArea.setValue(getStringValue());
 		stringTextArea.focus();
 	}
 
@@ -130,6 +129,11 @@ public class StringEditComponent extends AbstractStringValueEditComponent {
 		buttonLayout.setComponentAlignment(okButton, new Alignment(9));
 
 		return buttonLayout;
+	}
+
+	@Override
+	public void setStringValue(final String value) {
+		stringTextArea.setValue(value);
 	}
 
 	@Override

@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 
 import lombok.Delegate;
-import lombok.Setter;
 
 /**
  * Extends an {@link AbstractConfirmationComponent} with the ability to set and
@@ -17,12 +16,6 @@ import lombok.Setter;
 @SuppressWarnings("serial")
 public abstract class AbstractStringValueEditComponent extends
 		AbstractConfirmationComponent {
-	/**
-	 * The {@link String} to create/edit in this component
-	 */
-	@Setter
-	private String	stringValue;
-
 	private interface ReadOnlyStringList {
 		boolean addAll(final Collection<String> items);
 
@@ -37,10 +30,16 @@ public abstract class AbstractStringValueEditComponent extends
 	private final List<String>	availableVariables	= new ArrayList<String>();
 
 	/**
+	 * Set the current {@link String} value
+	 * 
+	 * @return
+	 */
+	public abstract void setStringValue(final String value);
+
+	/**
 	 * Return the current {@link String} value
 	 * 
 	 * @return
 	 */
 	public abstract String getStringValue();
-
 }

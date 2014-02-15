@@ -12,15 +12,24 @@
     /* Include all the styles from the reindeer theme */
     @include reindeer;
     /* Insert your theme rules here */
-    /* Basics */
-    min-width: 1000px;
-    min-height: 500px;
-    overflow: auto;
+    /* Variables */
     $selection-active-color: #ebebeb;
     $selection-inactive-color: #ffffff;
     $link-active-color: #4e4e4e;
     $link-color: #2a2a2a;
     $tab-color: $selection-active-color;
+    /* No selection */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    /* Basics */
+    min-width: 1000px;
+    min-height: 500px;
+    overflow: auto;
+    /* Basic stlyles */
     .bold {
         font-weight: bold;
     }

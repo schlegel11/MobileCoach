@@ -58,8 +58,8 @@ public class PasswordEditComponent extends AbstractStringValueEditComponent
 		localize(okButton, AdminMessageStrings.GENERAL__OK);
 		localize(cancelButton, AdminMessageStrings.GENERAL__CANCEL);
 
-		stringPasswordField.setValue(getStringValue());
-		stringPasswordFieldCheck.setValue(getStringValue());
+		stringPasswordField.setValue("");
+		stringPasswordFieldCheck.setValue("");
 		stringPasswordField.addTextChangeListener(this);
 		stringPasswordFieldCheck.addTextChangeListener(this);
 
@@ -74,6 +74,12 @@ public class PasswordEditComponent extends AbstractStringValueEditComponent
 	@Override
 	public void registerCancelButtonListener(final ClickListener clickListener) {
 		cancelButton.addClickListener(clickListener);
+	}
+
+	@Override
+	public void setStringValue(final String value) {
+		// Do nothing...it's about passwords
+
 	}
 
 	@Override
