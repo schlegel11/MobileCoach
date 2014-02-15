@@ -47,6 +47,11 @@ public class Author extends ModelObject {
 	@NonNull
 	private String	passwordHash;
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.isgf.mhc.model.ModelObject#toUIModelObject()
+	 */
 	@Override
 	public UIModelObject toUIModelObject() {
 		final val author = new UIAuthor(

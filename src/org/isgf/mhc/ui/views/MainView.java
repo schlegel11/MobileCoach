@@ -8,6 +8,7 @@ import org.isgf.mhc.conf.ThemeImageStrings;
 import org.isgf.mhc.ui.AdminNavigatorUI;
 import org.isgf.mhc.ui.views.components.access_control.AccessControlTabComponentWithController;
 import org.isgf.mhc.ui.views.components.basics.MenuButtonComponent;
+import org.isgf.mhc.ui.views.components.interventions.AllInterventionsTabComponentWithController;
 import org.isgf.mhc.ui.views.components.views.MainViewComponent;
 import org.isgf.mhc.ui.views.components.welcome.WelcomeTabComponentWithController;
 
@@ -140,7 +141,7 @@ public class MainView extends AbstractView implements View, LayoutClickListener 
 		removeAllTabs();
 
 		addTab(mainViewComponent.getContentAccordion(),
-				new WelcomeTabComponentWithController(),
+				new AllInterventionsTabComponentWithController(),
 				AdminMessageStrings.MAIN_VIEW__INTERVENTIONS_TAB,
 				ThemeImageStrings.INTERVENTIONS_ICON);
 	}

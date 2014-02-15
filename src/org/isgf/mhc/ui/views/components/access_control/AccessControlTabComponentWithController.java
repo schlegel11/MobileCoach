@@ -3,13 +3,11 @@ package org.isgf.mhc.ui.views.components.access_control;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
-import org.apache.commons.lang.RandomStringUtils;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.server.Author;
 import org.isgf.mhc.model.ui.UIAuthor;
-import org.isgf.mhc.tools.BCrypt;
 import org.isgf.mhc.ui.views.components.basics.PasswordEditComponent;
 import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;
 
@@ -127,13 +125,9 @@ public class AccessControlTabComponentWithController extends
 							getInterventionAdministrationManagerService()
 									.authorCheckValidAndUnique(newUsername);
 
-							// Create account with long random password
-							newAuthor = new Author(false, newUsername, BCrypt
-									.hashpw(RandomStringUtils
-											.randomAlphanumeric(128), BCrypt
-											.gensalt()));
-							getInterventionAdministrationManagerService()
-									.saveAuthor(newAuthor);
+							// Create new author
+							newAuthor = getInterventionAdministrationManagerService()
+									.authorCreate(newUsername);
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -159,7 +153,7 @@ public class AccessControlTabComponentWithController extends
 					.getRelatedModelObject(Author.class);
 
 			// Delete account
-			getInterventionAdministrationManagerService().deleteAuthor(
+			getInterventionAdministrationManagerService().authorDelete(
 					getUISession().getCurrentAuthorId(), selectedAuthor);
 		} catch (final Exception e) {
 			handleException(e);

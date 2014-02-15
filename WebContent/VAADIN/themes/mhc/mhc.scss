@@ -153,6 +153,20 @@
         text-decoration: underline;
         color: $link-active-color;
     }
+    .v-table-cell-content-inactive {
+        color: rgb(150, 28, 0);
+        background-image: url("img/inactive-icon-small.png");
+        background-repeat: no-repeat;
+        background-position: 5px;
+        text-indent: 20px;
+    }
+    .v-table-cell-content-active {
+        color: rgb(119, 169, 66);
+        background-image: url("img/active-icon-small.png");
+        background-repeat: no-repeat;
+        background-position: 5px;
+        text-indent: 20px;
+    }
     /* Own styles */
     /* about-window */
     .about-window .about-text {

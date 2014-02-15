@@ -14,7 +14,7 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 
 /**
- * Provides the about window component
+ * Provides the access control edit component
  * 
  * @author Andreas Filler
  */

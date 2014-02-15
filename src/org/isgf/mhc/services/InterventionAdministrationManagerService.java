@@ -3,16 +3,19 @@ package org.isgf.mhc.services;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.server.Author;
 import org.isgf.mhc.model.server.AuthorInterventionAccess;
+import org.isgf.mhc.model.server.Intervention;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.ModelObjectExchangeService;
 import org.isgf.mhc.tools.BCrypt;
+import org.isgf.mhc.tools.GlobalUniqueIdGenerator;
 import org.isgf.mhc.ui.NotificationMessageException;
 
 /**
@@ -64,6 +67,15 @@ public class InterventionAdministrationManagerService {
 	 * Class methods
 	 */
 	// Author
+	public Author authorCreate(final String username) {
+		val author = new Author(false, username, BCrypt.hashpw(
+				RandomStringUtils.randomAlphanumeric(128), BCrypt.gensalt()));
+
+		databaseManagerService.saveModelObject(author);
+
+		return author;
+	}
+
 	public Author authorAuthenticateAndReturn(final String username,
 			final String password) {
 		val author = databaseManagerService.findOneModelObject(Author.class,
@@ -85,6 +97,7 @@ public class InterventionAdministrationManagerService {
 
 	public void authorSetAdmin(final Author author) {
 		author.setAdmin(true);
+
 		databaseManagerService.saveModelObject(author);
 	}
 
@@ -96,6 +109,7 @@ public class InterventionAdministrationManagerService {
 		}
 
 		author.setAdmin(false);
+
 		databaseManagerService.saveModelObject(author);
 	}
 
@@ -110,7 +124,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(author);
 	}
 
-	public void deleteAuthor(final ObjectId currentAuthorId,
+	public void authorDelete(final ObjectId currentAuthorId,
 			final Author authorToDelete) throws NotificationMessageException {
 		if (authorToDelete.getId().equals(currentAuthorId)) {
 			throw new NotificationMessageException(
@@ -133,10 +147,6 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.deleteModelObject(Author.class, authorToDelete);
 	}
 
-	public void saveAuthor(final Author newAuthor) {
-		databaseManagerService.saveModelObject(newAuthor);
-	}
-
 	public void authorCheckValidAndUnique(final String newUsername)
 			throws NotificationMessageException {
 		if (newUsername.length() < 3) {
@@ -152,11 +162,35 @@ public class InterventionAdministrationManagerService {
 		}
 	}
 
+	// Intervention
+	public Intervention interventionCreate(final String name) {
+		val intervention = new Intervention(
+				GlobalUniqueIdGenerator.createGlobalUniqueId(), name,
+				System.currentTimeMillis(), false, false, 16, 5);
+
+		databaseManagerService.saveModelObject(intervention);
+
+		return intervention;
+	}
+
+	public void interventionDelete(final Intervention interventionToDelete)
+			throws NotificationMessageException {
+		// TODO delete also referenced objects
+
+		databaseManagerService.deleteModelObject(Intervention.class,
+				interventionToDelete);
+	}
+
 	/*
 	 * Getter methods
 	 */
 	public Iterable<Author> getAllAuthors() {
 		return databaseManagerService.findModelObjects(Author.class,
+				Queries.ALL);
+	}
+
+	public Iterable<Intervention> getAllInterventions() {
+		return databaseManagerService.findModelObjects(Intervention.class,
 				Queries.ALL);
 	}
 }

@@ -5,8 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.val;
 
+import org.isgf.mhc.conf.AdminMessageStrings;
+import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
+import org.isgf.mhc.model.UIModelObject;
+import org.isgf.mhc.model.ui.UIIntervention;
 
 /**
  * {@link ModelObject} to represent an {@link Intervention}
@@ -79,4 +84,29 @@ public class Intervention extends ModelObject {
 	@Getter
 	@Setter
 	private int		secondsDelayBetweenParticipantsRuleExecution;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.isgf.mhc.model.ModelObject#toUIModelObject()
+	 */
+	@Override
+	public UIModelObject toUIModelObject() {
+		val intervention = new UIIntervention(
+				name,
+				active,
+				active ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE),
+				messagingActive,
+				messagingActive ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE));
+
+		intervention.setRelatedModelObject(this);
+
+		return intervention;
+	}
 }
