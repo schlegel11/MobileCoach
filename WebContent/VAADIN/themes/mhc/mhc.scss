@@ -266,7 +266,17 @@
             }
         }
     }
+    /* intervention-container */
+    .intervention-container .title-label {
+        @extend bigger;
+        margin-left: 10px;
+        text-align: left;
+    }
     /* accordion */
+    .v-accordion {
+        border: none;
+        border-top: 1px solid #bebebe;
+    }
     .v-accordion-item-caption .v-icon {
         margin-top: -10px;
         margin-right: 10px;

@@ -7,6 +7,7 @@ import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.model.server.Intervention;
 import org.isgf.mhc.model.ui.UIIntervention;
+import org.isgf.mhc.ui.views.MainView;
 import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -26,13 +27,17 @@ import com.vaadin.ui.Button.ClickEvent;
 public class AllInterventionsTabComponentWithController extends
 		AllInterventionsTabComponent {
 
+	private final MainView									mainView;
+
 	private UIIntervention									selectedUIIntervention			= null;
 	private BeanItem<UIIntervention>						selectedUIInterventionBeanItem	= null;
 
 	private final BeanContainer<ObjectId, UIIntervention>	beanContainer;
 
-	public AllInterventionsTabComponentWithController() {
+	public AllInterventionsTabComponentWithController(final MainView mainView) {
 		super();
+
+		this.mainView = mainView;
 
 		// table options
 		val allInterventionsEditComponent = getAllInterventionsEditComponent();
@@ -85,6 +90,8 @@ public class AllInterventionsTabComponentWithController extends
 				buttonClickListener);
 		allInterventionsEditComponent.getExportButton().addClickListener(
 				buttonClickListener);
+		allInterventionsEditComponent.getRenameButton().addClickListener(
+				buttonClickListener);
 		allInterventionsEditComponent.getEditButton().addClickListener(
 				buttonClickListener);
 		allInterventionsEditComponent.getDuplicateButton().addClickListener(
@@ -109,8 +116,11 @@ public class AllInterventionsTabComponentWithController extends
 					.getExportButton()) {
 				// TODO export action
 			} else if (event.getButton() == allInterventionsEditComponent
+					.getRenameButton()) {
+				renameIntervention();
+			} else if (event.getButton() == allInterventionsEditComponent
 					.getEditButton()) {
-				// TODO edit action
+				editIntervention();
 			} else if (event.getButton() == allInterventionsEditComponent
 					.getDuplicateButton()) {
 				// TODO duplicate action
@@ -157,6 +167,63 @@ public class AllInterventionsTabComponentWithController extends
 				}, null);
 	}
 
+	public void renameIntervention() {
+		log.debug("Rename intervention");
+
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_NAME_FOR_INTERVENTION,
+				selectedUIIntervention.getInterventionName(), null,
+				new ShortStringEditComponent(),
+				new ExtendableButtonClickListener() {
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							val selectedIntervention = selectedUIIntervention
+									.getRelatedModelObject(Intervention.class);
+
+							// Change name
+							getInterventionAdministrationManagerService()
+									.interventionChangeName(
+											selectedIntervention,
+											getStringValue());
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						// Adapt UI
+						getStringItemProperty(selectedUIInterventionBeanItem,
+								UIIntervention.INTERVENTION_NAME).setValue(
+								selectedUIIntervention.getRelatedModelObject(
+										Intervention.class).getName());
+
+						getAdminUI()
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__INTERVENTION_RENAMED);
+						closeWindow();
+					}
+				}, null);
+	}
+
+	public void editIntervention() {
+		log.debug("Edit intervention");
+
+		val intervention = selectedUIIntervention
+				.getRelatedModelObject(Intervention.class);
+
+		// Replace current components with accordion
+		getMainLayout().removeAllComponents();
+		getMainLayout().addComponent(
+				new InterventionEditingContainerComponentWithController(this,
+						intervention));
+	}
+
+	public void returnToInterventionList() {
+		log.debug("Step back to intervention overview");
+
+		mainView.switchToInterventionsView();
+	}
+
 	public void deleteIntervention() {
 		log.debug("Delete intervention");
 		showConfirmationWindow(new ExtendableButtonClickListener() {
@@ -187,5 +254,4 @@ public class AllInterventionsTabComponentWithController extends
 			}
 		}, null);
 	}
-
 }

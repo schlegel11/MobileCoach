@@ -168,9 +168,24 @@ public class InterventionAdministrationManagerService {
 				GlobalUniqueIdGenerator.createGlobalUniqueId(), name,
 				System.currentTimeMillis(), false, false, 16, 5);
 
+		if (name.equals("")) {
+			intervention.setName("---");
+		}
+
 		databaseManagerService.saveModelObject(intervention);
 
 		return intervention;
+	}
+
+	public void interventionChangeName(final Intervention intervention,
+			final String newName) {
+		if (newName.equals("")) {
+			intervention.setName("---");
+		} else {
+			intervention.setName(newName);
+		}
+
+		databaseManagerService.saveModelObject(intervention);
 	}
 
 	public void interventionDelete(final Intervention interventionToDelete)
@@ -193,4 +208,5 @@ public class InterventionAdministrationManagerService {
 		return databaseManagerService.findModelObjects(Intervention.class,
 				Queries.ALL);
 	}
+
 }

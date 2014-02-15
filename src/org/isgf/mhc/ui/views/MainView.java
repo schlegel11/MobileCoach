@@ -137,11 +137,11 @@ public class MainView extends AbstractView implements View, LayoutClickListener 
 	}
 
 	@Synchronized
-	private void switchToInterventionsView() {
+	public void switchToInterventionsView() {
 		removeAllTabs();
 
 		addTab(mainViewComponent.getContentAccordion(),
-				new AllInterventionsTabComponentWithController(),
+				new AllInterventionsTabComponentWithController(this),
 				AdminMessageStrings.MAIN_VIEW__INTERVENTIONS_TAB,
 				ThemeImageStrings.INTERVENTIONS_ICON);
 	}

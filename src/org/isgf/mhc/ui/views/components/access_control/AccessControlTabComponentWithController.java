@@ -147,66 +147,6 @@ public class AccessControlTabComponentWithController extends
 				}, null);
 	}
 
-	public void deleteAccount() {
-		log.debug("Delete account");
-		showConfirmationWindow(new ExtendableButtonClickListener() {
-
-			@Override
-			public void buttonClick(final ClickEvent event) {
-				try {
-					val selectedAuthor = selectedUIAuthor.getRelatedModelObject(Author.class);
-
-					// Delete account
-					getInterventionAdministrationManagerService()
-							.authorDelete(getUISession().getCurrentAuthorId(),
-									selectedAuthor);
-				} catch (final Exception e) {
-					closeWindow();
-					handleException(e);
-					return;
-				}
-
-				// Adapt UI
-				getAccessControlEditComponent().getAccountsTable().removeItem(
-						selectedUIAuthor.getRelatedModelObject(Author.class)
-								.getId());
-				getAdminUI().showInformationNotification(
-						AdminMessageStrings.NOTIFICATION__ACCOUNT_DELETED);
-
-				closeWindow();
-			}
-		}, null);
-	}
-
-	public void setAccountPassword() {
-		log.debug("Set password");
-		showModalStringValueEditWindow(
-				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__SET_PASSWORD,
-				null, null, new PasswordEditComponent(),
-				new ExtendableButtonClickListener() {
-					@Override
-					public void buttonClick(final ClickEvent event) {
-						try {
-							val selectedAuthor = selectedUIAuthor
-									.getRelatedModelObject(Author.class);
-
-							// Change password
-							getInterventionAdministrationManagerService()
-									.authorChangePassword(selectedAuthor,
-											getStringValue());
-						} catch (final Exception e) {
-							handleException(e);
-							return;
-						}
-
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__PASSWORD_CHANGED);
-						closeWindow();
-					}
-				}, null);
-	}
-
 	public void makeAccountAuthor() {
 		log.debug("Set account author");
 		try {
@@ -247,5 +187,65 @@ public class AccessControlTabComponentWithController extends
 						Messages.getAdminString(AdminMessageStrings.UI_MODEL__ADMINISTRATOR));
 		getAdminUI().showInformationNotification(
 				AdminMessageStrings.NOTIFICATION__ACCOUNT_CHANGED_TO_ADMIN);
+	}
+
+	public void setAccountPassword() {
+		log.debug("Set password");
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__SET_PASSWORD,
+				null, null, new PasswordEditComponent(),
+				new ExtendableButtonClickListener() {
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							val selectedAuthor = selectedUIAuthor
+									.getRelatedModelObject(Author.class);
+
+							// Change password
+							getInterventionAdministrationManagerService()
+									.authorChangePassword(selectedAuthor,
+											getStringValue());
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						getAdminUI()
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__PASSWORD_CHANGED);
+						closeWindow();
+					}
+				}, null);
+	}
+
+	public void deleteAccount() {
+		log.debug("Delete account");
+		showConfirmationWindow(new ExtendableButtonClickListener() {
+
+			@Override
+			public void buttonClick(final ClickEvent event) {
+				try {
+					val selectedAuthor = selectedUIAuthor.getRelatedModelObject(Author.class);
+
+					// Delete account
+					getInterventionAdministrationManagerService()
+							.authorDelete(getUISession().getCurrentAuthorId(),
+									selectedAuthor);
+				} catch (final Exception e) {
+					closeWindow();
+					handleException(e);
+					return;
+				}
+
+				// Adapt UI
+				getAccessControlEditComponent().getAccountsTable().removeItem(
+						selectedUIAuthor.getRelatedModelObject(Author.class)
+								.getId());
+				getAdminUI().showInformationNotification(
+						AdminMessageStrings.NOTIFICATION__ACCOUNT_DELETED);
+
+				closeWindow();
+			}
+		}, null);
 	}
 }
