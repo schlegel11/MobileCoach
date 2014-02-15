@@ -141,6 +141,7 @@ public class AccessControlTabComponentWithController extends
 						getAdminUI()
 								.showInformationNotification(
 										AdminMessageStrings.NOTIFICATION__ACCOUNT_CREATED);
+
 						closeWindow();
 					}
 				}, null);
@@ -148,23 +149,33 @@ public class AccessControlTabComponentWithController extends
 
 	public void deleteAccount() {
 		log.debug("Delete account");
-		try {
-			val selectedAuthor = selectedUIAuthor
-					.getRelatedModelObject(Author.class);
+		showConfirmationWindow(new ExtendableButtonClickListener() {
 
-			// Delete account
-			getInterventionAdministrationManagerService().authorDelete(
-					getUISession().getCurrentAuthorId(), selectedAuthor);
-		} catch (final Exception e) {
-			handleException(e);
-			return;
-		}
+			@Override
+			public void buttonClick(final ClickEvent event) {
+				try {
+					val selectedAuthor = selectedUIAuthor.getRelatedModelObject(Author.class);
 
-		// Adapt UI
-		getAccessControlEditComponent().getAccountsTable().removeItem(
-				selectedUIAuthor.getRelatedModelObject(Author.class).getId());
-		getAdminUI().showInformationNotification(
-				AdminMessageStrings.NOTIFICATION__ACCOUNT_DELETED);
+					// Delete account
+					getInterventionAdministrationManagerService()
+							.authorDelete(getUISession().getCurrentAuthorId(),
+									selectedAuthor);
+				} catch (final Exception e) {
+					closeWindow();
+					handleException(e);
+					return;
+				}
+
+				// Adapt UI
+				getAccessControlEditComponent().getAccountsTable().removeItem(
+						selectedUIAuthor.getRelatedModelObject(Author.class)
+								.getId());
+				getAdminUI().showInformationNotification(
+						AdminMessageStrings.NOTIFICATION__ACCOUNT_DELETED);
+
+				closeWindow();
+			}
+		}, null);
 	}
 
 	public void setAccountPassword() {

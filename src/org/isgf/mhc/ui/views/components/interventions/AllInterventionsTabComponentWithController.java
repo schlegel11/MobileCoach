@@ -104,16 +104,16 @@ public class AllInterventionsTabComponentWithController extends
 				createIntervention();
 			} else if (event.getButton() == allInterventionsEditComponent
 					.getImportButton()) {
-				// TODO
+				// TODO import action
 			} else if (event.getButton() == allInterventionsEditComponent
 					.getExportButton()) {
-				// TODO
+				// TODO export action
 			} else if (event.getButton() == allInterventionsEditComponent
 					.getEditButton()) {
-				// TODO
+				// TODO edit action
 			} else if (event.getButton() == allInterventionsEditComponent
 					.getDuplicateButton()) {
-				// TODO
+				// TODO duplicate action
 			} else if (event.getButton() == allInterventionsEditComponent
 					.getDeleteButton()) {
 				deleteIntervention();
@@ -151,6 +151,7 @@ public class AllInterventionsTabComponentWithController extends
 						getAdminUI()
 								.showInformationNotification(
 										AdminMessageStrings.NOTIFICATION__INTERVENTION_CREATED);
+
 						closeWindow();
 					}
 				}, null);
@@ -158,25 +159,33 @@ public class AllInterventionsTabComponentWithController extends
 
 	public void deleteIntervention() {
 		log.debug("Delete intervention");
-		try {
-			val selectedIntervention = selectedUIIntervention
-					.getRelatedModelObject(Intervention.class);
+		showConfirmationWindow(new ExtendableButtonClickListener() {
 
-			// Delete intervention
-			getInterventionAdministrationManagerService().interventionDelete(
-					selectedIntervention);
-		} catch (final Exception e) {
-			handleException(e);
-			return;
-		}
+			@Override
+			public void buttonClick(final ClickEvent event) {
+				try {
+					val selectedIntervention = selectedUIIntervention.getRelatedModelObject(Intervention.class);
 
-		// Adapt UI
-		getAllInterventionsEditComponent().getAllInterventionsTable()
-				.removeItem(
-						selectedUIIntervention.getRelatedModelObject(
-								Intervention.class).getId());
-		getAdminUI().showInformationNotification(
-				AdminMessageStrings.NOTIFICATION__INTERVENTION_DELETED);
+					// Delete intervention
+					getInterventionAdministrationManagerService()
+							.interventionDelete(selectedIntervention);
+				} catch (final Exception e) {
+					closeWindow();
+					handleException(e);
+					return;
+				}
+
+				// Adapt UI
+				getAllInterventionsEditComponent().getAllInterventionsTable()
+						.removeItem(
+								selectedUIIntervention.getRelatedModelObject(
+										Intervention.class).getId());
+				getAdminUI().showInformationNotification(
+						AdminMessageStrings.NOTIFICATION__INTERVENTION_DELETED);
+
+				closeWindow();
+			}
+		}, null);
 	}
 
 }

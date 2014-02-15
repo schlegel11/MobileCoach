@@ -16,6 +16,7 @@ import org.isgf.mhc.services.InterventionAdministrationManagerService;
 import org.isgf.mhc.ui.AdminNavigatorUI;
 import org.isgf.mhc.ui.NotificationMessageException;
 import org.isgf.mhc.ui.UISession;
+import org.isgf.mhc.ui.views.components.basics.ConfirmationComponent;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -60,10 +61,10 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	public abstract class ExtendableButtonClickListener implements
 			Button.ClickListener {
 		@Setter
-		private Window								belongingWindow;
+		private Window							belongingWindow;
 
 		@Setter
-		private AbstractStringValueEditComponent	belongingStringValueEditComponent;
+		private AbstractConfirmationComponent	belongingComponent;
 
 		/**
 		 * Returns string value of belonging {@link AbstractCustomComponent}
@@ -71,7 +72,12 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 		 * @return
 		 */
 		protected String getStringValue() {
-			return belongingStringValueEditComponent.getStringValue();
+			if (belongingComponent instanceof AbstractStringValueEditComponent) {
+				return ((AbstractStringValueEditComponent) belongingComponent)
+						.getStringValue();
+			} else {
+				return null;
+			}
 		}
 
 		/**
@@ -128,8 +134,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 		// Register ok button listener
 		if (okButtonClickListener != null) {
 			okButtonClickListener.setBelongingWindow(modalWindow);
-			okButtonClickListener
-					.setBelongingStringValueEditComponent(stringValueComponent);
+			okButtonClickListener.setBelongingComponent(stringValueComponent);
 			stringValueComponent
 					.registerOkButtonListener(okButtonClickListener);
 		}
@@ -139,11 +144,56 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 		if (cancelButtonClickListener != null) {
 			cancelButtonClickListener.setBelongingWindow(modalWindow);
 			cancelButtonClickListener
-					.setBelongingStringValueEditComponent(stringValueComponent);
+					.setBelongingComponent(stringValueComponent);
 			stringValueComponent
 					.registerCancelButtonListener(cancelButtonClickListener);
 		} else {
 			stringValueComponent
+					.registerCancelButtonListener(new Button.ClickListener() {
+						@Override
+						public void buttonClick(final ClickEvent event) {
+							modalWindow.close();
+						}
+					});
+		}
+
+		// show window
+		getAdminUI().addWindow(modalWindow);
+
+		return modalWindow;
+	}
+
+	protected Window showConfirmationWindow(
+			final ExtendableButtonClickListener okButtonClickListener,
+			final ExtendableButtonClickListener cancelButtonClickListener) {
+
+		val confirmationComponent = new ConfirmationComponent();
+
+		val modalWindow = new Window(
+				Messages.getAdminString(AdminMessageStrings.CONFIRMATION_WINDOW__TITLE));
+		modalWindow.setModal(true);
+		modalWindow.setResizable(false);
+		modalWindow.setClosable(false);
+		modalWindow.setContent(confirmationComponent);
+
+		// Register ok button listener
+		if (okButtonClickListener != null) {
+			okButtonClickListener.setBelongingWindow(modalWindow);
+			okButtonClickListener.setBelongingComponent(confirmationComponent);
+			confirmationComponent
+					.registerOkButtonListener(okButtonClickListener);
+		}
+
+		// Register cancel button listener if provided or a simple window closer
+		// if not
+		if (cancelButtonClickListener != null) {
+			cancelButtonClickListener.setBelongingWindow(modalWindow);
+			cancelButtonClickListener
+					.setBelongingComponent(confirmationComponent);
+			confirmationComponent
+					.registerCancelButtonListener(cancelButtonClickListener);
+		} else {
+			confirmationComponent
 					.registerCancelButtonListener(new Button.ClickListener() {
 						@Override
 						public void buttonClick(final ClickEvent event) {

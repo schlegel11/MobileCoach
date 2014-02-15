@@ -7,17 +7,16 @@ import java.util.List;
 import lombok.Delegate;
 import lombok.Setter;
 
-import com.vaadin.ui.Button;
-
 /**
- * Extends an {@link AbstractCustomComponent} with the ability to set and return
+ * Extends an {@link AbstractConfirmationComponent} with the ability to set and
+ * return
  * a {@link String} value
  * 
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
 public abstract class AbstractStringValueEditComponent extends
-		AbstractCustomComponent {
+		AbstractConfirmationComponent {
 	/**
 	 * The {@link String} to create/edit in this component
 	 */
@@ -44,20 +43,4 @@ public abstract class AbstractStringValueEditComponent extends
 	 */
 	public abstract String getStringValue();
 
-	/**
-	 * Register the listener which is called when the OK button has been clicked
-	 * 
-	 * @param clickListener
-	 */
-	public abstract void registerOkButtonListener(
-			final Button.ClickListener clickListener);
-
-	/**
-	 * Register the listener which is called when the Cancel button has been
-	 * clicked
-	 * 
-	 * @param clickListener
-	 */
-	public abstract void registerCancelButtonListener(
-			final Button.ClickListener clickListener);
 }
