@@ -10,6 +10,7 @@ import lombok.extern.log4j.Log4j2;
 import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.model.AbstractModelObjectAccessService;
 import org.isgf.mhc.model.Indices;
+import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.server.Author;
 import org.isgf.mhc.tools.BCrypt;
@@ -103,6 +104,13 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 		mongoClient.close();
 
 		log.info("Stopped.");
+	}
+
+	public void garbageCollect(final ModelObject modelObject) {
+		log.error(
+				"The model object with id {} and class {} is inconsistent with the datastate and will be deleted",
+				modelObject, modelObject.getClass());
+		deleteModelObject(modelObject.getClass(), modelObject);
 	}
 
 	/*

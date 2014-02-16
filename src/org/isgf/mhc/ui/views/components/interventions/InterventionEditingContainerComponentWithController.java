@@ -19,7 +19,13 @@ public class InterventionEditingContainerComponentWithController extends
 	public InterventionEditingContainerComponentWithController(
 			final AllInterventionsTabComponentWithController allInterventionsTabComponentWithController,
 			final Intervention intervention) {
-		super(intervention);
+		super();
+
+		// Localize
+		localize(
+				getInterventionTitleLabel(),
+				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__INTERVENTIONS_TITLE,
+				intervention.getName());
 
 		// Handle buttons
 		getListAllInterventionsButton().addClickListener(

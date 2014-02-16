@@ -153,7 +153,7 @@ public class AccessControlTabComponentWithController extends
 			val selectedAuthor = selectedUIAuthor
 					.getRelatedModelObject(Author.class);
 			getInterventionAdministrationManagerService().authorSetAuthor(
-					selectedAuthor);
+					selectedAuthor, getUISession().getCurrentAuthorId());
 		} catch (final Exception e) {
 			handleException(e);
 			return;

@@ -1,5 +1,8 @@
 package org.isgf.mhc.services;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
@@ -64,7 +67,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	/*
-	 * Class methods
+	 * Modification methods
 	 */
 	// Author
 	public Author authorCreate(final String username) {
@@ -101,11 +104,15 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(author);
 	}
 
-	public void authorSetAuthor(final Author author)
-			throws NotificationMessageException {
+	public void authorSetAuthor(final Author author,
+			final ObjectId currentAuthor) throws NotificationMessageException {
 		if (author.getUsername().equals(Constants.getDefaultAdminUsername())) {
 			throw new NotificationMessageException(
 					AdminMessageStrings.NOTIFICATION__DEFAULT_ADMIN_CANT_BE_SET_AS_AUTHOR);
+		}
+		if (author.getId().equals(currentAuthor)) {
+			throw new NotificationMessageException(
+					AdminMessageStrings.NOTIFICATION__CANT_DOWNGRADE_YOURSELF);
 		}
 
 		author.setAdmin(false);
@@ -227,6 +234,11 @@ public class InterventionAdministrationManagerService {
 	/*
 	 * Getter methods
 	 */
+	public Author getAuthor(final ObjectId accountObjectId) {
+		return databaseManagerService.getModelObjectById(Author.class,
+				accountObjectId);
+	}
+
 	public Iterable<Author> getAllAuthors() {
 		return databaseManagerService.findModelObjects(Author.class,
 				Queries.ALL);
@@ -237,4 +249,26 @@ public class InterventionAdministrationManagerService {
 				Queries.ALL);
 	}
 
+	public Iterable<Intervention> getAllInterventionsForAccount(
+			final ObjectId authorId) {
+		val authorInterventionAccessForAuthor = databaseManagerService
+				.findModelObjects(AuthorInterventionAccess.class,
+						Queries.AUTHOR_INTERVENTION_ACCESS__BY_AUTHOR, authorId);
+
+		final List<Intervention> interventions = new ArrayList<Intervention>();
+
+		for (val authorInterventionAccess : authorInterventionAccessForAuthor) {
+			val intervention = databaseManagerService.getModelObjectById(
+					Intervention.class,
+					authorInterventionAccess.getIntervention());
+
+			if (intervention != null) {
+				interventions.add(intervention);
+			} else {
+				databaseManagerService.garbageCollect(authorInterventionAccess);
+			}
+		}
+
+		return interventions;
+	}
 }

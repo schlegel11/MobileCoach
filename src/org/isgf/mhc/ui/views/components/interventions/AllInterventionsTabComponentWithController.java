@@ -47,10 +47,13 @@ public class AllInterventionsTabComponentWithController extends
 		allInterventionsTable.setImmediate(true);
 
 		// table content
+		val allRelevantIntervention = getUISession().isAdmin() ? getInterventionAdministrationManagerService()
+				.getAllInterventions()
+				: getInterventionAdministrationManagerService()
+						.getAllInterventionsForAccount(
+								getUISession().getCurrentAuthorId());
 		beanContainer = createBeanContainerForModelObjects(
-				UIIntervention.class,
-				getInterventionAdministrationManagerService()
-						.getAllInterventions());
+				UIIntervention.class, allRelevantIntervention);
 
 		allInterventionsTable.setContainerDataSource(beanContainer);
 		allInterventionsTable.setSortContainerPropertyId(UIIntervention
