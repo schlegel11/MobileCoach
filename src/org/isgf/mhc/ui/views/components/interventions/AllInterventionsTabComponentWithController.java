@@ -1,12 +1,20 @@
 package org.isgf.mhc.ui.views.components.interventions;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+
+import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
+import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.model.server.Intervention;
 import org.isgf.mhc.model.ui.UIIntervention;
+import org.isgf.mhc.tools.OnDemandFileDownloader;
+import org.isgf.mhc.tools.OnDemandFileDownloader.OnDemandStreamResource;
 import org.isgf.mhc.ui.views.MainView;
 import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;
 
@@ -91,8 +99,6 @@ public class AllInterventionsTabComponentWithController extends
 				buttonClickListener);
 		allInterventionsEditComponent.getImportButton().addClickListener(
 				buttonClickListener);
-		allInterventionsEditComponent.getExportButton().addClickListener(
-				buttonClickListener);
 		allInterventionsEditComponent.getRenameButton().addClickListener(
 				buttonClickListener);
 		allInterventionsEditComponent.getEditButton().addClickListener(
@@ -101,6 +107,30 @@ public class AllInterventionsTabComponentWithController extends
 				buttonClickListener);
 		allInterventionsEditComponent.getDeleteButton().addClickListener(
 				buttonClickListener);
+
+		// Special handle for export button
+		val onDemandFileDownloader = new OnDemandFileDownloader(
+				new OnDemandStreamResource() {
+
+					@Override
+					@SneakyThrows(FileNotFoundException.class)
+					public InputStream getStream() {
+						return new FileInputStream(
+								getInterventionAdministrationManagerService()
+										.interventionExport(
+												selectedUIIntervention
+														.getRelatedModelObject(Intervention.class)));
+					}
+
+					@Override
+					public String getFilename() {
+						return selectedUIIntervention.getInterventionName()
+								.replaceAll("[^A-Za-z0-9_. ]+", "_")
+								+ Constants.getFileExtension();
+					}
+				});
+		onDemandFileDownloader.extend(allInterventionsEditComponent
+				.getExportButton());
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
@@ -175,8 +205,9 @@ public class AllInterventionsTabComponentWithController extends
 
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_NAME_FOR_INTERVENTION,
-				selectedUIIntervention.getInterventionName(), null,
-				new ShortStringEditComponent(),
+				selectedUIIntervention
+						.getRelatedModelObject(Intervention.class).getName(),
+				null, new ShortStringEditComponent(),
 				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {

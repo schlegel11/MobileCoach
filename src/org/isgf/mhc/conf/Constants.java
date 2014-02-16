@@ -59,6 +59,9 @@ public class Constants {
 	@Getter
 	private static String		templatesFolder					= "/mhc_data/templates";
 
+	@Getter
+	private static String		fileExtension					= ".mhc";
+
 	/**
 	 * Database configuration
 	 */

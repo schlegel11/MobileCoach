@@ -93,7 +93,8 @@ public class InterventionBasicSettingsTabComponentWithController extends
 				.isMessagingActive()) {
 			// Messaging status has been changed, so adapt UI
 			interventionEditingContainerComponentWithController
-					.setEditingDependingOnMessaging(!intervention.isMessagingActive());
+					.setEditingDependingOnMessaging(!intervention
+							.isMessagingActive());
 		}
 
 		lastInterventionMessagingActiveState = intervention.isMessagingActive();

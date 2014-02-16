@@ -61,13 +61,16 @@ public class InterventionEditingContainerComponentWithController extends
 							intervention),
 							Messages.getAdminString(AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__ACCESS_TAB));
 			interventionAccessTab.setStyleName("pointable");
-			interventionAccessTab.getComponent().setEnabled(editingAllowed);
 
+			// TODO Just a reminder for other tabs, eg Message Groups, Rules and
+			// Variables
+			// makeEditingDependingOnMessaging(TAB)
 		}
-		// TODO Just a reminder for other tabs, eg Message Groups, Rules and
-		// Variables
-		// availableTabsToSwitchDependingOnMessaging
-		// .add(interventionAccessTab);
+	}
+
+	private void makeEditingDependingOnMessaging(final Tab tab) {
+		tab.getComponent().setEnabled(editingAllowed);
+		availableTabsToSwitchDependingOnMessaging.add(tab);
 	}
 
 	public void setEditingDependingOnMessaging(final boolean editingAllowed) {

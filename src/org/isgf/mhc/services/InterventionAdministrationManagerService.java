@@ -1,5 +1,6 @@
 package org.isgf.mhc.services;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Constants;
+import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.server.Author;
 import org.isgf.mhc.model.server.AuthorInterventionAccess;
@@ -213,6 +215,16 @@ public class InterventionAdministrationManagerService {
 		intervention.setMessagingActive(value);
 
 		databaseManagerService.saveModelObject(intervention);
+	}
+
+	public File interventionExport(final Intervention intervention) {
+		final List<ModelObject> modelObjectsToExport = new ArrayList<ModelObject>();
+
+		modelObjectsToExport.add(intervention);
+		// TODO add also other relevant model objects
+
+		return modelObjectExchangeService
+				.exportModelObjects(modelObjectsToExport);
 	}
 
 	public void interventionDelete(final Intervention interventionToDelete)
