@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import org.isgf.mhc.conf.AdminMessageStrings;
-import org.isgf.mhc.model.UIModelObject;
 
 import com.vaadin.data.fieldgroup.PropertyId;
 

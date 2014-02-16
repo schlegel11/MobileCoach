@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import org.isgf.mhc.conf.AdminMessageStrings;
-import org.isgf.mhc.model.UIModelObject;
+import org.isgf.mhc.model.server.Author;
 
 import com.vaadin.data.fieldgroup.PropertyId;
 
@@ -34,5 +34,10 @@ public class UIAuthor extends UIModelObject {
 
 	public static String getSortColumn() {
 		return USERNAME;
+	}
+
+	@Override
+	public String toString() {
+		return getRelatedModelObject(Author.class).getUsername();
 	}
 }

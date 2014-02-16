@@ -10,8 +10,8 @@ import lombok.val;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
-import org.isgf.mhc.model.UIModelObject;
 import org.isgf.mhc.model.ui.UIAuthor;
+import org.isgf.mhc.model.ui.UIModelObject;
 
 /**
  * {@link ModelObject} to represent an {@link Author}

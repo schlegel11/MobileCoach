@@ -13,7 +13,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 
 /**
- * Provides the access control edit component
+ * Provides the account edit component
  * 
  * @author Andreas Filler
  */

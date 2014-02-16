@@ -12,7 +12,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 
 /**
- * Extends the access control tab component with a controller
+ * Extends the account tab component with a controller
  * 
  * @currentAccountAuthor Andreas Filler
  */
@@ -25,12 +25,12 @@ public class AccountTabComponentWithController extends AccountTabComponent {
 	public AccountTabComponentWithController(final ObjectId accountObjectId) {
 		super();
 
-		currentAccountAuthor = getInterventionAdministrationManagerService().getAuthor(
-				accountObjectId);
+		currentAccountAuthor = getInterventionAdministrationManagerService()
+				.getAuthor(accountObjectId);
 
 		// Localize
-		getAccountEditComponent()
-				.adjust(currentAccountAuthor.getUsername(), currentAccountAuthor.isAdmin());
+		getAccountEditComponent().adjust(currentAccountAuthor.getUsername(),
+				currentAccountAuthor.isAdmin());
 
 		val buttonClickListener = new ButtonClickListener();
 		getAccountEditComponent().getSetPasswordButton().addClickListener(

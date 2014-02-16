@@ -11,7 +11,7 @@ import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
-import org.isgf.mhc.model.UIModelObject;
+import org.isgf.mhc.model.ui.UIModelObject;
 import org.isgf.mhc.services.InterventionAdministrationManagerService;
 import org.isgf.mhc.ui.AdminNavigatorUI;
 import org.isgf.mhc.ui.NotificationMessageException;
@@ -212,7 +212,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	 * Creates an appropriate {@link BeanItemContainer} for a specific
 	 * {@link Iterable} containing {@link ModelObject}s
 	 * 
-	 * @param modelClass
+	 * @param uiModelObjectSubclass
 	 * @param iterableModelObjects
 	 * @return
 	 */
@@ -226,6 +226,31 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 		for (final ModelObject modelObject : iterableModelObjects) {
 			beanContainer.addItem(modelObject.getId(),
 					uiModelObjectSubclass.cast(modelObject.toUIModelObject()));
+		}
+
+		return beanContainer;
+	}
+
+	/**
+	 * Creates an appropriate {@link BeanItemContainer} for a specific
+	 * {@link Iterable} containing {@link ModelObject}s represented by only ONE
+	 * property
+	 * 
+	 * @param uiModelObjectSubclass
+	 * @param iterableModelObjects
+	 * @return
+	 */
+	protected <UIModelObjectSubclass extends UIModelObject> BeanContainer<UIModelObjectSubclass, UIModelObjectSubclass> createSimpleBeanContainerForModelObjects(
+			final Class<UIModelObjectSubclass> uiModelObjectSubclass,
+			final Iterable<? extends ModelObject> iterableModelObjects) {
+
+		final BeanContainer<UIModelObjectSubclass, UIModelObjectSubclass> beanContainer = new BeanContainer<UIModelObjectSubclass, UIModelObjectSubclass>(
+				uiModelObjectSubclass);
+
+		for (final ModelObject modelObject : iterableModelObjects) {
+			val uiModelObject = modelObject.toUIModelObject();
+			beanContainer.addItem(uiModelObjectSubclass.cast(uiModelObject),
+					uiModelObjectSubclass.cast(uiModelObject));
 		}
 
 		return beanContainer;

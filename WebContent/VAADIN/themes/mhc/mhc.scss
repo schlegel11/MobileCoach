@@ -45,6 +45,9 @@
     .biggest {
         font-size: 20px;
     }
+    .pointable {
+        cursor: pointer;
+    }
     .styled-border {
         border-bottom-color: rgb(210, 211, 212);
         border-bottom-left-radius: 3px;
@@ -113,7 +116,7 @@
     .v-disabled.v-button,
     .v-disabled.v-button .v-button-wrap {
         background-image: none;
-        cursor: pointer;
+        @extend .pointable;
     }
     .v-button,
     .v-disabled.v-button {
@@ -247,11 +250,11 @@
         .button-label {
             @extend .center;
             @extend .bigger;
-            cursor: pointer;
+            @extend .pointable;
         }
         .menu-button {
             @extend .styled-border;
-            cursor: pointer;
+            @extend .pointable;
         }
         .menu-button:focus {
             @extend .styled-border-active;
@@ -289,6 +292,12 @@
     .v-accordion-item-caption .v-icon {
         margin-top: -10px;
         margin-right: 10px;
+    }
+    .v-accordion-item-pointable .v-accordion-item-caption {
+        @extend .pointable;
+        .v-caption {
+            @extend .pointable;
+        }
     }
     /* welcome-tab */
     .welcome-tab .welcome-label {

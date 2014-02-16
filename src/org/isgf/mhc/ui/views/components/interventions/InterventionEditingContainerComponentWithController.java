@@ -42,6 +42,15 @@ public class InterventionEditingContainerComponentWithController extends
 		getContentAccordion()
 				.addTab(new InterventionBasicSettingsTabComponentWithController(
 						intervention),
-						Messages.getAdminString(AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__BASIC_SETTINGS_TAB));
+						Messages.getAdminString(AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__BASIC_SETTINGS_TAB))
+				.setStyleName("pointable");
+
+		if (getUISession().isAdmin()) {
+			getContentAccordion()
+					.addTab(new InterventionAccessTabComponentWithController(
+							intervention),
+							Messages.getAdminString(AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__ACCESS_TAB))
+					.setStyleName("pointable");
+		}
 	}
 }

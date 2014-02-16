@@ -39,8 +39,6 @@ public class AccessControlTabComponentWithController extends
 		// table options
 		val accessControlEditComponent = getAccessControlEditComponent();
 		val accountsTable = accessControlEditComponent.getAccountsTable();
-		accountsTable.setSelectable(true);
-		accountsTable.setImmediate(true);
 
 		// table content
 		beanContainer = createBeanContainerForModelObjects(UIAuthor.class,

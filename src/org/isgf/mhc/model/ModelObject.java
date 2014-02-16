@@ -10,6 +10,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.bson.types.ObjectId;
+import org.isgf.mhc.model.ui.UIModelObject;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.tools.CustomObjectMapper;
 import org.jongo.Jongo;

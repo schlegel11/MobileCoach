@@ -231,6 +231,28 @@ public class InterventionAdministrationManagerService {
 				interventionToDelete);
 	}
 
+	// Author Intervention Access
+	public void authorInterventionAccessCreate(final ObjectId authorId,
+			final ObjectId interventionId) {
+
+		val authorInterventionAccess = new AuthorInterventionAccess(authorId,
+				interventionId);
+
+		databaseManagerService.saveModelObject(authorInterventionAccess);
+	}
+
+	public void authorInterventionAccessDelete(final ObjectId authorId,
+			final ObjectId interventionId) {
+		val authorInterventionAccess = databaseManagerService
+				.findOneModelObject(
+						AuthorInterventionAccess.class,
+						Queries.AUTHOR_INTERVENTION_ACCESS__BY_AUTHOR_AND_INTERVENTION,
+						authorId, interventionId);
+
+		databaseManagerService.deleteModelObject(
+				AuthorInterventionAccess.class, authorInterventionAccess);
+	}
+
 	/*
 	 * Getter methods
 	 */
@@ -270,5 +292,28 @@ public class InterventionAdministrationManagerService {
 		}
 
 		return interventions;
+	}
+
+	public Iterable<Author> getAllAuthorsOfIntervention(
+			final ObjectId interventionId) {
+		val authorInterventionAccessForIntervention = databaseManagerService
+				.findModelObjects(AuthorInterventionAccess.class,
+						Queries.AUTHOR_INTERVENTION_ACCESS__BY_INTERVENTION,
+						interventionId);
+
+		final List<Author> authors = new ArrayList<Author>();
+
+		for (val authorInterventionAccess : authorInterventionAccessForIntervention) {
+			val author = databaseManagerService.getModelObjectById(
+					Author.class, authorInterventionAccess.getAuthor());
+
+			if (author != null) {
+				authors.add(author);
+			} else {
+				databaseManagerService.garbageCollect(authorInterventionAccess);
+			}
+		}
+
+		return authors;
 	}
 }
