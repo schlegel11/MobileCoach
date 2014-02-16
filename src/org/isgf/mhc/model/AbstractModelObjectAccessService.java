@@ -37,11 +37,10 @@ public abstract class AbstractModelObjectAccessService {
 	}
 
 	/**
-	 * @see ModelObject#delete(Class, ObjectId)
+	 * @see ModelObject#delete(ModelObject)
 	 */
-	public void deleteModelObject(final Class<? extends ModelObject> clazz,
-			final ModelObject modelObject) {
-		ModelObject.delete(clazz, modelObject.getId());
+	public void deleteModelObject(final ModelObject modelObject) {
+		ModelObject.delete(modelObject);
 	}
 
 	/**

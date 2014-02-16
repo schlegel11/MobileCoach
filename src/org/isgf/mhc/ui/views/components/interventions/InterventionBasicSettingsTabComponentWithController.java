@@ -20,15 +20,20 @@ import com.vaadin.ui.Button.ClickEvent;
 public class InterventionBasicSettingsTabComponentWithController extends
 		InterventionBasicSettingsTabComponent {
 
-	private final Intervention	intervention;
+	private final Intervention											intervention;
 
-	private boolean				lastInterventionMessagingActiveState	= false;
+	private final InterventionEditingContainerComponentWithController	interventionEditingContainerComponentWithController;
+
+	private boolean														lastInterventionMessagingActiveState	= false;
 
 	public InterventionBasicSettingsTabComponentWithController(
-			final Intervention intervention) {
+			final Intervention intervention,
+			final InterventionEditingContainerComponentWithController interventionEditingContainerComponentWithController) {
 		super();
 
 		this.intervention = intervention;
+		this.interventionEditingContainerComponentWithController = interventionEditingContainerComponentWithController;
+
 		lastInterventionMessagingActiveState = intervention.isMessagingActive();
 
 		// Handle buttons
@@ -85,9 +90,10 @@ public class InterventionBasicSettingsTabComponentWithController extends
 				intervention.getSecondsDelayBetweenParticipantsRuleExecution());
 
 		if (lastInterventionMessagingActiveState != intervention
-				.isMessagingActive() && intervention.isMessagingActive()) {
-			// Messaging has been activated, so disable all other tabs
-			// TODO disable all other tabs
+				.isMessagingActive()) {
+			// Messaging status has been changed, so adapt UI
+			interventionEditingContainerComponentWithController
+					.setEditingDependingOnMessaging(!intervention.isMessagingActive());
 		}
 
 		lastInterventionMessagingActiveState = intervention.isMessagingActive();
@@ -146,6 +152,9 @@ public class InterventionBasicSettingsTabComponentWithController extends
 					handleException(e);
 					return;
 				}
+
+				interventionEditingContainerComponentWithController.setEditingDependingOnMessaging(!intervention
+						.isMessagingActive());
 
 				adjust();
 				closeWindow();

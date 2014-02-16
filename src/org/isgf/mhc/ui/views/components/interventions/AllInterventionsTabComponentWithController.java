@@ -50,7 +50,7 @@ public class AllInterventionsTabComponentWithController extends
 		val allRelevantIntervention = getUISession().isAdmin() ? getInterventionAdministrationManagerService()
 				.getAllInterventions()
 				: getInterventionAdministrationManagerService()
-						.getAllInterventionsForAccount(
+						.getAllInterventionsForAuthor(
 								getUISession().getCurrentAuthorId());
 		beanContainer = createBeanContainerForModelObjects(
 				UIIntervention.class, allRelevantIntervention);

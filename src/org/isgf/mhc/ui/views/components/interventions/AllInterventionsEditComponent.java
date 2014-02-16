@@ -71,6 +71,15 @@ public class AllInterventionsEditComponent extends AbstractCustomComponent {
 		// set button start state
 		setNothingSelected();
 
+		// Hide some buttons from normal authors
+		if (!getUISession().isAdmin()) {
+			newButton.setVisible(false);
+			importButton.setVisible(false);
+			exportButton.setVisible(false);
+			duplicateButton.setVisible(false);
+			deleteButton.setVisible(false);
+		}
+
 		// set table formatter
 		allInterventionsTable
 				.setCellStyleGenerator(new Table.CellStyleGenerator() {

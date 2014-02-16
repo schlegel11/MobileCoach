@@ -109,8 +109,7 @@ public abstract class ModelObject {
 
 	/**
 	 * Will automatically be called before deletion to enable recursive deletion
-	 * of
-	 * other objects
+	 * of other objects
 	 */
 	@JsonIgnore
 	protected void performOnDelete() {
@@ -163,6 +162,45 @@ public abstract class ModelObject {
 	/**
 	 * Deletes {@link ModelObject} from database
 	 * 
+	 * @param modelObject
+	 *            The {@link ModelObject} to delete
+	 */
+	@JsonIgnore
+	protected static final void delete(final ModelObject modelObject) {
+		if (modelObject == null) {
+			log.warn("Model object does not exist (before delete)");
+			return;
+		}
+
+		final MongoCollection collection = db.getCollection(modelObject
+				.getClass().getSimpleName());
+
+		try {
+			if (modelObject != null) {
+				log.debug("Perform additionnal deletion steps on class {}...",
+						modelObject.getClass().getSimpleName());
+				modelObject.performOnDelete();
+				log.debug("Additionnal deletion steps done on class {}",
+						modelObject.getClass().getSimpleName());
+			}
+		} catch (final Exception e) {
+			log.warn("Error at recursive deleteion: {}", e.getMessage());
+		}
+
+		try {
+			collection.remove(modelObject.getId());
+			log.debug("Removed {} with id {}", modelObject.getClass()
+					.getSimpleName(), modelObject.getId());
+		} catch (final Exception e) {
+			log.warn("Could not delete {} with id {}: {}", modelObject
+					.getClass().getSimpleName(), modelObject.getId(), e
+					.getMessage());
+		}
+	}
+
+	/**
+	 * Deletes {@link ModelObject} from database
+	 * 
 	 * @param clazz
 	 *            The {@link ModelObject} subclass to delete
 	 * @param id
@@ -175,12 +213,16 @@ public abstract class ModelObject {
 				.getSimpleName());
 
 		try {
-			final ModelObject objectToDelete = get(clazz, id);
-			if (objectToDelete != null) {
-				objectToDelete.performOnDelete();
+			final ModelObject modelObject = get(clazz, id);
+			if (modelObject != null) {
+				log.debug("Perform additionnal deletion steps on class {}...",
+						modelObject.getClass().getSimpleName());
+				modelObject.performOnDelete();
+				log.debug("Additionnal deletion steps done on class {}",
+						modelObject.getClass().getSimpleName());
 			}
 		} catch (final Exception e) {
-			log.warn("Model object {} does not exist (before delete)");
+			log.warn("Error at recursive deletion: {}", e.getMessage());
 		}
 
 		try {
@@ -189,6 +231,20 @@ public abstract class ModelObject {
 		} catch (final Exception e) {
 			log.warn("Could not delete {} with id {}: {}",
 					clazz.getSimpleName(), id, e.getMessage());
+		}
+	}
+
+	/**
+	 * Deletes several {@link ModelObject}s from database
+	 * 
+	 * @param modelObjects
+	 *            The {@link ModelObject}s to delete
+	 */
+	@JsonIgnore
+	protected static final void delete(
+			final Iterable<? extends ModelObject> modelObjects) {
+		for (final ModelObject modelObject : modelObjects) {
+			delete(modelObject);
 		}
 	}
 

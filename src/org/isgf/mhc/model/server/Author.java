@@ -10,6 +10,7 @@ import lombok.val;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
+import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.ui.UIAuthor;
 import org.isgf.mhc.model.ui.UIModelObject;
 
@@ -64,5 +65,19 @@ public class Author extends ModelObject {
 		author.setRelatedModelObject(this);
 
 		return author;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.isgf.mhc.model.ModelObject#performOnDelete()
+	 */
+	@Override
+	public void performOnDelete() {
+		val authorInterventionAccessesToDelete = ModelObject.find(
+				AuthorInterventionAccess.class,
+				Queries.AUTHOR_INTERVENTION_ACCESS__BY_AUTHOR, getId());
+
+		ModelObject.delete(authorInterventionAccessesToDelete);
 	}
 }

@@ -106,14 +106,13 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 		log.info("Stopped.");
 	}
 
-	public void garbageCollect(final ModelObject modelObject) {
-		log.error(
-				"The model object with id {} and class {} is inconsistent with the datastate and will be deleted",
-				modelObject, modelObject.getClass());
-		deleteModelObject(modelObject.getClass(), modelObject);
-	}
-
 	/*
 	 * Class methods
 	 */
+	public void collectGarbage(final ModelObject modelObject) {
+		log.error(
+				"The model object with id {} and class {} is inconsistent with the datastate and will be deleted",
+				modelObject, modelObject.getClass());
+		deleteModelObject(modelObject);
+	}
 }

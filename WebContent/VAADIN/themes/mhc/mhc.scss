@@ -48,6 +48,9 @@
     .pointable {
         cursor: pointer;
     }
+    .unpointable {
+        cursor: default;
+    }
     .styled-border {
         border-bottom-color: rgb(210, 211, 212);
         border-bottom-left-radius: 3px;
@@ -112,11 +115,18 @@
         margin-top: 10px;
     }
     .v-button,
+    .v-button .v-button-wrap {
+        @extend .pointable;
+    }
+    .v-disabled.v-button,
+    .v-disabled.v-button .v-button-wrap {
+        @extend .unpointable;
+    }
+    .v-button,
     .v-button .v-button-wrap,
     .v-disabled.v-button,
     .v-disabled.v-button .v-button-wrap {
         background-image: none;
-        @extend .pointable;
     }
     .v-button,
     .v-disabled.v-button {

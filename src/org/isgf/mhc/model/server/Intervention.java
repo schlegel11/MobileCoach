@@ -22,6 +22,10 @@ import org.isgf.mhc.model.ui.UIModelObject;
  * 
  * @author Andreas Filler
  */
+/**
+ * @author Andreas Filler
+ * 
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 public class Intervention extends ModelObject {
@@ -108,5 +112,15 @@ public class Intervention extends ModelObject {
 		intervention.setRelatedModelObject(this);
 
 		return intervention;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.isgf.mhc.model.ModelObject#performOnDelete()
+	 */
+	@Override
+	public void performOnDelete() {
+		// TODO recursive deletion
 	}
 }

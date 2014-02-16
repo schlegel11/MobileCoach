@@ -143,15 +143,7 @@ public class InterventionAdministrationManagerService {
 					AdminMessageStrings.NOTIFICATION__DEFAULT_ADMIN_CANT_BE_DELETED);
 		}
 
-		val authorInterventionAccessToDelete = databaseManagerService
-				.findModelObjects(AuthorInterventionAccess.class,
-						Queries.AUTHOR_INTERVENTION_ACCESS__BY_AUTHOR,
-						authorToDelete.getId());
-		for (final AuthorInterventionAccess authorInterventionAccess : authorInterventionAccessToDelete) {
-			databaseManagerService.deleteModelObject(
-					AuthorInterventionAccess.class, authorInterventionAccess);
-		}
-		databaseManagerService.deleteModelObject(Author.class, authorToDelete);
+		databaseManagerService.deleteModelObject(authorToDelete);
 	}
 
 	public void authorCheckValidAndUnique(final String newUsername)
@@ -225,10 +217,8 @@ public class InterventionAdministrationManagerService {
 
 	public void interventionDelete(final Intervention interventionToDelete)
 			throws NotificationMessageException {
-		// TODO delete also referenced objects
 
-		databaseManagerService.deleteModelObject(Intervention.class,
-				interventionToDelete);
+		databaseManagerService.deleteModelObject(interventionToDelete);
 	}
 
 	// Author Intervention Access
@@ -249,8 +239,7 @@ public class InterventionAdministrationManagerService {
 						Queries.AUTHOR_INTERVENTION_ACCESS__BY_AUTHOR_AND_INTERVENTION,
 						authorId, interventionId);
 
-		databaseManagerService.deleteModelObject(
-				AuthorInterventionAccess.class, authorInterventionAccess);
+		databaseManagerService.deleteModelObject(authorInterventionAccess);
 	}
 
 	/*
@@ -271,7 +260,7 @@ public class InterventionAdministrationManagerService {
 				Queries.ALL);
 	}
 
-	public Iterable<Intervention> getAllInterventionsForAccount(
+	public Iterable<Intervention> getAllInterventionsForAuthor(
 			final ObjectId authorId) {
 		val authorInterventionAccessForAuthor = databaseManagerService
 				.findModelObjects(AuthorInterventionAccess.class,
@@ -287,7 +276,7 @@ public class InterventionAdministrationManagerService {
 			if (intervention != null) {
 				interventions.add(intervention);
 			} else {
-				databaseManagerService.garbageCollect(authorInterventionAccess);
+				databaseManagerService.collectGarbage(authorInterventionAccess);
 			}
 		}
 
@@ -310,7 +299,7 @@ public class InterventionAdministrationManagerService {
 			if (author != null) {
 				authors.add(author);
 			} else {
-				databaseManagerService.garbageCollect(authorInterventionAccess);
+				databaseManagerService.collectGarbage(authorInterventionAccess);
 			}
 		}
 
