@@ -8,6 +8,11 @@
 
 /* If somebody wants to extend the theme she will include this mixin. */
 
+body {
+    min-width: 1000px;
+    min-height: 500px;
+    overflow: auto;
+}
 @mixin mhc {
     /* Include all the styles from the reindeer theme */
     @include reindeer;
@@ -25,10 +30,6 @@
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    /* Basics */
-    min-width: 1000px;
-    min-height: 500px;
-    overflow: auto;
     /* Basic stlyles */
     .bold {
         font-weight: bold;
