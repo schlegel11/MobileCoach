@@ -17,6 +17,8 @@ public class ThemeImageStrings {
 															+ "access-control-icon.png";
 	public static final String	ACCOUNT_ICON		= IMAGE_PATH
 															+ "account-icon.png";
+	public static final String	COMPONENT_ICON		= IMAGE_PATH
+															+ "component-icon.png";			;
 	public static final String	ACTIVE_ICON			= IMAGE_PATH
 															+ "active-icon-small.png";
 	public static final String	INACTIVE_ICON		= IMAGE_PATH

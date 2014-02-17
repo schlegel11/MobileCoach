@@ -22,11 +22,14 @@ import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.AbstractComponent;
+import com.vaadin.ui.Accordion;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.TabSheet.Tab;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
@@ -299,6 +302,30 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 			final Table table, final Class<BeanItemClass> beanItemClass,
 			final Object objectId) {
 		return (BeanItem<BeanItemClass>) table.getItem(objectId);
+	}
+
+	/**
+	 * Adds a tab to the given {@link Accordion} and allows to add an optional
+	 * {@link ThemeResource} icon
+	 * 
+	 * @param accordion
+	 * @param tabComponent
+	 * @param accordionCaption
+	 * @param accordionIcon
+	 * @return
+	 */
+	protected Tab addTab(final Accordion accordion,
+			final AbstractCustomComponent tabComponent,
+			final AdminMessageStrings accordionCaption,
+			final String accordionIcon) {
+		if (accordionIcon == null) {
+			return accordion.addTab(tabComponent,
+					Messages.getAdminString(accordionCaption));
+		} else {
+			return accordion.addTab(tabComponent,
+					Messages.getAdminString(accordionCaption),
+					new ThemeResource(accordionIcon));
+		}
 	}
 
 	/**

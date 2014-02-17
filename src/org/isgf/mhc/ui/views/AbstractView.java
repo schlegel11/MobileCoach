@@ -9,6 +9,7 @@ import org.isgf.mhc.ui.views.components.AbstractCustomComponent;
 import com.vaadin.navigator.View;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.Accordion;
+import com.vaadin.ui.TabSheet.Tab;
 import com.vaadin.ui.VerticalLayout;
 
 /**
@@ -45,16 +46,17 @@ public abstract class AbstractView extends VerticalLayout implements View {
 	 * @param tabComponent
 	 * @param accordionCaption
 	 * @param accordionIcon
+	 * @return
 	 */
-	protected void addTab(final Accordion accordion,
+	protected Tab addTab(final Accordion accordion,
 			final AbstractCustomComponent tabComponent,
 			final AdminMessageStrings accordionCaption,
 			final String accordionIcon) {
 		if (accordionIcon == null) {
-			accordion.addTab(tabComponent,
+			return accordion.addTab(tabComponent,
 					Messages.getAdminString(accordionCaption));
 		} else {
-			accordion.addTab(tabComponent,
+			return accordion.addTab(tabComponent,
 					Messages.getAdminString(accordionCaption),
 					new ThemeResource(accordionIcon));
 		}

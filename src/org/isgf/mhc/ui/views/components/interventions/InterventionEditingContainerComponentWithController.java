@@ -6,7 +6,7 @@ import java.util.List;
 import lombok.val;
 
 import org.isgf.mhc.conf.AdminMessageStrings;
-import org.isgf.mhc.conf.Messages;
+import org.isgf.mhc.conf.ThemeImageStrings;
 import org.isgf.mhc.model.server.Intervention;
 
 import com.vaadin.ui.Button;
@@ -48,19 +48,21 @@ public class InterventionEditingContainerComponentWithController extends
 				});
 
 		// Fill Accordion
-		getContentAccordion()
-				.addTab(new InterventionBasicSettingsTabComponentWithController(
+		addTab(
+				getContentAccordion(),
+				new InterventionBasicSettingsTabComponentWithController(
 						intervention, this),
-						Messages.getAdminString(AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__BASIC_SETTINGS_TAB))
-				.setStyleName("pointable");
+				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__BASIC_SETTINGS_TAB,
+				ThemeImageStrings.COMPONENT_ICON).setStyleName("pointable");
 
 		if (getUISession().isAdmin()) {
 			// Add intervention access tab
-			val interventionAccessTab = getContentAccordion()
-					.addTab(new InterventionAccessTabComponentWithController(
+			addTab(
+					getContentAccordion(),
+					new InterventionAccessTabComponentWithController(
 							intervention),
-							Messages.getAdminString(AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__ACCESS_TAB));
-			interventionAccessTab.setStyleName("pointable");
+					AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__ACCESS_TAB,
+					ThemeImageStrings.COMPONENT_ICON).setStyleName("pointable");
 
 			// TODO Just a reminder for other tabs, eg Message Groups, Rules and
 			// Variables
