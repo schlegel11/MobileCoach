@@ -12,6 +12,7 @@ import com.vaadin.data.fieldgroup.PropertyId;
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class UIIntervention extends UIModelObject {
+	// NOTE: The String values have to fit the name of the variables
 	public static final String	INTERVENTION_NAME	= "interventionName";
 	public static final String	INTERVENTION_STATUS	= "interventionStatus";
 	public static final String	MESSAGING_STATUS	= "messagingStatus";

@@ -34,6 +34,11 @@ public class InterventionBasicSettingsTabComponentWithController extends
 
 		lastInterventionMessagingActiveState = intervention.isMessagingActive();
 
+		// Set the first time before other tabs are constructed
+		interventionEditingContainerComponentWithController
+				.setEditingDependingOnMessaging(!intervention
+						.isMessagingActive());
+
 		// Handle buttons
 		val interventionBasicSettingsComponent = getInterventionBasicSettingsComponent();
 

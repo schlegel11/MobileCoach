@@ -16,11 +16,13 @@ import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.server.Author;
 import org.isgf.mhc.model.server.AuthorInterventionAccess;
 import org.isgf.mhc.model.server.Intervention;
+import org.isgf.mhc.model.server.InterventionVariableWithValue;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.ModelObjectExchangeService;
 import org.isgf.mhc.tools.BCrypt;
 import org.isgf.mhc.tools.GlobalUniqueIdGenerator;
+import org.isgf.mhc.tools.StringValidator;
 import org.isgf.mhc.ui.NotificationMessageException;
 
 /**
@@ -220,13 +222,15 @@ public class InterventionAdministrationManagerService {
 	}
 
 	// Author Intervention Access
-	public void authorInterventionAccessCreate(final ObjectId authorId,
-			final ObjectId interventionId) {
+	public AuthorInterventionAccess authorInterventionAccessCreate(
+			final ObjectId authorId, final ObjectId interventionId) {
 
 		val authorInterventionAccess = new AuthorInterventionAccess(authorId,
 				interventionId);
 
 		databaseManagerService.saveModelObject(authorInterventionAccess);
+
+		return authorInterventionAccess;
 	}
 
 	public void authorInterventionAccessDelete(final ObjectId authorId,
@@ -238,6 +242,74 @@ public class InterventionAdministrationManagerService {
 						authorId, interventionId);
 
 		databaseManagerService.deleteModelObject(authorInterventionAccess);
+	}
+
+	// Intervention Variable With Value
+	public InterventionVariableWithValue interventionVariableWithValueCreate(
+			final String variableName, final ObjectId interventionId)
+			throws NotificationMessageException {
+
+		if (!StringValidator.isValidVariableName(variableName)) {
+			throw new NotificationMessageException(
+					AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_NOT_VALID);
+		}
+
+		val interventionVariables = databaseManagerService
+				.findModelObjects(
+						InterventionVariableWithValue.class,
+						Queries.INTERVENTION_VARIABLES_WITH_VALUES__BY_INTERVENTION_AND_NAME,
+						interventionId, variableName);
+		if (interventionVariables.iterator().hasNext()) {
+			throw new NotificationMessageException(
+					AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_ALREADY_IN_USE);
+		}
+
+		val interventionVariableWithValue = new InterventionVariableWithValue(
+				interventionId, variableName, "0");
+
+		databaseManagerService.saveModelObject(interventionVariableWithValue);
+
+		return interventionVariableWithValue;
+	}
+
+	public void interventionVariableWithValueChangeName(
+			final InterventionVariableWithValue interventionVariableWithValue,
+			final String newName) throws NotificationMessageException {
+
+		if (!StringValidator.isValidVariableName(newName)) {
+			throw new NotificationMessageException(
+					AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_NOT_VALID);
+		}
+
+		val interventionVariables = databaseManagerService
+				.findModelObjects(
+						InterventionVariableWithValue.class,
+						Queries.INTERVENTION_VARIABLES_WITH_VALUES__BY_INTERVENTION_AND_NAME,
+						interventionVariableWithValue.getIntervention(),
+						newName);
+		if (interventionVariables.iterator().hasNext()) {
+			throw new NotificationMessageException(
+					AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_ALREADY_IN_USE);
+		}
+
+		interventionVariableWithValue.setName(newName);
+
+		databaseManagerService.saveModelObject(interventionVariableWithValue);
+	}
+
+	public void interventionVariableWithValueChangeValue(
+			final InterventionVariableWithValue interventionVariableWithValue,
+			final String newValue) throws NotificationMessageException {
+
+		interventionVariableWithValue.setValue(newValue);
+
+		databaseManagerService.saveModelObject(interventionVariableWithValue);
+	}
+
+	public void interventionVariableWithValueDelete(
+			final InterventionVariableWithValue variableToDelete) {
+
+		databaseManagerService.deleteModelObject(variableToDelete);
 	}
 
 	/*
@@ -302,5 +374,14 @@ public class InterventionAdministrationManagerService {
 		}
 
 		return authors;
+	}
+
+	public Iterable<InterventionVariableWithValue> getAllInterventionVariablesOfIntervention(
+			final ObjectId interventionId) {
+
+		return databaseManagerService.findModelObjects(
+				InterventionVariableWithValue.class,
+				Queries.INTERVENTION_VARIABLES_WITH_VALUES__BY_INTERVENTION,
+				interventionId);
 	}
 }

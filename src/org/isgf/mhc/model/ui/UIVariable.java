@@ -5,40 +5,41 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import org.isgf.mhc.conf.AdminMessageStrings;
-import org.isgf.mhc.model.server.Author;
+import org.isgf.mhc.model.server.InterventionVariableWithValue;
 
 import com.vaadin.data.fieldgroup.PropertyId;
 
 @AllArgsConstructor
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class UIAuthor extends UIModelObject {
+public class UIVariable extends UIModelObject {
 	// NOTE: The String values have to fit the name of the variables
-	public static final String	USERNAME	= "username";
-	public static final String	TYPE		= "type";
+	public static final String	NAME	= "name";
+	public static final String	VALUE	= "value";
 
-	@PropertyId(USERNAME)
-	private String				username;
+	@PropertyId(NAME)
+	private String				name;
 
-	@PropertyId(TYPE)
-	private String				type;
+	@PropertyId(VALUE)
+	private String				value;
 
 	public static Object[] getVisibleColumns() {
-		return new Object[] { USERNAME, TYPE };
+		return new Object[] { NAME, VALUE };
 	}
 
 	public static String[] getColumnHeaders() {
 		return new String[] {
-				localize(AdminMessageStrings.UI_COLUMNS__ACCOUNT),
-				localize(AdminMessageStrings.UI_COLUMNS__ACCOUNT_TYPE) };
+				localize(AdminMessageStrings.UI_COLUMNS__VARIABLE_NAME),
+				localize(AdminMessageStrings.UI_COLUMNS__VARIABLE_VALUE) };
 	}
 
 	public static String getSortColumn() {
-		return USERNAME;
+		return NAME;
 	}
 
 	@Override
 	public String toString() {
-		return getRelatedModelObject(Author.class).getUsername();
+		return getRelatedModelObject(InterventionVariableWithValue.class)
+				.getName();
 	}
 }

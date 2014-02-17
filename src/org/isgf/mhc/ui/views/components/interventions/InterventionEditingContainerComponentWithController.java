@@ -48,29 +48,34 @@ public class InterventionEditingContainerComponentWithController extends
 				});
 
 		// Fill Accordion
-		addTab(
+		addPointableTab(
 				getContentAccordion(),
 				new InterventionBasicSettingsTabComponentWithController(
 						intervention, this),
 				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__BASIC_SETTINGS_TAB,
-				ThemeImageStrings.COMPONENT_ICON).setStyleName("pointable");
+				ThemeImageStrings.COMPONENT_ICON);
+
+		// Add intervention variables tab
+		registerToSetEditingDependingOnMessaging(addPointableTab(
+				getContentAccordion(),
+				new InterventionVariablesTabComponentWithController(
+						intervention),
+				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__VARIABLES_TAB,
+				ThemeImageStrings.COMPONENT_ICON));
 
 		if (getUISession().isAdmin()) {
 			// Add intervention access tab
-			addTab(
+			addPointableTab(
 					getContentAccordion(),
 					new InterventionAccessTabComponentWithController(
 							intervention),
 					AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__ACCESS_TAB,
-					ThemeImageStrings.COMPONENT_ICON).setStyleName("pointable");
-
-			// TODO Just a reminder for other tabs, eg Message Groups, Rules and
-			// Variables
-			// makeEditingDependingOnMessaging(TAB)
+					ThemeImageStrings.COMPONENT_ICON);
 		}
+
 	}
 
-	private void makeEditingDependingOnMessaging(final Tab tab) {
+	private void registerToSetEditingDependingOnMessaging(final Tab tab) {
 		tab.getComponent().setEnabled(editingAllowed);
 		availableTabsToSwitchDependingOnMessaging.add(tab);
 	}

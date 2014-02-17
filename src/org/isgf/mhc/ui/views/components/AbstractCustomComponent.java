@@ -314,17 +314,21 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	 * @param accordionIcon
 	 * @return
 	 */
-	protected Tab addTab(final Accordion accordion,
+	protected Tab addPointableTab(final Accordion accordion,
 			final AbstractCustomComponent tabComponent,
 			final AdminMessageStrings accordionCaption,
 			final String accordionIcon) {
 		if (accordionIcon == null) {
-			return accordion.addTab(tabComponent,
+			val tab = accordion.addTab(tabComponent,
 					Messages.getAdminString(accordionCaption));
+			tab.setStyleName("pointable");
+			return tab;
 		} else {
-			return accordion.addTab(tabComponent,
+			val tab = accordion.addTab(tabComponent,
 					Messages.getAdminString(accordionCaption),
 					new ThemeResource(accordionIcon));
+			tab.setStyleName("pointable");
+			return tab;
 		}
 	}
 
