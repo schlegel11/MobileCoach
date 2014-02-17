@@ -49,7 +49,8 @@ public class MonitoringReplyRule extends AbstractMonitoringRule {
 	}
 
 	/**
-	 * Belongs to the mentioned {@link MonitoringRule} and will be executed in
+	 * <strong>OPTIONAL:</strong> Belongs to the mentioned
+	 * {@link MonitoringRule} and will be executed in
 	 * case of an answer by the {@link Participant}
 	 */
 	@Getter
@@ -57,7 +58,8 @@ public class MonitoringReplyRule extends AbstractMonitoringRule {
 	private ObjectId	isGotAnswerRuleForMonitoringRule;
 
 	/**
-	 * Belongs to the mentioned {@link MonitoringRule} and will be executed in
+	 * <strong>OPTIONAL:</strong> Belongs to the mentioned
+	 * {@link MonitoringRule} and will be executed in
 	 * case of no answer by the {@link Participant}
 	 */
 	@Getter

@@ -94,6 +94,13 @@ public class ScreeningSurveySlide extends ModelObject {
 	private boolean								isLastSlide;
 
 	/**
+	 * <strong>OPTIONAL:</strong> The {@link Feedback} to hand over to if set
+	 */
+	@Getter
+	@Setter
+	private ObjectId							handsOverToFeedback;
+
+	/**
 	 * <strong>OPTIONAL:</strong> The answers presented to the
 	 * {@link Participant} for selection
 	 */

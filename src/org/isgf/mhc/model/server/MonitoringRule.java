@@ -2,6 +2,7 @@ package org.isgf.mhc.model.server;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Setter;
 
 import org.bson.types.ObjectId;
@@ -48,12 +49,20 @@ public class MonitoringRule extends AbstractMonitoringRule {
 	}
 
 	/**
+	 * {@link Intervention} to which this {@link MonitoringRule} belongs to
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private ObjectId	intervention;
+
+	/**
 	 * <strong>OPTIONAL if sendMassgeIfTrue is false:</strong> The hour the
 	 * message should be sent
 	 */
 	@Getter
 	@Setter
-	private int	hourToSendMessageVariable;
+	private int			hourToSendMessageVariable;
 
 	/**
 	 * <strong>OPTIONAL if sendMassgeIfTrue is false:</strong> The hours a
@@ -62,5 +71,5 @@ public class MonitoringRule extends AbstractMonitoringRule {
 	 */
 	@Getter
 	@Setter
-	private int	hoursUntilMessageIsHandledAsUnanswered;
+	private int			hoursUntilMessageIsHandledAsUnanswered;
 }

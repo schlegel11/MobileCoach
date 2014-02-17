@@ -26,15 +26,6 @@ public class DialogMessage extends ModelObject {
 	private ObjectId	participant;
 
 	/**
-	 * The {@link Intervention} as part of which the {@link DialogMessage} has
-	 * been sent
-	 */
-	@Getter
-	@Setter
-	@NonNull
-	private ObjectId	intervention;
-
-	/**
 	 * The message sent to the {@link Participant}
 	 */
 	@Getter
