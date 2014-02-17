@@ -167,7 +167,7 @@ public class InterventionAdministrationManagerService {
 	public Intervention interventionCreate(final String name) {
 		val intervention = new Intervention(
 				GlobalUniqueIdGenerator.createGlobalUniqueId(), name,
-				System.currentTimeMillis(), false, false, 16, 5);
+				System.currentTimeMillis(), false, false);
 
 		if (name.equals("")) {
 			intervention.setName("---");
@@ -185,20 +185,6 @@ public class InterventionAdministrationManagerService {
 		} else {
 			intervention.setName(newName);
 		}
-
-		databaseManagerService.saveModelObject(intervention);
-	}
-
-	public void interventionChangeHourOfDailyRuleExecution(
-			final Intervention intervention, final int value) {
-		intervention.setHourOfDailyRuleExecutionStart(value);
-
-		databaseManagerService.saveModelObject(intervention);
-	}
-
-	public void interventionChangeSecondsDelayBetweenParticipantsRuleExecution(
-			final Intervention intervention, final int value) {
-		intervention.setSecondsDelayBetweenParticipantsRuleExecution(value);
 
 		databaseManagerService.saveModelObject(intervention);
 	}

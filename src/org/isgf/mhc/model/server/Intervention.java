@@ -17,7 +17,7 @@ import org.isgf.mhc.model.ui.UIModelObject;
  * {@link ModelObject} to represent an {@link Intervention}
  * 
  * An {@link Intervention} describes the whole project consisting of a
- * {@link ScreeningSurvey}, {@link InterventionRule}s and {@link Participant}s.
+ * {@link ScreeningSurvey}, {@link MonitoringRule}s and {@link Participant}s.
  * It's the heart of the whole system.
  * 
  * @author Andreas Filler
@@ -71,23 +71,6 @@ public class Intervention extends ModelObject {
 	@Getter
 	@Setter
 	private boolean	messagingActive;
-
-	/**
-	 * The hour of the day the rule execution for all Participants in the
-	 * {@link Intervention} starts. It's defined in the 24h time standard, so
-	 * e.g. 1 PM would be 13, 8 AM would be 8.
-	 */
-	@Getter
-	@Setter
-	private int		hourOfDailyRuleExecutionStart;
-
-	/**
-	 * How many seconds does the system wait between the rule exeuction for each
-	 * {@link Participant} in an {@link Intervention}
-	 */
-	@Getter
-	@Setter
-	private int		secondsDelayBetweenParticipantsRuleExecution;
 
 	/*
 	 * (non-Javadoc)

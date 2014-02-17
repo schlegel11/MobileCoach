@@ -5,8 +5,6 @@ import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.model.server.Intervention;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 
@@ -47,47 +45,11 @@ public class InterventionBasicSettingsTabComponentWithController extends
 
 		// Set start state
 		adjust();
-
-		// Handle sliders
-		val valueChangeListener = new SliderValueChangeListener();
-		getInterventionBasicSettingsComponent().getHourOfRuleExecutionSlider()
-				.addValueChangeListener(valueChangeListener);
-		getInterventionBasicSettingsComponent()
-				.getSecondsDelayBetweenEachParticipantSlider()
-				.addValueChangeListener(valueChangeListener);
-	}
-
-	private class SliderValueChangeListener implements ValueChangeListener {
-
-		@Override
-		public void valueChange(final ValueChangeEvent event) {
-			if (event.getProperty() == getInterventionBasicSettingsComponent()
-					.getHourOfRuleExecutionSlider()) {
-				log.debug("Change hour of daily rule execution");
-				getInterventionAdministrationManagerService()
-						.interventionChangeHourOfDailyRuleExecution(
-								intervention,
-								((Double) event.getProperty().getValue())
-										.intValue());
-			} else if (event.getProperty() == getInterventionBasicSettingsComponent()
-					.getSecondsDelayBetweenEachParticipantSlider()) {
-				log.debug("Change seconds delay between participants rule execution");
-				getInterventionAdministrationManagerService()
-						.interventionChangeSecondsDelayBetweenParticipantsRuleExecution(
-								intervention,
-								((Double) event.getProperty().getValue())
-										.intValue());
-			}
-
-			adjust();
-		}
 	}
 
 	private void adjust() {
 		getInterventionBasicSettingsComponent().adjust(intervention.isActive(),
-				intervention.isMessagingActive(),
-				intervention.getHourOfDailyRuleExecutionStart(),
-				intervention.getSecondsDelayBetweenParticipantsRuleExecution());
+				intervention.isMessagingActive());
 
 		if (lastInterventionMessagingActiveState != intervention
 				.isMessagingActive()) {
