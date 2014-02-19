@@ -45,20 +45,24 @@ public class LoginView extends AbstractView implements View {
 	private class LoginButtonClickListener implements ClickListener {
 		@Override
 		public void buttonClick(final ClickEvent event) {
-			if (!loginViewComponent.getUsernameField().isValid()) {
-				getAdminUI().showWarningNotification(
-						AdminMessageStrings.NOTIFICATION__NO_VALID_USERNAME);
-				return;
-			}
-			if (!loginViewComponent.getPasswordField().isValid()) {
-				getAdminUI().showWarningNotification(
-						AdminMessageStrings.NOTIFICATION__NO_VALID_PASSWORD);
-				return;
-			}
-
-			getAdminUI().login(
-					loginViewComponent.getUsernameField().getValue(),
-					loginViewComponent.getPasswordField().getValue());
+			// TODO DEBUG LOGIN
+			getAdminUI().login("admin", "admin");
+			/*
+			 * if (!loginViewComponent.getUsernameField().isValid()) {
+			 * getAdminUI().showWarningNotification(
+			 * AdminMessageStrings.NOTIFICATION__NO_VALID_USERNAME);
+			 * return;
+			 * }
+			 * if (!loginViewComponent.getPasswordField().isValid()) {
+			 * getAdminUI().showWarningNotification(
+			 * AdminMessageStrings.NOTIFICATION__NO_VALID_PASSWORD);
+			 * return;
+			 * }
+			 * 
+			 * getAdminUI().login(
+			 * loginViewComponent.getUsernameField().getValue(),
+			 * loginViewComponent.getPasswordField().getValue());
+			 */
 		}
 	}
 
