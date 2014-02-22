@@ -5,9 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.val;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
+import org.isgf.mhc.model.Queries;
 
 /**
  * {@link ModelObject} to represent an {@link MonitoringMessageGroup}
@@ -45,4 +47,19 @@ public class MonitoringMessageGroup extends ModelObject {
 	@Getter
 	@Setter
 	private boolean		sendInRandomOrder;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.isgf.mhc.model.ModelObject#performOnDelete()
+	 */
+	@Override
+	public void performOnDelete() {
+		val monitoringMessagesToDelete = ModelObject.find(
+				MonitoringMessage.class,
+				Queries.MONITORING_MESSAGES__BY_MONITORING_MESSAGE_GROUP,
+				getId());
+
+		ModelObject.delete(monitoringMessagesToDelete);
+	}
 }

@@ -20,4 +20,10 @@ public class Queries {
 
 	public static final String	INTERVENTION_VARIABLES_WITH_VALUES__BY_INTERVENTION				= "{'intervention':#}";
 	public static final String	INTERVENTION_VARIABLES_WITH_VALUES__BY_INTERVENTION_AND_NAME	= "{'intervention':#,'name':#}";
+
+	public static final String	MONITORING_MESSAGE_GROUPS__BY_INTERVENTION						= "{'intervention':#}";
+	public static final String	MONITORING_MESSAGE_GROUPS__SORT_BY_NAME_ASC						= "{'name':1}";
+
+	public static final String	MONITORING_MESSAGES__BY_MONITORING_MESSAGE_GROUP				= "{'monitoringMessageGroup':#}";
+	public static final String	MONITORING_MESSAGE_GROUPS__SORT_BY_ORDER_ASC					= "{'order':1}";
 }

@@ -323,4 +323,46 @@ public abstract class ModelObject {
 
 		return iteratable;
 	}
+
+	/**
+	 * Find, loads and sort {@link ModelObject}s from database
+	 * 
+	 * @param clazz
+	 *            The {@link ModelObject} subclass to retrieve
+	 * @param query
+	 *            The query to find the appropriate {@link ModelObject}
+	 * @param sort
+	 *            The sort rules to sort the appropriate {@link ModelObject}
+	 * @param parameters
+	 *            The parameters to fill the query
+	 * @return The retrieved {@link ModelObject} subclass objects as
+	 *         {@link Iterable} (which contains no items if none has been found)
+	 */
+	@JsonIgnore
+	protected static final <ModelObjectSubclass extends ModelObject> Iterable<ModelObjectSubclass> findSorted(
+			final Class<ModelObjectSubclass> clazz, final String query,
+			final String sort, final Object... parameters) {
+		final MongoCollection collection = db.getCollection(clazz
+				.getSimpleName());
+
+		Iterable<ModelObjectSubclass> iteratable = null;
+		try {
+			if (parameters != null && parameters.length > 0) {
+				iteratable = collection.find(query, parameters).sort(sort)
+						.as(clazz);
+			} else {
+				iteratable = collection.find(query).sort(sort).as(clazz);
+			}
+			log.debug(
+					"Retrieved {} with find query {}, sort query {} and parameters {}",
+					clazz.getSimpleName(), query, sort, parameters);
+		} catch (final Exception e) {
+			log.warn(
+					"Could not retrieve {} with find query {}, sort query {} and parameters {}: {}",
+					clazz.getSimpleName(), query, sort, parameters,
+					e.getMessage());
+		}
+
+		return iteratable;
+	}
 }

@@ -17,6 +17,8 @@ import org.isgf.mhc.model.server.Author;
 import org.isgf.mhc.model.server.AuthorInterventionAccess;
 import org.isgf.mhc.model.server.Intervention;
 import org.isgf.mhc.model.server.InterventionVariableWithValue;
+import org.isgf.mhc.model.server.MonitoringMessage;
+import org.isgf.mhc.model.server.MonitoringMessageGroup;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.ModelObjectExchangeService;
@@ -31,7 +33,9 @@ import org.isgf.mhc.ui.NotificationMessageException;
  */
 @Log4j2
 public class InterventionAdministrationManagerService {
-	private static InterventionAdministrationManagerService	instance	= null;
+	private static final String								DEFAULT_OBJECT_NAME	= "---";
+
+	private static InterventionAdministrationManagerService	instance			= null;
 
 	private final DatabaseManagerService					databaseManagerService;
 	private final FileStorageManagerService					fileStorageManagerService;
@@ -172,7 +176,7 @@ public class InterventionAdministrationManagerService {
 				System.currentTimeMillis(), false, false);
 
 		if (name.equals("")) {
-			intervention.setName("---");
+			intervention.setName(DEFAULT_OBJECT_NAME);
 		}
 
 		databaseManagerService.saveModelObject(intervention);
@@ -183,7 +187,7 @@ public class InterventionAdministrationManagerService {
 	public void interventionChangeName(final Intervention intervention,
 			final String newName) {
 		if (newName.equals("")) {
-			intervention.setName("---");
+			intervention.setName(DEFAULT_OBJECT_NAME);
 		} else {
 			intervention.setName(newName);
 		}
@@ -312,6 +316,48 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.deleteModelObject(variableToDelete);
 	}
 
+	// Monitoring Message Group
+	public MonitoringMessageGroup monitoringMessageGroupCreate(
+			final String groupName, final ObjectId interventionId) {
+		val monitoringMessageGroup = new MonitoringMessageGroup(interventionId,
+				groupName, false);
+
+		if (monitoringMessageGroup.getName().equals("")) {
+			monitoringMessageGroup.setName(DEFAULT_OBJECT_NAME);
+		}
+
+		databaseManagerService.saveModelObject(monitoringMessageGroup);
+
+		return monitoringMessageGroup;
+	}
+
+	public void monitoringMessageGroupSetSentOrder(
+			final MonitoringMessageGroup monitoringMessageGroup,
+			final boolean newValue) {
+		monitoringMessageGroup.setSendInRandomOrder(newValue);
+
+		databaseManagerService.saveModelObject(monitoringMessageGroup);
+	}
+
+	public void monitoringMessageGroupChangeName(
+			final MonitoringMessageGroup monitoringMessageGroup,
+			final String newName) {
+		if (newName.equals("")) {
+			monitoringMessageGroup.setName(DEFAULT_OBJECT_NAME);
+		} else {
+			monitoringMessageGroup.setName(newName);
+		}
+
+		databaseManagerService.saveModelObject(monitoringMessageGroup);
+	}
+
+	public void monitoringMessageGroupDelete(
+			final MonitoringMessageGroup monitoringMessageGroupToDelete) {
+
+		databaseManagerService
+				.deleteModelObject(monitoringMessageGroupToDelete);
+	}
+
 	/*
 	 * Getter methods
 	 */
@@ -384,4 +430,23 @@ public class InterventionAdministrationManagerService {
 				Queries.INTERVENTION_VARIABLES_WITH_VALUES__BY_INTERVENTION,
 				interventionId);
 	}
+
+	public Iterable<MonitoringMessageGroup> getAllMonitoringMessageGroupsOfIntervention(
+			final ObjectId interventionId) {
+		return databaseManagerService.findSortedModelObjects(
+				MonitoringMessageGroup.class,
+				Queries.MONITORING_MESSAGE_GROUPS__BY_INTERVENTION,
+				Queries.MONITORING_MESSAGE_GROUPS__SORT_BY_NAME_ASC,
+				interventionId);
+	}
+
+	public Iterable<MonitoringMessage> getAllMonitoringMessagesOfMonitoringMessageGroup(
+			final ObjectId monitoringMessageGroupId) {
+		return databaseManagerService.findSortedModelObjects(
+				MonitoringMessage.class,
+				Queries.MONITORING_MESSAGES__BY_MONITORING_MESSAGE_GROUP,
+				Queries.MONITORING_MESSAGE_GROUPS__SORT_BY_ORDER_ASC,
+				monitoringMessageGroupId);
+	}
+
 }

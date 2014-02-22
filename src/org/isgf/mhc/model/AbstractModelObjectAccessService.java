@@ -60,4 +60,13 @@ public abstract class AbstractModelObjectAccessService {
 			final Object... parameters) {
 		return ModelObject.find(clazz, query, parameters);
 	}
+
+	/**
+	 * @see ModelObject#findSorted(Class, String, String, Object...)
+	 */
+	public <ModelObjectSubclass extends ModelObject> Iterable<ModelObjectSubclass> findSortedModelObjects(
+			final Class<ModelObjectSubclass> clazz, final String query,
+			final String sort, final Object... parameters) {
+		return ModelObject.findSorted(clazz, query, sort, parameters);
+	}
 }

@@ -63,6 +63,14 @@ public class InterventionEditingContainerComponentWithController extends
 				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__VARIABLES_TAB,
 				ThemeImageStrings.COMPONENT_ICON));
 
+		// Add monitoring message groups tab
+		registerToSetEditingDependingOnMessaging(addPointableTab(
+				getContentAccordion(),
+				new MonitoringMessageGroupsTabComponentWithController(
+						intervention),
+				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__MONITORING_MESSAGE_GROUPS_TAB,
+				ThemeImageStrings.COMPONENT_ICON));
+
 		if (getUISession().isAdmin()) {
 			// Add intervention access tab
 			addPointableTab(
