@@ -166,6 +166,67 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 		return modalWindow;
 	}
 
+	/**
+	 * Shows a model window to edit a {@link ModelObject}
+	 * 
+	 * @param title
+	 *            The title of the window
+	 * @param modelObjectToEdit
+	 *            The {@link ModelObject} to edit
+	 * @param modelObjectEditComponent
+	 *            The appropriate {@link AbstractStringValueEditComponent} to
+	 *            create
+	 * @param okButtonClickListener
+	 *            The listener for the OK button
+	 * @param cancelButtonClickListener
+	 *            The listener for the Cancel button
+	 * @return The shown window
+	 */
+	protected Window showModalModelObjectEditWindow(
+			final AdminMessageStrings title,
+			final ModelObject modelObjectToEdit,
+			final AbstractModelObjectEditComponent modelObjectEditComponent,
+			final ExtendableButtonClickListener okButtonClickListener,
+			final ExtendableButtonClickListener cancelButtonClickListener) {
+		val modalWindow = new Window(Messages.getAdminString(title));
+		modalWindow.setModal(true);
+		modalWindow.setResizable(false);
+		modalWindow.setClosable(false);
+		modalWindow.setContent(modelObjectEditComponent);
+
+		// Register ok button listener
+		if (okButtonClickListener != null) {
+			okButtonClickListener.setBelongingWindow(modalWindow);
+			okButtonClickListener
+					.setBelongingComponent(modelObjectEditComponent);
+			modelObjectEditComponent
+					.registerOkButtonListener(okButtonClickListener);
+		}
+
+		// Register cancel button listener if provided or a simple window closer
+		// if not
+		if (cancelButtonClickListener != null) {
+			cancelButtonClickListener.setBelongingWindow(modalWindow);
+			cancelButtonClickListener
+					.setBelongingComponent(modelObjectEditComponent);
+			modelObjectEditComponent
+					.registerCancelButtonListener(cancelButtonClickListener);
+		} else {
+			modelObjectEditComponent
+					.registerCancelButtonListener(new Button.ClickListener() {
+						@Override
+						public void buttonClick(final ClickEvent event) {
+							modalWindow.close();
+						}
+					});
+		}
+
+		// show window
+		getAdminUI().addWindow(modalWindow);
+
+		return modalWindow;
+	}
+
 	protected Window showConfirmationWindow(
 			final ExtendableButtonClickListener okButtonClickListener,
 			final ExtendableButtonClickListener cancelButtonClickListener) {

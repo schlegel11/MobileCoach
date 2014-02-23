@@ -53,6 +53,15 @@ public abstract class AbstractModelObjectAccessService {
 	}
 
 	/**
+	 * @see ModelObject#findOneSorted(Class, String, Object...)
+	 */
+	public <ModelObjectSubclass extends ModelObject> ModelObjectSubclass findOneSortedModelObject(
+			final Class<ModelObjectSubclass> clazz, final String query,
+			final String sort, final Object... parameters) {
+		return ModelObject.findOneSorted(clazz, query, sort, parameters);
+	}
+
+	/**
 	 * @see ModelObject#find(Class, String, Object...)
 	 */
 	public <ModelObjectSubclass extends ModelObject> Iterable<ModelObjectSubclass> findModelObjects(

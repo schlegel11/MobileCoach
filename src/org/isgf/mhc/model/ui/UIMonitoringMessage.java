@@ -13,9 +13,13 @@ import com.vaadin.data.fieldgroup.PropertyId;
 @EqualsAndHashCode(callSuper = false)
 public class UIMonitoringMessage extends UIModelObject {
 	// NOTE: The String values have to fit the name of the variables
+	public static final String	ORDER					= "order";
 	public static final String	TEXT_WITH_PLACEHOLDERS	= "textWithPlaceholders";
 	public static final String	HAS_LINKED_MEDIA_OBJECT	= "hasLinkedMediaObject";
 	public static final String	RESULT_VARIABLE			= "resultVariable";
+
+	@PropertyId(ORDER)
+	private int					order;
 
 	@PropertyId(TEXT_WITH_PLACEHOLDERS)
 	private String				textWithPlaceholders;
@@ -41,6 +45,6 @@ public class UIMonitoringMessage extends UIModelObject {
 	}
 
 	public static String getSortColumn() {
-		return TEXT_WITH_PLACEHOLDERS;
+		return ORDER;
 	}
 }

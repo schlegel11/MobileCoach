@@ -22,10 +22,6 @@ public abstract class AbstractStringValueEditComponent extends
 		String[] toArray(final String[] stringArray);
 	}
 
-	/**
-	 * The {@link String} to create/edit in this component
-	 */
-
 	@Delegate(types = ReadOnlyStringList.class)
 	private final List<String>	availableVariables	= new ArrayList<String>();
 

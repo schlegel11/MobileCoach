@@ -4,13 +4,15 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
+import org.isgf.mhc.conf.AdminMessageStrings;
+import org.isgf.mhc.model.server.MonitoringMessage;
 import org.isgf.mhc.model.server.MonitoringMessageGroup;
+import org.isgf.mhc.model.ui.UIModelObject;
 import org.isgf.mhc.model.ui.UIMonitoringMessage;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanContainer;
-import com.vaadin.data.util.BeanItem;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 
@@ -19,6 +21,10 @@ import com.vaadin.ui.Button.ClickEvent;
  * 
  * @author Andreas Filler
  */
+/**
+ * @author Andreas Filler
+ * 
+ */
 @SuppressWarnings("serial")
 @Log4j2
 public class MonitoringMessageGroupEditComponentWithController extends
@@ -26,8 +32,7 @@ public class MonitoringMessageGroupEditComponentWithController extends
 
 	private final MonitoringMessageGroup						monitoringMessageGroup;
 
-	private UIMonitoringMessage									selectedUIMonitoringMessage			= null;
-	private BeanItem<UIMonitoringMessage>						selectedUIMonitoringMessageBeanItem	= null;
+	private UIMonitoringMessage									selectedUIMonitoringMessage	= null;
 
 	private final BeanContainer<ObjectId, UIMonitoringMessage>	beanContainer;
 
@@ -55,6 +60,8 @@ public class MonitoringMessageGroupEditComponentWithController extends
 				.getVisibleColumns());
 		monitoringMessageTable.setColumnHeaders(UIMonitoringMessage
 				.getColumnHeaders());
+		monitoringMessageTable.setSortAscending(true);
+		monitoringMessageTable.setSortEnabled(false);
 
 		// check box
 		getRandomOrderCheckBox().setValue(
@@ -70,12 +77,8 @@ public class MonitoringMessageGroupEditComponentWithController extends
 						if (objectId == null) {
 							setNothingSelected();
 							selectedUIMonitoringMessage = null;
-							selectedUIMonitoringMessageBeanItem = null;
 						} else {
 							selectedUIMonitoringMessage = getUIModelObjectFromTableByObjectId(
-									monitoringMessageTable,
-									UIMonitoringMessage.class, objectId);
-							selectedUIMonitoringMessageBeanItem = getBeanItemFromTableByObjectId(
 									monitoringMessageTable,
 									UIMonitoringMessage.class, objectId);
 							setSomethingSelected();
@@ -109,173 +112,182 @@ public class MonitoringMessageGroupEditComponentWithController extends
 		@Override
 		public void buttonClick(final ClickEvent event) {
 			if (event.getButton() == getNewButton()) {
-				// createMessage();
+				createMessage();
 			} else if (event.getButton() == getEditButton()) {
-				// editMessage();
+				editMessage();
 			} else if (event.getButton() == getMoveUpButton()) {
-				// moveUpMessage();
+				moveMessage(true);
 			} else if (event.getButton() == getMoveDownButton()) {
-				// moveDownMessage();
+				moveMessage(false);
 			} else if (event.getButton() == getDeleteButton()) {
-				// deleteMessage();
+				deleteMessage();
 			}
 		}
 	}
 
-	// TODO all controller methods
-	// public void createMessage() {
-	// log.debug("Create variable");
-	// showModalStringValueEditWindow(
-	// AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NAME_FOR_VARIABLE,
-	// null, null, new ShortStringEditComponent(),
-	// new ExtendableButtonClickListener() {
-	// @Override
-	// public void buttonClick(final ClickEvent event) {
-	// InterventionVariableWithValue newVariable;
-	// try {
-	// // Create new variable
-	// newVariable = getInterventionAdministrationManagerService()
-	// .interventionVariableWithValueCreate(
-	// getStringValue(),
-	// intervention.getId());
-	// } catch (final Exception e) {
-	// handleException(e);
-	// return;
-	// }
-	//
-	// // Adapt UI
-	// beanContainer.addItem(newVariable.getId(),
-	// UIVariable.class.cast(newVariable
-	// .toUIModelObject()));
-	// getInterventionVariablesEditComponent()
-	// .getVariablesTable()
-	// .select(newVariable.getId());
-	// getAdminUI()
-	// .showInformationNotification(
-	// AdminMessageStrings.NOTIFICATION__VARIABLE_CREATED);
-	//
-	// closeWindow();
-	// }
-	// }, null);
-	// }
-	//
-	// public void editMessage() {
-	// log.debug("Rename variable");
-	//
-	// showModalStringValueEditWindow(
-	// AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_NAME_FOR_VARIABLE,
-	// selectedUIMonitoringMessage.getRelatedModelObject(
-	// InterventionVariableWithValue.class).getName(), null,
-	// new ShortStringEditComponent(),
-	// new ExtendableButtonClickListener() {
-	// @Override
-	// public void buttonClick(final ClickEvent event) {
-	// try {
-	// val selectedVariable = selectedUIMonitoringMessage
-	// .getRelatedModelObject(InterventionVariableWithValue.class);
-	//
-	// // Change name
-	// getInterventionAdministrationManagerService()
-	// .interventionVariableWithValueChangeName(
-	// selectedVariable, getStringValue());
-	// } catch (final Exception e) {
-	// handleException(e);
-	// return;
-	// }
-	//
-	// // Adapt UI
-	// getStringItemProperty(
-	// selectedUIMonitoringMessageBeanItem,
-	// UIVariable.NAME)
-	// .setValue(
-	// selectedUIMonitoringMessage
-	// .getRelatedModelObject(
-	// InterventionVariableWithValue.class)
-	// .getName());
-	//
-	// getAdminUI()
-	// .showInformationNotification(
-	// AdminMessageStrings.NOTIFICATION__VARIABLE_RENAMED);
-	// closeWindow();
-	// }
-	// }, null);
-	// }
-	//
-	// public void moveUpMessage() {
-	// log.debug("Edit variable value");
-	//
-	// showModalStringValueEditWindow(
-	// AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_VALUE_FOR_VARIABLE,
-	// selectedUIMonitoringMessage.getRelatedModelObject(
-	// InterventionVariableWithValue.class).getValue(), null,
-	// new ShortStringEditComponent(),
-	// new ExtendableButtonClickListener() {
-	// @Override
-	// public void buttonClick(final ClickEvent event) {
-	// try {
-	// val selectedVariable = selectedUIMonitoringMessage
-	// .getRelatedModelObject(InterventionVariableWithValue.class);
-	//
-	// // Change name
-	// getInterventionAdministrationManagerService()
-	// .interventionVariableWithValueChangeValue(
-	// selectedVariable, getStringValue());
-	// } catch (final Exception e) {
-	// handleException(e);
-	// return;
-	// }
-	//
-	// // Adapt UI
-	// getStringItemProperty(
-	// selectedUIMonitoringMessageBeanItem,
-	// UIVariable.VALUE)
-	// .setValue(
-	// selectedUIMonitoringMessage
-	// .getRelatedModelObject(
-	// InterventionVariableWithValue.class)
-	// .getValue());
-	//
-	// getAdminUI()
-	// .showInformationNotification(
-	// AdminMessageStrings.NOTIFICATION__VARIABLE_VALUE_CHANGED);
-	// closeWindow();
-	// }
-	// }, null);
-	// }
-	//
-	// public void deleteMessage() {
-	// log.debug("Delete variable");
-	// showConfirmationWindow(new ExtendableButtonClickListener() {
-	//
-	// @Override
-	// public void buttonClick(final ClickEvent event) {
-	// try {
-	// val selectedVariable =
-	// selectedUIMonitoringMessage.getRelatedModelObject(InterventionVariableWithValue.class);
-	//
-	// // Delete variable
-	// getInterventionAdministrationManagerService()
-	// .interventionVariableWithValueDelete(
-	// selectedVariable);
-	// } catch (final Exception e) {
-	// closeWindow();
-	// handleException(e);
-	// return;
-	// }
-	//
-	// // Adapt UI
-	// getInterventionVariablesEditComponent()
-	// .getVariablesTable()
-	// .removeItem(
-	// selectedUIMonitoringMessage
-	// .getRelatedModelObject(
-	// InterventionVariableWithValue.class)
-	// .getId());
-	// getAdminUI().showInformationNotification(
-	// AdminMessageStrings.NOTIFICATION__VARIABLE_DELETED);
-	//
-	// closeWindow();
-	// }
-	// }, null);
-	// }
+	public void createMessage() {
+		log.debug("Create message");
+		val newMonitoringMessage = getInterventionAdministrationManagerService()
+				.monitoringMessageCreate(monitoringMessageGroup.getId());
+
+		showModalModelObjectEditWindow(
+				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__CREATE_MONITORING_MESSAGE,
+				newMonitoringMessage, new MonitoringMessageEditComponent(),
+				new ExtendableButtonClickListener() {
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Update message
+							getInterventionAdministrationManagerService()
+									.monitoringMessageUpdate(
+											newMonitoringMessage);
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						// Adapt UI
+						beanContainer.addItem(newMonitoringMessage.getId(),
+								UIMonitoringMessage.class
+										.cast(newMonitoringMessage
+												.toUIModelObject()));
+						getMonitoringMessageTable().select(
+								newMonitoringMessage.getId());
+						getAdminUI()
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_CREATED);
+
+						closeWindow();
+					}
+				}, new ExtendableButtonClickListener() {
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Delete message
+							getInterventionAdministrationManagerService()
+									.monitoringMessageDelete(
+											newMonitoringMessage);
+						} catch (final Exception e) {
+							handleException(e);
+						}
+
+						closeWindow();
+					}
+				});
+	}
+
+	public void editMessage() {
+		log.debug("Edit message");
+		val selectedMonitoringMessage = selectedUIMonitoringMessage
+				.getRelatedModelObject(MonitoringMessage.class);
+
+		showModalModelObjectEditWindow(
+				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__EDIT_MONITORING_MESSAGE,
+				selectedMonitoringMessage,
+				new MonitoringMessageEditComponentWithController(
+						selectedMonitoringMessage),
+				new ExtendableButtonClickListener() {
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Update message
+							getInterventionAdministrationManagerService()
+									.monitoringMessageUpdate(
+											selectedMonitoringMessage);
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						// Adapt UI
+						removeAndAdd(beanContainer, selectedMonitoringMessage);
+						getMonitoringMessageTable().sort();
+						getMonitoringMessageTable().select(
+								selectedMonitoringMessage.getId());
+						getAdminUI()
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_UPDATED);
+
+						closeWindow();
+					}
+				}, new ExtendableButtonClickListener() {
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						// Restore prior message
+						selectedUIMonitoringMessage
+								.setRelatedModelObject(getInterventionAdministrationManagerService()
+										.getMonitoringMessage(
+												selectedMonitoringMessage
+														.getId()));
+
+						closeWindow();
+					}
+				});
+	}
+
+	/**
+	 * Removes and adds a {@link MonitoringMessage} from a {@link BeanContainer}
+	 * to update the content
+	 * 
+	 * @param beanContainer
+	 * @param monitoringMessage
+	 */
+	@SuppressWarnings("unchecked")
+	protected <SubClassOfUIModelObject extends UIModelObject> void removeAndAdd(
+
+	final BeanContainer<ObjectId, SubClassOfUIModelObject> beanContainer,
+			final MonitoringMessage monitoringMessage) {
+		beanContainer.removeItem(monitoringMessage.getId());
+		beanContainer.addItem(monitoringMessage.getId(),
+				(SubClassOfUIModelObject) monitoringMessage.toUIModelObject());
+	}
+
+	public void moveMessage(final boolean moveUp) {
+		log.debug("Move message {}", moveUp ? "up" : "down");
+
+		val selectedMonitoringMessage = selectedUIMonitoringMessage
+				.getRelatedModelObject(MonitoringMessage.class);
+		val swappedMonitoringMessage = getInterventionAdministrationManagerService()
+				.monitoringMessageMove(selectedMonitoringMessage, moveUp);
+
+		if (swappedMonitoringMessage == null) {
+			log.debug("Message is already at top/end of list");
+			return;
+		}
+
+		removeAndAdd(beanContainer, swappedMonitoringMessage);
+		removeAndAdd(beanContainer, selectedMonitoringMessage);
+		getMonitoringMessageTable().sort();
+		getMonitoringMessageTable().select(selectedMonitoringMessage.getId());
+	}
+
+	public void deleteMessage() {
+		log.debug("Delete message");
+		showConfirmationWindow(new ExtendableButtonClickListener() {
+			@Override
+			public void buttonClick(final ClickEvent event) {
+				try {
+					val selectedMonitoringMessage = selectedUIMonitoringMessage.getRelatedModelObject(MonitoringMessage.class);
+
+					// Delete variable
+					getInterventionAdministrationManagerService()
+							.monitoringMessageDelete(selectedMonitoringMessage);
+				} catch (final Exception e) {
+					closeWindow();
+					handleException(e);
+					return;
+				}
+
+				// Adapt UI
+				getMonitoringMessageTable().removeItem(
+						selectedUIMonitoringMessage.getRelatedModelObject(
+								MonitoringMessage.class).getId());
+				getAdminUI()
+						.showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_DELETED);
+
+				closeWindow();
+			}
+		}, null);
+	}
 }

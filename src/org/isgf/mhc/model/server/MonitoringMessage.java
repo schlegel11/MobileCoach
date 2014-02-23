@@ -33,7 +33,7 @@ public class MonitoringMessage extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId	interventionMessageGroup;
+	private ObjectId	monitoringMessageGroup;
 
 	/**
 	 * The message text containing placeholders for variables
@@ -76,6 +76,7 @@ public class MonitoringMessage extends ModelObject {
 	@Override
 	public UIModelObject toUIModelObject() {
 		final val monitoringMessage = new UIMonitoringMessage(
+				order,
 				textWithPlaceholders,
 				linkedMediaObject != null,
 				linkedMediaObject == null ? Messages

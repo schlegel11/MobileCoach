@@ -358,12 +358,72 @@ public class InterventionAdministrationManagerService {
 				.deleteModelObject(monitoringMessageGroupToDelete);
 	}
 
+	// Monitoring Message
+	public MonitoringMessage monitoringMessageCreate(
+			final ObjectId monitoringMessageGroupId) {
+		val monitoringMessage = new MonitoringMessage(monitoringMessageGroupId,
+				"", 0, null, null);
+
+		val highestOrderMessage = databaseManagerService
+				.findOneSortedModelObject(
+						MonitoringMessage.class,
+						Queries.MONITORING_MESSAGES__BY_MONITORING_MESSAGE_GROUP,
+						Queries.MONITORING_MESSAGES__SORT_BY_ORDER_DESC,
+						monitoringMessageGroupId);
+
+		if (highestOrderMessage != null) {
+			monitoringMessage.setOrder(highestOrderMessage.getOrder() + 1);
+		}
+
+		databaseManagerService.saveModelObject(monitoringMessage);
+
+		return monitoringMessage;
+	}
+
+	public void monitoringMessageUpdate(
+			final MonitoringMessage monitoringMessage) {
+		databaseManagerService.saveModelObject(monitoringMessage);
+	}
+
+	public MonitoringMessage monitoringMessageMove(
+			final MonitoringMessage monitoringMessage, final boolean moveUp) {
+		// Find monitoring message to swap with
+		val monitoringMessageToSwapWith = databaseManagerService
+				.findOneSortedModelObject(
+						MonitoringMessage.class,
+						moveUp ? Queries.MONITORING_MESSAGES__BY_MONITORING_MESSAGE_GROUP_AND_ORDER_LOWER
+								: Queries.MONITORING_MESSAGES__BY_MONITORING_MESSAGE_GROUP_AND_ORDER_HIGHER,
+						moveUp ? Queries.MONITORING_MESSAGES__SORT_BY_ORDER_DESC
+								: Queries.MONITORING_MESSAGES__SORT_BY_ORDER_ASC,
+						monitoringMessage.getMonitoringMessageGroup(),
+						monitoringMessage.getOrder());
+
+		if (monitoringMessageToSwapWith == null) {
+			return null;
+		}
+
+		// Swap order
+		final int order = monitoringMessage.getOrder();
+		monitoringMessage.setOrder(monitoringMessageToSwapWith.getOrder());
+		monitoringMessageToSwapWith.setOrder(order);
+
+		databaseManagerService.saveModelObject(monitoringMessage);
+		databaseManagerService.saveModelObject(monitoringMessageToSwapWith);
+
+		return monitoringMessageToSwapWith;
+	}
+
+	public void monitoringMessageDelete(
+			final MonitoringMessage monitoringMessage) {
+		databaseManagerService.deleteModelObject(monitoringMessage);
+	}
+
 	/*
 	 * Getter methods
 	 */
-	public Author getAuthor(final ObjectId accountObjectId) {
-		return databaseManagerService.getModelObjectById(Author.class,
-				accountObjectId);
+	public Author getAuthor(final ObjectId authorId) {
+		return databaseManagerService
+				.getModelObjectById(Author.class, authorId);
 	}
 
 	public Iterable<Author> getAllAuthors() {
@@ -445,8 +505,13 @@ public class InterventionAdministrationManagerService {
 		return databaseManagerService.findSortedModelObjects(
 				MonitoringMessage.class,
 				Queries.MONITORING_MESSAGES__BY_MONITORING_MESSAGE_GROUP,
-				Queries.MONITORING_MESSAGE_GROUPS__SORT_BY_ORDER_ASC,
+				Queries.MONITORING_MESSAGES__SORT_BY_ORDER_ASC,
 				monitoringMessageGroupId);
 	}
 
+	public MonitoringMessage getMonitoringMessage(
+			final ObjectId monitoringMessageId) {
+		return databaseManagerService.getModelObjectById(
+				MonitoringMessage.class, monitoringMessageId);
+	}
 }

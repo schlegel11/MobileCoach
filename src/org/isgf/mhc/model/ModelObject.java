@@ -249,7 +249,7 @@ public abstract class ModelObject {
 	}
 
 	/**
-	 * Find and load {@link ModelObject}s from database
+	 * Find and load a {@link ModelObject} from database
 	 * 
 	 * @param clazz
 	 *            The {@link ModelObject} subclass to retrieve
@@ -288,12 +288,60 @@ public abstract class ModelObject {
 	}
 
 	/**
-	 * Find and load {@link ModelObject}s from database
+	 * Find and load a {@link ModelObject} from database after sorting
 	 * 
 	 * @param clazz
 	 *            The {@link ModelObject} subclass to retrieve
 	 * @param query
 	 *            The query to find the appropriate {@link ModelObject}
+	 * @param sort
+	 *            The sort rules to sort the appropriate {@link ModelObject}
+	 * @param parameters
+	 *            The parameters to fill the query
+	 * @return The retrieved {@link ModelObject} subclass objects as
+	 *         {@link Iterable} or <code>null</code> if not
+	 *         found
+	 */
+	@JsonIgnore
+	protected static final <ModelObjectSubclass extends ModelObject> ModelObjectSubclass findOneSorted(
+			final Class<ModelObjectSubclass> clazz, final String query,
+			final String sort, final Object... parameters) {
+		final MongoCollection collection = db.getCollection(clazz
+				.getSimpleName());
+
+		ModelObjectSubclass modelObject = null;
+		try {
+			try {
+				if (parameters != null && parameters.length > 0) {
+					modelObject = collection.find(query, parameters).sort(sort)
+							.limit(1).as(clazz).iterator().next();
+				} else {
+					modelObject = collection.find(query).sort(sort).limit(1)
+							.as(clazz).iterator().next();
+				}
+			} catch (final NullPointerException f) {
+				modelObject = null;
+			}
+			log.debug(
+					"Retrieved {} with find one query {}, sort query {} and parameters {}: {}",
+					clazz.getSimpleName(), query, sort, parameters, modelObject);
+		} catch (final Exception e) {
+			log.warn(
+					"Could not retrieve {} with find one query {}, sort query {} and parameters {}: {}",
+					clazz.getSimpleName(), query, sort, parameters,
+					e.getMessage());
+		}
+
+		return modelObject;
+	}
+
+	/**
+	 * Find and load {@link ModelObject}s from database
+	 * 
+	 * @param clazz
+	 *            The {@link ModelObject} subclass to retrieve
+	 * @param query
+	 *            The query to find the appropriate {@link ModelObject}s
 	 * @param parameters
 	 *            The parameters to fill the query
 	 * @return The retrieved {@link ModelObject} subclass objects as
@@ -330,9 +378,9 @@ public abstract class ModelObject {
 	 * @param clazz
 	 *            The {@link ModelObject} subclass to retrieve
 	 * @param query
-	 *            The query to find the appropriate {@link ModelObject}
+	 *            The query to find the appropriate {@link ModelObject}s
 	 * @param sort
-	 *            The sort rules to sort the appropriate {@link ModelObject}
+	 *            The sort rules to sort the appropriate {@link ModelObject}s
 	 * @param parameters
 	 *            The parameters to fill the query
 	 * @return The retrieved {@link ModelObject} subclass objects as

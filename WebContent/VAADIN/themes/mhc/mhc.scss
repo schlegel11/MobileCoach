@@ -13,6 +13,9 @@ body {
     min-height: 500px;
     overflow: auto;
 }
+input.gwt-FileUpload {
+    width: 292px;
+}
 @mixin mhc {
     /* Include all the styles from the reindeer theme */
     @include reindeer;
@@ -315,5 +318,9 @@ body {
         @extend .bold;
         @extend .center;
         @extend .biggest;
+    }
+    /* upload-component */
+    .upload-component .v-button {
+        width: 100px;
     }
 }
