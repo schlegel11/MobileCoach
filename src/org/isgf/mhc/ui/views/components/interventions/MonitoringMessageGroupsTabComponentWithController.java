@@ -44,7 +44,8 @@ public class MonitoringMessageGroupsTabComponentWithController extends
 						intervention.getId());
 
 		for (val monitoringMessageGroup : monitoringMessageGroupsIterable) {
-			val newTab = addTabComponent(monitoringMessageGroup);
+			val newTab = addTabComponent(monitoringMessageGroup,
+					intervention.getId());
 			monitoringMessageGroups.add(monitoringMessageGroup);
 
 			if (getMonitoringMessageGroupsTabSheet().getComponentCount() == 1) {
@@ -121,7 +122,8 @@ public class MonitoringMessageGroupsTabComponentWithController extends
 						// Adapt UI
 						selectedMonitoringMessageGroup = newMonitoringMessageGroup;
 						monitoringMessageGroups.add(newMonitoringMessageGroup);
-						val newTab = addTabComponent(newMonitoringMessageGroup);
+						val newTab = addTabComponent(newMonitoringMessageGroup,
+								intervention.getId());
 						getMonitoringMessageGroupsTabSheet().setSelectedTab(
 								newTab);
 						getAdminUI()

@@ -2,6 +2,8 @@ package org.isgf.mhc.services;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import lombok.val;
@@ -386,8 +388,8 @@ public class InterventionAdministrationManagerService {
 		val highestOrderMessage = databaseManagerService
 				.findOneSortedModelObject(
 						MonitoringMessage.class,
-						Queries.MONITORING_MESSAGES__BY_MONITORING_MESSAGE_GROUP,
-						Queries.MONITORING_MESSAGES__SORT_BY_ORDER_DESC,
+						Queries.MONITORING_MESSAGE__BY_MONITORING_MESSAGE_GROUP,
+						Queries.MONITORING_MESSAGE__SORT_BY_ORDER_DESC,
 						monitoringMessageGroupId);
 
 		if (highestOrderMessage != null) {
@@ -405,10 +407,10 @@ public class InterventionAdministrationManagerService {
 		val monitoringMessageToSwapWith = databaseManagerService
 				.findOneSortedModelObject(
 						MonitoringMessage.class,
-						moveUp ? Queries.MONITORING_MESSAGES__BY_MONITORING_MESSAGE_GROUP_AND_ORDER_LOWER
-								: Queries.MONITORING_MESSAGES__BY_MONITORING_MESSAGE_GROUP_AND_ORDER_HIGHER,
-						moveUp ? Queries.MONITORING_MESSAGES__SORT_BY_ORDER_DESC
-								: Queries.MONITORING_MESSAGES__SORT_BY_ORDER_ASC,
+						moveUp ? Queries.MONITORING_MESSAGE__BY_MONITORING_MESSAGE_GROUP_AND_ORDER_LOWER
+								: Queries.MONITORING_MESSAGE__BY_MONITORING_MESSAGE_GROUP_AND_ORDER_HIGHER,
+						moveUp ? Queries.MONITORING_MESSAGE__SORT_BY_ORDER_DESC
+								: Queries.MONITORING_MESSAGE__SORT_BY_ORDER_ASC,
 						monitoringMessage.getMonitoringMessageGroup(),
 						monitoringMessage.getOrder());
 
@@ -433,6 +435,52 @@ public class InterventionAdministrationManagerService {
 		monitoringMessage.setLinkedMediaObject(linkedMediaObjectId);
 
 		databaseManagerService.saveModelObject(monitoringMessage);
+	}
+
+	public void monitoringMessageSetTextWithPlaceholders(
+			final MonitoringMessage monitoringMessage,
+			final String textWithPlaceholders,
+			final List<String> allPossibleMessageVariables)
+			throws NotificationMessageException {
+		if (textWithPlaceholders == null) {
+			monitoringMessage.setTextWithPlaceholders("");
+		} else {
+			if (!StringValidator.isValidVariableText(textWithPlaceholders,
+					allPossibleMessageVariables)) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
+			}
+
+			monitoringMessage.setTextWithPlaceholders(textWithPlaceholders);
+		}
+
+		databaseManagerService.saveModelObject(monitoringMessage);
+	}
+
+	public void monitoringMessageSetStoreResultToVariable(
+			final MonitoringMessage monitoringMessage, final String variableName)
+			throws NotificationMessageException {
+		if (variableName == null || variableName.equals("")) {
+			monitoringMessage.setStoreValueToVariableWithName(null);
+
+			databaseManagerService.saveModelObject(monitoringMessage);
+
+		} else {
+			if (!StringValidator.isValidVariableName(variableName)) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_NOT_VALID);
+			}
+
+			if (variablesManagerService
+					.isWriteProtectedParticipantOrSystemVariable(variableName)) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
+			}
+
+			monitoringMessage.setStoreValueToVariableWithName(variableName);
+
+			databaseManagerService.saveModelObject(monitoringMessage);
+		}
 	}
 
 	public void monitoringMessageDelete(
@@ -540,8 +588,8 @@ public class InterventionAdministrationManagerService {
 			final ObjectId interventionId) {
 		return databaseManagerService.findSortedModelObjects(
 				MonitoringMessageGroup.class,
-				Queries.MONITORING_MESSAGE_GROUPS__BY_INTERVENTION,
-				Queries.MONITORING_MESSAGE_GROUPS__SORT_BY_NAME_ASC,
+				Queries.MONITORING_MESSAGE_GROUP__BY_INTERVENTION,
+				Queries.MONITORING_MESSAGE_GROUP__SORT_BY_NAME_ASC,
 				interventionId);
 	}
 
@@ -549,8 +597,8 @@ public class InterventionAdministrationManagerService {
 			final ObjectId monitoringMessageGroupId) {
 		return databaseManagerService.findSortedModelObjects(
 				MonitoringMessage.class,
-				Queries.MONITORING_MESSAGES__BY_MONITORING_MESSAGE_GROUP,
-				Queries.MONITORING_MESSAGES__SORT_BY_ORDER_ASC,
+				Queries.MONITORING_MESSAGE__BY_MONITORING_MESSAGE_GROUP,
+				Queries.MONITORING_MESSAGE__SORT_BY_ORDER_ASC,
 				monitoringMessageGroupId);
 	}
 
@@ -567,5 +615,26 @@ public class InterventionAdministrationManagerService {
 
 	public File getFileByReference(final String fileReference) {
 		return fileStorageManagerService.getFileByReference(fileReference);
+	}
+
+	public List<String> getAllPossibleMessageVariables(
+			final ObjectId interventionId) {
+		val variables = new ArrayList<String>();
+
+		variables.addAll(Arrays.asList(variablesManagerService
+				.getAllSystemVariables()));
+
+		variables.addAll(variablesManagerService
+				.getAllInterventionVariables(interventionId));
+		variables.addAll(variablesManagerService
+				.getAllInterventionScreeningSurveyVariables(interventionId));
+		variables.addAll(variablesManagerService
+				.getAllMonitoringMessageVariables(interventionId));
+		variables.addAll(variablesManagerService
+				.getAllMonitoringRuleAndReplyRuleVariables(interventionId));
+
+		Collections.sort(variables);
+
+		return variables;
 	}
 }

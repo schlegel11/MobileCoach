@@ -3,6 +3,7 @@ package org.isgf.mhc.ui.views.components.interventions;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.model.server.MonitoringMessageGroup;
 import org.isgf.mhc.ui.views.components.AbstractCustomComponent;
@@ -77,9 +78,10 @@ public abstract class MonitoringMessageGroupsTabComponent extends
 	}
 
 	public Tab addTabComponent(
-			final MonitoringMessageGroup monitoringMessageGroup) {
+			final MonitoringMessageGroup monitoringMessageGroup,
+			final ObjectId interventionId) {
 		final MonitoringMessageGroupEditComponent monitoringMessageGroupEditComponent = new MonitoringMessageGroupEditComponentWithController(
-				monitoringMessageGroup);
+				monitoringMessageGroup, interventionId);
 		monitoringMessageGroupEditComponent.setImmediate(false);
 		monitoringMessageGroupEditComponent.setWidth("100.0%");
 		monitoringMessageGroupEditComponent.setHeight("-1px");

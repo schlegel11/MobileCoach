@@ -4,8 +4,11 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
+import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.model.server.MonitoringMessage;
 import org.isgf.mhc.ui.views.components.basics.MediaObjectIntegrationComponentWithController.MediaObjectCreationOrDeleteionListener;
+import org.isgf.mhc.ui.views.components.basics.PlaceholderStringEditComponent;
+import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;
 
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -23,11 +26,15 @@ public class MonitoringMessageEditComponentWithController extends
 
 	private final MonitoringMessage	monitoringMessage;
 
+	private final ObjectId			interventionId;
+
 	public MonitoringMessageEditComponentWithController(
-			final MonitoringMessage monitoringMessage) {
+			final MonitoringMessage monitoringMessage,
+			final ObjectId interventionId) {
 		super();
 
 		this.monitoringMessage = monitoringMessage;
+		this.interventionId = interventionId;
 
 		// Handle media object to component
 		if (monitoringMessage.getLinkedMediaObject() == null) {
@@ -65,19 +72,68 @@ public class MonitoringMessageEditComponentWithController extends
 				editTextWithPlaceholder();
 			} else if (event.getButton() == getStoreVariableTextFieldComponent()
 					.getButton()) {
-				editStoreVariable();
+				editStoreResultToVariable();
 			}
 		}
 	}
 
 	public void editTextWithPlaceholder() {
-		// TODO Auto-generated method stub
+		log.debug("Edit text with placeholder");
+		val allPossibleMessageVariables = getInterventionAdministrationManagerService()
+				.getAllPossibleMessageVariables(interventionId);
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_TEXT_WITH_PLACEHOLDERS,
+				monitoringMessage.getTextWithPlaceholders(),
+				allPossibleMessageVariables,
+				new PlaceholderStringEditComponent(),
+				new ExtendableButtonClickListener() {
 
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Change text with placeholders
+							getInterventionAdministrationManagerService()
+									.monitoringMessageSetTextWithPlaceholders(
+											monitoringMessage,
+											getStringValue(),
+											allPossibleMessageVariables);
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						adjust();
+
+						closeWindow();
+					}
+				}, null);
 	}
 
-	public void editStoreVariable() {
-		// TODO Auto-generated method stub
+	public void editStoreResultToVariable() {
+		log.debug("Edit store result to variable");
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_VARIABLE,
+				monitoringMessage.getStoreValueToVariableWithName(), null,
+				new ShortStringEditComponent(),
+				new ExtendableButtonClickListener() {
 
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Change name
+							getInterventionAdministrationManagerService()
+									.monitoringMessageSetStoreResultToVariable(
+											monitoringMessage, getStringValue());
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						adjust();
+
+						closeWindow();
+					}
+				}, null);
 	}
 
 	@Override

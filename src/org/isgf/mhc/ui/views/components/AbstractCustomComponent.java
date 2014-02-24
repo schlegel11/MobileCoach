@@ -131,7 +131,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 
 		// Set variables if not null
 		if (variablesToSelect != null) {
-			stringValueComponent.addAll(variablesToSelect);
+			stringValueComponent.addVariables(variablesToSelect);
 		}
 
 		// Register ok button listener

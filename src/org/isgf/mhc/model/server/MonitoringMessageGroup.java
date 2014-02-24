@@ -57,7 +57,7 @@ public class MonitoringMessageGroup extends ModelObject {
 	public void performOnDelete() {
 		val monitoringMessagesToDelete = ModelObject.find(
 				MonitoringMessage.class,
-				Queries.MONITORING_MESSAGES__BY_MONITORING_MESSAGE_GROUP,
+				Queries.MONITORING_MESSAGE__BY_MONITORING_MESSAGE_GROUP,
 				getId());
 
 		ModelObject.delete(monitoringMessagesToDelete);

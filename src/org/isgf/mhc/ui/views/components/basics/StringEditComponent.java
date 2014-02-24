@@ -1,5 +1,7 @@
 package org.isgf.mhc.ui.views.components.basics;
 
+import java.util.List;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -141,4 +143,8 @@ public class StringEditComponent extends AbstractStringValueEditComponent {
 		return stringTextArea.getValue();
 	}
 
+	@Override
+	public void addVariables(final List<String> variables) {
+		// Not required in this implementation
+	}
 }

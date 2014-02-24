@@ -1,5 +1,7 @@
 package org.isgf.mhc.ui.views.components.basics;
 
+import java.util.List;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -186,6 +188,11 @@ public class PasswordEditComponent extends AbstractStringValueEditComponent
 		buttonLayout.setComponentAlignment(okButton, new Alignment(9));
 
 		return buttonLayout;
+	}
+
+	@Override
+	public void addVariables(final List<String> variables) {
+		// Not required in this implementation
 	}
 
 }

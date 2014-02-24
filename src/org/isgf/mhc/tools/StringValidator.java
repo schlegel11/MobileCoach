@@ -1,7 +1,9 @@
 package org.isgf.mhc.tools;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
+import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -62,5 +64,28 @@ public class StringValidator {
 
 		log.debug("Yes");
 		return true;
+	}
+
+	/**
+	 * Check if the text contains unknown variables
+	 * 
+	 * @param textWithPlaceholders
+	 * @param allPossibleMessageVariables
+	 * @return
+	 */
+	public static boolean isValidVariableText(String textWithPlaceholders,
+			final List<String> allPossibleMessageVariables) {
+		log.debug("Testing if {} is a valid variable text");
+
+		for (final val variable : allPossibleMessageVariables) {
+			textWithPlaceholders = textWithPlaceholders.replace(variable, "");
+			log.debug(textWithPlaceholders);
+		}
+
+		if (textWithPlaceholders.contains("$")) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 }

@@ -32,15 +32,19 @@ public class MonitoringMessageGroupEditComponentWithController extends
 
 	private final MonitoringMessageGroup						monitoringMessageGroup;
 
+	private final ObjectId										interventionId;
+
 	private UIMonitoringMessage									selectedUIMonitoringMessage	= null;
 
 	private final BeanContainer<ObjectId, UIMonitoringMessage>	beanContainer;
 
 	protected MonitoringMessageGroupEditComponentWithController(
-			final MonitoringMessageGroup monitoringMessageGroup) {
+			final MonitoringMessageGroup monitoringMessageGroup,
+			final ObjectId interventionId) {
 		super();
 
 		this.monitoringMessageGroup = monitoringMessageGroup;
+		this.interventionId = interventionId;
 
 		// table options
 		val monitoringMessageTable = getMonitoringMessageTable();
@@ -133,7 +137,7 @@ public class MonitoringMessageGroupEditComponentWithController extends
 		showModalModelObjectEditWindow(
 				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__CREATE_MONITORING_MESSAGE,
 				new MonitoringMessageEditComponentWithController(
-						newMonitoringMessage),
+						newMonitoringMessage, interventionId),
 				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
@@ -161,7 +165,7 @@ public class MonitoringMessageGroupEditComponentWithController extends
 		showModalModelObjectEditWindow(
 				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__EDIT_MONITORING_MESSAGE,
 				new MonitoringMessageEditComponentWithController(
-						selectedMonitoringMessage),
+						selectedMonitoringMessage, interventionId),
 				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
