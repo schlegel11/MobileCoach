@@ -108,13 +108,14 @@ public class MediaObjectIntegrationComponentWithController extends
 		showConfirmationWindow(new ExtendableButtonClickListener() {
 			@Override
 			public void buttonClick(final ClickEvent event) {
-				getInterventionAdministrationManagerService()
-						.mediaObjectDelete(mediaObject);
 
 				mediaObject = null;
 				listener.updateLinkedMediaObjectId(null);
 
 				adjust();
+
+				getInterventionAdministrationManagerService()
+						.mediaObjectDelete(mediaObject);
 
 				closeWindow();
 			}

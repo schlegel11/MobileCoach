@@ -54,14 +54,16 @@ public class DefaultWrapperServlet extends HttpServlet {
 	public void doGet(final HttpServletRequest request,
 			final HttpServletResponse response) throws ServletException,
 			IOException {
-		final RequestDispatcher requestDispatcher = this.getServletContext()
+		log.debug("Serving static {}", request.getPathInfo());
+
+		final RequestDispatcher requestDispatcher = getServletContext()
 				.getNamedDispatcher("default");
 
 		final HttpServletRequest wrapped = new HttpServletRequestWrapper(
 				request) {
 			@Override
 			public String getServletPath() {
-				return "static";
+				return "/static";
 			}
 		};
 

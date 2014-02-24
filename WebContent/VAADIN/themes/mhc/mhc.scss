@@ -327,4 +327,8 @@ input.gwt-FileUpload {
     .media-object-description ul {
         padding-left: 30px;
     }
+    /* media-content */
+    .media-content {
+        @extend .center;
+    }
 }

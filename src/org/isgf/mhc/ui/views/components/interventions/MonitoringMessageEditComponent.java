@@ -164,7 +164,7 @@ public class MonitoringMessageEditComponent extends
 		integratedMediaObjectComponent = new MediaObjectIntegrationComponentWithController();
 		integratedMediaObjectComponent.setImmediate(false);
 		integratedMediaObjectComponent.setWidth("500px");
-		integratedMediaObjectComponent.setHeight("200px");
+		integratedMediaObjectComponent.setHeight("300px");
 		gridLayout.addComponent(integratedMediaObjectComponent, 1, 1);
 		gridLayout.setComponentAlignment(integratedMediaObjectComponent,
 				new Alignment(34));
