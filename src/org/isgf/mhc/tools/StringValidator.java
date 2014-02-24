@@ -79,7 +79,6 @@ public class StringValidator {
 
 		for (final val variable : allPossibleMessageVariables) {
 			textWithPlaceholders = textWithPlaceholders.replace(variable, "");
-			log.debug(textWithPlaceholders);
 		}
 
 		if (textWithPlaceholders.contains("$")) {
