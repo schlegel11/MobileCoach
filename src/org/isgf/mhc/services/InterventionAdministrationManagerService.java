@@ -17,8 +17,10 @@ import org.isgf.mhc.model.server.Author;
 import org.isgf.mhc.model.server.AuthorInterventionAccess;
 import org.isgf.mhc.model.server.Intervention;
 import org.isgf.mhc.model.server.InterventionVariableWithValue;
+import org.isgf.mhc.model.server.MediaObject;
 import org.isgf.mhc.model.server.MonitoringMessage;
 import org.isgf.mhc.model.server.MonitoringMessageGroup;
+import org.isgf.mhc.model.server.types.MediaObjectTypes;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.ModelObjectExchangeService;
@@ -380,11 +382,6 @@ public class InterventionAdministrationManagerService {
 		return monitoringMessage;
 	}
 
-	public void monitoringMessageUpdate(
-			final MonitoringMessage monitoringMessage) {
-		databaseManagerService.saveModelObject(monitoringMessage);
-	}
-
 	public MonitoringMessage monitoringMessageMove(
 			final MonitoringMessage monitoringMessage, final boolean moveUp) {
 		// Find monitoring message to swap with
@@ -413,9 +410,37 @@ public class InterventionAdministrationManagerService {
 		return monitoringMessageToSwapWith;
 	}
 
+	public void monitoringMessageGeneralUpdate(
+			final MonitoringMessage monitoringMessage) {
+		databaseManagerService.saveModelObject(monitoringMessage);
+	}
+
 	public void monitoringMessageDelete(
 			final MonitoringMessage monitoringMessage) {
 		databaseManagerService.deleteModelObject(monitoringMessage);
+	}
+
+	// Media Object
+	public MediaObject mediaObjectCreate(final File temporaryFile,
+			final String originalFileName,
+			final MediaObjectTypes originalFileType) {
+
+		MediaObject mediaObject;
+		try {
+			mediaObject = new MediaObject(originalFileType, originalFileName,
+					temporaryFile);
+		} catch (final Exception e) {
+			log.error("Can't create media object: {}", e.getMessage());
+			return null;
+		}
+
+		databaseManagerService.saveModelObject(mediaObject);
+
+		return mediaObject;
+	}
+
+	public void mediaObjectDelete(final MediaObject mediaObject) {
+		databaseManagerService.deleteModelObject(mediaObject);
 	}
 
 	/*
@@ -513,5 +538,14 @@ public class InterventionAdministrationManagerService {
 			final ObjectId monitoringMessageId) {
 		return databaseManagerService.getModelObjectById(
 				MonitoringMessage.class, monitoringMessageId);
+	}
+
+	public MediaObject getMediaObject(final ObjectId mediaObjectId) {
+		return databaseManagerService.getModelObjectById(MediaObject.class,
+				mediaObjectId);
+	}
+
+	public File getFileByReference(final String fileReference) {
+		return fileStorageManagerService.getFileByReference(fileReference);
 	}
 }

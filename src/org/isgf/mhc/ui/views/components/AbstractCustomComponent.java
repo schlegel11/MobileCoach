@@ -184,36 +184,25 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	 */
 	protected Window showModalModelObjectEditWindow(
 			final AdminMessageStrings title,
-			final ModelObject modelObjectToEdit,
 			final AbstractModelObjectEditComponent modelObjectEditComponent,
-			final ExtendableButtonClickListener okButtonClickListener,
-			final ExtendableButtonClickListener cancelButtonClickListener) {
+			final ExtendableButtonClickListener closeButtonClickListener) {
 		val modalWindow = new Window(Messages.getAdminString(title));
 		modalWindow.setModal(true);
 		modalWindow.setResizable(false);
 		modalWindow.setClosable(false);
 		modalWindow.setContent(modelObjectEditComponent);
 
-		// Register ok button listener
-		if (okButtonClickListener != null) {
-			okButtonClickListener.setBelongingWindow(modalWindow);
-			okButtonClickListener
-					.setBelongingComponent(modelObjectEditComponent);
-			modelObjectEditComponent
-					.registerOkButtonListener(okButtonClickListener);
-		}
-
-		// Register cancel button listener if provided or a simple window closer
+		// Register close button listener if provided or a simple window closer
 		// if not
-		if (cancelButtonClickListener != null) {
-			cancelButtonClickListener.setBelongingWindow(modalWindow);
-			cancelButtonClickListener
+		if (closeButtonClickListener != null) {
+			closeButtonClickListener.setBelongingWindow(modalWindow);
+			closeButtonClickListener
 					.setBelongingComponent(modelObjectEditComponent);
 			modelObjectEditComponent
-					.registerCancelButtonListener(cancelButtonClickListener);
+					.registerOkButtonListener(closeButtonClickListener);
 		} else {
 			modelObjectEditComponent
-					.registerCancelButtonListener(new Button.ClickListener() {
+					.registerOkButtonListener(new Button.ClickListener() {
 						@Override
 						public void buttonClick(final ClickEvent event) {
 							modalWindow.close();

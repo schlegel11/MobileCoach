@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.model.ModelObject;
@@ -68,16 +69,16 @@ public class MediaObject extends ModelObject {
 	public MediaObject(final MediaObjectTypes type, final String name,
 			final File temporaryFileToStoreAndReference) throws Exception {
 
-		getFileStorageManagerService().storeFile(
+		val fileReference = getFileStorageManagerService().storeFile(
 				temporaryFileToStoreAndReference);
 
-		if (this.fileReference == null) {
+		if (fileReference == null) {
 			throw new Exception("File cannot be stored");
 		}
 
-		this.setType(type);
-		this.setName(name);
-		this.setFileReference(this.fileReference);
+		setType(type);
+		setName(name);
+		setFileReference(fileReference);
 	}
 
 	/*
@@ -88,13 +89,13 @@ public class MediaObject extends ModelObject {
 	@Override
 	@JsonIgnore
 	protected void performOnDelete() {
-		log.debug("Deleting file with reference {}", this.fileReference);
+		log.debug("Deleting file with reference {}", fileReference);
 		try {
-			getFileStorageManagerService().deleteFile(this.fileReference);
+			getFileStorageManagerService().deleteFile(fileReference);
 		} catch (final Exception e) {
 			log.warn(
 					"File belonging to file reference {} could not be deleted: {}",
-					this.fileReference, e.getMessage());
+					fileReference, e.getMessage());
 		}
 
 		super.performOnDelete();

@@ -23,4 +23,6 @@ public class ThemeImageStrings {
 															+ "active-icon-small.png";
 	public static final String	INACTIVE_ICON		= IMAGE_PATH
 															+ "inactive-icon-small.png";
+	public static final String	BLANK_MEDIA_OBJECT	= IMAGE_PATH
+															+ "blank-media-object.png";
 }

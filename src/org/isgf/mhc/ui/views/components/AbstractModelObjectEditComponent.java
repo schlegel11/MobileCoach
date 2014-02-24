@@ -11,5 +11,4 @@ import org.isgf.mhc.model.ModelObject;
 @SuppressWarnings("serial")
 public abstract class AbstractModelObjectEditComponent extends
 		AbstractConfirmationComponent {
-
 }

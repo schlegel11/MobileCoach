@@ -132,20 +132,11 @@ public class MonitoringMessageGroupEditComponentWithController extends
 
 		showModalModelObjectEditWindow(
 				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__CREATE_MONITORING_MESSAGE,
-				newMonitoringMessage, new MonitoringMessageEditComponent(),
+				new MonitoringMessageEditComponentWithController(
+						newMonitoringMessage),
 				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
-						try {
-							// Update message
-							getInterventionAdministrationManagerService()
-									.monitoringMessageUpdate(
-											newMonitoringMessage);
-						} catch (final Exception e) {
-							handleException(e);
-							return;
-						}
-
 						// Adapt UI
 						beanContainer.addItem(newMonitoringMessage.getId(),
 								UIMonitoringMessage.class
@@ -159,20 +150,6 @@ public class MonitoringMessageGroupEditComponentWithController extends
 
 						closeWindow();
 					}
-				}, new ExtendableButtonClickListener() {
-					@Override
-					public void buttonClick(final ClickEvent event) {
-						try {
-							// Delete message
-							getInterventionAdministrationManagerService()
-									.monitoringMessageDelete(
-											newMonitoringMessage);
-						} catch (final Exception e) {
-							handleException(e);
-						}
-
-						closeWindow();
-					}
 				});
 	}
 
@@ -183,22 +160,11 @@ public class MonitoringMessageGroupEditComponentWithController extends
 
 		showModalModelObjectEditWindow(
 				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__EDIT_MONITORING_MESSAGE,
-				selectedMonitoringMessage,
 				new MonitoringMessageEditComponentWithController(
 						selectedMonitoringMessage),
 				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
-						try {
-							// Update message
-							getInterventionAdministrationManagerService()
-									.monitoringMessageUpdate(
-											selectedMonitoringMessage);
-						} catch (final Exception e) {
-							handleException(e);
-							return;
-						}
-
 						// Adapt UI
 						removeAndAdd(beanContainer, selectedMonitoringMessage);
 						getMonitoringMessageTable().sort();
@@ -207,18 +173,6 @@ public class MonitoringMessageGroupEditComponentWithController extends
 						getAdminUI()
 								.showInformationNotification(
 										AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_UPDATED);
-
-						closeWindow();
-					}
-				}, new ExtendableButtonClickListener() {
-					@Override
-					public void buttonClick(final ClickEvent event) {
-						// Restore prior message
-						selectedUIMonitoringMessage
-								.setRelatedModelObject(getInterventionAdministrationManagerService()
-										.getMonitoringMessage(
-												selectedMonitoringMessage
-														.getId()));
 
 						closeWindow();
 					}
