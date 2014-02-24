@@ -79,7 +79,7 @@ public class MonitoringMessage extends ModelObject {
 				order,
 				textWithPlaceholders,
 				linkedMediaObject != null,
-				linkedMediaObject == null ? Messages
+				linkedMediaObject != null ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
 						: Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
@@ -89,5 +89,22 @@ public class MonitoringMessage extends ModelObject {
 		monitoringMessage.setRelatedModelObject(this);
 
 		return monitoringMessage;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.isgf.mhc.model.ModelObject#performOnDelete()
+	 */
+	@Override
+	public void performOnDelete() {
+		if (linkedMediaObject != null) {
+			val mediaObjectToDelete = ModelObject.get(MediaObject.class,
+					linkedMediaObject);
+
+			if (mediaObjectToDelete != null) {
+				ModelObject.delete(mediaObjectToDelete);
+			}
+		}
 	}
 }

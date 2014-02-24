@@ -331,4 +331,16 @@ input.gwt-FileUpload {
     .media-content {
         @extend .center;
     }
+    /* read-only textfield */
+    .v-textfield.read-only {
+        padding: 5px;
+        text-overflow: ellipsis;
+        -o-text-overflow: ellipsis;
+        -icab-text-overflow: ellipsis;
+        -khtml-text-overflow: ellipsis;
+        -moz-text-overflow: ellipsis;
+        -webkit-text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+    }
 }

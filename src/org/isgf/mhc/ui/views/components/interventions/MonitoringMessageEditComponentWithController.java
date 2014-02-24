@@ -28,11 +28,8 @@ public class MonitoringMessageEditComponentWithController extends
 		super();
 
 		this.monitoringMessage = monitoringMessage;
-		// TODO a lot
-		monitoringMessage.setTextWithPlaceholders(String.valueOf(System
-				.currentTimeMillis()));
 
-		// Handle media objec to component
+		// Handle media object to component
 		if (monitoringMessage.getLinkedMediaObject() == null) {
 			getIntegratedMediaObjectComponent().setMediaObject(null, this);
 		} else {
@@ -42,24 +39,45 @@ public class MonitoringMessageEditComponentWithController extends
 					this);
 		}
 
+		// Adjust UI
+		adjust();
+
 		// handle buttons
 		val buttonClickListener = new ButtonClickListener();
-		// getNewGroupButton().addClickListener(buttonClickListener);
-		// getRenameGroupButton().addClickListener(buttonClickListener);
-		// getDeleteGroupButton().addClickListener(buttonClickListener);
+		getTextWithPlaceholdersTextFieldComponent().getButton()
+				.addClickListener(buttonClickListener);
+		getStoreVariableTextFieldComponent().getButton().addClickListener(
+				buttonClickListener);
+	}
+
+	private void adjust() {
+		getTextWithPlaceholdersTextFieldComponent().setValue(
+				monitoringMessage.getTextWithPlaceholders());
+		getStoreVariableTextFieldComponent().setValue(
+				monitoringMessage.getStoreValueToVariableWithName());
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
 		@Override
 		public void buttonClick(final ClickEvent event) {
-			// if (event.getButton() == getNewGroupButton()) {
-			// createGroup();
-			// } else if (event.getButton() == getRenameGroupButton()) {
-			// renameGroup();
-			// } else if (event.getButton() == getDeleteGroupButton()) {
-			// deleteGroup();
-			// }
+			if (event.getButton() == getTextWithPlaceholdersTextFieldComponent()
+					.getButton()) {
+				editTextWithPlaceholder();
+			} else if (event.getButton() == getStoreVariableTextFieldComponent()
+					.getButton()) {
+				editStoreVariable();
+			}
 		}
+	}
+
+	public void editTextWithPlaceholder() {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void editStoreVariable() {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
