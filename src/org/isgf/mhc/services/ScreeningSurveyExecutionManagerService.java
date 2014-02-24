@@ -13,6 +13,7 @@ import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.server.ScreeningSurvey;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
+import org.isgf.mhc.services.internal.VariablesManagerService;
 import org.isgf.mhc.services.types.ScreeningSurveySlideTemplateFieldTypes;
 import org.isgf.mhc.services.types.ScreeningSurveySlideTemplateLayoutTypes;
 
@@ -22,26 +23,31 @@ public class ScreeningSurveyExecutionManagerService {
 
 	private final DatabaseManagerService					databaseManagerService;
 	private final FileStorageManagerService					fileStorageManagerService;
+	private final VariablesManagerService					variablesManagerService;
 
 	private ScreeningSurveyExecutionManagerService(
 			final DatabaseManagerService databaseManagerService,
-			final FileStorageManagerService fileStorageManagerService)
+			final FileStorageManagerService fileStorageManagerService,
+			final VariablesManagerService variablesManagerService)
 			throws Exception {
 		log.info("Starting service...");
 
 		this.databaseManagerService = databaseManagerService;
 		this.fileStorageManagerService = fileStorageManagerService;
+		this.variablesManagerService = variablesManagerService;
 
 		log.info("Started.");
 	}
 
 	public static ScreeningSurveyExecutionManagerService start(
 			final DatabaseManagerService databaseManagerService,
-			final FileStorageManagerService fileStorageManagerService)
+			final FileStorageManagerService fileStorageManagerService,
+			final VariablesManagerService variablesManagerService)
 			throws Exception {
 		if (instance == null) {
 			instance = new ScreeningSurveyExecutionManagerService(
-					databaseManagerService, fileStorageManagerService);
+					databaseManagerService, fileStorageManagerService,
+					variablesManagerService);
 		}
 		return instance;
 	}
@@ -74,11 +80,11 @@ public class ScreeningSurveyExecutionManagerService {
 		// TODO a lot (not forget to set session values)
 
 		val templateVariables = new HashMap<String, Object>();
-		this.setLayoutTo(templateVariables,
+		setLayoutTo(templateVariables,
 				ScreeningSurveySlideTemplateLayoutTypes.SELECT_ONE);
 
-		templateVariables
-				.put(ScreeningSurveySlideTemplateFieldTypes.TEMPLATE_FOLDER
+		templateVariables.put(
+				ScreeningSurveySlideTemplateFieldTypes.TEMPLATE_FOLDER
 						.toVariable(), "basic-template");
 
 		return templateVariables;
@@ -127,8 +133,8 @@ public class ScreeningSurveyExecutionManagerService {
 	 */
 	public ScreeningSurvey getScreeningSurveyById(
 			final ObjectId screeningSurveyId) {
-		return this.databaseManagerService.getModelObjectById(
-				ScreeningSurvey.class, screeningSurveyId);
+		return databaseManagerService.getModelObjectById(ScreeningSurvey.class,
+				screeningSurveyId);
 	}
 
 	/**
@@ -139,8 +145,8 @@ public class ScreeningSurveyExecutionManagerService {
 	 * @return
 	 */
 	public Iterable<ScreeningSurvey> getActiveScreeningSurveys() {
-		return this.databaseManagerService.findModelObjects(
-				ScreeningSurvey.class, Queries.SCREENING_SURVEY__ACTIVE_TRUE);
+		return databaseManagerService.findModelObjects(ScreeningSurvey.class,
+				Queries.SCREENING_SURVEY__ACTIVE_TRUE);
 	}
 
 	/**
@@ -149,7 +155,7 @@ public class ScreeningSurveyExecutionManagerService {
 	 * @return
 	 */
 	public File getTemplatePath() {
-		return this.fileStorageManagerService.getTemplatesFolder();
+		return fileStorageManagerService.getTemplatesFolder();
 	}
 
 }

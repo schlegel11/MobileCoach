@@ -24,6 +24,7 @@ import org.isgf.mhc.model.server.types.MediaObjectTypes;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.ModelObjectExchangeService;
+import org.isgf.mhc.services.internal.VariablesManagerService;
 import org.isgf.mhc.tools.BCrypt;
 import org.isgf.mhc.tools.GlobalUniqueIdGenerator;
 import org.isgf.mhc.tools.StringValidator;
@@ -41,17 +42,20 @@ public class InterventionAdministrationManagerService {
 
 	private final DatabaseManagerService					databaseManagerService;
 	private final FileStorageManagerService					fileStorageManagerService;
+	private final VariablesManagerService					variablesManagerService;
 	private final ModelObjectExchangeService				modelObjectExchangeService;
 
 	private InterventionAdministrationManagerService(
 			final DatabaseManagerService databaseManagerService,
 			final FileStorageManagerService fileStorageManagerService,
+			final VariablesManagerService variablesManagerService,
 			final ModelObjectExchangeService modelObjectExchangeService)
 			throws Exception {
 		log.info("Starting service...");
 
 		this.databaseManagerService = databaseManagerService;
 		this.fileStorageManagerService = fileStorageManagerService;
+		this.variablesManagerService = variablesManagerService;
 		this.modelObjectExchangeService = modelObjectExchangeService;
 
 		log.info("Started.");
@@ -60,12 +64,13 @@ public class InterventionAdministrationManagerService {
 	public static InterventionAdministrationManagerService start(
 			final DatabaseManagerService databaseManagerService,
 			final FileStorageManagerService fileStorageManagerService,
+			final VariablesManagerService variablesManagerService,
 			final ModelObjectExchangeService modelObjectExchangeService)
 			throws Exception {
 		if (instance == null) {
 			instance = new InterventionAdministrationManagerService(
 					databaseManagerService, fileStorageManagerService,
-					modelObjectExchangeService);
+					variablesManagerService, modelObjectExchangeService);
 		}
 		return instance;
 	}
@@ -260,6 +265,12 @@ public class InterventionAdministrationManagerService {
 					AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_NOT_VALID);
 		}
 
+		if (variablesManagerService
+				.isWriteProtectedParticipantOrSystemVariable(variableName)) {
+			throw new NotificationMessageException(
+					AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
+		}
+
 		val interventionVariables = databaseManagerService
 				.findModelObjects(
 						InterventionVariableWithValue.class,
@@ -285,6 +296,12 @@ public class InterventionAdministrationManagerService {
 		if (!StringValidator.isValidVariableName(newName)) {
 			throw new NotificationMessageException(
 					AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_NOT_VALID);
+		}
+
+		if (variablesManagerService
+				.isWriteProtectedParticipantOrSystemVariable(newName)) {
+			throw new NotificationMessageException(
+					AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
 		}
 
 		val interventionVariables = databaseManagerService
@@ -410,8 +427,11 @@ public class InterventionAdministrationManagerService {
 		return monitoringMessageToSwapWith;
 	}
 
-	public void monitoringMessageGeneralUpdate(
-			final MonitoringMessage monitoringMessage) {
+	public void monitoringMessageSetLinkedMediaObject(
+			final MonitoringMessage monitoringMessage,
+			final ObjectId linkedMediaObjectId) {
+		monitoringMessage.setLinkedMediaObject(linkedMediaObjectId);
+
 		databaseManagerService.saveModelObject(monitoringMessage);
 	}
 

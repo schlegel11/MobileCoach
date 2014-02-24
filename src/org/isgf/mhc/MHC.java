@@ -16,6 +16,7 @@ import org.isgf.mhc.services.internal.CommunicationManagerService;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.ModelObjectExchangeService;
+import org.isgf.mhc.services.internal.VariablesManagerService;
 
 /**
  * @author Andreas Filler
@@ -31,6 +32,8 @@ public class MHC implements ServletContextListener {
 	// Internal services
 	DatabaseManagerService						databaseManagerService;
 	FileStorageManagerService					fileStorageManagerService;
+
+	VariablesManagerService						variablesManagerService;
 
 	CommunicationManagerService					communicationManagerService;
 	ModelObjectExchangeService					modelObjectExchangeService;
@@ -65,6 +68,8 @@ public class MHC implements ServletContextListener {
 			databaseManagerService = DatabaseManagerService.start();
 			fileStorageManagerService = FileStorageManagerService
 					.start(databaseManagerService);
+			variablesManagerService = VariablesManagerService
+					.start(databaseManagerService);
 			communicationManagerService = CommunicationManagerService.start();
 			modelObjectExchangeService = ModelObjectExchangeService.start(
 					databaseManagerService, fileStorageManagerService);
@@ -72,14 +77,16 @@ public class MHC implements ServletContextListener {
 			// Controller services
 			interventionAdministrationManagerService = InterventionAdministrationManagerService
 					.start(databaseManagerService, fileStorageManagerService,
-							modelObjectExchangeService);
+							variablesManagerService, modelObjectExchangeService);
 			screeningSurveyAdministrationManagerService = ScreeningSurveyAdministrationManagerService
 					.start(databaseManagerService, fileStorageManagerService,
-							modelObjectExchangeService);
+							variablesManagerService, modelObjectExchangeService);
 			interventionExecutionManagerService = InterventionExecutionManagerService
-					.start(databaseManagerService, fileStorageManagerService);
+					.start(databaseManagerService, fileStorageManagerService,
+							variablesManagerService);
 			screeningSurveyExecutionManagerService = ScreeningSurveyExecutionManagerService
-					.start(databaseManagerService, fileStorageManagerService);
+					.start(databaseManagerService, fileStorageManagerService,
+							variablesManagerService);
 		} catch (final Exception e) {
 			noErrorsOccurred = false;
 			log.error("Error at starting services: {}", e);
@@ -102,6 +109,7 @@ public class MHC implements ServletContextListener {
 		try {
 			databaseManagerService.stop();
 			fileStorageManagerService.stop();
+			variablesManagerService.stop();
 			communicationManagerService.stop();
 			modelObjectExchangeService.stop();
 			interventionAdministrationManagerService.stop();

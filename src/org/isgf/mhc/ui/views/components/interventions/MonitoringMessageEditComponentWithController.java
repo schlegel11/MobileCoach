@@ -64,9 +64,8 @@ public class MonitoringMessageEditComponentWithController extends
 
 	@Override
 	public void updateLinkedMediaObjectId(final ObjectId mediaObjectId) {
-		monitoringMessage.setLinkedMediaObject(mediaObjectId);
-
 		getInterventionAdministrationManagerService()
-				.monitoringMessageGeneralUpdate(monitoringMessage);
+				.monitoringMessageSetLinkedMediaObject(monitoringMessage,
+						mediaObjectId);
 	}
 }
