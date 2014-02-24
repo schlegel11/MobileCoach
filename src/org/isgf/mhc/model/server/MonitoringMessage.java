@@ -77,8 +77,8 @@ public class MonitoringMessage extends ModelObject {
 	public UIModelObject toUIModelObject() {
 		final val monitoringMessage = new UIMonitoringMessage(
 				order,
-				textWithPlaceholders.length() > 60 ? textWithPlaceholders
-						.substring(0, 60) + "..." : textWithPlaceholders,
+				textWithPlaceholders.length() > 160 ? textWithPlaceholders
+						.substring(0, 160) + "..." : textWithPlaceholders,
 				linkedMediaObject != null,
 				linkedMediaObject != null ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
