@@ -106,6 +106,8 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 				buttonClickListener);
 		screeningSurveysEditComponent.getDeleteButton().addClickListener(
 				buttonClickListener);
+		screeningSurveysEditComponent.getShowButton().addClickListener(
+				buttonClickListener);
 
 		// Special handle for export button
 		val onDemandFileDownloader = new OnDemandFileDownloader(
@@ -164,8 +166,8 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 					.getDeleteButton()) {
 				deleteScreeningSurvey();
 			} else if (event.getButton() == interventionScreeningSurveyEditComponent
-					.getCopyURLButton()) {
-				// TODO copy url action
+					.getShowButton()) {
+				showScreeningSurvey();
 			}
 		}
 	}
@@ -292,4 +294,24 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 			}
 		}, null);
 	}
+
+	public void showScreeningSurvey() {
+		log.debug("Show screening survey");
+
+		val screeningSurvey = selectedUIScreeningSurvey
+				.getRelatedModelObject(ScreeningSurvey.class);
+
+		final String url = getAdminUI()
+				.getPage()
+				.getLocation()
+				.toString()
+				.substring(
+						0,
+						getAdminUI().getPage().getLocation().toString()
+								.lastIndexOf("/") + 1)
+				+ screeningSurvey.getId() + "/";
+
+		getAdminUI().getPage().open(url, "_blank");
+	}
+
 }
