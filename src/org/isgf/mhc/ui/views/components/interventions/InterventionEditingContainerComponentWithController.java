@@ -48,12 +48,21 @@ public class InterventionEditingContainerComponentWithController extends
 				});
 
 		// Fill Accordion
+		// Add basic settings tab
 		addPointableTab(
 				getContentAccordion(),
 				new InterventionBasicSettingsTabComponentWithController(
 						intervention, this),
 				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__BASIC_SETTINGS_TAB,
 				ThemeImageStrings.COMPONENT_ICON);
+
+		// Add intervention screening surveys tab
+		registerToSetEditingDependingOnMessaging(addPointableTab(
+				getContentAccordion(),
+				new InterventionScreeningSurveysTabComponentWithController(
+						intervention),
+				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__SCREENING_SURVEYS_TAB,
+				ThemeImageStrings.COMPONENT_ICON));
 
 		// Add intervention variables tab
 		registerToSetEditingDependingOnMessaging(addPointableTab(

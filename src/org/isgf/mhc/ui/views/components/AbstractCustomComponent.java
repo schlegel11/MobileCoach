@@ -13,6 +13,7 @@ import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.ui.UIModelObject;
 import org.isgf.mhc.services.InterventionAdministrationManagerService;
+import org.isgf.mhc.services.ScreeningSurveyAdministrationManagerService;
 import org.isgf.mhc.ui.AdminNavigatorUI;
 import org.isgf.mhc.ui.NotificationMessageException;
 import org.isgf.mhc.ui.UISession;
@@ -45,6 +46,11 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 
 	protected InterventionAdministrationManagerService getInterventionAdministrationManagerService() {
 		return MHC.getInstance().getInterventionAdministrationManagerService();
+	}
+
+	protected ScreeningSurveyAdministrationManagerService getScreeningSurveyAdministrationManagerService() {
+		return MHC.getInstance()
+				.getScreeningSurveyAdministrationManagerService();
 	}
 
 	protected UISession getUISession() {

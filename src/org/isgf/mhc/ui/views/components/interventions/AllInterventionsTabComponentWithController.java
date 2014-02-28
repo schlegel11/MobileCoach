@@ -167,7 +167,7 @@ public class AllInterventionsTabComponentWithController extends
 	public void createIntervention() {
 		log.debug("Create intervention");
 		showModalStringValueEditWindow(
-				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NAME_FOR_NEW_INTERVENTION,
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NAME_FOR_INTERVENTION,
 				null, null, new ShortStringEditComponent(),
 				new ExtendableButtonClickListener() {
 					@Override

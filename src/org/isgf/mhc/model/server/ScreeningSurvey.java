@@ -5,9 +5,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.val;
 
 import org.bson.types.ObjectId;
+import org.isgf.mhc.conf.AdminMessageStrings;
+import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
+import org.isgf.mhc.model.ui.UIModelObject;
+import org.isgf.mhc.model.ui.UIScreeningSurvey;
 
 /**
  * {@link ModelObject} to represent an {@link ScreeningSurvey}
@@ -85,4 +90,35 @@ public class ScreeningSurvey extends ModelObject {
 	@Getter
 	@Setter
 	private boolean		active;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.isgf.mhc.model.ModelObject#toUIModelObject()
+	 */
+	@Override
+	public UIModelObject toUIModelObject() {
+		val screeningSurvey = new UIScreeningSurvey(
+				name,
+				password,
+				active,
+				active ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE));
+
+		screeningSurvey.setRelatedModelObject(this);
+
+		return screeningSurvey;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.isgf.mhc.model.ModelObject#performOnDelete()
+	 */
+	@Override
+	public void performOnDelete() {
+		// TODO recursive deletion
+	}
 }

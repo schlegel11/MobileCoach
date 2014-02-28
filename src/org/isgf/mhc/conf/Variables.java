@@ -19,6 +19,6 @@ public class Variables {
 	};
 
 	public enum READ_WRITE_PARTICIPANT_VARIABLES {
-		participantName
+		participantName, participantDialogOptionSMSData, participantDialogOptionEmailData
 	};
 }

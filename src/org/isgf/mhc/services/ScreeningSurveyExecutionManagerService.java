@@ -78,6 +78,7 @@ public class ScreeningSurveyExecutionManagerService {
 		// Check if
 
 		// TODO a lot (not forget to set session values)
+		// handle also "empty" template path (= "")
 
 		val templateVariables = new HashMap<String, Object>();
 		setLayoutTo(templateVariables,
