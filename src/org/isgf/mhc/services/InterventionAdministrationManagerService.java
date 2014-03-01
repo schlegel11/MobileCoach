@@ -545,8 +545,86 @@ public class InterventionAdministrationManagerService {
 		return monitoringRule;
 	}
 
-	public void monitoringRuleDelete(final MonitoringRule monitoringRule) {
-		databaseManagerService.deleteModelObject(monitoringRule);
+	public void monitoringRuleMove(final int movement,
+			final ObjectId monitoringRuleIdToMove,
+			final ObjectId referenceTargetId, final ObjectId interventionId) {
+		if (movement == 0) {
+			// At the beginning of sublist of target
+
+			// Move all items in sublist one step down
+			val otherMonitoringRulesToMove = databaseManagerService
+					.findModelObjects(
+							MonitoringRule.class,
+							Queries.MONITORING_RULE__BY_INTERVENTION_AND_PARENT,
+							interventionId, referenceTargetId);
+			for (val otherMonitoringRuleToMove : otherMonitoringRulesToMove) {
+				otherMonitoringRuleToMove.setOrder(otherMonitoringRuleToMove
+						.getOrder() + 1);
+				databaseManagerService
+						.saveModelObject(otherMonitoringRuleToMove);
+			}
+
+			// Set target as new parent
+			final MonitoringRule monitoringRuleToMove = databaseManagerService
+					.getModelObjectById(MonitoringRule.class,
+							monitoringRuleIdToMove);
+			monitoringRuleToMove
+					.setIsSubRuleOfMonitoringRule(referenceTargetId);
+
+			// Set at beginning of list
+			monitoringRuleToMove.setOrder(0);
+
+			databaseManagerService.saveModelObject(monitoringRuleToMove);
+		} else if (movement == 1 || movement == 2) {
+			// Move above or below
+
+			// Move all items in sublist after target one step
+			// down
+			final MonitoringRule referenceTarget = databaseManagerService
+					.getModelObjectById(MonitoringRule.class, referenceTargetId);
+
+			val otherMonitoringRulesToMove = databaseManagerService
+					.findModelObjects(
+							MonitoringRule.class,
+							Queries.MONITORING_RULE__BY_INTERVENTION_AND_PARENT_AND_ORDER_HIGHER,
+							interventionId,
+							referenceTarget.getIsSubRuleOfMonitoringRule(),
+							referenceTarget.getOrder());
+			for (val otherMonitoringRuleToMove : otherMonitoringRulesToMove) {
+				otherMonitoringRuleToMove.setOrder(otherMonitoringRuleToMove
+						.getOrder() + 1);
+				databaseManagerService
+						.saveModelObject(otherMonitoringRuleToMove);
+			}
+
+			// Set parent of target to rule
+			final MonitoringRule monitoringRuleToMove = databaseManagerService
+					.getModelObjectById(MonitoringRule.class,
+							monitoringRuleIdToMove);
+			monitoringRuleToMove.setIsSubRuleOfMonitoringRule(referenceTarget
+					.getIsSubRuleOfMonitoringRule());
+			log.debug("> " + referenceTarget.getIsSubRuleOfMonitoringRule());
+
+			if (movement == 1) {
+				// Set order to former order of target
+				monitoringRuleToMove.setOrder(referenceTarget.getOrder());
+				databaseManagerService.saveModelObject(monitoringRuleToMove);
+
+				// Set order of target one down
+				referenceTarget.setOrder(referenceTarget.getOrder() + 1);
+				databaseManagerService.saveModelObject(referenceTarget);
+			} else {
+				// Set order to former order of target plus 1
+				monitoringRuleToMove.setOrder(referenceTarget.getOrder() + 1);
+				databaseManagerService.saveModelObject(monitoringRuleToMove);
+			}
+		}
+
+	}
+
+	public void monitoringRuleDelete(final ObjectId monitoringRuleId) {
+		databaseManagerService.deleteModelObject(MonitoringRule.class,
+				monitoringRuleId);
 	}
 
 	/*
@@ -652,6 +730,12 @@ public class InterventionAdministrationManagerService {
 				MonitoringMessageGroup.class, monitoringMessageGroupId);
 	}
 
+	public Iterable<MonitoringRule> getAllMonitoringRulesOfIntervention(
+			final ObjectId interventionId) {
+		return databaseManagerService.findModelObjects(MonitoringRule.class,
+				Queries.MONITORING_RULE__BY_INTERVENTION, interventionId);
+	}
+
 	public Iterable<MonitoringRule> getAllMonitoringRulesOfInterventionAndParent(
 			final ObjectId interventionId, final ObjectId parentMonitoringRuleId) {
 		return databaseManagerService.findSortedModelObjects(
@@ -659,6 +743,11 @@ public class InterventionAdministrationManagerService {
 				Queries.MONITORING_RULE__BY_INTERVENTION_AND_PARENT,
 				Queries.MONITORING_RULE__SORT_BY_ORDER_ASC, interventionId,
 				parentMonitoringRuleId);
+	}
+
+	public MonitoringRule getMonitoringRule(final ObjectId monitoringRuleId) {
+		return databaseManagerService.getModelObjectById(MonitoringRule.class,
+				monitoringRuleId);
 	}
 
 	public MediaObject getMediaObject(final ObjectId mediaObjectId) {
@@ -690,4 +779,5 @@ public class InterventionAdministrationManagerService {
 
 		return variables;
 	}
+
 }

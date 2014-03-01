@@ -85,7 +85,8 @@ public class MonitoringRule extends AbstractMonitoringRule {
 		// Delete related reply rules
 		val monitoringReplyRulesToDelete = ModelObject.find(
 				MonitoringReplyRule.class,
-				Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE, getId());
+				Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE, getId(),
+				getId());
 		ModelObject.delete(monitoringReplyRulesToDelete);
 
 		// Delete sub rules

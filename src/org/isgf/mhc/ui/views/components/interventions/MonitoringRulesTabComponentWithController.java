@@ -1,6 +1,7 @@
 package org.isgf.mhc.ui.views.components.interventions;
 
-import java.util.Hashtable;
+import java.util.HashSet;
+import java.util.Set;
 
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -17,11 +18,20 @@ import org.isgf.mhc.model.server.MonitoringRule;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.HierarchicalContainer;
+import com.vaadin.event.DataBoundTransferable;
+import com.vaadin.event.Transferable;
+import com.vaadin.event.dd.DragAndDropEvent;
+import com.vaadin.event.dd.DropHandler;
+import com.vaadin.event.dd.acceptcriteria.AcceptAll;
+import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.ThemeResource;
+import com.vaadin.shared.ui.dd.VerticalDropLocation;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Tree;
+import com.vaadin.ui.Tree.TreeDragMode;
+import com.vaadin.ui.Tree.TreeTargetDetails;
 
 /**
  * Extends the monitoring rules tab with a controller
@@ -33,24 +43,22 @@ import com.vaadin.ui.Tree;
 public class MonitoringRulesTabComponentWithController extends
 		MonitoringRulesTabComponent {
 
-	private final Intervention							intervention;
+	private final Intervention					intervention;
 
-	private final MonitoringRulesEditComponent			monitoringRulesEditComponent;
-	private final Tree									rulesTree;
+	private final MonitoringRulesEditComponent	monitoringRulesEditComponent;
+	private final Tree							rulesTree;
 
-	private MonitoringRule								selectedMonitoringRule	= null;
+	private ObjectId							selectedMonitoringRuleId	= null;
 
-	public static final String							NAME					= "name";
-	public static final String							ICON					= "icon";
+	public static final String					NAME						= "name";
+	public static final String					ICON						= "icon";
 
-	private final ThemeResource							RULE_ICON				= new ThemeResource(
-																						ThemeImageStrings.RULE_ICON_SMALL);
-	private final ThemeResource							MESSAGE_RULE_ICON		= new ThemeResource(
-																						ThemeImageStrings.MESSAGE_ICON_SMALL);
+	private final ThemeResource					RULE_ICON					= new ThemeResource(
+																					ThemeImageStrings.RULE_ICON_SMALL);
+	private final ThemeResource					MESSAGE_RULE_ICON			= new ThemeResource(
+																					ThemeImageStrings.MESSAGE_ICON_SMALL);
 
-	private final HierarchicalContainer					container;
-
-	private final Hashtable<ObjectId, MonitoringRule>	monitoringRuleCache		= new Hashtable<ObjectId, MonitoringRule>();
+	private final HierarchicalContainer			container;
 
 	public MonitoringRulesTabComponentWithController(
 			final Intervention intervention) {
@@ -61,9 +69,11 @@ public class MonitoringRulesTabComponentWithController extends
 		monitoringRulesEditComponent = getMonitoringRulesEditComponent();
 		rulesTree = monitoringRulesEditComponent.getRulesTree();
 
-		selectedMonitoringRule = null;
+		selectedMonitoringRuleId = null;
 
 		// tree content
+		final Set<ObjectId> monitoringRuleIdCache = new HashSet<ObjectId>();
+
 		container = new HierarchicalContainer();
 		container.addContainerProperty(NAME, String.class, null);
 		container.addContainerProperty(ICON, ThemeResource.class, null);
@@ -74,15 +84,39 @@ public class MonitoringRulesTabComponentWithController extends
 		rulesTree.setItemCaptionPropertyId(NAME);
 		rulesTree.setItemIconPropertyId(ICON);
 
-		recursiveAddItemsToTree(null);
+		rulesTree.setDragMode(TreeDragMode.NODE);
+		rulesTree.setDropHandler(new TreeSortDropHandler(rulesTree, container,
+				this));
+
+		recursiveAddItemsToTree(null, monitoringRuleIdCache);
+
+		// clean old unlinked rules
+		log.debug("Cleaning old unlinked rules");
+		val allMonitoringRules = getInterventionAdministrationManagerService()
+				.getAllMonitoringRulesOfIntervention(intervention.getId());
+		for (final MonitoringRule monitoringRule : allMonitoringRules) {
+			if (!monitoringRuleIdCache.contains(monitoringRule.getId())) {
+				log.warn("Deleting unlinked rule with id {}",
+						monitoringRule.getId());
+				getInterventionAdministrationManagerService()
+						.monitoringRuleDelete(monitoringRule.getId());
+			}
+		}
 
 		// tree listener
 		rulesTree.addValueChangeListener(new ValueChangeListener() {
 
 			@Override
 			public void valueChange(final ValueChangeEvent event) {
-				selectedMonitoringRule = (MonitoringRule) event.getProperty()
+				selectedMonitoringRuleId = (ObjectId) event.getProperty()
 						.getValue();
+
+				if (selectedMonitoringRuleId == null) {
+					log.debug("Unselected monitoring rule");
+				} else {
+					log.debug("Selected monitoring rule {}",
+							selectedMonitoringRuleId);
+				}
 
 				adjust();
 			}
@@ -94,27 +128,32 @@ public class MonitoringRulesTabComponentWithController extends
 				buttonClickListener);
 		monitoringRulesEditComponent.getEditButton().addClickListener(
 				buttonClickListener);
+		monitoringRulesEditComponent.getExpandButton().addClickListener(
+				buttonClickListener);
+		monitoringRulesEditComponent.getCollapseButton().addClickListener(
+				buttonClickListener);
 		monitoringRulesEditComponent.getDeleteButton().addClickListener(
 				buttonClickListener);
 	}
 
-	private void recursiveAddItemsToTree(final ObjectId parentMonitoringRuleId) {
+	private void recursiveAddItemsToTree(final ObjectId parentMonitoringRuleId,
+			final Set<ObjectId> monitoringRuleIdCache) {
 		val existingMonitoringRules = getInterventionAdministrationManagerService()
 				.getAllMonitoringRulesOfInterventionAndParent(
 						intervention.getId(), parentMonitoringRuleId);
 
 		for (final MonitoringRule monitoringRule : existingMonitoringRules) {
 			if (parentMonitoringRuleId == null) {
-				addItemToTree(monitoringRule, null);
+				addItemToTree(monitoringRule.getId(), null);
 			} else {
-				addItemToTree(monitoringRule,
-						monitoringRuleCache.get(parentMonitoringRuleId));
+				addItemToTree(monitoringRule.getId(), parentMonitoringRuleId);
 			}
 
-			monitoringRuleCache.put(monitoringRule.getId(), monitoringRule);
+			monitoringRuleIdCache.add(monitoringRule.getId());
 
 			// Recursion to add all sub rules as well
-			recursiveAddItemsToTree(monitoringRule.getId());
+			recursiveAddItemsToTree(monitoringRule.getId(),
+					monitoringRuleIdCache);
 		}
 	}
 
@@ -128,6 +167,12 @@ public class MonitoringRulesTabComponentWithController extends
 					.getEditButton()) {
 				editRule();
 			} else if (event.getButton() == monitoringRulesEditComponent
+					.getExpandButton()) {
+				expandOrCollapseTree(true);
+			} else if (event.getButton() == monitoringRulesEditComponent
+					.getCollapseButton()) {
+				expandOrCollapseTree(false);
+			} else if (event.getButton() == monitoringRulesEditComponent
 					.getDeleteButton()) {
 				deleteRule();
 			}
@@ -135,9 +180,12 @@ public class MonitoringRulesTabComponentWithController extends
 	}
 
 	private void adjust() {
-		if (selectedMonitoringRule == null) {
+		if (selectedMonitoringRuleId == null) {
 			monitoringRulesEditComponent.setNothingSelected();
 		} else {
+			final MonitoringRule selectedMonitoringRule = getInterventionAdministrationManagerService()
+					.getMonitoringRule(selectedMonitoringRuleId);
+
 			String resultVariable;
 			if (selectedMonitoringRule.getStoreValueToVariableWithName() == null
 					|| selectedMonitoringRule.getStoreValueToVariableWithName()
@@ -175,19 +223,27 @@ public class MonitoringRulesTabComponentWithController extends
 		}
 	}
 
+	public void expandOrCollapseTree(final boolean expandTree) {
+		if (expandTree) {
+			rulesTree.expandItemsRecursively(selectedMonitoringRuleId);
+		} else {
+			rulesTree.collapseItemsRecursively(selectedMonitoringRuleId);
+		}
+	}
+
 	public void createRule() {
 		log.debug("Create rule");
 		final MonitoringRule newMonitoringRule = getInterventionAdministrationManagerService()
 				.monitoringRuleCreate(
 						intervention.getId(),
-						selectedMonitoringRule == null ? null
-								: selectedMonitoringRule.getId());
+						selectedMonitoringRuleId == null ? null
+								: selectedMonitoringRuleId);
 
 		// TODO
 		// Adapt UI
 
-		addItemToTree(newMonitoringRule, null);
-		rulesTree.select(newMonitoringRule);
+		addItemToTree(newMonitoringRule.getId(), null);
+		rulesTree.select(newMonitoringRule.getId());
 
 		// showModalModelObjectEditWindow(
 		// AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__CREATE_MONITORING_MESSAGE,
@@ -213,45 +269,72 @@ public class MonitoringRulesTabComponentWithController extends
 	}
 
 	@SuppressWarnings("unchecked")
-	private void addItemToTree(final MonitoringRule monitoringRule,
-			final MonitoringRule parentMonitoringRule) {
+	private void addItemToTree(final ObjectId monitoringRuleId,
+			final ObjectId parentMonitoringRuleId) {
+		// TODO window
+
 		// Create name and icon
+		val monitoringRule = getInterventionAdministrationManagerService()
+				.getMonitoringRule(monitoringRuleId);
+
 		String name = monitoringRule.getRuleWithPlaceholders();
 		if (name == null || name.equals("")) {
 			name = ImplementationContants.DEFAULT_OBJECT_NAME;
 		}
+
 		// TODO remove after debugging
 		name = monitoringRule.getOrder() + ". " + name;
 
 		ThemeResource icon;
-		if (monitoringRule.getStoreValueToVariableWithName() == null
-				|| monitoringRule.getStoreValueToVariableWithName().equals("")) {
-			icon = RULE_ICON;
-		} else {
+		if (monitoringRule.isSendMessageIfTrue()) {
 			icon = MESSAGE_RULE_ICON;
+		} else {
+			icon = RULE_ICON;
 		}
 
 		// Add item to tree
-		val item = container.addItem(monitoringRule);
+		val item = container.addItem(monitoringRuleId);
 		item.getItemProperty(NAME).setValue(name);
 		item.getItemProperty(ICON).setValue(icon);
 
-		container.setChildrenAllowed(monitoringRule, true);
+		container.setChildrenAllowed(monitoringRuleId, true);
 
 		// Care for sub structure at startup
-		if (parentMonitoringRule != null) {
-			container.setParent(monitoringRule, parentMonitoringRule);
+		if (parentMonitoringRuleId != null) {
+			container.setParent(monitoringRuleId, parentMonitoringRuleId);
 		}
 		// Care for sub structure when creating a new node
-		if (selectedMonitoringRule != null) {
-			container.setParent(monitoringRule, selectedMonitoringRule);
-			rulesTree.expandItem(selectedMonitoringRule);
+		if (selectedMonitoringRuleId != null) {
+			container.setParent(monitoringRuleId, selectedMonitoringRuleId);
+			rulesTree.expandItem(selectedMonitoringRuleId);
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public void editRule() {
 		log.debug("Edit rule");
 
+		// TODO window
+
+		// Adjust item and icon
+		val selectedMonitoringRule = getInterventionAdministrationManagerService()
+				.getMonitoringRule(selectedMonitoringRuleId);
+
+		String name = selectedMonitoringRule.getRuleWithPlaceholders();
+		if (name == null || name.equals("")) {
+			name = ImplementationContants.DEFAULT_OBJECT_NAME;
+		}
+
+		ThemeResource icon;
+		if (selectedMonitoringRule.isSendMessageIfTrue()) {
+			icon = MESSAGE_RULE_ICON;
+		} else {
+			icon = RULE_ICON;
+		}
+
+		val item = container.getItem(selectedMonitoringRuleId);
+		item.getItemProperty(NAME).setValue(name);
+		item.getItemProperty(ICON).setValue(icon);
 		// showModalModelObjectEditWindow(
 		// AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__EDIT_MONITORING_MESSAGE,
 		// new MonitoringMessageEditComponentWithController(
@@ -273,6 +356,14 @@ public class MonitoringRulesTabComponentWithController extends
 		// });
 	}
 
+	public void moveItem(final TreeSortDropHandler.MOVE movement,
+			final ObjectId sourceItemId, final ObjectId targetItemId) {
+		log.debug("Moving {} {} {}", sourceItemId, movement, targetItemId);
+		getInterventionAdministrationManagerService().monitoringRuleMove(
+				movement.ordinal(), sourceItemId, targetItemId,
+				intervention.getId());
+	}
+
 	public void deleteRule() {
 		log.debug("Delete rule");
 
@@ -283,7 +374,7 @@ public class MonitoringRulesTabComponentWithController extends
 				try {
 					// Delete rule
 					getInterventionAdministrationManagerService()
-							.monitoringRuleDelete(selectedMonitoringRule);
+							.monitoringRuleDelete(selectedMonitoringRuleId);
 				} catch (final Exception e) {
 					closeWindow();
 					handleException(e);
@@ -291,8 +382,7 @@ public class MonitoringRulesTabComponentWithController extends
 				}
 
 				// Adapt UI
-				// TODO
-				// rulesTree.removeItem(selectedUIMonitoringRule);
+				container.removeItemRecursively(selectedMonitoringRuleId);
 
 				getAdminUI()
 						.showInformationNotification(
@@ -301,5 +391,113 @@ public class MonitoringRulesTabComponentWithController extends
 				closeWindow();
 			}
 		}, null);
+	}
+
+	private static class TreeSortDropHandler implements DropHandler {
+		private final Tree										tree;
+
+		private final MonitoringRulesTabComponentWithController	component;
+
+		public static enum MOVE {
+			AS_CHILD, ABOVE, BELOW
+		};
+
+		/**
+		 * Manages the drag & drop events on the rules tree
+		 * 
+		 * @param tree
+		 * @param container
+		 */
+		public TreeSortDropHandler(final Tree tree,
+				final HierarchicalContainer container,
+				final MonitoringRulesTabComponentWithController component) {
+			this.tree = tree;
+			this.component = component;
+		}
+
+		@Override
+		public AcceptCriterion getAcceptCriterion() {
+			return AcceptAll.get();
+		}
+
+		@Override
+		public void drop(final DragAndDropEvent dropEvent) {
+			// Called whenever a drop occurs on the component
+
+			// Make sure the drag source is the same tree
+			final Transferable t = dropEvent.getTransferable();
+
+			// see the comment in getAcceptCriterion()
+			if (t.getSourceComponent() != tree
+					|| !(t instanceof DataBoundTransferable)) {
+				return;
+			}
+
+			final TreeTargetDetails dropData = (TreeTargetDetails) dropEvent
+					.getTargetDetails();
+
+			final Object sourceItemId = ((DataBoundTransferable) t).getItemId();
+			final Object targetItemId = dropData.getItemIdOver();
+
+			// Location describes on which part of the node the drop took
+			// place
+			final VerticalDropLocation location = dropData.getDropLocation();
+
+			moveNode(sourceItemId, targetItemId, location);
+
+		}
+
+		/**
+		 * Move a node within a tree onto, above or below another node depending
+		 * on the drop location.
+		 * 
+		 * @param sourceItemId
+		 *            id of the item to move
+		 * @param targetItemId
+		 *            id of the item onto which the source node should be moved
+		 * @param location
+		 *            VerticalDropLocation indicating where the source node was
+		 *            dropped relative to the target node
+		 */
+		private void moveNode(final Object sourceItemId,
+				final Object targetItemId, final VerticalDropLocation location) {
+			final HierarchicalContainer container = (HierarchicalContainer) tree
+					.getContainerDataSource();
+
+			// Sorting goes as
+			// - If dropped ON a node, we append it as a child
+			// - If dropped on the TOP part of a node, we move/add it before
+			// the node
+			// - If dropped on the BOTTOM part of a node, we move/add it
+			// after the node
+			if (location == VerticalDropLocation.MIDDLE) {
+				if (container.setParent(sourceItemId, targetItemId)
+						&& container.hasChildren(targetItemId)) {
+					// move first in the container
+					container.moveAfterSibling(sourceItemId, null);
+					// Adjust monitoring rule
+				}
+				component.moveItem(TreeSortDropHandler.MOVE.AS_CHILD,
+						(ObjectId) sourceItemId, (ObjectId) targetItemId);
+			} else if (location == VerticalDropLocation.TOP) {
+				final Object parentId = container.getParent(targetItemId);
+				if (container.setParent(sourceItemId, parentId)) {
+					// reorder only the two items, moving source above target
+					container.moveAfterSibling(sourceItemId, targetItemId);
+					container.moveAfterSibling(targetItemId, sourceItemId);
+					// Adjust monitoring rule
+				}
+				component.moveItem(TreeSortDropHandler.MOVE.ABOVE,
+						(ObjectId) sourceItemId, (ObjectId) targetItemId);
+			} else if (location == VerticalDropLocation.BOTTOM) {
+				final Object parentId = container.getParent(targetItemId);
+				if (container.setParent(sourceItemId, parentId)) {
+					container.moveAfterSibling(sourceItemId, targetItemId);
+					// Adjust monitoring rule
+				}
+				component.moveItem(TreeSortDropHandler.MOVE.BELOW,
+						(ObjectId) sourceItemId, (ObjectId) targetItemId);
+			}
+		}
 	}
 }

@@ -168,6 +168,7 @@ public class VariablesManagerService {
 			val monitoringReplyRuleModelObjects = databaseManagerService
 					.findModelObjects(MonitoringReplyRule.class,
 							Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE,
+							monitoringRuleModelObject.getId(),
 							monitoringRuleModelObject.getId());
 
 			for (val monitoringReplyRuleModelObject : monitoringReplyRuleModelObjects) {

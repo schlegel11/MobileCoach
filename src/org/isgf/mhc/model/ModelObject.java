@@ -2,6 +2,7 @@ package org.isgf.mhc.model;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.NoSuchElementException;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -184,7 +185,7 @@ public abstract class ModelObject {
 						modelObject.getClass().getSimpleName());
 			}
 		} catch (final Exception e) {
-			log.warn("Error at recursive deleteion: {}", e.getMessage());
+			log.warn("Error at recursive deletion: {}", e.getMessage());
 		}
 
 		try {
@@ -320,6 +321,8 @@ public abstract class ModelObject {
 							.as(clazz).iterator().next();
 				}
 			} catch (final NullPointerException f) {
+				modelObject = null;
+			} catch (final NoSuchElementException f) {
 				modelObject = null;
 			}
 			log.debug(
