@@ -518,7 +518,7 @@ public class InterventionAdministrationManagerService {
 	public MonitoringRule monitoringRuleCreate(final ObjectId interventionId,
 			final ObjectId parentMonitoringRuleId) {
 		val monitoringRule = new MonitoringRule(
-				RandomStringUtils.randomAlphanumeric(10),
+				"",
 				EquationSignTypes.EQUALS,
 				"",
 				parentMonitoringRuleId,

@@ -72,6 +72,13 @@ public class InterventionEditingContainerComponentWithController extends
 				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__VARIABLES_TAB,
 				ThemeImageStrings.COMPONENT_ICON));
 
+		// Add monitoring rules tab
+		registerToSetEditingDependingOnMessaging(addPointableTab(
+				getContentAccordion(),
+				new MonitoringRulesTabComponentWithController(intervention),
+				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__MONITORING_RULES_TAB,
+				ThemeImageStrings.COMPONENT_ICON));
+
 		// Add monitoring message groups tab
 		registerToSetEditingDependingOnMessaging(addPointableTab(
 				getContentAccordion(),

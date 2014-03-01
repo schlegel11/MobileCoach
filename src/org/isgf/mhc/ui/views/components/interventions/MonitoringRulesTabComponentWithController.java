@@ -282,9 +282,6 @@ public class MonitoringRulesTabComponentWithController extends
 			name = ImplementationContants.DEFAULT_OBJECT_NAME;
 		}
 
-		// TODO remove after debugging
-		name = monitoringRule.getOrder() + ". " + name;
-
 		ThemeResource icon;
 		if (monitoringRule.isSendMessageIfTrue()) {
 			icon = MESSAGE_RULE_ICON;

@@ -70,8 +70,7 @@ public class InterventionScreeningSurveysEditComponent extends
 		localize(editButton, AdminMessageStrings.GENERAL__EDIT);
 		localize(duplicateButton, AdminMessageStrings.GENERAL__DUPLICATE);
 		localize(deleteButton, AdminMessageStrings.GENERAL__DELETE);
-		localize(
-				showButton,
+		localize(showButton,
 				AdminMessageStrings.INTERVENTION_SCREENING_SURVEY_EDITING__SHOW);
 
 		// set button start state
@@ -138,7 +137,7 @@ public class InterventionScreeningSurveysEditComponent extends
 		screeningSurveysTable = new Table();
 		screeningSurveysTable.setImmediate(false);
 		screeningSurveysTable.setWidth("100.0%");
-		screeningSurveysTable.setHeight("150px");
+		screeningSurveysTable.setHeight("250px");
 		mainLayout.addComponent(screeningSurveysTable);
 
 		// buttonLayout

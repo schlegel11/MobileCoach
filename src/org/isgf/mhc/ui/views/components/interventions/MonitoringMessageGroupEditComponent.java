@@ -112,7 +112,7 @@ public class MonitoringMessageGroupEditComponent extends
 		monitoringMessageTable = new Table();
 		monitoringMessageTable.setImmediate(false);
 		monitoringMessageTable.setWidth("100.0%");
-		monitoringMessageTable.setHeight("150px");
+		monitoringMessageTable.setHeight("250px");
 		mainLayout.addComponent(monitoringMessageTable);
 
 		// buttonLayout

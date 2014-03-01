@@ -99,7 +99,7 @@ public class AccessControlEditComponent extends AbstractCustomComponent {
 		accountsTable = new Table();
 		accountsTable.setImmediate(false);
 		accountsTable.setWidth("100.0%");
-		accountsTable.setHeight("150px");
+		accountsTable.setHeight("250px");
 		mainLayout.addComponent(accountsTable);
 
 		// buttonLayout
