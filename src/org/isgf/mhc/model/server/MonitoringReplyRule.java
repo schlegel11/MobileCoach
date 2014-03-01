@@ -32,16 +32,15 @@ public class MonitoringReplyRule extends AbstractMonitoringRule {
 	public MonitoringReplyRule(final String ruleWithPlaceholders,
 			final EquationSignTypes ruleEquationSign,
 			final String ruleComparisonTermWithPlaceholders,
-			final ObjectId isSubInterventionRuleOfInterventionRule,
-			final int order, final String storeValueToVariableWithName,
+			final ObjectId isSubRuleOfMonitoringRule, final int order,
+			final String storeValueToVariableWithName,
 			final boolean sendMessageIfTrue,
 			final ObjectId relatedMonitoringMessageGroup,
 			final ObjectId isGotAnswerRuleForMonitoringRule,
 			final ObjectId isGotNoAnswerRuleForMonitoringRule) {
 		super(ruleWithPlaceholders, ruleEquationSign,
-				ruleComparisonTermWithPlaceholders,
-				isSubInterventionRuleOfInterventionRule, order,
-				storeValueToVariableWithName, sendMessageIfTrue,
+				ruleComparisonTermWithPlaceholders, isSubRuleOfMonitoringRule,
+				order, storeValueToVariableWithName, sendMessageIfTrue,
 				relatedMonitoringMessageGroup);
 
 		this.isGotAnswerRuleForMonitoringRule = isGotAnswerRuleForMonitoringRule;

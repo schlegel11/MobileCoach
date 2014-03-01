@@ -32,14 +32,14 @@ public abstract class AbstractMonitoringRule extends AbstractRule {
 	public AbstractMonitoringRule(final String ruleWithPlaceholders,
 			final EquationSignTypes ruleEquationSign,
 			final String ruleComparisonTermWithPlaceholders,
-			final ObjectId isSubInterventionRuleOfInterventionRule,
-			final int order, final String storeValueToVariableWithName,
+			final ObjectId isSubRuleOfMonitoringRule, final int order,
+			final String storeValueToVariableWithName,
 			final boolean sendMessageIfTrue,
 			final ObjectId relatedMonitoringMessageGroup) {
 		super(ruleWithPlaceholders, ruleEquationSign,
 				ruleComparisonTermWithPlaceholders);
 
-		isSubMonitoringRuleOfMonitoringRule = isSubInterventionRuleOfInterventionRule;
+		this.isSubRuleOfMonitoringRule = isSubRuleOfMonitoringRule;
 		this.order = order;
 		this.storeValueToVariableWithName = storeValueToVariableWithName;
 		this.sendMessageIfTrue = sendMessageIfTrue;
@@ -55,7 +55,7 @@ public abstract class AbstractMonitoringRule extends AbstractRule {
 	 */
 	@Getter
 	@Setter
-	private ObjectId	isSubMonitoringRuleOfMonitoringRule;
+	private ObjectId	isSubRuleOfMonitoringRule;
 
 	/**
 	 * The position of the {@link AbstractMonitoringRule} compared to all other

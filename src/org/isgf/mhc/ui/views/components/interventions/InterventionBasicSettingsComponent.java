@@ -59,7 +59,7 @@ public class InterventionBasicSettingsComponent extends AbstractCustomComponent 
 		// Adjust intervention status
 		if (interventionStatus) {
 			switchInterventionButton.setIcon(new ThemeResource(
-					ThemeImageStrings.ACTIVE_ICON));
+					ThemeImageStrings.ACTIVE_ICON_SMALL));
 			localize(
 					switchInterventionButton,
 					AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__SWITCH_INTERVENTION_BUTTON_ACTIVE);
@@ -67,7 +67,7 @@ public class InterventionBasicSettingsComponent extends AbstractCustomComponent 
 			switchMessagingButton.setEnabled(true);
 		} else {
 			switchInterventionButton.setIcon(new ThemeResource(
-					ThemeImageStrings.INACTIVE_ICON));
+					ThemeImageStrings.INACTIVE_ICON_SMALL));
 			localize(
 					switchInterventionButton,
 					AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__SWITCH_INTERVENTION_BUTTON_INACTIVE);
@@ -78,7 +78,7 @@ public class InterventionBasicSettingsComponent extends AbstractCustomComponent 
 		// Adjust messaging status
 		if (messagingStatus) {
 			switchMessagingButton.setIcon(new ThemeResource(
-					ThemeImageStrings.ACTIVE_ICON));
+					ThemeImageStrings.ACTIVE_ICON_SMALL));
 			localize(
 					switchMessagingButton,
 					AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__SWITCH_MESSAGING_BUTTON_ACTIVE);
@@ -86,7 +86,7 @@ public class InterventionBasicSettingsComponent extends AbstractCustomComponent 
 			switchInterventionButton.setEnabled(false);
 		} else {
 			switchMessagingButton.setIcon(new ThemeResource(
-					ThemeImageStrings.INACTIVE_ICON));
+					ThemeImageStrings.INACTIVE_ICON_SMALL));
 			localize(
 					switchMessagingButton,
 					AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__SWITCH_MESSAGING_BUTTON_INACTIVE);

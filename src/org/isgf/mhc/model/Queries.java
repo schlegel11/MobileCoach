@@ -35,6 +35,10 @@ public class Queries {
 	public static final String	SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY							= "{'screeningSurvey':#}";
 
 	public static final String	MONITORING_RULE__BY_INTERVENTION									= "{'intervention':#}";
+	public static final String	MONITORING_RULE__BY_INTERVENTION_AND_PARENT							= "{'intervention':#,'isSubRuleOfMonitoringRule':#}";
+	public static final String	MONITORING_RULE__BY_PARENT											= "{'isSubRuleOfMonitoringRule':#}";
+	public static final String	MONITORING_RULE__SORT_BY_ORDER_ASC									= "{'order':1}";
+	public static final String	MONITORING_RULE__SORT_BY_ORDER_DESC									= "{'order':-1}";
 
 	public static final String	MONITORING_REPLY_RULE__BY_MONITORING_RULE							= "{$or:[{'isGotAnswerRuleForMonitoringRule':#},{'isGotNoAnswerRuleForMonitoringRule':#}]}";
 

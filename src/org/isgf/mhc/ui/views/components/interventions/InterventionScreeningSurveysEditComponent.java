@@ -72,7 +72,7 @@ public class InterventionScreeningSurveysEditComponent extends
 		localize(deleteButton, AdminMessageStrings.GENERAL__DELETE);
 		localize(
 				showButton,
-				AdminMessageStrings.INTERVENTION_SCREENING_SURVEY_EDIT_COMPONENT__SHOW);
+				AdminMessageStrings.INTERVENTION_SCREENING_SURVEY_EDITING__SHOW);
 
 		// set button start state
 		setNothingSelected();
@@ -220,6 +220,7 @@ public class InterventionScreeningSurveysEditComponent extends
 		// showButton
 		showButton = new Button();
 		showButton.setCaption("!!! Show");
+		showButton.setIcon(new ThemeResource("img/play-icon-small.png"));
 		showButton.setImmediate(true);
 		showButton.setWidth("100px");
 		showButton.setHeight("-1px");

@@ -88,7 +88,7 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener {
 					@Override
 					public void browserWindowResized(
 							final BrowserWindowResizeEvent event) {
-						if ((event.getWidth() < 1000 || event.getHeight() < 500)
+						if ((event.getWidth() < 1100 || event.getHeight() < 650)
 								&& System.currentTimeMillis()
 										- lastNotification > 5000) {
 							lastNotification = System.currentTimeMillis();

@@ -13,6 +13,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Constants;
+import org.isgf.mhc.conf.ImplementationContants;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.server.Author;
@@ -22,6 +23,8 @@ import org.isgf.mhc.model.server.InterventionVariableWithValue;
 import org.isgf.mhc.model.server.MediaObject;
 import org.isgf.mhc.model.server.MonitoringMessage;
 import org.isgf.mhc.model.server.MonitoringMessageGroup;
+import org.isgf.mhc.model.server.MonitoringRule;
+import org.isgf.mhc.model.server.types.EquationSignTypes;
 import org.isgf.mhc.model.server.types.MediaObjectTypes;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
@@ -38,9 +41,7 @@ import org.isgf.mhc.ui.NotificationMessageException;
  */
 @Log4j2
 public class InterventionAdministrationManagerService {
-	private static final String								DEFAULT_OBJECT_NAME	= "---";
-
-	private static InterventionAdministrationManagerService	instance			= null;
+	private static InterventionAdministrationManagerService	instance	= null;
 
 	private final DatabaseManagerService					databaseManagerService;
 	private final FileStorageManagerService					fileStorageManagerService;
@@ -185,7 +186,7 @@ public class InterventionAdministrationManagerService {
 				System.currentTimeMillis(), false, false);
 
 		if (name.equals("")) {
-			intervention.setName(DEFAULT_OBJECT_NAME);
+			intervention.setName(ImplementationContants.DEFAULT_OBJECT_NAME);
 		}
 
 		databaseManagerService.saveModelObject(intervention);
@@ -196,7 +197,7 @@ public class InterventionAdministrationManagerService {
 	public void interventionChangeName(final Intervention intervention,
 			final String newName) {
 		if (newName.equals("")) {
-			intervention.setName(DEFAULT_OBJECT_NAME);
+			intervention.setName(ImplementationContants.DEFAULT_OBJECT_NAME);
 		} else {
 			intervention.setName(newName);
 		}
@@ -344,7 +345,8 @@ public class InterventionAdministrationManagerService {
 				groupName, false);
 
 		if (monitoringMessageGroup.getName().equals("")) {
-			monitoringMessageGroup.setName(DEFAULT_OBJECT_NAME);
+			monitoringMessageGroup
+					.setName(ImplementationContants.DEFAULT_OBJECT_NAME);
 		}
 
 		databaseManagerService.saveModelObject(monitoringMessageGroup);
@@ -364,7 +366,8 @@ public class InterventionAdministrationManagerService {
 			final MonitoringMessageGroup monitoringMessageGroup,
 			final String newName) {
 		if (newName.equals("")) {
-			monitoringMessageGroup.setName(DEFAULT_OBJECT_NAME);
+			monitoringMessageGroup
+					.setName(ImplementationContants.DEFAULT_OBJECT_NAME);
 		} else {
 			monitoringMessageGroup.setName(newName);
 		}
@@ -511,6 +514,41 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.deleteModelObject(mediaObject);
 	}
 
+	// Monitoring Rule
+	public MonitoringRule monitoringRuleCreate(final ObjectId interventionId,
+			final ObjectId parentMonitoringRuleId) {
+		val monitoringRule = new MonitoringRule(
+				RandomStringUtils.randomAlphanumeric(10),
+				EquationSignTypes.EQUALS,
+				"",
+				parentMonitoringRuleId,
+				0,
+				null,
+				false,
+				null,
+				interventionId,
+				ImplementationContants.DEFAULT_HOUR_TO_SEND_MESSAGE,
+				ImplementationContants.DEFAULT_HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED);
+
+		val highestOrderRule = databaseManagerService.findOneSortedModelObject(
+				MonitoringRule.class,
+				Queries.MONITORING_RULE__BY_INTERVENTION_AND_PARENT,
+				Queries.MONITORING_RULE__SORT_BY_ORDER_DESC, interventionId,
+				parentMonitoringRuleId);
+
+		if (highestOrderRule != null) {
+			monitoringRule.setOrder(highestOrderRule.getOrder() + 1);
+		}
+
+		databaseManagerService.saveModelObject(monitoringRule);
+
+		return monitoringRule;
+	}
+
+	public void monitoringRuleDelete(final MonitoringRule monitoringRule) {
+		databaseManagerService.deleteModelObject(monitoringRule);
+	}
+
 	/*
 	 * Getter methods
 	 */
@@ -606,6 +644,21 @@ public class InterventionAdministrationManagerService {
 			final ObjectId monitoringMessageId) {
 		return databaseManagerService.getModelObjectById(
 				MonitoringMessage.class, monitoringMessageId);
+	}
+
+	public MonitoringMessageGroup getMonitoringMessageGroup(
+			final ObjectId monitoringMessageGroupId) {
+		return databaseManagerService.getModelObjectById(
+				MonitoringMessageGroup.class, monitoringMessageGroupId);
+	}
+
+	public Iterable<MonitoringRule> getAllMonitoringRulesOfInterventionAndParent(
+			final ObjectId interventionId, final ObjectId parentMonitoringRuleId) {
+		return databaseManagerService.findSortedModelObjects(
+				MonitoringRule.class,
+				Queries.MONITORING_RULE__BY_INTERVENTION_AND_PARENT,
+				Queries.MONITORING_RULE__SORT_BY_ORDER_ASC, interventionId,
+				parentMonitoringRuleId);
 	}
 
 	public MediaObject getMediaObject(final ObjectId mediaObjectId) {
