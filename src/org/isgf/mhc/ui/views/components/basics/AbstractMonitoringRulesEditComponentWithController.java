@@ -16,7 +16,9 @@ import org.isgf.mhc.model.server.MonitoringMessageGroup;
 import org.isgf.mhc.model.server.MonitoringReplyRule;
 import org.isgf.mhc.model.server.MonitoringRule;
 import org.isgf.mhc.model.server.concepts.AbstractMonitoringRule;
+import org.isgf.mhc.model.server.types.EquationSignTypes;
 import org.isgf.mhc.ui.views.components.AbstractModelObjectEditComponent;
+import org.isgf.mhc.ui.views.components.interventions.monitoring_rules.MonitoringReplyRuleEditComponentWithController;
 import org.isgf.mhc.ui.views.components.interventions.monitoring_rules.MonitoringRuleEditComponentWithController;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -79,7 +81,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 	 * @param intervention
 	 */
 	public void init(final Intervention intervention) {
-		init(intervention, null, false);
+		internalInit(intervention, null, false);
 	}
 
 	/**
@@ -89,9 +91,10 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 	 * @param relatedMonitoringRuleId
 	 * @param isGotAnswerRule
 	 */
-	public void init(final ObjectId relatedMonitoringRuleId,
+	public void init(final Intervention intervention,
+			final ObjectId relatedMonitoringRuleId,
 			final boolean isGotAnswerRule) {
-		init(null, relatedMonitoringRuleId, isGotAnswerRule);
+		internalInit(intervention, relatedMonitoringRuleId, isGotAnswerRule);
 	}
 
 	/**
@@ -102,7 +105,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 	 * @param relatedMonitoringRuleId
 	 * @param isGotAnswerRule
 	 */
-	private void init(final Intervention intervention,
+	private void internalInit(final Intervention intervention,
 			final ObjectId relatedMonitoringRuleId,
 			final boolean isGotAnswerRule) {
 		this.intervention = intervention;
@@ -326,8 +329,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 			componentWithController = new MonitoringRuleEditComponentWithController(
 					intervention, newAbstractMonitoringRule.getId());
 		} else {
-			// TODO adjust for reply rule
-			componentWithController = null;
+			componentWithController = new MonitoringReplyRuleEditComponentWithController(
+					intervention, newAbstractMonitoringRule.getId());
 		}
 
 		showModalModelObjectEditWindow(
@@ -359,8 +362,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 			componentWithController = new MonitoringRuleEditComponentWithController(
 					intervention, selectedMonitoringRuleId);
 		} else {
-			// TODO adjust for reply rule
-			componentWithController = null;
+			componentWithController = new MonitoringReplyRuleEditComponentWithController(
+					intervention, selectedMonitoringRuleId);
 		}
 
 		showModalModelObjectEditWindow(
@@ -379,11 +382,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 											selectedMonitoringRuleId);
 						}
 
-						String name = selectedAbstractMonitoringRule
-								.getRuleWithPlaceholders();
-						if (name == null || name.equals("")) {
-							name = ImplementationContants.DEFAULT_OBJECT_NAME;
-						}
+						final String name = createName(selectedAbstractMonitoringRule);
 
 						ThemeResource icon;
 						if (selectedAbstractMonitoringRule
@@ -421,10 +420,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 					.getMonitoringReplyRule(monitoringRuleId);
 		}
 
-		String name = abstractMonitoringRule.getRuleWithPlaceholders();
-		if (name == null || name.equals("")) {
-			name = ImplementationContants.DEFAULT_OBJECT_NAME;
-		}
+		final String name = createName(abstractMonitoringRule);
 
 		ThemeResource icon;
 		if (abstractMonitoringRule.isSendMessageIfTrue()) {
@@ -449,6 +445,38 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 			container.setParent(monitoringRuleId, selectedMonitoringRuleId);
 			rulesTree.expandItem(selectedMonitoringRuleId);
 		}
+	}
+
+	private String createName(
+			final AbstractMonitoringRule abstractMonitoringRule) {
+		val name = new StringBuffer();
+
+		if (abstractMonitoringRule.getRuleWithPlaceholders() == null
+				|| abstractMonitoringRule.getRuleWithPlaceholders().equals("")) {
+			if (abstractMonitoringRule.getRuleEquationSign() != EquationSignTypes.IS_ALWAYS_TRUE
+					&& abstractMonitoringRule.getRuleEquationSign() != EquationSignTypes.IS_ALWAYS_FALSE) {
+				name.append(ImplementationContants.DEFAULT_OBJECT_NAME + " ");
+			}
+		} else {
+			name.append(abstractMonitoringRule.getRuleWithPlaceholders() + " ");
+		}
+
+		name.append(abstractMonitoringRule.getRuleEquationSign().toString());
+
+		if (abstractMonitoringRule.getRuleComparisonTermWithPlaceholders() == null
+				|| abstractMonitoringRule
+						.getRuleComparisonTermWithPlaceholders().equals("")) {
+			if (abstractMonitoringRule.getRuleEquationSign() != EquationSignTypes.IS_ALWAYS_TRUE
+					&& abstractMonitoringRule.getRuleEquationSign() != EquationSignTypes.IS_ALWAYS_FALSE) {
+				name.append(" " + ImplementationContants.DEFAULT_OBJECT_NAME);
+			}
+		} else {
+			name.append(" "
+					+ abstractMonitoringRule
+							.getRuleComparisonTermWithPlaceholders());
+		}
+
+		return name.toString();
 	}
 
 	public void moveItem(final TreeSortDropHandler.MOVE movement,

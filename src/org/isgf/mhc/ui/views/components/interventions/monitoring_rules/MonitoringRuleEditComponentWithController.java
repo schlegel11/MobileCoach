@@ -49,10 +49,10 @@ public class MonitoringRuleEditComponentWithController extends
 
 		monitoringReplyRulesEditComponentWithControllerIfAnswer = getMonitoringReplyRulesEditComponentWithControllerIfAnswer();
 		monitoringReplyRulesEditComponentWithControllerIfAnswer.init(
-				monitoringRuleId, true);
+				intervention, monitoringRuleId, true);
 		monitoringReplyRulesEditComponentWithControllerIfNoAnswer = getMonitoringReplyRulesEditComponentWithControllerIfNoAnswer();
 		monitoringReplyRulesEditComponentWithControllerIfNoAnswer.init(
-				monitoringRuleId, false);
+				intervention, monitoringRuleId, false);
 
 		/*
 		 * Adjust own components

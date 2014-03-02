@@ -663,7 +663,6 @@ public class InterventionAdministrationManagerService {
 
 			databaseManagerService.saveModelObject(monitoringRule);
 		}
-
 	}
 
 	public void monitoringRuleChangeHourToSendMessage(
@@ -789,6 +788,49 @@ public class InterventionAdministrationManagerService {
 			}
 		}
 
+	}
+
+	public void monitoringReplyRuleChangeSendMessageIfTrue(
+			final MonitoringReplyRule monitoringReplyRule,
+			final boolean newValue) {
+		monitoringReplyRule.setSendMessageIfTrue(newValue);
+
+		databaseManagerService.saveModelObject(monitoringReplyRule);
+	}
+
+	public void monitoringReplyRuleChangeRelatedMonitoringMessageGroup(
+			final MonitoringReplyRule monitoringReplyRule,
+			final ObjectId newMonitoringMessageGroupId) {
+		monitoringReplyRule
+				.setRelatedMonitoringMessageGroup(newMonitoringMessageGroupId);
+
+		databaseManagerService.saveModelObject(monitoringReplyRule);
+	}
+
+	public void monitoringReplyRuleSetStoreResultToVariable(
+			final MonitoringReplyRule monitoringReplyRule,
+			final String variableName) throws NotificationMessageException {
+		if (variableName == null || variableName.equals("")) {
+			monitoringReplyRule.setStoreValueToVariableWithName(null);
+
+			databaseManagerService.saveModelObject(monitoringReplyRule);
+
+		} else {
+			if (!StringValidator.isValidVariableName(variableName)) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_NOT_VALID);
+			}
+
+			if (variablesManagerService
+					.isWriteProtectedParticipantOrSystemVariableName(variableName)) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
+			}
+
+			monitoringReplyRule.setStoreValueToVariableWithName(variableName);
+
+			databaseManagerService.saveModelObject(monitoringReplyRule);
+		}
 	}
 
 	public void monitoringReplyRuleDelete(final ObjectId monitoringReplyRuleId) {
