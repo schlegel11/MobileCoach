@@ -10,6 +10,8 @@ import lombok.val;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
+import org.isgf.mhc.model.ui.UIModelObject;
+import org.isgf.mhc.model.ui.UIMonitoringMessageGroup;
 
 /**
  * {@link ModelObject} to represent an {@link MonitoringMessageGroup}
@@ -47,6 +49,20 @@ public class MonitoringMessageGroup extends ModelObject {
 	@Getter
 	@Setter
 	private boolean		sendInRandomOrder;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.isgf.mhc.model.ModelObject#toUIModelObject()
+	 */
+	@Override
+	public UIModelObject toUIModelObject() {
+		final val monitoringMessageGroup = new UIMonitoringMessageGroup(name);
+
+		monitoringMessageGroup.setRelatedModelObject(this);
+
+		return monitoringMessageGroup;
+	}
 
 	/*
 	 * (non-Javadoc)

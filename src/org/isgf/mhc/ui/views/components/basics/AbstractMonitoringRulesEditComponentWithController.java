@@ -268,25 +268,28 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 			}
 
 			String sendMessage;
-			if (selectedMonitoringRule.getRelatedMonitoringMessageGroup() == null) {
+			if (selectedMonitoringRule.isSendMessageIfTrue()) {
+				if (selectedMonitoringRule.getRelatedMonitoringMessageGroup() == null) {
+					sendMessage = Messages
+							.getAdminString(AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_MESSAGE_BUT_NO_GROUP_SELECTED);
+				} else {
+					final MonitoringMessageGroup monitoringMessageGroup = getInterventionAdministrationManagerService()
+							.getMonitoringMessageGroup(
+									selectedMonitoringRule
+											.getRelatedMonitoringMessageGroup());
+					if (monitoringMessageGroup == null) {
+						sendMessage = Messages
+								.getAdminString(AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_MESSAGE_FROM_ALREADY_DELETED_GROUP);
+					} else {
+						sendMessage = Messages
+								.getAdminString(
+										AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_MESSAGE_FROM_GROUP,
+										monitoringMessageGroup.getName());
+					}
+				}
+			} else {
 				sendMessage = Messages
 						.getAdminString(AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_NO_MESSAGE);
-			} else {
-				final MonitoringMessageGroup monitoringMessageGroup = getInterventionAdministrationManagerService()
-						.getMonitoringMessageGroup(
-								selectedMonitoringRule
-										.getRelatedMonitoringMessageGroup());
-				if (monitoringMessageGroup == null) {
-					sendMessage = Messages
-							.getAdminString(AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_MESSAGE_FROM_ALREADY_DELETED_GROUP);
-				} else {
-					sendMessage = Messages
-							.getAdminString(
-									AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_MESSAGE_FROM_GROUP,
-									monitoringMessageGroup.getName());
-				}
-				resultVariable = selectedMonitoringRule
-						.getStoreValueToVariableWithName();
 			}
 
 			setSomethingSelected(resultVariable, sendMessage);
@@ -339,6 +342,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 						getAdminUI()
 								.showInformationNotification(
 										AdminMessageStrings.NOTIFICATION__MONITORING_RULE_CREATED);
+
+						adjust();
 
 						closeWindow();
 					}
@@ -395,6 +400,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 						getAdminUI()
 								.showInformationNotification(
 										AdminMessageStrings.NOTIFICATION__MONITORING_RULE_UPDATED);
+
+						adjust();
 
 						closeWindow();
 					}

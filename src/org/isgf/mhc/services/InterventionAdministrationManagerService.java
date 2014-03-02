@@ -623,6 +623,63 @@ public class InterventionAdministrationManagerService {
 
 	}
 
+	public void monitoringRuleChangeSendMessageIfTrue(
+			final MonitoringRule monitoringRule, final boolean newValue) {
+		monitoringRule.setSendMessageIfTrue(newValue);
+
+		databaseManagerService.saveModelObject(monitoringRule);
+	}
+
+	public void monitoringRuleChangeRelatedMonitoringMessageGroup(
+			final MonitoringRule monitoringRule,
+			final ObjectId newMonitoringMessageGroupId) {
+		monitoringRule
+				.setRelatedMonitoringMessageGroup(newMonitoringMessageGroupId);
+
+		databaseManagerService.saveModelObject(monitoringRule);
+	}
+
+	public void monitoringRuleSetStoreResultToVariable(
+			final MonitoringRule monitoringRule, final String variableName)
+			throws NotificationMessageException {
+		if (variableName == null || variableName.equals("")) {
+			monitoringRule.setStoreValueToVariableWithName(null);
+
+			databaseManagerService.saveModelObject(monitoringRule);
+
+		} else {
+			if (!StringValidator.isValidVariableName(variableName)) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_NOT_VALID);
+			}
+
+			if (variablesManagerService
+					.isWriteProtectedParticipantOrSystemVariableName(variableName)) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
+			}
+
+			monitoringRule.setStoreValueToVariableWithName(variableName);
+
+			databaseManagerService.saveModelObject(monitoringRule);
+		}
+
+	}
+
+	public void monitoringRuleChangeHourToSendMessage(
+			final MonitoringRule monitoringRule, final int newValue) {
+		monitoringRule.setHourToSendMessage(newValue);
+
+		databaseManagerService.saveModelObject(monitoringRule);
+	}
+
+	public void monitoringRuleChangeHoursUntilMessageIsHandledAsUnanswered(
+			final MonitoringRule monitoringRule, final int newValue) {
+		monitoringRule.setHoursUntilMessageIsHandledAsUnanswered(newValue);
+
+		databaseManagerService.saveModelObject(monitoringRule);
+	}
+
 	public void monitoringRuleDelete(final ObjectId monitoringRuleId) {
 		databaseManagerService.deleteModelObject(MonitoringRule.class,
 				monitoringRuleId);

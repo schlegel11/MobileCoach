@@ -38,7 +38,7 @@ public class MonitoringRule extends AbstractMonitoringRule {
 			final String storeValueToVariableWithName,
 			final boolean sendMessageIfTrue,
 			final ObjectId relatedMonitoringMessageGroup,
-			final ObjectId intervention, final int hourToSendMessageVariable,
+			final ObjectId intervention, final int hourToSendMessage,
 			final int hoursUntilMessageIsHandledAsUnanswered) {
 		super(ruleWithPlaceholders, ruleEquationSign,
 				ruleComparisonTermWithPlaceholders, isSubRuleOfMonitoringRule,
@@ -46,7 +46,7 @@ public class MonitoringRule extends AbstractMonitoringRule {
 				relatedMonitoringMessageGroup);
 
 		this.intervention = intervention;
-		this.hourToSendMessageVariable = hourToSendMessageVariable;
+		this.hourToSendMessage = hourToSendMessage;
 		this.hoursUntilMessageIsHandledAsUnanswered = hoursUntilMessageIsHandledAsUnanswered;
 	}
 
@@ -64,7 +64,7 @@ public class MonitoringRule extends AbstractMonitoringRule {
 	 */
 	@Getter
 	@Setter
-	private int			hourToSendMessageVariable;
+	private int			hourToSendMessage;
 
 	/**
 	 * <strong>OPTIONAL if sendMassgeIfTrue is false:</strong> The hours a
