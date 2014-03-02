@@ -73,9 +73,13 @@ public class InterventionEditingContainerComponentWithController extends
 				ThemeImageStrings.COMPONENT_ICON));
 
 		// Add monitoring rules tab
+
+		val abstractMonitoringRulesTab = new AbstractMonitoringRulesTabComponentWithController();
+		abstractMonitoringRulesTab.init(intervention);
+
 		registerToSetEditingDependingOnMessaging(addPointableTab(
 				getContentAccordion(),
-				new MonitoringRulesTabComponentWithController(intervention),
+				abstractMonitoringRulesTab,
 				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__MONITORING_RULES_TAB,
 				ThemeImageStrings.COMPONENT_ICON));
 

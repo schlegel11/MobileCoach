@@ -24,7 +24,9 @@ import com.vaadin.ui.ComboBox;
 public class AbstractRuleEditComponentWithController extends
 		AbstractRuleEditComponent implements ValueChangeListener {
 
-	private final ObjectId						interventionId;
+	private boolean								initDone	= false;
+
+	private ObjectId							interventionId;
 
 	private AbstractRule						rule;
 
@@ -33,10 +35,8 @@ public class AbstractRuleEditComponentWithController extends
 
 	private final ComboBox						ruleEquationSignComboBox;
 
-	public AbstractRuleEditComponentWithController(final ObjectId interventionId) {
+	public AbstractRuleEditComponentWithController() {
 		super();
-
-		this.interventionId = interventionId;
 
 		ruleComponent = getRuleTextFieldComponent();
 		ruleComparisonTermComponent = getRuleComparisonTermTextFieldComponent();
@@ -61,7 +61,14 @@ public class AbstractRuleEditComponentWithController extends
 		setEnabled(false);
 	}
 
+	public void init(final ObjectId interventionId) {
+		this.interventionId = interventionId;
+
+		initDone = true;
+	}
+
 	public void adjust(AbstractRule rule) {
+
 		// Internal update when call with null
 		if (rule == null) {
 			rule = this.rule;
@@ -79,7 +86,9 @@ public class AbstractRuleEditComponentWithController extends
 
 		this.rule = rule;
 
-		setEnabled(true);
+		if (initDone) {
+			setEnabled(true);
+		}
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
