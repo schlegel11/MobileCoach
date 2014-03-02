@@ -173,6 +173,8 @@ public class MonitoringRuleEditComponentWithController extends
 			getHoursUntillHandledAsNotAnsweredLabel().setEnabled(true);
 			getHoursUntillHandledAsNotAnsweredSlider().setEnabled(true);
 
+			getReplyRulesTabSheet().setEnabled(true);
+
 			getReplyRulesIfAnswerLabel().setEnabled(true);
 			getMonitoringReplyRulesEditComponentWithControllerIfAnswer()
 					.setEnabled(true);
@@ -186,6 +188,8 @@ public class MonitoringRuleEditComponentWithController extends
 			getHourToSendMessageSlider().setEnabled(false);
 			getHoursUntillHandledAsNotAnsweredLabel().setEnabled(false);
 			getHoursUntillHandledAsNotAnsweredSlider().setEnabled(false);
+
+			getReplyRulesTabSheet().setEnabled(false);
 
 			getReplyRulesIfAnswerLabel().setEnabled(false);
 			getMonitoringReplyRulesEditComponentWithControllerIfAnswer()
