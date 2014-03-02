@@ -346,11 +346,11 @@ public class MonitoringRuleEditComponent extends
 		replyRulesIfAnswerLabelLayout.setImmediate(false);
 		replyRulesIfAnswerLabelLayout.setWidth("100.0%");
 		replyRulesIfAnswerLabelLayout.setHeight("-1px");
-		replyRulesIfAnswerLabelLayout.setMargin(true);
+		replyRulesIfAnswerLabelLayout.setMargin(false);
 
 		// replyRulesIfAnswerLabel
 		replyRulesIfAnswerLabel = new Label();
-		replyRulesIfAnswerLabel.setStyleName("bold");
+		replyRulesIfAnswerLabel.setStyleName("bold indent-left");
 		replyRulesIfAnswerLabel.setImmediate(false);
 		replyRulesIfAnswerLabel.setWidth("-1px");
 		replyRulesIfAnswerLabel.setHeight("-1px");
@@ -368,11 +368,11 @@ public class MonitoringRuleEditComponent extends
 		replyRulesIfNoAnswerLabelLayout.setImmediate(false);
 		replyRulesIfNoAnswerLabelLayout.setWidth("100.0%");
 		replyRulesIfNoAnswerLabelLayout.setHeight("-1px");
-		replyRulesIfNoAnswerLabelLayout.setMargin(true);
+		replyRulesIfNoAnswerLabelLayout.setMargin(false);
 
 		// replyRulesIfNoAnswerLabel
 		replyRulesIfNoAnswerLabel = new Label();
-		replyRulesIfNoAnswerLabel.setStyleName("bold");
+		replyRulesIfNoAnswerLabel.setStyleName("bold indent-left");
 		replyRulesIfNoAnswerLabel.setImmediate(false);
 		replyRulesIfNoAnswerLabel.setWidth("-1px");
 		replyRulesIfNoAnswerLabel.setHeight("-1px");

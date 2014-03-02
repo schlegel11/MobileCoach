@@ -114,7 +114,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 
 			// Adjust UI of MonitoringReplyRules to have a lower height
 			getMonitoringRuleInfoLabel().setVisible(false);
-			getTreeLayout().setHeight(150, Unit.PIXELS);
+			getTreeLayout().setHeight(130, Unit.PIXELS);
 		}
 		this.relatedMonitoringRuleId = relatedMonitoringRuleId;
 		this.isGotAnswerRule = isGotAnswerRule;

@@ -217,7 +217,6 @@ public class AbstractMonitoringRulesEditComponent extends
 		ruleDetailsLayout.setWidth("350px");
 		ruleDetailsLayout.setHeight("100.0%");
 		ruleDetailsLayout.setMargin(true);
-		ruleDetailsLayout.setSpacing(true);
 
 		// resultVariableLabel
 		resultVariableLabel = new Label();

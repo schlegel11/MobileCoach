@@ -65,7 +65,6 @@ public class AbstractRuleEditComponent extends AbstractCustomComponent {
 		mainLayout.setWidth("100%");
 		mainLayout.setHeight("-1px");
 		mainLayout.setMargin(true);
-		mainLayout.setSpacing(true);
 
 		// top-level component properties
 		setWidth("100.0%");
