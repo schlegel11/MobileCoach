@@ -24,6 +24,7 @@ import org.isgf.mhc.model.server.MediaObject;
 import org.isgf.mhc.model.server.MonitoringMessage;
 import org.isgf.mhc.model.server.MonitoringMessageGroup;
 import org.isgf.mhc.model.server.MonitoringRule;
+import org.isgf.mhc.model.server.concepts.AbstractRule;
 import org.isgf.mhc.model.server.types.EquationSignTypes;
 import org.isgf.mhc.model.server.types.MediaObjectTypes;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
@@ -627,6 +628,56 @@ public class InterventionAdministrationManagerService {
 				monitoringRuleId);
 	}
 
+	// Abstract Rule
+	public void abstractRuleChangeRuleWithPlaceholders(
+			final AbstractRule abstractRule, final String textWithPlaceholders,
+			final List<String> allPossibleVariables)
+			throws NotificationMessageException {
+		if (textWithPlaceholders == null) {
+			abstractRule.setRuleWithPlaceholders("");
+		} else {
+			if (!StringValidator.isValidVariableText(textWithPlaceholders,
+					allPossibleVariables)) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
+			}
+
+			abstractRule.setRuleWithPlaceholders(textWithPlaceholders);
+		}
+
+		databaseManagerService.saveModelObject(abstractRule);
+	}
+
+	public void abstractRuleChangeRuleComparisonTermWithPlaceholders(
+			final AbstractRule abstractRule, final String textWithPlaceholders,
+			final List<String> allPossibleVariables)
+			throws NotificationMessageException {
+		if (textWithPlaceholders == null) {
+			abstractRule.setRuleComparisonTermWithPlaceholders("");
+		} else {
+			if (!StringValidator.isValidVariableText(textWithPlaceholders,
+					allPossibleVariables)) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
+			}
+
+			abstractRule
+					.setRuleComparisonTermWithPlaceholders(textWithPlaceholders);
+		}
+
+		databaseManagerService.saveModelObject(abstractRule);
+	}
+
+	public void abstractRuleChangeEquationSign(
+			final Class<? extends AbstractRule> ruleClass,
+			final ObjectId ruleId, final EquationSignTypes newType) {
+		val ruleObject = databaseManagerService.getModelObjectById(ruleClass,
+				ruleId);
+		ruleObject.setRuleEquationSign(newType);
+
+		databaseManagerService.saveModelObject(ruleObject);
+	}
+
 	/*
 	 * Getter methods
 	 */
@@ -780,4 +831,24 @@ public class InterventionAdministrationManagerService {
 		return variables;
 	}
 
+	public List<String> getAllPossibleMonitoringRuleVariables(
+			final ObjectId interventionId) {
+		val variables = new ArrayList<String>();
+
+		variables.addAll(Arrays.asList(variablesManagerService
+				.getAllSystemVariables()));
+
+		variables.addAll(variablesManagerService
+				.getAllInterventionVariables(interventionId));
+		variables.addAll(variablesManagerService
+				.getAllInterventionScreeningSurveyVariables(interventionId));
+		variables.addAll(variablesManagerService
+				.getAllMonitoringMessageVariables(interventionId));
+		variables.addAll(variablesManagerService
+				.getAllMonitoringRuleAndReplyRuleVariables(interventionId));
+
+		Collections.sort(variables);
+
+		return variables;
+	}
 }
