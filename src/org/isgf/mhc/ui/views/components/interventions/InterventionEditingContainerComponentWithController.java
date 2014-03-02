@@ -8,6 +8,8 @@ import lombok.val;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.ThemeImageStrings;
 import org.isgf.mhc.model.server.Intervention;
+import org.isgf.mhc.ui.views.components.interventions.monitoring_messages.MonitoringMessageGroupsTabComponentWithController;
+import org.isgf.mhc.ui.views.components.interventions.monitoring_rules.MonitoringRulesEditComponentWithController;
 
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -73,13 +75,9 @@ public class InterventionEditingContainerComponentWithController extends
 				ThemeImageStrings.COMPONENT_ICON));
 
 		// Add monitoring rules tab
-
-		val abstractMonitoringRulesTab = new AbstractMonitoringRulesTabComponentWithController();
-		abstractMonitoringRulesTab.init(intervention);
-
 		registerToSetEditingDependingOnMessaging(addPointableTab(
 				getContentAccordion(),
-				abstractMonitoringRulesTab,
+				new MonitoringRulesEditComponentWithController(intervention),
 				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__MONITORING_RULES_TAB,
 				ThemeImageStrings.COMPONENT_ICON));
 

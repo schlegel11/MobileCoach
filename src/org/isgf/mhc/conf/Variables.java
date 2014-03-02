@@ -21,4 +21,8 @@ public class Variables {
 	public enum READ_WRITE_PARTICIPANT_VARIABLES {
 		participantName, participantDialogOptionSMSData, participantDialogOptionEmailData
 	};
+
+	public enum READ_ONLY_PARTICIPANT_REPLY_VARIABLES {
+		participantMessageReply
+	};
 }

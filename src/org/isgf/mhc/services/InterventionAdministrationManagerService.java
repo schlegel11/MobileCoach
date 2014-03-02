@@ -2,7 +2,6 @@ package org.isgf.mhc.services;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -271,7 +270,7 @@ public class InterventionAdministrationManagerService {
 		}
 
 		if (variablesManagerService
-				.isWriteProtectedParticipantOrSystemVariable(variableName)) {
+				.isWriteProtectedParticipantOrSystemVariableName(variableName)) {
 			throw new NotificationMessageException(
 					AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
 		}
@@ -304,7 +303,7 @@ public class InterventionAdministrationManagerService {
 		}
 
 		if (variablesManagerService
-				.isWriteProtectedParticipantOrSystemVariable(newName)) {
+				.isWriteProtectedParticipantOrSystemVariableName(newName)) {
 			throw new NotificationMessageException(
 					AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
 		}
@@ -477,7 +476,7 @@ public class InterventionAdministrationManagerService {
 			}
 
 			if (variablesManagerService
-					.isWriteProtectedParticipantOrSystemVariable(variableName)) {
+					.isWriteProtectedParticipantOrSystemVariableName(variableName)) {
 				throw new NotificationMessageException(
 						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
 			}
@@ -955,17 +954,17 @@ public class InterventionAdministrationManagerService {
 			final ObjectId interventionId) {
 		val variables = new ArrayList<String>();
 
-		variables.addAll(Arrays.asList(variablesManagerService
-				.getAllSystemVariables()));
+		variables.addAll(variablesManagerService.getAllSystemVariableNames());
 
 		variables.addAll(variablesManagerService
-				.getAllInterventionVariables(interventionId));
+				.getAllInterventionVariableNames(interventionId));
+		variables
+				.addAll(variablesManagerService
+						.getAllInterventionScreeningSurveyVariableNames(interventionId));
 		variables.addAll(variablesManagerService
-				.getAllInterventionScreeningSurveyVariables(interventionId));
+				.getAllMonitoringMessageVariableNames(interventionId));
 		variables.addAll(variablesManagerService
-				.getAllMonitoringMessageVariables(interventionId));
-		variables.addAll(variablesManagerService
-				.getAllMonitoringRuleAndReplyRuleVariables(interventionId));
+				.getAllMonitoringRuleAndReplyRuleVariableNames(interventionId));
 
 		Collections.sort(variables);
 
@@ -976,17 +975,17 @@ public class InterventionAdministrationManagerService {
 			final ObjectId interventionId) {
 		val variables = new ArrayList<String>();
 
-		variables.addAll(Arrays.asList(variablesManagerService
-				.getAllSystemVariables()));
+		variables.addAll(variablesManagerService.getAllSystemVariableNames());
 
 		variables.addAll(variablesManagerService
-				.getAllInterventionVariables(interventionId));
+				.getAllInterventionVariableNames(interventionId));
+		variables
+				.addAll(variablesManagerService
+						.getAllInterventionScreeningSurveyVariableNames(interventionId));
 		variables.addAll(variablesManagerService
-				.getAllInterventionScreeningSurveyVariables(interventionId));
+				.getAllMonitoringMessageVariableNames(interventionId));
 		variables.addAll(variablesManagerService
-				.getAllMonitoringMessageVariables(interventionId));
-		variables.addAll(variablesManagerService
-				.getAllMonitoringRuleAndReplyRuleVariables(interventionId));
+				.getAllMonitoringRuleAndReplyRuleVariableNames(interventionId));
 
 		Collections.sort(variables);
 

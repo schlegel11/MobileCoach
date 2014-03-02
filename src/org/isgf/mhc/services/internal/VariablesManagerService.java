@@ -1,8 +1,7 @@
 package org.isgf.mhc.services.internal;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Set;
 
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -29,8 +28,8 @@ public class VariablesManagerService {
 
 	private final DatabaseManagerService	databaseManagerService;
 
-	private final HashSet<String>			allSystemVariables;
-	private final HashSet<String>			writeProtectedVariables;
+	private final HashSet<String>			allSystemVariableNames;
+	private final HashSet<String>			writeProtectedVariableNames;
 
 	private VariablesManagerService(
 			final DatabaseManagerService databaseManagerService)
@@ -39,21 +38,25 @@ public class VariablesManagerService {
 
 		this.databaseManagerService = databaseManagerService;
 
-		writeProtectedVariables = new HashSet<String>();
+		writeProtectedVariableNames = new HashSet<String>();
 		for (val variable : Variables.READ_ONLY_SYSTEM_VARIABLES.values()) {
-			writeProtectedVariables.add("$" + variable.name());
+			writeProtectedVariableNames.add("$" + variable.name());
 		}
 		for (val variable : Variables.READ_ONLY_PARTICIPANT_VARIABLES.values()) {
-			writeProtectedVariables.add("$" + variable.name());
+			writeProtectedVariableNames.add("$" + variable.name());
+		}
+		for (val variable : Variables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES
+				.values()) {
+			writeProtectedVariableNames.add("$" + variable.name());
 		}
 
-		allSystemVariables = new HashSet<String>();
-		allSystemVariables.addAll(writeProtectedVariables);
+		allSystemVariableNames = new HashSet<String>();
+		allSystemVariableNames.addAll(writeProtectedVariableNames);
 		for (val variable : Variables.READ_WRITE_PARTICIPANT_VARIABLES.values()) {
-			allSystemVariables.add("$" + variable.name());
+			allSystemVariableNames.add("$" + variable.name());
 		}
 		for (val variable : Variables.READ_WRITE_SYSTEM_VARIABLES.values()) {
-			allSystemVariables.add("$" + variable.name());
+			allSystemVariableNames.add("$" + variable.name());
 		}
 
 		log.info("Started.");
@@ -74,18 +77,18 @@ public class VariablesManagerService {
 		log.info("Stopped.");
 	}
 
-	public boolean isWriteProtectedParticipantOrSystemVariable(
+	public boolean isWriteProtectedParticipantOrSystemVariableName(
 			final String variable) {
-		return writeProtectedVariables.contains(variable);
+		return writeProtectedVariableNames.contains(variable);
 	}
 
-	public String[] getAllSystemVariables() {
-		return allSystemVariables.toArray(new String[] {});
+	public Set<String> getAllSystemVariableNames() {
+		return allSystemVariableNames;
 	}
 
-	public List<String> getAllInterventionVariables(
+	public Set<String> getAllInterventionVariableNames(
 			final ObjectId interventionId) {
-		val variables = new ArrayList<String>();
+		val variables = new HashSet<String>();
 
 		val variableModelObjects = databaseManagerService.findModelObjects(
 				InterventionVariableWithValue.class,
@@ -99,9 +102,9 @@ public class VariablesManagerService {
 		return variables;
 	}
 
-	public List<String> getAllInterventionScreeningSurveyVariables(
+	public Set<String> getAllInterventionScreeningSurveyVariableNames(
 			final ObjectId interventionId) {
-		val variables = new ArrayList<String>();
+		val variables = new HashSet<String>();
 
 		val screeningSurveyModelObjects = databaseManagerService
 				.findModelObjects(ScreeningSurvey.class,
@@ -125,9 +128,9 @@ public class VariablesManagerService {
 		return variables;
 	}
 
-	public List<String> getAllMonitoringMessageVariables(
+	public Set<String> getAllMonitoringMessageVariableNames(
 			final ObjectId interventionId) {
-		val variables = new ArrayList<String>();
+		val variables = new HashSet<String>();
 
 		val monitoringMessageGroupModelObjects = databaseManagerService
 				.findModelObjects(MonitoringMessageGroup.class,
@@ -151,9 +154,9 @@ public class VariablesManagerService {
 		return variables;
 	}
 
-	public List<String> getAllMonitoringRuleAndReplyRuleVariables(
+	public Set<String> getAllMonitoringRuleAndReplyRuleVariableNames(
 			final ObjectId interventionId) {
-		val variables = new ArrayList<String>();
+		val variables = new HashSet<String>();
 
 		val monitoringRuleModelObjects = databaseManagerService
 				.findModelObjects(MonitoringRule.class,

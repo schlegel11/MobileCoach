@@ -6,7 +6,7 @@ package org.isgf.mhc.model.server.types;
  * @author Andreas Filler
  */
 public enum EquationSignTypes {
-	IS_SMALLER_THAN, IS_SMALLER_OR_EQUAL_THAN, EQUALS, IS_BIGGER_OR_EQUAL_THAN, IS_BIGGER_THAN;
+	IS_ALWAYS_TRUE, IS_ALWAYS_FALSE, IS_SMALLER_THAN, IS_SMALLER_OR_EQUAL_THAN, EQUALS, IS_BIGGER_OR_EQUAL_THAN, IS_BIGGER_THAN;
 
 	@Override
 	public String toString() {
