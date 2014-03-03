@@ -524,6 +524,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 						.showInformationNotification(
 								AdminMessageStrings.NOTIFICATION__MONITORING_RULE_DELETED);
 
+				rulesTree.select(null);
+
 				closeWindow();
 			}
 		}, null);
