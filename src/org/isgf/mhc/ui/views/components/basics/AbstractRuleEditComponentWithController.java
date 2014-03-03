@@ -105,14 +105,11 @@ public class AbstractRuleEditComponentWithController extends
 
 	@Override
 	public void valueChange(final ValueChangeEvent event) {
-		if (rule != null) {
-			log.debug("Changing rule equation sign to {}", event.getProperty()
-					.getValue());
-			getInterventionAdministrationManagerService()
-					.abstractRuleChangeEquationSign(rule.getClass(),
-							rule.getId(),
-							(EquationSignTypes) event.getProperty().getValue());
-		}
+		log.debug("Changing rule equation sign to {}", event.getProperty()
+				.getValue());
+		getInterventionAdministrationManagerService()
+				.abstractRuleChangeEquationSign(rule,
+						(EquationSignTypes) event.getProperty().getValue());
 	}
 
 	public void editRuleTextWithPlaceholder() {

@@ -878,14 +878,11 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(abstractRule);
 	}
 
-	public void abstractRuleChangeEquationSign(
-			final Class<? extends AbstractRule> ruleClass,
-			final ObjectId ruleId, final EquationSignTypes newType) {
-		val ruleObject = databaseManagerService.getModelObjectById(ruleClass,
-				ruleId);
-		ruleObject.setRuleEquationSign(newType);
+	public void abstractRuleChangeEquationSign(final AbstractRule abstractRule,
+			final EquationSignTypes newType) {
+		abstractRule.setRuleEquationSign(newType);
 
-		databaseManagerService.saveModelObject(ruleObject);
+		databaseManagerService.saveModelObject(abstractRule);
 	}
 
 	/*
