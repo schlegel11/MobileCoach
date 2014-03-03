@@ -51,8 +51,6 @@ public class AbstractRuleEditComponentWithController extends
 			ruleEquationSignComboBox.addItem(equationSignType);
 		}
 
-		ruleEquationSignComboBox.addValueChangeListener(this);
-
 		val buttonClickListener = new ButtonClickListener();
 		ruleComponent.getButton().addClickListener(buttonClickListener);
 		ruleComparisonTermComponent.getButton().addClickListener(
@@ -68,16 +66,22 @@ public class AbstractRuleEditComponentWithController extends
 	}
 
 	public void adjust(AbstractRule rule) {
+		boolean firstRun = false;
 
 		// Internal update when call with null
 		if (rule == null) {
 			rule = this.rule;
+		} else {
+			firstRun = true;
 		}
 
 		log.debug("Adjust for rule {}", rule);
 
 		if (!ruleEquationSignComboBox.isSelected(rule.getRuleEquationSign())) {
 			ruleEquationSignComboBox.select(rule.getRuleEquationSign());
+		}
+		if (firstRun) {
+			ruleEquationSignComboBox.addValueChangeListener(this);
 		}
 
 		ruleComponent.setValue(rule.getRuleWithPlaceholders());

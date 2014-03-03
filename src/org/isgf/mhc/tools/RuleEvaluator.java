@@ -61,6 +61,12 @@ public class RuleEvaluator {
 			// Evaluate equation sign
 			ruleEvaluationResult.setRuleMatchesEquationSign(false);
 			switch (rule.getRuleEquationSign()) {
+				case IS_ALWAYS_TRUE:
+					ruleEvaluationResult.setRuleMatchesEquationSign(true);
+					break;
+				case IS_ALWAYS_FALSE:
+					ruleEvaluationResult.setRuleMatchesEquationSign(false);
+					break;
 				case IS_SMALLER_THAN:
 					if (ruleResult < ruleComparisonTermResult) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
