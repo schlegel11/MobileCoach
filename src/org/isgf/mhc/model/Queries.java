@@ -52,4 +52,8 @@ public class Queries {
 	public static final String	MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_AND_ORDER_HIGHER_ONLY_GOT_NO_ANSWER	= "{'isGotNoAnswerRuleForMonitoringRule':#,'isSubRuleOfMonitoringRule':#,'order':{$gt:#}}";
 
 	public static final String	MONITORING_REPLY_RULE__BY_MONITORING_RULE													= "{$or:[{'isGotAnswerRuleForMonitoringRule':#},{'isGotNoAnswerRuleForMonitoringRule':#}]}";
+
+	public static final String	SYSTEM_UNIQUE_ID__BY_SHORT_ID																= "{'shortId':#}";
+	public static final String	SYSTEM_UNIQUE_ID__SORT_BY_SHORT_ID_DESC														= "{'shortId':-1}";
+
 }

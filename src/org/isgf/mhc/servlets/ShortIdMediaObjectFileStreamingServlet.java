@@ -13,14 +13,15 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 import net.balusc.webapp.FileServletWrapper;
 
-import org.bson.types.ObjectId;
 import org.isgf.mhc.MHC;
 import org.isgf.mhc.model.server.MediaObject;
+import org.isgf.mhc.model.server.SystemUniqueId;
 import org.isgf.mhc.services.InterventionAdministrationManagerService;
+import org.isgf.mhc.services.InterventionExecutionManagerService;
 
 /**
- * The {@link MediaObjectFileStreamingServlet} serves files contained in
- * {@link MediaObject}s
+ * The {@link ShortIdMediaObjectFileStreamingServlet} serves files contained in
+ * {@link MediaObject}s, which are referenced by {@link SystemUniqueId}s
  * 
  * The library used for serving the files is published under the LGPL license.
  * Therefore all modifications and extensions on these files are published as
@@ -34,10 +35,11 @@ import org.isgf.mhc.services.InterventionAdministrationManagerService;
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
-@WebServlet(displayName = "Media Object File Streaming", value = "/files/*", asyncSupported = true, loadOnStartup = 1)
+@WebServlet(displayName = "Short Id based Media Object File Streaming", value = "/files-short/*", asyncSupported = true, loadOnStartup = 1)
 @Log4j2
-public class MediaObjectFileStreamingServlet extends HttpServlet {
+public class ShortIdMediaObjectFileStreamingServlet extends HttpServlet {
 	private InterventionAdministrationManagerService	interventionAdministrationManagerService;
+	private InterventionExecutionManagerService			interventionExecutionManagerService;
 
 	private FileServletWrapper							fileServletWrapper;
 
@@ -48,6 +50,8 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 
 		interventionAdministrationManagerService = MHC.getInstance()
 				.getInterventionAdministrationManagerService();
+		interventionExecutionManagerService = MHC.getInstance()
+				.getInterventionExecutionManagerService();
 
 		fileServletWrapper = new FileServletWrapper();
 		fileServletWrapper.init(getServletContext());
@@ -66,25 +70,41 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 	private HttpServletRequest createWrappedReqest(
 			final HttpServletRequest request, final HttpServletResponse response)
 			throws IOException {
-		// Determine requested media object
-		ObjectId mediaObjectId = null;
+		// Determine requested system unique id
+		SystemUniqueId systemUniqueId = null;
 		try {
 			final val pathParts = request.getPathInfo().split("/");
-			mediaObjectId = new ObjectId(pathParts[1]);
+
+			final long shortId = SystemUniqueId
+					.validateURLIdPartAndReturnShortId(pathParts[1]);
+
+			systemUniqueId = interventionExecutionManagerService
+					.getSystemUniqueId(shortId);
 		} catch (final Exception e) {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return null;
 		}
-		log.debug("Requested media object {}", mediaObjectId);
+		log.debug("Requested system unique id {}", systemUniqueId);
+
+		// Check if system unique id exists
+		if (systemUniqueId == null) {
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return null;
+		}
 
 		final val mediaObject = interventionAdministrationManagerService
-				.getMediaObject(mediaObjectId);
+				.getMediaObject(systemUniqueId.getRelatedMediaObject());
 
 		// Check if media object exists
 		if (mediaObject == null) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return null;
 		}
+
+		// Mark media object as seen
+		interventionExecutionManagerService
+				.dialogMessageSetMediaContentViewed(systemUniqueId
+						.getRelatedDialogMessage());
 
 		// Retrieve file from media object
 		final val file = interventionAdministrationManagerService
@@ -119,7 +139,7 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 	protected void doHead(final HttpServletRequest request,
 			final HttpServletResponse response) throws ServletException,
 			IOException {
-		log.debug("Serving dynamic {}", request.getPathInfo());
+		log.debug("Serving short id dynamic {}", request.getPathInfo());
 
 		val wrapped = createWrappedReqest(request, response);
 
@@ -139,7 +159,7 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 	protected void doGet(final HttpServletRequest request,
 			final HttpServletResponse response) throws ServletException,
 			IOException {
-		log.debug("Serving dynamic {}", request.getPathInfo());
+		log.debug("Serving short id dynamic {}", request.getPathInfo());
 
 		val wrapped = createWrappedReqest(request, response);
 

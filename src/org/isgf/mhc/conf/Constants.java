@@ -33,13 +33,16 @@ public class Constants {
 	 * 
 	 * CAUTION: Can NOT be defined in configuration file
 	 */
-	public static final boolean	RUN_TESTS_AT_STARTUP			= false;
+	public static final boolean	RUN_TESTS_AT_STARTUP			= true;
 
 	/**
 	 * Basic configuration
 	 */
 	@Getter
 	private static boolean		listOpenScreenSurveysOnBaseURL	= false;
+
+	@Getter
+	private static String		mediaObjectLinkingBaseURL		= "https://f.mobile-coach.eu/";
 
 	/**
 	 * Admin configuration

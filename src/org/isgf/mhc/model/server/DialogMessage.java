@@ -101,12 +101,13 @@ public class DialogMessage extends ModelObject {
 	private boolean		manuallySent;
 
 	/**
-	 * The seconds a {@link Participant} viewed the presented media content (if
+	 * The information if a {@link Participant} viewed the presented media
+	 * content (if
 	 * integrated in the {@link MonitoringMessage})
 	 */
 	@Getter
 	@Setter
-	private int			secondsMediaContentViewed;
+	private boolean		mediaContentViewed;
 
 	/**
 	 * Marker showing if a response to a {@link DialogMessage} can not be

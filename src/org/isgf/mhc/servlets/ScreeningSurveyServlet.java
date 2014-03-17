@@ -79,6 +79,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 	protected void doGet(final HttpServletRequest request,
 			final HttpServletResponse response) throws ServletException,
 			IOException {
+		log.debug("Screening survey servlet call");
 		try {
 			// Determine request path
 			final String path = request.getRequestURI()
