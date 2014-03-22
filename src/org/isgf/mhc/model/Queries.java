@@ -33,6 +33,22 @@ public class Queries {
 	public static final String	SCREENING_SURVEY__BY_INTERVENTION															= "{'intervention':#}";
 
 	public static final String	SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY													= "{'screeningSurvey':#}";
+	public static final String	SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY_AND_ORDER_LOWER									= "{'screeningSurvey':#,'order':{$lt:#}}";
+	public static final String	SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY_AND_ORDER_HIGHER								= "{'screeningSurvey':#,'order':{$gt:#}}";
+	public static final String	SCREENING_SURVEY_SLIDE__SORT_BY_ORDER_ASC													= "{'order':1}";
+	public static final String	SCREENING_SURVEY_SLIDE__SORT_BY_ORDER_DESC													= "{'order':-1}";
+
+	public static final String	FEEDBACK__BY_SCREENING_SURVEY																= "{'screeningSurvey':#}";
+	public static final String	FEEDBACK__BY_SCREENING_SURVEY_AND_ORDER_LOWER												= "{'screeningSurvey':#,'order':{$lt:#}}";
+	public static final String	FEEDBACK__BY_SCREENING_SURVEY_AND_ORDER_HIGHER												= "{'screeningSurvey':#,'order':{$gt:#}}";
+	public static final String	FEEDBACK__SORT_BY_ORDER_ASC																	= "{'order':1}";
+	public static final String	FEEDBACK__SORT_BY_ORDER_DESC																= "{'order':-1}";
+
+	public static final String	FEEDBACK_SLIDE__BY_FEEDBACK																	= "{'feedback':#}";
+	public static final String	FEEDBACK_SLIDE__BY_FEEDBACK_AND_ORDER_LOWER													= "{'feedback':#,'order':{$lt:#}}";
+	public static final String	FEEDBACK_SLIDE__BY_FEEDBACK_AND_ORDER_HIGHER												= "{'feedback':#,'order':{$gt:#}}";
+	public static final String	FEEDBACK_SLIDE__SORT_BY_ORDER_ASC															= "{'order':1}";
+	public static final String	FEEDBACK_SLIDE__SORT_BY_ORDER_DESC															= "{'order':-1}";
 
 	public static final String	MONITORING_RULE__BY_INTERVENTION															= "{'intervention':#}";
 	public static final String	MONITORING_RULE__BY_INTERVENTION_AND_PARENT													= "{'intervention':#,'isSubRuleOfMonitoringRule':#}";
