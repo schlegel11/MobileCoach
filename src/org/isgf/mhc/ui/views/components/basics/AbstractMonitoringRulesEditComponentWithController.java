@@ -16,7 +16,7 @@ import org.isgf.mhc.model.server.MonitoringMessageGroup;
 import org.isgf.mhc.model.server.MonitoringReplyRule;
 import org.isgf.mhc.model.server.MonitoringRule;
 import org.isgf.mhc.model.server.concepts.AbstractMonitoringRule;
-import org.isgf.mhc.model.server.types.EquationSignTypes;
+import org.isgf.mhc.tools.StringHelpers;
 import org.isgf.mhc.ui.views.components.AbstractModelObjectEditComponent;
 import org.isgf.mhc.ui.views.components.interventions.monitoring_rules.MonitoringReplyRuleEditComponentWithController;
 import org.isgf.mhc.ui.views.components.interventions.monitoring_rules.MonitoringRuleEditComponentWithController;
@@ -382,7 +382,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 											selectedMonitoringRuleId);
 						}
 
-						final String name = createName(selectedAbstractMonitoringRule);
+						final String name = StringHelpers
+								.createRuleName(selectedAbstractMonitoringRule);
 
 						ThemeResource icon;
 						if (selectedAbstractMonitoringRule
@@ -420,7 +421,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 					.getMonitoringReplyRule(monitoringRuleId);
 		}
 
-		final String name = createName(abstractMonitoringRule);
+		final String name = StringHelpers
+				.createRuleName(abstractMonitoringRule);
 
 		ThemeResource icon;
 		if (abstractMonitoringRule.isSendMessageIfTrue()) {
@@ -445,38 +447,6 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 			container.setParent(monitoringRuleId, selectedMonitoringRuleId);
 			rulesTree.expandItem(selectedMonitoringRuleId);
 		}
-	}
-
-	private String createName(
-			final AbstractMonitoringRule abstractMonitoringRule) {
-		val name = new StringBuffer();
-
-		if (abstractMonitoringRule.getRuleWithPlaceholders() == null
-				|| abstractMonitoringRule.getRuleWithPlaceholders().equals("")) {
-			if (abstractMonitoringRule.getRuleEquationSign() != EquationSignTypes.IS_ALWAYS_TRUE
-					&& abstractMonitoringRule.getRuleEquationSign() != EquationSignTypes.IS_ALWAYS_FALSE) {
-				name.append(ImplementationContants.DEFAULT_OBJECT_NAME + " ");
-			}
-		} else {
-			name.append(abstractMonitoringRule.getRuleWithPlaceholders() + " ");
-		}
-
-		name.append(abstractMonitoringRule.getRuleEquationSign().toString());
-
-		if (abstractMonitoringRule.getRuleComparisonTermWithPlaceholders() == null
-				|| abstractMonitoringRule
-						.getRuleComparisonTermWithPlaceholders().equals("")) {
-			if (abstractMonitoringRule.getRuleEquationSign() != EquationSignTypes.IS_ALWAYS_TRUE
-					&& abstractMonitoringRule.getRuleEquationSign() != EquationSignTypes.IS_ALWAYS_FALSE) {
-				name.append(" " + ImplementationContants.DEFAULT_OBJECT_NAME);
-			}
-		} else {
-			name.append(" "
-					+ abstractMonitoringRule
-							.getRuleComparisonTermWithPlaceholders());
-		}
-
-		return name.toString();
 	}
 
 	public void moveItem(final TreeSortDropHandler.MOVE movement,

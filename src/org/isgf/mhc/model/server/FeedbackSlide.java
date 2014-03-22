@@ -5,15 +5,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.val;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
+import org.isgf.mhc.model.ui.UIFeedbackSlide;
+import org.isgf.mhc.model.ui.UIModelObject;
 
 /**
  * {@link ModelObject} to represent an {@link FeedbackSlide}
  * 
  * A {@link Feedback} consists of several {@link FeedbackSlide}s,
- * which are presented to a {@link Participant} in a fixed order.
+ * which are presented to a {@link Participant} in a fixed order, but only when
+ * the defined {@link FeedbackSlideRule}s are all true.
  * 
  * @author Andreas Filler
  */
@@ -73,4 +77,18 @@ public class FeedbackSlide extends ModelObject {
 	@Setter
 	@NonNull
 	private String		textWithPlaceholders;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.isgf.mhc.model.ModelObject#toUIModelObject()
+	 */
+	@Override
+	public UIModelObject toUIModelObject() {
+		val feedbackSlide = new UIFeedbackSlide(order, titleWithPlaceholders);
+
+		feedbackSlide.setRelatedModelObject(this);
+
+		return feedbackSlide;
+	}
 }

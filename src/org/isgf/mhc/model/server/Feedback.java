@@ -5,9 +5,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.val;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
+import org.isgf.mhc.model.ui.UIFeedback;
+import org.isgf.mhc.model.ui.UIModelObject;
 
 /**
  * {@link ModelObject} to represent an {@link Feedback}
@@ -44,4 +47,18 @@ public class Feedback extends ModelObject {
 	@Setter
 	@NonNull
 	private String		templatePath;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.isgf.mhc.model.ModelObject#toUIModelObject()
+	 */
+	@Override
+	public UIModelObject toUIModelObject() {
+		val feedback = new UIFeedback(name);
+
+		feedback.setRelatedModelObject(this);
+
+		return feedback;
+	}
 }

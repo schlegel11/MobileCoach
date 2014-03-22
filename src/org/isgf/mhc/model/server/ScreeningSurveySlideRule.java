@@ -4,11 +4,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.val;
 
 import org.bson.types.ObjectId;
+import org.isgf.mhc.conf.AdminMessageStrings;
+import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.server.concepts.AbstractRule;
 import org.isgf.mhc.model.server.types.EquationSignTypes;
+import org.isgf.mhc.model.ui.UIModelObject;
+import org.isgf.mhc.model.ui.UIScreeningSurveySlideRule;
+import org.isgf.mhc.tools.StringHelpers;
 
 /**
  * {@link ModelObject} to represent an {@link ScreeningSurveySlideRule}
@@ -76,4 +82,29 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 	@Getter
 	@Setter
 	private ObjectId	nextScreeningSurveySlideWhenFalse;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.isgf.mhc.model.ModelObject#toUIModelObject()
+	 */
+	@Override
+	public UIModelObject toUIModelObject() {
+		val screeningSurveySlide = new UIScreeningSurveySlideRule(
+				order,
+				StringHelpers.createRuleName(this),
+				nextScreeningSurveySlideWhenTrue != null ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
+				nextScreeningSurveySlideWhenFalse != null ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NO));
+		;
+
+		screeningSurveySlide.setRelatedModelObject(this);
+
+		return screeningSurveySlide;
+	}
 }

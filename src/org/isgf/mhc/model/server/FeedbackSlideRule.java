@@ -4,18 +4,22 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.val;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.server.concepts.AbstractRule;
 import org.isgf.mhc.model.server.types.EquationSignTypes;
+import org.isgf.mhc.model.ui.UIFeedbackSlideRule;
+import org.isgf.mhc.model.ui.UIModelObject;
+import org.isgf.mhc.tools.StringHelpers;
 
 /**
  * {@link ModelObject} to represent an {@link FeedbackSlideRule}
  * 
- * A {@link FeedbackSlideRule} can evaluate if a slide should be shown
- * next. If all {@link FeedbackSlideRule}s return true a specific
- * {@link FeedbackSlide} is shown
+ * A {@link FeedbackSlideRule} can evaluate if the belonging
+ * {@link FeedbackSlide} should be shown. If all {@link FeedbackSlideRule}s
+ * return true a specific {@link FeedbackSlide} is shown.
  * 
  * @author Andreas Filler
  */
@@ -52,4 +56,19 @@ public class FeedbackSlideRule extends AbstractRule {
 	@Getter
 	@Setter
 	private int			order;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.isgf.mhc.model.ModelObject#toUIModelObject()
+	 */
+	@Override
+	public UIModelObject toUIModelObject() {
+		val screeningSurveySlide = new UIFeedbackSlideRule(order,
+				StringHelpers.createRuleName(this));
+
+		screeningSurveySlide.setRelatedModelObject(this);
+
+		return screeningSurveySlide;
+	}
 }

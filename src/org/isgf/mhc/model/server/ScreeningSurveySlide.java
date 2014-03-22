@@ -5,10 +5,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.val;
 
 import org.bson.types.ObjectId;
+import org.isgf.mhc.conf.AdminMessageStrings;
+import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.server.types.ScreeningSurveySlideQuestionTypes;
+import org.isgf.mhc.model.ui.UIModelObject;
+import org.isgf.mhc.model.ui.UIScreeningSurveySlide;
 
 /**
  * {@link ModelObject} to represent an {@link ScreeningSurveySlide}
@@ -132,4 +137,24 @@ public class ScreeningSurveySlide extends ModelObject {
 	@Getter
 	@Setter
 	private String								storeValueToVariableWithName;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.isgf.mhc.model.ModelObject#toUIModelObject()
+	 */
+	@Override
+	public UIModelObject toUIModelObject() {
+		val screeningSurveySlide = new UIScreeningSurveySlide(
+				order,
+				titleWithPlaceholders,
+				questionType.toString(),
+				storeValueToVariableWithName != null ? storeValueToVariableWithName
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET));
+
+		screeningSurveySlide.setRelatedModelObject(this);
+
+		return screeningSurveySlide;
+	}
 }
