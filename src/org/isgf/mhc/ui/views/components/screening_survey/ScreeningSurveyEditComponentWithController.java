@@ -1,0 +1,402 @@
+package org.isgf.mhc.ui.views.components.screening_survey;
+
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
+
+import org.bson.types.ObjectId;
+import org.isgf.mhc.conf.AdminMessageStrings;
+import org.isgf.mhc.model.ModelObject;
+import org.isgf.mhc.model.server.Feedback;
+import org.isgf.mhc.model.server.ScreeningSurvey;
+import org.isgf.mhc.model.server.ScreeningSurveySlide;
+import org.isgf.mhc.model.ui.UIFeedback;
+import org.isgf.mhc.model.ui.UIModelObject;
+import org.isgf.mhc.model.ui.UIScreeningSurveySlide;
+import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;
+
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.BeanContainer;
+import com.vaadin.data.util.BeanItem;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Table;
+
+/**
+ * Provides the monitoring slide group edit component with a controller
+ * 
+ * @author Andreas Filler
+ */
+/**
+ * @author Andreas Filler
+ * 
+ */
+@SuppressWarnings("serial")
+@Log4j2
+public class ScreeningSurveyEditComponentWithController extends
+		ScreeningSurveyEditComponent {
+
+	private final ScreeningSurvey									screeningSurvey;
+
+	private final Table												slidesTable;
+	private final Table												feedbacksTable;
+
+	private UIScreeningSurveySlide									selectedUIScreeningSurveySlide	= null;
+	private UIFeedback												selectedUIFeedback				= null;
+
+	private final BeanContainer<ObjectId, UIScreeningSurveySlide>	slidesBeanContainer;
+	private final BeanContainer<ObjectId, UIFeedback>				feedbacksBeanContainer;
+
+	public ScreeningSurveyEditComponentWithController(
+			final ScreeningSurvey screeningSurvey) {
+		super();
+
+		this.screeningSurvey = screeningSurvey;
+
+		// table options
+		slidesTable = getScreeningSurveySlidesTable();
+		feedbacksTable = getFeedbacksTable();
+
+		// table content
+		val slidesOfScreeningSurvey = getScreeningSurveyAdministrationManagerService()
+				.getAllScreeningSurveySlidesOfScreeningSurvey(
+						screeningSurvey.getId());
+		val feedbacksOfScreeningSurvey = getScreeningSurveyAdministrationManagerService()
+				.getAllFeedbacksOfScreeningSurvey(screeningSurvey.getId());
+
+		slidesBeanContainer = createBeanContainerForModelObjects(
+				UIScreeningSurveySlide.class, slidesOfScreeningSurvey);
+
+		slidesTable.setContainerDataSource(slidesBeanContainer);
+		slidesTable.setSortContainerPropertyId(UIScreeningSurveySlide
+				.getSortColumn());
+		slidesTable.setVisibleColumns(UIScreeningSurveySlide
+				.getVisibleColumns());
+		slidesTable.setColumnHeaders(UIScreeningSurveySlide.getColumnHeaders());
+		slidesTable.setSortAscending(true);
+		slidesTable.setSortEnabled(false);
+
+		feedbacksBeanContainer = createBeanContainerForModelObjects(
+				UIFeedback.class, feedbacksOfScreeningSurvey);
+
+		feedbacksTable.setContainerDataSource(feedbacksBeanContainer);
+		feedbacksTable.setSortContainerPropertyId(UIFeedback.getSortColumn());
+		feedbacksTable.setVisibleColumns(UIFeedback.getVisibleColumns());
+		feedbacksTable.setColumnHeaders(UIFeedback.getColumnHeaders());
+		feedbacksTable.setSortAscending(true);
+		feedbacksTable.setSortEnabled(false);
+
+		// handle table selection change
+		slidesTable.addValueChangeListener(new ValueChangeListener() {
+
+			@Override
+			public void valueChange(final ValueChangeEvent event) {
+				val objectId = slidesTable.getValue();
+				if (objectId == null) {
+					setSlideSelected(false);
+					selectedUIScreeningSurveySlide = null;
+				} else {
+					selectedUIScreeningSurveySlide = getUIModelObjectFromTableByObjectId(
+							slidesTable, UIScreeningSurveySlide.class, objectId);
+					setSlideSelected(true);
+				}
+			}
+		});
+
+		feedbacksTable.addValueChangeListener(new ValueChangeListener() {
+
+			@Override
+			public void valueChange(final ValueChangeEvent event) {
+				val objectId = slidesTable.getValue();
+				if (objectId == null) {
+					setFeedbackSelected(false);
+					selectedUIFeedback = null;
+				} else {
+					selectedUIFeedback = getUIModelObjectFromTableByObjectId(
+							feedbacksTable, UIFeedback.class, objectId);
+					setFeedbackSelected(true);
+				}
+			}
+		});
+
+		// handle buttons
+		val buttonClickListener = new ButtonClickListener();
+		getNewButton().addClickListener(buttonClickListener);
+		getEditButton().addClickListener(buttonClickListener);
+		getMoveUpButton().addClickListener(buttonClickListener);
+		getMoveDownButton().addClickListener(buttonClickListener);
+		getDeleteButton().addClickListener(buttonClickListener);
+	}
+
+	private class ButtonClickListener implements Button.ClickListener {
+		@Override
+		public void buttonClick(final ClickEvent event) {
+			if (event.getButton() == getNewButton()) {
+				createSlide();
+			} else if (event.getButton() == getEditButton()) {
+				editSlide();
+			} else if (event.getButton() == getMoveUpButton()) {
+				moveSlide(true);
+			} else if (event.getButton() == getMoveDownButton()) {
+				moveSlide(false);
+			} else if (event.getButton() == getDeleteButton()) {
+				deleteSlide();
+			} else if (event.getButton() == getNewFeedbackButton()) {
+				createFeedback();
+			} else if (event.getButton() == getRenameFeedbackButton()) {
+				renameFeedback();
+			} else if (event.getButton() == getEditFeedbackButton()) {
+				editFeedback();
+			} else if (event.getButton() == getDeleteFeedbackButton()) {
+				deleteFeedback();
+			}
+		}
+	}
+
+	public void createSlide() {
+		log.debug("Create slide");
+		val newScreeningSurveySlide = getScreeningSurveyAdministrationManagerService()
+				.screeningSurveySlideCreate(screeningSurvey.getId());
+
+		// TODO folgendes NULL gegen passende komponente austauschen
+		showModalModelObjectEditWindow(
+				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__CREATE_SCREENING_SURVEY_SLIDE,
+				null, new ExtendableButtonClickListener() {
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						// Adapt UI
+						slidesBeanContainer.addItem(newScreeningSurveySlide
+								.getId(),
+								UIScreeningSurveySlide.class
+										.cast(newScreeningSurveySlide
+												.toUIModelObject()));
+						slidesTable.select(newScreeningSurveySlide.getId());
+						getAdminUI()
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_SLIDE_CREATED);
+
+						closeWindow();
+					}
+				});
+	}
+
+	public void editSlide() {
+		log.debug("Edit slide");
+		val selectedMonitoringSlide = selectedUIScreeningSurveySlide
+				.getRelatedModelObject(ScreeningSurveySlide.class);
+
+		// TODO folgendes NULL gegen passende komponente austauschen
+		showModalModelObjectEditWindow(
+				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__EDIT_SCREENING_SURVEY_SLIDE,
+				null, new ExtendableButtonClickListener() {
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						// Adapt UI
+						removeAndAdd(slidesBeanContainer,
+								selectedMonitoringSlide);
+						slidesTable.sort();
+						slidesTable.select(selectedMonitoringSlide.getId());
+						getAdminUI()
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_SLIDE_UPDATED);
+
+						closeWindow();
+					}
+				});
+	}
+
+	public void moveSlide(final boolean moveUp) {
+		log.debug("Move slide {}", moveUp ? "up" : "down");
+
+		val selectedMonitoringSlide = selectedUIScreeningSurveySlide
+				.getRelatedModelObject(ScreeningSurveySlide.class);
+		val swappedMonitoringSlide = getScreeningSurveyAdministrationManagerService()
+				.screeningSurveySlideMove(selectedMonitoringSlide, moveUp);
+
+		if (swappedMonitoringSlide == null) {
+			log.debug("Slide is already at top/end of list");
+			return;
+		}
+
+		removeAndAdd(slidesBeanContainer, swappedMonitoringSlide);
+		removeAndAdd(slidesBeanContainer, selectedMonitoringSlide);
+		slidesTable.sort();
+		slidesTable.select(selectedMonitoringSlide.getId());
+	}
+
+	public void deleteSlide() {
+		log.debug("Delete slide");
+		showConfirmationWindow(new ExtendableButtonClickListener() {
+			@Override
+			public void buttonClick(final ClickEvent event) {
+				try {
+					val selectedMonitoringSlide = selectedUIScreeningSurveySlide.getRelatedModelObject(ScreeningSurveySlide.class);
+
+					// Delete variable
+					getScreeningSurveyAdministrationManagerService()
+							.screeningSurveySlideDelete(selectedMonitoringSlide);
+				} catch (final Exception e) {
+					closeWindow();
+					handleException(e);
+					return;
+				}
+
+				// Adapt UI
+				slidesTable.removeItem(selectedUIScreeningSurveySlide
+						.getRelatedModelObject(ScreeningSurveySlide.class)
+						.getId());
+				getAdminUI()
+						.showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_SLIDE_DELETED);
+
+				closeWindow();
+			}
+		}, null);
+	}
+
+	public void createFeedback() {
+		log.debug("Create feedback");
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NAME_FOR_FEEDBACK,
+				null, null, new ShortStringEditComponent(),
+				new ExtendableButtonClickListener() {
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						final Feedback newFeedback;
+						try {
+							val newFeedbackName = getStringValue();
+
+							// Create feedback
+							newFeedback = getScreeningSurveyAdministrationManagerService()
+									.feedbackCreate(newFeedbackName,
+											screeningSurvey.getId());
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						// Adapt UI
+						feedbacksBeanContainer.addItem(newFeedback.getId(),
+								UIFeedback.class.cast(newFeedback
+										.toUIModelObject()));
+						feedbacksTable.select(newFeedback.getId());
+						getAdminUI()
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_CREATED);
+
+						closeWindow();
+					}
+				}, null);
+	}
+
+	public void renameFeedback() {
+		log.debug("Rename feedback");
+
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_NAME_FOR_FEEDBACK,
+				selectedUIFeedback.getRelatedModelObject(Feedback.class)
+						.getName(), null, new ShortStringEditComponent(),
+				new ExtendableButtonClickListener() {
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						BeanItem<UIFeedback> beanItem;
+						try {
+							val selectedFeedback = selectedUIFeedback
+									.getRelatedModelObject(Feedback.class);
+
+							beanItem = getBeanItemFromTableByObjectId(
+									feedbacksTable, UIFeedback.class,
+									selectedFeedback.getId());
+
+							// Change name
+							getScreeningSurveyAdministrationManagerService()
+									.feedbackChangeName(selectedFeedback,
+											getStringValue());
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						// Adapt UI
+						getStringItemProperty(beanItem,
+								UIFeedback.FEEDBACK_NAME).setValue(
+								selectedUIFeedback.getRelatedModelObject(
+										Feedback.class).getName());
+
+						getAdminUI()
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__FEEDBACK_RENAMED);
+						closeWindow();
+					}
+				}, null);
+	}
+
+	public void editFeedback() {
+		log.debug("Edit feedback");
+		val selectedFeedback = selectedUIFeedback
+				.getRelatedModelObject(Feedback.class);
+
+		// TODO folgendes NULL gegen passende komponente austauschen
+		showModalModelObjectEditWindow(
+				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__EDIT_FEEDBACK,
+				null, new ExtendableButtonClickListener() {
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						// Adapt UI
+						removeAndAdd(feedbacksBeanContainer, selectedFeedback);
+						feedbacksTable.sort();
+						feedbacksTable.select(selectedFeedback.getId());
+						getAdminUI()
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__FEEDBACK_UPDATED);
+
+						closeWindow();
+					}
+				});
+	}
+
+	public void deleteFeedback() {
+		log.debug("Delete feedback");
+		showConfirmationWindow(new ExtendableButtonClickListener() {
+			@Override
+			public void buttonClick(final ClickEvent event) {
+				try {
+					val selectedFeedback = selectedUIFeedback.getRelatedModelObject(Feedback.class);
+
+					// Delete variable
+					getScreeningSurveyAdministrationManagerService()
+							.feedbackDelete(selectedFeedback);
+				} catch (final Exception e) {
+					closeWindow();
+					handleException(e);
+					return;
+				}
+
+				// Adapt UI
+				feedbacksTable.removeItem(selectedUIFeedback
+						.getRelatedModelObject(Feedback.class).getId());
+				getAdminUI().showInformationNotification(
+						AdminMessageStrings.NOTIFICATION__FEEDBACK_DELETED);
+
+				closeWindow();
+			}
+		}, null);
+	}
+
+	/**
+	 * Removes and adds a {@link ModelObject} from a {@link BeanContainer} to
+	 * update the content
+	 * 
+	 * @param slidesBeanContainer
+	 * @param slide
+	 */
+	@SuppressWarnings("unchecked")
+	protected <SubClassOfUIModelObject extends UIModelObject> void removeAndAdd(
+
+	final BeanContainer<ObjectId, SubClassOfUIModelObject> beanContainer,
+			final ModelObject modelObject) {
+		beanContainer.removeItem(modelObject.getId());
+		beanContainer.addItem(modelObject.getId(),
+				(SubClassOfUIModelObject) modelObject.toUIModelObject());
+	}
+}

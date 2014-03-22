@@ -11,12 +11,15 @@ import lombok.extern.log4j.Log4j2;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Constants;
+import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.server.Intervention;
 import org.isgf.mhc.model.server.ScreeningSurvey;
+import org.isgf.mhc.model.ui.UIModelObject;
 import org.isgf.mhc.model.ui.UIScreeningSurvey;
 import org.isgf.mhc.tools.OnDemandFileDownloader;
 import org.isgf.mhc.tools.OnDemandFileDownloader.OnDemandStreamResource;
 import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;
+import org.isgf.mhc.ui.views.components.screening_survey.ScreeningSurveyEditComponentWithController;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -255,11 +258,29 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 
 	public void editScreeningSurvey() {
 		log.debug("Edit screening survey");
-
 		val screeningSurvey = selectedUIScreeningSurvey
 				.getRelatedModelObject(ScreeningSurvey.class);
 
-		// TODO open window to edit screening survey
+		showModalModelObjectEditWindow(
+				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__EDIT_SCREENING_SURVEY,
+				new ScreeningSurveyEditComponentWithController(screeningSurvey),
+				new ExtendableButtonClickListener() {
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						// Adapt UI
+						val screeningSurveysTable = getInterventionScreeningSurveyEditComponent()
+								.getScreeningSurveysTable();
+
+						removeAndAdd(beanContainer, screeningSurvey);
+						screeningSurveysTable.sort();
+						screeningSurveysTable.select(screeningSurvey.getId());
+						getAdminUI()
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_UPDATED);
+
+						closeWindow();
+					}
+				});
 	}
 
 	public void deleteScreeningSurvey() {
@@ -314,4 +335,20 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 		getAdminUI().getPage().open(url, "_blank");
 	}
 
+	/**
+	 * Removes and adds a {@link ModelObject} from a {@link BeanContainer} to
+	 * update the content
+	 * 
+	 * @param slidesBeanContainer
+	 * @param slide
+	 */
+	@SuppressWarnings("unchecked")
+	protected <SubClassOfUIModelObject extends UIModelObject> void removeAndAdd(
+
+	final BeanContainer<ObjectId, SubClassOfUIModelObject> beanContainer,
+			final ModelObject modelObject) {
+		beanContainer.removeItem(modelObject.getId());
+		beanContainer.addItem(modelObject.getId(),
+				(SubClassOfUIModelObject) modelObject.toUIModelObject());
+	}
 }

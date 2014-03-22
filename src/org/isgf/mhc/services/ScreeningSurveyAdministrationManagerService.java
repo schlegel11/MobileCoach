@@ -224,6 +224,34 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.deleteModelObject(feedbackSlide);
 	}
 
+	// Feedback
+	public Feedback feedbackCreate(final String name,
+			final ObjectId screeningSurveyId) {
+		val feedback = new Feedback(screeningSurveyId, name, "");
+
+		if (name.equals("")) {
+			feedback.setName(DEFAULT_OBJECT_NAME);
+		}
+
+		databaseManagerService.saveModelObject(feedback);
+
+		return feedback;
+	}
+
+	public void feedbackChangeName(final Feedback feedback, final String newName) {
+		if (newName.equals("")) {
+			feedback.setName(DEFAULT_OBJECT_NAME);
+		} else {
+			feedback.setName(newName);
+		}
+
+		databaseManagerService.saveModelObject(feedback);
+	}
+
+	public void feedbackDelete(final Feedback feedback) {
+		databaseManagerService.deleteModelObject(feedback);
+	}
+
 	/*
 	 * Getter methods
 	 */

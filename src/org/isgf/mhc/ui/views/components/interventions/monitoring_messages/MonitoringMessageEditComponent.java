@@ -199,7 +199,6 @@ public class MonitoringMessageEditComponent extends
 		buttonLayout.setHeight("-1px");
 		buttonLayout.setMargin(true);
 		buttonLayout.setSpacing(true);
-		buttonLayout.setColumns(2);
 
 		// closeButton
 		closeButton = new Button();
@@ -208,8 +207,8 @@ public class MonitoringMessageEditComponent extends
 		closeButton.setImmediate(true);
 		closeButton.setWidth("140px");
 		closeButton.setHeight("-1px");
-		buttonLayout.addComponent(closeButton, 1, 0);
-		buttonLayout.setComponentAlignment(closeButton, new Alignment(9));
+		buttonLayout.addComponent(closeButton, 0, 0);
+		buttonLayout.setComponentAlignment(closeButton, new Alignment(48));
 
 		return buttonLayout;
 	}
