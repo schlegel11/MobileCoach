@@ -110,6 +110,13 @@ public class ScreeningSurveyAdministrationManagerService {
 				.exportModelObjects(modelObjectsToExport);
 	}
 
+	public void screeningSurveySetActive(final ScreeningSurvey screeningSurvey,
+			final boolean newValue) {
+		screeningSurvey.setActive(newValue);
+
+		databaseManagerService.saveModelObject(screeningSurvey);
+	}
+
 	public void screeningSurveyDelete(
 			final ScreeningSurvey screeningSurveyToDelete)
 			throws NotificationMessageException {

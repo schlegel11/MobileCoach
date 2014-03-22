@@ -5,6 +5,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
+import org.isgf.mhc.conf.ThemeImageStrings;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.server.Feedback;
 import org.isgf.mhc.model.server.ScreeningSurvey;
@@ -18,6 +19,7 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItem;
+import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Table;
@@ -107,7 +109,7 @@ public class ScreeningSurveyEditComponentWithController extends
 
 			@Override
 			public void valueChange(final ValueChangeEvent event) {
-				val objectId = slidesTable.getValue();
+				val objectId = feedbacksTable.getValue();
 				if (objectId == null) {
 					setFeedbackSelected(false);
 					selectedUIFeedback = null;
@@ -126,6 +128,36 @@ public class ScreeningSurveyEditComponentWithController extends
 		getMoveUpButton().addClickListener(buttonClickListener);
 		getMoveDownButton().addClickListener(buttonClickListener);
 		getDeleteButton().addClickListener(buttonClickListener);
+
+		getNewFeedbackButton().addClickListener(buttonClickListener);
+		getEditFeedbackButton().addClickListener(buttonClickListener);
+		getRenameFeedbackButton().addClickListener(buttonClickListener);
+		getDeleteFeedbackButton().addClickListener(buttonClickListener);
+
+		getSwitchScreeningSurveyButton().addClickListener(buttonClickListener);
+
+		adjustActiveOrInactive();
+	}
+
+	private void adjustActiveOrInactive() {
+		val switchScreeningSurveyButton = getSwitchScreeningSurveyButton();
+		if (screeningSurvey.isActive()) {
+			switchScreeningSurveyButton.setIcon(new ThemeResource(
+					ThemeImageStrings.ACTIVE_ICON_SMALL));
+			localize(
+					switchScreeningSurveyButton,
+					AdminMessageStrings.SCREENING_SURVEY_EDITING__SWITCH_BUTTON_ACTIVE);
+
+			getActiveOrInactiveLayout().setEnabled(false);
+		} else {
+			switchScreeningSurveyButton.setIcon(new ThemeResource(
+					ThemeImageStrings.INACTIVE_ICON_SMALL));
+			localize(
+					switchScreeningSurveyButton,
+					AdminMessageStrings.SCREENING_SURVEY_EDITING__SWITCH_BUTTON_INACTIVE);
+
+			getActiveOrInactiveLayout().setEnabled(true);
+		}
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
@@ -149,6 +181,8 @@ public class ScreeningSurveyEditComponentWithController extends
 				editFeedback();
 			} else if (event.getButton() == getDeleteFeedbackButton()) {
 				deleteFeedback();
+			} else if (event.getButton() == getSwitchScreeningSurveyButton()) {
+				switchActiveOrInactive();
 			}
 		}
 	}
@@ -178,6 +212,28 @@ public class ScreeningSurveyEditComponentWithController extends
 						closeWindow();
 					}
 				});
+	}
+
+	public void switchActiveOrInactive() {
+		log.debug("Switch screening survey");
+		showConfirmationWindow(new ExtendableButtonClickListener() {
+
+			@Override
+			public void buttonClick(final ClickEvent event) {
+				try {
+					getScreeningSurveyAdministrationManagerService()
+							.screeningSurveySetActive(screeningSurvey,
+									!screeningSurvey.isActive());
+				} catch (final Exception e) {
+					closeWindow();
+					handleException(e);
+					return;
+				}
+
+				adjustActiveOrInactive();
+				closeWindow();
+			}
+		}, null);
 	}
 
 	public void editSlide() {
@@ -279,6 +335,7 @@ public class ScreeningSurveyEditComponentWithController extends
 						feedbacksBeanContainer.addItem(newFeedback.getId(),
 								UIFeedback.class.cast(newFeedback
 										.toUIModelObject()));
+						feedbacksTable.sort();
 						feedbacksTable.select(newFeedback.getId());
 						getAdminUI()
 								.showInformationNotification(
@@ -322,6 +379,7 @@ public class ScreeningSurveyEditComponentWithController extends
 								UIFeedback.FEEDBACK_NAME).setValue(
 								selectedUIFeedback.getRelatedModelObject(
 										Feedback.class).getName());
+						feedbacksTable.sort();
 
 						getAdminUI()
 								.showInformationNotification(
