@@ -134,6 +134,11 @@ public class ScreeningSurveyEditComponent extends
 		screeningSurveySlidesTable.setImmediate(true);
 		feedbacksTable.setSelectable(true);
 		feedbacksTable.setImmediate(true);
+
+		// adjust combo box
+		templatePathComboBox.setImmediate(true);
+		templatePathComboBox.setNullSelectionAllowed(false);
+		templatePathComboBox.setTextInputAllowed(false);
 	}
 
 	protected void setSlideSelected(final boolean selection) {

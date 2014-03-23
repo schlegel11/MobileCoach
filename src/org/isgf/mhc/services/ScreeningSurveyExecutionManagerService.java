@@ -1,6 +1,7 @@
 package org.isgf.mhc.services;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.servlet.http.HttpSession;
@@ -8,8 +9,10 @@ import javax.servlet.http.HttpSession;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.Queries;
+import org.isgf.mhc.model.server.Intervention;
 import org.isgf.mhc.model.server.ScreeningSurvey;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
@@ -146,8 +149,23 @@ public class ScreeningSurveyExecutionManagerService {
 	 * @return
 	 */
 	public Iterable<ScreeningSurvey> getActiveScreeningSurveys() {
-		return databaseManagerService.findModelObjects(ScreeningSurvey.class,
-				Queries.SCREENING_SURVEY__ACTIVE_TRUE);
+		final Iterable<Intervention> activeInterventions = databaseManagerService
+				.findModelObjects(Intervention.class,
+						Queries.INTERVENTION__ACTIVE_TRUE);
+
+		val activeScreeningSurveys = new ArrayList<ScreeningSurvey>();
+
+		for (val intervention : activeInterventions) {
+			CollectionUtils
+					.addAll(activeScreeningSurveys,
+							databaseManagerService
+									.findModelObjects(
+											ScreeningSurvey.class,
+											Queries.SCREENING_SURVEY__BY_INTERVENTION_AND_ACTIVE_TRUE,
+											intervention.getId()).iterator());
+		}
+
+		return activeScreeningSurveys;
 	}
 
 	/**
@@ -159,4 +177,30 @@ public class ScreeningSurveyExecutionManagerService {
 		return fileStorageManagerService.getTemplatesFolder();
 	}
 
+	/**
+	 * Returns if the requested {@link ScreeningSurvey} is currently accessible
+	 * (means the the {@link Intervention} and {@link ScreeningSurvey} are both
+	 * active)
+	 * 
+	 * @param screeningSurveyId
+	 * @return
+	 */
+	public boolean screeningSurveyCheckIfActive(final ObjectId screeningSurveyId) {
+		final ScreeningSurvey screeningSurvey = databaseManagerService
+				.getModelObjectById(ScreeningSurvey.class, screeningSurveyId);
+
+		if (screeningSurvey == null || !screeningSurvey.isActive()) {
+			return false;
+		}
+
+		final Intervention intervention = databaseManagerService
+				.getModelObjectById(Intervention.class,
+						screeningSurvey.getIntervention());
+
+		if (intervention == null || !intervention.isActive()) {
+			return false;
+		}
+
+		return true;
+	}
 }

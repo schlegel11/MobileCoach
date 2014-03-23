@@ -18,3 +18,6 @@ Eclipse specific:
 Install Lombok first by double-clicking lombok.jar
 
 
+
+### How to configure MHC
+-Dmhc.configuration="/Users/andreas/Documents/Projekte/MHC/Development/workspace/MHC/configuration.properties"

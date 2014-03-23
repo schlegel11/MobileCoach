@@ -121,6 +121,34 @@ public class ScreeningSurveyEditComponentWithController extends
 			}
 		});
 
+		// Handle combo box
+		val templatePaths = getScreeningSurveyAdministrationManagerService()
+				.getAllTemplatePaths();
+
+		val templatePathComboBox = getTemplatePathComboBox();
+		for (val templatePath : templatePaths) {
+			templatePathComboBox.addItem(templatePath);
+			if (screeningSurvey.getTemplatePath().equals(templatePath)) {
+				templatePathComboBox.select(templatePath);
+			}
+		}
+		templatePathComboBox.addValueChangeListener(new ValueChangeListener() {
+
+			@Override
+			public void valueChange(final ValueChangeEvent event) {
+				final String templatePath = (String) event.getProperty()
+						.getValue();
+
+				log.debug("Adjust template path to {}", templatePath);
+				getScreeningSurveyAdministrationManagerService()
+						.screeningSurveyChangeTemplatePath(screeningSurvey,
+								templatePath);
+
+				adjust();
+
+			}
+		});
+
 		// handle buttons
 		val buttonClickListener = new ButtonClickListener();
 		getNewButton().addClickListener(buttonClickListener);
@@ -136,7 +164,17 @@ public class ScreeningSurveyEditComponentWithController extends
 
 		getSwitchScreeningSurveyButton().addClickListener(buttonClickListener);
 
+		getPasswordTextFieldComponent().getButton().addClickListener(
+				buttonClickListener);
+
 		adjustActiveOrInactive();
+
+		adjust();
+	}
+
+	private void adjust() {
+		// Adjust store result variable
+		getPasswordTextFieldComponent().setValue(screeningSurvey.getPassword());
 	}
 
 	private void adjustActiveOrInactive() {
@@ -183,8 +221,38 @@ public class ScreeningSurveyEditComponentWithController extends
 				deleteFeedback();
 			} else if (event.getButton() == getSwitchScreeningSurveyButton()) {
 				switchActiveOrInactive();
+			} else if (event.getButton() == getPasswordTextFieldComponent()
+					.getButton()) {
+				editPassword();
 			}
 		}
+	}
+
+	public void editPassword() {
+		log.debug("Edit password");
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_PASSWORD,
+				screeningSurvey.getPassword(), null,
+				new ShortStringEditComponent(),
+				new ExtendableButtonClickListener() {
+
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Change password
+							getScreeningSurveyAdministrationManagerService()
+									.screeningSurveyChangePassword(
+											screeningSurvey, getStringValue());
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						adjust();
+
+						closeWindow();
+					}
+				}, null);
 	}
 
 	public void createSlide() {

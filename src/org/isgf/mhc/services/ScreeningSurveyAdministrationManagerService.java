@@ -1,6 +1,7 @@
 package org.isgf.mhc.services;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -96,6 +97,20 @@ public class ScreeningSurveyAdministrationManagerService {
 		} else {
 			screeningSurvey.setName(newName);
 		}
+
+		databaseManagerService.saveModelObject(screeningSurvey);
+	}
+
+	public void screeningSurveyChangePassword(
+			final ScreeningSurvey screeningSurvey, final String newPassword) {
+		screeningSurvey.setPassword(newPassword);
+
+		databaseManagerService.saveModelObject(screeningSurvey);
+	}
+
+	public void screeningSurveyChangeTemplatePath(
+			final ScreeningSurvey screeningSurvey, final String newTemplatePath) {
+		screeningSurvey.setTemplatePath(newTemplatePath);
 
 		databaseManagerService.saveModelObject(screeningSurvey);
 	}
@@ -290,5 +305,28 @@ public class ScreeningSurveyAdministrationManagerService {
 		return databaseManagerService.findSortedModelObjects(Feedback.class,
 				Queries.FEEDBACK__BY_SCREENING_SURVEY,
 				Queries.FEEDBACK__SORT_BY_ORDER_ASC, screeningSurveyId);
+	}
+
+	public String[] getAllTemplatePaths() {
+		final File[] templateFolder = fileStorageManagerService
+				.getTemplatesFolder().listFiles(new FileFilter() {
+
+					@Override
+					public boolean accept(final File pathname) {
+						if (pathname.isDirectory()) {
+							return true;
+						} else {
+							return false;
+						}
+					}
+				});
+
+		final String[] templateFolderStrings = new String[templateFolder.length];
+
+		for (int i = 0; i < templateFolder.length; i++) {
+			templateFolderStrings[i] = templateFolder[i].getName();
+		}
+
+		return templateFolderStrings;
 	}
 }

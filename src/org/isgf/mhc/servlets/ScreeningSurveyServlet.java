@@ -97,7 +97,10 @@ public class ScreeningSurveyServlet extends HttpServlet {
 					}
 
 					// Only object id
-					if (ObjectId.isValid(pathParts[0])) {
+					if (ObjectId.isValid(pathParts[0])
+							&& screeningSurveyExecutionManagerService
+									.screeningSurveyCheckIfActive(new ObjectId(
+											pathParts[0]))) {
 						handleTemplateRequest(request, response, new ObjectId(
 								pathParts[0]));
 						return;
