@@ -186,13 +186,17 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	 *            The listener for the OK button
 	 * @param cancelButtonClickListener
 	 *            The listener for the Cancel button
+	 * @param titleValues
+	 *            The placeholders to use in the title
 	 * @return The shown window
 	 */
 	protected Window showModalModelObjectEditWindow(
 			final AdminMessageStrings title,
 			final AbstractModelObjectEditComponent modelObjectEditComponent,
-			final ExtendableButtonClickListener closeButtonClickListener) {
-		val modalWindow = new Window(Messages.getAdminString(title));
+			final ExtendableButtonClickListener closeButtonClickListener,
+			final Object... titleValues) {
+		val modalWindow = new Window(
+				Messages.getAdminString(title, titleValues));
 		modalWindow.setModal(true);
 		modalWindow.setResizable(false);
 		modalWindow.setClosable(false);

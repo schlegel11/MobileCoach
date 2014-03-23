@@ -10,6 +10,7 @@ import lombok.val;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
+import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.ui.UIIntervention;
 import org.isgf.mhc.model.ui.UIModelObject;
 
@@ -104,6 +105,32 @@ public class Intervention extends ModelObject {
 	 */
 	@Override
 	public void performOnDelete() {
-		// TODO recursive deletion
+		// Delete participant
+		val participantsToDelete = ModelObject.find(Participant.class,
+				Queries.PARTICIPANT__BY_INTERVENTION, getId());
+		ModelObject.delete(participantsToDelete);
+
+		// Delete intervention variables with values
+		val interventionVariablesWithValuesToDelete = ModelObject.find(
+				InterventionVariableWithValue.class,
+				Queries.INTERVENTION_VARIABLES_WITH_VALUES__BY_INTERVENTION,
+				getId());
+		ModelObject.delete(interventionVariablesWithValuesToDelete);
+
+		// Delete author intervention access
+		val authorInterventionAccessToDelete = ModelObject.find(
+				AuthorInterventionAccess.class,
+				Queries.AUTHOR_INTERVENTION_ACCESS__BY_INTERVENTION, getId());
+		ModelObject.delete(authorInterventionAccessToDelete);
+
+		// Delete monitoring rules
+		val monitoringRulesToDelete = ModelObject.find(MonitoringRule.class,
+				Queries.MONITORING_RULE__BY_INTERVENTION, getId());
+		ModelObject.delete(monitoringRulesToDelete);
+
+		// Delete screening surveys
+		val screeningSurveysToDelete = ModelObject.find(ScreeningSurvey.class,
+				Queries.SCREENING_SURVEY__BY_INTERVENTION, getId());
+		ModelObject.delete(screeningSurveysToDelete);
 	}
 }

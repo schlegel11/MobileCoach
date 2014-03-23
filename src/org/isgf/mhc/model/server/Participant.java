@@ -5,9 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.val;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
+import org.isgf.mhc.model.Queries;
 
 /**
  * {@link ModelObject} to represent an {@link Participant}
@@ -97,4 +99,29 @@ public class Participant extends ModelObject {
 	@Setter
 	@NonNull
 	private String		organizationUnit;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.isgf.mhc.model.ModelObject#performOnDelete()
+	 */
+	@Override
+	public void performOnDelete() {
+		// Delete dialog options
+		val dialogOptionsToDelete = ModelObject.find(DialogOption.class,
+				Queries.DIALOG_OPTION__BY_PARTICIPANT, getId());
+		ModelObject.delete(dialogOptionsToDelete);
+
+		// Delete participant variables with values
+		val participantVariablesWithValuesToDelete = ModelObject.find(
+				ParticipantVariableWithValue.class,
+				Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT,
+				getId());
+		ModelObject.delete(participantVariablesWithValuesToDelete);
+
+		// Delete dialog messages
+		val dialogMessagesToDelete = ModelObject.find(DialogMessage.class,
+				Queries.DIALOG_MESSAGE__BY_PARTICIPANT, getId());
+		ModelObject.delete(dialogMessagesToDelete);
+	}
 }

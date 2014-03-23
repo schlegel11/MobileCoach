@@ -240,10 +240,10 @@ public class AllInterventionsTabComponentWithController extends
 	}
 
 	public void editIntervention() {
-		log.debug("Edit intervention");
-
 		val intervention = selectedUIIntervention
 				.getRelatedModelObject(Intervention.class);
+
+		log.debug("Edit intervention {}", intervention.getId());
 
 		// Replace current components with accordion
 		getMainLayout().removeAllComponents();

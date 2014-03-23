@@ -9,6 +9,7 @@ import lombok.val;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
+import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.ui.UIFeedbackSlide;
 import org.isgf.mhc.model.ui.UIModelObject;
 
@@ -90,5 +91,27 @@ public class FeedbackSlide extends ModelObject {
 		feedbackSlide.setRelatedModelObject(this);
 
 		return feedbackSlide;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.isgf.mhc.model.ModelObject#performOnDelete()
+	 */
+	@Override
+	public void performOnDelete() {
+		if (linkedMediaObject != null) {
+			val mediaObjectToDelete = ModelObject.get(MediaObject.class,
+					linkedMediaObject);
+
+			if (mediaObjectToDelete != null) {
+				ModelObject.delete(mediaObjectToDelete);
+			}
+		}
+
+		// Delete sub rules
+		val rulesToDelete = ModelObject.find(FeedbackSlideRule.class,
+				Queries.FEEDBACK_SLIDE_RULE__BY_FEEDBACK_SLIDE, getId());
+		ModelObject.delete(rulesToDelete);
 	}
 }

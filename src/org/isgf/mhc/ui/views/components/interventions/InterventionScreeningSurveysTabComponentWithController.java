@@ -280,7 +280,7 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 
 						closeWindow();
 					}
-				});
+				}, screeningSurvey.getName());
 	}
 
 	public void deleteScreeningSurvey() {

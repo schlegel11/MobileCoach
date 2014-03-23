@@ -186,6 +186,8 @@ public class ScreeningSurveyEditComponentWithController extends
 					switchScreeningSurveyButton,
 					AdminMessageStrings.SCREENING_SURVEY_EDITING__SWITCH_BUTTON_ACTIVE);
 
+			slidesTable.setEnabled(false);
+			feedbacksTable.setEnabled(false);
 			getActiveOrInactiveLayout().setEnabled(false);
 		} else {
 			switchScreeningSurveyButton.setIcon(new ThemeResource(
@@ -195,6 +197,8 @@ public class ScreeningSurveyEditComponentWithController extends
 					AdminMessageStrings.SCREENING_SURVEY_EDITING__SWITCH_BUTTON_INACTIVE);
 
 			getActiveOrInactiveLayout().setEnabled(true);
+			slidesTable.setEnabled(true);
+			feedbacksTable.setEnabled(true);
 		}
 	}
 

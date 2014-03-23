@@ -11,6 +11,7 @@ import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
+import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.server.types.ScreeningSurveySlideQuestionTypes;
 import org.isgf.mhc.model.ui.UIModelObject;
 import org.isgf.mhc.model.ui.UIScreeningSurveySlide;
@@ -156,5 +157,28 @@ public class ScreeningSurveySlide extends ModelObject {
 		screeningSurveySlide.setRelatedModelObject(this);
 
 		return screeningSurveySlide;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.isgf.mhc.model.ModelObject#performOnDelete()
+	 */
+	@Override
+	public void performOnDelete() {
+		if (linkedMediaObject != null) {
+			val mediaObjectToDelete = ModelObject.get(MediaObject.class,
+					linkedMediaObject);
+
+			if (mediaObjectToDelete != null) {
+				ModelObject.delete(mediaObjectToDelete);
+			}
+		}
+
+		// Delete sub rules
+		val rulesToDelete = ModelObject.find(ScreeningSurveySlideRule.class,
+				Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE,
+				getId());
+		ModelObject.delete(rulesToDelete);
 	}
 }

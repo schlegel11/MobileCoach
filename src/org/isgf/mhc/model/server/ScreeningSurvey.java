@@ -11,6 +11,7 @@ import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
+import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.ui.UIModelObject;
 import org.isgf.mhc.model.ui.UIScreeningSurvey;
 
@@ -119,6 +120,14 @@ public class ScreeningSurvey extends ModelObject {
 	 */
 	@Override
 	public void performOnDelete() {
-		// TODO recursive deletion
+		// Delete feedback
+		val feedbacksToDelete = ModelObject.find(Feedback.class,
+				Queries.FEEDBACK__BY_SCREENING_SURVEY, getId());
+		ModelObject.delete(feedbacksToDelete);
+
+		// Delete slides
+		val slidesToDelete = ModelObject.find(ScreeningSurveySlide.class,
+				Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY, getId());
+		ModelObject.delete(slidesToDelete);
 	}
 }
