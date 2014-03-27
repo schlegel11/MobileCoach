@@ -25,13 +25,9 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Table;
 
 /**
- * Provides the monitoring slide group edit component with a controller
+ * Provides the screening surey edit edit component with a controller
  * 
  * @author Andreas Filler
- */
-/**
- * @author Andreas Filler
- * 
  */
 @SuppressWarnings("serial")
 @Log4j2

@@ -20,7 +20,7 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 
 /**
- * Provides the monitoring message group edit component
+ * Provides the screening survey edit component
  * 
  * @author Andreas Filler
  */
