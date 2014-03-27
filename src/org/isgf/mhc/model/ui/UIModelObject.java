@@ -3,8 +3,6 @@ package org.isgf.mhc.model.ui;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
-import org.isgf.mhc.conf.AdminMessageStrings;
-import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
 
 /**
@@ -13,7 +11,7 @@ import org.isgf.mhc.model.ModelObject;
  * @author Andreas Filler
  */
 @NoArgsConstructor
-public abstract class UIModelObject {
+public abstract class UIModelObject extends UIObject {
 	/**
 	 * Contains the reference to the related model object
 	 */
@@ -29,21 +27,4 @@ public abstract class UIModelObject {
 	public void setRelatedModelObject(final ModelObject relatedModelObject) {
 		this.relatedModelObject = relatedModelObject;
 	}
-
-	/**
-	 * Returns the appropriate localization {@link String}, filled with given
-	 * placeholders (if provided)
-	 * 
-	 * @param adminMessageString
-	 * @param values
-	 * @return
-	 */
-	protected static String localize(
-			final AdminMessageStrings adminMessageString,
-			final Object... values) {
-		return Messages.getAdminString(adminMessageString, values);
-	}
-
-	@Override
-	public abstract String toString();
 }

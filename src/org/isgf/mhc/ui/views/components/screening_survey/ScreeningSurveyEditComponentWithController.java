@@ -25,7 +25,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Table;
 
 /**
- * Provides the screening surey edit edit component with a controller
+ * Provides the screening survey edit component with a controller
  * 
  * @author Andreas Filler
  */
@@ -169,7 +169,7 @@ public class ScreeningSurveyEditComponentWithController extends
 	}
 
 	private void adjust() {
-		// Adjust store result variable
+		// Adjust password text field
 		getPasswordTextFieldComponent().setValue(screeningSurvey.getPassword());
 	}
 
@@ -260,10 +260,11 @@ public class ScreeningSurveyEditComponentWithController extends
 		val newScreeningSurveySlide = getScreeningSurveyAdministrationManagerService()
 				.screeningSurveySlideCreate(screeningSurvey.getId());
 
-		// TODO folgendes NULL gegen passende komponente austauschen
 		showModalModelObjectEditWindow(
 				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__CREATE_SCREENING_SURVEY_SLIDE,
-				null, new ExtendableButtonClickListener() {
+				new ScreeningSurveySlideEditComponentWithController(
+						newScreeningSurveySlide),
+				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
@@ -279,7 +280,7 @@ public class ScreeningSurveyEditComponentWithController extends
 
 						closeWindow();
 					}
-				});
+				}, screeningSurvey.getName());
 	}
 
 	public void switchActiveOrInactive() {
@@ -306,27 +307,28 @@ public class ScreeningSurveyEditComponentWithController extends
 
 	public void editSlide() {
 		log.debug("Edit slide");
-		val selectedMonitoringSlide = selectedUIScreeningSurveySlide
+		val selectedScreeningSurveySlide = selectedUIScreeningSurveySlide
 				.getRelatedModelObject(ScreeningSurveySlide.class);
 
-		// TODO folgendes NULL gegen passende komponente austauschen
 		showModalModelObjectEditWindow(
 				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__EDIT_SCREENING_SURVEY_SLIDE,
-				null, new ExtendableButtonClickListener() {
+				new ScreeningSurveySlideEditComponentWithController(
+						selectedScreeningSurveySlide),
+				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
 						removeAndAdd(slidesBeanContainer,
-								selectedMonitoringSlide);
+								selectedScreeningSurveySlide);
 						slidesTable.sort();
-						slidesTable.select(selectedMonitoringSlide.getId());
+						slidesTable.select(selectedScreeningSurveySlide.getId());
 						getAdminUI()
 								.showInformationNotification(
 										AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_SLIDE_UPDATED);
 
 						closeWindow();
 					}
-				});
+				}, screeningSurvey.getName());
 	}
 
 	public void moveSlide(final boolean moveUp) {

@@ -11,7 +11,7 @@ import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
-import org.isgf.mhc.model.ui.UIModelObject;
+import org.isgf.mhc.model.ui.UIObject;
 import org.isgf.mhc.services.InterventionAdministrationManagerService;
 import org.isgf.mhc.services.ScreeningSurveyAdministrationManagerService;
 import org.isgf.mhc.ui.AdminNavigatorUI;
@@ -279,11 +279,11 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	 * @param iterableModelObjects
 	 * @return
 	 */
-	protected <UIModelObjectSubclass extends UIModelObject> BeanContainer<ObjectId, UIModelObjectSubclass> createBeanContainerForModelObjects(
-			final Class<UIModelObjectSubclass> uiModelObjectSubclass,
+	protected <UIObjectSubclass extends UIObject> BeanContainer<ObjectId, UIObjectSubclass> createBeanContainerForModelObjects(
+			final Class<UIObjectSubclass> uiModelObjectSubclass,
 			final Iterable<? extends ModelObject> iterableModelObjects) {
 
-		final BeanContainer<ObjectId, UIModelObjectSubclass> beanContainer = new BeanContainer<ObjectId, UIModelObjectSubclass>(
+		final BeanContainer<ObjectId, UIObjectSubclass> beanContainer = new BeanContainer<ObjectId, UIObjectSubclass>(
 				uiModelObjectSubclass);
 
 		for (final ModelObject modelObject : iterableModelObjects) {
@@ -299,48 +299,56 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	 * {@link Iterable} containing {@link ModelObject}s represented by only ONE
 	 * property
 	 * 
-	 * @param uiModelObjectSubclass
+	 * @param uiObjectSubclass
 	 * @param iterableModelObjects
 	 * @return
 	 */
-	protected <UIModelObjectSubclass extends UIModelObject> BeanContainer<UIModelObjectSubclass, UIModelObjectSubclass> createSimpleBeanContainerForModelObjects(
-			final Class<UIModelObjectSubclass> uiModelObjectSubclass,
+	protected <UIObjectSubclass extends UIObject> BeanContainer<UIObjectSubclass, UIObjectSubclass> createSimpleBeanContainerForModelObjects(
+			final Class<UIObjectSubclass> uiObjectSubclass,
 			final Iterable<? extends ModelObject> iterableModelObjects) {
 
-		final BeanContainer<UIModelObjectSubclass, UIModelObjectSubclass> beanContainer = new BeanContainer<UIModelObjectSubclass, UIModelObjectSubclass>(
-				uiModelObjectSubclass);
+		final BeanContainer<UIObjectSubclass, UIObjectSubclass> beanContainer = new BeanContainer<UIObjectSubclass, UIObjectSubclass>(
+				uiObjectSubclass);
 
 		for (final ModelObject modelObject : iterableModelObjects) {
 			val uiModelObject = modelObject.toUIModelObject();
-			beanContainer.addItem(uiModelObjectSubclass.cast(uiModelObject),
-					uiModelObjectSubclass.cast(uiModelObject));
+			beanContainer.addItem(uiObjectSubclass.cast(uiModelObject),
+					uiObjectSubclass.cast(uiModelObject));
 		}
 
 		return beanContainer;
 	}
 
 	/**
-	 * Returns the {@link UIModelObject} fitting to the item selected in a
+	 * Returns the {@link UIObject} fitting to the item selected in a
 	 * {@link Table}
 	 * 
 	 * @param table
-	 * @param beanItemClass
+	 * @param uiObjectSubclass
 	 * @param objectId
 	 * @return
 	 */
-	protected <BeanItemClass extends UIModelObject> BeanItemClass getUIModelObjectFromTableByObjectId(
-			final Table table, final Class<BeanItemClass> beanItemClass,
+	protected <UIObjectSubclass extends UIObject> UIObjectSubclass getUIModelObjectFromTableByObjectId(
+			final Table table, final Class<UIObjectSubclass> uiObjectSubclass,
 			final Object objectId) {
 
 		@SuppressWarnings("unchecked")
-		final BeanItemClass beanItem = ((BeanItem<BeanItemClass>) table
+		final UIObjectSubclass beanItem = ((BeanItem<UIObjectSubclass>) table
 				.getItem(objectId)).getBean();
 
 		return beanItem;
 	}
 
+	/**
+	 * Returns the {@link Property} as String fitting to the given
+	 * {@link UIObject} subclass
+	 * 
+	 * @param beanItem
+	 * @param type
+	 * @return
+	 */
 	protected Property<String> getStringItemProperty(
-			final BeanItem<? extends UIModelObject> beanItem, final String type) {
+			final BeanItem<? extends UIObject> beanItem, final String type) {
 
 		@SuppressWarnings("unchecked")
 		final Property<String> itemProperty = beanItem.getItemProperty(type);
@@ -353,15 +361,15 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	 * {@link Table}
 	 * 
 	 * @param table
-	 * @param beanItemClass
+	 * @param uiObjectSubclass
 	 * @param objectId
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	protected <BeanItemClass extends UIModelObject> BeanItem<BeanItemClass> getBeanItemFromTableByObjectId(
-			final Table table, final Class<BeanItemClass> beanItemClass,
+	protected <UIObjectSubclass extends UIObject> BeanItem<UIObjectSubclass> getBeanItemFromTableByObjectId(
+			final Table table, final Class<UIObjectSubclass> uiObjectSubclass,
 			final Object objectId) {
-		return (BeanItem<BeanItemClass>) table.getItem(objectId);
+		return (BeanItem<UIObjectSubclass>) table.getItem(objectId);
 	}
 
 	/**

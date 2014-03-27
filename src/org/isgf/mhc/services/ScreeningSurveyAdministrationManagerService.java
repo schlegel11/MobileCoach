@@ -15,6 +15,7 @@ import org.isgf.mhc.model.server.Feedback;
 import org.isgf.mhc.model.server.FeedbackSlide;
 import org.isgf.mhc.model.server.ScreeningSurvey;
 import org.isgf.mhc.model.server.ScreeningSurveySlide;
+import org.isgf.mhc.model.server.ScreeningSurveySlideRule;
 import org.isgf.mhc.model.server.types.ScreeningSurveySlideQuestionTypes;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
@@ -290,6 +291,15 @@ public class ScreeningSurveyAdministrationManagerService {
 				Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY,
 				Queries.SCREENING_SURVEY_SLIDE__SORT_BY_ORDER_ASC,
 				screeningSurveyId);
+	}
+
+	public Iterable<ScreeningSurveySlideRule> getAllScreeningSurveySlidesRulesOfScreeningSurveySlide(
+			final ObjectId screeningSurveySlideId) {
+		return databaseManagerService.findSortedModelObjects(
+				ScreeningSurveySlideRule.class,
+				Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE,
+				Queries.SCREENING_SURVEY_SLIDE_RULE__SORT_BY_ORDER_ASC,
+				screeningSurveySlideId);
 	}
 
 	public Iterable<ScreeningSurveySlide> getAllFeedbackSlidesOfFeedback(
