@@ -125,6 +125,27 @@ public class VariablesManagerService {
 				}
 			}
 		}
+
+		return variables;
+	}
+
+	public Set<String> getAllScreeningSurveyVariableNames(
+			final ObjectId screeningSurveyId) {
+		val variables = new HashSet<String>();
+
+		val screeningSurveySlideModelObjects = databaseManagerService
+				.findModelObjects(ScreeningSurveySlide.class,
+						Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY,
+						screeningSurveyId);
+
+		for (val screeningSurveySlideModelObject : screeningSurveySlideModelObjects) {
+			if (screeningSurveySlideModelObject
+					.getStoreValueToVariableWithName() != null) {
+				variables.add(screeningSurveySlideModelObject
+						.getStoreValueToVariableWithName());
+			}
+		}
+
 		return variables;
 	}
 
@@ -151,6 +172,7 @@ public class VariablesManagerService {
 				}
 			}
 		}
+
 		return variables;
 	}
 
@@ -182,6 +204,7 @@ public class VariablesManagerService {
 				}
 			}
 		}
+
 		return variables;
 	}
 }

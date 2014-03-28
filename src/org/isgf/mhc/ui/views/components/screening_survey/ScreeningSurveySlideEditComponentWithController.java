@@ -6,12 +6,17 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
+import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.model.ModelObject;
+import org.isgf.mhc.model.server.Feedback;
 import org.isgf.mhc.model.server.ScreeningSurveySlide;
 import org.isgf.mhc.model.server.types.ScreeningSurveySlideQuestionTypes;
 import org.isgf.mhc.model.ui.UIAnswer;
+import org.isgf.mhc.model.ui.UIFeedback;
 import org.isgf.mhc.model.ui.UIModelObject;
 import org.isgf.mhc.model.ui.UIScreeningSurveySlideRule;
+import org.isgf.mhc.ui.views.components.basics.PlaceholderStringEditComponent;
+import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -140,15 +145,15 @@ public class ScreeningSurveySlideEditComponentWithController extends
 
 			@Override
 			public void valueChange(final ValueChangeEvent event) {
-				final String screeningSurveySlideQuestionType = (String) event
+				val screeningSurveySlideQuestionType = (ScreeningSurveySlideQuestionTypes) event
 						.getProperty().getValue();
 
-				// TODO adjust
-				// log.debug("Adjust template path to {}",
-				// screeningSurveySlideQuestionType);
-				// getScreeningSurveyAdministrationManagerService()
-				// .screeningSurveyChangeTemplatePath(
-				// screeningSurveySlide, screeningSurveySlideQuestionType);
+				log.debug("Adjust question type to {}",
+						screeningSurveySlideQuestionType);
+				getScreeningSurveyAdministrationManagerService()
+						.screeningSurveySlideChangeQuestionType(
+								screeningSurveySlide,
+								screeningSurveySlideQuestionType);
 
 				adjust();
 
@@ -178,6 +183,57 @@ public class ScreeningSurveySlideEditComponentWithController extends
 					}
 				});
 
+		val feedbacks = getScreeningSurveyAdministrationManagerService()
+				.getAllFeedbacksOfScreeningSurvey(
+						screeningSurveySlide.getScreeningSurvey());
+
+		val feedbackComboBox = getFeedbackComboBox();
+		for (val feedback : feedbacks) {
+			val uiFeedback = feedback.toUIModelObject();
+			feedbackComboBox.addItem(uiFeedback);
+			if (screeningSurveySlide.getHandsOverToFeedback() != null
+					&& screeningSurveySlide.getHandsOverToFeedback().equals(
+							feedback.getId())) {
+				feedbackComboBox.select(uiFeedback);
+			}
+		}
+		feedbackComboBox.addValueChangeListener(new ValueChangeListener() {
+
+			@Override
+			public void valueChange(final ValueChangeEvent event) {
+				val selectedUIFeedback = (UIFeedback) event.getProperty()
+						.getValue();
+
+				ObjectId feedbackToHandOver = null;
+				if (selectedUIFeedback != null) {
+					feedbackToHandOver = selectedUIFeedback
+							.getRelatedModelObject(Feedback.class).getId();
+				}
+				log.debug("Adjust hand over feedback to {}", feedbackToHandOver);
+				getScreeningSurveyAdministrationManagerService()
+						.screeningSurveySlideChangeHandsOverToFeedback(
+								screeningSurveySlide, feedbackToHandOver);
+
+				adjust();
+			}
+		});
+
+		// Handle checkbox
+		getIsLastSlideCheckbox().addValueChangeListener(
+				new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						val newValue = (Boolean) event.getProperty().getValue();
+
+						getScreeningSurveyAdministrationManagerService()
+								.screeningSurveySlideChangeStopScreeningSurvey(
+										screeningSurveySlide, newValue);
+
+						adjust();
+					}
+				});
+
 		// handle buttons
 		val buttonClickListener = new ButtonClickListener();
 		getNewAnswerButton().addClickListener(buttonClickListener);
@@ -193,11 +249,14 @@ public class ScreeningSurveySlideEditComponentWithController extends
 		getMoveDownRuleButton().addClickListener(buttonClickListener);
 		getDeleteRuleButton().addClickListener(buttonClickListener);
 
-		// TODO variable field buttons
-		// getSwitchScreeningSurveyButton().addClickListener(buttonClickListener);
-		//
-		// getPasswordTextFieldComponent().getButton().addClickListener(
-		// buttonClickListener);
+		getTitleWithPlaceholdersTextFieldComponent().getButton()
+				.addClickListener(buttonClickListener);
+		getOptionalLayoutAttributeTextFieldComponent().getButton()
+				.addClickListener(buttonClickListener);
+		getQuestionTextWithPlaceholdersTextField().getButton()
+				.addClickListener(buttonClickListener);
+		getStoreVariableTextFieldComponent().getButton().addClickListener(
+				buttonClickListener);
 
 		adjust();
 	}
@@ -218,44 +277,183 @@ public class ScreeningSurveySlideEditComponentWithController extends
 		// Adjust variable text fields
 		getTitleWithPlaceholdersTextFieldComponent().setValue(
 				screeningSurveySlide.getTitleWithPlaceholders());
-		getOptionalLayoutAttributesTextFieldComponent().setValue(
+		getOptionalLayoutAttributeTextFieldComponent().setValue(
 				screeningSurveySlide.getOptionalLayoutAttribute());
 		getQuestionTextWithPlaceholdersTextField().setValue(
 				screeningSurveySlide.getQuestionWithPlaceholders());
 		getStoreVariableTextFieldComponent().setValue(
 				screeningSurveySlide.getStoreValueToVariableWithName());
+
+		// Adjust checkbox
+		getIsLastSlideCheckbox().setValue(screeningSurveySlide.isLastSlide());
+
+		if (getIsLastSlideCheckbox().getValue() == true) {
+			getFeedbackComboBox().setEnabled(true);
+		} else {
+			getFeedbackComboBox().setEnabled(false);
+			getFeedbackComboBox().select(null);
+		}
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
 		@Override
 		public void buttonClick(final ClickEvent event) {
-			// TODO button actions
-			// if (event.getButton() == getNewButton()) {
-			// createSlide();
-			// } else if (event.getButton() == getEditButton()) {
-			// editSlide();
-			// } else if (event.getButton() == getMoveUpButton()) {
-			// moveSlide(true);
-			// } else if (event.getButton() == getMoveDownButton()) {
-			// moveSlide(false);
-			// } else if (event.getButton() == getDeleteButton()) {
-			// deleteSlide();
-			// } else if (event.getButton() == getNewFeedbackButton()) {
-			// createFeedback();
-			// } else if (event.getButton() == getRenameFeedbackButton()) {
-			// renameFeedback();
-			// } else if (event.getButton() == getEditFeedbackButton()) {
-			// editFeedback();
-			// } else if (event.getButton() == getDeleteFeedbackButton()) {
-			// deleteFeedback();
-			// } else if (event.getButton() == getSwitchScreeningSurveyButton())
-			// {
-			// switchActiveOrInactive();
-			// } else if (event.getButton() == getPasswordTextFieldComponent()
-			// .getButton()) {
-			// editPassword();
-			// }
+			if (event.getButton() == getNewAnswerButton()) {
+				// createAnswer();
+			} else if (event.getButton() == getEditAnswerAnswerButton()) {
+				// editAnswerAnswer();
+			} else if (event.getButton() == getEditAnswerValueButton()) {
+				// editAnswerValue();
+			} else if (event.getButton() == getMoveUpAnswerButton()) {
+				// moveAnswer(true);
+			} else if (event.getButton() == getMoveDownAnswerButton()) {
+				// moveSlide(false);
+			} else if (event.getButton() == getDeleteAnswerButton()) {
+				// deleteAnswer();
+			} else if (event.getButton() == getNewRuleButton()) {
+				// createRule();
+			} else if (event.getButton() == getEditRuleButton()) {
+				// editRule();
+			} else if (event.getButton() == getMoveUpRuleButton()) {
+				// moveRule(true);
+			} else if (event.getButton() == getMoveDownRuleButton()) {
+				// moveRule(false);
+			} else if (event.getButton() == getDeleteRuleButton()) {
+				// deleteRule();
+			} else if (event.getButton() == getTitleWithPlaceholdersTextFieldComponent()
+					.getButton()) {
+				changeTitleWithPlaceholders();
+			} else if (event.getButton() == getOptionalLayoutAttributeTextFieldComponent()
+					.getButton()) {
+				changeOptionalLayoutAttribute();
+			} else if (event.getButton() == getQuestionTextWithPlaceholdersTextField()
+					.getButton()) {
+				changeQuestionWithPlaceholders();
+			} else if (event.getButton() == getStoreVariableTextFieldComponent()
+					.getButton()) {
+				changeStoreResultVariable();
+			}
 		}
+	}
+
+	public void changeTitleWithPlaceholders() {
+		log.debug("Edit title with placeholder");
+		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
+				.getAllPossibleScreenigSurveyVariables(
+						screeningSurveySlide.getScreeningSurvey());
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_TITLE_WITH_PLACEHOLDERS,
+				screeningSurveySlide.getTitleWithPlaceholders(),
+				allPossibleVariables, new PlaceholderStringEditComponent(),
+				new ExtendableButtonClickListener() {
+
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Change title with placeholders
+							getScreeningSurveyAdministrationManagerService()
+									.screeningSurveySlideChangeTitle(
+											screeningSurveySlide,
+											getStringValue(),
+											allPossibleVariables);
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						adjust();
+
+						closeWindow();
+					}
+				}, null);
+	}
+
+	public void changeOptionalLayoutAttribute() {
+		log.debug("Edit optional layout attribute");
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_OPTIONAL_LAYOUT_ATTRIBUTE,
+				screeningSurveySlide.getOptionalLayoutAttribute(), null,
+				new ShortStringEditComponent(),
+				new ExtendableButtonClickListener() {
+
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Change optional layout attribute
+							getScreeningSurveyAdministrationManagerService()
+									.screeningSurveySlideChangeOptionalLayoutAttribute(
+											screeningSurveySlide,
+											getStringValue());
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						adjust();
+
+						closeWindow();
+					}
+				}, null);
+	}
+
+	public void changeQuestionWithPlaceholders() {
+		log.debug("Edit question with placeholder");
+		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
+				.getAllPossibleScreenigSurveyVariables(
+						screeningSurveySlide.getScreeningSurvey());
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_QUESTION_TEXT_WITH_PLACEHOLDERS,
+				screeningSurveySlide.getQuestionWithPlaceholders(),
+				allPossibleVariables, new PlaceholderStringEditComponent(),
+				new ExtendableButtonClickListener() {
+
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Change question with placeholders
+							getScreeningSurveyAdministrationManagerService()
+									.screeningSurveySlideChangeQuestion(
+											screeningSurveySlide,
+											getStringValue(),
+											allPossibleVariables);
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						adjust();
+
+						closeWindow();
+					}
+				}, null);
+	}
+
+	public void changeStoreResultVariable() {
+		log.debug("Edit store result to variable");
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_VARIABLE,
+				screeningSurveySlide.getStoreValueToVariableWithName(), null,
+				new ShortStringEditComponent(),
+				new ExtendableButtonClickListener() {
+
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Change store result to variable
+							getScreeningSurveyAdministrationManagerService()
+									.screeningSurveySlideChangeStoreResultToVariable(
+											screeningSurveySlide,
+											getStringValue());
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						adjust();
+
+						closeWindow();
+					}
+				}, null);
 	}
 
 	// public void editPassword() {
@@ -560,4 +758,5 @@ public class ScreeningSurveySlideEditComponentWithController extends
 		beanContainer.addItem(modelObject.getId(),
 				(SubClassOfUIModelObject) modelObject.toUIModelObject());
 	}
+
 }

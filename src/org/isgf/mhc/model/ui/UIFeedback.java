@@ -29,4 +29,9 @@ public class UIFeedback extends UIModelObject {
 	public static String getSortColumn() {
 		return FEEDBACK_NAME;
 	}
+
+	@Override
+	public String toString() {
+		return feedbackName;
+	}
 }

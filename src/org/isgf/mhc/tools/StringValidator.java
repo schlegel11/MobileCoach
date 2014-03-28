@@ -75,7 +75,8 @@ public class StringValidator {
 	 */
 	public static boolean isValidVariableText(String textWithPlaceholders,
 			final List<String> allPossibleMessageVariables) {
-		log.debug("Testing if {} is a valid variable text");
+		log.debug("Testing if {} is a valid variable text",
+				textWithPlaceholders);
 
 		for (final val variable : allPossibleMessageVariables) {
 			textWithPlaceholders = textWithPlaceholders.replace(variable, "");

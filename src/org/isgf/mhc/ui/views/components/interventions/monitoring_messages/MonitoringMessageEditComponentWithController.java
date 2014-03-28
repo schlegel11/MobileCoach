@@ -120,7 +120,7 @@ public class MonitoringMessageEditComponentWithController extends
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						try {
-							// Change name
+							// Change store result to variable
 							getInterventionAdministrationManagerService()
 									.monitoringMessageSetStoreResultToVariable(
 											monitoringMessage, getStringValue());
