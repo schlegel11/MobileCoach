@@ -18,21 +18,42 @@ public class RuleEvaluationResult {
 	 */
 	@Getter
 	@Setter
-	private boolean	evaluatedSuccessful		= false;
+	private boolean	evaluatedSuccessful					= false;
 
 	/**
-	 * The result of the rule evaluation
+	 * The information if the rule evaluation has been performed calculated or
+	 * text based
 	 */
 	@Getter
 	@Setter
-	private double	ruleValue				= 0;
+	private boolean	isCalculatedRule					= false;
 
 	/**
-	 * The result of the rule comparison term evaluation
+	 * The result of the rule evaluation of calculated rules
 	 */
 	@Getter
 	@Setter
-	private double	ruleComparisonTermValue	= 0;
+	private double	calculatedRuleValue					= 0;
+
+	/**
+	 * The result of the rule comparison term evaluation of calculated rules
+	 */
+	@Getter
+	@Setter
+	private double	calculatedRuleComparisonTermValue	= 0;
+	/**
+	 * The result of the rule evaluation of text rules
+	 */
+	@Getter
+	@Setter
+	private String	textRuleValue						= "";
+
+	/**
+	 * The result of the rule comparison term evaluation of text rules
+	 */
+	@Getter
+	@Setter
+	private String	textRuleComparisonTermValue			= "";
 
 	/**
 	 * The result if the equation sign is correct regarding the evaluated values
@@ -40,7 +61,7 @@ public class RuleEvaluationResult {
 	 */
 	@Getter
 	@Setter
-	private boolean	ruleMatchesEquationSign	= false;
+	private boolean	ruleMatchesEquationSign				= false;
 
 	/**
 	 * The error message if an error occurred or <code>null</code> if no error
@@ -48,5 +69,5 @@ public class RuleEvaluationResult {
 	 */
 	@Getter
 	@Setter
-	private String	errorMessage			= null;
+	private String	errorMessage						= null;
 }

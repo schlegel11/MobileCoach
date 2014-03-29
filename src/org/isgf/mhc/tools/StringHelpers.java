@@ -23,8 +23,10 @@ public class StringHelpers {
 
 		if (abstractRule.getRuleWithPlaceholders() == null
 				|| abstractRule.getRuleWithPlaceholders().equals("")) {
-			if (abstractRule.getRuleEquationSign() != EquationSignTypes.IS_ALWAYS_TRUE
-					&& abstractRule.getRuleEquationSign() != EquationSignTypes.IS_ALWAYS_FALSE) {
+			if (abstractRule.getRuleEquationSign() != EquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE
+					&& abstractRule.getRuleEquationSign() != EquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_FALSE
+					&& abstractRule.getRuleEquationSign() != EquationSignTypes.CREATE_TEXT_BUT_RESULT_IS_ALWAYS_TRUE
+					&& abstractRule.getRuleEquationSign() != EquationSignTypes.CREATE_TEXT_BUT_RESULT_IS_ALWAYS_FALSE) {
 				name.append(ImplementationContants.DEFAULT_OBJECT_NAME + " ");
 			}
 		} else {
@@ -36,8 +38,10 @@ public class StringHelpers {
 		if (abstractRule.getRuleComparisonTermWithPlaceholders() == null
 				|| abstractRule.getRuleComparisonTermWithPlaceholders().equals(
 						"")) {
-			if (abstractRule.getRuleEquationSign() != EquationSignTypes.IS_ALWAYS_TRUE
-					&& abstractRule.getRuleEquationSign() != EquationSignTypes.IS_ALWAYS_FALSE) {
+			if (abstractRule.getRuleEquationSign() != EquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE
+					&& abstractRule.getRuleEquationSign() != EquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_FALSE
+					&& abstractRule.getRuleEquationSign() != EquationSignTypes.CREATE_TEXT_BUT_RESULT_IS_ALWAYS_TRUE
+					&& abstractRule.getRuleEquationSign() != EquationSignTypes.CREATE_TEXT_BUT_RESULT_IS_ALWAYS_FALSE) {
 				name.append(" " + ImplementationContants.DEFAULT_OBJECT_NAME);
 			}
 		} else {
@@ -47,5 +51,4 @@ public class StringHelpers {
 
 		return name.toString();
 	}
-
 }

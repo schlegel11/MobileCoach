@@ -12,7 +12,7 @@ import org.isgf.mhc.tools.model.RuleEvaluationResult;
 import com.fathzer.soft.javaluator.DoubleEvaluator;
 
 /**
- * Evaluates rules
+ * Evaluates calculated and text based rules
  * 
  * @author Andreas Filler
  */
@@ -35,60 +35,128 @@ public class RuleEvaluator {
 		val ruleEvaluationResult = new RuleEvaluationResult();
 
 		try {
-			// Evaluate rule
-			final double ruleResult;
-			try {
-				ruleResult = evaluateRuleTerm(rule.getRuleWithPlaceholders(),
-						variablesWithValues);
-				ruleEvaluationResult.setRuleValue(ruleResult);
-			} catch (final Exception e) {
-				throw new Exception("Could not parse rule: " + e.getMessage());
-			}
+			if (rule.getRuleEquationSign().isCalculatedEquationSignType()) {
+				log.debug("It's a calculated rule");
+				ruleEvaluationResult.setCalculatedRule(true);
 
-			// Evaluate rule comparison term
-			final double ruleComparisonTermResult;
-			try {
-				ruleComparisonTermResult = evaluateRuleTerm(
-						rule.getRuleComparisonTermWithPlaceholders(),
-						variablesWithValues);
-				ruleEvaluationResult
-						.setRuleComparisonTermValue(ruleComparisonTermResult);
-			} catch (final Exception e) {
-				throw new Exception("Could not parse rule comparision term: "
-						+ e.getMessage());
+				// Evaluate rule
+				final double ruleResult;
+				try {
+					ruleResult = evaluateCalculatedRuleTerm(
+							rule.getRuleWithPlaceholders(), variablesWithValues);
+					ruleEvaluationResult.setCalculatedRuleValue(ruleResult);
+				} catch (final Exception e) {
+					throw new Exception("Could not parse rule: "
+							+ e.getMessage());
+				}
+
+				// Evaluate rule comparison term
+				final double ruleComparisonTermResult;
+				try {
+					ruleComparisonTermResult = evaluateCalculatedRuleTerm(
+							rule.getRuleComparisonTermWithPlaceholders(),
+							variablesWithValues);
+					ruleEvaluationResult
+							.setCalculatedRuleComparisonTermValue(ruleComparisonTermResult);
+				} catch (final Exception e) {
+					throw new Exception(
+							"Could not parse rule comparision term: "
+									+ e.getMessage());
+				}
+			} else {
+				log.debug("It's a text based rule");
+				ruleEvaluationResult.setCalculatedRule(false);
+
+				// Evaluate rule
+				final String ruleResult;
+				try {
+					ruleResult = evaluateTextRuleTerm(
+							rule.getRuleWithPlaceholders(), variablesWithValues);
+					ruleEvaluationResult.setTextRuleValue(ruleResult);
+				} catch (final Exception e) {
+					throw new Exception("Could not parse rule: "
+							+ e.getMessage());
+				}
+
+				// Evaluate rule comparison term
+				final String ruleComparisonTermResult;
+				try {
+					ruleComparisonTermResult = evaluateTextRuleTerm(
+							rule.getRuleComparisonTermWithPlaceholders(),
+							variablesWithValues);
+					ruleEvaluationResult
+							.setTextRuleComparisonTermValue(ruleComparisonTermResult);
+				} catch (final Exception e) {
+					throw new Exception(
+							"Could not parse rule comparision term: "
+									+ e.getMessage());
+				}
 			}
 
 			// Evaluate equation sign
 			ruleEvaluationResult.setRuleMatchesEquationSign(false);
 			switch (rule.getRuleEquationSign()) {
-				case IS_ALWAYS_TRUE:
+				case CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE:
 					ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					break;
-				case IS_ALWAYS_FALSE:
+				case CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_FALSE:
 					ruleEvaluationResult.setRuleMatchesEquationSign(false);
 					break;
-				case IS_SMALLER_THAN:
-					if (ruleResult < ruleComparisonTermResult) {
+				case CALCULATED_VALUE_IS_SMALLER_THAN:
+					if (ruleEvaluationResult.getCalculatedRuleValue() < ruleEvaluationResult
+							.getCalculatedRuleComparisonTermValue()) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
-				case IS_SMALLER_OR_EQUAL_THAN:
-					if (ruleResult <= ruleComparisonTermResult) {
+				case CALCULATED_VALUE_IS_SMALLER_OR_EQUAL_THAN:
+					if (ruleEvaluationResult.getCalculatedRuleValue() <= ruleEvaluationResult
+							.getCalculatedRuleComparisonTermValue()) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
-				case EQUALS:
-					if (ruleResult == ruleComparisonTermResult) {
+				case CALCULATED_VALUE_EQUALS:
+					if (ruleEvaluationResult.getCalculatedRuleValue() == ruleEvaluationResult
+							.getCalculatedRuleComparisonTermValue()) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
-				case IS_BIGGER_OR_EQUAL_THAN:
-					if (ruleResult >= ruleComparisonTermResult) {
+				case CALCULATED_VALUE_IS_BIGGER_OR_EQUAL_THAN:
+					if (ruleEvaluationResult.getCalculatedRuleValue() >= ruleEvaluationResult
+							.getCalculatedRuleComparisonTermValue()) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
-				case IS_BIGGER_THAN:
-					if (ruleResult > ruleComparisonTermResult) {
+				case CALCULATED_VALUE_IS_BIGGER_THAN:
+					if (ruleEvaluationResult.getCalculatedRuleValue() > ruleEvaluationResult
+							.getCalculatedRuleComparisonTermValue()) {
+						ruleEvaluationResult.setRuleMatchesEquationSign(true);
+					}
+					break;
+				case CREATE_TEXT_BUT_RESULT_IS_ALWAYS_FALSE:
+					ruleEvaluationResult.setRuleMatchesEquationSign(true);
+					break;
+				case CREATE_TEXT_BUT_RESULT_IS_ALWAYS_TRUE:
+					ruleEvaluationResult.setRuleMatchesEquationSign(false);
+					break;
+				case TEXT_VALUE_EQUALS:
+					if (ruleEvaluationResult
+							.getTextRuleValue()
+							.trim()
+							.toLowerCase()
+							.equals(ruleEvaluationResult
+									.getTextRuleComparisonTermValue().trim()
+									.toLowerCase())) {
+						ruleEvaluationResult.setRuleMatchesEquationSign(true);
+					}
+					break;
+				case TEXT_VALUE_NOT_EQUALS:
+					if (!ruleEvaluationResult
+							.getTextRuleValue()
+							.trim()
+							.toLowerCase()
+							.equals(ruleEvaluationResult
+									.getTextRuleComparisonTermValue().trim()
+									.toLowerCase())) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
@@ -106,7 +174,7 @@ public class RuleEvaluator {
 	}
 
 	/**
-	 * Evaluates a rule String
+	 * Evaluates a calculatable rule {@link String}
 	 * 
 	 * @param ruleWithPlaceholders
 	 *            String to evaluate
@@ -115,7 +183,8 @@ public class RuleEvaluator {
 	 *            before evaluation
 	 * @return Value of the rule evaluation
 	 */
-	private static double evaluateRuleTerm(final String ruleWithPlaceholders,
+	private static double evaluateCalculatedRuleTerm(
+			final String ruleWithPlaceholders,
 			final List<AbstractVariableWithValue> variablesWithValues)
 			throws Exception {
 		String rule = ruleWithPlaceholders;
@@ -129,14 +198,49 @@ public class RuleEvaluator {
 		log.debug("Preparing rule {}", rule);
 
 		// Replace variables with their according values
-		rule = VariableStringReplacer.findVariablesAndReplaceWithValues(rule,
-				variablesWithValues, "(0)");
+		rule = VariableStringReplacer
+				.findVariablesAndReplaceWithCalculatableValues(rule,
+						variablesWithValues, "(0)");
 
 		// Evaluate rule
 		log.debug("Evaluating rule {}", rule);
 		val doubleEvaluator = new DoubleEvaluator();
 
 		val result = doubleEvaluator.evaluate(rule);
+		log.debug("Result of rule {} is {}", rule, result);
+
+		return result;
+	}
+
+	/**
+	 * Evaluates a text rule {@link String}
+	 * 
+	 * @param ruleWithPlaceholders
+	 *            String to evaluate
+	 * @param variablesWithValues
+	 *            List of {@link AbstractVariableWithValue}s to replace in rule
+	 *            before evaluation
+	 * @return Value of the rule evaluation
+	 */
+	private static String evaluateTextRuleTerm(
+			final String ruleWithPlaceholders,
+			final List<AbstractVariableWithValue> variablesWithValues)
+			throws Exception {
+		final String rule = ruleWithPlaceholders;
+
+		// Prevent null pointer exceptions
+		if (rule == null) {
+			log.debug("It's an empty rule");
+			return "";
+		}
+
+		log.debug("Preparing rule {}", rule);
+
+		// Replace variables with their according values
+		val result = VariableStringReplacer
+				.findVariablesAndReplaceWithTextValues(rule,
+						variablesWithValues, "");
+
 		log.debug("Result of rule {} is {}", rule, result);
 
 		return result;

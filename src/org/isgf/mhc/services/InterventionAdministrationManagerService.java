@@ -520,7 +520,7 @@ public class InterventionAdministrationManagerService {
 			final ObjectId parentMonitoringRuleId) {
 		val monitoringRule = new MonitoringRule(
 				"",
-				EquationSignTypes.EQUALS,
+				EquationSignTypes.CALCULATED_VALUE_EQUALS,
 				"",
 				parentMonitoringRuleId,
 				0,
@@ -689,8 +689,9 @@ public class InterventionAdministrationManagerService {
 			final ObjectId parentMonitoringReplyRuleId,
 			final boolean isGotAnswerRule) {
 		val monitoringReplyRule = new MonitoringReplyRule("",
-				EquationSignTypes.EQUALS, "", parentMonitoringReplyRuleId, 0,
-				null, false, null, isGotAnswerRule ? monitoringRuleId : null,
+				EquationSignTypes.CALCULATED_VALUE_EQUALS, "",
+				parentMonitoringReplyRuleId, 0, null, false, null,
+				isGotAnswerRule ? monitoringRuleId : null,
 				isGotAnswerRule ? null : monitoringRuleId);
 
 		val highestOrderRule = databaseManagerService

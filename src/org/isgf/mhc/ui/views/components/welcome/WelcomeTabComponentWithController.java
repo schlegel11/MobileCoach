@@ -21,7 +21,7 @@ public class WelcomeTabComponentWithController extends WelcomeTabComponent {
 		// TODO DEBUGGING
 		final ScreeningSurvey screeningSurvey = getScreeningSurveyAdministrationManagerService()
 				.getAllScreeningSurveysOfIntervention(
-						new ObjectId("5313c24ec2e6b13fbb905f43")).iterator()
+						new ObjectId("5336bc5dc2e6abfde2d01264")).iterator()
 				.next();
 
 		final ScreeningSurveySlide screeningSurveySlide = getScreeningSurveyAdministrationManagerService()
