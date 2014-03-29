@@ -15,6 +15,7 @@ import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.server.Feedback;
 import org.isgf.mhc.model.server.FeedbackSlide;
+import org.isgf.mhc.model.server.FeedbackSlideRule;
 import org.isgf.mhc.model.server.ScreeningSurvey;
 import org.isgf.mhc.model.server.ScreeningSurveySlide;
 import org.isgf.mhc.model.server.ScreeningSurveySlideRule;
@@ -353,7 +354,7 @@ public class ScreeningSurveyAdministrationManagerService {
 	public ScreeningSurveySlideRule screeningSurveySlideRuleMove(
 			final ScreeningSurveySlideRule screeningSurveySlideRule,
 			final boolean moveUp) {
-		// Find screening survey slide to swap with
+		// Find screening survey slide rule to swap with
 		val screeningSurveySlideRuleToSwapWith = databaseManagerService
 				.findOneSortedModelObject(
 						ScreeningSurveySlideRule.class,
@@ -407,7 +408,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		val feedbackSlide = new FeedbackSlide(feedbackId, 0, "", "", null, "");
 
 		val highestOrderSlide = databaseManagerService
-				.findOneSortedModelObject(ScreeningSurveySlide.class,
+				.findOneSortedModelObject(FeedbackSlide.class,
 						Queries.FEEDBACK_SLIDE__BY_FEEDBACK,
 						Queries.FEEDBACK_SLIDE__SORT_BY_ORDER_DESC, feedbackId);
 
@@ -420,9 +421,56 @@ public class ScreeningSurveyAdministrationManagerService {
 		return feedbackSlide;
 	}
 
+	public void feedbackSlideChangeTitle(final FeedbackSlide feedbackSlide,
+			final String textWithPlaceholders,
+			final List<String> allPossibleFeedbackVariables)
+			throws NotificationMessageException {
+		if (textWithPlaceholders == null) {
+			feedbackSlide.setTitleWithPlaceholders("");
+		} else {
+			if (!StringValidator.isValidVariableText(textWithPlaceholders,
+					allPossibleFeedbackVariables)) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
+			}
+
+			feedbackSlide.setTitleWithPlaceholders(textWithPlaceholders);
+		}
+
+		databaseManagerService.saveModelObject(feedbackSlide);
+	}
+
+	public void feedbackSlideChangeTextWithPlaceholders(
+			final FeedbackSlide feedbackSlide,
+			final String textWithPlaceholders,
+			final List<String> allPossibleFeedbackVariables)
+			throws NotificationMessageException {
+		if (textWithPlaceholders == null) {
+			feedbackSlide.setTitleWithPlaceholders("");
+		} else {
+			if (!StringValidator.isValidVariableText(textWithPlaceholders,
+					allPossibleFeedbackVariables)) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
+			}
+
+			feedbackSlide.setTextWithPlaceholders(textWithPlaceholders);
+		}
+
+		databaseManagerService.saveModelObject(feedbackSlide);
+	}
+
+	public void feedbackSlideChangeOptionalLayoutAttribute(
+			final FeedbackSlide feedbackSlide,
+			final String optionalLayoutAttributes) {
+		feedbackSlide.setOptionalLayoutAttribute(optionalLayoutAttributes);
+
+		databaseManagerService.saveModelObject(feedbackSlide);
+	}
+
 	public FeedbackSlide feedbackSlideMove(final FeedbackSlide feedbackSlide,
 			final boolean moveUp) {
-		// Find monitoring message to swap with
+		// Find feedback slide to swap with
 		val feedbackSlideToSwapWith = databaseManagerService
 				.findOneSortedModelObject(
 						FeedbackSlide.class,
@@ -447,8 +495,78 @@ public class ScreeningSurveyAdministrationManagerService {
 		return feedbackSlideToSwapWith;
 	}
 
+	public void feedbackSlideSetLinkedMediaObject(
+			final ScreeningSurveySlide screeningSurveySlide,
+			final ObjectId linkedMediaObjectId) {
+		screeningSurveySlide.setLinkedMediaObject(linkedMediaObjectId);
+
+		databaseManagerService.saveModelObject(screeningSurveySlide);
+	}
+
 	public void feedbackSlideDelete(final FeedbackSlide feedbackSlide) {
 		databaseManagerService.deleteModelObject(feedbackSlide);
+	}
+
+	// Feedback Slide Rule
+	public FeedbackSlideRule feedbackSlideRuleCreate(
+			final ObjectId feedbackSlideId) {
+		val feedbackSlideRule = new FeedbackSlideRule(feedbackSlideId, 0, "",
+				EquationSignTypes.CALCULATED_VALUE_EQUALS, "");
+
+		val highestOrderSlideRule = databaseManagerService
+				.findOneSortedModelObject(FeedbackSlideRule.class,
+						Queries.FEEDBACK_SLIDE_RULE__BY_FEEDBACK_SLIDE,
+						Queries.FEEDBACK_SLIDE_RULE__SORT_BY_ORDER_DESC,
+						feedbackSlideId);
+
+		if (highestOrderSlideRule != null) {
+			feedbackSlideRule.setOrder(highestOrderSlideRule.getOrder() + 1);
+		}
+
+		databaseManagerService.saveModelObject(feedbackSlideRule);
+
+		return feedbackSlideRule;
+	}
+
+	public FeedbackSlideRule feedbackSlideRuleMove(
+			final FeedbackSlideRule feedbackSlideRule, final boolean moveUp) {
+		// Find feedback slide rule to swap with
+		val feedbackSlideRuleToSwapWith = databaseManagerService
+				.findOneSortedModelObject(
+						FeedbackSlideRule.class,
+						moveUp ? Queries.FEEDBACK_SLIDE_RULE__BY_FEEDBACK_SLIDE_AND_ORDER_LOWER
+								: Queries.FEEDBACK_SLIDE_RULE__BY_FEEDBACK_SLIDE_AND_ORDER_HIGHER,
+						moveUp ? Queries.FEEDBACK_SLIDE_RULE__SORT_BY_ORDER_DESC
+								: Queries.FEEDBACK_SLIDE_RULE__SORT_BY_ORDER_ASC,
+						feedbackSlideRule.getBelongingFeedbackSlide(),
+						feedbackSlideRule.getOrder());
+
+		if (feedbackSlideRuleToSwapWith == null) {
+			return null;
+		}
+
+		// Swap order
+		final int order = feedbackSlideRule.getOrder();
+		feedbackSlideRule.setOrder(feedbackSlideRuleToSwapWith.getOrder());
+		feedbackSlideRuleToSwapWith.setOrder(order);
+
+		databaseManagerService.saveModelObject(feedbackSlideRule);
+		databaseManagerService.saveModelObject(feedbackSlideRuleToSwapWith);
+
+		return feedbackSlideRuleToSwapWith;
+	}
+
+	public void feedbackSlideSetLinkedMediaObject(
+			final FeedbackSlide feedbackSlide,
+			final ObjectId linkedMediaObjectId) {
+		feedbackSlide.setLinkedMediaObject(linkedMediaObjectId);
+
+		databaseManagerService.saveModelObject(feedbackSlide);
+	}
+
+	public void feedbackSlideRuleDelete(
+			final FeedbackSlideRule feedbackSlideRule) {
+		databaseManagerService.deleteModelObject(feedbackSlideRule);
 	}
 
 	// Feedback
@@ -475,6 +593,13 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(feedback);
 	}
 
+	public void feedbackChangeTemplatePath(final Feedback feedback,
+			final String newTemplatePath) {
+		feedback.setTemplatePath(newTemplatePath);
+
+		databaseManagerService.saveModelObject(feedback);
+	}
+
 	public void feedbackDelete(final Feedback feedback) {
 		databaseManagerService.deleteModelObject(feedback);
 	}
@@ -497,7 +622,7 @@ public class ScreeningSurveyAdministrationManagerService {
 				screeningSurveyId);
 	}
 
-	public Iterable<ScreeningSurveySlideRule> getAllScreeningSurveySlidesRulesOfScreeningSurveySlide(
+	public Iterable<ScreeningSurveySlideRule> getAllScreeningSurveySlideRulesOfScreeningSurveySlide(
 			final ObjectId screeningSurveySlideId) {
 		return databaseManagerService.findSortedModelObjects(
 				ScreeningSurveySlideRule.class,
@@ -506,19 +631,27 @@ public class ScreeningSurveyAdministrationManagerService {
 				screeningSurveySlideId);
 	}
 
-	public Iterable<ScreeningSurveySlide> getAllFeedbackSlidesOfFeedback(
-			final ObjectId feedbackId) {
-		return databaseManagerService.findSortedModelObjects(
-				ScreeningSurveySlide.class,
-				Queries.FEEDBACK_SLIDE__BY_FEEDBACK,
-				Queries.FEEDBACK_SLIDE__SORT_BY_ORDER_ASC, feedbackId);
-	}
-
 	public Iterable<Feedback> getAllFeedbacksOfScreeningSurvey(
 			final ObjectId screeningSurveyId) {
 		return databaseManagerService.findSortedModelObjects(Feedback.class,
 				Queries.FEEDBACK__BY_SCREENING_SURVEY,
 				Queries.FEEDBACK__SORT_BY_ORDER_ASC, screeningSurveyId);
+	}
+
+	public Iterable<FeedbackSlide> getAllFeedbackSlidesOfFeedback(
+			final ObjectId feedbackId) {
+		return databaseManagerService.findSortedModelObjects(
+				FeedbackSlide.class, Queries.FEEDBACK_SLIDE__BY_FEEDBACK,
+				Queries.FEEDBACK_SLIDE__SORT_BY_ORDER_ASC, feedbackId);
+	}
+
+	public Iterable<FeedbackSlideRule> getAllFeedbackSlideRulesOfFeedbackSlide(
+			final ObjectId feedbackSlideId) {
+		return databaseManagerService
+				.findSortedModelObjects(FeedbackSlideRule.class,
+						Queries.FEEDBACK_SLIDE_RULE__BY_FEEDBACK_SLIDE,
+						Queries.FEEDBACK_SLIDE_RULE__SORT_BY_ORDER_ASC,
+						feedbackSlideId);
 	}
 
 	public String[] getAllTemplatePaths() {

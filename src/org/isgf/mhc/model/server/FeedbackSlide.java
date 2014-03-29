@@ -8,6 +8,8 @@ import lombok.Setter;
 import lombok.val;
 
 import org.bson.types.ObjectId;
+import org.isgf.mhc.conf.AdminMessageStrings;
+import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.ui.UIFeedbackSlide;
@@ -86,7 +88,10 @@ public class FeedbackSlide extends ModelObject {
 	 */
 	@Override
 	public UIModelObject toUIModelObject() {
-		val feedbackSlide = new UIFeedbackSlide(order, titleWithPlaceholders);
+		val feedbackSlide = new UIFeedbackSlide(order,
+				titleWithPlaceholders.equals("") ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+						: titleWithPlaceholders);
 
 		feedbackSlide.setRelatedModelObject(this);
 

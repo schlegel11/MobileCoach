@@ -54,6 +54,7 @@ public class AbstractRuleEditComponentWithController extends
 		ruleEquationSignComboBox.setTextInputAllowed(false);
 		ruleEquationSignComboBox.setNewItemsAllowed(false);
 		ruleEquationSignComboBox.setNullSelectionAllowed(false);
+		ruleEquationSignComboBox.setPageLength(20);
 
 		for (val equationSignType : EquationSignTypes.values()) {
 			ruleEquationSignComboBox.addItem(equationSignType);
@@ -131,11 +132,13 @@ public class AbstractRuleEditComponentWithController extends
 		switch (type) {
 			case MONITORING_RULES:
 				allPossibleVariables = getInterventionAdministrationManagerService()
-						.getAllPossibleMonitoringRuleVariables(rulesRelatedModelObjectId);
+						.getAllPossibleMonitoringRuleVariables(
+								rulesRelatedModelObjectId);
 				break;
 			default:
 				allPossibleVariables = getScreeningSurveyAdministrationManagerService()
-						.getAllPossibleScreenigSurveyVariables(rulesRelatedModelObjectId);
+						.getAllPossibleScreenigSurveyVariables(
+								rulesRelatedModelObjectId);
 				break;
 		}
 		showModalStringValueEditWindow(
@@ -170,11 +173,13 @@ public class AbstractRuleEditComponentWithController extends
 		switch (type) {
 			case MONITORING_RULES:
 				allPossibleVariables = getInterventionAdministrationManagerService()
-						.getAllPossibleMonitoringRuleVariables(rulesRelatedModelObjectId);
+						.getAllPossibleMonitoringRuleVariables(
+								rulesRelatedModelObjectId);
 				break;
 			default:
 				allPossibleVariables = getScreeningSurveyAdministrationManagerService()
-						.getAllPossibleScreenigSurveyVariables(rulesRelatedModelObjectId);
+						.getAllPossibleScreenigSurveyVariables(
+								rulesRelatedModelObjectId);
 				break;
 		}
 		showModalStringValueEditWindow(

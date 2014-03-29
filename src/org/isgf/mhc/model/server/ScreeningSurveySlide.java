@@ -148,7 +148,9 @@ public class ScreeningSurveySlide extends ModelObject {
 	public UIModelObject toUIModelObject() {
 		val screeningSurveySlide = new UIScreeningSurveySlide(
 				order,
-				titleWithPlaceholders,
+				titleWithPlaceholders.equals("") ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+						: titleWithPlaceholders,
 				questionType.toString(),
 				storeValueToVariableWithName != null ? storeValueToVariableWithName
 						: Messages

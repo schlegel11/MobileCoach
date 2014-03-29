@@ -33,4 +33,9 @@ public class UIFeedbackSlide extends UIModelObject {
 	public static String getSortColumn() {
 		return ORDER;
 	}
+
+	@Override
+	public String toString() {
+		return titleWithPlaceholders;
+	}
 }

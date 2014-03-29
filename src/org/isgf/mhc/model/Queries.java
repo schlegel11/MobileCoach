@@ -60,6 +60,10 @@ public class Queries {
 	public static final String	FEEDBACK_SLIDE__SORT_BY_ORDER_DESC															= "{'order':-1}";
 
 	public static final String	FEEDBACK_SLIDE_RULE__BY_FEEDBACK_SLIDE														= "{'belongingFeedbackSlide':#}";
+	public static final String	FEEDBACK_SLIDE_RULE__BY_FEEDBACK_SLIDE_AND_ORDER_LOWER										= "{'belongingFeedbackSlide':#,'order':{$lt:#}}";
+	public static final String	FEEDBACK_SLIDE_RULE__BY_FEEDBACK_SLIDE_AND_ORDER_HIGHER										= "{'belongingFeedbackSlide':#,'order':{$gt:#}}";
+	public static final String	FEEDBACK_SLIDE_RULE__SORT_BY_ORDER_ASC														= "{'order':1}";
+	public static final String	FEEDBACK_SLIDE_RULE__SORT_BY_ORDER_DESC														= "{'order':-1}";
 
 	public static final String	MONITORING_RULE__BY_INTERVENTION															= "{'intervention':#}";
 	public static final String	MONITORING_RULE__BY_INTERVENTION_AND_PARENT													= "{'intervention':#,'isSubRuleOfMonitoringRule':#}";

@@ -81,7 +81,7 @@ public class ScreeningSurveySlideEditComponentWithController extends
 		answersTable.setSortEnabled(false);
 
 		val rulesOfScreeningSurveySlide = getScreeningSurveyAdministrationManagerService()
-				.getAllScreeningSurveySlidesRulesOfScreeningSurveySlide(
+				.getAllScreeningSurveySlideRulesOfScreeningSurveySlide(
 						screeningSurveySlide.getId());
 
 		rulesBeanContainer = createBeanContainerForModelObjects(

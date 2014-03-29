@@ -12,6 +12,7 @@ import org.isgf.mhc.model.server.ScreeningSurveySlide;
 import org.isgf.mhc.model.ui.UIFeedback;
 import org.isgf.mhc.model.ui.UIScreeningSurveySlide;
 import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;
+import org.isgf.mhc.ui.views.components.feedback.FeedbackEditComponentWithController;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -333,22 +334,22 @@ public class ScreeningSurveyEditComponentWithController extends
 	public void moveSlide(final boolean moveUp) {
 		log.debug("Move slide {}", moveUp ? "up" : "down");
 
-		val selectedMonitoringSlide = selectedUIScreeningSurveySlide
+		val selectedScreeningSurveySlide = selectedUIScreeningSurveySlide
 				.getRelatedModelObject(ScreeningSurveySlide.class);
-		val swappedMonitoringSlide = getScreeningSurveyAdministrationManagerService()
-				.screeningSurveySlideMove(selectedMonitoringSlide, moveUp);
+		val swappedScreeningSurveySlide = getScreeningSurveyAdministrationManagerService()
+				.screeningSurveySlideMove(selectedScreeningSurveySlide, moveUp);
 
-		if (swappedMonitoringSlide == null) {
+		if (swappedScreeningSurveySlide == null) {
 			log.debug("Slide is already at top/end of list");
 			return;
 		}
 
 		removeAndAddModelObjectToBeanContainer(slidesBeanContainer,
-				swappedMonitoringSlide);
+				swappedScreeningSurveySlide);
 		removeAndAddModelObjectToBeanContainer(slidesBeanContainer,
-				selectedMonitoringSlide);
+				selectedScreeningSurveySlide);
 		slidesTable.sort();
-		slidesTable.select(selectedMonitoringSlide.getId());
+		slidesTable.select(selectedScreeningSurveySlide.getId());
 	}
 
 	public void deleteSlide() {
@@ -357,11 +358,12 @@ public class ScreeningSurveyEditComponentWithController extends
 			@Override
 			public void buttonClick(final ClickEvent event) {
 				try {
-					val selectedMonitoringSlide = selectedUIScreeningSurveySlide.getRelatedModelObject(ScreeningSurveySlide.class);
+					val selectedScreeningSurveySlide = selectedUIScreeningSurveySlide.getRelatedModelObject(ScreeningSurveySlide.class);
 
 					// Delete variable
 					getScreeningSurveyAdministrationManagerService()
-							.screeningSurveySlideDelete(selectedMonitoringSlide);
+							.screeningSurveySlideDelete(
+									selectedScreeningSurveySlide);
 				} catch (final Exception e) {
 					closeWindow();
 					handleException(e);
@@ -465,10 +467,10 @@ public class ScreeningSurveyEditComponentWithController extends
 		val selectedFeedback = selectedUIFeedback
 				.getRelatedModelObject(Feedback.class);
 
-		// TODO folgendes NULL gegen passende komponente austauschen
 		showModalModelObjectEditWindow(
 				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__EDIT_FEEDBACK,
-				null, new ExtendableButtonClickListener() {
+				new FeedbackEditComponentWithController(selectedFeedback),
+				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
@@ -482,7 +484,7 @@ public class ScreeningSurveyEditComponentWithController extends
 
 						closeWindow();
 					}
-				});
+				}, selectedFeedback.getName(), screeningSurvey.getName());
 	}
 
 	public void deleteFeedback() {
