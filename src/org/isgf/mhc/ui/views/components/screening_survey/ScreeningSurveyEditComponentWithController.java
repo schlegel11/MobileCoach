@@ -6,12 +6,10 @@ import lombok.extern.log4j.Log4j2;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.ThemeImageStrings;
-import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.server.Feedback;
 import org.isgf.mhc.model.server.ScreeningSurvey;
 import org.isgf.mhc.model.server.ScreeningSurveySlide;
 import org.isgf.mhc.model.ui.UIFeedback;
-import org.isgf.mhc.model.ui.UIModelObject;
 import org.isgf.mhc.model.ui.UIScreeningSurveySlide;
 import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;
 
@@ -318,7 +316,8 @@ public class ScreeningSurveyEditComponentWithController extends
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
-						removeAndAdd(slidesBeanContainer,
+						removeAndAddModelObjectToBeanContainer(
+								slidesBeanContainer,
 								selectedScreeningSurveySlide);
 						slidesTable.sort();
 						slidesTable.select(selectedScreeningSurveySlide.getId());
@@ -344,8 +343,10 @@ public class ScreeningSurveyEditComponentWithController extends
 			return;
 		}
 
-		removeAndAdd(slidesBeanContainer, swappedMonitoringSlide);
-		removeAndAdd(slidesBeanContainer, selectedMonitoringSlide);
+		removeAndAddModelObjectToBeanContainer(slidesBeanContainer,
+				swappedMonitoringSlide);
+		removeAndAddModelObjectToBeanContainer(slidesBeanContainer,
+				selectedMonitoringSlide);
 		slidesTable.sort();
 		slidesTable.select(selectedMonitoringSlide.getId());
 	}
@@ -471,7 +472,8 @@ public class ScreeningSurveyEditComponentWithController extends
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
-						removeAndAdd(feedbacksBeanContainer, selectedFeedback);
+						removeAndAddModelObjectToBeanContainer(
+								feedbacksBeanContainer, selectedFeedback);
 						feedbacksTable.sort();
 						feedbacksTable.select(selectedFeedback.getId());
 						getAdminUI()
@@ -511,20 +513,4 @@ public class ScreeningSurveyEditComponentWithController extends
 		}, null);
 	}
 
-	/**
-	 * Removes and adds a {@link ModelObject} from a {@link BeanContainer} to
-	 * update the content
-	 * 
-	 * @param slidesBeanContainer
-	 * @param slide
-	 */
-	@SuppressWarnings("unchecked")
-	protected <SubClassOfUIModelObject extends UIModelObject> void removeAndAdd(
-
-	final BeanContainer<ObjectId, SubClassOfUIModelObject> beanContainer,
-			final ModelObject modelObject) {
-		beanContainer.removeItem(modelObject.getId());
-		beanContainer.addItem(modelObject.getId(),
-				(SubClassOfUIModelObject) modelObject.toUIModelObject());
-	}
 }

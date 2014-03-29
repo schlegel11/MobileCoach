@@ -7,7 +7,6 @@ import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.model.server.MonitoringMessage;
 import org.isgf.mhc.model.server.MonitoringMessageGroup;
-import org.isgf.mhc.model.ui.UIModelObject;
 import org.isgf.mhc.model.ui.UIMonitoringMessage;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -170,7 +169,8 @@ public class MonitoringMessageGroupEditComponentWithController extends
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
-						removeAndAdd(beanContainer, selectedMonitoringMessage);
+						removeAndAddModelObjectToBeanContainer(beanContainer,
+								selectedMonitoringMessage);
 						getMonitoringMessageTable().sort();
 						getMonitoringMessageTable().select(
 								selectedMonitoringMessage.getId());
@@ -181,23 +181,6 @@ public class MonitoringMessageGroupEditComponentWithController extends
 						closeWindow();
 					}
 				});
-	}
-
-	/**
-	 * Removes and adds a {@link MonitoringMessage} from a {@link BeanContainer}
-	 * to update the content
-	 * 
-	 * @param beanContainer
-	 * @param monitoringMessage
-	 */
-	@SuppressWarnings("unchecked")
-	protected <SubClassOfUIModelObject extends UIModelObject> void removeAndAdd(
-
-	final BeanContainer<ObjectId, SubClassOfUIModelObject> beanContainer,
-			final MonitoringMessage monitoringMessage) {
-		beanContainer.removeItem(monitoringMessage.getId());
-		beanContainer.addItem(monitoringMessage.getId(),
-				(SubClassOfUIModelObject) monitoringMessage.toUIModelObject());
 	}
 
 	public void moveMessage(final boolean moveUp) {
@@ -213,8 +196,10 @@ public class MonitoringMessageGroupEditComponentWithController extends
 			return;
 		}
 
-		removeAndAdd(beanContainer, swappedMonitoringMessage);
-		removeAndAdd(beanContainer, selectedMonitoringMessage);
+		removeAndAddModelObjectToBeanContainer(beanContainer,
+				swappedMonitoringMessage);
+		removeAndAddModelObjectToBeanContainer(beanContainer,
+				selectedMonitoringMessage);
 		getMonitoringMessageTable().sort();
 		getMonitoringMessageTable().select(selectedMonitoringMessage.getId());
 	}

@@ -42,7 +42,10 @@ public class Queries {
 	public static final String	SCREENING_SURVEY_SLIDE__SORT_BY_ORDER_DESC													= "{'order':-1}";
 
 	public static final String	SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE										= "{'belongingScreeningSurveySlide':#}";
+	public static final String	SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE_AND_ORDER_LOWER						= "{'belongingScreeningSurveySlide':#,'order':{$lt:#}}";
+	public static final String	SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE_AND_ORDER_HIGHER						= "{'belongingScreeningSurveySlide':#,'order':{$gt:#}}";
 	public static final String	SCREENING_SURVEY_SLIDE_RULE__SORT_BY_ORDER_ASC												= "{'order':1}";
+	public static final String	SCREENING_SURVEY_SLIDE_RULE__SORT_BY_ORDER_DESC												= "{'order':-1}";
 
 	public static final String	FEEDBACK__BY_SCREENING_SURVEY																= "{'screeningSurvey':#}";
 	public static final String	FEEDBACK__BY_SCREENING_SURVEY_AND_ORDER_LOWER												= "{'screeningSurvey':#,'order':{$lt:#}}";

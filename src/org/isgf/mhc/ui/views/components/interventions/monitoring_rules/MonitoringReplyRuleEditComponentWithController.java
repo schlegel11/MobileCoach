@@ -10,6 +10,7 @@ import org.isgf.mhc.model.server.MonitoringMessageGroup;
 import org.isgf.mhc.model.server.MonitoringReplyRule;
 import org.isgf.mhc.model.ui.UIMonitoringMessageGroup;
 import org.isgf.mhc.ui.views.components.basics.AbstractRuleEditComponentWithController;
+import org.isgf.mhc.ui.views.components.basics.AbstractRuleEditComponentWithController.TYPES;
 import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -41,7 +42,7 @@ public class MonitoringReplyRuleEditComponentWithController extends
 				.getMonitoringReplyRule(monitoringReplyRuleId);
 
 		ruleEditComponent = getAbstractRuleEditComponentWithController();
-		ruleEditComponent.init(intervention.getId());
+		ruleEditComponent.init(intervention.getId(), TYPES.MONITORING_RULES);
 		ruleEditComponent.adjust(monitoringRule);
 
 		/*

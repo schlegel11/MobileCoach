@@ -18,6 +18,7 @@ import org.isgf.mhc.model.server.FeedbackSlide;
 import org.isgf.mhc.model.server.ScreeningSurvey;
 import org.isgf.mhc.model.server.ScreeningSurveySlide;
 import org.isgf.mhc.model.server.ScreeningSurveySlideRule;
+import org.isgf.mhc.model.server.types.EquationSignTypes;
 import org.isgf.mhc.model.server.types.ScreeningSurveySlideQuestionTypes;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
@@ -325,6 +326,82 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.deleteModelObject(screeningSurveySlide);
 	}
 
+	// Screening Survey Slide Rule
+	public ScreeningSurveySlideRule screeningSurveySlideRuleCreate(
+			final ObjectId screeningSurveySlideId) {
+		val screeningSurveySlideRule = new ScreeningSurveySlideRule(
+				screeningSurveySlideId, 0, null, null, "",
+				EquationSignTypes.CALCULATED_VALUE_EQUALS, "");
+
+		val highestOrderSlideRule = databaseManagerService
+				.findOneSortedModelObject(
+						ScreeningSurveySlideRule.class,
+						Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE,
+						Queries.SCREENING_SURVEY_SLIDE_RULE__SORT_BY_ORDER_DESC,
+						screeningSurveySlideId);
+
+		if (highestOrderSlideRule != null) {
+			screeningSurveySlideRule
+					.setOrder(highestOrderSlideRule.getOrder() + 1);
+		}
+
+		databaseManagerService.saveModelObject(screeningSurveySlideRule);
+
+		return screeningSurveySlideRule;
+	}
+
+	public ScreeningSurveySlideRule screeningSurveySlideRuleMove(
+			final ScreeningSurveySlideRule screeningSurveySlideRule,
+			final boolean moveUp) {
+		// Find screening survey slide to swap with
+		val screeningSurveySlideRuleToSwapWith = databaseManagerService
+				.findOneSortedModelObject(
+						ScreeningSurveySlideRule.class,
+						moveUp ? Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE_AND_ORDER_LOWER
+								: Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE_AND_ORDER_HIGHER,
+						moveUp ? Queries.SCREENING_SURVEY_SLIDE_RULE__SORT_BY_ORDER_DESC
+								: Queries.SCREENING_SURVEY_SLIDE_RULE__SORT_BY_ORDER_ASC,
+						screeningSurveySlideRule
+								.getBelongingScreeningSurveySlide(),
+						screeningSurveySlideRule.getOrder());
+
+		if (screeningSurveySlideRuleToSwapWith == null) {
+			return null;
+		}
+
+		// Swap order
+		final int order = screeningSurveySlideRule.getOrder();
+		screeningSurveySlideRule.setOrder(screeningSurveySlideRuleToSwapWith
+				.getOrder());
+		screeningSurveySlideRuleToSwapWith.setOrder(order);
+
+		databaseManagerService.saveModelObject(screeningSurveySlideRule);
+		databaseManagerService
+				.saveModelObject(screeningSurveySlideRuleToSwapWith);
+
+		return screeningSurveySlideRuleToSwapWith;
+	}
+
+	public void screeningSurveySlideRuleSetJumpToSlide(
+			final ScreeningSurveySlideRule screeningSurveySlideRule,
+			final boolean isTrueCase,
+			final ObjectId selectedScreeningSurveySlideId) {
+		if (isTrueCase) {
+			screeningSurveySlideRule
+					.setNextScreeningSurveySlideWhenTrue(selectedScreeningSurveySlideId);
+		} else {
+			screeningSurveySlideRule
+					.setNextScreeningSurveySlideWhenFalse(selectedScreeningSurveySlideId);
+		}
+
+		databaseManagerService.saveModelObject(screeningSurveySlideRule);
+	}
+
+	public void screeningSurveySlideRuleDelete(
+			final ScreeningSurveySlideRule screeningSurveySlideRule) {
+		databaseManagerService.deleteModelObject(screeningSurveySlideRule);
+	}
+
 	// Feedback Slide
 	public FeedbackSlide feedbackSlideCreate(final ObjectId feedbackId) {
 		val feedbackSlide = new FeedbackSlide(feedbackId, 0, "", "", null, "");
@@ -486,5 +563,4 @@ public class ScreeningSurveyAdministrationManagerService {
 
 		return variables;
 	}
-
 }

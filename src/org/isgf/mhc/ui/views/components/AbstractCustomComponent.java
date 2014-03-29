@@ -11,6 +11,7 @@ import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
+import org.isgf.mhc.model.ui.UIModelObject;
 import org.isgf.mhc.model.ui.UIObject;
 import org.isgf.mhc.services.InterventionAdministrationManagerService;
 import org.isgf.mhc.services.ScreeningSurveyAdministrationManagerService;
@@ -438,5 +439,22 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 			log.error("An unexpected error occurred: {}",
 					exception.getMessage());
 		}
+	}
+
+	/**
+	 * Removes and adds a {@link ModelObject} from a {@link BeanContainer} to
+	 * update the content
+	 * 
+	 * @param answersBeanContainer
+	 * @param slide
+	 */
+	@SuppressWarnings("unchecked")
+	protected <SubClassOfUIModelObject extends UIModelObject> void removeAndAddModelObjectToBeanContainer(
+
+	final BeanContainer<ObjectId, SubClassOfUIModelObject> beanContainer,
+			final ModelObject modelObject) {
+		beanContainer.removeItem(modelObject.getId());
+		beanContainer.addItem(modelObject.getId(),
+				(SubClassOfUIModelObject) modelObject.toUIModelObject());
 	}
 }

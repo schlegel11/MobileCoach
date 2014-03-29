@@ -1,5 +1,7 @@
 package org.isgf.mhc.ui.views.components.basics;
 
+import java.util.List;
+
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
@@ -24,9 +26,15 @@ import com.vaadin.ui.ComboBox;
 public class AbstractRuleEditComponentWithController extends
 		AbstractRuleEditComponent implements ValueChangeListener {
 
+	public enum TYPES {
+		MONITORING_RULES, SCREENING_SURVEY_RULES, FEEDBACK_RULES
+	};
+
+	private TYPES								type;
+
 	private boolean								initDone	= false;
 
-	private ObjectId							interventionId;
+	private ObjectId							rulesRelatedModelObjectId;
 
 	private AbstractRule						rule;
 
@@ -59,8 +67,9 @@ public class AbstractRuleEditComponentWithController extends
 		setEnabled(false);
 	}
 
-	public void init(final ObjectId interventionId) {
-		this.interventionId = interventionId;
+	public void init(final ObjectId rulesRelatedModelObjectId, final TYPES type) {
+		this.rulesRelatedModelObjectId = rulesRelatedModelObjectId;
+		this.type = type;
 
 		initDone = true;
 	}
@@ -118,12 +127,20 @@ public class AbstractRuleEditComponentWithController extends
 
 	public void editRuleTextWithPlaceholder() {
 		log.debug("Edit rule with placeholder");
-		val allPossibleMonitoringRulesVariables = getInterventionAdministrationManagerService()
-				.getAllPossibleMonitoringRuleVariables(interventionId);
+		final List<String> allPossibleVariables;
+		switch (type) {
+			case MONITORING_RULES:
+				allPossibleVariables = getInterventionAdministrationManagerService()
+						.getAllPossibleMonitoringRuleVariables(rulesRelatedModelObjectId);
+				break;
+			default:
+				allPossibleVariables = getScreeningSurveyAdministrationManagerService()
+						.getAllPossibleScreenigSurveyVariables(rulesRelatedModelObjectId);
+				break;
+		}
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_TEXT_WITH_PLACEHOLDERS,
-				rule.getRuleWithPlaceholders(),
-				allPossibleMonitoringRulesVariables,
+				rule.getRuleWithPlaceholders(), allPossibleVariables,
 				new PlaceholderStringEditComponent(),
 				new ExtendableButtonClickListener() {
 
@@ -134,7 +151,7 @@ public class AbstractRuleEditComponentWithController extends
 							getInterventionAdministrationManagerService()
 									.abstractRuleChangeRuleWithPlaceholders(
 											rule, getStringValue(),
-											allPossibleMonitoringRulesVariables);
+											allPossibleVariables);
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -149,13 +166,21 @@ public class AbstractRuleEditComponentWithController extends
 
 	public void editRuleComparisonTextWithPlaceholder() {
 		log.debug("Edit rule comparison term with placeholder");
-		val allPossibleMonitoringRulesVariables = getInterventionAdministrationManagerService()
-				.getAllPossibleMonitoringRuleVariables(interventionId);
+		final List<String> allPossibleVariables;
+		switch (type) {
+			case MONITORING_RULES:
+				allPossibleVariables = getInterventionAdministrationManagerService()
+						.getAllPossibleMonitoringRuleVariables(rulesRelatedModelObjectId);
+				break;
+			default:
+				allPossibleVariables = getScreeningSurveyAdministrationManagerService()
+						.getAllPossibleScreenigSurveyVariables(rulesRelatedModelObjectId);
+				break;
+		}
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_TEXT_WITH_PLACEHOLDERS,
 				rule.getRuleComparisonTermWithPlaceholders(),
-				allPossibleMonitoringRulesVariables,
-				new PlaceholderStringEditComponent(),
+				allPossibleVariables, new PlaceholderStringEditComponent(),
 				new ExtendableButtonClickListener() {
 
 					@Override
@@ -165,7 +190,7 @@ public class AbstractRuleEditComponentWithController extends
 							getInterventionAdministrationManagerService()
 									.abstractRuleChangeRuleComparisonTermWithPlaceholders(
 											rule, getStringValue(),
-											allPossibleMonitoringRulesVariables);
+											allPossibleVariables);
 						} catch (final Exception e) {
 							handleException(e);
 							return;
