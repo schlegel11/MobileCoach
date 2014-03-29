@@ -3,7 +3,8 @@ package org.isgf.mhc.ui.views.components.welcome;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.model.server.ScreeningSurvey;
-import org.isgf.mhc.ui.views.components.screening_survey.ScreeningSurveyEditComponentWithController;
+import org.isgf.mhc.model.server.ScreeningSurveySlide;
+import org.isgf.mhc.ui.views.components.screening_survey.ScreeningSurveySlideEditComponentWithController;
 
 import com.vaadin.ui.Button.ClickEvent;
 
@@ -23,9 +24,14 @@ public class WelcomeTabComponentWithController extends WelcomeTabComponent {
 						new ObjectId("5313c24ec2e6b13fbb905f43")).iterator()
 				.next();
 
+		final ScreeningSurveySlide screeningSurveySlide = getScreeningSurveyAdministrationManagerService()
+				.getAllScreeningSurveySlidesOfScreeningSurvey(
+						screeningSurvey.getId()).iterator().next();
+
 		showModalModelObjectEditWindow(
-				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__EDIT_SCREENING_SURVEY,
-				new ScreeningSurveyEditComponentWithController(screeningSurvey),
+				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__EDIT_SCREENING_SURVEY_SLIDE,
+				new ScreeningSurveySlideEditComponentWithController(
+						screeningSurveySlide),
 				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
@@ -33,5 +39,15 @@ public class WelcomeTabComponentWithController extends WelcomeTabComponent {
 						closeWindow();
 					}
 				}, "TEST");
+		// showModalModelObjectEditWindow(
+		// AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__EDIT_SCREENING_SURVEY,
+		// new ScreeningSurveyEditComponentWithController(screeningSurvey),
+		// new ExtendableButtonClickListener() {
+		// @Override
+		// public void buttonClick(final ClickEvent event) {
+		//
+		// closeWindow();
+		// }
+		// }, "TEST");
 	}
 }

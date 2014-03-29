@@ -1,12 +1,11 @@
 package org.isgf.mhc.ui.views.components.screening_survey;
 
-import java.util.ArrayList;
-
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
+import org.isgf.mhc.conf.ImplementationContants;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.server.Feedback;
 import org.isgf.mhc.model.server.ScreeningSurveySlide;
@@ -15,12 +14,16 @@ import org.isgf.mhc.model.ui.UIAnswer;
 import org.isgf.mhc.model.ui.UIFeedback;
 import org.isgf.mhc.model.ui.UIModelObject;
 import org.isgf.mhc.model.ui.UIScreeningSurveySlideRule;
+import org.isgf.mhc.tools.StringValidator;
+import org.isgf.mhc.ui.NotificationMessageException;
+import org.isgf.mhc.ui.views.components.basics.MediaObjectIntegrationComponentWithController.MediaObjectCreationOrDeleteionListener;
 import org.isgf.mhc.ui.views.components.basics.PlaceholderStringEditComponent;
 import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanContainer;
+import com.vaadin.data.util.BeanItem;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Table;
@@ -33,7 +36,8 @@ import com.vaadin.ui.Table;
 @SuppressWarnings("serial")
 @Log4j2
 public class ScreeningSurveySlideEditComponentWithController extends
-		ScreeningSurveySlideEditComponent {
+		ScreeningSurveySlideEditComponent implements
+		MediaObjectCreationOrDeleteionListener {
 
 	private final ScreeningSurveySlide									screeningSurveySlide;
 
@@ -46,6 +50,8 @@ public class ScreeningSurveySlideEditComponentWithController extends
 	private final BeanContainer<Integer, UIAnswer>						answersBeanContainer;
 	private final BeanContainer<ObjectId, UIScreeningSurveySlideRule>	rulesBeanContainer;
 
+	private final ValueChangeListener									preselectedComboBoxListener;
+
 	public ScreeningSurveySlideEditComponentWithController(
 			final ScreeningSurveySlide screeningSurveySlide) {
 		super();
@@ -57,8 +63,6 @@ public class ScreeningSurveySlideEditComponentWithController extends
 		rulesTable = getRulesTable();
 
 		// table content
-		val answersOfScreeningSurveySlide = new ArrayList<UIAnswer>();
-
 		answersBeanContainer = new BeanContainer<Integer, UIAnswer>(
 				UIAnswer.class);
 
@@ -129,9 +133,6 @@ public class ScreeningSurveySlideEditComponentWithController extends
 		});
 
 		// Handle combo boxes
-		val questionTypes = getScreeningSurveyAdministrationManagerService()
-				.getAllTemplatePaths();
-
 		val questionTypeComboBox = getQuestionTypeComboBox();
 		for (val screeningSurveySlideQuestionType : ScreeningSurveySlideQuestionTypes
 				.values()) {
@@ -160,28 +161,23 @@ public class ScreeningSurveySlideEditComponentWithController extends
 			}
 		});
 
+		preselectedComboBoxListener = new ValueChangeListener() {
+			@Override
+			public void valueChange(final ValueChangeEvent event) {
+				int preselectedAnswer = -1;
+				if (event.getProperty().getValue() != null) {
+					preselectedAnswer = ((UIAnswer) event.getProperty()
+							.getValue()).getOrder();
+				}
+
+				log.debug("Adjust preselected answer to {}", preselectedAnswer);
+				getScreeningSurveyAdministrationManagerService()
+						.screeningSurveySlideChangePreselectedAnswer(
+								screeningSurveySlide, preselectedAnswer);
+			}
+		};
+
 		adjustPreselectedAnswer();
-
-		getPreselectedAnswerComboBox().addValueChangeListener(
-				new ValueChangeListener() {
-
-					@Override
-					public void valueChange(final ValueChangeEvent event) {
-						final String preselectedAnswer = (String) event
-								.getProperty().getValue();
-
-						// TODO adjust
-						// log.debug("Adjust template path to {}",
-						// screeningSurveySlideQuestionType);
-						// getScreeningSurveyAdministrationManagerService()
-						// .screeningSurveyChangeTemplatePath(
-						// screeningSurveySlide,
-						// screeningSurveySlideQuestionType);
-
-						adjust();
-
-					}
-				});
 
 		val feedbacks = getScreeningSurveyAdministrationManagerService()
 				.getAllFeedbacksOfScreeningSurvey(
@@ -258,19 +254,59 @@ public class ScreeningSurveySlideEditComponentWithController extends
 		getStoreVariableTextFieldComponent().getButton().addClickListener(
 				buttonClickListener);
 
+		// Handle media object to component
+		if (screeningSurveySlide.getLinkedMediaObject() == null) {
+			getIntegratedMediaObjectComponent().setMediaObject(null, this);
+		} else {
+			val mediaObject = getInterventionAdministrationManagerService()
+					.getMediaObject(screeningSurveySlide.getLinkedMediaObject());
+			getIntegratedMediaObjectComponent().setMediaObject(mediaObject,
+					this);
+		}
+
 		adjust();
+	}
+
+	private void saveAnswersWithValues() {
+		val itemIds = answersBeanContainer.getItemIds();
+		val answers = new String[itemIds.size()];
+		val values = new String[itemIds.size()];
+
+		for (int i = 0; i < itemIds.size(); i++) {
+			val itemId = itemIds.get(i);
+			val uiAnswer = answersBeanContainer.getItem(itemId).getBean();
+			answers[i] = uiAnswer.getAnswer();
+			values[i] = uiAnswer.getValue();
+		}
+		getScreeningSurveyAdministrationManagerService()
+				.screeningSurveySlideSetAnswersWithPlaceholdersAndValues(
+						screeningSurveySlide, answers, values);
 	}
 
 	private void adjustPreselectedAnswer() {
 		val preselectedAnswerComboBox = getPreselectedAnswerComboBox();
-		int i = 0;
-		for (val answer : screeningSurveySlide.getAnswersWithPlaceholders()) {
-			preselectedAnswerComboBox.addItem(answer);
-			if (screeningSurveySlide.getPreSelectedAnswer() == i) {
-				preselectedAnswerComboBox.select(answer);
-			}
-			i++;
+
+		if (preselectedComboBoxListener != null) {
+			preselectedAnswerComboBox
+					.removeValueChangeListener(preselectedComboBoxListener);
 		}
+
+		preselectedAnswerComboBox.removeAllItems();
+
+		val itemIds = answersBeanContainer.getItemIds();
+
+		for (int i = 0; i < itemIds.size(); i++) {
+			val uiAnswer = answersBeanContainer.getItem(itemIds.get(i))
+					.getBean();
+			preselectedAnswerComboBox.addItem(uiAnswer);
+
+			if (screeningSurveySlide.getPreSelectedAnswer() == i) {
+				preselectedAnswerComboBox.select(uiAnswer);
+			}
+		}
+
+		preselectedAnswerComboBox
+				.addValueChangeListener(preselectedComboBoxListener);
 	}
 
 	private void adjust() {
@@ -299,17 +335,17 @@ public class ScreeningSurveySlideEditComponentWithController extends
 		@Override
 		public void buttonClick(final ClickEvent event) {
 			if (event.getButton() == getNewAnswerButton()) {
-				// createAnswer();
+				createAnswer();
 			} else if (event.getButton() == getEditAnswerAnswerButton()) {
-				// editAnswerAnswer();
+				editAnswerAnswer();
 			} else if (event.getButton() == getEditAnswerValueButton()) {
-				// editAnswerValue();
+				editAnswerValue();
 			} else if (event.getButton() == getMoveUpAnswerButton()) {
-				// moveAnswer(true);
+				moveAnswer(true);
 			} else if (event.getButton() == getMoveDownAnswerButton()) {
-				// moveSlide(false);
+				moveAnswer(false);
 			} else if (event.getButton() == getDeleteAnswerButton()) {
-				// deleteAnswer();
+				deleteAnswer();
 			} else if (event.getButton() == getNewRuleButton()) {
 				// createRule();
 			} else if (event.getButton() == getEditRuleButton()) {
@@ -334,6 +370,164 @@ public class ScreeningSurveySlideEditComponentWithController extends
 				changeStoreResultVariable();
 			}
 		}
+	}
+
+	public void createAnswer() {
+		log.debug("Create answer");
+
+		int newId = 0;
+		if (answersBeanContainer.size() > 0) {
+			newId = answersBeanContainer.getItemIds().get(
+					answersBeanContainer.size() - 1) + 1;
+		}
+
+		log.debug("New answer has id {}", newId);
+		val uiAnswer = new UIAnswer(newId,
+				ImplementationContants.DEFAULT_ANSWER_NAME,
+				ImplementationContants.DEFAULT_ANSWER_VALUE);
+
+		answersBeanContainer.addItem(newId, uiAnswer);
+		answersTable.select(newId);
+
+		saveAnswersWithValues();
+		adjustPreselectedAnswer();
+	}
+
+	public void deleteAnswer() {
+		log.debug("Delete answer");
+
+		answersBeanContainer.removeItem(selectedUIAnswer.getOrder());
+
+		if (getPreselectedAnswerComboBox().isSelected(selectedUIAnswer)) {
+			getScreeningSurveyAdministrationManagerService()
+					.screeningSurveySlideChangePreselectedAnswer(
+							screeningSurveySlide, -1);
+		}
+
+		saveAnswersWithValues();
+		adjustPreselectedAnswer();
+	}
+
+	public void editAnswerAnswer() {
+		log.debug("Edit answer answer with placeholders");
+		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
+				.getAllPossibleScreenigSurveyVariables(
+						screeningSurveySlide.getScreeningSurvey());
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_ANSWER_WITH_PLACEHOLDERS,
+				selectedUIAnswer.getAnswer(), allPossibleVariables,
+				new PlaceholderStringEditComponent(),
+				new ExtendableButtonClickListener() {
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						BeanItem<UIAnswer> beanItem;
+						try {
+							beanItem = getBeanItemFromTableByObjectId(
+									answersTable, UIAnswer.class,
+									selectedUIAnswer.getOrder());
+
+							// Change answer
+							if (!StringValidator.isValidVariableText(
+									getStringValue(), allPossibleVariables)) {
+								throw new NotificationMessageException(
+										AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
+							}
+
+							selectedUIAnswer.setAnswer(getStringValue());
+
+							saveAnswersWithValues();
+							adjustPreselectedAnswer();
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						// Adapt UI
+						getStringItemProperty(beanItem, UIAnswer.ANSWER)
+								.setValue(selectedUIAnswer.getAnswer());
+
+						closeWindow();
+					}
+				}, null);
+	}
+
+	public void editAnswerValue() {
+		log.debug("Edit answer value");
+
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_ANSWER_VALUE,
+				selectedUIAnswer.getValue(), null,
+				new ShortStringEditComponent(),
+				new ExtendableButtonClickListener() {
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						BeanItem<UIAnswer> beanItem;
+						try {
+							beanItem = getBeanItemFromTableByObjectId(
+									answersTable, UIAnswer.class,
+									selectedUIAnswer.getOrder());
+
+							// Change value
+							selectedUIAnswer.setValue(getStringValue());
+
+							saveAnswersWithValues();
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						// Adapt UI
+						getStringItemProperty(beanItem, UIAnswer.VALUE)
+								.setValue(selectedUIAnswer.getValue());
+
+						closeWindow();
+					}
+				}, null);
+	}
+
+	public void moveAnswer(final boolean moveUp) {
+		log.debug("Move answer {}", moveUp ? "up" : "down");
+
+		if (moveUp
+				&& selectedUIAnswer.getOrder() == answersBeanContainer
+						.getIdByIndex(0)) {
+			log.debug("Answer is already at top");
+			return;
+		} else if (!moveUp
+				&& selectedUIAnswer.getOrder() == answersBeanContainer
+						.getIdByIndex(answersBeanContainer.size() - 1)) {
+			log.debug("Answer is already at bottom");
+			return;
+		}
+
+		int swapPosition;
+		if (moveUp) {
+			swapPosition = answersBeanContainer.indexOfId(selectedUIAnswer
+					.getOrder()) - 1;
+		} else {
+			swapPosition = answersBeanContainer.indexOfId(selectedUIAnswer
+					.getOrder()) + 1;
+		}
+
+		val uiAnswerToSwapWith = answersBeanContainer.getItem(
+				answersBeanContainer.getIdByIndex(swapPosition)).getBean();
+
+		final int positionOnHold = selectedUIAnswer.getOrder();
+		selectedUIAnswer.setOrder(uiAnswerToSwapWith.getOrder());
+		uiAnswerToSwapWith.setOrder(positionOnHold);
+
+		answersBeanContainer.removeItem(selectedUIAnswer.getOrder());
+		answersBeanContainer.removeItem(uiAnswerToSwapWith.getOrder());
+		answersBeanContainer.addItem(selectedUIAnswer.getOrder(),
+				selectedUIAnswer);
+		answersBeanContainer.addItem(uiAnswerToSwapWith.getOrder(),
+				uiAnswerToSwapWith);
+
+		answersTable.sort();
+		answersTable.select(selectedUIAnswer.getOrder());
+
+		saveAnswersWithValues();
+		adjustPreselectedAnswer();
 	}
 
 	public void changeTitleWithPlaceholders() {
@@ -742,6 +936,13 @@ public class ScreeningSurveySlideEditComponentWithController extends
 	// }, null);
 	// }
 
+	@Override
+	public void updateLinkedMediaObjectId(final ObjectId linkedMediaObjectId) {
+		getScreeningSurveyAdministrationManagerService()
+				.screeningSurveySlideSetLinkedMediaObject(screeningSurveySlide,
+						linkedMediaObjectId);
+	}
+
 	/**
 	 * Removes and adds a {@link ModelObject} from a {@link BeanContainer} to
 	 * update the content
@@ -758,5 +959,4 @@ public class ScreeningSurveySlideEditComponentWithController extends
 		beanContainer.addItem(modelObject.getId(),
 				(SubClassOfUIModelObject) modelObject.toUIModelObject());
 	}
-
 }

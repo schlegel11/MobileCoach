@@ -11,7 +11,7 @@
 	<!ENTITY mongodb-driver.version "2.11.3">
 	<!ENTITY jena.version "2.11.0">
 	<!ENTITY javaluator.version "2.0.0">
-	<!ENTITY lombok.version "1.12.2">
+	<!ENTITY lombok.version "1.12.6">
 	<!ENTITY mustache.java.version "0.8.13">
 ]>
 <ivy-module version="2.0"

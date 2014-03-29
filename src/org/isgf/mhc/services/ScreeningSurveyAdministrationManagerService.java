@@ -224,6 +224,14 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
 
+	public void screeningSurveySlideChangePreselectedAnswer(
+			final ScreeningSurveySlide screeningSurveySlide,
+			final int preselectedAnswer) {
+		screeningSurveySlide.setPreSelectedAnswer(preselectedAnswer);
+
+		databaseManagerService.saveModelObject(screeningSurveySlide);
+	}
+
 	public void screeningSurveySlideChangeStoreResultToVariable(
 			final ScreeningSurveySlide screeningSurveySlide,
 			final String variableName) throws NotificationMessageException {
@@ -265,10 +273,19 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
 
+	public void screeningSurveySlideSetAnswersWithPlaceholdersAndValues(
+			final ScreeningSurveySlide screeningSurveySlide,
+			final String[] answers, final String[] values) {
+		screeningSurveySlide.setAnswersWithPlaceholders(answers);
+		screeningSurveySlide.setAnswerValues(values);
+
+		databaseManagerService.saveModelObject(screeningSurveySlide);
+	}
+
 	public ScreeningSurveySlide screeningSurveySlideMove(
 			final ScreeningSurveySlide screeningSurveySlide,
 			final boolean moveUp) {
-		// Find monitoring message to swap with
+		// Find screening survey slide to swap with
 		val screeningSurveySlideToSwapWith = databaseManagerService
 				.findOneSortedModelObject(
 						ScreeningSurveySlide.class,
@@ -293,6 +310,14 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurveySlideToSwapWith);
 
 		return screeningSurveySlideToSwapWith;
+	}
+
+	public void screeningSurveySlideSetLinkedMediaObject(
+			final ScreeningSurveySlide screeningSurveySlide,
+			final ObjectId linkedMediaObjectId) {
+		screeningSurveySlide.setLinkedMediaObject(linkedMediaObjectId);
+
+		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
 
 	public void screeningSurveySlideDelete(

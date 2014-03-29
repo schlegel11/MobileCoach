@@ -109,13 +109,15 @@ public class MediaObjectIntegrationComponentWithController extends
 			@Override
 			public void buttonClick(final ClickEvent event) {
 
+				val mediaObjectToDelete = mediaObject;
 				mediaObject = null;
+
 				listener.updateLinkedMediaObjectId(null);
 
 				adjust();
 
 				getInterventionAdministrationManagerService()
-						.mediaObjectDelete(mediaObject);
+						.mediaObjectDelete(mediaObjectToDelete);
 
 				closeWindow();
 			}

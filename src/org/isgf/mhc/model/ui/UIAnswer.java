@@ -39,4 +39,9 @@ public class UIAnswer extends UIObject {
 	public static String getSortColumn() {
 		return ORDER;
 	}
+
+	@Override
+	public String toString() {
+		return answer;
+	}
 }
