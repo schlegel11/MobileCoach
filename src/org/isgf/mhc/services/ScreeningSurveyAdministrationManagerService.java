@@ -81,11 +81,10 @@ public class ScreeningSurveyAdministrationManagerService {
 	 */
 	// ScreeningSurvey
 	public ScreeningSurvey screeningSurveyCreate(final String name,
-			final ObjectId interventionId,
-			final String globalUniqueInterventionId) {
+			final ObjectId interventionId) {
 		val screeningSurvey = new ScreeningSurvey(
 				GlobalUniqueIdGenerator.createGlobalUniqueId(), interventionId,
-				globalUniqueInterventionId, name, "", null, false);
+				name, "", null, false);
 
 		if (name.equals("")) {
 			screeningSurvey.setName(DEFAULT_OBJECT_NAME);

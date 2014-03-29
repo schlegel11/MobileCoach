@@ -31,16 +31,6 @@ import org.isgf.mhc.model.ui.UIModelObject;
 @AllArgsConstructor
 public class Intervention extends ModelObject {
 	/**
-	 * A absolutely unique Id to enable to reference a {@link Intervention} also
-	 * after independent export/import to/from
-	 * another system
-	 */
-	@Getter
-	@Setter
-	@NonNull
-	private String	globalUniqueId;
-
-	/**
 	 * The name of the {@link Intervention} as shown in the backend
 	 */
 	@Getter

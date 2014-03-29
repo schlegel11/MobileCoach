@@ -189,8 +189,7 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 							newScreeningSurvey = getScreeningSurveyAdministrationManagerService()
 									.screeningSurveyCreate(
 											newScreeningSurveyName,
-											intervention.getId(),
-											intervention.getGlobalUniqueId());
+											intervention.getId());
 						} catch (final Exception e) {
 							handleException(e);
 							return;

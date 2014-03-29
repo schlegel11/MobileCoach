@@ -50,17 +50,6 @@ public class ScreeningSurvey extends ModelObject {
 	private ObjectId	intervention;
 
 	/**
-	 * Stores the reference to the {@link Intervention} in an independent way;
-	 * This enables to reference a {@link Intervention} also after independent
-	 * export/import to/from
-	 * another system
-	 */
-	@Getter
-	@Setter
-	@NonNull
-	private String		assignedInterventionGlobalUniqueId;
-
-	/**
 	 * The name of the {@link ScreeningSurvey} as displayed in the backend
 	 */
 	@Getter

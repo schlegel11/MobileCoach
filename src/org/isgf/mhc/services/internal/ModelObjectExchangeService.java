@@ -146,7 +146,7 @@ public class ModelObjectExchangeService {
 
 		log.debug("Export done.");
 
-		return this.createZipFile(exchangeModelObjects);
+		return createZipFile(exchangeModelObjects);
 	}
 
 	/**
@@ -164,7 +164,7 @@ public class ModelObjectExchangeService {
 			throws FileNotFoundException, IOException {
 		val modelObjects = new ArrayList<ModelObject>();
 
-		val exchangeModelObjects = this.readZipFile(new ZipFile(zipFile));
+		val exchangeModelObjects = readZipFile(new ZipFile(zipFile));
 
 		log.debug("Importing model objects...");
 
@@ -196,7 +196,7 @@ public class ModelObjectExchangeService {
 
 		// Create all model objects in the database
 		for (val modelObject : modelObjects) {
-			this.databaseManagerService.saveModelObject(modelObject);
+			databaseManagerService.saveModelObject(modelObject);
 		}
 
 		// Adjust all relevant id references
@@ -211,9 +211,6 @@ public class ModelObjectExchangeService {
 
 			// Check all exchange model objects for references
 			for (val toCheckExchangeModelObject : exchangeModelObjects) {
-				// for (val methodAndObjectIdEntrySet :
-				// toCheckExchangeModelObject
-				// .getObjectIdSetMethodsWithAppropriateValues().keys()) {
 				for (val methodName : toCheckExchangeModelObject
 						.getObjectIdSetMethodsWithAppropriateValues().keySet()) {
 					final String oldObjectId = toCheckExchangeModelObject
@@ -230,6 +227,7 @@ public class ModelObjectExchangeService {
 						final ModelObject modelObjectToAdjust = modelObjects
 								.get(exchangeModelObjects
 										.indexOf(toCheckExchangeModelObject));
+
 						// Find appropriate method to call to set object id
 						final Method methodToAdjustObjectIdReference;
 						try {
@@ -260,7 +258,7 @@ public class ModelObjectExchangeService {
 						}
 
 						// Save changes
-						this.databaseManagerService
+						databaseManagerService
 								.saveModelObject(modelObjectToAdjust);
 					}
 				}
@@ -306,7 +304,7 @@ public class ModelObjectExchangeService {
 			if (exchangeModelObject.getFileReference() != null) {
 				final String uniqueFileZipName = "F "
 						+ exchangeModelObject.getFileReference();
-				final File referencedFile = this.fileStorageManagerService
+				final File referencedFile = fileStorageManagerService
 						.getFileByReference(exchangeModelObject
 								.getFileReference());
 				log.debug("Adding referenced file {} as {} to zip file",
@@ -381,7 +379,7 @@ public class ModelObjectExchangeService {
 						.getInputStream(zipEntry);
 				IOUtils.copy(zipEntryInputStream, fileOutputStream);
 
-				final String newFileReference = this.fileStorageManagerService
+				final String newFileReference = fileStorageManagerService
 						.storeFile(temporaryFile);
 
 				final String oldFileReference = zipEntry.getName().split(" ")[1];

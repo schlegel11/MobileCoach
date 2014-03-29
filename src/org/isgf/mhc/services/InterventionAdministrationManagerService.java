@@ -32,7 +32,6 @@ import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.ModelObjectExchangeService;
 import org.isgf.mhc.services.internal.VariablesManagerService;
 import org.isgf.mhc.tools.BCrypt;
-import org.isgf.mhc.tools.GlobalUniqueIdGenerator;
 import org.isgf.mhc.tools.StringValidator;
 import org.isgf.mhc.ui.NotificationMessageException;
 
@@ -182,9 +181,8 @@ public class InterventionAdministrationManagerService {
 
 	// Intervention
 	public Intervention interventionCreate(final String name) {
-		val intervention = new Intervention(
-				GlobalUniqueIdGenerator.createGlobalUniqueId(), name,
-				System.currentTimeMillis(), false, false);
+		val intervention = new Intervention(name, System.currentTimeMillis(),
+				false, false);
 
 		if (name.equals("")) {
 			intervention.setName(ImplementationContants.DEFAULT_OBJECT_NAME);
