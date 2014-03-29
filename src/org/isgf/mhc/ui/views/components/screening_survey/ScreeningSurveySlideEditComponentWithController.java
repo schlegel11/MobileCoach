@@ -654,8 +654,8 @@ public class ScreeningSurveySlideEditComponentWithController extends
 		val newScreeningSurveySlideRule = getScreeningSurveyAdministrationManagerService()
 				.screeningSurveySlideRuleCreate(screeningSurveySlide.getId());
 
-		showModalModelObjectEditWindow(
-				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__CREATE_SCREENING_SURVEY_SLIDE_RULE,
+		showModalClosableEditWindow(
+				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__CREATE_SCREENING_SURVEY_SLIDE_RULE,
 				new ScreeningSurveySlideRuleEditComponentWithController(
 						newScreeningSurveySlideRule, screeningSurveySlide
 								.getScreeningSurvey()),
@@ -682,8 +682,8 @@ public class ScreeningSurveySlideEditComponentWithController extends
 		val selectedScreeningSurveySlideRule = selectedUIScreeningSurveySlideRule
 				.getRelatedModelObject(ScreeningSurveySlideRule.class);
 
-		showModalModelObjectEditWindow(
-				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__EDIT_SCREENING_SURVEY_SLIDE_RULE,
+		showModalClosableEditWindow(
+				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_SCREENING_SURVEY_SLIDE_RULE,
 				new ScreeningSurveySlideRuleEditComponentWithController(
 						selectedScreeningSurveySlideRule, screeningSurveySlide
 								.getScreeningSurvey()),

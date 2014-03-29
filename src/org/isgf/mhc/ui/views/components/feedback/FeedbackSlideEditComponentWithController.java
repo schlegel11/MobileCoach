@@ -238,8 +238,8 @@ public class FeedbackSlideEditComponentWithController extends
 		val newFeedbackSlideRule = getScreeningSurveyAdministrationManagerService()
 				.feedbackSlideRuleCreate(feedbackSlide.getId());
 
-		showModalModelObjectEditWindow(
-				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__CREATE_FEEDBACK_SLIDE_RULE,
+		showModalClosableEditWindow(
+				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__CREATE_FEEDBACK_SLIDE_RULE,
 				new FeedbackSlideRuleEditComponentWithController(
 						newFeedbackSlideRule, relatedScreeningSurveyId),
 				new ExtendableButtonClickListener() {
@@ -266,8 +266,8 @@ public class FeedbackSlideEditComponentWithController extends
 		val selectedFeedbackSlideRule = selectedUIFeedbackSlideRule
 				.getRelatedModelObject(FeedbackSlideRule.class);
 
-		showModalModelObjectEditWindow(
-				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__EDIT_FEEDBACK_SLIDE_RULE,
+		showModalClosableEditWindow(
+				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_FEEDBACK_SLIDE_RULE,
 				new FeedbackSlideRuleEditComponentWithController(
 						selectedFeedbackSlideRule, relatedScreeningSurveyId),
 				new ExtendableButtonClickListener() {

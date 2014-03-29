@@ -152,9 +152,6 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 					.getImportButton()) {
 				// TODO import action
 			} else if (event.getButton() == interventionScreeningSurveyEditComponent
-					.getExportButton()) {
-				// TODO export action
-			} else if (event.getButton() == interventionScreeningSurveyEditComponent
 					.getRenameButton()) {
 				renameScreeningSurvey();
 			} else if (event.getButton() == interventionScreeningSurveyEditComponent
@@ -258,8 +255,8 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 		val screeningSurvey = selectedUIScreeningSurvey
 				.getRelatedModelObject(ScreeningSurvey.class);
 
-		showModalModelObjectEditWindow(
-				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__EDIT_SCREENING_SURVEY,
+		showModalClosableEditWindow(
+				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_SCREENING_SURVEY,
 				new ScreeningSurveyEditComponentWithController(screeningSurvey),
 				new ExtendableButtonClickListener() {
 					@Override

@@ -127,8 +127,8 @@ public class FeedbackEditComponentWithController extends FeedbackEditComponent {
 		val newFeedbackSlide = getScreeningSurveyAdministrationManagerService()
 				.feedbackSlideCreate(feedback.getId());
 
-		showModalModelObjectEditWindow(
-				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__CREATE_FEEDBACK_SLIDE,
+		showModalClosableEditWindow(
+				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__CREATE_FEEDBACK_SLIDE,
 				new FeedbackSlideEditComponentWithController(newFeedbackSlide,
 						feedback.getScreeningSurvey()),
 				new ExtendableButtonClickListener() {
@@ -153,8 +153,8 @@ public class FeedbackEditComponentWithController extends FeedbackEditComponent {
 		val selectedFeedbackSlide = selectedUIFeedbackSlide
 				.getRelatedModelObject(FeedbackSlide.class);
 
-		showModalModelObjectEditWindow(
-				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__EDIT_FEEDBACK_SLIDE,
+		showModalClosableEditWindow(
+				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_FEEDBACK_SLIDE,
 				new FeedbackSlideEditComponentWithController(
 						selectedFeedbackSlide, feedback.getScreeningSurvey()),
 				new ExtendableButtonClickListener() {

@@ -17,7 +17,7 @@ import org.isgf.mhc.model.server.MonitoringReplyRule;
 import org.isgf.mhc.model.server.MonitoringRule;
 import org.isgf.mhc.model.server.concepts.AbstractMonitoringRule;
 import org.isgf.mhc.tools.StringHelpers;
-import org.isgf.mhc.ui.views.components.AbstractModelObjectEditComponent;
+import org.isgf.mhc.ui.views.components.AbstractClosableEditComponent;
 import org.isgf.mhc.ui.views.components.interventions.monitoring_rules.MonitoringReplyRuleEditComponentWithController;
 import org.isgf.mhc.ui.views.components.interventions.monitoring_rules.MonitoringRuleEditComponentWithController;
 
@@ -324,7 +324,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 									: selectedMonitoringRuleId, isGotAnswerRule);
 		}
 
-		AbstractModelObjectEditComponent componentWithController;
+		AbstractClosableEditComponent componentWithController;
 		if (isMonitoringRule) {
 			componentWithController = new MonitoringRuleEditComponentWithController(
 					intervention, newAbstractMonitoringRule.getId());
@@ -333,8 +333,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 					intervention, newAbstractMonitoringRule.getId());
 		}
 
-		showModalModelObjectEditWindow(
-				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__CREATE_MONITORING_RULE,
+		showModalClosableEditWindow(
+				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__CREATE_MONITORING_RULE,
 				componentWithController, new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
@@ -357,7 +357,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 	public void editRule() {
 		log.debug("Edit rule");
 
-		AbstractModelObjectEditComponent componentWithController;
+		AbstractClosableEditComponent componentWithController;
 		if (isMonitoringRule) {
 			componentWithController = new MonitoringRuleEditComponentWithController(
 					intervention, selectedMonitoringRuleId);
@@ -366,8 +366,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 					intervention, selectedMonitoringRuleId);
 		}
 
-		showModalModelObjectEditWindow(
-				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__EDIT_MONITORING_RULE,
+		showModalClosableEditWindow(
+				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_MONITORING_RULE,
 				componentWithController, new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {

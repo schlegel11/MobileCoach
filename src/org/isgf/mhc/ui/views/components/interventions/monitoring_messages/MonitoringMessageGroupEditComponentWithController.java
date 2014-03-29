@@ -133,8 +133,8 @@ public class MonitoringMessageGroupEditComponentWithController extends
 		val newMonitoringMessage = getInterventionAdministrationManagerService()
 				.monitoringMessageCreate(monitoringMessageGroup.getId());
 
-		showModalModelObjectEditWindow(
-				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__CREATE_MONITORING_MESSAGE,
+		showModalClosableEditWindow(
+				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__CREATE_MONITORING_MESSAGE,
 				new MonitoringMessageEditComponentWithController(
 						newMonitoringMessage, interventionId),
 				new ExtendableButtonClickListener() {
@@ -161,8 +161,8 @@ public class MonitoringMessageGroupEditComponentWithController extends
 		val selectedMonitoringMessage = selectedUIMonitoringMessage
 				.getRelatedModelObject(MonitoringMessage.class);
 
-		showModalModelObjectEditWindow(
-				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__EDIT_MONITORING_MESSAGE,
+		showModalClosableEditWindow(
+				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_MONITORING_MESSAGE,
 				new MonitoringMessageEditComponentWithController(
 						selectedMonitoringMessage, interventionId),
 				new ExtendableButtonClickListener() {

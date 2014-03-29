@@ -259,8 +259,8 @@ public class ScreeningSurveyEditComponentWithController extends
 		val newScreeningSurveySlide = getScreeningSurveyAdministrationManagerService()
 				.screeningSurveySlideCreate(screeningSurvey.getId());
 
-		showModalModelObjectEditWindow(
-				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__CREATE_SCREENING_SURVEY_SLIDE,
+		showModalClosableEditWindow(
+				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__CREATE_SCREENING_SURVEY_SLIDE,
 				new ScreeningSurveySlideEditComponentWithController(
 						newScreeningSurveySlide),
 				new ExtendableButtonClickListener() {
@@ -309,8 +309,8 @@ public class ScreeningSurveyEditComponentWithController extends
 		val selectedScreeningSurveySlide = selectedUIScreeningSurveySlide
 				.getRelatedModelObject(ScreeningSurveySlide.class);
 
-		showModalModelObjectEditWindow(
-				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__EDIT_SCREENING_SURVEY_SLIDE,
+		showModalClosableEditWindow(
+				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_SCREENING_SURVEY_SLIDE,
 				new ScreeningSurveySlideEditComponentWithController(
 						selectedScreeningSurveySlide),
 				new ExtendableButtonClickListener() {
@@ -467,8 +467,8 @@ public class ScreeningSurveyEditComponentWithController extends
 		val selectedFeedback = selectedUIFeedback
 				.getRelatedModelObject(Feedback.class);
 
-		showModalModelObjectEditWindow(
-				AdminMessageStrings.ABSTRACT_MODEL_OBJECT_EDIT_WINDOW__EDIT_FEEDBACK,
+		showModalClosableEditWindow(
+				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_FEEDBACK,
 				new FeedbackEditComponentWithController(selectedFeedback),
 				new ExtendableButtonClickListener() {
 					@Override

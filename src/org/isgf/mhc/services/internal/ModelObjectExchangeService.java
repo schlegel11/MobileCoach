@@ -31,6 +31,10 @@ import org.isgf.mhc.tools.model.ExchangeModelObject;
  */
 @Log4j2
 public class ModelObjectExchangeService {
+	public enum EXCHANGE_FORMAT {
+		INTERVENTION, SCREENING_SURVEY, PARTICIPANTS
+	}
+
 	private static ModelObjectExchangeService	instance	= null;
 
 	private final DatabaseManagerService		databaseManagerService;
@@ -74,10 +78,13 @@ public class ModelObjectExchangeService {
 	 * 
 	 * @param modelObjects
 	 *            The {@link ModelObject}s to export
+	 * @param exchangeFormat
+	 *            The format of {@link ModelObject}s in this export
 	 * @return The zip-file containing the {@link ModelObject}s with meta data
 	 *         for import into another system
 	 */
-	public File exportModelObjects(final List<ModelObject> modelObjects) {
+	public File exportModelObjects(final List<ModelObject> modelObjects,
+			final EXCHANGE_FORMAT exchangeFormat) {
 		val exchangeModelObjects = new ArrayList<ExchangeModelObject>();
 
 		log.debug("Exporting model objects...");
@@ -146,7 +153,7 @@ public class ModelObjectExchangeService {
 
 		log.debug("Export done.");
 
-		return createZipFile(exchangeModelObjects);
+		return createZipFile(exchangeModelObjects, exchangeFormat);
 	}
 
 	/**
@@ -155,16 +162,20 @@ public class ModelObjectExchangeService {
 	 * 
 	 * @param zipFile
 	 *            The zip-file to import
+	 * @param expectedExchangeFormat
+	 *            The format of {@link ModelObject}s expected in this import
 	 * @return Imported {@link ModelObject}s
 	 * @throws FileNotFoundException
 	 * @throws SecurityException
 	 * @throws NoSuchMethodException
 	 */
-	public List<ModelObject> importModelObjects(final File zipFile)
+	public List<ModelObject> importModelObjects(final File zipFile,
+			final EXCHANGE_FORMAT expectedExchangeFormat)
 			throws FileNotFoundException, IOException {
 		val modelObjects = new ArrayList<ModelObject>();
 
-		val exchangeModelObjects = readZipFile(new ZipFile(zipFile));
+		val exchangeModelObjects = readZipFile(new ZipFile(zipFile),
+				expectedExchangeFormat);
 
 		log.debug("Importing model objects...");
 
@@ -276,11 +287,14 @@ public class ModelObjectExchangeService {
 	 * 
 	 * @param exchangeModelObjects
 	 *            The {@link ExchangeModelObject}s to save in the zip-file
+	 * @param exchangeFormat
+	 *            The format of {@link ModelObject}s in this export
 	 * @return The zip-file containing all {@link ExchangeModelObject}s
 	 */
 	@SneakyThrows
 	private File createZipFile(
-			final List<ExchangeModelObject> exchangeModelObjects) {
+			final List<ExchangeModelObject> exchangeModelObjects,
+			final EXCHANGE_FORMAT exchangeFormat) {
 
 		log.debug("Writing exchange model objects to zip file");
 
@@ -298,6 +312,7 @@ public class ModelObjectExchangeService {
 		val fileOutputStream = new FileOutputStream(zipFile);
 		@Cleanup
 		val zipOutputStream = new ZipOutputStream(fileOutputStream);
+		zipOutputStream.setComment(exchangeFormat.toString());
 
 		for (val exchangeModelObject : exchangeModelObjects) {
 			// Care for linked files
@@ -343,13 +358,21 @@ public class ModelObjectExchangeService {
 	 * 
 	 * @param zipFile
 	 *            The file to read from
+	 * @param expectedExchangeFormat
+	 *            The format of {@link ModelObject}s expected in this import
 	 * @return {@link List} of {@link ExchangeModelObject}s in the
 	 *         {@link ZipFile}
 	 * @throws IOException
 	 */
-	private List<ExchangeModelObject> readZipFile(final ZipFile zipFile)
-			throws IOException {
+	private List<ExchangeModelObject> readZipFile(final ZipFile zipFile,
+			final EXCHANGE_FORMAT expectedExchangeFormat) throws IOException {
 		val exchangeModelObjects = new ArrayList<ExchangeModelObject>();
+
+		if (!zipFile.getComment().equals(expectedExchangeFormat.toString())) {
+			throw new IOException("Wrong exchange format provided: "
+					+ expectedExchangeFormat + " expected, "
+					+ zipFile.getComment() + " received");
+		}
 
 		log.debug("Loading exchange model objects from zip file {}",
 				zipFile.getName());

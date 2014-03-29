@@ -4,7 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import org.isgf.mhc.conf.AdminMessageStrings;
-import org.isgf.mhc.ui.views.components.AbstractModelObjectEditComponent;
+import org.isgf.mhc.ui.views.components.AbstractClosableEditComponent;
 import org.isgf.mhc.ui.views.components.basics.MediaObjectIntegrationComponentWithController;
 import org.isgf.mhc.ui.views.components.basics.VariableTextFieldComponent;
 
@@ -29,7 +29,7 @@ import com.vaadin.ui.VerticalLayout;
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class FeedbackSlideEditComponent extends
-		AbstractModelObjectEditComponent {
+		AbstractClosableEditComponent {
 
 	/*- VaadinEditorProperties={"grid":"RegularGrid,20","showGrid":true,"snapToGrid":true,"snapToObject":true,"movingGuides":false,"snappingDistance":10} */
 

@@ -24,6 +24,7 @@ import org.isgf.mhc.model.server.types.ScreeningSurveySlideQuestionTypes;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.ModelObjectExchangeService;
+import org.isgf.mhc.services.internal.ModelObjectExchangeService.EXCHANGE_FORMAT;
 import org.isgf.mhc.services.internal.VariablesManagerService;
 import org.isgf.mhc.tools.GlobalUniqueIdGenerator;
 import org.isgf.mhc.tools.StringValidator;
@@ -126,8 +127,8 @@ public class ScreeningSurveyAdministrationManagerService {
 		modelObjectsToExport.add(screeningSurvey);
 		// TODO add also other relevant model objects
 
-		return modelObjectExchangeService
-				.exportModelObjects(modelObjectsToExport);
+		return modelObjectExchangeService.exportModelObjects(
+				modelObjectsToExport, EXCHANGE_FORMAT.SCREENING_SURVEY);
 	}
 
 	public void screeningSurveySetActive(final ScreeningSurvey screeningSurvey,

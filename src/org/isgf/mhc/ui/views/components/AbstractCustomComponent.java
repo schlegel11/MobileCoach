@@ -174,13 +174,13 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	}
 
 	/**
-	 * Shows a model window to edit a {@link ModelObject}
+	 * Shows a model and closable edit window
 	 * 
 	 * @param title
 	 *            The title of the window
 	 * @param modelObjectToEdit
 	 *            The {@link ModelObject} to edit
-	 * @param modelObjectEditComponent
+	 * @param closableEditComponent
 	 *            The appropriate {@link AbstractStringValueEditComponent} to
 	 *            create
 	 * @param okButtonClickListener
@@ -191,9 +191,9 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	 *            The placeholders to use in the title
 	 * @return The shown window
 	 */
-	protected Window showModalModelObjectEditWindow(
+	protected Window showModalClosableEditWindow(
 			final AdminMessageStrings title,
-			final AbstractModelObjectEditComponent modelObjectEditComponent,
+			final AbstractClosableEditComponent closableEditComponent,
 			final ExtendableButtonClickListener closeButtonClickListener,
 			final Object... titleValues) {
 		val modalWindow = new Window(
@@ -201,18 +201,18 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 		modalWindow.setModal(true);
 		modalWindow.setResizable(false);
 		modalWindow.setClosable(false);
-		modalWindow.setContent(modelObjectEditComponent);
+		modalWindow.setContent(closableEditComponent);
 
 		// Register close button listener if provided or a simple window closer
 		// if not
 		if (closeButtonClickListener != null) {
 			closeButtonClickListener.setBelongingWindow(modalWindow);
 			closeButtonClickListener
-					.setBelongingComponent(modelObjectEditComponent);
-			modelObjectEditComponent
+					.setBelongingComponent(closableEditComponent);
+			closableEditComponent
 					.registerOkButtonListener(closeButtonClickListener);
 		} else {
-			modelObjectEditComponent
+			closableEditComponent
 					.registerOkButtonListener(new Button.ClickListener() {
 						@Override
 						public void buttonClick(final ClickEvent event) {

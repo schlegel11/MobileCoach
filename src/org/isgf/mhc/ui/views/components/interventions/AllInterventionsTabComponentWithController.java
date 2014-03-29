@@ -1,5 +1,6 @@
 package org.isgf.mhc.ui.views.components.interventions;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -16,6 +17,8 @@ import org.isgf.mhc.model.ui.UIIntervention;
 import org.isgf.mhc.tools.OnDemandFileDownloader;
 import org.isgf.mhc.tools.OnDemandFileDownloader.OnDemandStreamResource;
 import org.isgf.mhc.ui.views.MainView;
+import org.isgf.mhc.ui.views.components.basics.FileUploadComponentWithController;
+import org.isgf.mhc.ui.views.components.basics.FileUploadComponentWithController.UploadListener;
 import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -144,10 +147,7 @@ public class AllInterventionsTabComponentWithController extends
 				createIntervention();
 			} else if (event.getButton() == allInterventionsEditComponent
 					.getImportButton()) {
-				// TODO import action
-			} else if (event.getButton() == allInterventionsEditComponent
-					.getExportButton()) {
-				// TODO export action
+				importIntervention();
 			} else if (event.getButton() == allInterventionsEditComponent
 					.getRenameButton()) {
 				renameIntervention();
@@ -198,6 +198,22 @@ public class AllInterventionsTabComponentWithController extends
 						closeWindow();
 					}
 				}, null);
+	}
+
+	public void importIntervention() {
+		log.debug("Import intervention");
+
+		val fileUploadComponentWithController = new FileUploadComponentWithController();
+		fileUploadComponentWithController.setListener(new UploadListener() {
+			@Override
+			public void fileUploadReceived(final File file) {
+				log.debug("File upload sucessful, starting import of intervention");
+				// TODO import action
+			}
+		});
+		showModalClosableEditWindow(
+				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__IMPORT_INTERVENTION,
+				fileUploadComponentWithController, null);
 	}
 
 	public void renameIntervention() {

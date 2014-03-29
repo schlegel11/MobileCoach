@@ -30,6 +30,7 @@ import org.isgf.mhc.model.server.types.MediaObjectTypes;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.ModelObjectExchangeService;
+import org.isgf.mhc.services.internal.ModelObjectExchangeService.EXCHANGE_FORMAT;
 import org.isgf.mhc.services.internal.VariablesManagerService;
 import org.isgf.mhc.tools.BCrypt;
 import org.isgf.mhc.tools.StringValidator;
@@ -224,8 +225,8 @@ public class InterventionAdministrationManagerService {
 		modelObjectsToExport.add(intervention);
 		// TODO add also other relevant model objects
 
-		return modelObjectExchangeService
-				.exportModelObjects(modelObjectsToExport);
+		return modelObjectExchangeService.exportModelObjects(
+				modelObjectsToExport, EXCHANGE_FORMAT.INTERVENTION);
 	}
 
 	public void interventionDelete(final Intervention interventionToDelete)
