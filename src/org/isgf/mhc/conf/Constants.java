@@ -18,7 +18,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public class Constants {
-	private static boolean		injectionPerformed				= false;
+	private static boolean		injectionPerformed					= false;
 
 	/**
 	 * Debugging is only activated when IS_LIVE_SYSTEM is false, but it should
@@ -26,58 +26,63 @@ public class Constants {
 	 * 
 	 * CAUTION: Can NOT be defined in configuration file
 	 */
-	public static final boolean	IS_LIVE_SYSTEM					= false;
+	public static final boolean	IS_LIVE_SYSTEM						= false;
 
 	/**
 	 * Basic debugging configuration
 	 * 
 	 * CAUTION: Can NOT be defined in configuration file
 	 */
-	public static final boolean	RUN_TESTS_AT_STARTUP			= true;
+	public static final boolean	RUN_TESTS_AT_STARTUP				= true;
 
 	/**
 	 * Basic configuration
 	 */
 	@Getter
-	private static boolean		listOpenScreenSurveysOnBaseURL	= false;
+	private static boolean		listOpenScreenSurveysOnBaseURL		= false;
 
 	@Getter
-	private static String		mediaObjectLinkingBaseURL		= "https://f.mobile-coach.eu/";
+	private static String		mediaObjectLinkingBaseURL			= "https://f.mobile-coach.eu/";
 
 	/**
 	 * Admin configuration
 	 */
 	@Getter
-	private static String		defaultAdminUsername			= "admin";
+	private static String		defaultAdminUsername				= "admin";
 	@Getter
-	private static String		defaultAdminPassword			= "admin";
+	private static String		defaultAdminPassword				= "admin";
+
+	// CAUTION! DO NEVER ACTIVATE THIS ON PUBLIC SERVERS! IT'S ONLY FOR
+	// DEVELOPMENT
+	@Getter
+	private static boolean		automaticallyLoginAsDefaultAdmin	= false;
 
 	@Getter
-	private static Locale		adminLocale						= Locale.ENGLISH;
+	private static Locale		adminLocale							= Locale.ENGLISH;
 
 	@Getter
-	private static String		loggingFolder					= "/mhc_data/logs";
+	private static String		loggingFolder						= "/mhc_data/logs";
 	@Getter
-	private static String		storageFolder					= "/mhc_data/FileStorage";
+	private static String		storageFolder						= "/mhc_data/FileStorage";
 	@Getter
-	private static String		templatesFolder					= "/mhc_data/templates";
+	private static String		templatesFolder						= "/mhc_data/templates";
 
 	@Getter
-	private static String		fileExtension					= ".mhc";
+	private static String		fileExtension						= ".mhc";
 
 	/**
 	 * Database configuration
 	 */
 	@Getter
-	private static String		databaseHost					= "127.0.0.1";
+	private static String		databaseHost						= "127.0.0.1";
 	@Getter
-	private static int			databasePort					= 27017;
+	private static int			databasePort						= 27017;
 	@Getter
-	private static String		databaseUser					= "mhc";
+	private static String		databaseUser						= "mhc";
 	@Getter
-	private static String		databasePassword				= "mhc";
+	private static String		databasePassword					= "mhc";
 	@Getter
-	private static String		databaseName					= "mhc";
+	private static String		databaseName						= "mhc";
 
 	/**
 	 * Injects a specific configuration file (if provided as system parameter

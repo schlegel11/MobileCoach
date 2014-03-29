@@ -4,6 +4,7 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.conf.AdminMessageStrings;
+import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.ui.AdminNavigatorUI;
 import org.isgf.mhc.ui.views.components.basics.AboutTextComponent;
@@ -45,24 +46,28 @@ public class LoginView extends AbstractView implements View {
 	private class LoginButtonClickListener implements ClickListener {
 		@Override
 		public void buttonClick(final ClickEvent event) {
-			// TODO DEBUG LOGIN
-			getAdminUI().login("admin", "admin");
-			/*
-			 * if (!loginViewComponent.getUsernameField().isValid()) {
-			 * getAdminUI().showWarningNotification(
-			 * AdminMessageStrings.NOTIFICATION__NO_VALID_USERNAME);
-			 * return;
-			 * }
-			 * if (!loginViewComponent.getPasswordField().isValid()) {
-			 * getAdminUI().showWarningNotification(
-			 * AdminMessageStrings.NOTIFICATION__NO_VALID_PASSWORD);
-			 * return;
-			 * }
-			 * 
-			 * getAdminUI().login(
-			 * loginViewComponent.getUsernameField().getValue(),
-			 * loginViewComponent.getPasswordField().getValue());
-			 */
+			if (Constants.isAutomaticallyLoginAsDefaultAdmin()) {
+				log.warn("AUTOMATIC DEBUG LOGIN - BE CAREFUL");
+				getAdminUI().login(Constants.getDefaultAdminUsername(),
+						Constants.getDefaultAdminPassword());
+			} else {
+				if (!loginViewComponent.getUsernameField().isValid()) {
+					getAdminUI()
+							.showWarningNotification(
+									AdminMessageStrings.NOTIFICATION__NO_VALID_USERNAME);
+					return;
+				}
+				if (!loginViewComponent.getPasswordField().isValid()) {
+					getAdminUI()
+							.showWarningNotification(
+									AdminMessageStrings.NOTIFICATION__NO_VALID_PASSWORD);
+					return;
+				}
+
+				getAdminUI().login(
+						loginViewComponent.getUsernameField().getValue(),
+						loginViewComponent.getPasswordField().getValue());
+			}
 		}
 	}
 
