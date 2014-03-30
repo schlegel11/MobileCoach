@@ -108,8 +108,7 @@ public class FileUploadComponentWithController extends FileUploadComponent {
 
 			reset();
 
-			getAdminUI().showInformationNotification(
-					AdminMessageStrings.NOTIFICATION__UPLOAD_SUCCESSFUL);
+			getCancelButton().click();
 		}
 
 		@Override

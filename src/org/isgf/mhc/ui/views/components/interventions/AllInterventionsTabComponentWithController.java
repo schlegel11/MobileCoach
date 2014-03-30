@@ -9,6 +9,7 @@ import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.lang.NullArgumentException;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Constants;
@@ -127,8 +128,9 @@ public class AllInterventionsTabComponentWithController extends
 
 					@Override
 					public String getFilename() {
-						return selectedUIIntervention.getInterventionName()
-								.replaceAll("[^A-Za-z0-9_. ]+", "_")
+						return "Intervention_"
+								+ selectedUIIntervention.getInterventionName()
+										.replaceAll("[^A-Za-z0-9_. ]+", "_")
 								+ Constants.getFileExtension();
 					}
 				});
@@ -156,7 +158,7 @@ public class AllInterventionsTabComponentWithController extends
 				editIntervention();
 			} else if (event.getButton() == allInterventionsEditComponent
 					.getDuplicateButton()) {
-				// TODO duplicate action
+				duplicateIntervention();
 			} else if (event.getButton() == allInterventionsEditComponent
 					.getDeleteButton()) {
 				deleteIntervention();
@@ -200,6 +202,47 @@ public class AllInterventionsTabComponentWithController extends
 				}, null);
 	}
 
+	public void duplicateIntervention() {
+		log.debug("Duplicate intervention");
+
+		final File temporaryBackupFile = getInterventionAdministrationManagerService()
+				.interventionExport(
+						selectedUIIntervention
+								.getRelatedModelObject(Intervention.class));
+
+		try {
+			final Intervention importedIntervention = getInterventionAdministrationManagerService()
+					.interventionImport(temporaryBackupFile);
+
+			if (importedIntervention == null) {
+				throw new NullArgumentException(
+						"Imported intervention not found in import");
+			}
+
+			// Adapt UI
+			beanContainer.addItem(importedIntervention.getId(),
+					UIIntervention.class.cast(importedIntervention
+							.toUIModelObject()));
+			getAllInterventionsEditComponent().getAllInterventionsTable()
+					.select(importedIntervention.getId());
+			getAllInterventionsEditComponent().getAllInterventionsTable()
+					.sort();
+
+			getAdminUI().showInformationNotification(
+					AdminMessageStrings.NOTIFICATION__INTERVENTION_DUPLICATED);
+		} catch (final Exception e) {
+			getAdminUI()
+					.showWarningNotification(
+							AdminMessageStrings.NOTIFICATION__INTERVENTION_DUPLICATION_FAILED);
+		}
+
+		try {
+			temporaryBackupFile.delete();
+		} catch (final Exception f) {
+			// Do nothing
+		}
+	}
+
 	public void importIntervention() {
 		log.debug("Import intervention");
 
@@ -208,7 +251,40 @@ public class AllInterventionsTabComponentWithController extends
 			@Override
 			public void fileUploadReceived(final File file) {
 				log.debug("File upload sucessful, starting import of intervention");
-				// TODO import action
+
+				try {
+					final Intervention importedIntervention = getInterventionAdministrationManagerService()
+							.interventionImport(file);
+
+					if (importedIntervention == null) {
+						throw new NullArgumentException(
+								"Imported intervention not found in import");
+					}
+
+					// Adapt UI
+					beanContainer.addItem(importedIntervention.getId(),
+							UIIntervention.class.cast(importedIntervention
+									.toUIModelObject()));
+					getAllInterventionsEditComponent()
+							.getAllInterventionsTable().select(
+									importedIntervention.getId());
+					getAllInterventionsEditComponent()
+							.getAllInterventionsTable().sort();
+
+					getAdminUI()
+							.showInformationNotification(
+									AdminMessageStrings.NOTIFICATION__INTERVENTION_IMPORTED);
+				} catch (final Exception e) {
+					getAdminUI()
+							.showWarningNotification(
+									AdminMessageStrings.NOTIFICATION__INTERVENTION_IMPORT_FAILED);
+				} finally {
+					try {
+						file.delete();
+					} catch (final Exception f) {
+						// Do nothing
+					}
+				}
 			}
 		});
 		showModalClosableEditWindow(

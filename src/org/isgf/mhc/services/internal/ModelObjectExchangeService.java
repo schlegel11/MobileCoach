@@ -369,6 +369,9 @@ public class ModelObjectExchangeService {
 		val exchangeModelObjects = new ArrayList<ExchangeModelObject>();
 
 		if (!zipFile.getComment().equals(expectedExchangeFormat.toString())) {
+			log.warn("Wrong exchange format provided: "
+					+ expectedExchangeFormat + " expected, "
+					+ zipFile.getComment() + " received");
 			throw new IOException("Wrong exchange format provided: "
 					+ expectedExchangeFormat + " expected, "
 					+ zipFile.getComment() + " received");

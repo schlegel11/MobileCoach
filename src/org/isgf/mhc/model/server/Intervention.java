@@ -102,6 +102,13 @@ public class Intervention extends ModelObject {
 			final List<ModelObject> exportList) {
 		exportList.add(this);
 
+		// Add screening surveys
+		for (val screeningSurvey : ModelObject.find(ScreeningSurvey.class,
+				Queries.SCREENING_SURVEY__BY_INTERVENTION, getId())) {
+			screeningSurvey
+					.collectThisAndRelatedModelObjectsForExport(exportList);
+		}
+
 		// Add intervention variables with values
 		for (val interventionVariableWithValue : ModelObject.find(
 				InterventionVariableWithValue.class,

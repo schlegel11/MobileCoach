@@ -1,5 +1,6 @@
 package org.isgf.mhc.ui.views.components.interventions;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -8,6 +9,7 @@ import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.lang.NullArgumentException;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Constants;
@@ -16,6 +18,8 @@ import org.isgf.mhc.model.server.ScreeningSurvey;
 import org.isgf.mhc.model.ui.UIScreeningSurvey;
 import org.isgf.mhc.tools.OnDemandFileDownloader;
 import org.isgf.mhc.tools.OnDemandFileDownloader.OnDemandStreamResource;
+import org.isgf.mhc.ui.views.components.basics.FileUploadComponentWithController;
+import org.isgf.mhc.ui.views.components.basics.FileUploadComponentWithController.UploadListener;
 import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;
 import org.isgf.mhc.ui.views.components.screening_survey.ScreeningSurveyEditComponentWithController;
 
@@ -126,9 +130,10 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 
 					@Override
 					public String getFilename() {
-						return intervention.getName().replaceAll(
-								"[^A-Za-z0-9_. ]+", "_")
-								+ "_"
+						return "Intervention_"
+								+ intervention.getName().replaceAll(
+										"[^A-Za-z0-9_. ]+", "_")
+								+ "_Screening_Survey_"
 								+ selectedUIScreeningSurvey
 										.getScreeningSurveyName().replaceAll(
 												"[^A-Za-z0-9_. ]+", "_")
@@ -150,7 +155,7 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 				createScreeningSurvey();
 			} else if (event.getButton() == interventionScreeningSurveyEditComponent
 					.getImportButton()) {
-				// TODO import action
+				importScreeningSurvey();
 			} else if (event.getButton() == interventionScreeningSurveyEditComponent
 					.getRenameButton()) {
 				renameScreeningSurvey();
@@ -159,7 +164,7 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 				editScreeningSurvey();
 			} else if (event.getButton() == interventionScreeningSurveyEditComponent
 					.getDuplicateButton()) {
-				// TODO duplicate action
+				duplicateScreeningSurvey();
 			} else if (event.getButton() == interventionScreeningSurveyEditComponent
 					.getDeleteButton()) {
 				deleteScreeningSurvey();
@@ -206,6 +211,105 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 						closeWindow();
 					}
 				}, null);
+	}
+
+	public void duplicateScreeningSurvey() {
+		log.debug("Duplicate screening survey");
+
+		final File temporaryBackupFile = getScreeningSurveyAdministrationManagerService()
+				.screeningSurveyExport(
+						selectedUIScreeningSurvey
+								.getRelatedModelObject(ScreeningSurvey.class));
+
+		try {
+			final ScreeningSurvey importedScreeningSurvey = getScreeningSurveyAdministrationManagerService()
+					.screeningSurveyImport(temporaryBackupFile,
+							intervention.getId());
+
+			if (importedScreeningSurvey == null) {
+				throw new NullArgumentException(
+						"Imported screening survey not found in import");
+			} else {
+				getScreeningSurveyAdministrationManagerService()
+						.screeningSurveyRecreateGlobalUniqueId(
+								importedScreeningSurvey);
+			}
+
+			// Adapt UI
+			beanContainer.addItem(importedScreeningSurvey.getId(),
+					UIScreeningSurvey.class.cast(importedScreeningSurvey
+							.toUIModelObject()));
+			getInterventionScreeningSurveyEditComponent()
+					.getScreeningSurveysTable().select(
+							importedScreeningSurvey.getId());
+			getInterventionScreeningSurveyEditComponent()
+					.getScreeningSurveysTable().sort();
+
+			getAdminUI()
+					.showInformationNotification(
+							AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_DUPLICATED);
+		} catch (final Exception e) {
+			getAdminUI()
+					.showWarningNotification(
+							AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_DUPLICATION_FAILED);
+		}
+
+		try {
+			temporaryBackupFile.delete();
+		} catch (final Exception f) {
+			// Do nothing
+		}
+	}
+
+	public void importScreeningSurvey() {
+		log.debug("Import screening survey");
+
+		val fileUploadComponentWithController = new FileUploadComponentWithController();
+		fileUploadComponentWithController.setListener(new UploadListener() {
+			@Override
+			public void fileUploadReceived(final File file) {
+				log.debug("File upload sucessful, starting import of screening survey");
+
+				try {
+					final ScreeningSurvey importedScreeningSurvey = getScreeningSurveyAdministrationManagerService()
+							.screeningSurveyImport(file, intervention.getId());
+
+					if (importedScreeningSurvey == null) {
+						throw new NullArgumentException(
+								"Imported screening survey not found in import");
+					}
+
+					// Adapt UI
+					beanContainer.addItem(importedScreeningSurvey.getId(),
+							UIScreeningSurvey.class
+									.cast(importedScreeningSurvey
+											.toUIModelObject()));
+					getInterventionScreeningSurveyEditComponent()
+							.getScreeningSurveysTable().select(
+									importedScreeningSurvey.getId());
+					getInterventionScreeningSurveyEditComponent()
+							.getScreeningSurveysTable().sort();
+
+					getAdminUI()
+							.showInformationNotification(
+									AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_IMPORTED);
+				} catch (final Exception e) {
+					getAdminUI()
+							.showWarningNotification(
+									AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_IMPORT_FAILED);
+				} finally {
+					try {
+						file.delete();
+					} catch (final Exception f) {
+						// Do nothing
+					}
+				}
+			}
+		});
+		showModalClosableEditWindow(
+				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__IMPORT_SCREENING_SURVEY,
+				fileUploadComponentWithController, null);
+
 	}
 
 	public void renameScreeningSurvey() {

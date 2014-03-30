@@ -1,7 +1,11 @@
 package org.isgf.mhc.services;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
@@ -218,6 +222,31 @@ public class InterventionAdministrationManagerService {
 		intervention.setMessagingActive(value);
 
 		databaseManagerService.saveModelObject(intervention);
+	}
+
+	public Intervention interventionImport(final File file)
+			throws FileNotFoundException, IOException {
+		val importedModelObjects = modelObjectExchangeService
+				.importModelObjects(file, EXCHANGE_FORMAT.INTERVENTION);
+
+		for (val modelObject : importedModelObjects) {
+			if (modelObject instanceof Intervention) {
+				val intervention = (Intervention) modelObject;
+
+				val dateFormat = DateFormat.getDateTimeInstance(
+						DateFormat.MEDIUM, DateFormat.MEDIUM,
+						Constants.getAdminLocale());
+				val date = dateFormat.format(Calendar.getInstance().getTime());
+				intervention
+						.setName(intervention.getName() + " (" + date + ")");
+
+				databaseManagerService.saveModelObject(intervention);
+
+				return intervention;
+			}
+		}
+
+		return null;
 	}
 
 	public File interventionExport(final Intervention intervention) {

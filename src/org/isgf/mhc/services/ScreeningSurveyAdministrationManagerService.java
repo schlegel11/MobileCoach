@@ -2,7 +2,11 @@ package org.isgf.mhc.services;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
@@ -11,6 +15,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
+import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.server.Feedback;
@@ -96,6 +101,14 @@ public class ScreeningSurveyAdministrationManagerService {
 		return screeningSurvey;
 	}
 
+	public void screeningSurveyRecreateGlobalUniqueId(
+			final ScreeningSurvey importedScreeningSurvey) {
+		importedScreeningSurvey.setGlobalUniqueId(GlobalUniqueIdGenerator
+				.createGlobalUniqueId());
+
+		databaseManagerService.saveModelObject(importedScreeningSurvey);
+	}
+
 	public void screeningSurveyChangeName(
 			final ScreeningSurvey screeningSurvey, final String newName) {
 		if (newName.equals("")) {
@@ -119,6 +132,34 @@ public class ScreeningSurveyAdministrationManagerService {
 		screeningSurvey.setTemplatePath(newTemplatePath);
 
 		databaseManagerService.saveModelObject(screeningSurvey);
+	}
+
+	public ScreeningSurvey screeningSurveyImport(final File file,
+			final ObjectId interventionId) throws FileNotFoundException,
+			IOException {
+		val importedModelObjects = modelObjectExchangeService
+				.importModelObjects(file, EXCHANGE_FORMAT.SCREENING_SURVEY);
+
+		for (val modelObject : importedModelObjects) {
+			if (modelObject instanceof ScreeningSurvey) {
+				val screeningSurvey = (ScreeningSurvey) modelObject;
+
+				screeningSurvey.setIntervention(interventionId);
+
+				val dateFormat = DateFormat.getDateTimeInstance(
+						DateFormat.MEDIUM, DateFormat.MEDIUM,
+						Constants.getAdminLocale());
+				val date = dateFormat.format(Calendar.getInstance().getTime());
+				screeningSurvey.setName(screeningSurvey.getName() + " (" + date
+						+ ")");
+
+				databaseManagerService.saveModelObject(screeningSurvey);
+
+				return screeningSurvey;
+			}
+		}
+
+		return null;
 	}
 
 	public File screeningSurveyExport(final ScreeningSurvey screeningSurvey) {

@@ -92,7 +92,8 @@ public class MonitoringRule extends AbstractMonitoringRule {
 		// Add monitoring reply rule
 		for (val monitoringReplyRule : ModelObject.find(
 				MonitoringReplyRule.class,
-				Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE, getId())) {
+				Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE, getId(),
+				getId())) {
 			monitoringReplyRule
 					.collectThisAndRelatedModelObjectsForExport(exportList);
 		}
