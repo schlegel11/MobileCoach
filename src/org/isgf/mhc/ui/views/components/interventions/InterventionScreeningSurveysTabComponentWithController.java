@@ -43,7 +43,7 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 	private final Intervention									intervention;
 
 	private UIScreeningSurvey									selectedUIScreeningSurvey		= null;
-	private BeanItem<UIScreeningSurvey>							selectedUIInterventionBeanItem	= null;
+	private BeanItem<UIScreeningSurvey>							selectedUIScreeningSurveyBeanItem	= null;
 
 	private final BeanContainer<ObjectId, UIScreeningSurvey>	beanContainer;
 
@@ -57,8 +57,6 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 		val screeningSurveysEditComponent = getInterventionScreeningSurveyEditComponent();
 		val screeningSurveysTable = getInterventionScreeningSurveyEditComponent()
 				.getScreeningSurveysTable();
-		screeningSurveysTable.setSelectable(true);
-		screeningSurveysTable.setImmediate(true);
 
 		// table content
 		beanContainer = createBeanContainerForModelObjects(
@@ -84,12 +82,12 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 				if (objectId == null) {
 					screeningSurveysEditComponent.setNothingSelected();
 					selectedUIScreeningSurvey = null;
-					selectedUIInterventionBeanItem = null;
+					selectedUIScreeningSurveyBeanItem = null;
 				} else {
 					selectedUIScreeningSurvey = getUIModelObjectFromTableByObjectId(
 							screeningSurveysTable, UIScreeningSurvey.class,
 							objectId);
-					selectedUIInterventionBeanItem = getBeanItemFromTableByObjectId(
+					selectedUIScreeningSurveyBeanItem = getBeanItemFromTableByObjectId(
 							screeningSurveysTable, UIScreeningSurvey.class,
 							objectId);
 					screeningSurveysEditComponent.setSomethingSelected();
@@ -338,7 +336,7 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 						}
 
 						// Adapt UI
-						getStringItemProperty(selectedUIInterventionBeanItem,
+						getStringItemProperty(selectedUIScreeningSurveyBeanItem,
 								UIScreeningSurvey.SCREENING_SURVEY_NAME)
 								.setValue(
 										selectedUIScreeningSurvey

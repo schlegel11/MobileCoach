@@ -13,6 +13,7 @@ public class Queries {
 
 	public static final String	SCREENING_SURVEY__ACTIVE_TRUE																= "{'active':true}";
 	public static final String	SCREENING_SURVEY__BY_INTERVENTION_AND_ACTIVE_TRUE											= "{'intervention':#,'active':true}";
+	public static final String	SCREENING_SURVEY__BY_INTERVENTION_AND_GLOBAL_UNIQUE_ID										= "{'intervention':#,'globalUniqueId':#}";
 
 	public static final String	AUTHOR__BY_USERNAME																			= "{'username':#}";
 	public static final String	AUTHOR__ADMIN_TRUE																			= "{'admin':true}";

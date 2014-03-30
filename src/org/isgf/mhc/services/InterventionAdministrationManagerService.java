@@ -918,18 +918,72 @@ public class InterventionAdministrationManagerService {
 	}
 
 	// Participant
+	public List<Participant> participantsImport(final File file,
+			final ObjectId interventionId) throws FileNotFoundException,
+			IOException {
+		val importedParticipants = new ArrayList<Participant>();
+
+		val importedModelObjects = modelObjectExchangeService
+				.importModelObjects(file, EXCHANGE_FORMAT.PARTICIPANTS);
+
+		for (val modelObject : importedModelObjects) {
+			if (modelObject instanceof Participant) {
+				val participant = (Participant) modelObject;
+
+				participant.setIntervention(interventionId);
+				databaseManagerService.saveModelObject(participant);
+
+				importedParticipants.add(participant);
+			}
+		}
+
+		return importedParticipants;
+	}
+
 	public File participantsExport(final List<Participant> participants) {
 		final List<ModelObject> modelObjectsToExport = new ArrayList<ModelObject>();
 
-		log.debug("Recursively collect all model objects related to the participant");
+		log.debug("Recursively collect all model objects related to the participants");
 		for (val participant : participants) {
 			participant
 					.collectThisAndRelatedModelObjectsForExport(modelObjectsToExport);
 		}
 
-		log.debug("Export participant");
+		log.debug("Export participants");
 		return modelObjectExchangeService.exportModelObjects(
 				modelObjectsToExport, EXCHANGE_FORMAT.PARTICIPANTS);
+	}
+
+	public void participantsSetOrganization(
+			final List<Participant> participants, final String newValue) {
+		for (val participant : participants) {
+			participant.setOrganization(newValue);
+
+			databaseManagerService.saveModelObject(participant);
+		}
+	}
+
+	public void participantsSetOrganizationUnit(
+			final List<Participant> participants, final String newValue) {
+		for (val participant : participants) {
+			participant.setOrganizationUnit(newValue);
+
+			databaseManagerService.saveModelObject(participant);
+		}
+	}
+
+	public void participantsSwitchMessaging(final List<Participant> participants) {
+		for (val participant : participants) {
+			participant.setMessagingActive(!participant.isMessagingActive());
+
+			databaseManagerService.saveModelObject(participant);
+		}
+	}
+
+	public void participantsDelete(final List<Participant> participantsToDelete) {
+		for (val participantToDelete : participantsToDelete) {
+			databaseManagerService.deleteModelObject(participantToDelete);
+		}
 	}
 
 	/*
@@ -1076,6 +1130,12 @@ public class InterventionAdministrationManagerService {
 								: Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_NO_ANSWER,
 						Queries.MONITORING_RULE__SORT_BY_ORDER_ASC,
 						monitoringRuleId, parentMonitoringReplyRuleId);
+	}
+
+	public Iterable<Participant> getAllParticipantsOfIntervention(
+			final ObjectId interventionId) {
+		return databaseManagerService.findModelObjects(Participant.class,
+				Queries.PARTICIPANT__BY_INTERVENTION, interventionId);
 	}
 
 	public MonitoringReplyRule getMonitoringReplyRule(

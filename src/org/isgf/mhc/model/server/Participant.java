@@ -1,5 +1,6 @@
 package org.isgf.mhc.model.server;
 
+import java.util.Date;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -10,8 +11,13 @@ import lombok.Setter;
 import lombok.val;
 
 import org.bson.types.ObjectId;
+import org.isgf.mhc.conf.AdminMessageStrings;
+import org.isgf.mhc.conf.ImplementationContants;
+import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
+import org.isgf.mhc.model.ui.UIModelObject;
+import org.isgf.mhc.model.ui.UIParticipant;
 
 /**
  * {@link ModelObject} to represent an {@link Participant}
@@ -101,6 +107,46 @@ public class Participant extends ModelObject {
 	@Setter
 	@NonNull
 	private String		organizationUnit;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.isgf.mhc.model.ModelObject#toUIModelObject()
+	 */
+	@Override
+	public UIModelObject toUIModelObject() {
+		val screeningSurvey = ModelObject.findOne(ScreeningSurvey.class,
+				Queries.SCREENING_SURVEY__BY_INTERVENTION_AND_GLOBAL_UNIQUE_ID,
+				intervention, assignedScreeningSurveyGlobalUniqueId);
+
+		String screeningSurveyName;
+		if (screeningSurvey == null) {
+			screeningSurveyName = Messages
+					.getAdminString(AdminMessageStrings.UI_MODEL__UNKNOWN);
+		} else if (screeningSurvey.getName().equals("")) {
+			screeningSurveyName = ImplementationContants.DEFAULT_OBJECT_NAME;
+		} else {
+			screeningSurveyName = screeningSurvey.getName();
+		}
+
+		val participant = new UIParticipant(
+				nickname.equals("") ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+						: nickname,
+				organization,
+				organizationUnit,
+				new Date(createdTimestamp),
+				screeningSurveyName,
+				messagingActive ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE),
+				messagingActive);
+
+		participant.setRelatedModelObject(this);
+
+		return participant;
+	}
 
 	/*
 	 * (non-Javadoc)
