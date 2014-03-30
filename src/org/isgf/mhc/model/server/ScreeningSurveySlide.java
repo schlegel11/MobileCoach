@@ -1,5 +1,7 @@
 package org.isgf.mhc.model.server;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -159,6 +161,34 @@ public class ScreeningSurveySlide extends ModelObject {
 		screeningSurveySlide.setRelatedModelObject(this);
 
 		return screeningSurveySlide;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.isgf.mhc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
+	 * (java.util.List)
+	 */
+	@Override
+	protected void collectThisAndRelatedModelObjectsForExport(
+			final List<ModelObject> exportList) {
+		exportList.add(this);
+
+		// Linked media object
+		if (linkedMediaObject != null) {
+			exportList.add(ModelObject
+					.get(MediaObject.class, linkedMediaObject));
+		}
+
+		// Add screening survey slide rule
+		for (val screeningSurveySlideRule : ModelObject.find(
+				ScreeningSurveySlideRule.class,
+				Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE,
+				getId())) {
+			screeningSurveySlideRule
+					.collectThisAndRelatedModelObjectsForExport(exportList);
+		}
 	}
 
 	/*

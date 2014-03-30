@@ -1,5 +1,7 @@
 package org.isgf.mhc.model.server;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -96,6 +98,32 @@ public class FeedbackSlide extends ModelObject {
 		feedbackSlide.setRelatedModelObject(this);
 
 		return feedbackSlide;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.isgf.mhc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
+	 * (java.util.List)
+	 */
+	@Override
+	protected void collectThisAndRelatedModelObjectsForExport(
+			final List<ModelObject> exportList) {
+		exportList.add(this);
+
+		// Linked media object
+		if (linkedMediaObject != null) {
+			exportList.add(ModelObject
+					.get(MediaObject.class, linkedMediaObject));
+		}
+
+		// Add feedback slide rule
+		for (val feedbackSlideRule : ModelObject.find(FeedbackSlideRule.class,
+				Queries.FEEDBACK_SLIDE_RULE__BY_FEEDBACK_SLIDE, getId())) {
+			feedbackSlideRule
+					.collectThisAndRelatedModelObjectsForExport(exportList);
+		}
 	}
 
 	/*

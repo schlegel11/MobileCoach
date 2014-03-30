@@ -24,6 +24,7 @@ import org.isgf.mhc.model.server.MonitoringMessage;
 import org.isgf.mhc.model.server.MonitoringMessageGroup;
 import org.isgf.mhc.model.server.MonitoringReplyRule;
 import org.isgf.mhc.model.server.MonitoringRule;
+import org.isgf.mhc.model.server.Participant;
 import org.isgf.mhc.model.server.concepts.AbstractRule;
 import org.isgf.mhc.model.server.types.EquationSignTypes;
 import org.isgf.mhc.model.server.types.MediaObjectTypes;
@@ -222,9 +223,11 @@ public class InterventionAdministrationManagerService {
 	public File interventionExport(final Intervention intervention) {
 		final List<ModelObject> modelObjectsToExport = new ArrayList<ModelObject>();
 
-		modelObjectsToExport.add(intervention);
-		// TODO add also other relevant model objects
+		log.debug("Recursively collect all model objects related to the intervention");
+		intervention
+				.collectThisAndRelatedModelObjectsForExport(modelObjectsToExport);
 
+		log.debug("Export intervention");
 		return modelObjectExchangeService.exportModelObjects(
 				modelObjectsToExport, EXCHANGE_FORMAT.INTERVENTION);
 	}
@@ -883,6 +886,21 @@ public class InterventionAdministrationManagerService {
 		abstractRule.setRuleEquationSign(newType);
 
 		databaseManagerService.saveModelObject(abstractRule);
+	}
+
+	// Participant
+	public File participantsExport(final List<Participant> participants) {
+		final List<ModelObject> modelObjectsToExport = new ArrayList<ModelObject>();
+
+		log.debug("Recursively collect all model objects related to the participant");
+		for (val participant : participants) {
+			participant
+					.collectThisAndRelatedModelObjectsForExport(modelObjectsToExport);
+		}
+
+		log.debug("Export participant");
+		return modelObjectExchangeService.exportModelObjects(
+				modelObjectsToExport, EXCHANGE_FORMAT.PARTICIPANTS);
 	}
 
 	/*

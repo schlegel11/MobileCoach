@@ -1,5 +1,7 @@
 package org.isgf.mhc.model.server;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -90,6 +92,25 @@ public class MonitoringMessage extends ModelObject {
 		monitoringMessage.setRelatedModelObject(this);
 
 		return monitoringMessage;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.isgf.mhc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
+	 * (java.util.List)
+	 */
+	@Override
+	protected void collectThisAndRelatedModelObjectsForExport(
+			final List<ModelObject> exportList) {
+		exportList.add(this);
+
+		// Linked media object
+		if (linkedMediaObject != null) {
+			exportList.add(ModelObject
+					.get(MediaObject.class, linkedMediaObject));
+		}
 	}
 
 	/*

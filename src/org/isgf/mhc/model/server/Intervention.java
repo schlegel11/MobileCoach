@@ -1,5 +1,7 @@
 package org.isgf.mhc.model.server;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -91,6 +93,43 @@ public class Intervention extends ModelObject {
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see
+	 * org.isgf.mhc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
+	 * (java.util.List)
+	 */
+	@Override
+	public void collectThisAndRelatedModelObjectsForExport(
+			final List<ModelObject> exportList) {
+		exportList.add(this);
+
+		// Add intervention variables with values
+		for (val interventionVariableWithValue : ModelObject.find(
+				InterventionVariableWithValue.class,
+				Queries.INTERVENTION_VARIABLES_WITH_VALUES__BY_INTERVENTION,
+				getId())) {
+			interventionVariableWithValue
+					.collectThisAndRelatedModelObjectsForExport(exportList);
+		}
+
+		// Add monitoring rules
+		for (val monitoringRules : ModelObject.find(MonitoringRule.class,
+				Queries.MONITORING_RULE__BY_INTERVENTION, getId())) {
+			monitoringRules
+					.collectThisAndRelatedModelObjectsForExport(exportList);
+		}
+
+		// Add monitoring message groups
+		for (val monitoringMessageGroups : ModelObject.find(
+				MonitoringMessageGroup.class,
+				Queries.MONITORING_MESSAGE_GROUP__BY_INTERVENTION, getId())) {
+			monitoringMessageGroups
+					.collectThisAndRelatedModelObjectsForExport(exportList);
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.isgf.mhc.model.ModelObject#performOnDelete()
 	 */
 	@Override
@@ -117,6 +156,12 @@ public class Intervention extends ModelObject {
 		val monitoringRulesToDelete = ModelObject.find(MonitoringRule.class,
 				Queries.MONITORING_RULE__BY_INTERVENTION, getId());
 		ModelObject.delete(monitoringRulesToDelete);
+
+		// Delete monitoring message groups
+		val monitoringMessageGroupsToDelete = ModelObject.find(
+				MonitoringMessageGroup.class,
+				Queries.MONITORING_MESSAGE_GROUP__BY_INTERVENTION, getId());
+		ModelObject.delete(monitoringMessageGroupsToDelete);
 
 		// Delete screening surveys
 		val screeningSurveysToDelete = ModelObject.find(ScreeningSurvey.class,

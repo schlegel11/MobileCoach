@@ -1,5 +1,7 @@
 package org.isgf.mhc.model.server;
 
+import java.util.List;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -36,4 +38,17 @@ public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 	@Setter
 	@NonNull
 	private ObjectId	participant;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.isgf.mhc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
+	 * (java.util.List)
+	 */
+	@Override
+	protected void collectThisAndRelatedModelObjectsForExport(
+			final List<ModelObject> exportList) {
+		exportList.add(this);
+	}
 }

@@ -1,5 +1,7 @@
 package org.isgf.mhc.model.server;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -99,6 +101,34 @@ public class Participant extends ModelObject {
 	@Setter
 	@NonNull
 	private String		organizationUnit;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.isgf.mhc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
+	 * (java.util.List)
+	 */
+	@Override
+	public void collectThisAndRelatedModelObjectsForExport(
+			final List<ModelObject> exportList) {
+		exportList.add(this);
+
+		// Add participant variable with value
+		for (val participantVariableWithValue : ModelObject.find(
+				ParticipantVariableWithValue.class,
+				Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT,
+				getId())) {
+			participantVariableWithValue
+					.collectThisAndRelatedModelObjectsForExport(exportList);
+		}
+
+		// Add dialog option
+		for (val dialogOption : ModelObject.find(DialogOption.class,
+				Queries.DIALOG_OPTION__BY_PARTICIPANT, getId())) {
+			dialogOption.collectThisAndRelatedModelObjectsForExport(exportList);
+		}
+	}
 
 	/*
 	 * (non-Javadoc)

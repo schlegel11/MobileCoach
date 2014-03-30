@@ -2,6 +2,7 @@ package org.isgf.mhc.model;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import lombok.AccessLevel;
@@ -106,6 +107,19 @@ public abstract class ModelObject {
 	public UIModelObject toUIModelObject() {
 		log.error("A model object should have been transformed to a UI model object, but the conversion is not implemented!");
 		throw new NotImplementedException(this.getClass());
+	}
+
+	/**
+	 * Will recursively collect all related {@link ModelObject} for export
+	 * 
+	 * @param exportList
+	 *            The {@link ModelObject} itself and all related
+	 *            {@link ModelObject}s
+	 */
+	@JsonIgnore
+	protected void collectThisAndRelatedModelObjectsForExport(
+			final List<ModelObject> exportList) {
+		// Nothing, but can be overwritten
 	}
 
 	/**

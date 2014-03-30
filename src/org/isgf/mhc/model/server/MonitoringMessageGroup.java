@@ -1,5 +1,7 @@
 package org.isgf.mhc.model.server;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -62,6 +64,27 @@ public class MonitoringMessageGroup extends ModelObject {
 		monitoringMessageGroup.setRelatedModelObject(this);
 
 		return monitoringMessageGroup;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.isgf.mhc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
+	 * (java.util.List)
+	 */
+	@Override
+	protected void collectThisAndRelatedModelObjectsForExport(
+			final List<ModelObject> exportList) {
+		exportList.add(this);
+
+		// Add monitoring message
+		for (val monitoringMessage : ModelObject.find(MonitoringMessage.class,
+				Queries.MONITORING_MESSAGE__BY_MONITORING_MESSAGE_GROUP,
+				getId())) {
+			monitoringMessage
+					.collectThisAndRelatedModelObjectsForExport(exportList);
+		}
 	}
 
 	/*

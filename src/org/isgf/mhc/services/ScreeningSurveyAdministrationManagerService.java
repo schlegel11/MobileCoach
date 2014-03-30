@@ -124,9 +124,11 @@ public class ScreeningSurveyAdministrationManagerService {
 	public File screeningSurveyExport(final ScreeningSurvey screeningSurvey) {
 		final List<ModelObject> modelObjectsToExport = new ArrayList<ModelObject>();
 
-		modelObjectsToExport.add(screeningSurvey);
-		// TODO add also other relevant model objects
+		log.debug("Recursively collect all model objects related to the screening survey");
+		screeningSurvey
+				.collectThisAndRelatedModelObjectsForExport(modelObjectsToExport);
 
+		log.debug("Export screening survey");
 		return modelObjectExchangeService.exportModelObjects(
 				modelObjectsToExport, EXCHANGE_FORMAT.SCREENING_SURVEY);
 	}

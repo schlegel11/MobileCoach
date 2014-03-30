@@ -1,5 +1,7 @@
 package org.isgf.mhc.model.server;
 
+import java.util.List;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -8,6 +10,8 @@ import lombok.Setter;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.server.concepts.AbstractVariableWithValue;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * {@link ModelObject} to represent an {@link InterventionVariableWithValue}
@@ -36,4 +40,18 @@ public class InterventionVariableWithValue extends AbstractVariableWithValue {
 	@Setter
 	@NonNull
 	private ObjectId	intervention;
+
+	/**
+	 * Will recursively collect all related {@link ModelObject} for export
+	 * 
+	 * @param exportList
+	 *            The {@link ModelObject} itself and all related
+	 *            {@link ModelObject}s
+	 */
+	@Override
+	@JsonIgnore
+	protected void collectThisAndRelatedModelObjectsForExport(
+			final List<ModelObject> exportList) {
+		exportList.add(this);
+	}
 }

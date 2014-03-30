@@ -1,5 +1,7 @@
 package org.isgf.mhc.model.server;
 
+import java.util.List;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -74,6 +76,27 @@ public class MonitoringRule extends AbstractMonitoringRule {
 	@Getter
 	@Setter
 	private int			hoursUntilMessageIsHandledAsUnanswered;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.isgf.mhc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
+	 * (java.util.List)
+	 */
+	@Override
+	protected void collectThisAndRelatedModelObjectsForExport(
+			final List<ModelObject> exportList) {
+		exportList.add(this);
+
+		// Add monitoring reply rule
+		for (val monitoringReplyRule : ModelObject.find(
+				MonitoringReplyRule.class,
+				Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE, getId())) {
+			monitoringReplyRule
+					.collectThisAndRelatedModelObjectsForExport(exportList);
+		}
+	}
 
 	/*
 	 * (non-Javadoc)
