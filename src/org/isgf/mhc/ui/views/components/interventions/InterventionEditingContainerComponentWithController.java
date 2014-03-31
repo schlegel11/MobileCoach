@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.ThemeImageStrings;
@@ -13,6 +14,8 @@ import org.isgf.mhc.ui.views.components.interventions.monitoring_rules.Monitorin
 
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
+import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
 import com.vaadin.ui.TabSheet.Tab;
 
 /**
@@ -21,8 +24,10 @@ import com.vaadin.ui.TabSheet.Tab;
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
+@Log4j2
 public class InterventionEditingContainerComponentWithController extends
-		InterventionEditingContainerComponent {
+		InterventionEditingContainerComponent implements
+		SelectedTabChangeListener {
 
 	private boolean			editingAllowed								= false;
 	private final List<Tab>	availableTabsToSwitchDependingOnMessaging	= new ArrayList<Tab>();
@@ -48,6 +53,9 @@ public class InterventionEditingContainerComponentWithController extends
 								.returnToInterventionList();
 					}
 				});
+
+		// Handle accordion change
+		getContentAccordion().addSelectedTabChangeListener(this);
 
 		// Fill Accordion
 		// Add basic settings tab
@@ -121,6 +129,17 @@ public class InterventionEditingContainerComponentWithController extends
 			if (tab.getComponent().isEnabled() != editingAllowed) {
 				tab.getComponent().setEnabled(editingAllowed);
 			}
+		}
+	}
+
+	@Override
+	public void selectedTabChange(final SelectedTabChangeEvent event) {
+		val selectedTab = event.getTabSheet().getSelectedTab();
+		log.debug("Changed tab to {}", selectedTab.getClass().getSimpleName());
+
+		if (selectedTab instanceof InterventionParticipantsTabComponentWithController) {
+			val interventionParticipantsTabWithController = (InterventionParticipantsTabComponentWithController) selectedTab;
+			interventionParticipantsTabWithController.update();
 		}
 	}
 }

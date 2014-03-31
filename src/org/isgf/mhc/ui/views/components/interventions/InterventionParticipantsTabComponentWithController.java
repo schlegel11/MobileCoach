@@ -63,8 +63,7 @@ public class InterventionParticipantsTabComponentWithController extends
 
 		// table content
 		beanContainer = createBeanContainerForModelObjects(UIParticipant.class,
-				getInterventionAdministrationManagerService()
-						.getAllParticipantsOfIntervention(intervention.getId()));
+				null);
 
 		participantsTable.setContainerDataSource(beanContainer);
 		participantsTable.setSortContainerPropertyId(UIParticipant
@@ -139,6 +138,13 @@ public class InterventionParticipantsTabComponentWithController extends
 				});
 		onDemandFileDownloader.extend(participantsEditComponent
 				.getExportButton());
+	}
+
+	public void update() {
+		log.debug("Update participants");
+		refreshBeanContainer(beanContainer, UIParticipant.class,
+				getInterventionAdministrationManagerService()
+						.getAllParticipantsOfIntervention(intervention.getId()));
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
@@ -376,5 +382,4 @@ public class InterventionParticipantsTabComponentWithController extends
 
 		return selectedParticipants;
 	}
-
 }

@@ -15,6 +15,7 @@ import org.isgf.mhc.ui.views.MainView;
 import com.vaadin.annotations.Theme;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.server.ClientConnector.DetachListener;
 import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
@@ -30,7 +31,8 @@ import com.vaadin.ui.UI;
 @SuppressWarnings("serial")
 @Theme("mhc")
 @Log4j2
-public class AdminNavigatorUI extends UI implements ViewChangeListener {
+public class AdminNavigatorUI extends UI implements ViewChangeListener,
+		DetachListener {
 	/**
 	 * Contains all available admin views
 	 * 
@@ -102,6 +104,9 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener {
 
 		// Redirect to appropriate view
 		getNavigator().addViewChangeListener(this);
+
+		// Listener for close
+		addDetachListener(this);
 	}
 
 	protected void clearSession() {
@@ -195,5 +200,10 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener {
 	 */
 	private UISession getUISession() {
 		return getSession().getAttribute(UISession.class);
+	}
+
+	@Override
+	public void detach(final DetachEvent event) {
+		log.debug("View detached");
 	}
 }

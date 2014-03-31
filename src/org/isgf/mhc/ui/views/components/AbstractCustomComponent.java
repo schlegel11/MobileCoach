@@ -23,7 +23,6 @@ import org.isgf.mhc.ui.views.components.basics.ConfirmationComponent;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItem;
-import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.Accordion;
@@ -273,7 +272,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	}
 
 	/**
-	 * Creates an appropriate {@link BeanItemContainer} for a specific
+	 * Creates an appropriate {@link BeanContainer} for a specific
 	 * {@link Iterable} containing {@link ModelObject}s
 	 * 
 	 * @param uiModelObjectSubclass
@@ -287,16 +286,40 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 		final BeanContainer<ObjectId, UIObjectSubclass> beanContainer = new BeanContainer<ObjectId, UIObjectSubclass>(
 				uiModelObjectSubclass);
 
-		for (final ModelObject modelObject : iterableModelObjects) {
-			beanContainer.addItem(modelObject.getId(),
-					uiModelObjectSubclass.cast(modelObject.toUIModelObject()));
+		if (iterableModelObjects != null) {
+			for (final ModelObject modelObject : iterableModelObjects) {
+				beanContainer.addItem(modelObject.getId(),
+						uiModelObjectSubclass.cast(modelObject
+								.toUIModelObject()));
+			}
 		}
 
 		return beanContainer;
 	}
 
 	/**
-	 * Creates an appropriate {@link BeanItemContainer} for a specific
+	 * Updates a {@link BeanContainer} with the provided {@link Iterable}
+	 * containing {@link ModelObject}s
+	 * 
+	 * @param beanContainer
+	 * @param uiModelObjectSubclass
+	 * @param iterableModelObjects
+	 */
+	protected <UIObjectSubclass extends UIObject> void refreshBeanContainer(
+			final BeanContainer<ObjectId, UIObjectSubclass> beanContainer,
+			final Class<UIObjectSubclass> uiModelObjectSubclass,
+			final Iterable<? extends ModelObject> iterableModelObjects) {
+
+		beanContainer.removeAllItems();
+
+		for (final ModelObject modelObject : iterableModelObjects) {
+			beanContainer.addItem(modelObject.getId(),
+					uiModelObjectSubclass.cast(modelObject.toUIModelObject()));
+		}
+	}
+
+	/**
+	 * Creates an appropriate {@link BeanContainer} for a specific
 	 * {@link Iterable} containing {@link ModelObject}s represented by only ONE
 	 * property
 	 * 
