@@ -987,6 +987,10 @@ public class InterventionAdministrationManagerService {
 	}
 
 	/*
+	 * Special methods
+	 */
+
+	/*
 	 * Getter methods
 	 */
 	public Author getAuthor(final ObjectId authorId) {

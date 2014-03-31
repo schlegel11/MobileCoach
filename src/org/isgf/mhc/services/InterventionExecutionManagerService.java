@@ -55,7 +55,7 @@ public class InterventionExecutionManagerService {
 	}
 
 	/*
-	 * Class methods
+	 * Modification methods
 	 */
 	// System Unique Id
 	@Synchronized
@@ -88,6 +88,10 @@ public class InterventionExecutionManagerService {
 
 		databaseManagerService.saveModelObject(dialogMessage);
 	}
+
+	/*
+	 * Special methods
+	 */
 
 	/*
 	 * Getter methods

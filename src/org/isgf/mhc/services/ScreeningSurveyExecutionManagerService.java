@@ -62,38 +62,12 @@ public class ScreeningSurveyExecutionManagerService {
 	}
 
 	/*
-	 * Class methods
+	 * Modification methods
 	 */
 
-	/**
-	 * Returns the appropriate {@link HashMap} to fill the template or
-	 * <code>null</code> if an unexpected error occurs
-	 * 
-	 * @param participantId
-	 * @param screeningSurveyId
-	 * @param resultValue
-	 * @param session
-	 * @return
+	/*
+	 * Special methods
 	 */
-	public HashMap<String, Object> getAppropriateSlide(
-			final ObjectId participantId, final ObjectId screeningSurveyId,
-			final String resultValue, final HttpSession session) {
-		// Check if
-
-		// TODO a lot (not forget to set session values)
-		// handle also "empty" template path (= "")
-
-		val templateVariables = new HashMap<String, Object>();
-		setLayoutTo(templateVariables,
-				ScreeningSurveySlideTemplateLayoutTypes.SELECT_ONE);
-
-		templateVariables.put(
-				ScreeningSurveySlideTemplateFieldTypes.TEMPLATE_FOLDER
-						.toVariable(), "basic-template");
-
-		return templateVariables;
-	}
-
 	/**
 	 * Sets the given layout to <code>true</code> and all other available
 	 * layouts to <code>false</code>
@@ -125,9 +99,64 @@ public class ScreeningSurveyExecutionManagerService {
 		return templateVariables;
 	}
 
+	/**
+	 * Returns if the requested {@link ScreeningSurvey} is currently accessible
+	 * (means the the {@link Intervention} and {@link ScreeningSurvey} are both
+	 * active)
+	 * 
+	 * @param screeningSurveyId
+	 * @return
+	 */
+	public boolean screeningSurveyCheckIfActive(final ObjectId screeningSurveyId) {
+		final ScreeningSurvey screeningSurvey = databaseManagerService
+				.getModelObjectById(ScreeningSurvey.class, screeningSurveyId);
+
+		if (screeningSurvey == null || !screeningSurvey.isActive()) {
+			return false;
+		}
+
+		final Intervention intervention = databaseManagerService
+				.getModelObjectById(Intervention.class,
+						screeningSurvey.getIntervention());
+
+		if (intervention == null || !intervention.isActive()) {
+			return false;
+		}
+
+		return true;
+	}
+
 	/*
 	 * Getter methods
 	 */
+	/**
+	 * Returns the appropriate {@link HashMap} to fill the template or
+	 * <code>null</code> if an unexpected error occurs
+	 * 
+	 * @param participantId
+	 * @param screeningSurveyId
+	 * @param resultValue
+	 * @param session
+	 * @return
+	 */
+	public HashMap<String, Object> getAppropriateSlide(
+			final ObjectId participantId, final ObjectId screeningSurveyId,
+			final String resultValue, final HttpSession session) {
+		// Check if
+
+		// TODO a lot (not forget to set session values)
+		// handle also "empty" template path (= "")
+
+		val templateVariables = new HashMap<String, Object>();
+		setLayoutTo(templateVariables,
+				ScreeningSurveySlideTemplateLayoutTypes.SELECT_ONE);
+
+		templateVariables.put(
+				ScreeningSurveySlideTemplateFieldTypes.TEMPLATE_FOLDER
+						.toVariable(), "basic-template");
+
+		return templateVariables;
+	}
 
 	/**
 	 * Get a specific {@link ScreeningSurvey} by {@link ObjectId}
@@ -175,32 +204,5 @@ public class ScreeningSurveyExecutionManagerService {
 	 */
 	public File getTemplatePath() {
 		return fileStorageManagerService.getTemplatesFolder();
-	}
-
-	/**
-	 * Returns if the requested {@link ScreeningSurvey} is currently accessible
-	 * (means the the {@link Intervention} and {@link ScreeningSurvey} are both
-	 * active)
-	 * 
-	 * @param screeningSurveyId
-	 * @return
-	 */
-	public boolean screeningSurveyCheckIfActive(final ObjectId screeningSurveyId) {
-		final ScreeningSurvey screeningSurvey = databaseManagerService
-				.getModelObjectById(ScreeningSurvey.class, screeningSurveyId);
-
-		if (screeningSurvey == null || !screeningSurvey.isActive()) {
-			return false;
-		}
-
-		final Intervention intervention = databaseManagerService
-				.getModelObjectById(Intervention.class,
-						screeningSurvey.getIntervention());
-
-		if (intervention == null || !intervention.isActive()) {
-			return false;
-		}
-
-		return true;
 	}
 }

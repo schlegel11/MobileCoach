@@ -139,7 +139,7 @@ public class InterventionEditingContainerComponentWithController extends
 
 		if (selectedTab instanceof InterventionParticipantsTabComponentWithController) {
 			val interventionParticipantsTabWithController = (InterventionParticipantsTabComponentWithController) selectedTab;
-			interventionParticipantsTabWithController.update();
+			interventionParticipantsTabWithController.adjust();
 		}
 	}
 }

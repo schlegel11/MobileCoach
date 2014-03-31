@@ -140,7 +140,17 @@ public class InterventionParticipantsTabComponentWithController extends
 				.getExportButton());
 	}
 
-	public void update() {
+	public void adjust() {
+		log.debug("Check access rights for participants based on scrrening surveys");
+		val isOneScreeningSurveyActive = getScreeningSurveyAdministrationManagerService()
+				.isOneScreeningSurveyOfInterventionActive(intervention.getId());
+
+		if (isOneScreeningSurveyActive == isEnabled()) {
+			setEnabled(!isOneScreeningSurveyActive);
+			getInterventionParticipantsEditComponent().getParticipantsTable()
+					.setEnabled(!isOneScreeningSurveyActive);
+		}
+
 		log.debug("Update participants");
 		refreshBeanContainer(beanContainer, UIParticipant.class,
 				getInterventionAdministrationManagerService()

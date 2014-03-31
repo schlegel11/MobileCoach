@@ -648,6 +648,24 @@ public class ScreeningSurveyAdministrationManagerService {
 	}
 
 	/*
+	 * Special methods
+	 */
+	public boolean isOneScreeningSurveyOfInterventionActive(
+			final ObjectId interventionId) {
+
+		val activeScreeningSurveys = databaseManagerService.findModelObjects(
+				ScreeningSurvey.class,
+				Queries.SCREENING_SURVEY__BY_INTERVENTION_AND_ACTIVE_TRUE,
+				interventionId);
+
+		if (activeScreeningSurveys.iterator().hasNext()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/*
 	 * Getter methods
 	 */
 	public Iterable<ScreeningSurvey> getAllScreeningSurveysOfIntervention(
