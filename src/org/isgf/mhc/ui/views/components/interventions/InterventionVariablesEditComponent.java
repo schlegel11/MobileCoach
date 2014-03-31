@@ -91,7 +91,7 @@ public class InterventionVariablesEditComponent extends AbstractCustomComponent 
 		variablesTable = new Table();
 		variablesTable.setImmediate(false);
 		variablesTable.setWidth("100.0%");
-		variablesTable.setHeight("250px");
+		variablesTable.setHeight("150px");
 		mainLayout.addComponent(variablesTable);
 
 		// buttonLayout

@@ -137,7 +137,7 @@ public class InterventionScreeningSurveysEditComponent extends
 		screeningSurveysTable = new Table();
 		screeningSurveysTable.setImmediate(false);
 		screeningSurveysTable.setWidth("100.0%");
-		screeningSurveysTable.setHeight("250px");
+		screeningSurveysTable.setHeight("150px");
 		mainLayout.addComponent(screeningSurveysTable);
 
 		// buttonLayout

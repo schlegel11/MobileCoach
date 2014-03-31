@@ -148,7 +148,7 @@ public class AllInterventionsEditComponent extends AbstractCustomComponent {
 		allInterventionsTable = new Table();
 		allInterventionsTable.setImmediate(false);
 		allInterventionsTable.setWidth("100.0%");
-		allInterventionsTable.setHeight("250px");
+		allInterventionsTable.setHeight("150px");
 		mainLayout.addComponent(allInterventionsTable);
 
 		// buttonLayout

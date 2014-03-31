@@ -131,7 +131,7 @@ public class InterventionParticipantsEditComponent extends
 		participantsTable = new Table();
 		participantsTable.setImmediate(false);
 		participantsTable.setWidth("100.0%");
-		participantsTable.setHeight("250px");
+		participantsTable.setHeight("150px");
 		mainLayout.addComponent(participantsTable);
 
 		// buttonLayout
