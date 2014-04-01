@@ -2,6 +2,7 @@ package org.isgf.mhc.model.memory;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import org.isgf.mhc.services.internal.CommunicationManagerService;
 
@@ -10,6 +11,7 @@ import org.isgf.mhc.services.internal.CommunicationManagerService;
  * 
  * @author Andreas Filler
  */
+@ToString
 public class ReceivedMessage {
 	@Getter
 	@Setter

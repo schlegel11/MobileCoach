@@ -90,13 +90,17 @@ public class Constants {
 	@Getter
 	private static String		mailhostIncoming					= "localhost";
 	@Getter
+	private static String		mailboxProtocol						= "pop3";
+	@Getter
+	private static String		mailboxFolder						= "INBOX";
+	@Getter
 	private static String		mailhostOutgoing					= "localhost";
 	@Getter
 	private static String		mailUser							= "---";
 	@Getter
 	private static String		mailPassword						= "---";
 	@Getter
-	private static String		mailboxFolder						= "INBOX";
+	private static String		mailSubjectStartsWith				= "SMS received on";
 
 	/**
 	 * SMS configuration
