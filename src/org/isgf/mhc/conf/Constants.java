@@ -85,6 +85,34 @@ public class Constants {
 	private static String		databaseName						= "mhc";
 
 	/**
+	 * Mailing configuration
+	 */
+	@Getter
+	private static String		mailhostIncoming					= "localhost";
+	@Getter
+	private static String		mailhostOutgoing					= "localhost";
+	@Getter
+	private static String		mailUser							= "---";
+	@Getter
+	private static String		mailPassword						= "---";
+	@Getter
+	private static String		mailboxFolder						= "INBOX";
+
+	/**
+	 * SMS configuration
+	 */
+	@Getter
+	private static String		smsEmailFrom						= "a@b.eu";
+	@Getter
+	private static String		smsEmailTo							= "c@d.eu";
+	@Getter
+	private static String		smsUserKey							= "abc";
+	@Getter
+	private static String		smsUserPassword						= "xyz";
+	@Getter
+	private static String		smsPhoneNumberFrom					= "+4567890";
+
+	/**
 	 * Injects a specific configuration file (if provided as system parameter
 	 * "mhc.configuration")
 	 * 

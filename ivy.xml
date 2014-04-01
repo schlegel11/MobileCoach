@@ -13,6 +13,7 @@
 	<!ENTITY javaluator.version "2.0.0">
 	<!ENTITY lombok.version "1.12.6">
 	<!ENTITY mustache.java.version "0.8.14">
+	<!ENTITY java.mail.version "1.4.7">
 ]>
 <ivy-module version="2.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -88,5 +89,8 @@
 
 		<!-- Mustache.java -->
 		<dependency org="com.github.spullara.mustache.java" name="compiler" rev="&mustache.java.version;"/>
+		
+		<!-- JavaMail -->
+		<dependency org="javax.mail" name="mail" rev="&java.mail.version;"/>
 	</dependencies>
 </ivy-module>
