@@ -6,9 +6,9 @@ import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.Queries;
-import org.isgf.mhc.model.server.DialogMessage;
-import org.isgf.mhc.model.server.MediaObject;
-import org.isgf.mhc.model.server.SystemUniqueId;
+import org.isgf.mhc.model.persistent.DialogMessage;
+import org.isgf.mhc.model.persistent.MediaObject;
+import org.isgf.mhc.model.persistent.SystemUniqueId;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.VariablesManagerService;

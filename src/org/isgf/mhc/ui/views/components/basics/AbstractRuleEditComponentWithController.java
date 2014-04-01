@@ -7,8 +7,8 @@ import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
-import org.isgf.mhc.model.server.concepts.AbstractRule;
-import org.isgf.mhc.model.server.types.EquationSignTypes;
+import org.isgf.mhc.model.persistent.concepts.AbstractRule;
+import org.isgf.mhc.model.persistent.types.EquationSignTypes;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;

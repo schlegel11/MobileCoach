@@ -5,9 +5,9 @@ import java.util.List;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
-import org.isgf.mhc.model.server.concepts.AbstractRule;
-import org.isgf.mhc.model.server.concepts.AbstractVariableWithValue;
-import org.isgf.mhc.tools.model.RuleEvaluationResult;
+import org.isgf.mhc.model.memory.RuleEvaluationResult;
+import org.isgf.mhc.model.persistent.concepts.AbstractRule;
+import org.isgf.mhc.model.persistent.concepts.AbstractVariableWithValue;
 
 import com.fathzer.soft.javaluator.DoubleEvaluator;
 

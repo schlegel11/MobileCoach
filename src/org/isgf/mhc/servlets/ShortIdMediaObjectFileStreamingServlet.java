@@ -14,8 +14,8 @@ import lombok.extern.log4j.Log4j2;
 import net.balusc.webapp.FileServletWrapper;
 
 import org.isgf.mhc.MHC;
-import org.isgf.mhc.model.server.MediaObject;
-import org.isgf.mhc.model.server.SystemUniqueId;
+import org.isgf.mhc.model.persistent.MediaObject;
+import org.isgf.mhc.model.persistent.SystemUniqueId;
 import org.isgf.mhc.services.InterventionAdministrationManagerService;
 import org.isgf.mhc.services.InterventionExecutionManagerService;
 

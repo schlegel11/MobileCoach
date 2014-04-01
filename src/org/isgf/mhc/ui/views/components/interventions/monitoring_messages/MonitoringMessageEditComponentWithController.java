@@ -5,7 +5,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
-import org.isgf.mhc.model.server.MonitoringMessage;
+import org.isgf.mhc.model.persistent.MonitoringMessage;
 import org.isgf.mhc.ui.views.components.basics.MediaObjectIntegrationComponentWithController.MediaObjectCreationOrDeleteionListener;
 import org.isgf.mhc.ui.views.components.basics.PlaceholderStringEditComponent;
 import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;

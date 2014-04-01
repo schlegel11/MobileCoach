@@ -7,15 +7,15 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
-import org.isgf.mhc.conf.Variables;
 import org.isgf.mhc.model.Queries;
-import org.isgf.mhc.model.server.InterventionVariableWithValue;
-import org.isgf.mhc.model.server.MonitoringMessage;
-import org.isgf.mhc.model.server.MonitoringMessageGroup;
-import org.isgf.mhc.model.server.MonitoringReplyRule;
-import org.isgf.mhc.model.server.MonitoringRule;
-import org.isgf.mhc.model.server.ScreeningSurvey;
-import org.isgf.mhc.model.server.ScreeningSurveySlide;
+import org.isgf.mhc.model.persistent.InterventionVariableWithValue;
+import org.isgf.mhc.model.persistent.MonitoringMessage;
+import org.isgf.mhc.model.persistent.MonitoringMessageGroup;
+import org.isgf.mhc.model.persistent.MonitoringReplyRule;
+import org.isgf.mhc.model.persistent.MonitoringRule;
+import org.isgf.mhc.model.persistent.ScreeningSurvey;
+import org.isgf.mhc.model.persistent.ScreeningSurveySlide;
+import org.isgf.mhc.services.types.SystemVariables;
 
 /**
  * Manages all variables for the system and a specific participant
@@ -39,23 +39,23 @@ public class VariablesManagerService {
 		this.databaseManagerService = databaseManagerService;
 
 		writeProtectedVariableNames = new HashSet<String>();
-		for (val variable : Variables.READ_ONLY_SYSTEM_VARIABLES.values()) {
+		for (val variable : SystemVariables.READ_ONLY_SYSTEM_VARIABLES.values()) {
 			writeProtectedVariableNames.add("$" + variable.name());
 		}
-		for (val variable : Variables.READ_ONLY_PARTICIPANT_VARIABLES.values()) {
+		for (val variable : SystemVariables.READ_ONLY_PARTICIPANT_VARIABLES.values()) {
 			writeProtectedVariableNames.add("$" + variable.name());
 		}
-		for (val variable : Variables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES
+		for (val variable : SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES
 				.values()) {
 			writeProtectedVariableNames.add("$" + variable.name());
 		}
 
 		allSystemVariableNames = new HashSet<String>();
 		allSystemVariableNames.addAll(writeProtectedVariableNames);
-		for (val variable : Variables.READ_WRITE_PARTICIPANT_VARIABLES.values()) {
+		for (val variable : SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES.values()) {
 			allSystemVariableNames.add("$" + variable.name());
 		}
-		for (val variable : Variables.READ_WRITE_SYSTEM_VARIABLES.values()) {
+		for (val variable : SystemVariables.READ_WRITE_SYSTEM_VARIABLES.values()) {
 			allSystemVariableNames.add("$" + variable.name());
 		}
 

@@ -5,8 +5,8 @@ import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
-import org.isgf.mhc.model.server.Feedback;
-import org.isgf.mhc.model.server.FeedbackSlide;
+import org.isgf.mhc.model.persistent.Feedback;
+import org.isgf.mhc.model.persistent.FeedbackSlide;
 import org.isgf.mhc.model.ui.UIFeedbackSlide;
 
 import com.vaadin.data.Property.ValueChangeEvent;

@@ -15,7 +15,7 @@ import net.balusc.webapp.FileServletWrapper;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.MHC;
-import org.isgf.mhc.model.server.MediaObject;
+import org.isgf.mhc.model.persistent.MediaObject;
 import org.isgf.mhc.services.InterventionAdministrationManagerService;
 
 /**

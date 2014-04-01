@@ -3,8 +3,8 @@ package org.isgf.mhc.tools;
 import lombok.val;
 
 import org.isgf.mhc.conf.ImplementationContants;
-import org.isgf.mhc.model.server.concepts.AbstractRule;
-import org.isgf.mhc.model.server.types.EquationSignTypes;
+import org.isgf.mhc.model.persistent.concepts.AbstractRule;
+import org.isgf.mhc.model.persistent.types.EquationSignTypes;
 
 /**
  * Small helpers for {@link String}s

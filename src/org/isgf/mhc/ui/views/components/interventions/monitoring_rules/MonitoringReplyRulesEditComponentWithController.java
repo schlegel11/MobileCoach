@@ -2,7 +2,7 @@ package org.isgf.mhc.ui.views.components.interventions.monitoring_rules;
 
 import lombok.extern.log4j.Log4j2;
 
-import org.isgf.mhc.model.server.MonitoringRule;
+import org.isgf.mhc.model.persistent.MonitoringRule;
 import org.isgf.mhc.ui.views.components.basics.AbstractMonitoringRulesEditComponentWithController;
 
 /**

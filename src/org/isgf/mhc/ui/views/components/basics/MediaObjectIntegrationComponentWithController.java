@@ -14,8 +14,8 @@ import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.ThemeImageStrings;
 import org.isgf.mhc.model.ModelObject;
-import org.isgf.mhc.model.server.MediaObject;
-import org.isgf.mhc.model.server.types.MediaObjectTypes;
+import org.isgf.mhc.model.persistent.MediaObject;
+import org.isgf.mhc.model.persistent.types.MediaObjectTypes;
 
 import com.vaadin.server.ErrorHandler;
 import com.vaadin.server.ExternalResource;

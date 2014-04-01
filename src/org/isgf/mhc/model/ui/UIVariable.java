@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import org.isgf.mhc.conf.AdminMessageStrings;
-import org.isgf.mhc.model.server.InterventionVariableWithValue;
+import org.isgf.mhc.model.persistent.InterventionVariableWithValue;
 
 import com.vaadin.data.fieldgroup.PropertyId;
 

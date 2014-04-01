@@ -19,24 +19,24 @@ import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.conf.ImplementationContants;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
-import org.isgf.mhc.model.server.Author;
-import org.isgf.mhc.model.server.AuthorInterventionAccess;
-import org.isgf.mhc.model.server.Intervention;
-import org.isgf.mhc.model.server.InterventionVariableWithValue;
-import org.isgf.mhc.model.server.MediaObject;
-import org.isgf.mhc.model.server.MonitoringMessage;
-import org.isgf.mhc.model.server.MonitoringMessageGroup;
-import org.isgf.mhc.model.server.MonitoringReplyRule;
-import org.isgf.mhc.model.server.MonitoringRule;
-import org.isgf.mhc.model.server.Participant;
-import org.isgf.mhc.model.server.concepts.AbstractRule;
-import org.isgf.mhc.model.server.types.EquationSignTypes;
-import org.isgf.mhc.model.server.types.MediaObjectTypes;
+import org.isgf.mhc.model.persistent.Author;
+import org.isgf.mhc.model.persistent.AuthorInterventionAccess;
+import org.isgf.mhc.model.persistent.Intervention;
+import org.isgf.mhc.model.persistent.InterventionVariableWithValue;
+import org.isgf.mhc.model.persistent.MediaObject;
+import org.isgf.mhc.model.persistent.MonitoringMessage;
+import org.isgf.mhc.model.persistent.MonitoringMessageGroup;
+import org.isgf.mhc.model.persistent.MonitoringReplyRule;
+import org.isgf.mhc.model.persistent.MonitoringRule;
+import org.isgf.mhc.model.persistent.Participant;
+import org.isgf.mhc.model.persistent.concepts.AbstractRule;
+import org.isgf.mhc.model.persistent.types.EquationSignTypes;
+import org.isgf.mhc.model.persistent.types.MediaObjectTypes;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.ModelObjectExchangeService;
-import org.isgf.mhc.services.internal.ModelObjectExchangeService.EXCHANGE_FORMAT;
 import org.isgf.mhc.services.internal.VariablesManagerService;
+import org.isgf.mhc.services.types.ModelObjectExchangeFormats;
 import org.isgf.mhc.tools.BCrypt;
 import org.isgf.mhc.tools.StringValidator;
 import org.isgf.mhc.ui.NotificationMessageException;
@@ -227,7 +227,7 @@ public class InterventionAdministrationManagerService {
 	public Intervention interventionImport(final File file)
 			throws FileNotFoundException, IOException {
 		val importedModelObjects = modelObjectExchangeService
-				.importModelObjects(file, EXCHANGE_FORMAT.INTERVENTION);
+				.importModelObjects(file, ModelObjectExchangeFormats.INTERVENTION);
 
 		for (val modelObject : importedModelObjects) {
 			if (modelObject instanceof Intervention) {
@@ -258,7 +258,7 @@ public class InterventionAdministrationManagerService {
 
 		log.debug("Export intervention");
 		return modelObjectExchangeService.exportModelObjects(
-				modelObjectsToExport, EXCHANGE_FORMAT.INTERVENTION);
+				modelObjectsToExport, ModelObjectExchangeFormats.INTERVENTION);
 	}
 
 	public void interventionDelete(final Intervention interventionToDelete)
@@ -924,7 +924,7 @@ public class InterventionAdministrationManagerService {
 		val importedParticipants = new ArrayList<Participant>();
 
 		val importedModelObjects = modelObjectExchangeService
-				.importModelObjects(file, EXCHANGE_FORMAT.PARTICIPANTS);
+				.importModelObjects(file, ModelObjectExchangeFormats.PARTICIPANTS);
 
 		for (val modelObject : importedModelObjects) {
 			if (modelObject instanceof Participant) {
@@ -951,7 +951,7 @@ public class InterventionAdministrationManagerService {
 
 		log.debug("Export participants");
 		return modelObjectExchangeService.exportModelObjects(
-				modelObjectsToExport, EXCHANGE_FORMAT.PARTICIPANTS);
+				modelObjectsToExport, ModelObjectExchangeFormats.PARTICIPANTS);
 	}
 
 	public void participantsSetOrganization(

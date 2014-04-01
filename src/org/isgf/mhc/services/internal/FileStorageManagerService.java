@@ -13,7 +13,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
-import org.isgf.mhc.model.server.MediaObject;
+import org.isgf.mhc.model.persistent.MediaObject;
 
 import com.google.gwt.thirdparty.guava.common.io.Files;
 

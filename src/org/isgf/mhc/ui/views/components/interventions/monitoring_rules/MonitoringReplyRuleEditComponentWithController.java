@@ -5,9 +5,9 @@ import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
-import org.isgf.mhc.model.server.Intervention;
-import org.isgf.mhc.model.server.MonitoringMessageGroup;
-import org.isgf.mhc.model.server.MonitoringReplyRule;
+import org.isgf.mhc.model.persistent.Intervention;
+import org.isgf.mhc.model.persistent.MonitoringMessageGroup;
+import org.isgf.mhc.model.persistent.MonitoringReplyRule;
 import org.isgf.mhc.model.ui.UIMonitoringMessageGroup;
 import org.isgf.mhc.ui.views.components.basics.AbstractRuleEditComponentWithController;
 import org.isgf.mhc.ui.views.components.basics.AbstractRuleEditComponentWithController.TYPES;

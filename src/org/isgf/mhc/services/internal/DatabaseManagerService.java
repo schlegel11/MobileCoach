@@ -12,7 +12,7 @@ import org.isgf.mhc.model.AbstractModelObjectAccessService;
 import org.isgf.mhc.model.Indices;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
-import org.isgf.mhc.model.server.Author;
+import org.isgf.mhc.model.persistent.Author;
 import org.isgf.mhc.tools.BCrypt;
 import org.jongo.Jongo;
 

@@ -7,8 +7,8 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.conf.AdminMessageStrings;
-import org.isgf.mhc.model.server.Intervention;
-import org.isgf.mhc.model.server.MonitoringMessageGroup;
+import org.isgf.mhc.model.persistent.Intervention;
+import org.isgf.mhc.model.persistent.MonitoringMessageGroup;
 import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;
 
 import com.vaadin.ui.Button;

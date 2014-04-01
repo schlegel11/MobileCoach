@@ -13,7 +13,7 @@ import org.apache.commons.lang.NullArgumentException;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Constants;
-import org.isgf.mhc.model.server.Intervention;
+import org.isgf.mhc.model.persistent.Intervention;
 import org.isgf.mhc.model.ui.UIIntervention;
 import org.isgf.mhc.tools.OnDemandFileDownloader;
 import org.isgf.mhc.tools.OnDemandFileDownloader.OnDemandStreamResource;

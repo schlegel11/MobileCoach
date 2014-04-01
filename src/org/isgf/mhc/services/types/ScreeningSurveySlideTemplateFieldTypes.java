@@ -1,6 +1,6 @@
 package org.isgf.mhc.services.types;
 
-import org.isgf.mhc.model.server.ScreeningSurveySlide;
+import org.isgf.mhc.model.persistent.ScreeningSurveySlide;
 
 /**
  * Contains all template fields that can be available in the HTML template of a

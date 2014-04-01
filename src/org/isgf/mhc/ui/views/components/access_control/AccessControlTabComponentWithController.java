@@ -6,7 +6,7 @@ import lombok.extern.log4j.Log4j2;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Messages;
-import org.isgf.mhc.model.server.Author;
+import org.isgf.mhc.model.persistent.Author;
 import org.isgf.mhc.model.ui.UIAuthor;
 import org.isgf.mhc.ui.views.components.basics.PasswordEditComponent;
 import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;

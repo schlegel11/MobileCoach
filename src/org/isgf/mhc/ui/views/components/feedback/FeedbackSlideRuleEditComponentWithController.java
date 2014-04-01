@@ -1,7 +1,7 @@
 package org.isgf.mhc.ui.views.components.feedback;
 
 import org.bson.types.ObjectId;
-import org.isgf.mhc.model.server.FeedbackSlideRule;
+import org.isgf.mhc.model.persistent.FeedbackSlideRule;
 import org.isgf.mhc.ui.views.components.basics.AbstractRuleEditComponentWithController;
 import org.isgf.mhc.ui.views.components.basics.AbstractRuleEditComponentWithController.TYPES;
 

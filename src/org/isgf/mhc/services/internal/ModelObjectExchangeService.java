@@ -23,18 +23,15 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
-import org.isgf.mhc.model.server.MediaObject;
-import org.isgf.mhc.tools.model.ExchangeModelObject;
+import org.isgf.mhc.model.memory.ExchangeModelObject;
+import org.isgf.mhc.model.persistent.MediaObject;
+import org.isgf.mhc.services.types.ModelObjectExchangeFormats;
 
 /**
  * @author Andreas Filler
  */
 @Log4j2
 public class ModelObjectExchangeService {
-	public enum EXCHANGE_FORMAT {
-		INTERVENTION, SCREENING_SURVEY, PARTICIPANTS
-	}
-
 	private static ModelObjectExchangeService	instance	= null;
 
 	private final DatabaseManagerService		databaseManagerService;
@@ -84,7 +81,7 @@ public class ModelObjectExchangeService {
 	 *         for import into another system
 	 */
 	public File exportModelObjects(final List<ModelObject> modelObjects,
-			final EXCHANGE_FORMAT exchangeFormat) {
+			final ModelObjectExchangeFormats exchangeFormat) {
 		val exchangeModelObjects = new ArrayList<ExchangeModelObject>();
 
 		log.debug("Exporting model objects...");
@@ -170,7 +167,7 @@ public class ModelObjectExchangeService {
 	 * @throws NoSuchMethodException
 	 */
 	public List<ModelObject> importModelObjects(final File zipFile,
-			final EXCHANGE_FORMAT expectedExchangeFormat)
+			final ModelObjectExchangeFormats expectedExchangeFormat)
 			throws FileNotFoundException, IOException {
 		val modelObjects = new ArrayList<ModelObject>();
 
@@ -294,7 +291,7 @@ public class ModelObjectExchangeService {
 	@SneakyThrows
 	private File createZipFile(
 			final List<ExchangeModelObject> exchangeModelObjects,
-			final EXCHANGE_FORMAT exchangeFormat) {
+			final ModelObjectExchangeFormats exchangeFormat) {
 
 		log.debug("Writing exchange model objects to zip file");
 
@@ -365,7 +362,7 @@ public class ModelObjectExchangeService {
 	 * @throws IOException
 	 */
 	private List<ExchangeModelObject> readZipFile(final ZipFile zipFile,
-			final EXCHANGE_FORMAT expectedExchangeFormat) throws IOException {
+			final ModelObjectExchangeFormats expectedExchangeFormat) throws IOException {
 		val exchangeModelObjects = new ArrayList<ExchangeModelObject>();
 
 		if (!zipFile.getComment().equals(expectedExchangeFormat.toString())) {

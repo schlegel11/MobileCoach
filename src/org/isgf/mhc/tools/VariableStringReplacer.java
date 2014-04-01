@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
-import org.isgf.mhc.model.server.concepts.AbstractVariableWithValue;
+import org.isgf.mhc.model.persistent.concepts.AbstractVariableWithValue;
 
 /**
  * Replaces variables in Strings with the according values

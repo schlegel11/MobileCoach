@@ -4,8 +4,8 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
-import org.isgf.mhc.model.server.ScreeningSurveySlide;
-import org.isgf.mhc.model.server.ScreeningSurveySlideRule;
+import org.isgf.mhc.model.persistent.ScreeningSurveySlide;
+import org.isgf.mhc.model.persistent.ScreeningSurveySlideRule;
 import org.isgf.mhc.model.ui.UIScreeningSurveySlide;
 import org.isgf.mhc.ui.views.components.basics.AbstractRuleEditComponentWithController;
 import org.isgf.mhc.ui.views.components.basics.AbstractRuleEditComponentWithController.TYPES;

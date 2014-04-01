@@ -1,7 +1,7 @@
 package org.isgf.mhc.services.types;
 
-import org.isgf.mhc.model.server.ScreeningSurveySlide;
-import org.isgf.mhc.model.server.types.ScreeningSurveySlideQuestionTypes;
+import org.isgf.mhc.model.persistent.ScreeningSurveySlide;
+import org.isgf.mhc.model.persistent.types.ScreeningSurveySlideQuestionTypes;
 
 /**
  * "Extends" {@link ScreeningSurveySlideQuestionTypes} and contains all layouts

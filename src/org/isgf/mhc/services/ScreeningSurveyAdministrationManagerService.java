@@ -18,19 +18,19 @@ import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
-import org.isgf.mhc.model.server.Feedback;
-import org.isgf.mhc.model.server.FeedbackSlide;
-import org.isgf.mhc.model.server.FeedbackSlideRule;
-import org.isgf.mhc.model.server.ScreeningSurvey;
-import org.isgf.mhc.model.server.ScreeningSurveySlide;
-import org.isgf.mhc.model.server.ScreeningSurveySlideRule;
-import org.isgf.mhc.model.server.types.EquationSignTypes;
-import org.isgf.mhc.model.server.types.ScreeningSurveySlideQuestionTypes;
+import org.isgf.mhc.model.persistent.Feedback;
+import org.isgf.mhc.model.persistent.FeedbackSlide;
+import org.isgf.mhc.model.persistent.FeedbackSlideRule;
+import org.isgf.mhc.model.persistent.ScreeningSurvey;
+import org.isgf.mhc.model.persistent.ScreeningSurveySlide;
+import org.isgf.mhc.model.persistent.ScreeningSurveySlideRule;
+import org.isgf.mhc.model.persistent.types.EquationSignTypes;
+import org.isgf.mhc.model.persistent.types.ScreeningSurveySlideQuestionTypes;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.ModelObjectExchangeService;
-import org.isgf.mhc.services.internal.ModelObjectExchangeService.EXCHANGE_FORMAT;
 import org.isgf.mhc.services.internal.VariablesManagerService;
+import org.isgf.mhc.services.types.ModelObjectExchangeFormats;
 import org.isgf.mhc.tools.GlobalUniqueIdGenerator;
 import org.isgf.mhc.tools.StringValidator;
 import org.isgf.mhc.ui.NotificationMessageException;
@@ -138,7 +138,7 @@ public class ScreeningSurveyAdministrationManagerService {
 			final ObjectId interventionId) throws FileNotFoundException,
 			IOException {
 		val importedModelObjects = modelObjectExchangeService
-				.importModelObjects(file, EXCHANGE_FORMAT.SCREENING_SURVEY);
+				.importModelObjects(file, ModelObjectExchangeFormats.SCREENING_SURVEY);
 
 		for (val modelObject : importedModelObjects) {
 			if (modelObject instanceof ScreeningSurvey) {
@@ -171,7 +171,7 @@ public class ScreeningSurveyAdministrationManagerService {
 
 		log.debug("Export screening survey");
 		return modelObjectExchangeService.exportModelObjects(
-				modelObjectsToExport, EXCHANGE_FORMAT.SCREENING_SURVEY);
+				modelObjectsToExport, ModelObjectExchangeFormats.SCREENING_SURVEY);
 	}
 
 	public void screeningSurveySetActive(final ScreeningSurvey screeningSurvey,

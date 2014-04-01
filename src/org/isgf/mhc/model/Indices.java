@@ -4,7 +4,7 @@ import java.util.Hashtable;
 
 import lombok.val;
 
-import org.isgf.mhc.model.server.Author;
+import org.isgf.mhc.model.persistent.Author;
 
 /**
  * Describes all indices that shall be created in the database

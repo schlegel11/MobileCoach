@@ -5,8 +5,8 @@ import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
-import org.isgf.mhc.model.server.FeedbackSlide;
-import org.isgf.mhc.model.server.FeedbackSlideRule;
+import org.isgf.mhc.model.persistent.FeedbackSlide;
+import org.isgf.mhc.model.persistent.FeedbackSlideRule;
 import org.isgf.mhc.model.ui.UIFeedbackSlideRule;
 import org.isgf.mhc.ui.views.components.basics.MediaObjectIntegrationComponentWithController.MediaObjectCreationOrDeleteionListener;
 import org.isgf.mhc.ui.views.components.basics.PlaceholderStringEditComponent;
