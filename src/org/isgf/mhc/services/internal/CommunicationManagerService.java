@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import javax.mail.Authenticator;
 import javax.mail.Flags;
@@ -28,6 +29,8 @@ import javax.xml.xpath.XPathFactory;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.bson.types.ObjectId;
+import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.conf.ImplementationContants;
 import org.isgf.mhc.model.memory.ReceivedMessage;
@@ -54,27 +57,6 @@ public class CommunicationManagerService {
 
 	private final DocumentBuilderFactory		documentBuilderFactory;
 	private final SimpleDateFormat				receiverDateFormat;
-
-	/**
-	 * Password authenticator for mail accounts with authentication
-	 * 
-	 * @author Andreas Filler
-	 */
-	private class PasswordAuthenticator extends Authenticator {
-		private final String	mailUser;
-		private final String	mailPassword;
-
-		public PasswordAuthenticator(final String mailUser,
-				final String mailPassword) {
-			this.mailUser = mailUser;
-			this.mailPassword = mailPassword;
-		}
-
-		@Override
-		protected PasswordAuthentication getPasswordAuthentication() {
-			return new PasswordAuthentication(mailUser, mailPassword);
-		}
-	}
 
 	private CommunicationManagerService() throws Exception {
 		log.info("Starting service...");
@@ -146,94 +128,16 @@ public class CommunicationManagerService {
 	}
 
 	/**
-	 * Enables threaded sending of messages, with retries
-	 * 
-	 * @author Andreas Filler
-	 */
-	private class MailingThread extends Thread {
-		private final DialogOption	dialogOption;
-		private final String		message;
-
-		public MailingThread(final DialogOption dialogOption,
-				final String message) {
-			setName("Mailing Thread " + dialogOption.getData());
-			this.dialogOption = dialogOption;
-			this.message = message;
-		}
-
-		@Override
-		public void run() {
-			try {
-				sendMessage(dialogOption, message);
-				return;
-			} catch (final Exception e) {
-				log.warn(
-						"Could not send mail to {}, retrying later another {} times: ",
-						dialogOption.getData(),
-						ImplementationContants.MAILING_RETRIES, e.getMessage());
-			}
-
-			for (int i = 0; i < ImplementationContants.MAILING_RETRIES; i++) {
-				try {
-					sleep(ImplementationContants.SLEEP_MILLIS_BETWEEN_MAILING_RETRIES);
-				} catch (final InterruptedException e) {
-					log.warn("Interrupted messaging sending approach {}", i);
-					return;
-				}
-
-				try {
-					sendMessage(dialogOption, message);
-					return;
-				} catch (final Exception e) {
-					log.warn("Could not send mail to {} in approach {}: ",
-							dialogOption.getData(), i, e.getMessage());
-				}
-			}
-
-			log.error("Could not send mail to {} several times...giving up",
-					dialogOption.getData());
-		}
-
-		/**
-		 * Sends message using SMTP protocol
-		 * 
-		 * @param dialogOption
-		 * @param message
-		 * @throws AddressException
-		 * @throws MessagingException
-		 */
-		private void sendMessage(final DialogOption dialogOption,
-				final String message) throws AddressException,
-				MessagingException {
-			log.debug("Sending mail for outgoing SMS to {} with text {}",
-					dialogOption.getData(), message);
-
-			val mailMessage = new MimeMessage(outgoingMailSession);
-
-			mailMessage.setFrom(new InternetAddress(smsEmailFrom));
-			mailMessage.addRecipient(Message.RecipientType.TO,
-					new InternetAddress(smsEmailTo));
-			mailMessage.setSubject("UserKey=" + smsUserKey + ",Password="
-					+ smsUserPassword + ",Recipient=" + dialogOption.getData()
-					+ ",Originator=" + smsPhoneNumberFrom + ",Notify=none");
-			mailMessage.setText(message, "ISO-8859-1");
-
-			mailMessage.setText(message);
-			Transport.send(mailMessage);
-
-			log.debug("Message sent to {}", dialogOption.getData());
-		}
-	}
-
-	/**
 	 * Sends a mail message (asynchronous)
 	 * 
 	 * @param dialogOption
+	 * @param dialogMessageId
 	 * @param message
 	 */
 	public void sendMessage(final DialogOption dialogOption,
-			final String message) {
-		val mailingThread = new MailingThread(dialogOption, message);
+			final ObjectId dialogMessageId, final String message) {
+		val mailingThread = new MailingThread(dialogOption, dialogMessageId,
+				message);
 		mailingThread.start();
 	}
 
@@ -328,5 +232,120 @@ public class CommunicationManagerService {
 		}
 
 		return receivedMessages;
+	}
+
+	/**
+	 * Password authenticator for mail accounts with authentication
+	 * 
+	 * @author Andreas Filler
+	 */
+	private class PasswordAuthenticator extends Authenticator {
+		private final String	mailUser;
+		private final String	mailPassword;
+
+		public PasswordAuthenticator(final String mailUser,
+				final String mailPassword) {
+			this.mailUser = mailUser;
+			this.mailPassword = mailPassword;
+		}
+
+		@Override
+		protected PasswordAuthentication getPasswordAuthentication() {
+			return new PasswordAuthentication(mailUser, mailPassword);
+		}
+	}
+
+	/**
+	 * Enables threaded sending of messages, with retries
+	 * 
+	 * @author Andreas Filler
+	 */
+	private class MailingThread extends Thread {
+		private final DialogOption	dialogOption;
+		private final ObjectId		dialogMessageId;
+		private final String		message;
+
+		public MailingThread(final DialogOption dialogOption,
+				final ObjectId dialogMessageId, final String message) {
+			setName("Mailing Thread " + dialogOption.getData());
+			this.dialogOption = dialogOption;
+			this.dialogMessageId = dialogMessageId;
+			this.message = message;
+		}
+
+		@Override
+		public void run() {
+			try {
+				sendMessage(dialogOption, message);
+
+				MHC.getInstance()
+						.getInterventionExecutionManagerService()
+						.dialogMessageSetSent(dialogMessageId,
+								System.currentTimeMillis());
+
+				return;
+			} catch (final Exception e) {
+				log.warn(
+						"Could not send mail to {}, retrying later another {} times: ",
+						dialogOption.getData(),
+						ImplementationContants.MAILING_SEND_RETRIES, e.getMessage());
+			}
+
+			for (int i = 0; i < ImplementationContants.MAILING_SEND_RETRIES; i++) {
+				try {
+					TimeUnit.SECONDS
+							.sleep(ImplementationContants.MAILING_RECEIVE_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
+				} catch (final InterruptedException e) {
+					log.warn("Interrupted messaging sending approach {}", i);
+					return;
+				}
+
+				try {
+					sendMessage(dialogOption, message);
+
+					MHC.getInstance()
+							.getInterventionExecutionManagerService()
+							.dialogMessageSetSent(dialogMessageId,
+									System.currentTimeMillis());
+					return;
+				} catch (final Exception e) {
+					log.warn("Could not send mail to {} in approach {}: ",
+							dialogOption.getData(), i, e.getMessage());
+				}
+			}
+
+			log.error("Could not send mail to {} several times...giving up",
+					dialogOption.getData());
+		}
+
+		/**
+		 * Sends message using SMTP protocol
+		 * 
+		 * @param dialogOption
+		 * @param message
+		 * @throws AddressException
+		 * @throws MessagingException
+		 */
+		private void sendMessage(final DialogOption dialogOption,
+				final String message) throws AddressException,
+				MessagingException {
+			log.debug("Sending mail for outgoing SMS to {} with text {}",
+					dialogOption.getData(), message);
+
+			val mailMessage = new MimeMessage(outgoingMailSession);
+
+			mailMessage.setFrom(new InternetAddress(smsEmailFrom));
+			mailMessage.addRecipient(Message.RecipientType.TO,
+					new InternetAddress(smsEmailTo));
+			mailMessage.setSubject("UserKey=" + smsUserKey + ",Password="
+					+ smsUserPassword + ",Recipient=" + dialogOption.getData()
+					+ ",Originator=" + smsPhoneNumberFrom + ",Notify=none");
+			mailMessage.setText(message, "ISO-8859-1");
+
+			mailMessage.setText(message);
+			Transport.send(mailMessage);
+
+			log.debug("Message sent to {}", dialogOption.getData());
+		}
 	}
 }

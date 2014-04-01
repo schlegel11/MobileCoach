@@ -83,7 +83,8 @@ public class MHC implements ServletContextListener {
 							variablesManagerService, modelObjectExchangeService);
 			interventionExecutionManagerService = InterventionExecutionManagerService
 					.start(databaseManagerService, fileStorageManagerService,
-							variablesManagerService);
+							variablesManagerService,
+							communicationManagerService);
 			screeningSurveyExecutionManagerService = ScreeningSurveyExecutionManagerService
 					.start(databaseManagerService, fileStorageManagerService,
 							variablesManagerService);
@@ -107,15 +108,15 @@ public class MHC implements ServletContextListener {
 		log.info("Stopping services...");
 
 		try {
-			databaseManagerService.stop();
-			fileStorageManagerService.stop();
-			variablesManagerService.stop();
-			communicationManagerService.stop();
-			modelObjectExchangeService.stop();
-			interventionAdministrationManagerService.stop();
-			screeningSurveyAdministrationManagerService.stop();
-			interventionExecutionManagerService.stop();
 			screeningSurveyExecutionManagerService.stop();
+			interventionExecutionManagerService.stop();
+			screeningSurveyAdministrationManagerService.stop();
+			interventionAdministrationManagerService.stop();
+			modelObjectExchangeService.stop();
+			communicationManagerService.stop();
+			variablesManagerService.stop();
+			fileStorageManagerService.stop();
+			databaseManagerService.stop();
 		} catch (final Exception e) {
 			log.warn("Error at stopping services: {}", e);
 		}
