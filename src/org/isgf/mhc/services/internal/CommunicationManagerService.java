@@ -254,6 +254,7 @@ public class CommunicationManagerService {
 			folder.open(Folder.READ_WRITE);
 
 			for (val message : folder.getMessages()) {
+				// Only handle messages who match the subject pattern
 				if (message.getSubject().startsWith(mailSubjectStartsWith)) {
 					log.debug("Mail received with subject '{}'",
 							message.getSubject());
@@ -306,9 +307,10 @@ public class CommunicationManagerService {
 					log.debug("Mail parsed as {}", receivedMessage.toString());
 
 					receivedMessages.add(receivedMessage);
-
-					message.setFlag(Flags.Flag.DELETED, true);
 				}
+
+				// Delete also messages not matching the subject pattern
+				message.setFlag(Flags.Flag.DELETED, true);
 			}
 		} catch (final Exception e) {
 			log.error("Could not retrieve messages: {}", e.getMessage());
