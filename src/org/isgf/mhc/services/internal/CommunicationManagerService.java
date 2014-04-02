@@ -324,7 +324,7 @@ public class CommunicationManagerService {
 			for (int i = 0; i < ImplementationContants.MAILING_SEND_RETRIES; i++) {
 				try {
 					TimeUnit.SECONDS
-							.sleep(ImplementationContants.MAILING_RECEIVE_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
+							.sleep(ImplementationContants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS);
 				} catch (final InterruptedException e) {
 					log.warn("Interrupted messaging sending approach {}", i);
 

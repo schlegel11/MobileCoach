@@ -40,7 +40,7 @@ public class IncomingMessageWorker extends Thread {
 
 			try {
 				TimeUnit.SECONDS
-						.sleep(ImplementationContants.MAILING_RECEIVE_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
+						.sleep(ImplementationContants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS);
 			} catch (final InterruptedException e) {
 				interrupt();
 				log.debug("Incoming message worker received signal to stop");

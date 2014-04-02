@@ -76,6 +76,11 @@ public class InterventionExecutionManagerService {
 	public void stop() throws Exception {
 		log.info("Stopping service...");
 
+		log.debug("Stopping master rule evaluation worker...");
+		synchronized (masterRuleEvaluationWorker) {
+			masterRuleEvaluationWorker.interrupt();
+			masterRuleEvaluationWorker.join();
+		}
 		log.debug("Stopping incoming message worker...");
 		synchronized (incomingMessageWorker) {
 			incomingMessageWorker.interrupt();

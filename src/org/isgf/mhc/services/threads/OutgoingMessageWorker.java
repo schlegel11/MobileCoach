@@ -42,7 +42,7 @@ public class OutgoingMessageWorker extends Thread {
 
 			try {
 				TimeUnit.SECONDS
-						.sleep(ImplementationContants.MAILING_SEND_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
+						.sleep(ImplementationContants.MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS);
 			} catch (final InterruptedException e) {
 				interrupt();
 				log.debug("Outgoing message worker received signal to stop");

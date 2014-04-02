@@ -16,13 +16,13 @@ import org.isgf.mhc.conf.ImplementationContants;
 @Log4j2
 public class MasterRuleEvaluationWorker extends Thread {
 	public MasterRuleEvaluationWorker() {
-		setName("Master Rules Evaluation Worker");
+		setName("Master Rule Evaluation Worker");
 	}
 
 	@Override
 	public void run() {
 		while (!isInterrupted()) {
-			log.debug("Executing new run of master rules evaluation worker...");
+			log.debug("Executing new run of master rule evaluation worker...");
 
 			// TODO
 			// determineParticipantsRelevantForRuleExecution(); //
@@ -33,10 +33,10 @@ public class MasterRuleEvaluationWorker extends Thread {
 
 			try {
 				TimeUnit.MINUTES
-						.sleep(ImplementationContants.MASTER_RULES_EVALUTION_WORKER_MINUTES_SLEEP_BETWEEN_CHECK_CYCLES);
+						.sleep(ImplementationContants.MASTER_RULE_EVALUTION_WORKER_MINUTES_SLEEP_BETWEEN_CHECK_CYCLES);
 			} catch (final InterruptedException e) {
 				interrupt();
-				log.debug("Master rules evaluation worker received signal to stop");
+				log.debug("Master rule evaluation worker received signal to stop");
 			}
 		}
 	}
