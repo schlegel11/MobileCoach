@@ -5,15 +5,18 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
-import org.isgf.mhc.conf.ImplementationContants;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.persistent.DialogMessage;
 import org.isgf.mhc.model.persistent.MediaObject;
 import org.isgf.mhc.model.persistent.SystemUniqueId;
+import org.isgf.mhc.model.persistent.types.DialogMessageStatusTypes;
 import org.isgf.mhc.services.internal.CommunicationManagerService;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.VariablesManagerService;
+import org.isgf.mhc.services.threads.IncomingMessageWorker;
+import org.isgf.mhc.services.threads.MasterRuleEvaluationWorker;
+import org.isgf.mhc.services.threads.OutgoingMessageWorker;
 
 @Log4j2
 public class InterventionExecutionManagerService {
@@ -22,10 +25,11 @@ public class InterventionExecutionManagerService {
 	private final DatabaseManagerService				databaseManagerService;
 	private final FileStorageManagerService				fileStorageManagerService;
 	private final VariablesManagerService				variablesManagerService;
-	private final CommunicationManagerService			communicationManagerService;
+	final CommunicationManagerService					communicationManagerService;
 
-	private final InternalIncomingMessageWorker			internalIncomingMessageWorker;
-	private final InternalOutgoingMessageWorker			internalOutgoingMessageWorker;
+	private final IncomingMessageWorker					incomingMessageWorker;
+	private final OutgoingMessageWorker					outgoingMessageWorker;
+	private final MasterRuleEvaluationWorker			masterRuleEvaluationWorker;
 
 	private InterventionExecutionManagerService(
 			final DatabaseManagerService databaseManagerService,
@@ -40,10 +44,17 @@ public class InterventionExecutionManagerService {
 		this.variablesManagerService = variablesManagerService;
 		this.communicationManagerService = communicationManagerService;
 
-		internalOutgoingMessageWorker = new InternalOutgoingMessageWorker();
-		internalOutgoingMessageWorker.start();
-		internalIncomingMessageWorker = new InternalIncomingMessageWorker();
-		internalIncomingMessageWorker.start();
+		// Reset all messages which could not be sent the last times
+		dialogMessagesResetStatusAfterRestart();
+
+		outgoingMessageWorker = new OutgoingMessageWorker(
+				communicationManagerService);
+		outgoingMessageWorker.start();
+		incomingMessageWorker = new IncomingMessageWorker(
+				communicationManagerService);
+		incomingMessageWorker.start();
+		masterRuleEvaluationWorker = new MasterRuleEvaluationWorker();
+		masterRuleEvaluationWorker.start();
 
 		log.info("Started.");
 	}
@@ -65,15 +76,15 @@ public class InterventionExecutionManagerService {
 	public void stop() throws Exception {
 		log.info("Stopping service...");
 
-		log.debug("Stopping incoming message worker");
-		synchronized (internalIncomingMessageWorker) {
-			internalIncomingMessageWorker.interrupt();
-			internalIncomingMessageWorker.join();
+		log.debug("Stopping incoming message worker...");
+		synchronized (incomingMessageWorker) {
+			incomingMessageWorker.interrupt();
+			incomingMessageWorker.join();
 		}
-		log.debug("Stopping outgoing message worker");
-		synchronized (internalOutgoingMessageWorker) {
-			internalOutgoingMessageWorker.interrupt();
-			internalOutgoingMessageWorker.join();
+		log.debug("Stopping outgoing message worker...");
+		synchronized (outgoingMessageWorker) {
+			outgoingMessageWorker.interrupt();
+			outgoingMessageWorker.join();
 		}
 
 		log.info("Stopped.");
@@ -105,6 +116,52 @@ public class InterventionExecutionManagerService {
 
 	// Dialog Message
 	@Synchronized
+	public void dialogMessageCreate(final ObjectId participantId,
+			final String message, final int hourToSendMessage,
+			final int hoursUntilMessageIsHandledAsUnanswered,
+			final boolean manuallySent,
+			final ObjectId relatedMonitoringRuleForReplyRules) {
+		val dialogMessage = new DialogMessage(participantId, 0,
+				DialogMessageStatusTypes.PREPARED_FOR_SENDING, message, -1, -1,
+				-1, -1, null, false, relatedMonitoringRuleForReplyRules, false,
+				manuallySent);
+
+		val highestOrderMessage = databaseManagerService
+				.findOneSortedModelObject(DialogMessage.class,
+						Queries.DIALOG_MESSAGE__BY_PARTICIPANT,
+						Queries.DIALOG_MESSAGE__SORT_BY_ORDER_DESC,
+						participantId);
+
+		if (highestOrderMessage != null) {
+			dialogMessage.setOrder(highestOrderMessage.getOrder() + 1);
+		}
+
+		databaseManagerService.saveModelObject(dialogMessage);
+	}
+
+	@SuppressWarnings("incomplete-switch")
+	@Synchronized
+	public void dialogMessageSetStatus(final ObjectId dialogMessageId,
+			final DialogMessageStatusTypes newStatus,
+			final long timeStampOfEvent) {
+		val dialogMessage = databaseManagerService.getModelObjectById(
+				DialogMessage.class, dialogMessageId);
+
+		dialogMessage.setStatus(newStatus);
+
+		switch (newStatus) {
+			case SENT:
+				dialogMessage.setSentTimestamp(timeStampOfEvent);
+				break;
+			case SENT_AND_ANSWERED_BY_PARTICIPANT:
+				dialogMessage.setAnswerReceivedTimestamp(timeStampOfEvent);
+				break;
+		}
+
+		databaseManagerService.saveModelObject(dialogMessage);
+	}
+
+	@Synchronized
 	public void dialogMessageSetMediaContentViewed(
 			final ObjectId dialogMessageId) {
 		val dialogMessage = databaseManagerService.getModelObjectById(
@@ -115,20 +172,24 @@ public class InterventionExecutionManagerService {
 		databaseManagerService.saveModelObject(dialogMessage);
 	}
 
-	@Synchronized
-	public void dialogMessageSetSent(final ObjectId dialogMessageId,
-			final long sentTimestamp) {
-		val dialogMessage = databaseManagerService.getModelObjectById(
-				DialogMessage.class, dialogMessageId);
-
-		dialogMessage.setSentTimestamp(sentTimestamp);
-
-		databaseManagerService.saveModelObject(dialogMessage);
-	}
-
 	/*
 	 * Special methods
 	 */
+	@Synchronized
+	private void dialogMessagesResetStatusAfterRestart() {
+		log.debug("Resetting dialog message status after restart...");
+
+		val pendingDialogMessages = databaseManagerService.findModelObjects(
+				DialogMessage.class, Queries.DIALOG_MESSAGE__BY_STATUS,
+				DialogMessageStatusTypes.SENDING);
+
+		for (val pendingDialogMessage : pendingDialogMessages) {
+			pendingDialogMessage
+					.setStatus(DialogMessageStatusTypes.PREPARED_FOR_SENDING);
+
+			databaseManagerService.saveModelObject(pendingDialogMessage);
+		}
+	}
 
 	/*
 	 * Getter methods
@@ -136,73 +197,5 @@ public class InterventionExecutionManagerService {
 	public SystemUniqueId getSystemUniqueId(final long shortId) {
 		return databaseManagerService.findOneModelObject(SystemUniqueId.class,
 				Queries.SYSTEM_UNIQUE_ID__BY_SHORT_ID, shortId);
-	}
-
-	/*
-	 * Internal classes
-	 */
-	/**
-	 * Manages the handling of incoming messages
-	 * 
-	 * @author Andreas Filler
-	 */
-	private class InternalIncomingMessageWorker extends Thread {
-		public InternalIncomingMessageWorker() {
-			setName("Internal Incoming Message Worker");
-		}
-
-		@Override
-		public void run() {
-			while (!isInterrupted()) {
-				// TODO A LOT
-				System.out.println("Und er läuft und er läuft und er läuft");
-				// HIER LOKALER KLASSENAUFRUF
-
-				try {
-					sleep(ImplementationContants.MAILING_RECEIVE_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
-				} catch (final InterruptedException e) {
-					interrupt();
-					System.out.println("Unterbrechung in sleep()");
-				}
-				// TODO A LOT
-			}
-		}
-	}
-
-	/**
-	 * Manages the handling of outgoing messages
-	 * 
-	 * @author Andreas Filler
-	 */
-	private class InternalOutgoingMessageWorker extends Thread {
-		public InternalOutgoingMessageWorker() {
-			setName("Internal Outgoing Message Worker");
-		}
-
-		@Override
-		public void run() {
-			while (!isInterrupted()) {
-				// TODO A LOT
-
-				// DETERMINE MESSAGES WHICH SHOULD HAVE BEEN SENT BUT AREN'T
-				// SENT YET...and are currently not in SEND QUEUE...
-				// sending-state? --> SENT auf bestimmte zahl und RESET beim
-				// NEUSTART des SYSTEMS (in diesem FAlle kann sogar der Thread
-				// dies beim Start aufräumen)
-
-				// HIER WERDEN AUCH DIE MESSAGES GESENDET
-
-				System.out.println("Und er läuft und er läuft und er läuft");
-				// HIER LOKALER KLASSENAUFRUF
-
-				try {
-					sleep(ImplementationContants.MAILING_PREPARATION_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
-				} catch (final InterruptedException e) {
-					interrupt();
-					System.out.println("Unterbrechung in sleep()");
-				}
-				// TODO A LOT
-			}
-		}
 	}
 }

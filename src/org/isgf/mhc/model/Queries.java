@@ -95,4 +95,7 @@ public class Queries {
 	public static final String	PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT												= "{'participant':#}";
 
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT																= "{'participant':#}";
+	public static final String	DIALOG_MESSAGE__BY_STATUS																	= "{'status':#}";
+	public static final String	DIALOG_MESSAGE__SORT_BY_ORDER_DESC															= "{'order':-1}";
+
 }

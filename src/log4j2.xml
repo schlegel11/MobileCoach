@@ -2,7 +2,7 @@
 <Configuration>
 	<Appenders>
 		<Console name="Console" target="SYSTEM_OUT">
-			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %40.40c %x - %m%n" />
+			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %40.40c [%t] - %m%n" />
 		</Console>
 		<File name="File" fileName="${sys:mhc_logging_folder}/mhc.log" bufferedIO="false"
 			append="true">

@@ -82,7 +82,7 @@ public class TestServlet extends HttpServlet {
 	}
 
 	private void runTestcases() {
-		// TODO define testcases
+		// TODO OPTIONAL: Testcases could be defined here
 	}
 
 	private void logToWeb(final String logMessage) {
