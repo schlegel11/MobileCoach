@@ -30,7 +30,7 @@ import org.isgf.mhc.model.persistent.MonitoringReplyRule;
 import org.isgf.mhc.model.persistent.MonitoringRule;
 import org.isgf.mhc.model.persistent.Participant;
 import org.isgf.mhc.model.persistent.concepts.AbstractRule;
-import org.isgf.mhc.model.persistent.types.EquationSignTypes;
+import org.isgf.mhc.model.persistent.types.RuleEquationSignTypes;
 import org.isgf.mhc.model.persistent.types.MediaObjectTypes;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
@@ -551,7 +551,7 @@ public class InterventionAdministrationManagerService {
 			final ObjectId parentMonitoringRuleId) {
 		val monitoringRule = new MonitoringRule(
 				"",
-				EquationSignTypes.CALCULATED_VALUE_EQUALS,
+				RuleEquationSignTypes.CALCULATED_VALUE_EQUALS,
 				"",
 				parentMonitoringRuleId,
 				0,
@@ -720,7 +720,7 @@ public class InterventionAdministrationManagerService {
 			final ObjectId parentMonitoringReplyRuleId,
 			final boolean isGotAnswerRule) {
 		val monitoringReplyRule = new MonitoringReplyRule("",
-				EquationSignTypes.CALCULATED_VALUE_EQUALS, "",
+				RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "",
 				parentMonitoringReplyRuleId, 0, null, false, null,
 				isGotAnswerRule ? monitoringRuleId : null,
 				isGotAnswerRule ? null : monitoringRuleId);
@@ -911,7 +911,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	public void abstractRuleChangeEquationSign(final AbstractRule abstractRule,
-			final EquationSignTypes newType) {
+			final RuleEquationSignTypes newType) {
 		abstractRule.setRuleEquationSign(newType);
 
 		databaseManagerService.saveModelObject(abstractRule);

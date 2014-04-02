@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
+import org.isgf.mhc.model.persistent.types.DialogMessageStatusTypes;
 
 /**
  * {@link ModelObject} to represent an {@link DialogMessage}
@@ -23,7 +24,25 @@ public class DialogMessage extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId	participant;
+	private ObjectId					participant;
+
+	/**
+	 * The position of the {@link DialogMessage} compared to all other
+	 * {@link DialogMessage}s of a specific {@link Participant}
+	 */
+	@Getter
+	@Setter
+	private int							order;
+
+	/**
+	 * The status of the {@link DialogMessage}; all statuses follow each other
+	 * except for the last two: a {@link DialogMessage} can only have one of
+	 * them
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private DialogMessageStatusTypes	status;
 
 	/**
 	 * The message sent to the {@link Participant}
@@ -31,49 +50,50 @@ public class DialogMessage extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String		message;
+	private String						message;
 
 	/**
-	 * Timestamp when the {@link DialogMessage} should been sent
+	 * Timestamp when the {@link DialogMessage} should have been sent
 	 */
 	@Getter
 	@Setter
-	private long		shouldBeSentTimestamp;
+	private long						shouldBeSentTimestamp;
 
 	/**
 	 * Timestamp when the {@link DialogMessage} has been sent
 	 */
 	@Getter
 	@Setter
-	private long		sentTimestamp;
+	private long						sentTimestamp;
 
 	/**
 	 * Timestamp when the {@link DialogMessage} is handled as unanswered
 	 */
 	@Getter
 	@Setter
-	private long		isUnansweredAfterTimestamp;
-
-	/**
-	 * Marker if message has been answered by {@link Participant}
-	 */
-	@Getter
-	@Setter
-	private boolean		answeredByParticipant;
-
-	/**
-	 * The response retrieved from the {@link Participant}
-	 */
-	@Getter
-	@Setter
-	private String		answerFromParticipant;
+	private long						isUnansweredAfterTimestamp;
 
 	/**
 	 * Timestamp when the answer has been received
 	 */
 	@Getter
 	@Setter
-	private long		answerReceivedTimestamp;
+	private long						answerReceivedTimestamp;
+
+	/**
+	 * The response retrieved from the {@link Participant}
+	 */
+	@Getter
+	@Setter
+	private String						answerReceived;
+
+	/**
+	 * Marker showing if a response to a {@link DialogMessage} can not be
+	 * automatically processed by the system
+	 */
+	@Getter
+	@Setter
+	private boolean						answerNotAutomaticallyProcessable;
 
 	/**
 	 * <strong>OPTIONAL:</strong> The {@link MonitoringRule} containing the
@@ -82,23 +102,7 @@ public class DialogMessage extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private ObjectId	monitoringRuleContainingReplyRules;
-
-	/**
-	 * Marks if the {@link DialogMessage} has been completely proceeded if a
-	 * timeout has been set before
-	 */
-	@Getter
-	@Setter
-	private boolean		proceededAfterTimeoutOrAnswer;
-
-	/**
-	 * Marker showing if the {@link DialogMessage} has been sent manually by an
-	 * {@link Author}
-	 */
-	@Getter
-	@Setter
-	private boolean		manuallySent;
+	private ObjectId					relatedMonitoringRuleForReplyRules;
 
 	/**
 	 * The information if a {@link Participant} viewed the presented media
@@ -107,13 +111,14 @@ public class DialogMessage extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private boolean		mediaContentViewed;
+	private boolean						mediaContentViewed;
 
 	/**
-	 * Marker showing if a response to a {@link DialogMessage} can not be
-	 * automatically processed by the system
+	 * Marker showing if the {@link DialogMessage} has been sent manually by an
+	 * {@link Author}
 	 */
 	@Getter
 	@Setter
-	private boolean		notAutomaticallyProcessable;
+	private boolean						manuallySent;
+
 }

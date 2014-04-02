@@ -7,7 +7,7 @@ import lombok.Setter;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.persistent.MonitoringMessageGroup;
-import org.isgf.mhc.model.persistent.types.EquationSignTypes;
+import org.isgf.mhc.model.persistent.types.RuleEquationSignTypes;
 
 /**
  * {@link ModelObject} to represent an {@link AbstractMonitoringRule}
@@ -30,7 +30,7 @@ public abstract class AbstractMonitoringRule extends AbstractRule {
 	 * Default constructor
 	 */
 	public AbstractMonitoringRule(final String ruleWithPlaceholders,
-			final EquationSignTypes ruleEquationSign,
+			final RuleEquationSignTypes ruleEquationSign,
 			final String ruleComparisonTermWithPlaceholders,
 			final ObjectId isSubRuleOfMonitoringRule, final int order,
 			final String storeValueToVariableWithName,

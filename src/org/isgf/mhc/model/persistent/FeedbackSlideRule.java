@@ -11,7 +11,7 @@ import lombok.val;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.persistent.concepts.AbstractRule;
-import org.isgf.mhc.model.persistent.types.EquationSignTypes;
+import org.isgf.mhc.model.persistent.types.RuleEquationSignTypes;
 import org.isgf.mhc.model.ui.UIFeedbackSlideRule;
 import org.isgf.mhc.model.ui.UIModelObject;
 import org.isgf.mhc.tools.StringHelpers;
@@ -32,7 +32,7 @@ public class FeedbackSlideRule extends AbstractRule {
 	 */
 	public FeedbackSlideRule(final ObjectId belongingFeedbackSlide,
 			final int order, final String ruleWithPlaceholders,
-			final EquationSignTypes ruleEquationSign,
+			final RuleEquationSignTypes ruleEquationSign,
 			final String ruleComparisonTermWithPlaceholders) {
 		super(ruleWithPlaceholders, ruleEquationSign,
 				ruleComparisonTermWithPlaceholders);

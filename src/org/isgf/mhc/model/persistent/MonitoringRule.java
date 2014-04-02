@@ -12,7 +12,7 @@ import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.persistent.concepts.AbstractMonitoringRule;
-import org.isgf.mhc.model.persistent.types.EquationSignTypes;
+import org.isgf.mhc.model.persistent.types.RuleEquationSignTypes;
 
 /**
  * {@link ModelObject} to represent an {@link MonitoringRule}
@@ -34,7 +34,7 @@ public class MonitoringRule extends AbstractMonitoringRule {
 	 * Default constructor
 	 */
 	public MonitoringRule(final String ruleWithPlaceholders,
-			final EquationSignTypes ruleEquationSign,
+			final RuleEquationSignTypes ruleEquationSign,
 			final String ruleComparisonTermWithPlaceholders,
 			final ObjectId isSubRuleOfMonitoringRule, final int order,
 			final String storeValueToVariableWithName,

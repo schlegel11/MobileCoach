@@ -13,7 +13,7 @@ import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.persistent.concepts.AbstractRule;
-import org.isgf.mhc.model.persistent.types.EquationSignTypes;
+import org.isgf.mhc.model.persistent.types.RuleEquationSignTypes;
 import org.isgf.mhc.model.ui.UIModelObject;
 import org.isgf.mhc.model.ui.UIScreeningSurveySlideRule;
 import org.isgf.mhc.tools.StringHelpers;
@@ -38,7 +38,7 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 			final ObjectId nextScreeningSurveySlideWhenTrue,
 			final ObjectId nextScreeningSurveySlideWhenFalse,
 			final String ruleWithPlaceholders,
-			final EquationSignTypes ruleEquationSign,
+			final RuleEquationSignTypes ruleEquationSign,
 			final String ruleComparisonTermWithPlaceholders) {
 		super(ruleWithPlaceholders, ruleEquationSign,
 				ruleComparisonTermWithPlaceholders);

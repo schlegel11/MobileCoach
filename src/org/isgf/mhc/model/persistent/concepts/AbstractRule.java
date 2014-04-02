@@ -7,7 +7,7 @@ import lombok.NonNull;
 import lombok.Setter;
 
 import org.isgf.mhc.model.ModelObject;
-import org.isgf.mhc.model.persistent.types.EquationSignTypes;
+import org.isgf.mhc.model.persistent.types.RuleEquationSignTypes;
 
 /**
  * {@link ModelObject} to represent a rule
@@ -35,7 +35,7 @@ public abstract class AbstractRule extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private EquationSignTypes	ruleEquationSign;
+	private RuleEquationSignTypes	ruleEquationSign;
 
 	/**
 	 * The term containing placeholders to compare the rule with

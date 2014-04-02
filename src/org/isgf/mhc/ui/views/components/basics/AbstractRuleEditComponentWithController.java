@@ -8,7 +8,7 @@ import lombok.extern.log4j.Log4j2;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.model.persistent.concepts.AbstractRule;
-import org.isgf.mhc.model.persistent.types.EquationSignTypes;
+import org.isgf.mhc.model.persistent.types.RuleEquationSignTypes;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -56,7 +56,7 @@ public class AbstractRuleEditComponentWithController extends
 		ruleEquationSignComboBox.setNullSelectionAllowed(false);
 		ruleEquationSignComboBox.setPageLength(20);
 
-		for (val equationSignType : EquationSignTypes.values()) {
+		for (val equationSignType : RuleEquationSignTypes.values()) {
 			ruleEquationSignComboBox.addItem(equationSignType);
 		}
 
@@ -123,7 +123,7 @@ public class AbstractRuleEditComponentWithController extends
 				.getValue());
 		getInterventionAdministrationManagerService()
 				.abstractRuleChangeEquationSign(rule,
-						(EquationSignTypes) event.getProperty().getValue());
+						(RuleEquationSignTypes) event.getProperty().getValue());
 	}
 
 	public void editRuleTextWithPlaceholder() {

@@ -24,7 +24,7 @@ import org.isgf.mhc.model.persistent.FeedbackSlideRule;
 import org.isgf.mhc.model.persistent.ScreeningSurvey;
 import org.isgf.mhc.model.persistent.ScreeningSurveySlide;
 import org.isgf.mhc.model.persistent.ScreeningSurveySlideRule;
-import org.isgf.mhc.model.persistent.types.EquationSignTypes;
+import org.isgf.mhc.model.persistent.types.RuleEquationSignTypes;
 import org.isgf.mhc.model.persistent.types.ScreeningSurveySlideQuestionTypes;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
@@ -375,7 +375,7 @@ public class ScreeningSurveyAdministrationManagerService {
 			final ObjectId screeningSurveySlideId) {
 		val screeningSurveySlideRule = new ScreeningSurveySlideRule(
 				screeningSurveySlideId, 0, null, null, "",
-				EquationSignTypes.CALCULATED_VALUE_EQUALS, "");
+				RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "");
 
 		val highestOrderSlideRule = databaseManagerService
 				.findOneSortedModelObject(
@@ -554,7 +554,7 @@ public class ScreeningSurveyAdministrationManagerService {
 	public FeedbackSlideRule feedbackSlideRuleCreate(
 			final ObjectId feedbackSlideId) {
 		val feedbackSlideRule = new FeedbackSlideRule(feedbackSlideId, 0, "",
-				EquationSignTypes.CALCULATED_VALUE_EQUALS, "");
+				RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "");
 
 		val highestOrderSlideRule = databaseManagerService
 				.findOneSortedModelObject(FeedbackSlideRule.class,

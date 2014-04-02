@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Supported {@link EquationSignTypes}
+ * Supported {@link RuleEquationSignTypes}
  * 
  * @author Andreas Filler
  */
-public enum EquationSignTypes {
+public enum RuleEquationSignTypes {
 	CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE, CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_FALSE, CALCULATED_VALUE_IS_SMALLER_THAN, CALCULATED_VALUE_IS_SMALLER_OR_EQUAL_THAN, CALCULATED_VALUE_EQUALS, CALCULATED_VALUE_IS_BIGGER_OR_EQUAL_THAN, CALCULATED_VALUE_IS_BIGGER_THAN, CREATE_TEXT_BUT_RESULT_IS_ALWAYS_TRUE, CREATE_TEXT_BUT_RESULT_IS_ALWAYS_FALSE, TEXT_VALUE_EQUALS, TEXT_VALUE_NOT_EQUALS;
 
-	private static List<EquationSignTypes>	calculatedEquationSigns	= null;
+	private static List<RuleEquationSignTypes>	calculatedEquationSigns	= null;
 
 	@Override
 	public String toString() {
@@ -20,7 +20,7 @@ public enum EquationSignTypes {
 
 	public synchronized boolean isCalculatedEquationSignType() {
 		if (calculatedEquationSigns == null) {
-			calculatedEquationSigns = new ArrayList<EquationSignTypes>();
+			calculatedEquationSigns = new ArrayList<RuleEquationSignTypes>();
 			calculatedEquationSigns
 					.add(CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE);
 			calculatedEquationSigns
