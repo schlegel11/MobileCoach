@@ -105,6 +105,14 @@ public class DialogMessage extends ModelObject {
 	private ObjectId					relatedMonitoringRuleForReplyRules;
 
 	/**
+	 * <strong>OPTIONAL:</strong> The {@link MonitoringMessage} used to create
+	 * this {@link DialogMessage}
+	 */
+	@Getter
+	@Setter
+	private ObjectId					relatedMonitoringMessage;
+
+	/**
 	 * The information if a {@link Participant} viewed the presented media
 	 * content (if
 	 * integrated in the {@link MonitoringMessage})

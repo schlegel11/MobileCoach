@@ -132,7 +132,7 @@ public class ScreeningSurveySlideEditComponent extends
 				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__QUESTION_TYPE);
 		localize(
 				optionalLayoutAttributeLabel,
-				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__OPTIONAL_LAYOUT_ATTRIBUTE);
+				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__OPTIONAL_LAYOUT_ATTRIBUTE_WITH_PLACEHOLDERS);
 		localize(
 				questionTextWithPlaceholdersLabel,
 				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__QUESTION_TEXT);

@@ -20,6 +20,15 @@ import org.isgf.mhc.services.internal.VariablesManagerService;
 import org.isgf.mhc.services.types.ScreeningSurveySlideTemplateFieldTypes;
 import org.isgf.mhc.services.types.ScreeningSurveySlideTemplateLayoutTypes;
 
+/**
+ * Cares for the orchestration of {@link ScreeningSurveySlides} as
+ * part of a {@link ScreeningSurvey}
+ * 
+ * The templates are based on the Mustache standard. Details can be found in the
+ * {@link ScreeningSurveySlideTemplateFieldTypes} class
+ * 
+ * @author Andreas Filler
+ */
 @Log4j2
 public class ScreeningSurveyExecutionManagerService {
 	private static ScreeningSurveyExecutionManagerService	instance	= null;

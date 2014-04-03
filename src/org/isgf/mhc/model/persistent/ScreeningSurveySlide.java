@@ -61,11 +61,13 @@ public class ScreeningSurveySlide extends ModelObject {
 
 	/**
 	 * Enables to add an optional layout attribute for the template generation
-	 * in addition to the template set by the question type
+	 * in addition to the template set by the question type containing
+	 * placeholders
+	 * for variables
 	 */
 	@Getter
 	@Setter
-	private String								optionalLayoutAttribute;
+	private String								optionalLayoutAttributeWithPlaceholders;
 
 	/**
 	 * <strong>OPTIONAL:</strong> A {@link MediaObject} can be linked to be

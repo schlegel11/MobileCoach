@@ -10,7 +10,6 @@ import org.isgf.mhc.model.persistent.FeedbackSlideRule;
 import org.isgf.mhc.model.ui.UIFeedbackSlideRule;
 import org.isgf.mhc.ui.views.components.basics.MediaObjectIntegrationComponentWithController.MediaObjectCreationOrDeleteionListener;
 import org.isgf.mhc.ui.views.components.basics.PlaceholderStringEditComponent;
-import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -178,10 +177,12 @@ public class FeedbackSlideEditComponentWithController extends
 
 	public void changeOptionalLayoutAttribute() {
 		log.debug("Edit optional layout attribute");
+		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
+				.getAllPossibleScreenigSurveyVariables(relatedScreeningSurveyId);
 		showModalStringValueEditWindow(
-				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_OPTIONAL_LAYOUT_ATTRIBUTE,
-				feedbackSlide.getOptionalLayoutAttribute(), null,
-				new ShortStringEditComponent(),
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_OPTIONAL_LAYOUT_ATTRIBUTE_WITH_PLACEHOLDERS,
+				feedbackSlide.getOptionalLayoutAttribute(),
+				allPossibleVariables, new PlaceholderStringEditComponent(),
 				new ExtendableButtonClickListener() {
 
 					@Override

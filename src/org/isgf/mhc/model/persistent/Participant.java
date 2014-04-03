@@ -56,14 +56,6 @@ public class Participant extends ModelObject {
 	private String		nickname;
 
 	/**
-	 * Stores if the {@link Participant} already performed a
-	 * {@link ScreeningSurvey} of this {@link Intervention}
-	 */
-	@Getter
-	@Setter
-	private boolean		performedScreeningSurvey;
-
-	/**
 	 * Stores the reference to the {@link ScreeningSurvey} started by the
 	 * {@link Participant} in an independent way; This enables to reference a
 	 * {@link ScreeningSurvey} also after independent export/import to/from
@@ -72,13 +64,6 @@ public class Participant extends ModelObject {
 	@Getter
 	@Setter
 	private String		assignedScreeningSurveyGlobalUniqueId;
-
-	/**
-	 * Timestamp when the user finished the {@link ScreeningSurvey}
-	 */
-	@Getter
-	@Setter
-	private long		screeningSurveyPerformedTimestamp;
 
 	/**
 	 * Stores if the {@link Participant} is activated for the rule-based
@@ -199,5 +184,10 @@ public class Participant extends ModelObject {
 		val dialogMessagesToDelete = ModelObject.find(DialogMessage.class,
 				Queries.DIALOG_MESSAGE__BY_PARTICIPANT, getId());
 		ModelObject.delete(dialogMessagesToDelete);
+
+		// Delete dialog status
+		val dialogStatusesToDelete = ModelObject.find(DialogStatus.class,
+				Queries.DIALOG_STATUS__BY_PARTICIPANT, getId());
+		ModelObject.delete(dialogStatusesToDelete);
 	}
 }

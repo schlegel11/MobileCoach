@@ -5,8 +5,10 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
+import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.persistent.DialogMessage;
+import org.isgf.mhc.model.persistent.Intervention;
 import org.isgf.mhc.model.persistent.MediaObject;
 import org.isgf.mhc.model.persistent.SystemUniqueId;
 import org.isgf.mhc.model.persistent.types.DialogMessageStatusTypes;
@@ -18,6 +20,12 @@ import org.isgf.mhc.services.threads.IncomingMessageWorker;
 import org.isgf.mhc.services.threads.MasterRuleEvaluationWorker;
 import org.isgf.mhc.services.threads.OutgoingMessageWorker;
 
+/**
+ * Cares for the orchestration of the {@link Intervention}s as well as all
+ * related {@link ModelObject}s
+ * 
+ * @author Andreas Filler
+ */
 @Log4j2
 public class InterventionExecutionManagerService {
 	private static InterventionExecutionManagerService	instance	= null;
@@ -125,11 +133,12 @@ public class InterventionExecutionManagerService {
 			final String message, final int hourToSendMessage,
 			final int hoursUntilMessageIsHandledAsUnanswered,
 			final boolean manuallySent,
-			final ObjectId relatedMonitoringRuleForReplyRules) {
+			final ObjectId relatedMonitoringRuleForReplyRules,
+			final ObjectId relatedMonitoringMessage) {
 		val dialogMessage = new DialogMessage(participantId, 0,
 				DialogMessageStatusTypes.PREPARED_FOR_SENDING, message, -1, -1,
-				-1, -1, null, false, relatedMonitoringRuleForReplyRules, false,
-				manuallySent);
+				-1, -1, null, false, relatedMonitoringRuleForReplyRules,
+				relatedMonitoringMessage, false, manuallySent);
 
 		val highestOrderMessage = databaseManagerService
 				.findOneSortedModelObject(DialogMessage.class,

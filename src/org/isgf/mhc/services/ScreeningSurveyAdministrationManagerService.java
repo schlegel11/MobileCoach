@@ -36,6 +36,12 @@ import org.isgf.mhc.tools.StringValidator;
 import org.isgf.mhc.ui.NotificationMessageException;
 
 @Log4j2
+/**
+ * Cares for the creation of the {@link ScreeningSurvey}s and {@link Feedback}s
+ * as well as all related {@link ModelObject}s
+ * 
+ * @author Andreas Filler
+ */
 public class ScreeningSurveyAdministrationManagerService {
 	private static final String									DEFAULT_OBJECT_NAME	= "---";
 
@@ -138,7 +144,8 @@ public class ScreeningSurveyAdministrationManagerService {
 			final ObjectId interventionId) throws FileNotFoundException,
 			IOException {
 		val importedModelObjects = modelObjectExchangeService
-				.importModelObjects(file, ModelObjectExchangeFormats.SCREENING_SURVEY);
+				.importModelObjects(file,
+						ModelObjectExchangeFormats.SCREENING_SURVEY);
 
 		for (val modelObject : importedModelObjects) {
 			if (modelObject instanceof ScreeningSurvey) {
@@ -171,7 +178,8 @@ public class ScreeningSurveyAdministrationManagerService {
 
 		log.debug("Export screening survey");
 		return modelObjectExchangeService.exportModelObjects(
-				modelObjectsToExport, ModelObjectExchangeFormats.SCREENING_SURVEY);
+				modelObjectsToExport,
+				ModelObjectExchangeFormats.SCREENING_SURVEY);
 	}
 
 	public void screeningSurveySetActive(final ScreeningSurvey screeningSurvey,
@@ -260,11 +268,11 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
 
-	public void screeningSurveySlideChangeOptionalLayoutAttribute(
+	public void screeningSurveySlideChangeOptionalLayoutAttributeWithPlaceholders(
 			final ScreeningSurveySlide screeningSurveySlide,
-			final String optionalLayoutAttributes) {
+			final String optionalLayoutAttributeWithPlaceholders) {
 		screeningSurveySlide
-				.setOptionalLayoutAttribute(optionalLayoutAttributes);
+				.setOptionalLayoutAttributeWithPlaceholders(optionalLayoutAttributeWithPlaceholders);
 
 		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}

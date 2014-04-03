@@ -313,7 +313,8 @@ public class ScreeningSurveySlideEditComponentWithController extends
 		getTitleWithPlaceholdersTextFieldComponent().setValue(
 				screeningSurveySlide.getTitleWithPlaceholders());
 		getOptionalLayoutAttributeTextFieldComponent().setValue(
-				screeningSurveySlide.getOptionalLayoutAttribute());
+				screeningSurveySlide
+						.getOptionalLayoutAttributeWithPlaceholders());
 		getQuestionTextWithPlaceholdersTextField().setValue(
 				screeningSurveySlide.getQuestionWithPlaceholders());
 		getStoreVariableTextFieldComponent().setValue(
@@ -563,10 +564,14 @@ public class ScreeningSurveySlideEditComponentWithController extends
 
 	public void changeOptionalLayoutAttribute() {
 		log.debug("Edit optional layout attribute");
+		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
+				.getAllPossibleScreenigSurveyVariables(
+						screeningSurveySlide.getScreeningSurvey());
 		showModalStringValueEditWindow(
-				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_OPTIONAL_LAYOUT_ATTRIBUTE,
-				screeningSurveySlide.getOptionalLayoutAttribute(), null,
-				new ShortStringEditComponent(),
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_OPTIONAL_LAYOUT_ATTRIBUTE_WITH_PLACEHOLDERS,
+				screeningSurveySlide
+						.getOptionalLayoutAttributeWithPlaceholders(),
+				allPossibleVariables, new PlaceholderStringEditComponent(),
 				new ExtendableButtonClickListener() {
 
 					@Override
@@ -574,7 +579,7 @@ public class ScreeningSurveySlideEditComponentWithController extends
 						try {
 							// Change optional layout attribute
 							getScreeningSurveyAdministrationManagerService()
-									.screeningSurveySlideChangeOptionalLayoutAttribute(
+									.screeningSurveySlideChangeOptionalLayoutAttributeWithPlaceholders(
 											screeningSurveySlide,
 											getStringValue());
 						} catch (final Exception e) {

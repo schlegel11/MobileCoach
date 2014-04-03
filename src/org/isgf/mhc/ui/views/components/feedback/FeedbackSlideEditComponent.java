@@ -28,8 +28,7 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class FeedbackSlideEditComponent extends
-		AbstractClosableEditComponent {
+public class FeedbackSlideEditComponent extends AbstractClosableEditComponent {
 
 	/*- VaadinEditorProperties={"grid":"RegularGrid,20","showGrid":true,"snapToGrid":true,"snapToObject":true,"movingGuides":false,"snappingDistance":10} */
 
@@ -95,7 +94,7 @@ public class FeedbackSlideEditComponent extends
 				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__TITLE_WITH_PLACEHOLDERS);
 		localize(
 				optionalLayoutAttributeLabel,
-				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__OPTIONAL_LAYOUT_ATTRIBUTE);
+				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__OPTIONAL_LAYOUT_ATTRIBUTE_WITH_PLACEHOLDERS);
 		localize(
 				feedbackTextWithPlaceholdersLabel,
 				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__FEEDBACK_TEXT);
@@ -225,7 +224,7 @@ public class FeedbackSlideEditComponent extends
 		optionalLayoutAttributeLabel.setWidth("-1px");
 		optionalLayoutAttributeLabel.setHeight("-1px");
 		optionalLayoutAttributeLabel
-				.setValue("!!! Optional layout attribute (e.g. CSS classes):");
+				.setValue("!!! Optional layout attribute (with placeholders, e.g. CSS classes):");
 		switchesLayoutGroup.addComponent(optionalLayoutAttributeLabel, 0, 1);
 
 		// optionalLayoutAttributeTextFieldComponent

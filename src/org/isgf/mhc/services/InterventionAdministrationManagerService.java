@@ -30,8 +30,8 @@ import org.isgf.mhc.model.persistent.MonitoringReplyRule;
 import org.isgf.mhc.model.persistent.MonitoringRule;
 import org.isgf.mhc.model.persistent.Participant;
 import org.isgf.mhc.model.persistent.concepts.AbstractRule;
-import org.isgf.mhc.model.persistent.types.RuleEquationSignTypes;
 import org.isgf.mhc.model.persistent.types.MediaObjectTypes;
+import org.isgf.mhc.model.persistent.types.RuleEquationSignTypes;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.ModelObjectExchangeService;
@@ -42,8 +42,10 @@ import org.isgf.mhc.tools.StringValidator;
 import org.isgf.mhc.ui.NotificationMessageException;
 
 /**
- * @author Andreas Filler
+ * Cares for the creation of the {@link Author}s, {@link Participant}s and
+ * {@link Intervention}s as well as all related {@link ModelObject}s
  * 
+ * @author Andreas Filler
  */
 @Log4j2
 public class InterventionAdministrationManagerService {
@@ -227,7 +229,8 @@ public class InterventionAdministrationManagerService {
 	public Intervention interventionImport(final File file)
 			throws FileNotFoundException, IOException {
 		val importedModelObjects = modelObjectExchangeService
-				.importModelObjects(file, ModelObjectExchangeFormats.INTERVENTION);
+				.importModelObjects(file,
+						ModelObjectExchangeFormats.INTERVENTION);
 
 		for (val modelObject : importedModelObjects) {
 			if (modelObject instanceof Intervention) {
@@ -924,7 +927,8 @@ public class InterventionAdministrationManagerService {
 		val importedParticipants = new ArrayList<Participant>();
 
 		val importedModelObjects = modelObjectExchangeService
-				.importModelObjects(file, ModelObjectExchangeFormats.PARTICIPANTS);
+				.importModelObjects(file,
+						ModelObjectExchangeFormats.PARTICIPANTS);
 
 		for (val modelObject : importedModelObjects) {
 			if (modelObject instanceof Participant) {
