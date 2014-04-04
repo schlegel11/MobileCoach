@@ -45,26 +45,26 @@ public class VariablesManagerService {
 
 		writeProtectedVariableNames = new HashSet<String>();
 		for (val variable : SystemVariables.READ_ONLY_SYSTEM_VARIABLES.values()) {
-			writeProtectedVariableNames.add("$" + variable.name());
+			writeProtectedVariableNames.add(variable.toVariableName());
 		}
 		for (val variable : SystemVariables.READ_ONLY_PARTICIPANT_VARIABLES
 				.values()) {
-			writeProtectedVariableNames.add("$" + variable.name());
+			writeProtectedVariableNames.add(variable.toVariableName());
 		}
 		for (val variable : SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES
 				.values()) {
-			writeProtectedVariableNames.add("$" + variable.name());
+			writeProtectedVariableNames.add(variable.toVariableName());
 		}
 
 		allSystemVariableNames = new HashSet<String>();
 		allSystemVariableNames.addAll(writeProtectedVariableNames);
 		for (val variable : SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES
 				.values()) {
-			allSystemVariableNames.add("$" + variable.name());
+			allSystemVariableNames.add(variable.toVariableName());
 		}
 		for (val variable : SystemVariables.READ_WRITE_SYSTEM_VARIABLES
 				.values()) {
-			allSystemVariableNames.add("$" + variable.name());
+			allSystemVariableNames.add(variable.toVariableName());
 		}
 
 		log.info("Started.");

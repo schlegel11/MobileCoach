@@ -30,7 +30,7 @@ public class MasterRuleEvaluationWorker extends Thread {
 		while (!isInterrupted()) {
 			log.debug("Executing new run of master rule evaluation worker...");
 
-			// TODO
+			// TODO care about monitoring
 			// determineParticipantsRelevantForRuleExecution(); //
 			// intervention active, messaging active, messaging of
 			// participant acitive , participant finished screening survey

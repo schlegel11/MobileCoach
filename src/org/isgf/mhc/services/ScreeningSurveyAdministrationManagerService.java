@@ -112,7 +112,17 @@ public class ScreeningSurveyAdministrationManagerService {
 		importedScreeningSurvey.setGlobalUniqueId(GlobalUniqueIdGenerator
 				.createGlobalUniqueId());
 
-		databaseManagerService.saveModelObject(importedScreeningSurvey);
+		val feedbacksOfScreeningSurvey = databaseManagerService
+				.findModelObjects(Feedback.class,
+						Queries.FEEDBACK__BY_SCREENING_SURVEY,
+						importedScreeningSurvey.getId());
+
+		for (val feedback : feedbacksOfScreeningSurvey) {
+			feedback.setGlobalUniqueId(GlobalUniqueIdGenerator
+					.createGlobalUniqueId());
+
+			databaseManagerService.saveModelObject(importedScreeningSurvey);
+		}
 	}
 
 	public void screeningSurveyChangeName(

@@ -1,5 +1,8 @@
 package org.isgf.mhc.tools;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import lombok.val;
 
 import org.isgf.mhc.conf.ImplementationContants;
@@ -12,6 +15,9 @@ import org.isgf.mhc.model.persistent.types.RuleEquationSignTypes;
  * @author Andreas Filler
  */
 public class StringHelpers {
+	private static SimpleDateFormat	simpleDateFormat	= new SimpleDateFormat(
+																"yyyy-MM-dd");
+
 	/**
 	 * Creates a readable name representation of a rule's name
 	 * 
@@ -50,5 +56,11 @@ public class StringHelpers {
 		}
 
 		return name.toString();
+	}
+
+	public static String createStringTimeStamp() {
+		val date = new Date(System.currentTimeMillis());
+
+		return simpleDateFormat.format(date);
 	}
 }

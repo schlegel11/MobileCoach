@@ -21,6 +21,7 @@ import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.persistent.Author;
 import org.isgf.mhc.model.persistent.AuthorInterventionAccess;
+import org.isgf.mhc.model.persistent.DialogStatus;
 import org.isgf.mhc.model.persistent.Intervention;
 import org.isgf.mhc.model.persistent.InterventionVariableWithValue;
 import org.isgf.mhc.model.persistent.MediaObject;
@@ -303,8 +304,7 @@ public class InterventionAdministrationManagerService {
 					AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_NOT_VALID);
 		}
 
-		if (variablesManagerService
-				.isWriteProtectedVariableName(variableName)) {
+		if (variablesManagerService.isWriteProtectedVariableName(variableName)) {
 			throw new NotificationMessageException(
 					AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
 		}
@@ -336,8 +336,7 @@ public class InterventionAdministrationManagerService {
 					AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_NOT_VALID);
 		}
 
-		if (variablesManagerService
-				.isWriteProtectedVariableName(newName)) {
+		if (variablesManagerService.isWriteProtectedVariableName(newName)) {
 			throw new NotificationMessageException(
 					AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
 		}
@@ -1172,10 +1171,12 @@ public class InterventionAdministrationManagerService {
 		variables
 				.addAll(variablesManagerService
 						.getAllScreeningSurveyVariableNamesOfIntervention(interventionId));
-		variables.addAll(variablesManagerService
-				.getAllMonitoringMessageVariableNamesOfIntervention(interventionId));
-		variables.addAll(variablesManagerService
-				.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(interventionId));
+		variables
+				.addAll(variablesManagerService
+						.getAllMonitoringMessageVariableNamesOfIntervention(interventionId));
+		variables
+				.addAll(variablesManagerService
+						.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(interventionId));
 
 		Collections.sort(variables);
 
@@ -1193,13 +1194,21 @@ public class InterventionAdministrationManagerService {
 		variables
 				.addAll(variablesManagerService
 						.getAllScreeningSurveyVariableNamesOfIntervention(interventionId));
-		variables.addAll(variablesManagerService
-				.getAllMonitoringMessageVariableNamesOfIntervention(interventionId));
-		variables.addAll(variablesManagerService
-				.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(interventionId));
+		variables
+				.addAll(variablesManagerService
+						.getAllMonitoringMessageVariableNamesOfIntervention(interventionId));
+		variables
+				.addAll(variablesManagerService
+						.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(interventionId));
 
 		Collections.sort(variables);
 
 		return variables;
+	}
+
+	public DialogStatus getDialogStatusOfParticipant(
+			final ObjectId participantId) {
+		return databaseManagerService.findOneModelObject(DialogStatus.class,
+				Queries.DIALOG_STATUS__BY_PARTICIPANT, participantId);
 	}
 }

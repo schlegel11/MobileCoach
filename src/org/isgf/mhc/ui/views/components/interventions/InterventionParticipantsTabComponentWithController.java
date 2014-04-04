@@ -111,6 +111,8 @@ public class InterventionParticipantsTabComponentWithController extends
 				buttonClickListener);
 		participantsEditComponent.getDeleteButton().addClickListener(
 				buttonClickListener);
+		participantsEditComponent.getRefreshButton().addClickListener(
+				buttonClickListener);
 
 		// Special handle for export button
 		val onDemandFileDownloader = new OnDemandFileDownloader(
@@ -145,16 +147,21 @@ public class InterventionParticipantsTabComponentWithController extends
 		val isOneScreeningSurveyActive = getScreeningSurveyAdministrationManagerService()
 				.isOneScreeningSurveyOfInterventionActive(intervention.getId());
 
-		if (isOneScreeningSurveyActive == isEnabled()) {
-			setEnabled(!isOneScreeningSurveyActive);
+		val participantsTable = getInterventionParticipantsEditComponent()
+				.getParticipantsTable();
+		if (isOneScreeningSurveyActive == !participantsTable.isReadOnly()) {
+			participantsTable.setValue(null);
+			getInterventionParticipantsEditComponent().setNothingSelected();
 			getInterventionParticipantsEditComponent().getParticipantsTable()
-					.setEnabled(!isOneScreeningSurveyActive);
+					.setReadOnly(isOneScreeningSurveyActive);
 		}
 
 		log.debug("Update participants");
 		refreshBeanContainer(beanContainer, UIParticipant.class,
 				getInterventionAdministrationManagerService()
 						.getAllParticipantsOfIntervention(intervention.getId()));
+
+		participantsTable.sort();
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
@@ -178,6 +185,9 @@ public class InterventionParticipantsTabComponentWithController extends
 			} else if (event.getButton() == interventionScreeningSurveyEditComponent
 					.getDeleteButton()) {
 				deleteParticipants();
+			} else if (event.getButton() == interventionScreeningSurveyEditComponent
+					.getRefreshButton()) {
+				adjust();
 			}
 		}
 	}

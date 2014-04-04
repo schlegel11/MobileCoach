@@ -8,6 +8,7 @@ import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.persistent.DialogMessage;
+import org.isgf.mhc.model.persistent.DialogStatus;
 import org.isgf.mhc.model.persistent.Intervention;
 import org.isgf.mhc.model.persistent.MediaObject;
 import org.isgf.mhc.model.persistent.SystemUniqueId;
@@ -184,6 +185,20 @@ public class InterventionExecutionManagerService {
 		dialogMessage.setMediaContentViewed(true);
 
 		databaseManagerService.saveModelObject(dialogMessage);
+	}
+
+	// Dialog status
+	private void dialogStatusSetInterventionFinished(
+			final ObjectId participantId) {
+		val dialogStatus = databaseManagerService.findOneModelObject(
+				DialogStatus.class, Queries.DIALOG_STATUS__BY_PARTICIPANT,
+				participantId);
+
+		dialogStatus.setInterventionPerformed(true);
+		dialogStatus.setInterventionPerformedTimestamp(System
+				.currentTimeMillis());
+
+		databaseManagerService.saveModelObject(dialogStatus);
 	}
 
 	/*

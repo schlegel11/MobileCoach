@@ -91,6 +91,7 @@ public class Queries {
 	public static final String	PARTICIPANT__BY_INTERVENTION																= "{'intervention':#}";
 
 	public static final String	DIALOG_OPTION__BY_PARTICIPANT																= "{'participant':#}";
+	public static final String	DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE														= "{'participant':#,'type':#}";
 
 	public static final String	DIALOG_STATUS__BY_PARTICIPANT																= "{'participant':#}";
 

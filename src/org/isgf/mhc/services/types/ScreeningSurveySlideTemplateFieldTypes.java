@@ -24,6 +24,10 @@ public enum ScreeningSurveySlideTemplateFieldTypes {
 	 */
 	BASE_URL,
 	/**
+	 * Contains the URL of the screening survey feedback
+	 */
+	FEEDBACK_URL,
+	/**
 	 * Contains the name of the survey
 	 */
 	SURVEY_NAME,
@@ -74,18 +78,15 @@ public enum ScreeningSurveySlideTemplateFieldTypes {
 	 */
 	PRESELECTED_ANSWER,
 	/**
-	 * Contains the name of the result variable, which should contain the slides
+	 * Contains the name of the result variable which should contain the slides
 	 * selection when pressing the button for the next slide
 	 */
 	RESULT_VARIABLE,
 	/**
-	 * Is true, when the slide is the last slide of the screening survey
+	 * Contains the variable name and value of a hidden variable for consistency
+	 * checks
 	 */
 	IS_LAST_SLIDE,
-	/**
-	 * Contains the URL of the screening survey feedback
-	 */
-	FEEDBACK_URL,
 	/**
 	 * <strong>ONLY</strong> internal, can't be used in templates
 	 */

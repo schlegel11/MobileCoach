@@ -111,7 +111,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				case 2:
 					// Check if it's a feedback, otherwise handle as file
 					// (default case)
-					if (pathParts[0].equals("feedback")) {
+					if (pathParts[0]
+							.equals(ImplementationContants.SCREENING_SURVEY_SERVLET_FEEDBACK_SUBPATH)) {
 						if (pathParts[1].equals("")) {
 							// Empty request
 							throw new Exception("Invalid feedback request");
@@ -344,7 +345,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			boolean accessGranted;
 			try {
 				accessGranted = (boolean) session
-						.getAttribute(SessionAttributeTypes.ACCESS_GRANTED
+						.getAttribute(SessionAttributeTypes.PARTICIPANT_ACCESS_GRANTED
 								.toString());
 			} catch (final Exception e) {
 				accessGranted = false;
@@ -353,8 +354,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			// Get question result if available
 			String resultValue;
 			try {
-				resultValue = (String) request
-						.getAttribute(ImplementationContants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLE);
+				resultValue = request
+						.getParameter(ImplementationContants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLE);
 			} catch (final Exception e) {
 				resultValue = null;
 			}
@@ -430,6 +431,16 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				.put(ScreeningSurveySlideTemplateFieldTypes.RESULT_VARIABLE
 						.toVariable(),
 						ImplementationContants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLE);
+		if (session.getAttribute(SessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
+				.toString()) != null) {
+			templateVariables
+					.put(ScreeningSurveySlideTemplateFieldTypes.FEEDBACK_URL
+							.toVariable(),
+							baseURL
+									+ session
+											.getAttribute(SessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
+													.toString()));
+		}
 
 		// Create new Mustache template factory on non-production system
 		if (!Constants.IS_LIVE_SYSTEM) {
@@ -449,6 +460,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 
 		// Fill template
 		log.debug("Filling template in folder {}", templateFolder);
+		log.debug("Variables: {}", templateVariables.toString());
 		Mustache mustache;
 		synchronized (mustacheFactory) {
 			try {

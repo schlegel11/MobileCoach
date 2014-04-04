@@ -29,5 +29,6 @@ public class ImplementationContants {
 	public static final long	MAILING_SEND_RETRIES											= 2;
 	public static final long	MAILING_SEND_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS			= 5 * 60;
 
+	public static final String	SCREENING_SURVEY_SERVLET_FEEDBACK_SUBPATH						= "feedback";
 	public static final String	SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLE					= "MHCResultValue";
 }

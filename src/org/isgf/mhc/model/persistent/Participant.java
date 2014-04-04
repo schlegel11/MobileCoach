@@ -11,6 +11,7 @@ import lombok.Setter;
 import lombok.val;
 
 import org.bson.types.ObjectId;
+import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.ImplementationContants;
 import org.isgf.mhc.conf.Messages;
@@ -124,6 +125,21 @@ public class Participant extends ModelObject {
 			screeningSurveyName = screeningSurvey.getName();
 		}
 
+		boolean screeningSurveyStatus = false;
+		boolean interventionStatus = false;
+
+		val dialogStatus = MHC.getInstance()
+				.getInterventionAdministrationManagerService()
+				.getDialogStatusOfParticipant(getId());
+
+		if (dialogStatus == null) {
+			screeningSurveyStatus = false;
+			interventionStatus = false;
+		} else {
+			screeningSurveyStatus = dialogStatus.isScreeningSurveyPerformed();
+			interventionStatus = dialogStatus.isInterventionPerformed();
+		}
+
 		val participant = new UIParticipant(
 				nickname.equals("") ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
@@ -132,6 +148,16 @@ public class Participant extends ModelObject {
 				organizationUnit,
 				new Date(createdTimestamp),
 				screeningSurveyName,
+				screeningSurveyStatus ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__FINISHED)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_FINISHED),
+				screeningSurveyStatus,
+				interventionStatus ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__FINISHED)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_FINISHED),
+				interventionStatus,
 				messagingActive ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
 						: Messages
@@ -168,6 +194,12 @@ public class Participant extends ModelObject {
 		for (val dialogOption : ModelObject.find(DialogOption.class,
 				Queries.DIALOG_OPTION__BY_PARTICIPANT, getId())) {
 			dialogOption.collectThisAndRelatedModelObjectsForExport(exportList);
+		}
+
+		// Add dialog status
+		for (val dialogStatus : ModelObject.find(DialogStatus.class,
+				Queries.DIALOG_STATUS__BY_PARTICIPANT, getId())) {
+			dialogStatus.collectThisAndRelatedModelObjectsForExport(exportList);
 		}
 	}
 

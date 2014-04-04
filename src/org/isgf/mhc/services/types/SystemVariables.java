@@ -7,22 +7,42 @@ package org.isgf.mhc.services.types;
  */
 public class SystemVariables {
 	public enum READ_ONLY_SYSTEM_VARIABLES {
-		systemDayOfMonth, systemMonth, systemYear, systemDayInWeek
+		systemDayOfMonth, systemMonth, systemYear, systemDayInWeek;
+
+		public String toVariableName() {
+			return "$" + toString();
+		}
 	};
 
 	public enum READ_WRITE_SYSTEM_VARIABLES {
+		;
 
+		public String toVariableName() {
+			return "$" + toString();
+		}
 	};
 
 	public enum READ_ONLY_PARTICIPANT_VARIABLES {
-		participantParticipationInWeeks, participantParticipationInDays
+		participantParticipationInWeeks, participantParticipationInDays;
+
+		public String toVariableName() {
+			return "$" + toString();
+		}
 	};
 
 	public enum READ_WRITE_PARTICIPANT_VARIABLES {
-		participantName, participantDialogOptionSMSData, participantDialogOptionEmailData
+		participantName, participantDialogOptionSMSData, participantDialogOptionEmailData;
+
+		public String toVariableName() {
+			return "$" + toString();
+		}
 	};
 
 	public enum READ_ONLY_PARTICIPANT_REPLY_VARIABLES {
-		participantMessageReply
+		participantMessageReply;
+
+		public String toVariableName() {
+			return "$" + toString();
+		}
 	};
 }

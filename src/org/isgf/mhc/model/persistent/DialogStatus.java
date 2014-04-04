@@ -1,5 +1,7 @@
 package org.isgf.mhc.model.persistent;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -52,4 +54,31 @@ public class DialogStatus extends ModelObject {
 	@Setter
 	private long		screeningSurveyPerformedTimestamp;
 
+	/**
+	 * Stores if the {@link Participant} performed the whole
+	 * {@link Intervention}
+	 */
+	@Getter
+	@Setter
+	private boolean		interventionPerformed;
+
+	/**
+	 * Timestamp when the user finished the {@link Intervention}
+	 */
+	@Getter
+	@Setter
+	private long		interventionPerformedTimestamp;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.isgf.mhc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
+	 * (java.util.List)
+	 */
+	@Override
+	protected void collectThisAndRelatedModelObjectsForExport(
+			final List<ModelObject> exportList) {
+		exportList.add(this);
+	}
 }

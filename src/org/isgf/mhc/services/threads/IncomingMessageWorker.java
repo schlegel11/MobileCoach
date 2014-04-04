@@ -38,7 +38,7 @@ public class IncomingMessageWorker extends Thread {
 			log.debug("Received {} messages", receivedMessages.size());
 
 			for (val receivedMessage : receivedMessages) {
-				// TODO
+				// TODO manage received messages
 				// adjustDialogMessageToIncomingMessage(receivedMessage);
 			}
 

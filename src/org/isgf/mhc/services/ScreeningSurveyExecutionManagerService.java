@@ -11,17 +11,24 @@ import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
+import org.isgf.mhc.conf.ImplementationContants;
 import org.isgf.mhc.model.Queries;
+import org.isgf.mhc.model.persistent.DialogOption;
+import org.isgf.mhc.model.persistent.DialogStatus;
 import org.isgf.mhc.model.persistent.Feedback;
 import org.isgf.mhc.model.persistent.Intervention;
 import org.isgf.mhc.model.persistent.Participant;
 import org.isgf.mhc.model.persistent.ScreeningSurvey;
+import org.isgf.mhc.model.persistent.ScreeningSurveySlide;
+import org.isgf.mhc.model.persistent.types.DialogOptionTypes;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.VariablesManagerService;
 import org.isgf.mhc.services.types.ScreeningSurveySlideTemplateFieldTypes;
 import org.isgf.mhc.services.types.ScreeningSurveySlideTemplateLayoutTypes;
 import org.isgf.mhc.services.types.SessionAttributeTypes;
+import org.isgf.mhc.services.types.SystemVariables;
+import org.isgf.mhc.tools.StringHelpers;
 
 /**
  * Cares for the orchestration of {@link ScreeningSurveySlides} as
@@ -76,6 +83,7 @@ public class ScreeningSurveyExecutionManagerService {
 	/*
 	 * Modification methods
 	 */
+	// Participant
 	private Participant participantCreate(final ScreeningSurvey screeningSurvey) {
 		val participant = new Participant(screeningSurvey.getIntervention(),
 				System.currentTimeMillis(), "",
@@ -83,7 +91,55 @@ public class ScreeningSurveyExecutionManagerService {
 
 		databaseManagerService.saveModelObject(participant);
 
+		dialogStatusCreate(participant.getId());
+
 		return participant;
+	}
+
+	private void participantSetName(final Participant participant,
+			final String participantName) {
+		participant.setNickname(participantName);
+
+		databaseManagerService.saveModelObject(participant);
+	}
+
+	private void participantSetDialogOption(final Participant participant,
+			final DialogOptionTypes dialogOptionType,
+			final String dialogOptionData) {
+		DialogOption dialogOption = databaseManagerService.findOneModelObject(
+				DialogOption.class,
+				Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
+				participant.getId(), dialogOptionType);
+
+		if (dialogOption == null) {
+			dialogOption = new DialogOption(participant.getId(),
+					dialogOptionType, dialogOptionData);
+		}
+
+		dialogOption.setData(dialogOptionData);
+
+		databaseManagerService.saveModelObject(dialogOption);
+	}
+
+	// Dialog status
+	private void dialogStatusCreate(final ObjectId participantId) {
+		val dialogStatus = new DialogStatus(participantId,
+				StringHelpers.createStringTimeStamp(), false, 0, false, 0);
+
+		databaseManagerService.saveModelObject(dialogStatus);
+	}
+
+	private void dialogStatusSetScreeningSurveyFinished(
+			final ObjectId participantId) {
+		val dialogStatus = databaseManagerService.findOneModelObject(
+				DialogStatus.class, Queries.DIALOG_STATUS__BY_PARTICIPANT,
+				participantId);
+
+		dialogStatus.setScreeningSurveyPerformed(true);
+		dialogStatus.setScreeningSurveyPerformedTimestamp(System
+				.currentTimeMillis());
+
+		databaseManagerService.saveModelObject(dialogStatus);
 	}
 
 	/*
@@ -203,6 +259,7 @@ public class ScreeningSurveyExecutionManagerService {
 		val templateVariables = new HashMap<String, Object>();
 
 		// Check if screening survey is active
+		log.debug("Check if screening survey is active");
 		if (!screeningSurveyCheckIfActive(screeningSurveyId)) {
 			setLayoutTo(templateVariables,
 					ScreeningSurveySlideTemplateLayoutTypes.CLOSED);
@@ -217,6 +274,7 @@ public class ScreeningSurveyExecutionManagerService {
 						.toVariable(), screeningSurvey.getName());
 
 		// Check if screening survey template is set
+		log.debug("Check if template is set");
 		if (screeningSurvey.getTemplatePath() == null
 				|| screeningSurvey.getTemplatePath().equals("")) {
 			return templateVariables;
@@ -227,6 +285,7 @@ public class ScreeningSurveyExecutionManagerService {
 		}
 
 		// Check if participant already has access (if required)
+		log.debug("Check if participant has access to screening survey");
 		if (screeningSurvey.getPassword() != null
 				&& !screeningSurvey.getPassword().equals("") && !accessGranted) {
 			// Login is required, check login information, if provided
@@ -234,7 +293,8 @@ public class ScreeningSurveyExecutionManagerService {
 					&& resultValue.equals(screeningSurvey.getPassword())) {
 				// Remember that user authenticated
 				session.setAttribute(
-						SessionAttributeTypes.ACCESS_GRANTED.toString(), true);
+						SessionAttributeTypes.PARTICIPANT_ACCESS_GRANTED
+								.toString(), true);
 			} else {
 				// Redirect to password page
 				setLayoutTo(templateVariables,
@@ -244,25 +304,128 @@ public class ScreeningSurveyExecutionManagerService {
 		}
 
 		// Create participant if she does not exist
+		Participant participant = null;
 		if (participantId == null) {
-			val participant = participantCreate(screeningSurvey);
+			log.debug("Create participant");
+			participant = participantCreate(screeningSurvey);
 			participantId = participant.getId();
 
 			session.setAttribute(
 					SessionAttributeTypes.PARTICIPANT_ID.toString(),
 					participantId);
+			session.removeAttribute(SessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
+					.toString());
+			session.removeAttribute(SessionAttributeTypes.PARTICIPANT_LAST_SCREENING_SURVEY_SLIDE_ID
+					.toString());
+		} else {
+			log.debug("Participant exists");
+			participant = databaseManagerService.getModelObjectById(
+					Participant.class, participantId);
+
+			val dialogStatus = databaseManagerService.findOneModelObject(
+					DialogStatus.class, Queries.DIALOG_STATUS__BY_PARTICIPANT,
+					participantId);
+
+			// Redirect to done slide if user already completely performed the
+			// screening survey
+			if (dialogStatus != null
+					&& dialogStatus.isScreeningSurveyPerformed()) {
+				log.debug("User already participated");
+
+				setLayoutTo(templateVariables,
+						ScreeningSurveySlideTemplateLayoutTypes.DONE);
+				return templateVariables;
+			}
 		}
 
 		// Get last slide
 		val lastScreeningSurveySlideId = session
-				.getAttribute(SessionAttributeTypes.LAST_SCREENING_SURVEY_SLIDE_ID
+				.getAttribute(SessionAttributeTypes.PARTICIPANT_LAST_SCREENING_SURVEY_SLIDE_ID
 						.toString());
+		ScreeningSurveySlide lastScreeningSurveySlide = null;
 
-		// If there was a last slide, store result
-		setLayoutTo(templateVariables,
-				ScreeningSurveySlideTemplateLayoutTypes.SELECT_ONE);
+		if (lastScreeningSurveySlideId != null) {
+			lastScreeningSurveySlide = databaseManagerService
+					.getModelObjectById(ScreeningSurveySlide.class,
+							(ObjectId) lastScreeningSurveySlideId);
+
+			// If there was a last slide, store result if provided
+			if (resultValue != null
+					&& lastScreeningSurveySlide
+							.getStoreValueToVariableWithName() != null
+					&& !lastScreeningSurveySlide
+							.getStoreValueToVariableWithName().equals("")) {
+				val variableName = lastScreeningSurveySlide
+						.getStoreValueToVariableWithName();
+				log.debug(
+						"Storing result of screening survey slide {} to variable {} as value {}",
+						lastScreeningSurveySlideId, variableName, resultValue);
+
+				if (variableName
+						.equals(SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES.participantName
+								.toVariableName())) {
+					participantSetName(participant, resultValue);
+				} else if (variableName
+						.equals(SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES.participantDialogOptionSMSData
+								.toVariableName())) {
+					participantSetDialogOption(participant,
+							DialogOptionTypes.SMS, resultValue);
+				} else if (variableName
+						.equals(SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES.participantDialogOptionEmailData
+								.toVariableName())) {
+					participantSetDialogOption(participant,
+							DialogOptionTypes.EMAIL, resultValue);
+				}
+				try {
+					variablesManagerService.storeVariableValueOfParticipant(
+							participant, variableName, resultValue);
+				} catch (final Exception e) {
+					log.error("Error when storing variable: {}", e.getMessage());
+				}
+			}
+
+		}
+
+		// Determine next slide
+		val nextSlide = getNextScreeningSurveySlide(screeningSurvey,
+				participant, lastScreeningSurveySlide);
+
+		if (nextSlide == null) {
+			// Screening survey done
+			log.debug("No next slide found");
+
+			setLayoutTo(templateVariables,
+					ScreeningSurveySlideTemplateLayoutTypes.DONE);
+		} else {
+			// Check if is last slide
+			if (nextSlide.isLastSlide()) {
+				dialogStatusSetScreeningSurveyFinished(participantId);
+
+				// Set feedback URL to session if required
+				if (nextSlide.getHandsOverToFeedback() != null) {
+					session.setAttribute(
+							SessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
+									.toString(),
+							ImplementationContants.SCREENING_SURVEY_SERVLET_FEEDBACK_SUBPATH
+									+ "/" + participantId);
+				}
+			}
+
+			// Fill next screening survey slide
+			log.debug("Filling next slide {} with contents",
+					nextSlide.getTitleWithPlaceholders());
+
+			// TODO
+		}
 
 		return templateVariables;
+	}
+
+	private ScreeningSurveySlide getNextScreeningSurveySlide(
+			final ScreeningSurvey screeningSurvey, final Object participant,
+			final Object lastScreeningSurveySlide) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	/**
