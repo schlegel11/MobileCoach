@@ -28,6 +28,16 @@ import org.isgf.mhc.model.ui.UIModelObject;
 @AllArgsConstructor
 public class Feedback extends ModelObject {
 	/**
+	 * A absolutely unique Id to enable to reference a {@link Feedback} also
+	 * after independent export/import to/from
+	 * another system
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private String		globalUniqueId;
+
+	/**
 	 * The {@link ScreeningSurvey} the {@link Feedback} belongs to
 	 */
 	@Getter

@@ -12,13 +12,16 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.Queries;
+import org.isgf.mhc.model.persistent.Feedback;
 import org.isgf.mhc.model.persistent.Intervention;
+import org.isgf.mhc.model.persistent.Participant;
 import org.isgf.mhc.model.persistent.ScreeningSurvey;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.VariablesManagerService;
 import org.isgf.mhc.services.types.ScreeningSurveySlideTemplateFieldTypes;
 import org.isgf.mhc.services.types.ScreeningSurveySlideTemplateLayoutTypes;
+import org.isgf.mhc.services.types.SessionAttributeTypes;
 
 /**
  * Cares for the orchestration of {@link ScreeningSurveySlides} as
@@ -73,6 +76,15 @@ public class ScreeningSurveyExecutionManagerService {
 	/*
 	 * Modification methods
 	 */
+	private Participant participantCreate(final ScreeningSurvey screeningSurvey) {
+		val participant = new Participant(screeningSurvey.getIntervention(),
+				System.currentTimeMillis(), "",
+				screeningSurvey.getGlobalUniqueId(), null, false, "", "");
+
+		databaseManagerService.saveModelObject(participant);
+
+		return participant;
+	}
 
 	/*
 	 * Special methods
@@ -117,16 +129,47 @@ public class ScreeningSurveyExecutionManagerService {
 	 * @return
 	 */
 	public boolean screeningSurveyCheckIfActive(final ObjectId screeningSurveyId) {
-		final ScreeningSurvey screeningSurvey = databaseManagerService
-				.getModelObjectById(ScreeningSurvey.class, screeningSurveyId);
+		val screeningSurvey = databaseManagerService.getModelObjectById(
+				ScreeningSurvey.class, screeningSurveyId);
 
 		if (screeningSurvey == null || !screeningSurvey.isActive()) {
 			return false;
 		}
 
-		final Intervention intervention = databaseManagerService
-				.getModelObjectById(Intervention.class,
-						screeningSurvey.getIntervention());
+		val intervention = databaseManagerService.getModelObjectById(
+				Intervention.class, screeningSurvey.getIntervention());
+
+		if (intervention == null || !intervention.isActive()) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Returns if the requested {@link Feedback} is currently accessible
+	 * (means the the {@link Intervention} is active)
+	 * 
+	 * @param screeningSurveyId
+	 * @return
+	 */
+	public boolean feedbackCheckIfActive(final ObjectId feedbackId) {
+		val feedback = databaseManagerService.getModelObjectById(
+				Feedback.class, feedbackId);
+
+		if (feedback == null) {
+			return false;
+		}
+
+		val screeningSurvey = databaseManagerService.getModelObjectById(
+				ScreeningSurvey.class, feedback.getScreeningSurvey());
+
+		if (screeningSurvey == null) {
+			return false;
+		}
+
+		val intervention = databaseManagerService.getModelObjectById(
+				Intervention.class, screeningSurvey.getIntervention());
 
 		if (intervention == null || !intervention.isActive()) {
 			return false;
@@ -143,30 +186,104 @@ public class ScreeningSurveyExecutionManagerService {
 	 * <code>null</code> if an unexpected error occurs
 	 * 
 	 * @param participantId
+	 *            The {@link ObjectId} of the current participant or
+	 *            <code>null</code> if not created
+	 * @param accessGranted
 	 * @param screeningSurveyId
+	 *            The {@link ObjectId} of the requested {@link ScreeningSurvey}
 	 * @param resultValue
 	 * @param session
 	 * @return
 	 */
-	public HashMap<String, Object> getAppropriateSlide(
-			final ObjectId participantId, final ObjectId screeningSurveyId,
-			final String resultValue, final HttpSession session) {
-		// Check if
-
-		// TODO a lot (not forget to set session values)
-		// handle also "empty" template path (= "")
+	public HashMap<String, Object> getAppropriateScreeningSurveySlide(
+			ObjectId participantId, final boolean accessGranted,
+			final ObjectId screeningSurveyId, final String resultValue,
+			final HttpSession session) {
 
 		val templateVariables = new HashMap<String, Object>();
+
+		// Check if screening survey is active
+		if (!screeningSurveyCheckIfActive(screeningSurveyId)) {
+			setLayoutTo(templateVariables,
+					ScreeningSurveySlideTemplateLayoutTypes.CLOSED);
+			return templateVariables;
+		}
+
+		val screeningSurvey = getScreeningSurveyById(screeningSurveyId);
+
+		// Set name
+		templateVariables
+				.put(ScreeningSurveySlideTemplateFieldTypes.SURVEY_NAME
+						.toVariable(), screeningSurvey.getName());
+
+		// Check if screening survey template is set
+		if (screeningSurvey.getTemplatePath() == null
+				|| screeningSurvey.getTemplatePath().equals("")) {
+			return templateVariables;
+		} else {
+			templateVariables.put(
+					ScreeningSurveySlideTemplateFieldTypes.TEMPLATE_FOLDER
+							.toVariable(), screeningSurvey.getTemplatePath());
+		}
+
+		// Check if participant already has access (if required)
+		if (screeningSurvey.getPassword() != null
+				&& !screeningSurvey.getPassword().equals("") && !accessGranted) {
+			// Login is required, check login information, if provided
+			if (resultValue != null
+					&& resultValue.equals(screeningSurvey.getPassword())) {
+				// Remember that user authenticated
+				session.setAttribute(
+						SessionAttributeTypes.ACCESS_GRANTED.toString(), true);
+			} else {
+				// Redirect to password page
+				setLayoutTo(templateVariables,
+						ScreeningSurveySlideTemplateLayoutTypes.PASSWORD_INPUT);
+				return templateVariables;
+			}
+		}
+
+		// Create participant if she does not exist
+		if (participantId == null) {
+			val participant = participantCreate(screeningSurvey);
+			participantId = participant.getId();
+
+			session.setAttribute(
+					SessionAttributeTypes.PARTICIPANT_ID.toString(),
+					participantId);
+		}
+
+		// Get last slide
+		val lastScreeningSurveySlideId = session
+				.getAttribute(SessionAttributeTypes.LAST_SCREENING_SURVEY_SLIDE_ID
+						.toString());
+
+		// If there was a last slide, store result
 		setLayoutTo(templateVariables,
 				ScreeningSurveySlideTemplateLayoutTypes.SELECT_ONE);
-
-		templateVariables.put(
-				ScreeningSurveySlideTemplateFieldTypes.TEMPLATE_FOLDER
-						.toVariable(), "basic-template");
 
 		return templateVariables;
 	}
 
+	/**
+	 * Returns the appropriate {@link HashMap} to fill the template or
+	 * <code>null</code> if an unexpected error occurs
+	 * 
+	 * @param feedbackParticipantId
+	 *            The {@link ObjectId} of the participant of which the feedback
+	 *            should be shown
+	 * @param session
+	 * @return
+	 */
+	public HashMap<String, Object> getAppropriateFeedbackSlide(
+			final ObjectId feedbackParticipantId, final HttpSession session) {
+		// TODO AFTER screening survey slide handling is finished
+		return null;
+	}
+
+	/*
+	 * Getter
+	 */
 	/**
 	 * Get a specific {@link ScreeningSurvey} by {@link ObjectId}
 	 * 

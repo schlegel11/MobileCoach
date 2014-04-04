@@ -299,7 +299,7 @@ public class ScreeningSurveyAdministrationManagerService {
 			}
 
 			if (variablesManagerService
-					.isWriteProtectedParticipantOrSystemVariableName(variableName)) {
+					.isWriteProtectedVariableName(variableName)) {
 				throw new NotificationMessageException(
 						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
 			}
@@ -623,7 +623,9 @@ public class ScreeningSurveyAdministrationManagerService {
 	// Feedback
 	public Feedback feedbackCreate(final String name,
 			final ObjectId screeningSurveyId) {
-		val feedback = new Feedback(screeningSurveyId, name, "");
+		val feedback = new Feedback(
+				GlobalUniqueIdGenerator.createGlobalUniqueId(),
+				screeningSurveyId, name, "");
 
 		if (name.equals("")) {
 			feedback.setName(DEFAULT_OBJECT_NAME);
@@ -746,7 +748,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		return templateFolderStrings;
 	}
 
-	public List<String> getAllPossibleScreenigSurveyVariables(
+	public List<String> getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 			final ObjectId screeningSurveyId) {
 		val variables = new ArrayList<String>();
 
@@ -756,10 +758,11 @@ public class ScreeningSurveyAdministrationManagerService {
 				ScreeningSurvey.class, screeningSurveyId);
 
 		variables.addAll(variablesManagerService
-				.getAllInterventionVariableNames(screeningSurvey
+				.getAllInterventionVariableNamesOfIntervention(screeningSurvey
 						.getIntervention()));
-		variables.addAll(variablesManagerService
-				.getAllScreeningSurveyVariableNames(screeningSurveyId));
+		variables
+				.addAll(variablesManagerService
+						.getAllScreeningSurveyVariableNamesOfScreeningSurvey(screeningSurveyId));
 
 		Collections.sort(variables);
 

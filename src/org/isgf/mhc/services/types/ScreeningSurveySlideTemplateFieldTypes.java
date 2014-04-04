@@ -79,6 +79,14 @@ public enum ScreeningSurveySlideTemplateFieldTypes {
 	 */
 	RESULT_VARIABLE,
 	/**
+	 * Is true, when the slide is the last slide of the screening survey
+	 */
+	IS_LAST_SLIDE,
+	/**
+	 * Contains the URL of the screening survey feedback
+	 */
+	FEEDBACK_URL,
+	/**
 	 * <strong>ONLY</strong> internal, can't be used in templates
 	 */
 	TEMPLATE_FOLDER;
@@ -90,7 +98,7 @@ public enum ScreeningSurveySlideTemplateFieldTypes {
 	 * @return The appropriate variable name
 	 */
 	public String toVariable() {
-		return this.toString();
+		return toString();
 	}
 
 	/*

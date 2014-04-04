@@ -6,6 +6,7 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.conf.ImplementationContants;
+import org.isgf.mhc.services.InterventionExecutionManagerService;
 import org.isgf.mhc.services.internal.CommunicationManagerService;
 
 /**
@@ -15,12 +16,15 @@ import org.isgf.mhc.services.internal.CommunicationManagerService;
  */
 @Log4j2
 public class IncomingMessageWorker extends Thread {
-	private final CommunicationManagerService	communicationManagerService;
+	private final InterventionExecutionManagerService	interventionExecutionManagerService;
+	private final CommunicationManagerService			communicationManagerService;
 
 	public IncomingMessageWorker(
+			final InterventionExecutionManagerService interventionExecutionManagerService,
 			final CommunicationManagerService communicationManagerService) {
 		setName("Incoming Message Worker");
 
+		this.interventionExecutionManagerService = interventionExecutionManagerService;
 		this.communicationManagerService = communicationManagerService;
 	}
 

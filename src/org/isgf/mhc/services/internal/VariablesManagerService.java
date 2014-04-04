@@ -1,6 +1,7 @@
 package org.isgf.mhc.services.internal;
 
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Set;
 
 import lombok.val;
@@ -13,9 +14,13 @@ import org.isgf.mhc.model.persistent.MonitoringMessage;
 import org.isgf.mhc.model.persistent.MonitoringMessageGroup;
 import org.isgf.mhc.model.persistent.MonitoringReplyRule;
 import org.isgf.mhc.model.persistent.MonitoringRule;
+import org.isgf.mhc.model.persistent.Participant;
+import org.isgf.mhc.model.persistent.ParticipantVariableWithValue;
 import org.isgf.mhc.model.persistent.ScreeningSurvey;
 import org.isgf.mhc.model.persistent.ScreeningSurveySlide;
+import org.isgf.mhc.model.persistent.concepts.AbstractVariableWithValue;
 import org.isgf.mhc.services.types.SystemVariables;
+import org.isgf.mhc.tools.StringValidator;
 
 /**
  * Manages all variables for the system and a specific participant
@@ -42,7 +47,8 @@ public class VariablesManagerService {
 		for (val variable : SystemVariables.READ_ONLY_SYSTEM_VARIABLES.values()) {
 			writeProtectedVariableNames.add("$" + variable.name());
 		}
-		for (val variable : SystemVariables.READ_ONLY_PARTICIPANT_VARIABLES.values()) {
+		for (val variable : SystemVariables.READ_ONLY_PARTICIPANT_VARIABLES
+				.values()) {
 			writeProtectedVariableNames.add("$" + variable.name());
 		}
 		for (val variable : SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES
@@ -52,10 +58,12 @@ public class VariablesManagerService {
 
 		allSystemVariableNames = new HashSet<String>();
 		allSystemVariableNames.addAll(writeProtectedVariableNames);
-		for (val variable : SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES.values()) {
+		for (val variable : SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES
+				.values()) {
 			allSystemVariableNames.add("$" + variable.name());
 		}
-		for (val variable : SystemVariables.READ_WRITE_SYSTEM_VARIABLES.values()) {
+		for (val variable : SystemVariables.READ_WRITE_SYSTEM_VARIABLES
+				.values()) {
 			allSystemVariableNames.add("$" + variable.name());
 		}
 
@@ -77,8 +85,79 @@ public class VariablesManagerService {
 		log.info("Stopped.");
 	}
 
-	public boolean isWriteProtectedParticipantOrSystemVariableName(
-			final String variable) {
+	/*
+	 * Methods for execution
+	 */
+	public Hashtable<String, AbstractVariableWithValue> getVariablesWithValuesOfParticipant(
+			final Participant participant) {
+		val variablesWithValues = new Hashtable<String, AbstractVariableWithValue>();
+
+		val participantVariablesWithValues = databaseManagerService
+				.findModelObjects(
+						InterventionVariableWithValue.class,
+						Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT,
+						participant.getIntervention());
+		val interventionVariablesWithValues = databaseManagerService
+				.findModelObjects(
+						InterventionVariableWithValue.class,
+						Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION,
+						participant.getIntervention());
+
+		// Add all variables of participant
+		for (val participantVariableWithValue : participantVariablesWithValues) {
+			variablesWithValues.put(participantVariableWithValue.getName(),
+					participantVariableWithValue);
+		}
+
+		// Add also variables of intervention, but only if not overwritten for
+		// participant
+		for (val interventionVariableWithValue : interventionVariablesWithValues) {
+			if (!variablesWithValues.containsKey(interventionVariableWithValue
+					.getName())) {
+				variablesWithValues.put(
+						interventionVariableWithValue.getName(),
+						interventionVariableWithValue);
+			}
+		}
+
+		return variablesWithValues;
+	}
+
+	public void storeVariableValueOfParticipant(final Participant participant,
+			final String variableName, final String variableValue)
+			throws WriteProtectedVariableException,
+			InvalidVariableNameException {
+		val participantVariableWithValue = databaseManagerService
+				.findOneModelObject(
+						ParticipantVariableWithValue.class,
+						Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_VARIABLE_NAME,
+						participant.getId(), variableName);
+
+		if (StringValidator.isValidVariableName(variableName)) {
+			throw new InvalidVariableNameException();
+		}
+
+		if (isWriteProtectedVariableName(variableName)) {
+			throw new WriteProtectedVariableException();
+		}
+
+		if (participantVariableWithValue == null) {
+
+			val newParticipantVariableWithValue = new ParticipantVariableWithValue(
+					participant.getId(), variableName,
+					variableValue == null ? "" : variableValue);
+			databaseManagerService
+					.saveModelObject(newParticipantVariableWithValue);
+		} else {
+			participantVariableWithValue.setValue(variableValue == null ? ""
+					: variableValue);
+		}
+	}
+
+	/*
+	 * Methods for administration
+	 */
+	public boolean isWriteProtectedVariableName(final String variable) {
 		return writeProtectedVariableNames.contains(variable);
 	}
 
@@ -86,13 +165,13 @@ public class VariablesManagerService {
 		return allSystemVariableNames;
 	}
 
-	public Set<String> getAllInterventionVariableNames(
+	public Set<String> getAllInterventionVariableNamesOfIntervention(
 			final ObjectId interventionId) {
 		val variables = new HashSet<String>();
 
 		val variableModelObjects = databaseManagerService.findModelObjects(
 				InterventionVariableWithValue.class,
-				Queries.INTERVENTION_VARIABLES_WITH_VALUES__BY_INTERVENTION,
+				Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION,
 				interventionId);
 
 		for (val variableModelObject : variableModelObjects) {
@@ -102,7 +181,7 @@ public class VariablesManagerService {
 		return variables;
 	}
 
-	public Set<String> getAllInterventionScreeningSurveyVariableNames(
+	public Set<String> getAllScreeningSurveyVariableNamesOfIntervention(
 			final ObjectId interventionId) {
 		val variables = new HashSet<String>();
 
@@ -129,7 +208,7 @@ public class VariablesManagerService {
 		return variables;
 	}
 
-	public Set<String> getAllScreeningSurveyVariableNames(
+	public Set<String> getAllScreeningSurveyVariableNamesOfScreeningSurvey(
 			final ObjectId screeningSurveyId) {
 		val variables = new HashSet<String>();
 
@@ -149,7 +228,7 @@ public class VariablesManagerService {
 		return variables;
 	}
 
-	public Set<String> getAllMonitoringMessageVariableNames(
+	public Set<String> getAllMonitoringMessageVariableNamesOfIntervention(
 			final ObjectId interventionId) {
 		val variables = new HashSet<String>();
 
@@ -176,7 +255,7 @@ public class VariablesManagerService {
 		return variables;
 	}
 
-	public Set<String> getAllMonitoringRuleAndReplyRuleVariableNames(
+	public Set<String> getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(
 			final ObjectId interventionId) {
 		val variables = new HashSet<String>();
 
@@ -206,5 +285,22 @@ public class VariablesManagerService {
 		}
 
 		return variables;
+	}
+
+	/*
+	 * Exceptions
+	 */
+	@SuppressWarnings("serial")
+	private class WriteProtectedVariableException extends Exception {
+		public WriteProtectedVariableException() {
+			super("This variable name is write protected");
+		}
+	}
+
+	@SuppressWarnings("serial")
+	private class InvalidVariableNameException extends Exception {
+		public InvalidVariableNameException() {
+			super("This variable name is not allowed");
+		}
 	}
 }

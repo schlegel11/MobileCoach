@@ -304,7 +304,7 @@ public class InterventionAdministrationManagerService {
 		}
 
 		if (variablesManagerService
-				.isWriteProtectedParticipantOrSystemVariableName(variableName)) {
+				.isWriteProtectedVariableName(variableName)) {
 			throw new NotificationMessageException(
 					AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
 		}
@@ -312,7 +312,7 @@ public class InterventionAdministrationManagerService {
 		val interventionVariables = databaseManagerService
 				.findModelObjects(
 						InterventionVariableWithValue.class,
-						Queries.INTERVENTION_VARIABLES_WITH_VALUES__BY_INTERVENTION_AND_NAME,
+						Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME,
 						interventionId, variableName);
 		if (interventionVariables.iterator().hasNext()) {
 			throw new NotificationMessageException(
@@ -337,7 +337,7 @@ public class InterventionAdministrationManagerService {
 		}
 
 		if (variablesManagerService
-				.isWriteProtectedParticipantOrSystemVariableName(newName)) {
+				.isWriteProtectedVariableName(newName)) {
 			throw new NotificationMessageException(
 					AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
 		}
@@ -345,7 +345,7 @@ public class InterventionAdministrationManagerService {
 		val interventionVariables = databaseManagerService
 				.findModelObjects(
 						InterventionVariableWithValue.class,
-						Queries.INTERVENTION_VARIABLES_WITH_VALUES__BY_INTERVENTION_AND_NAME,
+						Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME,
 						interventionVariableWithValue.getIntervention(),
 						newName);
 		if (interventionVariables.iterator().hasNext()) {
@@ -510,7 +510,7 @@ public class InterventionAdministrationManagerService {
 			}
 
 			if (variablesManagerService
-					.isWriteProtectedParticipantOrSystemVariableName(variableName)) {
+					.isWriteProtectedVariableName(variableName)) {
 				throw new NotificationMessageException(
 						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
 			}
@@ -688,7 +688,7 @@ public class InterventionAdministrationManagerService {
 			}
 
 			if (variablesManagerService
-					.isWriteProtectedParticipantOrSystemVariableName(variableName)) {
+					.isWriteProtectedVariableName(variableName)) {
 				throw new NotificationMessageException(
 						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
 			}
@@ -857,7 +857,7 @@ public class InterventionAdministrationManagerService {
 			}
 
 			if (variablesManagerService
-					.isWriteProtectedParticipantOrSystemVariableName(variableName)) {
+					.isWriteProtectedVariableName(variableName)) {
 				throw new NotificationMessageException(
 						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
 			}
@@ -1063,7 +1063,7 @@ public class InterventionAdministrationManagerService {
 
 		return databaseManagerService.findModelObjects(
 				InterventionVariableWithValue.class,
-				Queries.INTERVENTION_VARIABLES_WITH_VALUES__BY_INTERVENTION,
+				Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION,
 				interventionId);
 	}
 
@@ -1161,42 +1161,42 @@ public class InterventionAdministrationManagerService {
 		return fileStorageManagerService.getFileByReference(fileReference);
 	}
 
-	public List<String> getAllPossibleMessageVariables(
+	public List<String> getAllPossibleMessageVariablesOfIntervention(
 			final ObjectId interventionId) {
 		val variables = new ArrayList<String>();
 
 		variables.addAll(variablesManagerService.getAllSystemVariableNames());
 
 		variables.addAll(variablesManagerService
-				.getAllInterventionVariableNames(interventionId));
+				.getAllInterventionVariableNamesOfIntervention(interventionId));
 		variables
 				.addAll(variablesManagerService
-						.getAllInterventionScreeningSurveyVariableNames(interventionId));
+						.getAllScreeningSurveyVariableNamesOfIntervention(interventionId));
 		variables.addAll(variablesManagerService
-				.getAllMonitoringMessageVariableNames(interventionId));
+				.getAllMonitoringMessageVariableNamesOfIntervention(interventionId));
 		variables.addAll(variablesManagerService
-				.getAllMonitoringRuleAndReplyRuleVariableNames(interventionId));
+				.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(interventionId));
 
 		Collections.sort(variables);
 
 		return variables;
 	}
 
-	public List<String> getAllPossibleMonitoringRuleVariables(
+	public List<String> getAllPossibleMonitoringRuleVariablesOfIntervention(
 			final ObjectId interventionId) {
 		val variables = new ArrayList<String>();
 
 		variables.addAll(variablesManagerService.getAllSystemVariableNames());
 
 		variables.addAll(variablesManagerService
-				.getAllInterventionVariableNames(interventionId));
+				.getAllInterventionVariableNamesOfIntervention(interventionId));
 		variables
 				.addAll(variablesManagerService
-						.getAllInterventionScreeningSurveyVariableNames(interventionId));
+						.getAllScreeningSurveyVariableNamesOfIntervention(interventionId));
 		variables.addAll(variablesManagerService
-				.getAllMonitoringMessageVariableNames(interventionId));
+				.getAllMonitoringMessageVariableNamesOfIntervention(interventionId));
 		variables.addAll(variablesManagerService
-				.getAllMonitoringRuleAndReplyRuleVariableNames(interventionId));
+				.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(interventionId));
 
 		Collections.sort(variables);
 

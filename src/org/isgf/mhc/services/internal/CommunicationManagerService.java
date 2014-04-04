@@ -26,6 +26,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
+import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
@@ -36,12 +37,15 @@ import org.isgf.mhc.conf.ImplementationContants;
 import org.isgf.mhc.model.memory.ReceivedMessage;
 import org.isgf.mhc.model.persistent.DialogOption;
 import org.isgf.mhc.model.persistent.types.DialogMessageStatusTypes;
+import org.isgf.mhc.services.InterventionExecutionManagerService;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 @Log4j2
 public class CommunicationManagerService {
 	private static CommunicationManagerService	instance	= null;
+
+	private InterventionExecutionManagerService	interventionExecutionManagerService;
 
 	private final Session						incomingMailSession;
 	private final Session						outgoingMailSession;
@@ -149,16 +153,20 @@ public class CommunicationManagerService {
 	 * @param dialogMessageId
 	 * @param message
 	 */
+	@Synchronized
 	public void sendMessage(final DialogOption dialogOption,
 			final ObjectId dialogMessageId, final String message) {
+		if (interventionExecutionManagerService == null) {
+			interventionExecutionManagerService = MHC.getInstance()
+					.getInterventionExecutionManagerService();
+		}
+
 		val mailingThread = new MailingThread(dialogOption, dialogMessageId,
 				message);
 
-		MHC.getInstance()
-				.getInterventionExecutionManagerService()
-				.dialogMessageSetStatus(dialogMessageId,
-						DialogMessageStatusTypes.SENDING,
-						System.currentTimeMillis());
+		interventionExecutionManagerService.dialogMessageSetStatus(
+				dialogMessageId, DialogMessageStatusTypes.SENDING,
+				System.currentTimeMillis());
 
 		synchronized (runningMailingThreads) {
 			runningMailingThreads.add(mailingThread);
@@ -304,11 +312,9 @@ public class CommunicationManagerService {
 			try {
 				sendMessage(dialogOption, message);
 
-				MHC.getInstance()
-						.getInterventionExecutionManagerService()
-						.dialogMessageSetStatus(dialogMessageId,
-								DialogMessageStatusTypes.SENT,
-								System.currentTimeMillis());
+				interventionExecutionManagerService.dialogMessageSetStatus(
+						dialogMessageId, DialogMessageStatusTypes.SENT,
+						System.currentTimeMillis());
 
 				removeFromList();
 
@@ -328,12 +334,10 @@ public class CommunicationManagerService {
 				} catch (final InterruptedException e) {
 					log.warn("Interrupted messaging sending approach {}", i);
 
-					MHC.getInstance()
-							.getInterventionExecutionManagerService()
-							.dialogMessageSetStatus(
-									dialogMessageId,
-									DialogMessageStatusTypes.PREPARED_FOR_SENDING,
-									System.currentTimeMillis());
+					interventionExecutionManagerService.dialogMessageSetStatus(
+							dialogMessageId,
+							DialogMessageStatusTypes.PREPARED_FOR_SENDING,
+							System.currentTimeMillis());
 
 					return;
 				}
@@ -341,11 +345,9 @@ public class CommunicationManagerService {
 				try {
 					sendMessage(dialogOption, message);
 
-					MHC.getInstance()
-							.getInterventionExecutionManagerService()
-							.dialogMessageSetStatus(dialogMessageId,
-									DialogMessageStatusTypes.SENT,
-									System.currentTimeMillis());
+					interventionExecutionManagerService.dialogMessageSetStatus(
+							dialogMessageId, DialogMessageStatusTypes.SENT,
+							System.currentTimeMillis());
 
 					removeFromList();
 
@@ -359,11 +361,10 @@ public class CommunicationManagerService {
 			log.error("Could not send mail to {} several times...giving up",
 					dialogOption.getData());
 
-			MHC.getInstance()
-					.getInterventionExecutionManagerService()
-					.dialogMessageSetStatus(dialogMessageId,
-							DialogMessageStatusTypes.PREPARED_FOR_SENDING,
-							System.currentTimeMillis());
+			interventionExecutionManagerService.dialogMessageSetStatus(
+					dialogMessageId,
+					DialogMessageStatusTypes.PREPARED_FOR_SENDING,
+					System.currentTimeMillis());
 
 			removeFromList();
 		}

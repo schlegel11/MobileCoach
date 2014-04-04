@@ -148,7 +148,7 @@ public class FeedbackSlideEditComponentWithController extends
 	public void changeTitleWithPlaceholders() {
 		log.debug("Edit title with placeholder");
 		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
-				.getAllPossibleScreenigSurveyVariables(relatedScreeningSurveyId);
+				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(relatedScreeningSurveyId);
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_TITLE_WITH_PLACEHOLDERS,
 				feedbackSlide.getTitleWithPlaceholders(), allPossibleVariables,
@@ -178,7 +178,7 @@ public class FeedbackSlideEditComponentWithController extends
 	public void changeOptionalLayoutAttribute() {
 		log.debug("Edit optional layout attribute");
 		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
-				.getAllPossibleScreenigSurveyVariables(relatedScreeningSurveyId);
+				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(relatedScreeningSurveyId);
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_OPTIONAL_LAYOUT_ATTRIBUTE_WITH_PLACEHOLDERS,
 				feedbackSlide.getOptionalLayoutAttribute(),
@@ -207,7 +207,7 @@ public class FeedbackSlideEditComponentWithController extends
 	public void changeFeedbackTextWithPlaceholders() {
 		log.debug("Edit feedback text with placeholder");
 		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
-				.getAllPossibleScreenigSurveyVariables(relatedScreeningSurveyId);
+				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(relatedScreeningSurveyId);
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_FEEDBACK_TEXT_WITH_PLACEHOLDERS,
 				feedbackSlide.getTextWithPlaceholders(), allPossibleVariables,

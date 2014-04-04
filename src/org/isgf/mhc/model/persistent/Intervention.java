@@ -112,7 +112,7 @@ public class Intervention extends ModelObject {
 		// Add intervention variables with values
 		for (val interventionVariableWithValue : ModelObject.find(
 				InterventionVariableWithValue.class,
-				Queries.INTERVENTION_VARIABLES_WITH_VALUES__BY_INTERVENTION,
+				Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION,
 				getId())) {
 			interventionVariableWithValue
 					.collectThisAndRelatedModelObjectsForExport(exportList);
@@ -149,7 +149,7 @@ public class Intervention extends ModelObject {
 		// Delete intervention variables with values
 		val interventionVariablesWithValuesToDelete = ModelObject.find(
 				InterventionVariableWithValue.class,
-				Queries.INTERVENTION_VARIABLES_WITH_VALUES__BY_INTERVENTION,
+				Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION,
 				getId());
 		ModelObject.delete(interventionVariablesWithValuesToDelete);
 

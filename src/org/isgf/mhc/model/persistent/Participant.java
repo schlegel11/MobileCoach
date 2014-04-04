@@ -66,6 +66,16 @@ public class Participant extends ModelObject {
 	private String		assignedScreeningSurveyGlobalUniqueId;
 
 	/**
+	 * Stores the reference to the {@link Feedback} started by the
+	 * {@link Participant} in an independent way; This enables to reference a
+	 * {@link Feedback} also after independent export/import to/from
+	 * another system
+	 */
+	@Getter
+	@Setter
+	private String		assignedFeedbackGlobalUniqueId;
+
+	/**
 	 * Stores if the {@link Participant} is activated for the rule-based
 	 * messaging; If a {@link Participant} should never participate in the
 	 * {@link Intervention} based on this results from the

@@ -22,8 +22,8 @@ public class Queries {
 	public static final String	AUTHOR_INTERVENTION_ACCESS__BY_INTERVENTION													= "{'intervention':#}";
 	public static final String	AUTHOR_INTERVENTION_ACCESS__BY_AUTHOR_AND_INTERVENTION										= "{'author':#,'intervention':#}";
 
-	public static final String	INTERVENTION_VARIABLES_WITH_VALUES__BY_INTERVENTION											= "{'intervention':#}";
-	public static final String	INTERVENTION_VARIABLES_WITH_VALUES__BY_INTERVENTION_AND_NAME								= "{'intervention':#,'name':#}";
+	public static final String	INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION											= "{'intervention':#}";
+	public static final String	INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME									= "{'intervention':#,'name':#}";
 
 	public static final String	MONITORING_MESSAGE_GROUP__BY_INTERVENTION													= "{'intervention':#}";
 	public static final String	MONITORING_MESSAGE_GROUP__SORT_BY_NAME_ASC													= "{'name':1}";
@@ -95,6 +95,7 @@ public class Queries {
 	public static final String	DIALOG_STATUS__BY_PARTICIPANT																= "{'participant':#}";
 
 	public static final String	PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT												= "{'participant':#}";
+	public static final String	PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_VARIABLE_NAME							= "{'participant':#,'name':#}";
 
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT																= "{'participant':#}";
 	public static final String	DIALOG_MESSAGE__BY_STATUS																	= "{'status':#}";

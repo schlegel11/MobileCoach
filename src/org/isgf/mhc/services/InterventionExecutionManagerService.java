@@ -55,13 +55,13 @@ public class InterventionExecutionManagerService {
 		// Reset all messages which could not be sent the last times
 		dialogMessagesResetStatusAfterRestart();
 
-		outgoingMessageWorker = new OutgoingMessageWorker(
+		outgoingMessageWorker = new OutgoingMessageWorker(this,
 				communicationManagerService);
 		outgoingMessageWorker.start();
-		incomingMessageWorker = new IncomingMessageWorker(
+		incomingMessageWorker = new IncomingMessageWorker(this,
 				communicationManagerService);
 		incomingMessageWorker.start();
-		masterRuleEvaluationWorker = new MasterRuleEvaluationWorker();
+		masterRuleEvaluationWorker = new MasterRuleEvaluationWorker(this);
 		masterRuleEvaluationWorker.start();
 
 		log.info("Started.");

@@ -80,7 +80,7 @@ public class MonitoringMessageEditComponentWithController extends
 	public void editTextWithPlaceholder() {
 		log.debug("Edit text with placeholder");
 		val allPossibleMessageVariables = getInterventionAdministrationManagerService()
-				.getAllPossibleMessageVariables(interventionId);
+				.getAllPossibleMessageVariablesOfIntervention(interventionId);
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_TEXT_WITH_PLACEHOLDERS,
 				monitoringMessage.getTextWithPlaceholders(),

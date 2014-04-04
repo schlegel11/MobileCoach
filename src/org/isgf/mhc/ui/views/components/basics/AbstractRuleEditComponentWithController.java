@@ -132,12 +132,12 @@ public class AbstractRuleEditComponentWithController extends
 		switch (type) {
 			case MONITORING_RULES:
 				allPossibleVariables = getInterventionAdministrationManagerService()
-						.getAllPossibleMonitoringRuleVariables(
+						.getAllPossibleMonitoringRuleVariablesOfIntervention(
 								rulesRelatedModelObjectId);
 				break;
 			default:
 				allPossibleVariables = getScreeningSurveyAdministrationManagerService()
-						.getAllPossibleScreenigSurveyVariables(
+						.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 								rulesRelatedModelObjectId);
 				break;
 		}
@@ -173,12 +173,12 @@ public class AbstractRuleEditComponentWithController extends
 		switch (type) {
 			case MONITORING_RULES:
 				allPossibleVariables = getInterventionAdministrationManagerService()
-						.getAllPossibleMonitoringRuleVariables(
+						.getAllPossibleMonitoringRuleVariablesOfIntervention(
 								rulesRelatedModelObjectId);
 				break;
 			default:
 				allPossibleVariables = getScreeningSurveyAdministrationManagerService()
-						.getAllPossibleScreenigSurveyVariables(
+						.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 								rulesRelatedModelObjectId);
 				break;
 		}

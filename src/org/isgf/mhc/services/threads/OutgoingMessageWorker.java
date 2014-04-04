@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.conf.ImplementationContants;
+import org.isgf.mhc.services.InterventionExecutionManagerService;
 import org.isgf.mhc.services.internal.CommunicationManagerService;
 
 /**
@@ -14,12 +15,15 @@ import org.isgf.mhc.services.internal.CommunicationManagerService;
  */
 @Log4j2
 public class OutgoingMessageWorker extends Thread {
-	private final CommunicationManagerService	communicationManagerService;
+	private final InterventionExecutionManagerService	interventionExecutionManagerService;
+	private final CommunicationManagerService			communicationManagerService;
 
 	public OutgoingMessageWorker(
+			final InterventionExecutionManagerService interventionExecutionManagerService,
 			final CommunicationManagerService communicationManagerService) {
 		setName("Outgoing Message Worker");
 
+		this.interventionExecutionManagerService = interventionExecutionManagerService;
 		this.communicationManagerService = communicationManagerService;
 	}
 

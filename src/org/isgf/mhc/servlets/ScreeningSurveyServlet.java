@@ -25,6 +25,7 @@ import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.Constants;
+import org.isgf.mhc.conf.ImplementationContants;
 import org.isgf.mhc.model.persistent.ScreeningSurvey;
 import org.isgf.mhc.model.persistent.ScreeningSurveySlide;
 import org.isgf.mhc.services.ScreeningSurveyExecutionManagerService;
@@ -41,7 +42,7 @@ import com.github.mustachejava.MustacheFactory;
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
-@WebServlet(displayName = "Screening Survey", value = "/*", asyncSupported = true, loadOnStartup = 1)
+@WebServlet(displayName = "Screening Survey and Feedback", value = "/*", asyncSupported = true, loadOnStartup = 1)
 @Log4j2
 public class ScreeningSurveyServlet extends HttpServlet {
 	private MustacheFactory							mustacheFactory;
@@ -102,10 +103,31 @@ public class ScreeningSurveyServlet extends HttpServlet {
 									.screeningSurveyCheckIfActive(new ObjectId(
 											pathParts[0]))) {
 						handleTemplateRequest(request, response, new ObjectId(
-								pathParts[0]));
+								pathParts[0]), null);
 						return;
 					} else {
 						throw new Exception("Invalid id");
+					}
+				case 2:
+					// Check if it's a feedback, otherwise handle as file
+					// (default case)
+					if (pathParts[0].equals("feedback")) {
+						if (pathParts[1].equals("")) {
+							// Empty request
+							throw new Exception("Invalid feedback request");
+						}
+
+						// Only object id
+						if (ObjectId.isValid(pathParts[1])
+								&& screeningSurveyExecutionManagerService
+										.feedbackCheckIfActive(new ObjectId(
+												pathParts[1]))) {
+							handleTemplateRequest(request, response, null,
+									new ObjectId(pathParts[1]));
+							return;
+						} else {
+							throw new Exception("Invalid id");
+						}
 					}
 				default:
 					// Object id and file request
@@ -289,52 +311,104 @@ public class ScreeningSurveyServlet extends HttpServlet {
 	 * @throws IOException
 	 */
 	private void handleTemplateRequest(final HttpServletRequest request,
-			final HttpServletResponse response, final ObjectId screeningSurveyId)
-			throws ServletException, IOException {
-		log.debug("Handling template request for screening survey {}",
-				screeningSurveyId);
-
-		// Get information from session
-		val session = request.getSession(true);
-		ObjectId participantId;
-		try {
-			participantId = (ObjectId) session
-					.getAttribute(SessionAttributeTypes.PARTICIPANT_ID
-							.toString());
-		} catch (final Exception e) {
-			participantId = null;
+			final HttpServletResponse response,
+			final ObjectId screeningSurveyId,
+			final ObjectId feedbackParticipantId) throws ServletException,
+			IOException {
+		if (screeningSurveyId == null) {
+			log.debug("Handling template request for feedback participant {}",
+					feedbackParticipantId);
+		} else {
+			log.debug("Handling template request for screening survey {}",
+					screeningSurveyId);
 		}
 
-		// Get question result if available
-		String resultValue;
-		try {
-			resultValue = (String) request.getAttribute("MHC_result");
-		} catch (final Exception e) {
-			resultValue = null;
-		}
-		log.debug(
-				"Retrieved information from request: participant: {}, screening survey: {}, result value: {}",
-				participantId, screeningSurveyId, resultValue);
-
-		// Decide which slide should be send to the participant
 		HashMap<String, Object> templateVariables;
-		try {
-			templateVariables = screeningSurveyExecutionManagerService
-					.getAppropriateSlide(participantId, screeningSurveyId,
-							resultValue, session);
+		val session = request.getSession(true);
 
-			if (templateVariables == null
-					|| !templateVariables
-							.containsKey(ScreeningSurveySlideTemplateFieldTypes.TEMPLATE_FOLDER
-									.toVariable())) {
-				throw new NullPointerException();
+		// Handle screening survey or feedback request
+		if (screeningSurveyId != null) {
+			/*
+			 * Handle screening survey specific things
+			 */
+
+			// Get information from session
+			ObjectId participantId;
+			try {
+				participantId = (ObjectId) session
+						.getAttribute(SessionAttributeTypes.PARTICIPANT_ID
+								.toString());
+			} catch (final Exception e) {
+				participantId = null;
 			}
-		} catch (final Exception e) {
-			log.warn("An error occurred while getting appropriate slide: {}",
-					e.getMessage());
+			boolean accessGranted;
+			try {
+				accessGranted = (boolean) session
+						.getAttribute(SessionAttributeTypes.ACCESS_GRANTED
+								.toString());
+			} catch (final Exception e) {
+				accessGranted = false;
+			}
 
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			return;
+			// Get question result if available
+			String resultValue;
+			try {
+				resultValue = (String) request
+						.getAttribute(ImplementationContants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLE);
+			} catch (final Exception e) {
+				resultValue = null;
+			}
+			log.debug(
+					"Retrieved information from request: participant: {}, access granted: {}, screening survey: {}, result value: {}",
+					participantId, accessGranted, screeningSurveyId,
+					resultValue);
+
+			// Decide which slide should be send to the participant
+			try {
+				templateVariables = screeningSurveyExecutionManagerService
+						.getAppropriateScreeningSurveySlide(participantId,
+								accessGranted, screeningSurveyId, resultValue,
+								session);
+
+				if (templateVariables == null
+						|| !templateVariables
+								.containsKey(ScreeningSurveySlideTemplateFieldTypes.TEMPLATE_FOLDER
+										.toVariable())) {
+					throw new NullPointerException();
+				}
+			} catch (final Exception e) {
+				log.warn(
+						"An error occurred while getting appropriate slide: {}",
+						e.getMessage());
+
+				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				return;
+			}
+		} else {
+			/*
+			 * Handle feedback specific things
+			 */
+
+			// Decide which slide should be send to the participant
+			try {
+				templateVariables = screeningSurveyExecutionManagerService
+						.getAppropriateFeedbackSlide(feedbackParticipantId,
+								session);
+
+				if (templateVariables == null
+						|| !templateVariables
+								.containsKey(ScreeningSurveySlideTemplateFieldTypes.TEMPLATE_FOLDER
+										.toVariable())) {
+					throw new NullPointerException();
+				}
+			} catch (final Exception e) {
+				log.warn(
+						"An error occurred while getting appropriate slide: {}",
+						e.getMessage());
+
+				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				return;
+			}
 		}
 
 		log.debug("Setting no-cache headers");
@@ -352,6 +426,10 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		templateVariables.put(
 				ScreeningSurveySlideTemplateFieldTypes.BASE_URL.toVariable(),
 				baseURL);
+		templateVariables
+				.put(ScreeningSurveySlideTemplateFieldTypes.RESULT_VARIABLE
+						.toVariable(),
+						ImplementationContants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLE);
 
 		// Create new Mustache template factory on non-production system
 		if (!Constants.IS_LIVE_SYSTEM) {
@@ -373,7 +451,15 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		log.debug("Filling template in folder {}", templateFolder);
 		Mustache mustache;
 		synchronized (mustacheFactory) {
-			mustache = mustacheFactory.compile(templateFolder + "/index.html");
+			try {
+				mustache = mustacheFactory.compile(templateFolder
+						+ "/index.html");
+			} catch (final Exception e) {
+				log.error("There seems to be a problem with the template: {}",
+						e.getMessage());
+				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				return;
+			}
 		}
 
 		@Cleanup

@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.conf.ImplementationContants;
+import org.isgf.mhc.services.InterventionExecutionManagerService;
 
 /**
  * Manages the handling of interventions, rules and participants (== the
@@ -15,8 +16,13 @@ import org.isgf.mhc.conf.ImplementationContants;
  */
 @Log4j2
 public class MasterRuleEvaluationWorker extends Thread {
-	public MasterRuleEvaluationWorker() {
+	private final InterventionExecutionManagerService	interventionExecutionManagerService;
+
+	public MasterRuleEvaluationWorker(
+			final InterventionExecutionManagerService interventionExecutionManagerService) {
 		setName("Master Rule Evaluation Worker");
+
+		this.interventionExecutionManagerService = interventionExecutionManagerService;
 	}
 
 	@Override

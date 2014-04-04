@@ -411,7 +411,7 @@ public class ScreeningSurveySlideEditComponentWithController extends
 	public void editAnswerAnswer() {
 		log.debug("Edit answer answer with placeholders");
 		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
-				.getAllPossibleScreenigSurveyVariables(
+				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 						screeningSurveySlide.getScreeningSurvey());
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_ANSWER_WITH_PLACEHOLDERS,
@@ -533,7 +533,7 @@ public class ScreeningSurveySlideEditComponentWithController extends
 	public void changeTitleWithPlaceholders() {
 		log.debug("Edit title with placeholder");
 		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
-				.getAllPossibleScreenigSurveyVariables(
+				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 						screeningSurveySlide.getScreeningSurvey());
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_TITLE_WITH_PLACEHOLDERS,
@@ -565,7 +565,7 @@ public class ScreeningSurveySlideEditComponentWithController extends
 	public void changeOptionalLayoutAttribute() {
 		log.debug("Edit optional layout attribute");
 		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
-				.getAllPossibleScreenigSurveyVariables(
+				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 						screeningSurveySlide.getScreeningSurvey());
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_OPTIONAL_LAYOUT_ATTRIBUTE_WITH_PLACEHOLDERS,
@@ -597,7 +597,7 @@ public class ScreeningSurveySlideEditComponentWithController extends
 	public void changeQuestionWithPlaceholders() {
 		log.debug("Edit question with placeholder");
 		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
-				.getAllPossibleScreenigSurveyVariables(
+				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 						screeningSurveySlide.getScreeningSurvey());
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_QUESTION_TEXT_WITH_PLACEHOLDERS,
