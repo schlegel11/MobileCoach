@@ -1,5 +1,7 @@
 package org.isgf.mhc.services.internal;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
@@ -9,6 +11,9 @@ import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.Queries;
+import org.isgf.mhc.model.memory.MemoryVariable;
+import org.isgf.mhc.model.persistent.DialogOption;
+import org.isgf.mhc.model.persistent.DialogStatus;
 import org.isgf.mhc.model.persistent.InterventionVariableWithValue;
 import org.isgf.mhc.model.persistent.MonitoringMessage;
 import org.isgf.mhc.model.persistent.MonitoringMessageGroup;
@@ -19,6 +24,7 @@ import org.isgf.mhc.model.persistent.ParticipantVariableWithValue;
 import org.isgf.mhc.model.persistent.ScreeningSurvey;
 import org.isgf.mhc.model.persistent.ScreeningSurveySlide;
 import org.isgf.mhc.model.persistent.concepts.AbstractVariableWithValue;
+import org.isgf.mhc.model.persistent.types.DialogOptionTypes;
 import org.isgf.mhc.services.types.SystemVariables;
 import org.isgf.mhc.tools.StringValidator;
 
@@ -29,12 +35,21 @@ import org.isgf.mhc.tools.StringValidator;
  */
 @Log4j2
 public class VariablesManagerService {
-	private static VariablesManagerService	instance	= null;
+	private static VariablesManagerService	instance			= null;
 
 	private final DatabaseManagerService	databaseManagerService;
 
 	private final HashSet<String>			allSystemVariableNames;
 	private final HashSet<String>			writeProtectedVariableNames;
+
+	private static SimpleDateFormat			dayInWeekFormatter	= new SimpleDateFormat(
+																		"u");
+	private static SimpleDateFormat			dayOfMonthFormatter	= new SimpleDateFormat(
+																		"d");
+	private static SimpleDateFormat			monthFormatter		= new SimpleDateFormat(
+																		"M");
+	private static SimpleDateFormat			yearFormatter		= new SimpleDateFormat(
+																		"yyyy");
 
 	private VariablesManagerService(
 			final DatabaseManagerService databaseManagerService)
@@ -88,10 +103,57 @@ public class VariablesManagerService {
 	/*
 	 * Methods for execution
 	 */
-	public Hashtable<String, AbstractVariableWithValue> getVariablesWithValuesOfParticipant(
+	public Hashtable<String, AbstractVariableWithValue> getAllVariablesWithValuesOfParticipantAndSystem(
 			final Participant participant) {
 		val variablesWithValues = new Hashtable<String, AbstractVariableWithValue>();
 
+		// Add all read/write system variables (to become overwritten, if
+		// required)
+		for (val variable : SystemVariables.READ_WRITE_SYSTEM_VARIABLES
+				.values()) {
+			switch (variable) {
+			// nothing
+			}
+		}
+		// Add all read/write participant variables (to become overwritten, if
+		// required)
+		for (val variable : SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES
+				.values()) {
+			switch (variable) {
+				case participantDialogOptionEmailData:
+					val dialogOptionEmail = databaseManagerService
+							.findOneModelObject(
+									DialogOption.class,
+									Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
+									participant.getId(),
+									DialogOptionTypes.EMAIL);
+					if (dialogOptionEmail != null) {
+						addToHashtable(variablesWithValues,
+								variable.toVariableName(),
+								dialogOptionEmail.getData());
+					}
+					break;
+				case participantDialogOptionSMSData:
+					val dialogOptionSMS = databaseManagerService
+							.findOneModelObject(
+									DialogOption.class,
+									Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
+									participant.getId(), DialogOptionTypes.SMS);
+					if (dialogOptionSMS != null) {
+						addToHashtable(variablesWithValues,
+								variable.toVariableName(),
+								dialogOptionSMS.getData());
+					}
+					break;
+				case participantName:
+					addToHashtable(variablesWithValues,
+							variable.toVariableName(),
+							participant.getNickname());
+					break;
+			}
+		}
+
+		// Retrieve all stored variables
 		val participantVariablesWithValues = databaseManagerService
 				.findModelObjects(
 						InterventionVariableWithValue.class,
@@ -120,7 +182,88 @@ public class VariablesManagerService {
 			}
 		}
 
+		// Add all read only system variables
+		val date = new Date(System.currentTimeMillis());
+		for (val variable : SystemVariables.READ_ONLY_SYSTEM_VARIABLES.values()) {
+			switch (variable) {
+				case systemDayInWeek:
+					addToHashtable(variablesWithValues,
+							variable.toVariableName(),
+							dayInWeekFormatter.format(date));
+					break;
+				case systemDayOfMonth:
+					addToHashtable(variablesWithValues,
+							variable.toVariableName(),
+							dayOfMonthFormatter.format(date));
+					break;
+				case systemMonth:
+					addToHashtable(variablesWithValues,
+							variable.toVariableName(),
+							monthFormatter.format(date));
+					break;
+				case systemYear:
+					addToHashtable(variablesWithValues,
+							variable.toVariableName(),
+							yearFormatter.format(date));
+					break;
+			}
+		}
+
+		// Add all read only participant variables
+		val dialogStatus = databaseManagerService.findOneModelObject(
+				DialogStatus.class, Queries.DIALOG_STATUS__BY_PARTICIPANT,
+				participant.getId());
+		int participationInDays = 0;
+		int participationInWeeks = 0;
+		if (dialogStatus != null) {
+			participationInDays = dialogStatus
+					.getInterventionDaysParticipated();
+			participationInWeeks = Math.floorDiv(participationInDays, 7);
+		}
+		for (val variable : SystemVariables.READ_ONLY_PARTICIPANT_VARIABLES
+				.values()) {
+			switch (variable) {
+				case participantParticipationInDays:
+					addToHashtable(variablesWithValues,
+							variable.toVariableName(),
+							String.valueOf(participationInDays));
+					break;
+				case participantParticipationInWeeks:
+					addToHashtable(variablesWithValues,
+							variable.toVariableName(),
+							String.valueOf(participationInWeeks));
+					break;
+			}
+		}
+
+		// Add all read only participant reply variables
+		for (val variable : SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES
+				.values()) {
+			switch (variable) {
+				case participantMessageReply:
+					break;
+			}
+		}
+
 		return variablesWithValues;
+	}
+
+	/**
+	 * Adds the variable with value as {@link AbstractVariableWithValue} to the
+	 * hashtable
+	 * 
+	 * @param hashtable
+	 * @param variable
+	 * @param value
+	 */
+	private void addToHashtable(
+			final Hashtable<String, AbstractVariableWithValue> hashtable,
+			final String variable, final String value) {
+		val newVariableWithValue = new MemoryVariable();
+		newVariableWithValue.setName(variable);
+		newVariableWithValue.setValue(value);
+
+		hashtable.put(variable, newVariableWithValue);
 	}
 
 	public void storeVariableValueOfParticipant(final Participant participant,
@@ -133,7 +276,7 @@ public class VariablesManagerService {
 						Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_VARIABLE_NAME,
 						participant.getId(), variableName);
 
-		if (StringValidator.isValidVariableName(variableName)) {
+		if (!StringValidator.isValidVariableName(variableName)) {
 			throw new InvalidVariableNameException();
 		}
 

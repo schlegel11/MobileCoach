@@ -69,6 +69,14 @@ public class DialogStatus extends ModelObject {
 	@Setter
 	private long		interventionPerformedTimestamp;
 
+	/**
+	 * Number of days the {@link Participant} participated in the intervention
+	 * (== the messaging)
+	 */
+	@Getter
+	@Setter
+	private int			interventionDaysParticipated;
+
 	/*
 	 * (non-Javadoc)
 	 * 

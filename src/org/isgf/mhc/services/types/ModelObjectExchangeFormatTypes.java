@@ -7,6 +7,6 @@ import org.isgf.mhc.model.ModelObject;
  * 
  * @author Andreas Filler
  */
-public enum ModelObjectExchangeFormats {
+public enum ModelObjectExchangeFormatTypes {
 	INTERVENTION, SCREENING_SURVEY, PARTICIPANTS
 }

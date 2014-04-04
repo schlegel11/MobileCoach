@@ -37,7 +37,7 @@ import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.ModelObjectExchangeService;
 import org.isgf.mhc.services.internal.VariablesManagerService;
-import org.isgf.mhc.services.types.ModelObjectExchangeFormats;
+import org.isgf.mhc.services.types.ModelObjectExchangeFormatTypes;
 import org.isgf.mhc.tools.BCrypt;
 import org.isgf.mhc.tools.StringValidator;
 import org.isgf.mhc.ui.NotificationMessageException;
@@ -231,7 +231,7 @@ public class InterventionAdministrationManagerService {
 			throws FileNotFoundException, IOException {
 		val importedModelObjects = modelObjectExchangeService
 				.importModelObjects(file,
-						ModelObjectExchangeFormats.INTERVENTION);
+						ModelObjectExchangeFormatTypes.INTERVENTION);
 
 		for (val modelObject : importedModelObjects) {
 			if (modelObject instanceof Intervention) {
@@ -262,7 +262,7 @@ public class InterventionAdministrationManagerService {
 
 		log.debug("Export intervention");
 		return modelObjectExchangeService.exportModelObjects(
-				modelObjectsToExport, ModelObjectExchangeFormats.INTERVENTION);
+				modelObjectsToExport, ModelObjectExchangeFormatTypes.INTERVENTION);
 	}
 
 	public void interventionDelete(final Intervention interventionToDelete)
@@ -927,7 +927,7 @@ public class InterventionAdministrationManagerService {
 
 		val importedModelObjects = modelObjectExchangeService
 				.importModelObjects(file,
-						ModelObjectExchangeFormats.PARTICIPANTS);
+						ModelObjectExchangeFormatTypes.PARTICIPANTS);
 
 		for (val modelObject : importedModelObjects) {
 			if (modelObject instanceof Participant) {
@@ -954,7 +954,7 @@ public class InterventionAdministrationManagerService {
 
 		log.debug("Export participants");
 		return modelObjectExchangeService.exportModelObjects(
-				modelObjectsToExport, ModelObjectExchangeFormats.PARTICIPANTS);
+				modelObjectsToExport, ModelObjectExchangeFormatTypes.PARTICIPANTS);
 	}
 
 	public void participantsSetOrganization(

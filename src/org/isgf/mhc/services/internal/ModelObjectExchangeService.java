@@ -25,7 +25,7 @@ import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.memory.ExchangeModelObject;
 import org.isgf.mhc.model.persistent.MediaObject;
-import org.isgf.mhc.services.types.ModelObjectExchangeFormats;
+import org.isgf.mhc.services.types.ModelObjectExchangeFormatTypes;
 
 /**
  * @author Andreas Filler
@@ -81,7 +81,7 @@ public class ModelObjectExchangeService {
 	 *         for import into another system
 	 */
 	public File exportModelObjects(final List<ModelObject> modelObjects,
-			final ModelObjectExchangeFormats exchangeFormat) {
+			final ModelObjectExchangeFormatTypes exchangeFormat) {
 		val exchangeModelObjects = new ArrayList<ExchangeModelObject>();
 
 		log.debug("Exporting model objects...");
@@ -167,7 +167,7 @@ public class ModelObjectExchangeService {
 	 * @throws NoSuchMethodException
 	 */
 	public List<ModelObject> importModelObjects(final File zipFile,
-			final ModelObjectExchangeFormats expectedExchangeFormat)
+			final ModelObjectExchangeFormatTypes expectedExchangeFormat)
 			throws FileNotFoundException, IOException {
 		val modelObjects = new ArrayList<ModelObject>();
 
@@ -291,7 +291,7 @@ public class ModelObjectExchangeService {
 	@SneakyThrows
 	private File createZipFile(
 			final List<ExchangeModelObject> exchangeModelObjects,
-			final ModelObjectExchangeFormats exchangeFormat) {
+			final ModelObjectExchangeFormatTypes exchangeFormat) {
 
 		log.debug("Writing exchange model objects to zip file");
 
@@ -362,7 +362,7 @@ public class ModelObjectExchangeService {
 	 * @throws IOException
 	 */
 	private List<ExchangeModelObject> readZipFile(final ZipFile zipFile,
-			final ModelObjectExchangeFormats expectedExchangeFormat) throws IOException {
+			final ModelObjectExchangeFormatTypes expectedExchangeFormat) throws IOException {
 		val exchangeModelObjects = new ArrayList<ExchangeModelObject>();
 
 		if (!zipFile.getComment().equals(expectedExchangeFormat.toString())) {

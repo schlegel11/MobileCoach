@@ -3,6 +3,7 @@ package org.isgf.mhc.services;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
@@ -17,6 +18,7 @@ import org.isgf.mhc.model.persistent.DialogOption;
 import org.isgf.mhc.model.persistent.DialogStatus;
 import org.isgf.mhc.model.persistent.Feedback;
 import org.isgf.mhc.model.persistent.Intervention;
+import org.isgf.mhc.model.persistent.MediaObject;
 import org.isgf.mhc.model.persistent.Participant;
 import org.isgf.mhc.model.persistent.ScreeningSurvey;
 import org.isgf.mhc.model.persistent.ScreeningSurveySlide;
@@ -24,11 +26,13 @@ import org.isgf.mhc.model.persistent.types.DialogOptionTypes;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.VariablesManagerService;
+import org.isgf.mhc.services.types.ScreeningSurveySessionAttributeTypes;
 import org.isgf.mhc.services.types.ScreeningSurveySlideTemplateFieldTypes;
 import org.isgf.mhc.services.types.ScreeningSurveySlideTemplateLayoutTypes;
-import org.isgf.mhc.services.types.SessionAttributeTypes;
 import org.isgf.mhc.services.types.SystemVariables;
+import org.isgf.mhc.tools.GlobalUniqueIdGenerator;
 import org.isgf.mhc.tools.StringHelpers;
+import org.isgf.mhc.tools.VariableStringReplacer;
 
 /**
  * Cares for the orchestration of {@link ScreeningSurveySlides} as
@@ -124,7 +128,7 @@ public class ScreeningSurveyExecutionManagerService {
 	// Dialog status
 	private void dialogStatusCreate(final ObjectId participantId) {
 		val dialogStatus = new DialogStatus(participantId,
-				StringHelpers.createStringTimeStamp(), false, 0, false, 0);
+				StringHelpers.createStringTimeStamp(), false, 0, false, 0, 0);
 
 		databaseManagerService.saveModelObject(dialogStatus);
 	}
@@ -135,47 +139,18 @@ public class ScreeningSurveyExecutionManagerService {
 				DialogStatus.class, Queries.DIALOG_STATUS__BY_PARTICIPANT,
 				participantId);
 
-		dialogStatus.setScreeningSurveyPerformed(true);
-		dialogStatus.setScreeningSurveyPerformedTimestamp(System
-				.currentTimeMillis());
+		if (!dialogStatus.isScreeningSurveyPerformed()) {
+			dialogStatus.setScreeningSurveyPerformed(true);
+			dialogStatus.setScreeningSurveyPerformedTimestamp(System
+					.currentTimeMillis());
 
-		databaseManagerService.saveModelObject(dialogStatus);
+			databaseManagerService.saveModelObject(dialogStatus);
+		}
 	}
 
 	/*
 	 * Special methods
 	 */
-	/**
-	 * Sets the given layout to <code>true</code> and all other available
-	 * layouts to <code>false</code>
-	 * 
-	 * @param templateVariables
-	 *            The {@link HashMap} to extend with the layout information or
-	 *            <code>null</code> if a new one shall be created
-	 * @param slideTemplateLayout
-	 *            The {@link ScreeningSurveySlideTemplateLayoutTypes} to set as
-	 *            <code>true</code>
-	 * @return
-	 */
-	public HashMap<String, Object> setLayoutTo(
-			HashMap<String, Object> templateVariables,
-			final ScreeningSurveySlideTemplateLayoutTypes slideTemplateLayout) {
-		if (templateVariables == null) {
-			templateVariables = new HashMap<String, Object>();
-		}
-
-		for (final val availableSlideLayoutType : ScreeningSurveySlideTemplateLayoutTypes
-				.values()) {
-			if (slideTemplateLayout == availableSlideLayoutType) {
-				templateVariables.put(slideTemplateLayout.toVariable(), true);
-			} else {
-				templateVariables.put(slideTemplateLayout.toVariable(), true);
-			}
-		}
-
-		return templateVariables;
-	}
-
 	/**
 	 * Returns if the requested {@link ScreeningSurvey} is currently accessible
 	 * (means the the {@link Intervention} and {@link ScreeningSurvey} are both
@@ -254,15 +229,16 @@ public class ScreeningSurveyExecutionManagerService {
 	public HashMap<String, Object> getAppropriateScreeningSurveySlide(
 			ObjectId participantId, final boolean accessGranted,
 			final ObjectId screeningSurveyId, final String resultValue,
-			final HttpSession session) {
+			final String checkValue, final HttpSession session) {
 
 		val templateVariables = new HashMap<String, Object>();
 
 		// Check if screening survey is active
 		log.debug("Check if screening survey is active");
 		if (!screeningSurveyCheckIfActive(screeningSurveyId)) {
-			setLayoutTo(templateVariables,
-					ScreeningSurveySlideTemplateLayoutTypes.CLOSED);
+			templateVariables
+					.put(ScreeningSurveySlideTemplateLayoutTypes.CLOSED
+							.toVariable(), true);
 			return templateVariables;
 		}
 
@@ -293,12 +269,13 @@ public class ScreeningSurveyExecutionManagerService {
 					&& resultValue.equals(screeningSurvey.getPassword())) {
 				// Remember that user authenticated
 				session.setAttribute(
-						SessionAttributeTypes.PARTICIPANT_ACCESS_GRANTED
+						ScreeningSurveySessionAttributeTypes.PARTICIPANT_ACCESS_GRANTED
 								.toString(), true);
 			} else {
 				// Redirect to password page
-				setLayoutTo(templateVariables,
-						ScreeningSurveySlideTemplateLayoutTypes.PASSWORD_INPUT);
+				templateVariables.put(
+						ScreeningSurveySlideTemplateLayoutTypes.PASSWORD_INPUT
+								.toVariable(), true);
 				return templateVariables;
 			}
 		}
@@ -311,11 +288,11 @@ public class ScreeningSurveyExecutionManagerService {
 			participantId = participant.getId();
 
 			session.setAttribute(
-					SessionAttributeTypes.PARTICIPANT_ID.toString(),
-					participantId);
-			session.removeAttribute(SessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
+					ScreeningSurveySessionAttributeTypes.PARTICIPANT_ID
+							.toString(), participantId);
+			session.removeAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
 					.toString());
-			session.removeAttribute(SessionAttributeTypes.PARTICIPANT_LAST_SCREENING_SURVEY_SLIDE_ID
+			session.removeAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_FORMER_SCREENING_SURVEY_SLIDE_ID
 					.toString());
 		} else {
 			log.debug("Participant exists");
@@ -332,70 +309,93 @@ public class ScreeningSurveyExecutionManagerService {
 					&& dialogStatus.isScreeningSurveyPerformed()) {
 				log.debug("User already participated");
 
-				setLayoutTo(templateVariables,
-						ScreeningSurveySlideTemplateLayoutTypes.DONE);
+				templateVariables.put(
+						ScreeningSurveySlideTemplateLayoutTypes.DONE
+								.toVariable(), true);
 				return templateVariables;
 			}
 		}
 
 		// Get last slide
-		val lastScreeningSurveySlideId = session
-				.getAttribute(SessionAttributeTypes.PARTICIPANT_LAST_SCREENING_SURVEY_SLIDE_ID
+		val formerSlideId = session
+				.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_FORMER_SCREENING_SURVEY_SLIDE_ID
 						.toString());
-		ScreeningSurveySlide lastScreeningSurveySlide = null;
 
-		if (lastScreeningSurveySlideId != null) {
-			lastScreeningSurveySlide = databaseManagerService
-					.getModelObjectById(ScreeningSurveySlide.class,
-							(ObjectId) lastScreeningSurveySlideId);
+		ScreeningSurveySlide formerSlide = null;
+		if (formerSlideId != null) {
+			formerSlide = databaseManagerService.getModelObjectById(
+					ScreeningSurveySlide.class, (ObjectId) formerSlideId);
+		}
 
+		ScreeningSurveySlide nextSlide;
+		if (formerSlideId != null
+				&& !session
+						.getAttribute(
+								ScreeningSurveySessionAttributeTypes.CONSISTENCY_CHECK_VALUE
+										.toString()).equals(checkValue)) {
+			log.debug("Consistency check failed; show same page again");
+
+			// Next slide is last slide
+			nextSlide = formerSlide;
+		} else {
 			// If there was a last slide, store result if provided
-			if (resultValue != null
-					&& lastScreeningSurveySlide
-							.getStoreValueToVariableWithName() != null
-					&& !lastScreeningSurveySlide
-							.getStoreValueToVariableWithName().equals("")) {
-				val variableName = lastScreeningSurveySlide
-						.getStoreValueToVariableWithName();
-				log.debug(
-						"Storing result of screening survey slide {} to variable {} as value {}",
-						lastScreeningSurveySlideId, variableName, resultValue);
+			if (formerSlideId != null) {
+				if (resultValue != null
+						&& formerSlide.getStoreValueToVariableWithName() != null
+						&& !formerSlide.getStoreValueToVariableWithName()
+								.equals("")) {
+					val variableName = formerSlide
+							.getStoreValueToVariableWithName();
 
-				if (variableName
-						.equals(SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES.participantName
-								.toVariableName())) {
-					participantSetName(participant, resultValue);
-				} else if (variableName
-						.equals(SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES.participantDialogOptionSMSData
-								.toVariableName())) {
-					participantSetDialogOption(participant,
-							DialogOptionTypes.SMS, resultValue);
-				} else if (variableName
-						.equals(SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES.participantDialogOptionEmailData
-								.toVariableName())) {
-					participantSetDialogOption(participant,
-							DialogOptionTypes.EMAIL, resultValue);
-				}
-				try {
-					variablesManagerService.storeVariableValueOfParticipant(
-							participant, variableName, resultValue);
-				} catch (final Exception e) {
-					log.error("Error when storing variable: {}", e.getMessage());
+					log.debug(
+							"Storing result of screening survey slide {} to variable {} as value {}",
+							formerSlideId, variableName, resultValue);
+
+					// Set special variable or create regular variable entry for
+					// participant
+					if (variableName
+							.equals(SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES.participantName
+									.toVariableName())) {
+						participantSetName(participant, resultValue);
+					} else if (variableName
+							.equals(SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES.participantDialogOptionSMSData
+									.toVariableName())) {
+						participantSetDialogOption(participant,
+								DialogOptionTypes.SMS, resultValue);
+					} else if (variableName
+							.equals(SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES.participantDialogOptionEmailData
+									.toVariableName())) {
+						participantSetDialogOption(participant,
+								DialogOptionTypes.EMAIL, resultValue);
+					} else {
+						// It's a regular variable, so store it
+						try {
+							variablesManagerService
+									.storeVariableValueOfParticipant(
+											participant, variableName,
+											resultValue);
+						} catch (final Exception e) {
+							log.error("Error when storing variable '{}': {}",
+									variableName, e.getMessage());
+						}
+					}
 				}
 			}
 
+			// Determine next slide
+			nextSlide = getNextScreeningSurveySlide(screeningSurvey,
+					participant, formerSlide);
 		}
-
-		// Determine next slide
-		val nextSlide = getNextScreeningSurveySlide(screeningSurvey,
-				participant, lastScreeningSurveySlide);
 
 		if (nextSlide == null) {
 			// Screening survey done
 			log.debug("No next slide found");
 
-			setLayoutTo(templateVariables,
-					ScreeningSurveySlideTemplateLayoutTypes.DONE);
+			dialogStatusSetScreeningSurveyFinished(participantId);
+
+			templateVariables.put(
+					ScreeningSurveySlideTemplateLayoutTypes.DONE.toVariable(),
+					true);
 		} else {
 			// Check if is last slide
 			if (nextSlide.isLastSlide()) {
@@ -404,28 +404,217 @@ public class ScreeningSurveyExecutionManagerService {
 				// Set feedback URL to session if required
 				if (nextSlide.getHandsOverToFeedback() != null) {
 					session.setAttribute(
-							SessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
+							ScreeningSurveySessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
 									.toString(),
 							ImplementationContants.SCREENING_SURVEY_SERVLET_FEEDBACK_SUBPATH
 									+ "/" + participantId);
 				}
 			}
 
+			// Remember next slide as former slide
+			session.setAttribute(
+					ScreeningSurveySessionAttributeTypes.PARTICIPANT_FORMER_SCREENING_SURVEY_SLIDE_ID
+							.toString(), nextSlide.getId());
+
+			// Remember check variable
+			val newCheckValue = GlobalUniqueIdGenerator.createGlobalUniqueId();
+			session.setAttribute(
+					ScreeningSurveySessionAttributeTypes.CONSISTENCY_CHECK_VALUE
+							.toString(), newCheckValue);
+
 			// Fill next screening survey slide
 			log.debug("Filling next slide {} with contents",
 					nextSlide.getTitleWithPlaceholders());
 
-			// TODO
+			// Layout
+			switch (nextSlide.getQuestionType()) {
+				case MULTILINE_TEXT_INPUT:
+					templateVariables
+							.put(ScreeningSurveySlideTemplateLayoutTypes.MULTILINE_TEXT_INPUT
+									.toVariable(), true);
+					break;
+				case NUMBER_INPUT:
+					templateVariables
+							.put(ScreeningSurveySlideTemplateLayoutTypes.NUMBER_INPUT
+									.toVariable(), true);
+					break;
+				case SELECT_MANY:
+					templateVariables.put(
+							ScreeningSurveySlideTemplateLayoutTypes.SELECT_MANY
+									.toVariable(), true);
+					break;
+				case SELECT_ONE:
+					templateVariables.put(
+							ScreeningSurveySlideTemplateLayoutTypes.SELECT_ONE
+									.toVariable(), true);
+					break;
+				case TEXT_INPUT:
+					templateVariables.put(
+							ScreeningSurveySlideTemplateLayoutTypes.TEXT_INPUT
+									.toVariable(), true);
+					break;
+				case TEXT_ONLY:
+					templateVariables.put(
+							ScreeningSurveySlideTemplateLayoutTypes.TEXT_ONLY
+									.toVariable(), true);
+					break;
+			}
+
+			// Check variable
+			templateVariables
+					.put(ScreeningSurveySlideTemplateFieldTypes.HIDDEN_CHECK_VARIABLE
+							.toVariable(),
+							ImplementationContants.SCREENING_SURVEY_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE);
+			templateVariables
+					.put(ScreeningSurveySlideTemplateFieldTypes.HIDDEN_CHECK_VARIABLE_VALUE
+							.toVariable(), newCheckValue);
+
+			// Retrieve all required variables
+			val variablesWithValues = variablesManagerService
+					.getAllVariablesWithValuesOfParticipantAndSystem(participant);
+
+			// Optional layout attribute
+			val optionalLayoutAttribute = VariableStringReplacer
+					.findVariablesAndReplaceWithTextValues(nextSlide
+							.getOptionalLayoutAttributeWithPlaceholders(),
+							variablesWithValues.values(), "");
+			templateVariables
+					.put(ScreeningSurveySlideTemplateFieldTypes.OPTIONAL_LAYOUT_ATTRIBUTE
+							.toVariable(), optionalLayoutAttribute);
+			// Title
+			val title = VariableStringReplacer
+					.findVariablesAndReplaceWithTextValues(
+							nextSlide.getTitleWithPlaceholders(),
+							variablesWithValues.values(), "");
+			templateVariables.put(
+					ScreeningSurveySlideTemplateFieldTypes.TITLE.toVariable(),
+					title);
+
+			// Media object URL and type
+			if (nextSlide.getLinkedMediaObject() != null) {
+				val mediaObject = databaseManagerService.getModelObjectById(
+						MediaObject.class, nextSlide.getLinkedMediaObject());
+
+				templateVariables.put(
+						ScreeningSurveySlideTemplateFieldTypes.MEDIA_OBJECT_URL
+								.toVariable(), mediaObject.getId() + "/"
+								+ mediaObject.getName());
+
+				switch (mediaObject.getType()) {
+					case AUDIO:
+						templateVariables
+								.put(ScreeningSurveySlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_AUDIO
+										.toVariable(), true);
+						break;
+					case HTML_TEXT:
+						templateVariables
+								.put(ScreeningSurveySlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_HTML_TEXT
+										.toVariable(), true);
+						break;
+					case IMAGE:
+						templateVariables
+								.put(ScreeningSurveySlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_IMAGE
+										.toVariable(), true);
+						break;
+					case VIDEO:
+						templateVariables
+								.put(ScreeningSurveySlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_VIDEO
+										.toVariable(), true);
+						break;
+				}
+			}
+
+			// Question
+			val question = VariableStringReplacer
+					.findVariablesAndReplaceWithTextValues(
+							nextSlide.getTitleWithPlaceholders(),
+							variablesWithValues.values(), "");
+			templateVariables.put(
+					ScreeningSurveySlideTemplateFieldTypes.QUESTION
+							.toVariable(), question);
+
+			// Answers (text, value, preselected)
+			val answersWithPlaceholders = nextSlide
+					.getAnswersWithPlaceholders();
+			val answerValues = nextSlide.getAnswerValues();
+			final List<HashMap<String, Object>> answersObjects = new ArrayList<HashMap<String, Object>>();
+			for (int i = 0; i < answersWithPlaceholders.length; i++) {
+				final HashMap<String, Object> answerObjects = new HashMap<String, Object>();
+
+				val answerWithPlaceholder = answersWithPlaceholders[i];
+				val finalAnswer = VariableStringReplacer
+						.findVariablesAndReplaceWithTextValues(
+								answerWithPlaceholder,
+								variablesWithValues.values(), "");
+
+				val answerValue = answerValues[i];
+
+				answerObjects.put(
+						ScreeningSurveySlideTemplateFieldTypes.ANSWER_TEXT
+								.toVariable(), finalAnswer);
+				answerObjects.put(
+						ScreeningSurveySlideTemplateFieldTypes.ANSWER_VALUE
+								.toVariable(), answerValue);
+
+				if (nextSlide.getPreSelectedAnswer() == i) {
+					answerObjects
+							.put(ScreeningSurveySlideTemplateFieldTypes.PRESELECTED_ANSWER
+									.toVariable(), true);
+				}
+
+				answersObjects.add(answerObjects);
+			}
+			if (answersObjects.size() > 0) {
+				templateVariables.put(
+						ScreeningSurveySlideTemplateFieldTypes.ANSWERS
+								.toVariable(), answersObjects);
+			}
+
+			// Is last slide
+			if (nextSlide.isLastSlide()) {
+				templateVariables.put(
+						ScreeningSurveySlideTemplateFieldTypes.IS_LAST_SLIDE
+								.toVariable(), true);
+			}
 		}
 
 		return templateVariables;
 	}
 
+	/**
+	 * Determines which slide is the next slide to present to the user
+	 * 
+	 * @param screeningSurvey
+	 * @param participant
+	 * @param formerSlide
+	 * @return
+	 */
 	private ScreeningSurveySlide getNextScreeningSurveySlide(
 			final ScreeningSurvey screeningSurvey, final Object participant,
-			final Object lastScreeningSurveySlide) {
-		// TODO Auto-generated method stub
-		return null;
+			final ScreeningSurveySlide formerSlide) {
+		if (formerSlide == null) {
+			val nextSlide = databaseManagerService.findOneSortedModelObject(
+					ScreeningSurveySlide.class,
+					Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY,
+					Queries.SCREENING_SURVEY_SLIDE__SORT_BY_ORDER_ASC,
+					screeningSurvey.getId());
+
+			return nextSlide;
+		} else {
+			ScreeningSurveySlide nextSlide = null;
+			// TODO !!! NEXT T O D O !!!! Execute rules and look if one matches
+
+			if (nextSlide == null) {
+				nextSlide = databaseManagerService
+						.findOneSortedModelObject(
+								ScreeningSurveySlide.class,
+								Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY_AND_ORDER_HIGHER,
+								Queries.SCREENING_SURVEY_SLIDE__SORT_BY_ORDER_ASC,
+								screeningSurvey.getId(), formerSlide.getOrder());
+			}
+
+			return nextSlide;
+		}
 	}
 
 	/**

@@ -40,7 +40,7 @@ public enum ScreeningSurveySlideTemplateFieldTypes {
 	/**
 	 * Contains the title of the slide
 	 */
-	SLIDE_TITLE,
+	TITLE,
 	/**
 	 * <strong>OPTIONAL:</strong> Can contain the URL of an media object that
 	 * should be shown in the slide
@@ -85,6 +85,10 @@ public enum ScreeningSurveySlideTemplateFieldTypes {
 	/**
 	 * Contains the variable name and value of a hidden variable for consistency
 	 * checks
+	 */
+	HIDDEN_CHECK_VARIABLE, HIDDEN_CHECK_VARIABLE_VALUE,
+	/**
+	 * Is true, when the slide is the last slide of the screening survey
 	 */
 	IS_LAST_SLIDE,
 	/**

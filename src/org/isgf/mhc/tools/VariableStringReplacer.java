@@ -1,6 +1,7 @@
 package org.isgf.mhc.tools;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -102,7 +103,7 @@ public class VariableStringReplacer {
 	 */
 	public static String findVariablesAndReplaceWithTextValues(
 			String stringWithVariables,
-			final List<AbstractVariableWithValue> variablesWithValues,
+			final Collection<AbstractVariableWithValue> variablesWithValues,
 			final String notFoundReplacer) {
 		// Prevent null pointer exceptions
 		if (stringWithVariables == null || stringWithVariables.equals("")) {

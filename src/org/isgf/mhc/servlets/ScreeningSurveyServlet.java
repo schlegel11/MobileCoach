@@ -29,8 +29,8 @@ import org.isgf.mhc.conf.ImplementationContants;
 import org.isgf.mhc.model.persistent.ScreeningSurvey;
 import org.isgf.mhc.model.persistent.ScreeningSurveySlide;
 import org.isgf.mhc.services.ScreeningSurveyExecutionManagerService;
+import org.isgf.mhc.services.types.ScreeningSurveySessionAttributeTypes;
 import org.isgf.mhc.services.types.ScreeningSurveySlideTemplateFieldTypes;
-import org.isgf.mhc.services.types.SessionAttributeTypes;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
@@ -337,7 +337,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			ObjectId participantId;
 			try {
 				participantId = (ObjectId) session
-						.getAttribute(SessionAttributeTypes.PARTICIPANT_ID
+						.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_ID
 								.toString());
 			} catch (final Exception e) {
 				participantId = null;
@@ -345,7 +345,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			boolean accessGranted;
 			try {
 				accessGranted = (boolean) session
-						.getAttribute(SessionAttributeTypes.PARTICIPANT_ACCESS_GRANTED
+						.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_ACCESS_GRANTED
 								.toString());
 			} catch (final Exception e) {
 				accessGranted = false;
@@ -359,6 +359,14 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			} catch (final Exception e) {
 				resultValue = null;
 			}
+			// Get consistence check value if available
+			String checkValue;
+			try {
+				checkValue = request
+						.getParameter(ImplementationContants.SCREENING_SURVEY_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE);
+			} catch (final Exception e) {
+				checkValue = null;
+			}
 			log.debug(
 					"Retrieved information from request: participant: {}, access granted: {}, screening survey: {}, result value: {}",
 					participantId, accessGranted, screeningSurveyId,
@@ -369,7 +377,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				templateVariables = screeningSurveyExecutionManagerService
 						.getAppropriateScreeningSurveySlide(participantId,
 								accessGranted, screeningSurveyId, resultValue,
-								session);
+								checkValue, session);
 
 				if (templateVariables == null
 						|| !templateVariables
@@ -419,7 +427,11 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		response.setDateHeader("Expires", 1);
 		response.setContentType("text/html");
 
-		// Add essential variables to template variables
+		/*
+		 * Add essential variables to template variables
+		 */
+
+		// Base URL
 		String baseURL = request.getRequestURL().toString();
 		if (!baseURL.endsWith("/")) {
 			baseURL += "/";
@@ -431,15 +443,35 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				.put(ScreeningSurveySlideTemplateFieldTypes.RESULT_VARIABLE
 						.toVariable(),
 						ImplementationContants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLE);
-		if (session.getAttribute(SessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
-				.toString()) != null) {
+
+		// Adjust feedback URL
+		if (session
+				.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
+						.toString()) != null) {
 			templateVariables
 					.put(ScreeningSurveySlideTemplateFieldTypes.FEEDBACK_URL
 							.toVariable(),
 							baseURL
+
 									+ session
-											.getAttribute(SessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
+											.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
 													.toString()));
+		}
+
+		// Adjust media object URL
+		if (templateVariables
+				.get(ScreeningSurveySlideTemplateFieldTypes.MEDIA_OBJECT_URL
+						.toVariable()) != null) {
+			templateVariables
+					.put(ScreeningSurveySlideTemplateFieldTypes.MEDIA_OBJECT_URL
+							.toVariable(),
+							baseURL
+									+ "../"
+									+ ImplementationContants.FILE_STREAMING_SERVLET_PATH
+									+ "/"
+									+ templateVariables
+											.get(ScreeningSurveySlideTemplateFieldTypes.MEDIA_OBJECT_URL
+													.toVariable()));
 		}
 
 		// Create new Mustache template factory on non-production system

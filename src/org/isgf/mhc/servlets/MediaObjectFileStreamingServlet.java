@@ -15,6 +15,7 @@ import net.balusc.webapp.FileServletWrapper;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.MHC;
+import org.isgf.mhc.conf.ImplementationContants;
 import org.isgf.mhc.model.persistent.MediaObject;
 import org.isgf.mhc.services.InterventionAdministrationManagerService;
 
@@ -34,7 +35,8 @@ import org.isgf.mhc.services.InterventionAdministrationManagerService;
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
-@WebServlet(displayName = "Media Object File Streaming", value = "/files/*", asyncSupported = true, loadOnStartup = 1)
+@WebServlet(displayName = "Media Object File Streaming", value = "/"
+		+ ImplementationContants.FILE_STREAMING_SERVLET_PATH + "/*", asyncSupported = true, loadOnStartup = 1)
 @Log4j2
 public class MediaObjectFileStreamingServlet extends HttpServlet {
 	private InterventionAdministrationManagerService	interventionAdministrationManagerService;

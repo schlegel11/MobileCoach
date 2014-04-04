@@ -30,7 +30,7 @@ import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.ModelObjectExchangeService;
 import org.isgf.mhc.services.internal.VariablesManagerService;
-import org.isgf.mhc.services.types.ModelObjectExchangeFormats;
+import org.isgf.mhc.services.types.ModelObjectExchangeFormatTypes;
 import org.isgf.mhc.tools.GlobalUniqueIdGenerator;
 import org.isgf.mhc.tools.StringValidator;
 import org.isgf.mhc.ui.NotificationMessageException;
@@ -155,7 +155,7 @@ public class ScreeningSurveyAdministrationManagerService {
 			IOException {
 		val importedModelObjects = modelObjectExchangeService
 				.importModelObjects(file,
-						ModelObjectExchangeFormats.SCREENING_SURVEY);
+						ModelObjectExchangeFormatTypes.SCREENING_SURVEY);
 
 		for (val modelObject : importedModelObjects) {
 			if (modelObject instanceof ScreeningSurvey) {
@@ -189,7 +189,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		log.debug("Export screening survey");
 		return modelObjectExchangeService.exportModelObjects(
 				modelObjectsToExport,
-				ModelObjectExchangeFormats.SCREENING_SURVEY);
+				ModelObjectExchangeFormatTypes.SCREENING_SURVEY);
 	}
 
 	public void screeningSurveySetActive(final ScreeningSurvey screeningSurvey,
