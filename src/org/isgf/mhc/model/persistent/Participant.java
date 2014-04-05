@@ -57,6 +57,13 @@ public class Participant extends ModelObject {
 	private String		nickname;
 
 	/**
+	 * The {@link ScreeningSurvey} the {@link Participant} participates in
+	 */
+	@Getter
+	@Setter
+	private ObjectId	assignedScreeningSurvey;
+
+	/**
 	 * Stores the reference to the {@link ScreeningSurvey} started by the
 	 * {@link Participant} in an independent way; This enables to reference a
 	 * {@link ScreeningSurvey} also after independent export/import to/from
@@ -65,6 +72,13 @@ public class Participant extends ModelObject {
 	@Getter
 	@Setter
 	private String		assignedScreeningSurveyGlobalUniqueId;
+
+	/**
+	 * The {@link Feedback} the {@link Participant} participates in
+	 */
+	@Getter
+	@Setter
+	private ObjectId	assignedFeedback;
 
 	/**
 	 * Stores the reference to the {@link Feedback} started by the
@@ -111,9 +125,8 @@ public class Participant extends ModelObject {
 	 */
 	@Override
 	public UIModelObject toUIModelObject() {
-		val screeningSurvey = ModelObject.findOne(ScreeningSurvey.class,
-				Queries.SCREENING_SURVEY__BY_INTERVENTION_AND_GLOBAL_UNIQUE_ID,
-				intervention, assignedScreeningSurveyGlobalUniqueId);
+		val screeningSurvey = ModelObject.get(ScreeningSurvey.class,
+				assignedScreeningSurvey);
 
 		String screeningSurveyName;
 		if (screeningSurvey == null) {

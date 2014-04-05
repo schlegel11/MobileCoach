@@ -26,9 +26,12 @@ import org.bson.types.ObjectId;
 import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.conf.ImplementationContants;
+import org.isgf.mhc.model.persistent.Feedback;
 import org.isgf.mhc.model.persistent.ScreeningSurvey;
 import org.isgf.mhc.model.persistent.ScreeningSurveySlide;
 import org.isgf.mhc.services.ScreeningSurveyExecutionManagerService;
+import org.isgf.mhc.services.types.FeedbackSlideTemplateFieldTypes;
+import org.isgf.mhc.services.types.GeneralSlideTemplateFieldTypes;
 import org.isgf.mhc.services.types.ScreeningSurveySessionAttributeTypes;
 import org.isgf.mhc.services.types.ScreeningSurveySlideTemplateFieldTypes;
 
@@ -98,37 +101,24 @@ public class ScreeningSurveyServlet extends HttpServlet {
 					}
 
 					// Only object id
-					if (ObjectId.isValid(pathParts[0])
-							&& screeningSurveyExecutionManagerService
-									.screeningSurveyCheckIfActive(new ObjectId(
-											pathParts[0]))) {
-						handleTemplateRequest(request, response, new ObjectId(
-								pathParts[0]), null);
-						return;
+					if (ObjectId.isValid(pathParts[0])) {
+						if (screeningSurveyExecutionManagerService
+								.screeningSurveyCheckIfActive(new ObjectId(
+										pathParts[0]))) {
+							handleTemplateRequest(request, response,
+									new ObjectId(pathParts[0]), null);
+							return;
+						}
+						if (screeningSurveyExecutionManagerService
+								.feedbackCheckIfActiveByBelongingParticipant(new ObjectId(
+										pathParts[0]))) {
+							handleTemplateRequest(request, response, null,
+									new ObjectId(pathParts[0]));
+							return;
+						}
+						throw new Exception("Invalid id");
 					} else {
 						throw new Exception("Invalid id");
-					}
-				case 2:
-					// Check if it's a feedback, otherwise handle as file
-					// (default case)
-					if (pathParts[0]
-							.equals(ImplementationContants.SCREENING_SURVEY_SERVLET_FEEDBACK_SUBPATH)) {
-						if (pathParts[1].equals("")) {
-							// Empty request
-							throw new Exception("Invalid feedback request");
-						}
-
-						// Only object id
-						if (ObjectId.isValid(pathParts[1])
-								&& screeningSurveyExecutionManagerService
-										.feedbackCheckIfActive(new ObjectId(
-												pathParts[1]))) {
-							handleTemplateRequest(request, response, null,
-									new ObjectId(pathParts[1]));
-							return;
-						} else {
-							throw new Exception("Invalid id");
-						}
 					}
 				default:
 					// Object id and file request
@@ -161,31 +151,38 @@ public class ScreeningSurveyServlet extends HttpServlet {
 	}
 
 	/**
-	 * Return appropriate file fitting to {@link ScreeningSurvey}
+	 * Return appropriate file fitting to {@link ScreeningSurvey} or
+	 * {@link Feedback}
 	 * 
 	 * @param request
 	 * @param response
-	 * @param screeningSurveyId
+	 * @param screeningSurveyOrFeedbackParticipantId
 	 * @param fileRequest
 	 */
 	private void handleFileRequest(final HttpServletRequest request,
 			final HttpServletResponse response,
-			final ObjectId screeningSurveyId, final String fileRequest)
-			throws ServletException, IOException {
-		log.debug("Handling file request '{}' for screening survey {}",
-				fileRequest, screeningSurveyId);
+			final ObjectId screeningSurveyOrFeedbackParticipantId,
+			final String fileRequest) throws ServletException, IOException {
+		val screeningSurvey = screeningSurveyExecutionManagerService
+				.getScreeningSurveyById(screeningSurveyOrFeedbackParticipantId);
+		val feedback = screeningSurveyExecutionManagerService
+				.getFeedbackByBelongingParticipant(screeningSurveyOrFeedbackParticipantId);
 
-		final ScreeningSurvey screeningSurvey = screeningSurveyExecutionManagerService
-				.getScreeningSurveyById(screeningSurveyId);
-
-		if (screeningSurvey == null) {
+		if (screeningSurvey == null && feedback == null) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
+		val isScreeningSurveyRequest = screeningSurvey != null;
+
+		log.debug("Handling file request '{}' for {} {}", fileRequest,
+				isScreeningSurveyRequest ? "scrrening survey"
+						: "feedback of participant"
+								+ screeningSurveyOrFeedbackParticipantId);
 
 		final File basicTemplateFolder = new File(
 				screeningSurveyExecutionManagerService.getTemplatePath(),
-				screeningSurvey.getTemplatePath());
+				isScreeningSurveyRequest ? screeningSurvey.getTemplatePath()
+						: feedback.getTemplatePath());
 		final File requestedFile = new File(basicTemplateFolder, fileRequest);
 
 		if (!requestedFile.getAbsolutePath().startsWith(
@@ -359,6 +356,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			} catch (final Exception e) {
 				resultValue = null;
 			}
+
 			// Get consistence check value if available
 			String checkValue;
 			try {
@@ -367,10 +365,11 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			} catch (final Exception e) {
 				checkValue = null;
 			}
+
 			log.debug(
-					"Retrieved information from request: participant: {}, access granted: {}, screening survey: {}, result value: {}",
+					"Retrieved information from screening survey slide request: participant: {}, access granted: {}, screening survey: {}, result value: {}, check value: {}",
 					participantId, accessGranted, screeningSurveyId,
-					resultValue);
+					resultValue, checkValue);
 
 			// Decide which slide should be send to the participant
 			try {
@@ -381,7 +380,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 
 				if (templateVariables == null
 						|| !templateVariables
-								.containsKey(ScreeningSurveySlideTemplateFieldTypes.TEMPLATE_FOLDER
+								.containsKey(GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER
 										.toVariable())) {
 					throw new NullPointerException();
 				}
@@ -398,15 +397,37 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			 * Handle feedback specific things
 			 */
 
+			// Get navigation value if available
+			String navigationValue;
+			try {
+				navigationValue = request
+						.getParameter(ImplementationContants.FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE);
+			} catch (final Exception e) {
+				navigationValue = null;
+			}
+
+			// Get consistence check value if available
+			String checkValue;
+			try {
+				checkValue = request
+						.getParameter(ImplementationContants.FEEDBACK_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE);
+			} catch (final Exception e) {
+				checkValue = null;
+			}
+
+			log.debug(
+					"Retrieved information from feedback slide request: feedback participant: {}, navigation value: {}, check value: {}",
+					feedbackParticipantId, navigationValue, checkValue);
+
 			// Decide which slide should be send to the participant
 			try {
 				templateVariables = screeningSurveyExecutionManagerService
 						.getAppropriateFeedbackSlide(feedbackParticipantId,
-								session);
+								navigationValue, checkValue, session);
 
 				if (templateVariables == null
 						|| !templateVariables
-								.containsKey(ScreeningSurveySlideTemplateFieldTypes.TEMPLATE_FOLDER
+								.containsKey(GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER
 										.toVariable())) {
 					throw new NullPointerException();
 				}
@@ -436,22 +457,39 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		if (!baseURL.endsWith("/")) {
 			baseURL += "/";
 		}
+		final String normalizedBaseURL = baseURL
+				.replaceAll(
+						"/"
+								+ ImplementationContants.REGULAR_EXPRESSION_TO_MATCH_ONE_OBJECT_ID
+								+ "/$", "/");
+
 		templateVariables.put(
-				ScreeningSurveySlideTemplateFieldTypes.BASE_URL.toVariable(),
-				baseURL);
+				GeneralSlideTemplateFieldTypes.BASE_URL.toVariable(), baseURL);
 		templateVariables
 				.put(ScreeningSurveySlideTemplateFieldTypes.RESULT_VARIABLE
 						.toVariable(),
 						ImplementationContants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLE);
 
-		// Adjust feedback URL
-		if (session
-				.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
-						.toString()) != null) {
+		// Slide type
+		if (screeningSurveyId != null) {
+			templateVariables.put(
+					ScreeningSurveySlideTemplateFieldTypes.IS_SCREENING_SURVEY
+							.toVariable(), true);
+		} else {
+			templateVariables.put(
+					FeedbackSlideTemplateFieldTypes.IS_FEEDBACK.toVariable(),
+					true);
+		}
+
+		// Adjust feedback URL (only for screening survey slides)
+		if (screeningSurveyId != null
+				&& session
+						.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
+								.toString()) != null) {
 			templateVariables
-					.put(ScreeningSurveySlideTemplateFieldTypes.FEEDBACK_URL
+					.put(GeneralSlideTemplateFieldTypes.FEEDBACK_URL
 							.toVariable(),
-							baseURL
+							normalizedBaseURL
 
 									+ session
 											.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
@@ -460,17 +498,16 @@ public class ScreeningSurveyServlet extends HttpServlet {
 
 		// Adjust media object URL
 		if (templateVariables
-				.get(ScreeningSurveySlideTemplateFieldTypes.MEDIA_OBJECT_URL
+				.get(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL
 						.toVariable()) != null) {
 			templateVariables
-					.put(ScreeningSurveySlideTemplateFieldTypes.MEDIA_OBJECT_URL
+					.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL
 							.toVariable(),
-							baseURL
-									+ "../"
+							normalizedBaseURL
 									+ ImplementationContants.FILE_STREAMING_SERVLET_PATH
 									+ "/"
 									+ templateVariables
-											.get(ScreeningSurveySlideTemplateFieldTypes.MEDIA_OBJECT_URL
+											.get(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL
 													.toVariable()));
 		}
 
@@ -484,11 +521,10 @@ public class ScreeningSurveyServlet extends HttpServlet {
 
 		// Get template folder
 		final String templateFolder = (String) templateVariables
-				.get(ScreeningSurveySlideTemplateFieldTypes.TEMPLATE_FOLDER
+				.get(GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER
 						.toVariable());
-		templateVariables
-				.remove(ScreeningSurveySlideTemplateFieldTypes.TEMPLATE_FOLDER
-						.toVariable());
+		templateVariables.remove(GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER
+				.toVariable());
 
 		// Fill template
 		log.debug("Filling template in folder {}", templateFolder);
@@ -528,7 +564,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 	 * @return The newly created Mustache factory
 	 */
 	private MustacheFactory createMustacheFactory() {
-		return new DefaultMustacheFactory(
+		val mustacheFactory = new DefaultMustacheFactory(
 				screeningSurveyExecutionManagerService.getTemplatePath());
+		return mustacheFactory;
 	}
 }

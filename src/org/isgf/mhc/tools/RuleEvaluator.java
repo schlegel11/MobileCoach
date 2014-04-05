@@ -1,6 +1,6 @@
 package org.isgf.mhc.tools;
 
-import java.util.List;
+import java.util.Collection;
 
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -31,7 +31,7 @@ public class RuleEvaluator {
 	 *         the rule evaluation
 	 */
 	public static RuleEvaluationResult evaluateRule(final AbstractRule rule,
-			final List<AbstractVariableWithValue> variablesWithValues) {
+			final Collection<AbstractVariableWithValue> variablesWithValues) {
 		val ruleEvaluationResult = new RuleEvaluationResult();
 
 		try {
@@ -185,7 +185,7 @@ public class RuleEvaluator {
 	 */
 	private static double evaluateCalculatedRuleTerm(
 			final String ruleWithPlaceholders,
-			final List<AbstractVariableWithValue> variablesWithValues)
+			final Collection<AbstractVariableWithValue> variablesWithValues)
 			throws Exception {
 		String rule = ruleWithPlaceholders;
 
@@ -224,7 +224,7 @@ public class RuleEvaluator {
 	 */
 	private static String evaluateTextRuleTerm(
 			final String ruleWithPlaceholders,
-			final List<AbstractVariableWithValue> variablesWithValues)
+			final Collection<AbstractVariableWithValue> variablesWithValues)
 			throws Exception {
 		final String rule = ruleWithPlaceholders;
 

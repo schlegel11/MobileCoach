@@ -32,7 +32,15 @@ public class ImplementationContants {
 	public static final String	FILE_STREAMING_SERVLET_PATH										= "files";
 	public static final String	SHORT_ID_FILE_STREAMING_SERVLET_PATH							= "files-short";
 
-	public static final String	SCREENING_SURVEY_SERVLET_FEEDBACK_SUBPATH						= "feedback";
 	public static final String	SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLE					= "MHC_ResultValue";
 	public static final String	SCREENING_SURVEY_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE		= "MHC_ConsistencyCheckValue";
+
+	public static final String	FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE						= "MHC_Navigation";
+	public static final String	FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE_VALUE_PREVIOUS		= "previous";
+	public static final String	FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE_VALUE_NEXT			= "next";
+	public static final String	FEEDBACK_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE				= "MHC_ConsistencyCheckValue";
+
+	public static final String	REGULAR_EXPRESSION_TO_MATCH_ONE_OBJECT_ID						= "[A-Za-z0-9]+";
+	public static final String	REGULAR_EXPRESSION_TO_VALIDATE_RULE								= "^[\\$a-zA-Z0-9_\\+\\-%*/^().,]*$";
+	public static final String	REGULAR_EXPRESSION_TO_VALIDATE_VARIABLE_NAME					= "^\\$[a-zA-Z_]*$";
 }

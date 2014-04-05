@@ -521,10 +521,11 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(feedbackSlide);
 	}
 
-	public void feedbackSlideChangeOptionalLayoutAttribute(
+	public void feedbackSlideChangeOptionalLayoutAttributeWithPlaceholders(
 			final FeedbackSlide feedbackSlide,
-			final String optionalLayoutAttributes) {
-		feedbackSlide.setOptionalLayoutAttribute(optionalLayoutAttributes);
+			final String optionalLayoutAttributeWithPlaceholders) {
+		feedbackSlide
+				.setOptionalLayoutAttributeWithPlaceholders(optionalLayoutAttributeWithPlaceholders);
 
 		databaseManagerService.saveModelObject(feedbackSlide);
 	}

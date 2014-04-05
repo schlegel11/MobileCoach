@@ -22,6 +22,7 @@ import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.persistent.Author;
 import org.isgf.mhc.model.persistent.AuthorInterventionAccess;
 import org.isgf.mhc.model.persistent.DialogStatus;
+import org.isgf.mhc.model.persistent.Feedback;
 import org.isgf.mhc.model.persistent.Intervention;
 import org.isgf.mhc.model.persistent.InterventionVariableWithValue;
 import org.isgf.mhc.model.persistent.MediaObject;
@@ -30,6 +31,7 @@ import org.isgf.mhc.model.persistent.MonitoringMessageGroup;
 import org.isgf.mhc.model.persistent.MonitoringReplyRule;
 import org.isgf.mhc.model.persistent.MonitoringRule;
 import org.isgf.mhc.model.persistent.Participant;
+import org.isgf.mhc.model.persistent.ScreeningSurvey;
 import org.isgf.mhc.model.persistent.concepts.AbstractRule;
 import org.isgf.mhc.model.persistent.types.MediaObjectTypes;
 import org.isgf.mhc.model.persistent.types.RuleEquationSignTypes;
@@ -262,7 +264,8 @@ public class InterventionAdministrationManagerService {
 
 		log.debug("Export intervention");
 		return modelObjectExchangeService.exportModelObjects(
-				modelObjectsToExport, ModelObjectExchangeFormatTypes.INTERVENTION);
+				modelObjectsToExport,
+				ModelObjectExchangeFormatTypes.INTERVENTION);
 	}
 
 	public void interventionDelete(final Intervention interventionToDelete)
@@ -933,6 +936,44 @@ public class InterventionAdministrationManagerService {
 			if (modelObject instanceof Participant) {
 				val participant = (Participant) modelObject;
 
+				val screeningSurvey = databaseManagerService
+						.findOneModelObject(
+								ScreeningSurvey.class,
+								Queries.SCREENING_SURVEY__BY_INTERVENTION_AND_GLOBAL_UNIQUE_ID,
+								interventionId,
+								participant
+										.getAssignedScreeningSurveyGlobalUniqueId());
+
+				if (screeningSurvey == null) {
+					participant.setAssignedScreeningSurvey(null);
+					participant.setAssignedScreeningSurveyGlobalUniqueId(null);
+
+					participant.setAssignedFeedback(null);
+					participant.setAssignedFeedbackGlobalUniqueId(null);
+				} else {
+					participant.setAssignedScreeningSurvey(screeningSurvey
+							.getId());
+					participant
+							.setAssignedScreeningSurveyGlobalUniqueId(screeningSurvey
+									.getGlobalUniqueId());
+
+					val feedback = databaseManagerService
+							.findOneModelObject(
+									Feedback.class,
+									Queries.FEEDBACK__BY_SCREENING_SURVEY_AND_GLOBAL_UNIQUE_ID,
+									screeningSurvey.getId(),
+									participant
+											.getAssignedFeedbackGlobalUniqueId());
+					if (feedback == null) {
+						participant.setAssignedFeedback(null);
+						participant.setAssignedFeedbackGlobalUniqueId(null);
+					} else {
+						participant.setAssignedFeedback(feedback.getId());
+						participant.setAssignedFeedbackGlobalUniqueId(feedback
+								.getGlobalUniqueId());
+					}
+				}
+
 				participant.setIntervention(interventionId);
 				databaseManagerService.saveModelObject(participant);
 
@@ -954,7 +995,8 @@ public class InterventionAdministrationManagerService {
 
 		log.debug("Export participants");
 		return modelObjectExchangeService.exportModelObjects(
-				modelObjectsToExport, ModelObjectExchangeFormatTypes.PARTICIPANTS);
+				modelObjectsToExport,
+				ModelObjectExchangeFormatTypes.PARTICIPANTS);
 	}
 
 	public void participantsSetOrganization(

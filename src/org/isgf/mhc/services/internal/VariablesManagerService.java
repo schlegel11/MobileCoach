@@ -270,6 +270,9 @@ public class VariablesManagerService {
 			final String variableName, final String variableValue)
 			throws WriteProtectedVariableException,
 			InvalidVariableNameException {
+		log.debug("Storing variable {} with value {}", variableName,
+				variableValue);
+
 		val participantVariableWithValue = databaseManagerService
 				.findOneModelObject(
 						ParticipantVariableWithValue.class,

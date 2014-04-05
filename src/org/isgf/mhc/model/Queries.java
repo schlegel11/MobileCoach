@@ -51,6 +51,7 @@ public class Queries {
 	public static final String	FEEDBACK__BY_SCREENING_SURVEY																= "{'screeningSurvey':#}";
 	public static final String	FEEDBACK__BY_SCREENING_SURVEY_AND_ORDER_LOWER												= "{'screeningSurvey':#,'order':{$lt:#}}";
 	public static final String	FEEDBACK__BY_SCREENING_SURVEY_AND_ORDER_HIGHER												= "{'screeningSurvey':#,'order':{$gt:#}}";
+	public static final String	FEEDBACK__BY_SCREENING_SURVEY_AND_GLOBAL_UNIQUE_ID											= "{'screeningSurvey':#,'globalUniqueId':#}";
 	public static final String	FEEDBACK__SORT_BY_ORDER_ASC																	= "{'order':1}";
 	public static final String	FEEDBACK__SORT_BY_ORDER_DESC																= "{'order':-1}";
 

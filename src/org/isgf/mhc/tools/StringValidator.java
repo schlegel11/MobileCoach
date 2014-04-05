@@ -6,6 +6,8 @@ import java.util.regex.Pattern;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.isgf.mhc.conf.ImplementationContants;
+
 /**
  * Validates strings for several purposes
  * 
@@ -29,7 +31,7 @@ public class StringValidator {
 		}
 
 		// Check letters
-		final String pattern = "^[\\$a-zA-Z0-9_\\+\\-%*/^().,]*$";
+		final String pattern = ImplementationContants.REGULAR_EXPRESSION_TO_VALIDATE_RULE;
 		if (!Pattern.matches(pattern, rule)) {
 			log.debug("No");
 			return false;
@@ -56,7 +58,7 @@ public class StringValidator {
 		}
 
 		// Check letters
-		final String pattern = "^\\$[a-zA-Z_]*$";
+		final String pattern = ImplementationContants.REGULAR_EXPRESSION_TO_VALIDATE_VARIABLE_NAME;
 		if (!Pattern.matches(pattern, name)) {
 			log.debug("No");
 			return false;

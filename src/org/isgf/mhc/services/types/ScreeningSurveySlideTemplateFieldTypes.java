@@ -18,40 +18,9 @@ import org.isgf.mhc.model.persistent.ScreeningSurveySlide;
  */
 public enum ScreeningSurveySlideTemplateFieldTypes {
 	/**
-	 * Contains the base URL of the website:
-	 * 
-	 * <code>&lt;head&gt;&lt;base href="{{base_url}}"&gt;&lt;/head&gt;</code>
+	 * Exists if it's a screening survey slide
 	 */
-	BASE_URL,
-	/**
-	 * Contains the URL of the screening survey feedback
-	 */
-	FEEDBACK_URL,
-	/**
-	 * Contains the name of the survey
-	 */
-	SURVEY_NAME,
-	/**
-	 * <strong>OPTIONAL:</strong> Can contain an optional value for e.g. a
-	 * specific css layout
-	 * class
-	 */
-	OPTIONAL_LAYOUT_ATTRIBUTE,
-	/**
-	 * Contains the title of the slide
-	 */
-	TITLE,
-	/**
-	 * <strong>OPTIONAL:</strong> Can contain the URL of an media object that
-	 * should be shown in the slide
-	 */
-	MEDIA_OBJECT_URL,
-	/**
-	 * <strong>OPTIONAL:</strong> Can contain the type of an media object that
-	 * should be shown in the slide; only one is true at a time and only if
-	 * MEDIA_OBJECT_URL is also set
-	 */
-	MEDIA_OBJECT_TYPE_HTML_TEXT, MEDIA_OBJECT_TYPE_IMAGE, MEDIA_OBJECT_TYPE_AUDIO, MEDIA_OBJECT_TYPE_VIDEO,
+	IS_SCREENING_SURVEY,
 	/**
 	 * Contains the question text
 	 */
@@ -83,18 +52,9 @@ public enum ScreeningSurveySlideTemplateFieldTypes {
 	 */
 	RESULT_VARIABLE,
 	/**
-	 * Contains the variable name and value of a hidden variable for consistency
-	 * checks
-	 */
-	HIDDEN_CHECK_VARIABLE, HIDDEN_CHECK_VARIABLE_VALUE,
-	/**
 	 * Is true, when the slide is the last slide of the screening survey
 	 */
-	IS_LAST_SLIDE,
-	/**
-	 * <strong>ONLY</strong> internal, can't be used in templates
-	 */
-	TEMPLATE_FOLDER;
+	IS_LAST_SLIDE;
 
 	/**
 	 * Creates the appropriate variable name of the
