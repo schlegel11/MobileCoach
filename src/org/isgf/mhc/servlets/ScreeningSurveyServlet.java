@@ -84,6 +84,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			final HttpServletResponse response) throws ServletException,
 			IOException {
 		log.debug("Screening survey servlet call");
+
+		request.setCharacterEncoding("UTF-8");
 		try {
 			// Determine request path
 			final String path = request.getRequestURI()
