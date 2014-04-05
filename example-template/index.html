@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Set this to the main language of your site -->
+
+<head>
+    <meta charset="utf-8">
+    <title>{{#error}}ERROR{{/error}}{{^error}}{{name}}{{/error}}</title>
+    <base href="{{base_url}}">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="css/normalize.css" rel="stylesheet" media="all">
+    <link href="css/styles.css" rel="stylesheet" media="all">
+    <!--[if lt IE 9]><script src="js/html5shiv-printshiv.js" media="all"></script><![endif]-->
+</head>
+
+<body>
+    <header role="banner">
+        <h1>{{#is_feedback}}FEEDBACK{{/is_feedback}}{{#is_screening_survey}}SCREENING SURVEY{{/is_screening_survey}}: {{title}} {{#is_last_slide}}(LAST SLIDE){{/is_last_slide}}</h1>
+        <h3>{{#optional_layout_attribute}}(Layout: {{optional_layout_attribute}}){{/optional_layout_attribute}}</h3>
+        {{#feedback_url}}
+        <h2>
+            <a href="{{feedback_url}}">Feeback available here</a>
+        </h2>
+        {{/feedback_url}}
+    </header>
+
+    {{#done}}
+        <h3>DONE</h3>
+    {{/done}}
+    {{#password_input}}
+    <div class="wrap">
+        <h3>Password:</h3>
+        <form method="POST">
+            <input type="password" name="{{result_variable}}"/>
+            <br>
+
+            <input type="submit" value="Next" />
+        </form>
+    </div>
+    {{/password_input}}
+    {{^password_input}}{{^done}}
+    <div class="wrap">
+        {{#question}}
+        <h2>Question:</h2>
+        <p class="with-linebreaks">{{question}}</p>
+        {{/question}}
+        {{#text}}
+        <h2>Text:</h2>
+        <p class="with-linebreaks">{{text}}</p>
+        {{/text}}
+
+        <!-- Wrapper, no style, only relevant for nice HTML formatting -->
+        <div>
+            {{#is_feedback}}
+            <form method="POST">
+                <input type="hidden" name="{{hidden_check_variable}}" value="{{hidden_check_variable_value}}"/>
+                <input type="hidden" name="{{hidden_navigation_variable}}" value="{{hidden_navigation_variable_navigate_previous}}"/>
+                <input type="submit" value="Previous" />
+            </form>
+            <form method="POST">
+                <input type="hidden" name="{{hidden_check_variable}}" value="{{hidden_check_variable_value}}"/>
+                <input type="hidden" name="{{hidden_navigation_variable}}" value="{{hidden_navigation_variable_navigate_next}}"/>
+                <input type="submit" value="Next" />
+            </form>
+            {{/is_feedback}}
+            {{#text_only}}
+            <h3>Text only.</h3>
+            <form method="POST">
+                <input type="hidden" name="{{hidden_check_variable}}" value="{{hidden_check_variable_value}}"/>
+                <input type="submit" value="Next" />
+            </form>
+            {{/text_only}} 
+            
+            {{#select_one}}
+            <h3>Select one:</h3>
+            <p>Possible answers:</p>
+            <form method="POST">
+                {{#answers}}
+                <input type="radio" name="{{result_variable}}" value="{{answer_value}}" {{#preselected_answer}}checked{{/preselected_answer}}/>{{answer_text}}
+                <br>{{/answers}}
+
+                <input type="hidden" name="{{hidden_check_variable}}" value="{{hidden_check_variable_value}}"/>
+                <input type="submit" value="Next" />
+            </form>
+            {{/select_one}}
+            
+            {{#select_many}}
+            <h3>Select many:</h3>
+            <p>Possible answers:</p>
+            <form method="POST">
+                {{#answers}}
+                <input type="checkbox" name="{{result_variable}}" value="{{answer_value}}" {{#preselected_answer}}checked{{/preselected_answer}}/>{{answer_text}}
+                <br>{{/answers}}
+
+                <input type="hidden" name="{{hidden_check_variable}}" value="{{hidden_check_variable_value}}"/>
+                <input type="submit" value="Next" />
+            </form>
+            {{/select_many}}
+            
+            {{#number_input}}
+            <h3>Number input:</h3>
+            <form method="POST">
+                <input type="text" name="{{result_variable}}"/>
+
+                <input type="submit" value="Next" />
+            </form>
+            {{/number_input}}
+            
+            {{#text_input}}
+            <h3>Text input:</h3>
+            <form method="POST">
+                <input type="text" name="{{result_variable}}"/>
+
+                <input type="hidden" name="{{hidden_check_variable}}" value="{{hidden_check_variable_value}}"/>
+                <input type="submit" value="Next" />
+            </form>
+            {{/text_input}}
+            
+            {{#multiline_text_input}}
+            <h3>Multiline text:</h3>
+            <form method="POST">
+                <textarea name="{{result_variable}}"></textarea>
+
+                <input type="hidden" name="{{hidden_check_variable}}" value="{{hidden_check_variable_value}}"/>
+                <input type="submit" value="Next" />
+            </form>
+            {{/multiline_text_input}}
+        </div>
+
+        <!-- Wrapper, no style, only relevant for nice HTML formatting -->
+        <div>
+            <h3>Media here:</h3>
+            {{> media-template}}
+        </div>
+    </div>
+    {{/done}}{{/password_input}}
+    
+    <footer role="contentinfo">
+        <small>Copyright &copy;
+            <time datetime="2014">2014</time>
+        </small>
+    </footer>
+
+    <!-- Google Analytics - Optimized version by Mathias Bynens -->
+    <!-- See: http://mathiasbynens.be/notes/async-analytics-snippet -->
+    <script>
+        var _gaq=[['_setAccount','UA-XXXX-XX'],['_trackPageview']];(function(a,b){var c=a.createElement(b),d=a.getElementsByTagName(b)[0];c.src=("https:"==location.protocol?"//ssl":"//www")+".google-analytics.com/ga.js";d.parentNode.insertBefore(c,d)})(document,"script");
+    </script>
+</body>
+
+</html>
