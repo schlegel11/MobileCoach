@@ -22,15 +22,30 @@ public enum ScreeningSurveySlideTemplateFieldTypes {
 	 */
 	IS_SCREENING_SURVEY,
 	/**
+	 * Contains the current layout of the slide; can be used instead or together
+	 * with the values defined in
+	 * {@link ScreeningSurveySlideTemplateLayoutTypes}
+	 */
+	LAYOUT,
+	/**
 	 * Contains the question text
 	 */
 	QUESTION,
+	/**
+	 * Contains the number of available answers
+	 */
+	ANSWERS_COUNT,
 	/**
 	 * Contains a list of answers:
 	 * 
 	 * <code>{{#answers}}...use the fields {{answer_text}}, {{answer_value}}, {{preselected_answer}} etc. here...{{/answers}}</code>
 	 */
 	ANSWERS,
+	/**
+	 * Contains the position (1...n) of one answer option and can be used inside
+	 * <code>{{#answers}}...{{/answers}}</code>
+	 */
+	ANSWER_POSITION,
 	/**
 	 * Contains the text of one answer option and can be used inside
 	 * <code>{{#answers}}...{{/answers}}</code>
@@ -41,6 +56,18 @@ public enum ScreeningSurveySlideTemplateFieldTypes {
 	 * <code>{{#answers}}...{{/answers}}</code>
 	 */
 	ANSWER_VALUE,
+	/**
+	 * <strong>OPTIONAL:</strong> Exists if the answer is the last one in the
+	 * list of answers; it can be
+	 * used inside <code>{{#answers}}...{{/answers}}</code>
+	 */
+	IS_FIRST_ANSWER,
+	/**
+	 * <strong>OPTIONAL:</strong> Exists if the answer is the last one in the
+	 * list of answers; it can be
+	 * used inside <code>{{#answers}}...{{/answers}}</code>
+	 */
+	IS_LAST_ANSWER,
 	/**
 	 * Is true if the current answer should be preselected and can be used
 	 * inside <code>{{#answers}}...{{/answers}}</code>

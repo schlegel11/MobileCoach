@@ -34,6 +34,7 @@ import org.isgf.mhc.services.types.FeedbackSlideTemplateFieldTypes;
 import org.isgf.mhc.services.types.GeneralSlideTemplateFieldTypes;
 import org.isgf.mhc.services.types.ScreeningSurveySessionAttributeTypes;
 import org.isgf.mhc.services.types.ScreeningSurveySlideTemplateFieldTypes;
+import org.isgf.mhc.services.types.ScreeningSurveySlideTemplateLayoutTypes;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
@@ -408,7 +409,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				navigationValue = null;
 			}
 
-			// Get consistence check value if available
+			// Get consistency check value if available
 			String checkValue;
 			try {
 				checkValue = request
@@ -496,6 +497,18 @@ public class ScreeningSurveyServlet extends HttpServlet {
 									+ session
 											.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
 													.toString()));
+		}
+
+		// Set layout (only for screening survey slides)
+		if (screeningSurveyId != null) {
+			for (val layout : ScreeningSurveySlideTemplateLayoutTypes.values()) {
+				if (templateVariables.get(layout.toVariable()) != null) {
+					templateVariables.put(
+							ScreeningSurveySlideTemplateFieldTypes.LAYOUT
+									.toVariable(), templateVariables.get(layout
+									.toVariable()));
+				}
+			}
 		}
 
 		// Adjust media object URL

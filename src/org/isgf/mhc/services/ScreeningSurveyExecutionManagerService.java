@@ -553,9 +553,14 @@ public class ScreeningSurveyExecutionManagerService {
 			val answersWithPlaceholders = nextSlide
 					.getAnswersWithPlaceholders();
 			val answerValues = nextSlide.getAnswerValues();
+
+			templateVariables.put(
+					ScreeningSurveySlideTemplateFieldTypes.ANSWERS_COUNT
+							.toVariable(), answerValues.length);
+
 			final List<HashMap<String, Object>> answersObjects = new ArrayList<HashMap<String, Object>>();
 			for (int i = 0; i < answersWithPlaceholders.length; i++) {
-				final HashMap<String, Object> answerObjects = new HashMap<String, Object>();
+				val answerObjects = new HashMap<String, Object>();
 
 				val answerWithPlaceholder = answersWithPlaceholders[i];
 				val finalAnswer = VariableStringReplacer
@@ -566,12 +571,24 @@ public class ScreeningSurveyExecutionManagerService {
 				val answerValue = answerValues[i];
 
 				answerObjects.put(
+						ScreeningSurveySlideTemplateFieldTypes.ANSWER_POSITION
+								.toVariable(), i + 1);
+				answerObjects.put(
 						ScreeningSurveySlideTemplateFieldTypes.ANSWER_TEXT
 								.toVariable(), finalAnswer);
 				answerObjects.put(
 						ScreeningSurveySlideTemplateFieldTypes.ANSWER_VALUE
 								.toVariable(), answerValue);
-
+				if (i == 0) {
+					answerObjects
+							.put(ScreeningSurveySlideTemplateFieldTypes.IS_FIRST_ANSWER
+									.toVariable(), true);
+				}
+				if (i == answersWithPlaceholders.length - 1) {
+					answerObjects
+							.put(ScreeningSurveySlideTemplateFieldTypes.IS_LAST_ANSWER
+									.toVariable(), true);
+				}
 				if (nextSlide.getPreSelectedAnswer() == i) {
 					answerObjects
 							.put(ScreeningSurveySlideTemplateFieldTypes.PRESELECTED_ANSWER
@@ -866,6 +883,16 @@ public class ScreeningSurveyExecutionManagerService {
 			templateVariables.put(
 					GeneralSlideTemplateFieldTypes.OPTIONAL_LAYOUT_ATTRIBUTE
 							.toVariable(), optionalLayoutAttribute);
+			val optionalLayoutAttributeObjects = new HashMap<String, Object>();
+			for (val item : optionalLayoutAttribute.split(",")) {
+				optionalLayoutAttributeObjects
+						.put(GeneralSlideTemplateFieldTypes.OPTIONAL_LAYOUT_ATTRIBUTE_ITEM
+								.toVariable(), item);
+			}
+			templateVariables
+					.put(GeneralSlideTemplateFieldTypes.OPTIONAL_LAYOUT_ATTRIBUTE_LIST
+							.toVariable(), optionalLayoutAttributeObjects);
+
 			// Title
 			val title = VariableStringReplacer
 					.findVariablesAndReplaceWithTextValues(

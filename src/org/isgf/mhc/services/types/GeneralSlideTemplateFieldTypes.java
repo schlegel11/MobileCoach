@@ -34,10 +34,20 @@ public enum GeneralSlideTemplateFieldTypes {
 	NAME,
 	/**
 	 * <strong>OPTIONAL:</strong> Can contain an optional value for e.g. a
-	 * specific css layout
-	 * class
+	 * specific css layout class
 	 */
 	OPTIONAL_LAYOUT_ATTRIBUTE,
+	/**
+	 * <strong>OPTIONAL:</strong> Can contain optional values for e.g. a
+	 * specific css layout classes and is created by splitting the
+	 * OPTIONAL_LAYOUT_ATTRIBUTE by comma
+	 */
+	OPTIONAL_LAYOUT_ATTRIBUTE_LIST,
+	/**
+	 * <strong>OPTIONAL:</strong> One of the items contained in
+	 * OPTIONAL_LAYOUT_ATTRIBUTE_LIST
+	 */
+	OPTIONAL_LAYOUT_ATTRIBUTE_ITEM,
 	/**
 	 * Contains the title of the slide
 	 */

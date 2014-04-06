@@ -24,7 +24,7 @@ public enum ScreeningSurveySlideTemplateLayoutTypes {
 	 * @return The appropriate variable name
 	 */
 	public String toVariable() {
-		return this.toString();
+		return toString();
 	}
 
 	/*
