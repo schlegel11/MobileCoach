@@ -179,8 +179,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 
 		log.debug("Handling file request '{}' for {} {}", fileRequest,
 				isScreeningSurveyRequest ? "scrrening survey"
-						: "feedback of participant"
-								+ screeningSurveyOrFeedbackParticipantId);
+						: "feedback of participant",
+				screeningSurveyOrFeedbackParticipantId);
 
 		final File basicTemplateFolder = new File(
 				screeningSurveyExecutionManagerService.getTemplatePath(),
@@ -221,8 +221,22 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				+ requestedFile.getName() + "\"");
 
 		// Allow caching
-		response.setHeader("Pragma", "cache");
-		response.setHeader("Cache-control", "cache");
+		if (Constants.IS_LIVE_SYSTEM) {
+			response.setHeader("Pragma", "cache");
+			response.setHeader(
+					"Cache-Control",
+					"max-age="
+							+ ImplementationContants.SCREENING_SURVEY_FILE_CACHE_IN_MINUTES);
+			response.setDateHeader(
+					"Expires",
+					System.currentTimeMillis()
+							+ ImplementationContants.SCREENING_SURVEY_FILE_CACHE_IN_MINUTES
+							* 1000);
+		} else {
+			response.setHeader("Pragma", "No-cache");
+			response.setHeader("Cache-Control", "no-cache,no-store,max-age=0");
+			response.setDateHeader("Expires", 1);
+		}
 
 		// Open the file and output streams
 		@Cleanup
@@ -505,8 +519,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				if (templateVariables.get(layout.toVariable()) != null) {
 					templateVariables.put(
 							ScreeningSurveySlideTemplateFieldTypes.LAYOUT
-									.toVariable(), templateVariables.get(layout
-									.toVariable()));
+									.toVariable(), layout.toVariable());
 				}
 			}
 		}

@@ -30,7 +30,15 @@ public enum FeedbackSlideTemplateFieldTypes {
 	 * navigation; the variable has to occur in the form with one of the two
 	 * possible values
 	 */
-	HIDDEN_NAVIGATION_VARIABLE, HIDDEN_NAVIGATION_VARIABLE_NAVIGATE_PREVIOUS, HIDDEN_NAVIGATION_VARIABLE_NAVIGATE_NEXT;
+	HIDDEN_NAVIGATION_VARIABLE, HIDDEN_NAVIGATION_VARIABLE_NAVIGATE_PREVIOUS, HIDDEN_NAVIGATION_VARIABLE_NAVIGATE_NEXT,
+	/**
+	 * Is true, when the slide is the first slide of the feedback
+	 */
+	IS_FIRST_SLIDE,
+	/**
+	 * Is true, when the slide is the last slide of the screening survey
+	 */
+	IS_LAST_SLIDE;
 
 	/**
 	 * Creates the appropriate variable name of the

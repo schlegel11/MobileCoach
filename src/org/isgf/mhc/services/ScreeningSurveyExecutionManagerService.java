@@ -479,6 +479,11 @@ public class ScreeningSurveyExecutionManagerService {
 							ScreeningSurveySlideTemplateLayoutTypes.TEXT_ONLY
 									.toVariable(), true);
 					break;
+				case IMAGE_ONLY:
+					templateVariables.put(
+							ScreeningSurveySlideTemplateLayoutTypes.IMAGE_ONLY
+									.toVariable(), true);
+					break;
 			}
 
 			// Check variable
@@ -848,6 +853,22 @@ public class ScreeningSurveyExecutionManagerService {
 					FeedbackSessionAttributeTypes.FEEDBACK_CONSISTENCY_CHECK_VALUE
 							.toString(), newCheckValue);
 
+			// Check if slide is first or last slide
+			if (databaseManagerService.findOneModelObject(FeedbackSlide.class,
+					Queries.FEEDBACK_SLIDE__BY_FEEDBACK_AND_ORDER_LOWER,
+					nextSlide.getFeedback(), nextSlide.getOrder()) == null) {
+				templateVariables.put(
+						FeedbackSlideTemplateFieldTypes.IS_FIRST_SLIDE
+								.toVariable(), true);
+			}
+			if (databaseManagerService.findOneModelObject(FeedbackSlide.class,
+					Queries.FEEDBACK_SLIDE__BY_FEEDBACK_AND_ORDER_HIGHER,
+					nextSlide.getFeedback(), nextSlide.getOrder()) == null) {
+				templateVariables.put(
+						FeedbackSlideTemplateFieldTypes.IS_LAST_SLIDE
+								.toVariable(), true);
+			}
+
 			// Fill next feedback slide
 			log.debug("Filling next slide {} with contents",
 					nextSlide.getTitleWithPlaceholders());
@@ -885,9 +906,11 @@ public class ScreeningSurveyExecutionManagerService {
 							.toVariable(), optionalLayoutAttribute);
 			val optionalLayoutAttributeObjects = new HashMap<String, Object>();
 			for (val item : optionalLayoutAttribute.split(",")) {
-				optionalLayoutAttributeObjects
-						.put(GeneralSlideTemplateFieldTypes.OPTIONAL_LAYOUT_ATTRIBUTE_ITEM
-								.toVariable(), item);
+				if (!item.equals("")) {
+					optionalLayoutAttributeObjects
+							.put(GeneralSlideTemplateFieldTypes.OPTIONAL_LAYOUT_ATTRIBUTE_ITEM
+									.toVariable(), item);
+				}
 			}
 			templateVariables
 					.put(GeneralSlideTemplateFieldTypes.OPTIONAL_LAYOUT_ATTRIBUTE_LIST
