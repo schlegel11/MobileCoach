@@ -5,9 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.val;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
+import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.persistent.types.DialogMessageStatusTypes;
 
 /**
@@ -128,5 +130,20 @@ public class DialogMessage extends ModelObject {
 	@Getter
 	@Setter
 	private boolean						manuallySent;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.isgf.mhc.model.ModelObject#performOnDelete()
+	 */
+	@Override
+	public void performOnDelete() {
+		// Delete media object participant short URLs
+		val mediaObjectParticipantShortURLsToDelete = ModelObject
+				.find(MediaObjectParticipantShortURL.class,
+						Queries.MEDIA_OBJECT_PARTICIPANT_SHORT_URL__BY_RELATED_DIALOG_MESSAGE,
+						getId());
+		ModelObject.delete(mediaObjectParticipantShortURLsToDelete);
+	}
 
 }

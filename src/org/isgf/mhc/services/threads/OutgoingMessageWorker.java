@@ -2,9 +2,11 @@ package org.isgf.mhc.services.threads;
 
 import java.util.concurrent.TimeUnit;
 
+import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.conf.ImplementationContants;
+import org.isgf.mhc.model.persistent.DialogMessage;
 import org.isgf.mhc.services.InterventionExecutionManagerService;
 import org.isgf.mhc.services.internal.CommunicationManagerService;
 
@@ -32,17 +34,42 @@ public class OutgoingMessageWorker extends Thread {
 		while (!isInterrupted()) {
 			log.debug("Executing new run of outgoing message worker...");
 
-			// TODO implementieren, aber hier lassen
-			// val dialogMessagesToSend = determineDialogMessagesToSend();
-			//
-			// for (val dialogMessageToSend : dialogMessagesToSend) {
-			// val dialogOption =
-			// dialogDialogOptionForParticipant(dialogMessagesToSend
-			// .getParticipant());
-			// communicationManagerService.sendMessage(dialogOption,
-			// dialogMessageToSend.getId(),
-			// dialogMessageToSend.getMessage());
-			// }
+			try {
+				final val dialogMessagesToSend = determineDialogMessagesToSend();
+				for (val dialogMessageToSend : dialogMessagesToSend) {
+					try {
+						val dialogOption = interventionExecutionManagerService
+								.getDialogOptionByParticipantAndType(
+										dialogMessageToSend.getParticipant(),
+										communicationManagerService
+												.getSupportedDialogOptionType());
+
+						if (dialogOption != null) {
+							communicationManagerService.sendMessage(
+									dialogOption, dialogMessageToSend.getId(),
+									dialogMessageToSend.getMessage());
+						} else {
+							log.error("Could not send prepared message, because there was no valid dialog option to send message to participant; solution: deactive messaging for participant and removing current dialog message");
+
+							try {
+								interventionExecutionManagerService
+										.deactivateMessagingForParticipantAndDeleteDialogMessages(dialogMessageToSend
+												.getParticipant());
+								log.debug("Cleanup sucessful");
+							} catch (final Exception e) {
+								log.error("Cleanup not sucessful: {}",
+										e.getMessage());
+							}
+						}
+					} catch (final Exception e) {
+						log.error("Could not send prepared message: {}",
+								e.getMessage());
+					}
+				}
+			} catch (final Exception e) {
+				log.error("Could not send all prepared messages: {}",
+						e.getMessage());
+			}
 
 			try {
 				TimeUnit.SECONDS
@@ -52,5 +79,16 @@ public class OutgoingMessageWorker extends Thread {
 				log.debug("Outgoing message worker received signal to stop");
 			}
 		}
+	}
+
+	/**
+	 * Returns a list of {@link DialogMessage}s that should be sent
+	 * 
+	 * @return
+	 */
+	private Iterable<DialogMessage> determineDialogMessagesToSend() {
+		val dialogMessagesWaitingToBeSend = interventionExecutionManagerService
+				.getDialogMessagesWaitingToBeSent();
+		return dialogMessagesWaitingToBeSend;
 	}
 }

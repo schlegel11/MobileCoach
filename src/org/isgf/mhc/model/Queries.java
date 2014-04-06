@@ -86,13 +86,15 @@ public class Queries {
 
 	public static final String	MONITORING_REPLY_RULE__BY_MONITORING_RULE													= "{$or:[{'isGotAnswerRuleForMonitoringRule':#},{'isGotNoAnswerRuleForMonitoringRule':#}]}";
 
-	public static final String	SYSTEM_UNIQUE_ID__BY_SHORT_ID																= "{'shortId':#}";
-	public static final String	SYSTEM_UNIQUE_ID__SORT_BY_SHORT_ID_DESC														= "{'shortId':-1}";
+	public static final String	MEDIA_OBJECT_PARTICIPANT_SHORT_URL__BY_SHORT_ID												= "{'shortId':#}";
+	public static final String	MEDIA_OBJECT_PARTICIPANT_SHORT_URL__SORT_BY_SHORT_ID_DESC									= "{'shortId':-1}";
+	public static final String	MEDIA_OBJECT_PARTICIPANT_SHORT_URL__BY_RELATED_DIALOG_MESSAGE								= "{'dialogMessage':-1}";
 
 	public static final String	PARTICIPANT__BY_INTERVENTION																= "{'intervention':#}";
 
 	public static final String	DIALOG_OPTION__BY_PARTICIPANT																= "{'participant':#}";
 	public static final String	DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE														= "{'participant':#,'type':#}";
+	public static final String	DIALOG_OPTION__BY_TYPE_AND_DATA																= "{'type':#,'data':#}";
 
 	public static final String	DIALOG_STATUS__BY_PARTICIPANT																= "{'participant':#}";
 
@@ -100,7 +102,8 @@ public class Queries {
 	public static final String	PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_VARIABLE_NAME							= "{'participant':#,'name':#}";
 
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT																= "{'participant':#}";
+	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS													= "{'participant':#,'status':#}";
+	public static final String	DIALOG_MESSAGE__BY_STATUS_AND_SHOULD_BE_SENT_TIMESTAMP_LOWER								= "{'status':#,'shouldBeSentTimestamp':{$lt:#}}";
 	public static final String	DIALOG_MESSAGE__BY_STATUS																	= "{'status':#}";
 	public static final String	DIALOG_MESSAGE__SORT_BY_ORDER_DESC															= "{'order':-1}";
-
 }

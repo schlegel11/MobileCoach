@@ -30,12 +30,16 @@ public class MasterRuleEvaluationWorker extends Thread {
 		while (!isInterrupted()) {
 			log.debug("Executing new run of master rule evaluation worker...");
 
-			// TODO care about monitoring
-			// determineParticipantsRelevantForRuleExecution(); //
-			// intervention active, messaging active, messaging of
-			// participant acitive , participant finished screening survey
-			//
-			// prepareDialogMessagesBasedOnRuleEvaluation(participants);
+			try {
+				// TODO care about monitoring
+				// determineParticipantsRelevantForRuleExecution(); //
+				// intervention active, messaging active, messaging of
+				// participant acitive , participant finished screening survey
+				//
+				// prepareDialogMessagesBasedOnRuleEvaluation(participants);
+			} catch (final Exception e) {
+				log.error("Could not shedule monitoring: {}", e.getMessage());
+			}
 
 			try {
 				TimeUnit.MINUTES

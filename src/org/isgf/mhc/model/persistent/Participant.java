@@ -214,6 +214,11 @@ public class Participant extends ModelObject {
 				Queries.DIALOG_STATUS__BY_PARTICIPANT, getId())) {
 			dialogStatus.collectThisAndRelatedModelObjectsForExport(exportList);
 		}
+
+		/*
+		 * DialogMessages and SystemUniqueIds are not added to reduce complexity
+		 * (Participants can only be copied before monitoring started)
+		 */
 	}
 
 	/*

@@ -14,18 +14,19 @@ import org.isgf.mhc.model.ModelObject;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
- * {@link ModelObject} to represent an {@link SystemUniqueId}
+ * {@link ModelObject} to represent an {@link MediaObjectParticipantShortURL}
  * 
- * A {@link SystemUniqueId} is used to create and verify unique Ids for specific
- * {@link MediaObject}s and {@link Participant}s
+ * A {@link MediaObjectParticipantShortURL} is used to create and verify unique
+ * Ids for
+ * specific {@link MediaObject}s and {@link Participant}s to create URLs
  * 
  * @author Andreas Filler
  */
 @NoArgsConstructor
 @AllArgsConstructor
-public class SystemUniqueId extends ModelObject {
+public class MediaObjectParticipantShortURL extends ModelObject {
 	/**
-	 * The short id defining this {@link SystemUniqueId}
+	 * The short id defining this {@link MediaObjectParticipantShortURL}
 	 */
 	@Getter
 	@Setter
@@ -34,12 +35,12 @@ public class SystemUniqueId extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId	relatedDialogMessage;
+	private ObjectId	dialogMessage;
 
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId	relatedMediaObject;
+	private ObjectId	mediaObject;
 
 	/**
 	 * Calculates a URL that can be checked for validity
@@ -47,7 +48,7 @@ public class SystemUniqueId extends ModelObject {
 	 * @return
 	 */
 	@JsonIgnore
-	public String calculateMessageURL() {
+	public String calculateURL() {
 		val shortIdString = String.valueOf(shortId);
 
 		String checksum = null;

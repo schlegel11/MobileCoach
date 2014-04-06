@@ -633,13 +633,13 @@ public class ScreeningSurveyExecutionManagerService {
 						.toVariableName())) {
 			log.debug("Setting variable 'participantDialogOptionSMSData'");
 			participantSetDialogOption(participant, DialogOptionTypes.SMS,
-					variableValue);
+					StringHelpers.cleanPhoneNumber(variableValue));
 		} else if (variableName
 				.equals(SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES.participantDialogOptionEmailData
 						.toVariableName())) {
 			log.debug("Setting variable 'participantDialogOptionEmailData'");
 			participantSetDialogOption(participant, DialogOptionTypes.EMAIL,
-					variableValue);
+					StringHelpers.cleanEmailAddress(variableValue));
 		} else {
 			// It's a regular variable, so store it
 			try {

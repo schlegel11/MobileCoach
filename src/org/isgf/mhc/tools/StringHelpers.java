@@ -63,4 +63,27 @@ public class StringHelpers {
 
 		return simpleDateFormat.format(date);
 	}
+
+	/**
+	 * Creates a clean phone number of the given {@link String}
+	 * 
+	 * @param variableValue
+	 * @return
+	 */
+	public static String cleanPhoneNumber(final String value) {
+		val newValue = value.trim().replaceAll("[^\\d]", "")
+				.replaceAll("^0+", "");
+		return newValue;
+	}
+
+	/**
+	 * Creates a clean email address of the given {@link String}
+	 * 
+	 * @param variableValue
+	 * @return
+	 */
+	public static String cleanEmailAddress(final String value) {
+		val newValue = value.trim().toLowerCase();
+		return newValue;
+	}
 }

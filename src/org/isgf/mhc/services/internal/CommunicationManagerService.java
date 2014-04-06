@@ -37,6 +37,7 @@ import org.isgf.mhc.conf.ImplementationContants;
 import org.isgf.mhc.model.memory.ReceivedMessage;
 import org.isgf.mhc.model.persistent.DialogOption;
 import org.isgf.mhc.model.persistent.types.DialogMessageStatusTypes;
+import org.isgf.mhc.model.persistent.types.DialogOptionTypes;
 import org.isgf.mhc.services.InterventionExecutionManagerService;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -166,7 +167,7 @@ public class CommunicationManagerService {
 
 		interventionExecutionManagerService.dialogMessageSetStatus(
 				dialogMessageId, DialogMessageStatusTypes.SENDING,
-				System.currentTimeMillis());
+				System.currentTimeMillis(), null);
 
 		synchronized (runningMailingThreads) {
 			runningMailingThreads.add(mailingThread);
@@ -314,7 +315,7 @@ public class CommunicationManagerService {
 
 				interventionExecutionManagerService.dialogMessageSetStatus(
 						dialogMessageId, DialogMessageStatusTypes.SENT,
-						System.currentTimeMillis());
+						System.currentTimeMillis(), null);
 
 				removeFromList();
 
@@ -337,7 +338,7 @@ public class CommunicationManagerService {
 					interventionExecutionManagerService.dialogMessageSetStatus(
 							dialogMessageId,
 							DialogMessageStatusTypes.PREPARED_FOR_SENDING,
-							System.currentTimeMillis());
+							System.currentTimeMillis(), null);
 
 					return;
 				}
@@ -347,7 +348,7 @@ public class CommunicationManagerService {
 
 					interventionExecutionManagerService.dialogMessageSetStatus(
 							dialogMessageId, DialogMessageStatusTypes.SENT,
-							System.currentTimeMillis());
+							System.currentTimeMillis(), null);
 
 					removeFromList();
 
@@ -364,7 +365,7 @@ public class CommunicationManagerService {
 			interventionExecutionManagerService.dialogMessageSetStatus(
 					dialogMessageId,
 					DialogMessageStatusTypes.PREPARED_FOR_SENDING,
-					System.currentTimeMillis());
+					System.currentTimeMillis(), null);
 
 			removeFromList();
 		}
@@ -404,5 +405,9 @@ public class CommunicationManagerService {
 
 			log.debug("Message sent to {}", dialogOption.getData());
 		}
+	}
+
+	public DialogOptionTypes getSupportedDialogOptionType() {
+		return DialogOptionTypes.SMS;
 	}
 }

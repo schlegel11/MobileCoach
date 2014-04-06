@@ -16,13 +16,14 @@ import net.balusc.webapp.FileServletWrapper;
 import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.ImplementationContants;
 import org.isgf.mhc.model.persistent.MediaObject;
-import org.isgf.mhc.model.persistent.SystemUniqueId;
+import org.isgf.mhc.model.persistent.MediaObjectParticipantShortURL;
 import org.isgf.mhc.services.InterventionAdministrationManagerService;
 import org.isgf.mhc.services.InterventionExecutionManagerService;
 
 /**
- * The {@link ShortIdMediaObjectFileStreamingServlet} serves files contained in
- * {@link MediaObject}s, which are referenced by {@link SystemUniqueId}s
+ * The {@link ShortURLMediaObjectFileStreamingServlet} serves files contained in
+ * {@link MediaObject}s, which are referenced by
+ * {@link MediaObjectParticipantShortURL}s
  * 
  * The library used for serving the files is published under the LGPL license.
  * Therefore all modifications and extensions on these files are published as
@@ -36,10 +37,10 @@ import org.isgf.mhc.services.InterventionExecutionManagerService;
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
-@WebServlet(displayName = "Short Id based Media Object File Streaming", value = "/"
+@WebServlet(displayName = "Short URL based Media Object File Streaming", value = "/"
 		+ ImplementationContants.SHORT_ID_FILE_STREAMING_SERVLET_PATH + "/*", asyncSupported = true, loadOnStartup = 1)
 @Log4j2
-public class ShortIdMediaObjectFileStreamingServlet extends HttpServlet {
+public class ShortURLMediaObjectFileStreamingServlet extends HttpServlet {
 	private InterventionAdministrationManagerService	interventionAdministrationManagerService;
 	private InterventionExecutionManagerService			interventionExecutionManagerService;
 
@@ -73,29 +74,30 @@ public class ShortIdMediaObjectFileStreamingServlet extends HttpServlet {
 			final HttpServletRequest request, final HttpServletResponse response)
 			throws IOException {
 		// Determine requested system unique id
-		SystemUniqueId systemUniqueId = null;
+		MediaObjectParticipantShortURL mediaObjectParticipantShortURL = null;
 		try {
 			final val pathParts = request.getPathInfo().split("/");
 
-			final long shortId = SystemUniqueId
+			final long shortId = MediaObjectParticipantShortURL
 					.validateURLIdPartAndReturnShortId(pathParts[1]);
 
-			systemUniqueId = interventionExecutionManagerService
+			mediaObjectParticipantShortURL = interventionExecutionManagerService
 					.getSystemUniqueId(shortId);
 		} catch (final Exception e) {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return null;
 		}
-		log.debug("Requested system unique id {}", systemUniqueId);
+		log.debug("Requested system unique id {}",
+				mediaObjectParticipantShortURL);
 
 		// Check if system unique id exists
-		if (systemUniqueId == null) {
+		if (mediaObjectParticipantShortURL == null) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return null;
 		}
 
 		final val mediaObject = interventionAdministrationManagerService
-				.getMediaObject(systemUniqueId.getRelatedMediaObject());
+				.getMediaObject(mediaObjectParticipantShortURL.getMediaObject());
 
 		// Check if media object exists
 		if (mediaObject == null) {
@@ -105,8 +107,8 @@ public class ShortIdMediaObjectFileStreamingServlet extends HttpServlet {
 
 		// Mark media object as seen
 		interventionExecutionManagerService
-				.dialogMessageSetMediaContentViewed(systemUniqueId
-						.getRelatedDialogMessage());
+				.dialogMessageSetMediaContentViewed(mediaObjectParticipantShortURL
+						.getDialogMessage());
 
 		// Retrieve file from media object
 		final val file = interventionAdministrationManagerService
