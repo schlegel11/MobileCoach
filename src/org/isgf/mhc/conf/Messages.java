@@ -43,15 +43,23 @@ public class Messages {
 	 * @throws Exception
 	 */
 	public static void checkForMissingLocales() {
-		log.info("Checking for missing localization strings in the selected language...");
-		for (final val field : AdminMessageStrings.values()) {
+		log.info("Checking for missing/obsolete localization strings in the selected language...");
+		for (val field : AdminMessageStrings.values()) {
 			try {
 				ADMIN_RESOURCE_BUNDLE.getString(field.toString().toLowerCase()
 						.replace("__", "."));
 
 			} catch (final Exception e) {
-				log.error("Admin message string {} is missing!", field
+				log.error("Admin message string {} is MISSING!", field
 						.toString().toLowerCase().replace("__", "."));
+			}
+		}
+		for (val field : ADMIN_RESOURCE_BUNDLE.keySet()) {
+			try {
+				AdminMessageStrings.valueOf(field.toUpperCase().replace(".",
+						"__"));
+			} catch (final Exception e) {
+				log.error("Admin message string {} is OBSOLETE!", field);
 			}
 		}
 		log.info("Check done.");

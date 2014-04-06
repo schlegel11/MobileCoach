@@ -15,7 +15,7 @@ public class UIIntervention extends UIModelObject {
 	// NOTE: The String values have to fit the name of the variables
 	public static final String	INTERVENTION_NAME	= "interventionName";
 	public static final String	INTERVENTION_STATUS	= "interventionStatus";
-	public static final String	MESSAGING_STATUS	= "messagingStatus";
+	public static final String	MONITORING_STATUS	= "monitoringStatus";
 
 	@PropertyId(INTERVENTION_NAME)
 	private String				interventionName;
@@ -27,19 +27,19 @@ public class UIIntervention extends UIModelObject {
 
 	private boolean				booleanMessagingStatus;
 
-	@PropertyId(MESSAGING_STATUS)
-	private String				messagingStatus;
+	@PropertyId(MONITORING_STATUS)
+	private String				monitoringStatus;
 
 	public static Object[] getVisibleColumns() {
 		return new Object[] { INTERVENTION_NAME, INTERVENTION_STATUS,
-				MESSAGING_STATUS };
+				MONITORING_STATUS };
 	}
 
 	public static String[] getColumnHeaders() {
 		return new String[] {
 				localize(AdminMessageStrings.UI_COLUMNS__INTERVENTION),
 				localize(AdminMessageStrings.UI_COLUMNS__INTERVENTION_STATUS),
-				localize(AdminMessageStrings.UI_COLUMNS__MESSAGING_STATUS) };
+				localize(AdminMessageStrings.UI_COLUMNS__MONITORING_STATUS) };
 	}
 
 	public static String getSortColumn() {

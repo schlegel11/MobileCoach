@@ -10,6 +10,7 @@ public class Queries {
 	public static final String	ALL																							= "{}";
 
 	public static final String	INTERVENTION__ACTIVE_TRUE																	= "{'active':true}";
+	public static final String	INTERVENTION__ACTIVE_TRUE_MONITORING_ACTIVE_TRUE											= "{'active':true,'monitoring':true}";
 
 	public static final String	SCREENING_SURVEY__ACTIVE_TRUE																= "{'active':true}";
 	public static final String	SCREENING_SURVEY__BY_INTERVENTION_AND_ACTIVE_TRUE											= "{'intervention':#,'active':true}";
@@ -87,10 +88,11 @@ public class Queries {
 	public static final String	MONITORING_REPLY_RULE__BY_MONITORING_RULE													= "{$or:[{'isGotAnswerRuleForMonitoringRule':#},{'isGotNoAnswerRuleForMonitoringRule':#}]}";
 
 	public static final String	MEDIA_OBJECT_PARTICIPANT_SHORT_URL__BY_SHORT_ID												= "{'shortId':#}";
+	public static final String	MEDIA_OBJECT_PARTICIPANT_SHORT_URL__BY_RELATED_DIALOG_MESSAGE								= "{'dialogMessage':#}";
 	public static final String	MEDIA_OBJECT_PARTICIPANT_SHORT_URL__SORT_BY_SHORT_ID_DESC									= "{'shortId':-1}";
-	public static final String	MEDIA_OBJECT_PARTICIPANT_SHORT_URL__BY_RELATED_DIALOG_MESSAGE								= "{'dialogMessage':-1}";
 
 	public static final String	PARTICIPANT__BY_INTERVENTION																= "{'intervention':#}";
+	public static final String	PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE										= "{'intervention':#,'monitoringActive':true}";
 
 	public static final String	DIALOG_OPTION__BY_PARTICIPANT																= "{'participant':#}";
 	public static final String	DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE														= "{'participant':#,'type':#}";

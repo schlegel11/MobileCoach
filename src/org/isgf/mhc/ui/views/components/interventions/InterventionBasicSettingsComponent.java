@@ -48,7 +48,7 @@ public class InterventionBasicSettingsComponent extends AbstractCustomComponent 
 				AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__SWITCH_INTERVENTION_BUTTON_INACTIVE);
 		localize(
 				switchMessagingButton,
-				AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__SWITCH_MESSAGING_BUTTON_INACTIVE);
+				AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__SWITCH_MONITORING_BUTTON_INACTIVE);
 
 		// set start settings
 		adjust(false, false);
@@ -81,7 +81,7 @@ public class InterventionBasicSettingsComponent extends AbstractCustomComponent 
 					ThemeImageStrings.ACTIVE_ICON_SMALL));
 			localize(
 					switchMessagingButton,
-					AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__SWITCH_MESSAGING_BUTTON_ACTIVE);
+					AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__SWITCH_MONITORING_BUTTON_ACTIVE);
 
 			switchInterventionButton.setEnabled(false);
 		} else {
@@ -89,7 +89,7 @@ public class InterventionBasicSettingsComponent extends AbstractCustomComponent 
 					ThemeImageStrings.INACTIVE_ICON_SMALL));
 			localize(
 					switchMessagingButton,
-					AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__SWITCH_MESSAGING_BUTTON_INACTIVE);
+					AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__SWITCH_MONITORING_BUTTON_INACTIVE);
 
 			switchInterventionButton.setEnabled(true);
 		}

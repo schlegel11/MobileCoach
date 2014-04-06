@@ -40,6 +40,7 @@ public class VariablesManagerService {
 	private final DatabaseManagerService	databaseManagerService;
 
 	private final HashSet<String>			allSystemVariableNames;
+	private final HashSet<String>			allSystemVariableNamesRelevantForSlides;
 	private final HashSet<String>			writeProtectedVariableNames;
 
 	private static SimpleDateFormat			dayInWeekFormatter	= new SimpleDateFormat(
@@ -80,6 +81,14 @@ public class VariablesManagerService {
 		for (val variable : SystemVariables.READ_WRITE_SYSTEM_VARIABLES
 				.values()) {
 			allSystemVariableNames.add(variable.toVariableName());
+		}
+
+		allSystemVariableNamesRelevantForSlides = new HashSet<String>();
+		allSystemVariableNamesRelevantForSlides.addAll(allSystemVariableNames);
+		for (val variable : SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES
+				.values()) {
+			allSystemVariableNamesRelevantForSlides.remove(variable
+					.toVariableName());
 		}
 
 		log.info("Started.");
@@ -288,7 +297,6 @@ public class VariablesManagerService {
 		}
 
 		if (participantVariableWithValue == null) {
-
 			val newParticipantVariableWithValue = new ParticipantVariableWithValue(
 					participant.getId(), variableName,
 					variableValue == null ? "" : variableValue);
@@ -309,6 +317,10 @@ public class VariablesManagerService {
 
 	public Set<String> getAllSystemVariableNames() {
 		return allSystemVariableNames;
+	}
+
+	public Set<String> getAllSystemVariableNamesRelevantForSlides() {
+		return allSystemVariableNamesRelevantForSlides;
 	}
 
 	public Set<String> getAllInterventionVariableNamesOfIntervention(

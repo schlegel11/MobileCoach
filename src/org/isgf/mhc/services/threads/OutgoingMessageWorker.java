@@ -45,6 +45,8 @@ public class OutgoingMessageWorker extends Thread {
 												.getSupportedDialogOptionType());
 
 						if (dialogOption != null) {
+							log.debug("Sending prepared message to {}",
+									dialogOption.getData());
 							communicationManagerService.sendMessage(
 									dialogOption, dialogMessageToSend.getId(),
 									dialogMessageToSend.getMessage());

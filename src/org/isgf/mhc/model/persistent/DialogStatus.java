@@ -37,7 +37,7 @@ public class DialogStatus extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String		dateIndexOfLastDailyInterventionProcessing;
+	private String		dateIndexOfLastDailyMonitoringProcessing;
 
 	/**
 	 * Stores if the {@link Participant} already performed a

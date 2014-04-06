@@ -62,7 +62,9 @@ public class IncomingMessageWorker extends Thread {
 										DialogMessageStatusTypes.SENT);
 
 						if (dialogMessage == null) {
-							log.debug("Received an unexpected SMS from '{}', store it and mark it as unexpected");
+							log.debug(
+									"Received an unexpected SMS from '{}', store it and mark it as unexpected",
+									receivedMessage.getSender());
 							interventionExecutionManagerService
 									.dialogMessageCreateAsUnexpectedReceived(
 											dialogOption.getParticipant(),

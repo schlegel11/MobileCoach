@@ -351,7 +351,7 @@ public class InterventionParticipantsTabComponentWithController extends
 
 				getAdminUI()
 						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__PARTICIPANTS_MESSAGING_SWITCHED);
+								AdminMessageStrings.NOTIFICATION__PARTICIPANTS_MONITORING_SWITCHED);
 				closeWindow();
 			}
 		}, null);

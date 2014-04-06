@@ -71,8 +71,8 @@ public class StringHelpers {
 	 * @return
 	 */
 	public static String cleanPhoneNumber(final String value) {
-		val newValue = value.trim().replaceAll("[^\\d]", "")
-				.replaceAll("^0+", "");
+		val newValue = "00"
+				+ value.trim().replaceAll("[^\\d]", "").replaceAll("^0+", "");
 		return newValue;
 	}
 

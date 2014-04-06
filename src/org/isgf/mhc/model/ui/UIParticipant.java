@@ -22,7 +22,7 @@ public class UIParticipant extends UIModelObject {
 	public static final String	SCREENING_SURVEY_NAME	= "screeningSurveyName";
 	public static final String	SCREENING_SURVEY_STATUS	= "screeningSurveyStatus";
 	public static final String	INTERVENTION_STATUS		= "interventionStatus";
-	public static final String	MESSAGING_STATUS		= "messagingStatus";
+	public static final String	MONITORING_STATUS		= "monitoringStatus";
 
 	@PropertyId(NAME)
 	private String				name;
@@ -49,15 +49,15 @@ public class UIParticipant extends UIModelObject {
 
 	private boolean				booleanInterventionStatus;
 
-	@PropertyId(MESSAGING_STATUS)
-	private String				messagingStatus;
+	@PropertyId(MONITORING_STATUS)
+	private String				monitoringStatus;
 
-	private boolean				booleanMessagingStatus;
+	private boolean				booleanMonitoringStatus;
 
 	public static Object[] getVisibleColumns() {
 		return new Object[] { NAME, ORGANIZATION, UNIT, CREATED,
 				SCREENING_SURVEY_NAME, SCREENING_SURVEY_STATUS,
-				INTERVENTION_STATUS, MESSAGING_STATUS };
+				INTERVENTION_STATUS, MONITORING_STATUS };
 	}
 
 	public static String[] getColumnHeaders() {
@@ -69,7 +69,7 @@ public class UIParticipant extends UIModelObject {
 				localize(AdminMessageStrings.UI_COLUMNS__SCREENING_SURVEY_NAME),
 				localize(AdminMessageStrings.UI_COLUMNS__PARTICIPANT_SCREENING_SURVEY_STATUS),
 				localize(AdminMessageStrings.UI_COLUMNS__PARTICIPANT_INTERVENTION_STATUS),
-				localize(AdminMessageStrings.UI_COLUMNS__MESSAGING_STATUS) };
+				localize(AdminMessageStrings.UI_COLUMNS__MONITORING_STATUS) };
 	}
 
 	public static String getSortColumn() {

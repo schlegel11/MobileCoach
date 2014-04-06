@@ -763,7 +763,8 @@ public class ScreeningSurveyAdministrationManagerService {
 			final ObjectId screeningSurveyId) {
 		val variables = new ArrayList<String>();
 
-		variables.addAll(variablesManagerService.getAllSystemVariableNames());
+		variables.addAll(variablesManagerService
+				.getAllSystemVariableNamesRelevantForSlides());
 
 		val screeningSurvey = databaseManagerService.getModelObjectById(
 				ScreeningSurvey.class, screeningSurveyId);

@@ -6,7 +6,7 @@ package org.isgf.mhc.model.persistent.types;
  * @author Andreas Filler
  */
 public enum ScreeningSurveySlideQuestionTypes {
-	TEXT_ONLY, IMAGE_ONLY, SELECT_ONE, SELECT_MANY, NUMBER_INPUT, TEXT_INPUT, MULTILINE_TEXT_INPUT;
+	TEXT_ONLY, MEDIA_ONLY, SELECT_ONE, SELECT_MANY, NUMBER_INPUT, TEXT_INPUT, MULTILINE_TEXT_INPUT;
 
 	@Override
 	public String toString() {

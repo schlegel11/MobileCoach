@@ -22,7 +22,7 @@ public class InterventionBasicSettingsTabComponentWithController extends
 
 	private final InterventionEditingContainerComponentWithController	interventionEditingContainerComponentWithController;
 
-	private boolean														lastInterventionMessagingActiveState	= false;
+	private boolean														lastInterventionMonitoringState	= false;
 
 	public InterventionBasicSettingsTabComponentWithController(
 			final Intervention intervention,
@@ -32,12 +32,13 @@ public class InterventionBasicSettingsTabComponentWithController extends
 		this.intervention = intervention;
 		this.interventionEditingContainerComponentWithController = interventionEditingContainerComponentWithController;
 
-		lastInterventionMessagingActiveState = intervention.isMessagingActive();
+		lastInterventionMonitoringState = intervention
+				.isMonitoringActive();
 
 		// Set the first time before other tabs are constructed
 		interventionEditingContainerComponentWithController
 				.setEditingDependingOnMessaging(!intervention
-						.isMessagingActive());
+						.isMonitoringActive());
 
 		// Handle buttons
 		val interventionBasicSettingsComponent = getInterventionBasicSettingsComponent();
@@ -54,17 +55,18 @@ public class InterventionBasicSettingsTabComponentWithController extends
 
 	private void adjust() {
 		getInterventionBasicSettingsComponent().adjust(intervention.isActive(),
-				intervention.isMessagingActive());
+				intervention.isMonitoringActive());
 
-		if (lastInterventionMessagingActiveState != intervention
-				.isMessagingActive()) {
+		if (lastInterventionMonitoringState != intervention
+				.isMonitoringActive()) {
 			// Messaging status has been changed, so adapt UI
 			interventionEditingContainerComponentWithController
 					.setEditingDependingOnMessaging(!intervention
-							.isMessagingActive());
+							.isMonitoringActive());
 		}
 
-		lastInterventionMessagingActiveState = intervention.isMessagingActive();
+		lastInterventionMonitoringState = intervention
+				.isMonitoringActive();
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
@@ -91,7 +93,7 @@ public class InterventionBasicSettingsTabComponentWithController extends
 			public void buttonClick(final ClickEvent event) {
 				try {
 					getInterventionAdministrationManagerService()
-							.interventionSetActive(intervention,
+							.interventionSetStatus(intervention,
 									!intervention.isActive());
 				} catch (final Exception e) {
 					closeWindow();
@@ -113,8 +115,8 @@ public class InterventionBasicSettingsTabComponentWithController extends
 			public void buttonClick(final ClickEvent event) {
 				try {
 					getInterventionAdministrationManagerService()
-							.interventionSetMessagingActive(intervention,
-									!intervention.isMessagingActive());
+							.interventionSetMonitoring(intervention,
+									!intervention.isMonitoringActive());
 				} catch (final Exception e) {
 					closeWindow();
 					handleException(e);
@@ -122,7 +124,7 @@ public class InterventionBasicSettingsTabComponentWithController extends
 				}
 
 				interventionEditingContainerComponentWithController.setEditingDependingOnMessaging(!intervention
-						.isMessagingActive());
+						.isMonitoringActive());
 
 				adjust();
 				closeWindow();

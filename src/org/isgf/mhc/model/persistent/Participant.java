@@ -98,7 +98,7 @@ public class Participant extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private boolean		messagingActive;
+	private boolean		monitoringActive;
 
 	/**
 	 * The organization the {@link Participant} belongs to; can e.g. be used for
@@ -171,11 +171,11 @@ public class Participant extends ModelObject {
 						: Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_FINISHED),
 				interventionStatus,
-				messagingActive ? Messages
+				monitoringActive ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
 						: Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE),
-				messagingActive);
+				monitoringActive);
 
 		participant.setRelatedModelObject(this);
 

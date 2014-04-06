@@ -143,6 +143,7 @@ public class DialogMessage extends ModelObject {
 				.find(MediaObjectParticipantShortURL.class,
 						Queries.MEDIA_OBJECT_PARTICIPANT_SHORT_URL__BY_RELATED_DIALOG_MESSAGE,
 						getId());
+
 		ModelObject.delete(mediaObjectParticipantShortURLsToDelete);
 	}
 

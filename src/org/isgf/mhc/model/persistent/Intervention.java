@@ -57,13 +57,13 @@ public class Intervention extends ModelObject {
 	private boolean	active;
 
 	/**
-	 * Defines if the messaging in this {@link Intervention} is active. If not
+	 * Defines if the monitoring in this {@link Intervention} is active. If not
 	 * the rule execution will not be executed also if the intervention is
 	 * active.
 	 */
 	@Getter
 	@Setter
-	private boolean	messagingActive;
+	private boolean	monitoringActive;
 
 	/*
 	 * (non-Javadoc)
@@ -79,8 +79,8 @@ public class Intervention extends ModelObject {
 						.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
 						: Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE),
-				messagingActive,
-				messagingActive ? Messages
+				monitoringActive,
+				monitoringActive ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
 						: Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE));

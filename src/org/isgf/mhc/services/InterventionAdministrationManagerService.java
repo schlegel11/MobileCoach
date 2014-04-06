@@ -215,16 +215,16 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(intervention);
 	}
 
-	public void interventionSetActive(final Intervention intervention,
+	public void interventionSetStatus(final Intervention intervention,
 			final boolean value) {
 		intervention.setActive(value);
 
 		databaseManagerService.saveModelObject(intervention);
 	}
 
-	public void interventionSetMessagingActive(final Intervention intervention,
+	public void interventionSetMonitoring(final Intervention intervention,
 			final boolean value) {
-		intervention.setMessagingActive(value);
+		intervention.setMonitoringActive(value);
 
 		databaseManagerService.saveModelObject(intervention);
 	}
@@ -1019,7 +1019,7 @@ public class InterventionAdministrationManagerService {
 
 	public void participantsSwitchMessaging(final List<Participant> participants) {
 		for (val participant : participants) {
-			participant.setMessagingActive(!participant.isMessagingActive());
+			participant.setMonitoringActive(!participant.isMonitoringActive());
 
 			databaseManagerService.saveModelObject(participant);
 		}

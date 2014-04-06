@@ -1,5 +1,8 @@
 package org.isgf.mhc.services;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -22,7 +25,7 @@ import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.VariablesManagerService;
 import org.isgf.mhc.services.threads.IncomingMessageWorker;
-import org.isgf.mhc.services.threads.MasterRuleEvaluationWorker;
+import org.isgf.mhc.services.threads.MonitoringShedulingWorker;
 import org.isgf.mhc.services.threads.OutgoingMessageWorker;
 
 /**
@@ -42,7 +45,7 @@ public class InterventionExecutionManagerService {
 
 	private final IncomingMessageWorker					incomingMessageWorker;
 	private final OutgoingMessageWorker					outgoingMessageWorker;
-	private final MasterRuleEvaluationWorker			masterRuleEvaluationWorker;
+	private final MonitoringShedulingWorker				monitoringShedulingWorker;
 
 	private InterventionExecutionManagerService(
 			final DatabaseManagerService databaseManagerService,
@@ -66,8 +69,8 @@ public class InterventionExecutionManagerService {
 		incomingMessageWorker = new IncomingMessageWorker(this,
 				communicationManagerService);
 		incomingMessageWorker.start();
-		masterRuleEvaluationWorker = new MasterRuleEvaluationWorker(this);
-		masterRuleEvaluationWorker.start();
+		monitoringShedulingWorker = new MonitoringShedulingWorker(this);
+		monitoringShedulingWorker.start();
 
 		log.info("Started.");
 	}
@@ -90,9 +93,9 @@ public class InterventionExecutionManagerService {
 		log.info("Stopping service...");
 
 		log.debug("Stopping master rule evaluation worker...");
-		synchronized (masterRuleEvaluationWorker) {
-			masterRuleEvaluationWorker.interrupt();
-			masterRuleEvaluationWorker.join();
+		synchronized (monitoringShedulingWorker) {
+			monitoringShedulingWorker.interrupt();
+			monitoringShedulingWorker.join();
 		}
 		log.debug("Stopping incoming message worker...");
 		synchronized (incomingMessageWorker) {
@@ -338,5 +341,66 @@ public class InterventionExecutionManagerService {
 				dialogMessageStatusType);
 
 		return dialogMessage;
+	}
+
+	@Synchronized
+	public DialogStatus getDialogStatusByParticipant(
+			final ObjectId participantId) {
+		val dialogStatus = databaseManagerService.findOneModelObject(
+				DialogStatus.class, Queries.DIALOG_STATUS__BY_PARTICIPANT,
+				participantId);
+
+		return dialogStatus;
+	}
+
+	/**
+	 * Returns a list of {@link Participant}s that are relevant for monitoring;
+	 * Parameters therefore are:
+	 * 
+	 * - the belonging intervention is active
+	 * - the belonging intervention monitoring is active
+	 * - the participant has monitoring active
+	 * - the participant finished screening survey
+	 * - the participant not finished intervention
+	 * 
+	 * @return
+	 */
+	@Synchronized
+	public List<Participant> getAllParticipantsRelevantForMonitoringSheduling() {
+		val relevantParticipants = new ArrayList<Participant>();
+
+		for (val intervention : databaseManagerService.findModelObjects(
+				Intervention.class,
+				Queries.INTERVENTION__ACTIVE_TRUE_MONITORING_ACTIVE_TRUE)) {
+			for (val participant : databaseManagerService
+					.findModelObjects(
+							Participant.class,
+							Queries.PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE,
+							intervention.getId())) {
+				for (val dialogStatus : databaseManagerService
+						.findModelObjects(DialogStatus.class,
+								Queries.DIALOG_STATUS__BY_PARTICIPANT,
+								participant.getId())) {
+					if (dialogStatus != null
+							&& dialogStatus.isScreeningSurveyPerformed()
+							&& !dialogStatus.isInterventionPerformed()) {
+						relevantParticipants.add(participant);
+					}
+				}
+			}
+		}
+
+		return relevantParticipants;
+	}
+
+	@Synchronized
+	public void dialogStatusSetDateIndexOfLastDailyMonitoringProcessing(
+			final ObjectId dialogStatusId, final String dateIndex) {
+		val dialogStatus = databaseManagerService.getModelObjectById(
+				DialogStatus.class, dialogStatusId);
+
+		dialogStatus.setDateIndexOfLastDailyMonitoringProcessing(dateIndex);
+
+		databaseManagerService.saveModelObject(dialogStatus);
 	}
 }

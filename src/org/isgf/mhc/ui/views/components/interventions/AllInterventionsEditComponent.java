@@ -98,7 +98,7 @@ public class AllInterventionsEditComponent extends AbstractCustomComponent {
 									return "inactive";
 								}
 							} else if (propertyId
-									.equals(UIIntervention.MESSAGING_STATUS)) {
+									.equals(UIIntervention.MONITORING_STATUS)) {
 								val uiIntervention = getUIModelObjectFromTableByObjectId(
 										source, UIIntervention.class, itemId);
 								if (uiIntervention.isBooleanMessagingStatus()) {

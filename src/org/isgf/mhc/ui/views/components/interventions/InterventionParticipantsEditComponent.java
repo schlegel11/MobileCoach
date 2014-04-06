@@ -71,7 +71,7 @@ public class InterventionParticipantsEditComponent extends
 				AdminMessageStrings.INTERVENTION_PARTICIPANTS_EDITING__ASSIGN_UNIT);
 		localize(
 				switchMessagingButton,
-				AdminMessageStrings.INTERVENTION_PARTICIPANTS_EDITING__SWITCH_MESSAGING);
+				AdminMessageStrings.INTERVENTION_PARTICIPANTS_EDITING__SWITCH_MONITORING);
 		localize(deleteButton, AdminMessageStrings.GENERAL__DELETE);
 		localize(refreshButton, AdminMessageStrings.GENERAL__REFRESH);
 
@@ -84,10 +84,10 @@ public class InterventionParticipantsEditComponent extends
 			public String getStyle(final Table source, final Object itemId,
 					final Object propertyId) {
 				if (propertyId != null) {
-					if (propertyId.equals(UIParticipant.MESSAGING_STATUS)) {
+					if (propertyId.equals(UIParticipant.MONITORING_STATUS)) {
 						val uiParticipant = getUIModelObjectFromTableByObjectId(
 								source, UIParticipant.class, itemId);
-						if (uiParticipant.isBooleanMessagingStatus()) {
+						if (uiParticipant.isBooleanMonitoringStatus()) {
 							return "active";
 						} else {
 							return "inactive";

@@ -479,9 +479,9 @@ public class ScreeningSurveyExecutionManagerService {
 							ScreeningSurveySlideTemplateLayoutTypes.TEXT_ONLY
 									.toVariable(), true);
 					break;
-				case IMAGE_ONLY:
+				case MEDIA_ONLY:
 					templateVariables.put(
-							ScreeningSurveySlideTemplateLayoutTypes.IMAGE_ONLY
+							ScreeningSurveySlideTemplateLayoutTypes.MEDIA_ONLY
 									.toVariable(), true);
 					break;
 			}

@@ -26,14 +26,14 @@ public class Constants {
 	 * 
 	 * CAUTION: Can NOT be defined in configuration file
 	 */
-	public static final boolean	IS_LIVE_SYSTEM						= true;
+	public static final boolean	IS_LIVE_SYSTEM						= false;
 
 	/**
 	 * Basic debugging configuration
 	 * 
 	 * CAUTION: Can NOT be defined in configuration file
 	 */
-	public static final boolean	RUN_TESTS_AT_STARTUP				= true;
+	public static final boolean	RUN_TESTS_AT_STARTUP				= false;
 
 	/**
 	 * Basic configuration
