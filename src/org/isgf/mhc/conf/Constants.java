@@ -33,7 +33,7 @@ public class Constants {
 	 * 
 	 * CAUTION: Can NOT be defined in configuration file
 	 */
-	public static final boolean	RUN_TESTS_AT_STARTUP				= false;
+	public static final boolean	RUN_TESTS_AT_STARTUP				= true;
 
 	/**
 	 * Basic configuration

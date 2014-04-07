@@ -1,6 +1,7 @@
 package org.isgf.mhc.services;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import lombok.Synchronized;
@@ -26,7 +27,7 @@ import org.isgf.mhc.model.persistent.types.DialogMessageStatusTypes;
 import org.isgf.mhc.model.persistent.types.DialogOptionTypes;
 import org.isgf.mhc.services.internal.CommunicationManagerService;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
-import org.isgf.mhc.services.internal.FileStorageManagerService;
+import org.isgf.mhc.services.internal.RecursiveAbstractMonitoringRulesResolver;
 import org.isgf.mhc.services.internal.VariablesManagerService;
 import org.isgf.mhc.services.threads.IncomingMessageWorker;
 import org.isgf.mhc.services.threads.MonitoringShedulingWorker;
@@ -44,7 +45,6 @@ public class InterventionExecutionManagerService {
 	private static InterventionExecutionManagerService	instance	= null;
 
 	private final DatabaseManagerService				databaseManagerService;
-	private final FileStorageManagerService				fileStorageManagerService;
 	private final VariablesManagerService				variablesManagerService;
 	final CommunicationManagerService					communicationManagerService;
 
@@ -54,14 +54,12 @@ public class InterventionExecutionManagerService {
 
 	private InterventionExecutionManagerService(
 			final DatabaseManagerService databaseManagerService,
-			final FileStorageManagerService fileStorageManagerService,
 			final VariablesManagerService variablesManagerService,
 			final CommunicationManagerService communicationManagerService)
 			throws Exception {
 		log.info("Starting service...");
 
 		this.databaseManagerService = databaseManagerService;
-		this.fileStorageManagerService = fileStorageManagerService;
 		this.variablesManagerService = variablesManagerService;
 		this.communicationManagerService = communicationManagerService;
 
@@ -81,14 +79,13 @@ public class InterventionExecutionManagerService {
 
 	public static InterventionExecutionManagerService start(
 			final DatabaseManagerService databaseManagerService,
-			final FileStorageManagerService fileStorageManagerService,
 			final VariablesManagerService variablesManagerService,
 			final CommunicationManagerService communicationManagerService)
 			throws Exception {
 		if (instance == null) {
 			instance = new InterventionExecutionManagerService(
-					databaseManagerService, fileStorageManagerService,
-					variablesManagerService, communicationManagerService);
+					databaseManagerService, variablesManagerService,
+					communicationManagerService);
 		}
 		return instance;
 	}
@@ -148,15 +145,16 @@ public class InterventionExecutionManagerService {
 	// Dialog message
 	@Synchronized
 	public void dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
-			final ObjectId participantId, final String message,
+			final Participant participant, final String message,
 			final boolean manuallySent, final long timestampToSendMessage,
-			final ObjectId relatedMonitoringRule,
-			final ObjectId relatedMonitoringMessage) {
-		val dialogMessage = new DialogMessage(participantId, 0,
+			final MonitoringRule relatedMonitoringRule,
+			final MonitoringMessage relatedMonitoringMessage) {
+		log.debug("Create message and prepare for sending");
+		val dialogMessage = new DialogMessage(participant.getId(), 0,
 				DialogMessageStatusTypes.PREPARED_FOR_SENDING, message,
 				timestampToSendMessage, -1, -1, -1, null, false,
-				relatedMonitoringRule, relatedMonitoringMessage, false,
-				manuallySent);
+				relatedMonitoringRule.getId(),
+				relatedMonitoringMessage.getId(), false, manuallySent);
 
 		// Check linked media object
 		MediaObject linkedMediaObject = null;
@@ -178,7 +176,7 @@ public class InterventionExecutionManagerService {
 				.findOneSortedModelObject(DialogMessage.class,
 						Queries.DIALOG_MESSAGE__BY_PARTICIPANT,
 						Queries.DIALOG_MESSAGE__SORT_BY_ORDER_DESC,
-						participantId);
+						participant.getId());
 
 		if (highestOrderMessage != null) {
 			dialogMessage.setOrder(highestOrderMessage.getOrder() + 1);
@@ -322,8 +320,7 @@ public class InterventionExecutionManagerService {
 	}
 
 	/**
-	 * Handles states form "SENT" to
-	 * "INTERVENTION_FINISHED_BEFORE_PROCESSING_FINISHED"
+	 * Handles states form "SENT" till end
 	 * 
 	 * @param dialogMessageId
 	 * @param newStatus
@@ -386,8 +383,121 @@ public class InterventionExecutionManagerService {
 	}
 
 	/*
-	 * MAIN methods
+	 * MAIN methods -
+	 * 
+	 * (the following two methods contain the elemental parts of
+	 * the monitoring process)
 	 */
+	@Synchronized
+	public void reactOnAnsweredAndUnansweredMessages(
+			final boolean reactOnAnsweredMessages) {
+		log.debug(
+				"Create a list of all relevant participants for handling {} messages",
+				reactOnAnsweredMessages ? "answered" : "unanswered");
+		val participants = getAllParticipantsRelevantForAnsweredInTimeChecksAndMonitoringSheduling();
+
+		for (val participant : participants) {
+
+			// Get relevant messages of participant
+			Iterable<DialogMessage> dialogMessages;
+			if (reactOnAnsweredMessages) {
+				dialogMessages = getDialogMessagesOfParticipantAnsweredByParticipant(participant
+						.getId());
+			} else {
+				dialogMessages = getDialogMessagesOfParticipantUnansweredByParticipant(participant
+						.getId());
+			}
+
+			// Handle messages
+			for (val dialogMessage : dialogMessages) {
+				// Set new message status
+				dialogMessageStatusChangesAfterSending(dialogMessage.getId(),
+						DialogMessageStatusTypes.PROCESSED,
+						System.currentTimeMillis(), null);
+
+				// Handle message reply by participant if message is answered by
+				// participant and not a manually sent or reply rule based rule
+				if (reactOnAnsweredMessages
+						&& dialogMessage.getRelatedMonitoringMessage() != null) {
+					log.debug("Managing message reply (because the message is answered and has a reference ot a monitoring message)");
+
+					val relatedMonitoringMessage = databaseManagerService
+							.getModelObjectById(MonitoringMessage.class,
+									dialogMessage.getRelatedMonitoringMessage());
+
+					if (relatedMonitoringMessage != null
+							&& relatedMonitoringMessage
+									.getStoreValueToVariableWithName() != null
+							&& !relatedMonitoringMessage
+									.getStoreValueToVariableWithName().equals(
+											"")) {
+						log.debug(
+								"Store value '{}' of message to '{}' for participant {}",
+								dialogMessage.getAnswerReceived(),
+								relatedMonitoringMessage
+										.getStoreValueToVariableWithName(),
+								participant.getId());
+						try {
+							variablesManagerService
+									.writeVariableValueOfParticipant(
+											participant,
+											relatedMonitoringMessage
+													.getStoreValueToVariableWithName(),
+											dialogMessage.getAnswerReceived());
+						} catch (final Exception e) {
+							log.warn(
+									"Could not store value '{}' of message to '{}' for participant {}",
+									dialogMessage.getAnswerReceived(),
+									relatedMonitoringMessage
+											.getStoreValueToVariableWithName(),
+									participant.getId());
+						}
+					}
+				}
+
+				// Handle rule actions if rule was not sent manually or
+				// based on reply rules
+				if (dialogMessage.getRelatedMonitoringRuleForReplyRules() != null) {
+					log.debug("Caring for reply rules resolving");
+
+					val recursiveRuleResolver = new RecursiveAbstractMonitoringRulesResolver(
+							databaseManagerService, variablesManagerService,
+							participant,
+
+							false,
+							dialogMessage
+									.getRelatedMonitoringRuleForReplyRules(),
+							reactOnAnsweredMessages);
+
+					// Resolve rules
+					try {
+						recursiveRuleResolver.resolve();
+					} catch (final Exception e) {
+						log.error(
+								"Could not resolve rules for participant {}: {}",
+								participant.getId(), e.getMessage());
+						continue;
+					}
+
+					val sendMessage = recursiveRuleResolver
+							.shouldAMessageBeSentAfterThisResolving();
+
+					if (sendMessage) {
+						log.debug("Preparing reply message for sending for participant");
+
+						val messageTextToSend = recursiveRuleResolver
+								.getMessageTextToSend();
+
+						// Prepare message for sending
+						dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
+								participant, messageTextToSend, false,
+								System.currentTimeMillis(), null, null);
+					}
+				}
+			}
+		}
+	}
+
 	@Synchronized
 	public void sheduleMessagesForSending() {
 		log.debug("Create a list of all relevant participants for sheduling of monitoring messages");
@@ -403,11 +513,61 @@ public class InterventionExecutionManagerService {
 					&& !dialogStatus
 							.getDateIndexOfLastDailyMonitoringProcessing()
 							.equals(dateIndex)) {
-				dialogStatusUpdate(dialogStatus.getId(), dateIndex);
+				log.debug(
+						"Participant {} has not been sheduled today! Start sheduling...",
+						participant.getId());
 
-				// TODO Erstellung neuer prepared for sending nach Ausführung
-				// aller Regeln und schreiben aller variablen (neue Klasse?)
-				// prepareDialogMessagesBasedOnRuleEvaluation(participant);
+				val recursiveRuleResolver = new RecursiveAbstractMonitoringRulesResolver(
+						databaseManagerService, variablesManagerService,
+						participant, true, null, false);
+
+				// Resolve rules
+				try {
+					recursiveRuleResolver.resolve();
+				} catch (final Exception e) {
+					log.error("Could not resolve rules for participant {}: {}",
+							participant.getId(), e.getMessage());
+					continue;
+				}
+
+				val finishIntervention = recursiveRuleResolver
+						.isInterventionFinishedForParticipantAfterThisResolving();
+
+				val sendMessage = recursiveRuleResolver
+						.shouldAMessageBeSentAfterThisResolving();
+
+				if (finishIntervention) {
+					log.debug("Finishing intervention for participant");
+					dialogStatusSetMonitoringFinished(participant.getId());
+				} else if (sendMessage) {
+					log.debug("Preparing message for sending for participant");
+
+					val monitoringRule = recursiveRuleResolver
+							.getRuleThatCausedMessageSending();
+					val monitoringMessage = recursiveRuleResolver
+							.getMonitoringMessageToSend();
+					val messageTextToSend = recursiveRuleResolver
+							.getMessageTextToSend();
+
+					// Calculate time to send message
+					final int hourToSendMessage = monitoringRule
+							.getHourToSendMessage();
+					final Calendar timeToSendMessage = Calendar.getInstance();
+					timeToSendMessage.set(Calendar.HOUR_OF_DAY,
+							hourToSendMessage);
+					timeToSendMessage.set(Calendar.MINUTE, 0);
+					timeToSendMessage.set(Calendar.SECOND, 0);
+					timeToSendMessage.set(Calendar.MILLISECOND, 0);
+
+					// Prepare message for sending
+					dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
+							participant, messageTextToSend, false,
+							timeToSendMessage.getTimeInMillis(),
+							monitoringRule, monitoringMessage);
+				}
+
+				// Update status and status values
+				dialogStatusUpdate(dialogStatus.getId(), dateIndex);
 			}
 		}
 	}
@@ -571,6 +731,32 @@ public class InterventionExecutionManagerService {
 		}
 
 		return dialogMessagesWaitingToBeSend;
+	}
+
+	@Synchronized
+	private Iterable<DialogMessage> getDialogMessagesOfParticipantUnansweredByParticipant(
+			final ObjectId participantId) {
+		val dialogMessages = databaseManagerService
+				.findSortedModelObjects(
+						DialogMessage.class,
+						Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_UNANSWERED_AFTER_TIMESTAMP_LOWER,
+						Queries.DIALOG_MESSAGE__SORT_BY_ORDER_DESC,
+						participantId, DialogMessageStatusTypes.SENT,
+						System.currentTimeMillis());
+
+		return dialogMessages;
+	}
+
+	@Synchronized
+	private Iterable<DialogMessage> getDialogMessagesOfParticipantAnsweredByParticipant(
+			final ObjectId participantId) {
+		val dialogMessages = databaseManagerService.findSortedModelObjects(
+				DialogMessage.class,
+				Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS,
+				Queries.DIALOG_MESSAGE__SORT_BY_ORDER_DESC, participantId,
+				DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT);
+
+		return dialogMessages;
 	}
 
 	@Synchronized

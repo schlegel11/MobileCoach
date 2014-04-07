@@ -274,7 +274,7 @@ public class VariablesManagerService {
 		hashtable.put(variable, newVariableWithValue);
 	}
 
-	public void storeVariableValueOfParticipant(final Participant participant,
+	public void writeVariableValueOfParticipant(final Participant participant,
 			final String variableName, final String variableValue)
 			throws WriteProtectedVariableException,
 			InvalidVariableNameException {

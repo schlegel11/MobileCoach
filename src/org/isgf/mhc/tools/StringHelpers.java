@@ -67,23 +67,35 @@ public class StringHelpers {
 	/**
 	 * Creates a clean phone number of the given {@link String}
 	 * 
-	 * @param variableValue
+	 * @param phoneNumber
 	 * @return
 	 */
-	public static String cleanPhoneNumber(final String value) {
+	public static String cleanPhoneNumber(final String phoneNumber) {
 		val newValue = "00"
-				+ value.trim().replaceAll("[^\\d]", "").replaceAll("^0+", "");
+				+ phoneNumber.trim().replaceAll("[^\\d]", "")
+						.replaceAll("^0+", "");
 		return newValue;
 	}
 
 	/**
 	 * Creates a clean email address of the given {@link String}
 	 * 
-	 * @param variableValue
+	 * @param emailAddress
 	 * @return
 	 */
-	public static String cleanEmailAddress(final String value) {
-		val newValue = value.trim().toLowerCase();
+	public static String cleanEmailAddress(final String emailAddress) {
+		val newValue = emailAddress.trim().toLowerCase();
+		return newValue;
+	}
+
+	/**
+	 * Creates a clean message of the given string {@link String}
+	 * 
+	 * @param messageString
+	 * @return
+	 */
+	public static String cleanReceivedMessageString(final String messageString) {
+		val newValue = messageString.trim().replaceAll("[^A-Za-z0-9\\s]", "");
 		return newValue;
 	}
 }

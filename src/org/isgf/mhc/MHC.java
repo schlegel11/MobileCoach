@@ -82,8 +82,7 @@ public class MHC implements ServletContextListener {
 					.start(databaseManagerService, fileStorageManagerService,
 							variablesManagerService, modelObjectExchangeService);
 			interventionExecutionManagerService = InterventionExecutionManagerService
-					.start(databaseManagerService, fileStorageManagerService,
-							variablesManagerService,
+					.start(databaseManagerService, variablesManagerService,
 							communicationManagerService);
 			screeningSurveyExecutionManagerService = ScreeningSurveyExecutionManagerService
 					.start(databaseManagerService, fileStorageManagerService,

@@ -643,7 +643,7 @@ public class ScreeningSurveyExecutionManagerService {
 		} else {
 			// It's a regular variable, so store it
 			try {
-				variablesManagerService.storeVariableValueOfParticipant(
+				variablesManagerService.writeVariableValueOfParticipant(
 						participant, variableName, variableValue);
 			} catch (final Exception e) {
 				log.error("Error when storing variable '{}': {}", variableName,

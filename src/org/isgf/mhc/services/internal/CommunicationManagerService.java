@@ -39,6 +39,7 @@ import org.isgf.mhc.model.persistent.DialogOption;
 import org.isgf.mhc.model.persistent.types.DialogMessageStatusTypes;
 import org.isgf.mhc.model.persistent.types.DialogOptionTypes;
 import org.isgf.mhc.services.InterventionExecutionManagerService;
+import org.isgf.mhc.tools.StringHelpers;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
@@ -242,7 +243,8 @@ public class CommunicationManagerService {
 					val messageString = URLDecoder.decode(messageStringEncoded,
 							"ISO-8859-1");
 
-					receivedMessage.setMessage(messageString);
+					receivedMessage.setMessage(StringHelpers
+							.cleanReceivedMessageString(messageString));
 
 					log.debug("Mail parsed as {}", receivedMessage.toString());
 

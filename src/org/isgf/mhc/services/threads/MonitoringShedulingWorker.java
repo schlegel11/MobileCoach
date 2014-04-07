@@ -32,16 +32,16 @@ public class MonitoringShedulingWorker extends Thread {
 			try {
 				try {
 					log.debug("React on unanswered messages");
-					// TODO unanswered messages (gleiche regeln wie beim
-					// versand) --> rules
+					interventionExecutionManagerService
+							.reactOnAnsweredAndUnansweredMessages(false);
 				} catch (final Exception e) {
 					log.error("Could react on unanswered messages: {}",
 							e.getMessage());
 				}
 				try {
 					log.debug("React on answered messages");
-					// TODO answered messages (gleiche regeln wie beim versand)
-					// --> rules
+					interventionExecutionManagerService
+							.reactOnAnsweredAndUnansweredMessages(true);
 				} catch (final Exception e) {
 					log.error("Could react on answered messages: {}",
 							e.getMessage());
