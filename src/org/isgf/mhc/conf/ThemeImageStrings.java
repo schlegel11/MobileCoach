@@ -21,13 +21,15 @@ public class ThemeImageStrings {
 															+ "component-icon.png";
 	public static final String	BLANK_MEDIA_OBJECT	= IMAGE_PATH
 															+ "blank-media-object.png";
-	public static final String	ACTIVE_ICON_SMALL			= IMAGE_PATH
+	public static final String	ACTIVE_ICON_SMALL	= IMAGE_PATH
 															+ "active-icon-small.png";
-	public static final String	INACTIVE_ICON_SMALL		= IMAGE_PATH
+	public static final String	INACTIVE_ICON_SMALL	= IMAGE_PATH
 															+ "inactive-icon-small.png";
 
 	public static final String	MESSAGE_ICON_SMALL	= IMAGE_PATH
 															+ "message-icon-small.png";
 	public static final String	RULE_ICON_SMALL		= IMAGE_PATH
 															+ "rule-icon-small.png";
+	public static final String	STOP_ICON_SMALL		= IMAGE_PATH
+															+ "stop-icon-small.png";
 }

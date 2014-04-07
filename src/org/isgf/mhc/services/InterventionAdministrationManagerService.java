@@ -551,7 +551,8 @@ public class InterventionAdministrationManagerService {
 				null,
 				interventionId,
 				ImplementationContants.DEFAULT_HOUR_TO_SEND_MESSAGE,
-				ImplementationContants.DEFAULT_HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED);
+				ImplementationContants.DEFAULT_HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED,
+				false);
 
 		val highestOrderRule = databaseManagerService.findOneSortedModelObject(
 				MonitoringRule.class,
@@ -648,6 +649,13 @@ public class InterventionAdministrationManagerService {
 	public void monitoringRuleChangeSendMessageIfTrue(
 			final MonitoringRule monitoringRule, final boolean newValue) {
 		monitoringRule.setSendMessageIfTrue(newValue);
+
+		databaseManagerService.saveModelObject(monitoringRule);
+	}
+
+	public void monitoringRuleChangeStopInterventionIfTrue(
+			final MonitoringRule monitoringRule, final boolean newValue) {
+		monitoringRule.setStopInterventionWhenTrue(newValue);
 
 		databaseManagerService.saveModelObject(monitoringRule);
 	}

@@ -136,11 +136,43 @@ public class MonitoringRuleEditComponentWithController extends
 					@Override
 					public void valueChange(final ValueChangeEvent event) {
 						log.debug("Adjust send message if true");
+						val newValue = (boolean) event.getProperty().getValue();
+
 						getInterventionAdministrationManagerService()
 								.monitoringRuleChangeSendMessageIfTrue(
-										monitoringRule,
-										(boolean) event.getProperty()
-												.getValue());
+										monitoringRule, newValue);
+
+						if (newValue
+								&& getStopRuleExecutionAndFinishInterventionIfTrueComboBox()
+										.getValue()) {
+							getStopRuleExecutionAndFinishInterventionIfTrueComboBox()
+									.setValue(false);
+						}
+
+						adjust();
+					}
+				});
+
+		getStopRuleExecutionAndFinishInterventionIfTrueComboBox().setValue(
+				monitoringRule.isStopInterventionWhenTrue());
+		getStopRuleExecutionAndFinishInterventionIfTrueComboBox()
+				.addValueChangeListener(new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						log.debug("Adjust stop intervention if true");
+						val newValue = (boolean) event.getProperty().getValue();
+
+						getInterventionAdministrationManagerService()
+								.monitoringRuleChangeStopInterventionIfTrue(
+										monitoringRule, newValue);
+
+						if (newValue
+								&& getStopRuleExecutionIfTrueComboBox()
+										.getValue()) {
+							getStopRuleExecutionIfTrueComboBox()
+									.setValue(false);
+						}
 
 						adjust();
 					}

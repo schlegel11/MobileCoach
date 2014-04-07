@@ -343,14 +343,15 @@ public class InterventionExecutionManagerService {
 
 		switch (newStatus) {
 			case SENT_AND_ANSWERED_BY_PARTICIPANT:
+				// setting timestamp and answer received
 				dialogMessage.setAnswerReceivedTimestamp(timeStampOfEvent);
 				dialogMessage.setAnswerReceived(dataOfEvent);
 				break;
 			case SENT_BUT_NOT_ANSWERED_BY_PARTICIPANT:
-				// TODO Relevante Anpassungen?
+				// no changes necessary
 				break;
 			case PROCESSED:
-				// TODO Relevante Anpassungen?
+				// no changes necessary
 				break;
 		}
 
@@ -359,26 +360,27 @@ public class InterventionExecutionManagerService {
 
 	// Dialog status
 	@Synchronized
-	private void dialogStatusSetDateIndexOfLastDailyMonitoringProcessing(
-			final ObjectId dialogStatusId, final String dateIndex) {
+	private void dialogStatusUpdate(final ObjectId dialogStatusId,
+			final String dateIndex) {
 		val dialogStatus = databaseManagerService.getModelObjectById(
 				DialogStatus.class, dialogStatusId);
 
 		dialogStatus.setDateIndexOfLastDailyMonitoringProcessing(dateIndex);
+		dialogStatus.setMonitoringDaysParticipated(dialogStatus
+				.getMonitoringDaysParticipated() + 1);
 
 		databaseManagerService.saveModelObject(dialogStatus);
 	}
 
 	@Synchronized
-	private void dialogStatusSetInterventionFinished(
-			final ObjectId participantId) {
+	private void dialogStatusSetMonitoringFinished(final ObjectId participantId) {
 		val dialogStatus = databaseManagerService.findOneModelObject(
 				DialogStatus.class, Queries.DIALOG_STATUS__BY_PARTICIPANT,
 				participantId);
 
-		dialogStatus.setInterventionPerformed(true);
-		dialogStatus.setInterventionPerformedTimestamp(System
-				.currentTimeMillis());
+		dialogStatus.setMonitoringPerformed(true);
+		dialogStatus
+				.setMonitoringPerformedTimestamp(System.currentTimeMillis());
 
 		databaseManagerService.saveModelObject(dialogStatus);
 	}
@@ -401,8 +403,7 @@ public class InterventionExecutionManagerService {
 					&& !dialogStatus
 							.getDateIndexOfLastDailyMonitoringProcessing()
 							.equals(dateIndex)) {
-				dialogStatusSetDateIndexOfLastDailyMonitoringProcessing(
-						dialogStatus.getId(), dateIndex);
+				dialogStatusUpdate(dialogStatus.getId(), dateIndex);
 
 				// TODO Erstellung neuer prepared for sending nach Ausführung
 				// aller Regeln und schreiben aller variablen (neue Klasse?)
@@ -524,7 +525,7 @@ public class InterventionExecutionManagerService {
 	 * - the belonging intervention monitoring is active
 	 * - the participant has monitoring active
 	 * - the participant finished screening survey
-	 * - the participant not finished intervention
+	 * - the participant not finished monitoring
 	 * - the message should have the status PREPARED_FOR_SENDING
 	 * - the should be sent timestamp should be lower than the current time
 	 * 
@@ -549,7 +550,7 @@ public class InterventionExecutionManagerService {
 									participant.getId())) {
 						if (dialogStatus != null
 								&& dialogStatus.isScreeningSurveyPerformed()
-								&& !dialogStatus.isInterventionPerformed()) {
+								&& !dialogStatus.isMonitoringPerformed()) {
 
 							val dialogMessagesWaitingToBeSendOfParticipant = databaseManagerService
 									.findModelObjects(
@@ -650,7 +651,7 @@ public class InterventionExecutionManagerService {
 	 * - the belonging intervention monitoring is active
 	 * - the participant has monitoring active
 	 * - the participant finished screening survey
-	 * - the participant not finished intervention
+	 * - the participant not finished monitoring
 	 * 
 	 * @return
 	 */
@@ -673,7 +674,7 @@ public class InterventionExecutionManagerService {
 									participant.getId())) {
 						if (dialogStatus != null
 								&& dialogStatus.isScreeningSurveyPerformed()
-								&& !dialogStatus.isInterventionPerformed()) {
+								&& !dialogStatus.isMonitoringPerformed()) {
 							relevantParticipants.add(participant);
 						}
 					}

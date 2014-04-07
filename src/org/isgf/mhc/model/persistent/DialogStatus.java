@@ -56,26 +56,25 @@ public class DialogStatus extends ModelObject {
 
 	/**
 	 * Stores if the {@link Participant} performed the whole
-	 * {@link Intervention}
+	 * monitoring process
 	 */
 	@Getter
 	@Setter
-	private boolean		interventionPerformed;
+	private boolean		monitoringPerformed;
 
 	/**
-	 * Timestamp when the user finished the {@link Intervention}
+	 * Timestamp when the user finished the monitoring
 	 */
 	@Getter
 	@Setter
-	private long		interventionPerformedTimestamp;
+	private long		monitoringPerformedTimestamp;
 
 	/**
-	 * Number of days the {@link Participant} participated in the intervention
-	 * (== the messaging)
+	 * Number of days the {@link Participant} participated in the monitoring
 	 */
 	@Getter
 	@Setter
-	private int			interventionDaysParticipated;
+	private int			monitoringDaysParticipated;
 
 	/*
 	 * (non-Javadoc)

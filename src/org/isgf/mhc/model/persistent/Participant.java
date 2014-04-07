@@ -139,7 +139,7 @@ public class Participant extends ModelObject {
 		}
 
 		boolean screeningSurveyStatus = false;
-		boolean interventionStatus = false;
+		boolean monitoringStatus = false;
 
 		val dialogStatus = MHC.getInstance()
 				.getInterventionAdministrationManagerService()
@@ -147,10 +147,10 @@ public class Participant extends ModelObject {
 
 		if (dialogStatus == null) {
 			screeningSurveyStatus = false;
-			interventionStatus = false;
+			monitoringStatus = false;
 		} else {
 			screeningSurveyStatus = dialogStatus.isScreeningSurveyPerformed();
-			interventionStatus = dialogStatus.isInterventionPerformed();
+			monitoringStatus = dialogStatus.isMonitoringPerformed();
 		}
 
 		val participant = new UIParticipant(
@@ -166,11 +166,11 @@ public class Participant extends ModelObject {
 						: Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_FINISHED),
 				screeningSurveyStatus,
-				interventionStatus ? Messages
+				monitoringStatus ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__FINISHED)
 						: Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_FINISHED),
-				interventionStatus,
+				monitoringStatus,
 				monitoringActive ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
 						: Messages

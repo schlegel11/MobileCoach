@@ -68,6 +68,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 																		ThemeImageStrings.RULE_ICON_SMALL);
 	private final ThemeResource		MESSAGE_RULE_ICON			= new ThemeResource(
 																		ThemeImageStrings.MESSAGE_ICON_SMALL);
+	private final ThemeResource		STOP_RULE_ICON				= new ThemeResource(
+																		ThemeImageStrings.STOP_ICON_SMALL);
 
 	private HierarchicalContainer	container;
 
@@ -291,8 +293,20 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 					}
 				}
 			} else {
-				sendMessage = Messages
-						.getAdminString(AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_NO_MESSAGE);
+				if (isMonitoringRule) {
+					val selectedMonitoringRuleCasted = (MonitoringRule) selectedMonitoringRule;
+					if (selectedMonitoringRuleCasted
+							.isStopInterventionWhenTrue()) {
+						sendMessage = Messages
+								.getAdminString(AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_NO_MESSAGE_BUT_FINISH_INTERVENTION);
+					} else {
+						sendMessage = Messages
+								.getAdminString(AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_NO_MESSAGE);
+					}
+				} else {
+					sendMessage = Messages
+							.getAdminString(AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_NO_MESSAGE);
+				}
 			}
 
 			setSomethingSelected(resultVariable, sendMessage);
@@ -389,6 +403,10 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 						if (selectedAbstractMonitoringRule
 								.isSendMessageIfTrue()) {
 							icon = MESSAGE_RULE_ICON;
+						} else if (isMonitoringRule
+								&& ((MonitoringRule) selectedAbstractMonitoringRule)
+										.isStopInterventionWhenTrue()) {
+							icon = STOP_RULE_ICON;
 						} else {
 							icon = RULE_ICON;
 						}
@@ -427,6 +445,10 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 		ThemeResource icon;
 		if (abstractMonitoringRule.isSendMessageIfTrue()) {
 			icon = MESSAGE_RULE_ICON;
+		} else if (isMonitoringRule
+				&& ((MonitoringRule) abstractMonitoringRule)
+						.isStopInterventionWhenTrue()) {
+			icon = STOP_RULE_ICON;
 		} else {
 			icon = RULE_ICON;
 		}

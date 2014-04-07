@@ -41,7 +41,8 @@ public class MonitoringRule extends AbstractMonitoringRule {
 			final boolean sendMessageIfTrue,
 			final ObjectId relatedMonitoringMessageGroup,
 			final ObjectId intervention, final int hourToSendMessage,
-			final int hoursUntilMessageIsHandledAsUnanswered) {
+			final int hoursUntilMessageIsHandledAsUnanswered,
+			final boolean stopInterventionWhenTrue) {
 		super(ruleWithPlaceholders, ruleEquationSign,
 				ruleComparisonTermWithPlaceholders, isSubRuleOfMonitoringRule,
 				order, storeValueToVariableWithName, sendMessageIfTrue,
@@ -50,6 +51,7 @@ public class MonitoringRule extends AbstractMonitoringRule {
 		this.intervention = intervention;
 		this.hourToSendMessage = hourToSendMessage;
 		this.hoursUntilMessageIsHandledAsUnanswered = hoursUntilMessageIsHandledAsUnanswered;
+		this.stopInterventionWhenTrue = stopInterventionWhenTrue;
 	}
 
 	/**
@@ -76,6 +78,14 @@ public class MonitoringRule extends AbstractMonitoringRule {
 	@Getter
 	@Setter
 	private int			hoursUntilMessageIsHandledAsUnanswered;
+
+	/**
+	 * <strong>OPTIONAL:</strong> The intervention will be set to finished for
+	 * participant and rule execution will stop when the rule evaluates to true
+	 */
+	@Getter
+	@Setter
+	private boolean		stopInterventionWhenTrue;
 
 	/*
 	 * (non-Javadoc)
