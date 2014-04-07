@@ -21,6 +21,8 @@ public class ImplementationContants {
 	public static final int		HOUR_TO_SEND_MESSAGE_MAX										= 23;
 	public static final int		DEFAULT_HOUR_TO_SEND_MESSAGE									= 16;
 
+	public static final int		HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR							= 60 * 60 * 1000;
+
 	public static final long	MASTER_RULE_EVALUTION_WORKER_MINUTES_SLEEP_BETWEEN_CHECK_CYCLES	= 10;
 
 	public static final long	MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS					= 2 * 60;

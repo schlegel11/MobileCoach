@@ -165,9 +165,10 @@ public class CommunicationManagerService {
 		val mailingThread = new MailingThread(dialogOption, dialogMessageId,
 				message);
 
-		interventionExecutionManagerService.dialogMessageAtomaryStatusChange(
-				dialogMessageId, DialogMessageStatusTypes.SENDING,
-				System.currentTimeMillis(), null);
+		interventionExecutionManagerService
+				.dialogMessageStatusChangesForSending(dialogMessageId,
+						DialogMessageStatusTypes.SENDING,
+						System.currentTimeMillis());
 
 		synchronized (runningMailingThreads) {
 			runningMailingThreads.add(mailingThread);
@@ -313,9 +314,10 @@ public class CommunicationManagerService {
 			try {
 				sendMessage(dialogOption, message);
 
-				interventionExecutionManagerService.dialogMessageAtomaryStatusChange(
-						dialogMessageId, DialogMessageStatusTypes.SENT,
-						System.currentTimeMillis(), null);
+				interventionExecutionManagerService
+						.dialogMessageStatusChangesForSending(dialogMessageId,
+								DialogMessageStatusTypes.SENT,
+								System.currentTimeMillis());
 
 				removeFromList();
 
@@ -335,10 +337,11 @@ public class CommunicationManagerService {
 				} catch (final InterruptedException e) {
 					log.warn("Interrupted messaging sending approach {}", i);
 
-					interventionExecutionManagerService.dialogMessageAtomaryStatusChange(
-							dialogMessageId,
-							DialogMessageStatusTypes.PREPARED_FOR_SENDING,
-							System.currentTimeMillis(), null);
+					interventionExecutionManagerService
+							.dialogMessageStatusChangesForSending(
+									dialogMessageId,
+									DialogMessageStatusTypes.PREPARED_FOR_SENDING,
+									System.currentTimeMillis());
 
 					return;
 				}
@@ -346,9 +349,11 @@ public class CommunicationManagerService {
 				try {
 					sendMessage(dialogOption, message);
 
-					interventionExecutionManagerService.dialogMessageAtomaryStatusChange(
-							dialogMessageId, DialogMessageStatusTypes.SENT,
-							System.currentTimeMillis(), null);
+					interventionExecutionManagerService
+							.dialogMessageStatusChangesForSending(
+									dialogMessageId,
+									DialogMessageStatusTypes.SENT,
+									System.currentTimeMillis());
 
 					removeFromList();
 
@@ -362,10 +367,10 @@ public class CommunicationManagerService {
 			log.error("Could not send mail to {} several times...giving up",
 					dialogOption.getData());
 
-			interventionExecutionManagerService.dialogMessageAtomaryStatusChange(
-					dialogMessageId,
-					DialogMessageStatusTypes.PREPARED_FOR_SENDING,
-					System.currentTimeMillis(), null);
+			interventionExecutionManagerService
+					.dialogMessageStatusChangesForSending(dialogMessageId,
+							DialogMessageStatusTypes.PREPARED_FOR_SENDING,
+							System.currentTimeMillis());
 
 			removeFromList();
 		}

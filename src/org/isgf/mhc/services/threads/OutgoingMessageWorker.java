@@ -26,7 +26,7 @@ public class OutgoingMessageWorker extends Thread {
 	@Override
 	public void run() {
 		while (!isInterrupted()) {
-			log.debug("Executing new run of outgoing message worker...");
+			log.debug("Executing new run of outgoing message worker...started");
 
 			try {
 				interventionExecutionManagerService.handleOutgoingMessages();
@@ -34,6 +34,8 @@ public class OutgoingMessageWorker extends Thread {
 				log.error("Could not send all prepared messages: {}",
 						e.getMessage());
 			}
+
+			log.debug("Executing new run of outgoing message worker...done");
 
 			try {
 				TimeUnit.SECONDS

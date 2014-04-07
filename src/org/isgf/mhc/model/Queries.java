@@ -104,8 +104,8 @@ public class Queries {
 	public static final String	PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_VARIABLE_NAME							= "{'participant':#,'name':#}";
 
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT																= "{'participant':#}";
-	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS													= "{'participant':#,'status':#}";
-	public static final String	DIALOG_MESSAGE__BY_STATUS_AND_SHOULD_BE_SENT_TIMESTAMP_LOWER								= "{'status':#,'shouldBeSentTimestamp':{$lt:#}}";
+	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_UNANSWERED_AFTER_TIMESTAMP_HIGHER				= "{'participant':#,'status':#,'isUnansweredAfterTimestamp':{$gt:#}}";
+	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_SHOULD_BE_SENT_TIMESTAMP_LOWER				= "{'participant':#,'status':#,'shouldBeSentTimestamp':{$lt:#}}";
 	public static final String	DIALOG_MESSAGE__BY_STATUS																	= "{'status':#}";
 	public static final String	DIALOG_MESSAGE__SORT_BY_ORDER_DESC															= "{'order':-1}";
 }

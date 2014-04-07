@@ -27,20 +27,21 @@ public class MonitoringShedulingWorker extends Thread {
 	@Override
 	public void run() {
 		while (!isInterrupted()) {
-			log.debug("Executing new run of monitoring sheduling worker...");
+			log.debug("Executing new run of monitoring sheduling worker...started");
 
 			try {
 				try {
 					log.debug("React on unanswered messages");
-
-					// TODO unanswered messages --> rules
+					// TODO unanswered messages (gleiche regeln wie beim
+					// versand) --> rules
 				} catch (final Exception e) {
 					log.error("Could react on unanswered messages: {}",
 							e.getMessage());
 				}
 				try {
 					log.debug("React on answered messages");
-					// TODO answered messages --> rules
+					// TODO answered messages (gleiche regeln wie beim versand)
+					// --> rules
 				} catch (final Exception e) {
 					log.error("Could react on answered messages: {}",
 							e.getMessage());
@@ -57,6 +58,8 @@ public class MonitoringShedulingWorker extends Thread {
 				log.error("Could not run whole sheduling process: {}",
 						e.getMessage());
 			}
+
+			log.debug("Executing new run of monitoring sheduling worker...done");
 
 			try {
 				TimeUnit.MINUTES
