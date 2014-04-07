@@ -16,6 +16,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.lang.NullArgumentException;
 import org.bson.types.ObjectId;
+import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.model.persistent.Intervention;
@@ -333,7 +334,7 @@ public class InterventionParticipantsTabComponentWithController extends
 				val selectedParticipants = convertSelectedToParticipantsList();
 				try {
 					// Change organization
-					getInterventionAdministrationManagerService()
+					MHC.getInstance().getInterventionExecutionManagerService()
 							.participantsSwitchMessaging(selectedParticipants);
 				} catch (final Exception e) {
 					handleException(e);

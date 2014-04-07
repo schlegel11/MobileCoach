@@ -27,6 +27,7 @@ import org.isgf.mhc.services.internal.VariablesManagerService;
 import org.isgf.mhc.services.threads.IncomingMessageWorker;
 import org.isgf.mhc.services.threads.MonitoringShedulingWorker;
 import org.isgf.mhc.services.threads.OutgoingMessageWorker;
+import org.isgf.mhc.tools.StringHelpers;
 
 /**
  * Cares for the orchestration of the {@link Intervention}s as well as all
@@ -63,8 +64,7 @@ public class InterventionExecutionManagerService {
 		// Reset all messages which could not be sent the last times
 		dialogMessagesResetStatusAfterRestart();
 
-		outgoingMessageWorker = new OutgoingMessageWorker(this,
-				communicationManagerService);
+		outgoingMessageWorker = new OutgoingMessageWorker(this);
 		outgoingMessageWorker.start();
 		incomingMessageWorker = new IncomingMessageWorker(this,
 				communicationManagerService);
@@ -112,81 +112,40 @@ public class InterventionExecutionManagerService {
 	}
 
 	/*
-	 * Modification methods
+	 * PUBLIC Modification methods
 	 */
-	// System Unique Id
+	// Intervention
 	@Synchronized
-	public MediaObjectParticipantShortURL systemUniqueIdCreate(
-			final DialogMessage relatedDialogMessage,
-			final MediaObject relatedMediaObject) {
+	public void interventionSetStatus(final Intervention intervention,
+			final boolean value) {
+		intervention.setActive(value);
 
-		val newestSystemUniqueId = databaseManagerService
-				.findOneSortedModelObject(
-						MediaObjectParticipantShortURL.class,
-						Queries.ALL,
-						Queries.MEDIA_OBJECT_PARTICIPANT_SHORT_URL__SORT_BY_SHORT_ID_DESC);
-
-		final long nextShortId = newestSystemUniqueId == null ? 1
-				: newestSystemUniqueId.getShortId() + 1;
-
-		val newSystemUniqueId = new MediaObjectParticipantShortURL(nextShortId,
-				relatedDialogMessage.getId(), relatedMediaObject.getId());
-
-		databaseManagerService.saveModelObject(newSystemUniqueId);
-
-		return newSystemUniqueId;
+		databaseManagerService.saveModelObject(intervention);
 	}
 
-	// Dialog Message
 	@Synchronized
-	public void dialogMessageCreate(final ObjectId participantId,
-			final String message, final int hourToSendMessage,
-			final int hoursUntilMessageIsHandledAsUnanswered,
-			final boolean manuallySent,
-			final ObjectId relatedMonitoringRuleForReplyRules,
-			final ObjectId relatedMonitoringMessage) {
-		val dialogMessage = new DialogMessage(participantId, 0,
-				DialogMessageStatusTypes.PREPARED_FOR_SENDING, message, -1, -1,
-				-1, -1, null, false, relatedMonitoringRuleForReplyRules,
-				relatedMonitoringMessage, false, manuallySent);
+	public void interventionSetMonitoring(final Intervention intervention,
+			final boolean value) {
+		intervention.setMonitoringActive(value);
 
-		val highestOrderMessage = databaseManagerService
-				.findOneSortedModelObject(DialogMessage.class,
-						Queries.DIALOG_MESSAGE__BY_PARTICIPANT,
-						Queries.DIALOG_MESSAGE__SORT_BY_ORDER_DESC,
-						participantId);
+		databaseManagerService.saveModelObject(intervention);
+	}
 
-		if (highestOrderMessage != null) {
-			dialogMessage.setOrder(highestOrderMessage.getOrder() + 1);
+	// Participant
+	@Synchronized
+	public void participantsSwitchMessaging(final List<Participant> participants) {
+		for (val participant : participants) {
+			participant.setMonitoringActive(!participant.isMonitoringActive());
+
+			databaseManagerService.saveModelObject(participant);
 		}
-
-		databaseManagerService.saveModelObject(dialogMessage);
 	}
 
-	@Synchronized
-	public void dialogMessageCreateAsUnexpectedReceived(
-			final ObjectId participantId, final ReceivedMessage receivedMessage) {
-		val dialogMessage = new DialogMessage(participantId, 0,
-				DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY, "", -1, -1, -1,
-				receivedMessage.getReceivedTimestamp(),
-				receivedMessage.getMessage(), true, null, null, false, false);
-
-		val highestOrderMessage = databaseManagerService
-				.findOneSortedModelObject(DialogMessage.class,
-						Queries.DIALOG_MESSAGE__BY_PARTICIPANT,
-						Queries.DIALOG_MESSAGE__SORT_BY_ORDER_DESC,
-						participantId);
-
-		if (highestOrderMessage != null) {
-			dialogMessage.setOrder(highestOrderMessage.getOrder() + 1);
-		}
-
-		databaseManagerService.saveModelObject(dialogMessage);
-	}
-
+	// Dialog message
 	@SuppressWarnings("incomplete-switch")
 	@Synchronized
-	public void dialogMessageSetStatus(final ObjectId dialogMessageId,
+	public void dialogMessageAtomaryStatusChange(
+			final ObjectId dialogMessageId,
 			final DialogMessageStatusTypes newStatus,
 			final long timeStampOfEvent, final String dataOfEvent) {
 		val dialogMessage = databaseManagerService.getModelObjectById(
@@ -218,24 +177,79 @@ public class InterventionExecutionManagerService {
 		databaseManagerService.saveModelObject(dialogMessage);
 	}
 
-	// Dialog status
+	/*
+	 * PRIVATE Modification methods
+	 */
+	// System Unique Id
 	@Synchronized
-	private void dialogStatusSetInterventionFinished(
-			final ObjectId participantId) {
-		val dialogStatus = databaseManagerService.findOneModelObject(
-				DialogStatus.class, Queries.DIALOG_STATUS__BY_PARTICIPANT,
-				participantId);
+	private MediaObjectParticipantShortURL systemUniqueIdCreate(
+			final DialogMessage relatedDialogMessage,
+			final MediaObject relatedMediaObject) {
 
-		dialogStatus.setInterventionPerformed(true);
-		dialogStatus.setInterventionPerformedTimestamp(System
-				.currentTimeMillis());
+		val newestSystemUniqueId = databaseManagerService
+				.findOneSortedModelObject(
+						MediaObjectParticipantShortURL.class,
+						Queries.ALL,
+						Queries.MEDIA_OBJECT_PARTICIPANT_SHORT_URL__SORT_BY_SHORT_ID_DESC);
 
-		databaseManagerService.saveModelObject(dialogStatus);
+		final long nextShortId = newestSystemUniqueId == null ? 1
+				: newestSystemUniqueId.getShortId() + 1;
+
+		val newSystemUniqueId = new MediaObjectParticipantShortURL(nextShortId,
+				relatedDialogMessage.getId(), relatedMediaObject.getId());
+
+		databaseManagerService.saveModelObject(newSystemUniqueId);
+
+		return newSystemUniqueId;
 	}
 
-	/*
-	 * Special methods
-	 */
+	// Dialog Message
+	@Synchronized
+	private void dialogMessageCreate(final ObjectId participantId,
+			final String message, final int hourToSendMessage,
+			final int hoursUntilMessageIsHandledAsUnanswered,
+			final boolean manuallySent,
+			final ObjectId relatedMonitoringRuleForReplyRules,
+			final ObjectId relatedMonitoringMessage) {
+		val dialogMessage = new DialogMessage(participantId, 0,
+				DialogMessageStatusTypes.PREPARED_FOR_SENDING, message, -1, -1,
+				-1, -1, null, false, relatedMonitoringRuleForReplyRules,
+				relatedMonitoringMessage, false, manuallySent);
+
+		val highestOrderMessage = databaseManagerService
+				.findOneSortedModelObject(DialogMessage.class,
+						Queries.DIALOG_MESSAGE__BY_PARTICIPANT,
+						Queries.DIALOG_MESSAGE__SORT_BY_ORDER_DESC,
+						participantId);
+
+		if (highestOrderMessage != null) {
+			dialogMessage.setOrder(highestOrderMessage.getOrder() + 1);
+		}
+
+		databaseManagerService.saveModelObject(dialogMessage);
+	}
+
+	@Synchronized
+	private void dialogMessageCreateAsUnexpectedReceived(
+			final ObjectId participantId, final ReceivedMessage receivedMessage) {
+		val dialogMessage = new DialogMessage(participantId, 0,
+				DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY, "", -1, -1, -1,
+				receivedMessage.getReceivedTimestamp(),
+				receivedMessage.getMessage(), true, null, null, false, false);
+
+		val highestOrderMessage = databaseManagerService
+				.findOneSortedModelObject(DialogMessage.class,
+						Queries.DIALOG_MESSAGE__BY_PARTICIPANT,
+						Queries.DIALOG_MESSAGE__SORT_BY_ORDER_DESC,
+						participantId);
+
+		if (highestOrderMessage != null) {
+			dialogMessage.setOrder(highestOrderMessage.getOrder() + 1);
+		}
+
+		databaseManagerService.saveModelObject(dialogMessage);
+	}
+
 	@Synchronized
 	private void dialogMessagesResetStatusAfterRestart() {
 		log.debug("Resetting dialog message status after restart...");
@@ -252,6 +266,124 @@ public class InterventionExecutionManagerService {
 		}
 	}
 
+	// Dialog status
+	@Synchronized
+	private void dialogStatusSetDateIndexOfLastDailyMonitoringProcessing(
+			final ObjectId dialogStatusId, final String dateIndex) {
+		val dialogStatus = databaseManagerService.getModelObjectById(
+				DialogStatus.class, dialogStatusId);
+
+		dialogStatus.setDateIndexOfLastDailyMonitoringProcessing(dateIndex);
+
+		databaseManagerService.saveModelObject(dialogStatus);
+	}
+
+	@Synchronized
+	private void dialogStatusSetInterventionFinished(
+			final ObjectId participantId) {
+		val dialogStatus = databaseManagerService.findOneModelObject(
+				DialogStatus.class, Queries.DIALOG_STATUS__BY_PARTICIPANT,
+				participantId);
+
+		dialogStatus.setInterventionPerformed(true);
+		dialogStatus.setInterventionPerformedTimestamp(System
+				.currentTimeMillis());
+
+		databaseManagerService.saveModelObject(dialogStatus);
+	}
+
+	/*
+	 * MAIN methods
+	 */
+	@Synchronized
+	public void sheduleMessagesForSending() {
+		log.debug("Create a list of all relevant participants for sheduling of monitoring messages");
+		val participants = getAllParticipantsRelevantForMonitoringSheduling();
+
+		val dateIndex = StringHelpers.createStringTimeStamp();
+		for (val participant : participants) {
+
+			// Check if participant has already been sheduled today
+			val dialogStatus = getDialogStatusByParticipant(participant.getId());
+
+			if (dialogStatus != null
+					&& !dialogStatus
+							.getDateIndexOfLastDailyMonitoringProcessing()
+							.equals(dateIndex)) {
+				dialogStatusSetDateIndexOfLastDailyMonitoringProcessing(
+						dialogStatus.getId(), dateIndex);
+
+				// TODO
+				// prepareDialogMessagesBasedOnRuleEvaluation(participant);
+			}
+		}
+	}
+
+	@Synchronized
+	public void handleReceivedMessage(final ReceivedMessage receivedMessage) {
+		val dialogOption = getDialogOptionByTypeAndData(
+				communicationManagerService.getSupportedDialogOptionType(),
+				StringHelpers.cleanPhoneNumber(receivedMessage.getSender()));
+		if (dialogOption == null) {
+			log.warn(
+					"The received message with sender number '{}' does not fit to any participant, skip it",
+					receivedMessage.getSender());
+			return;
+		}
+
+		val dialogMessage = getDialogMessageByParticipantAndStatus(
+				dialogOption.getParticipant(), DialogMessageStatusTypes.SENT);
+
+		if (dialogMessage == null) {
+			log.debug(
+					"Received an unexpected SMS from '{}', store it and mark it as unexpected",
+					receivedMessage.getSender());
+			dialogMessageCreateAsUnexpectedReceived(
+					dialogOption.getParticipant(), receivedMessage);
+
+			return;
+		}
+
+		dialogMessageAtomaryStatusChange(dialogMessage.getId(),
+				DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
+				receivedMessage.getReceivedTimestamp(),
+				receivedMessage.getMessage());
+	}
+
+	@Synchronized
+	public void handleOutgoingMessages() {
+		final val dialogMessagesToSend = getDialogMessagesWaitingToBeSent();
+		for (val dialogMessageToSend : dialogMessagesToSend) {
+			try {
+
+				val dialogOption = getDialogOptionByParticipantAndType(
+						dialogMessageToSend.getParticipant(),
+						communicationManagerService
+								.getSupportedDialogOptionType());
+
+				if (dialogOption != null) {
+					log.debug("Sending prepared message to {}",
+							dialogOption.getData());
+					communicationManagerService.sendMessage(dialogOption,
+							dialogMessageToSend.getId(),
+							dialogMessageToSend.getMessage());
+				} else {
+					log.error("Could not send prepared message, because there was no valid dialog option to send message to participant; solution: deactive messaging for participant and removing current dialog message");
+
+					try {
+						deactivateMessagingForParticipantAndDeleteDialogMessages(dialogMessageToSend
+								.getParticipant());
+						log.debug("Cleanup sucessful");
+					} catch (final Exception e) {
+						log.error("Cleanup not sucessful: {}", e.getMessage());
+					}
+				}
+			} catch (final Exception e) {
+				log.error("Could not send prepared message: {}", e.getMessage());
+			}
+		}
+	}
+
 	/**
 	 * Cleanup method for the case of problems when trying to send to a
 	 * participant
@@ -259,7 +391,7 @@ public class InterventionExecutionManagerService {
 	 * @param participantId
 	 */
 	@Synchronized
-	public void deactivateMessagingForParticipantAndDeleteDialogMessages(
+	private void deactivateMessagingForParticipantAndDeleteDialogMessages(
 			final ObjectId participantId) {
 		val dialogMessagesToDelete = databaseManagerService.findModelObjects(
 				DialogMessage.class, Queries.DIALOG_MESSAGE__BY_PARTICIPANT,
@@ -276,16 +408,20 @@ public class InterventionExecutionManagerService {
 	}
 
 	/*
-	 * Getter methods
+	 * PUBLIC Getter methods
 	 */
 	@Synchronized
-	public MediaObjectParticipantShortURL getSystemUniqueId(final long shortId) {
+	public MediaObjectParticipantShortURL getMediaObjectParticipantShortURLByShortId(
+			final long shortId) {
 		return databaseManagerService.findOneModelObject(
 				MediaObjectParticipantShortURL.class,
 				Queries.MEDIA_OBJECT_PARTICIPANT_SHORT_URL__BY_SHORT_ID,
 				shortId);
 	}
 
+	/*
+	 * PRIVATE Getter methods
+	 */
 	/**
 	 * Returns a list of {@link DialogMessage}s that should be sent; Parameters
 	 * therefore are:
@@ -296,7 +432,7 @@ public class InterventionExecutionManagerService {
 	 * @return
 	 */
 	@Synchronized
-	public Iterable<DialogMessage> getDialogMessagesWaitingToBeSent() {
+	private Iterable<DialogMessage> getDialogMessagesWaitingToBeSent() {
 		val dialogMessagesWaitingToBeSend = databaseManagerService
 				.findModelObjects(
 						DialogMessage.class,
@@ -308,7 +444,7 @@ public class InterventionExecutionManagerService {
 	}
 
 	@Synchronized
-	public DialogOption getDialogOptionByParticipantAndType(
+	private DialogOption getDialogOptionByParticipantAndType(
 			final ObjectId participantId,
 			final DialogOptionTypes dialogOptionType) {
 		val dialogOption = databaseManagerService.findOneModelObject(
@@ -320,7 +456,7 @@ public class InterventionExecutionManagerService {
 	}
 
 	@Synchronized
-	public DialogOption getDialogOptionByTypeAndData(
+	private DialogOption getDialogOptionByTypeAndData(
 			final DialogOptionTypes dialogOptionType,
 			final String dialogOptionData) {
 		val dialogOption = databaseManagerService.findOneModelObject(
@@ -331,7 +467,7 @@ public class InterventionExecutionManagerService {
 	}
 
 	@Synchronized
-	public DialogMessage getDialogMessageByParticipantAndStatus(
+	private DialogMessage getDialogMessageByParticipantAndStatus(
 			final ObjectId participantId,
 			final DialogMessageStatusTypes dialogMessageStatusType) {
 		val dialogMessage = databaseManagerService.findOneSortedModelObject(
@@ -344,7 +480,7 @@ public class InterventionExecutionManagerService {
 	}
 
 	@Synchronized
-	public DialogStatus getDialogStatusByParticipant(
+	private DialogStatus getDialogStatusByParticipant(
 			final ObjectId participantId) {
 		val dialogStatus = databaseManagerService.findOneModelObject(
 				DialogStatus.class, Queries.DIALOG_STATUS__BY_PARTICIPANT,
@@ -366,7 +502,7 @@ public class InterventionExecutionManagerService {
 	 * @return
 	 */
 	@Synchronized
-	public List<Participant> getAllParticipantsRelevantForMonitoringSheduling() {
+	private List<Participant> getAllParticipantsRelevantForMonitoringSheduling() {
 		val relevantParticipants = new ArrayList<Participant>();
 
 		for (val intervention : databaseManagerService.findModelObjects(
@@ -391,16 +527,5 @@ public class InterventionExecutionManagerService {
 		}
 
 		return relevantParticipants;
-	}
-
-	@Synchronized
-	public void dialogStatusSetDateIndexOfLastDailyMonitoringProcessing(
-			final ObjectId dialogStatusId, final String dateIndex) {
-		val dialogStatus = databaseManagerService.getModelObjectById(
-				DialogStatus.class, dialogStatusId);
-
-		dialogStatus.setDateIndexOfLastDailyMonitoringProcessing(dateIndex);
-
-		databaseManagerService.saveModelObject(dialogStatus);
 	}
 }

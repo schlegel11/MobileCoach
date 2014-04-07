@@ -165,7 +165,7 @@ public class CommunicationManagerService {
 		val mailingThread = new MailingThread(dialogOption, dialogMessageId,
 				message);
 
-		interventionExecutionManagerService.dialogMessageSetStatus(
+		interventionExecutionManagerService.dialogMessageAtomaryStatusChange(
 				dialogMessageId, DialogMessageStatusTypes.SENDING,
 				System.currentTimeMillis(), null);
 
@@ -313,7 +313,7 @@ public class CommunicationManagerService {
 			try {
 				sendMessage(dialogOption, message);
 
-				interventionExecutionManagerService.dialogMessageSetStatus(
+				interventionExecutionManagerService.dialogMessageAtomaryStatusChange(
 						dialogMessageId, DialogMessageStatusTypes.SENT,
 						System.currentTimeMillis(), null);
 
@@ -335,7 +335,7 @@ public class CommunicationManagerService {
 				} catch (final InterruptedException e) {
 					log.warn("Interrupted messaging sending approach {}", i);
 
-					interventionExecutionManagerService.dialogMessageSetStatus(
+					interventionExecutionManagerService.dialogMessageAtomaryStatusChange(
 							dialogMessageId,
 							DialogMessageStatusTypes.PREPARED_FOR_SENDING,
 							System.currentTimeMillis(), null);
@@ -346,7 +346,7 @@ public class CommunicationManagerService {
 				try {
 					sendMessage(dialogOption, message);
 
-					interventionExecutionManagerService.dialogMessageSetStatus(
+					interventionExecutionManagerService.dialogMessageAtomaryStatusChange(
 							dialogMessageId, DialogMessageStatusTypes.SENT,
 							System.currentTimeMillis(), null);
 
@@ -362,7 +362,7 @@ public class CommunicationManagerService {
 			log.error("Could not send mail to {} several times...giving up",
 					dialogOption.getData());
 
-			interventionExecutionManagerService.dialogMessageSetStatus(
+			interventionExecutionManagerService.dialogMessageAtomaryStatusChange(
 					dialogMessageId,
 					DialogMessageStatusTypes.PREPARED_FOR_SENDING,
 					System.currentTimeMillis(), null);

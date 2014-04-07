@@ -3,6 +3,7 @@ package org.isgf.mhc.ui.views.components.interventions;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.isgf.mhc.MHC;
 import org.isgf.mhc.model.persistent.Intervention;
 
 import com.vaadin.ui.Button;
@@ -32,8 +33,7 @@ public class InterventionBasicSettingsTabComponentWithController extends
 		this.intervention = intervention;
 		this.interventionEditingContainerComponentWithController = interventionEditingContainerComponentWithController;
 
-		lastInterventionMonitoringState = intervention
-				.isMonitoringActive();
+		lastInterventionMonitoringState = intervention.isMonitoringActive();
 
 		// Set the first time before other tabs are constructed
 		interventionEditingContainerComponentWithController
@@ -65,8 +65,7 @@ public class InterventionBasicSettingsTabComponentWithController extends
 							.isMonitoringActive());
 		}
 
-		lastInterventionMonitoringState = intervention
-				.isMonitoringActive();
+		lastInterventionMonitoringState = intervention.isMonitoringActive();
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
@@ -92,7 +91,8 @@ public class InterventionBasicSettingsTabComponentWithController extends
 			@Override
 			public void buttonClick(final ClickEvent event) {
 				try {
-					getInterventionAdministrationManagerService()
+					MHC.getInstance()
+							.getInterventionExecutionManagerService()
 							.interventionSetStatus(intervention,
 									!intervention.isActive());
 				} catch (final Exception e) {
@@ -114,7 +114,8 @@ public class InterventionBasicSettingsTabComponentWithController extends
 			@Override
 			public void buttonClick(final ClickEvent event) {
 				try {
-					getInterventionAdministrationManagerService()
+					MHC.getInstance()
+							.getInterventionExecutionManagerService()
 							.interventionSetMonitoring(intervention,
 									!intervention.isMonitoringActive());
 				} catch (final Exception e) {

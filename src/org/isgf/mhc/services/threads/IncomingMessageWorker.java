@@ -6,10 +6,8 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.conf.ImplementationContants;
-import org.isgf.mhc.model.persistent.types.DialogMessageStatusTypes;
 import org.isgf.mhc.services.InterventionExecutionManagerService;
 import org.isgf.mhc.services.internal.CommunicationManagerService;
-import org.isgf.mhc.tools.StringHelpers;
 
 /**
  * Manages the handling of incoming messages
@@ -42,43 +40,8 @@ public class IncomingMessageWorker extends Thread {
 
 				for (val receivedMessage : receivedMessages) {
 					try {
-						val dialogOption = interventionExecutionManagerService
-								.getDialogOptionByTypeAndData(
-										communicationManagerService
-												.getSupportedDialogOptionType(),
-										StringHelpers
-												.cleanPhoneNumber(receivedMessage
-														.getSender()));
-						if (dialogOption == null) {
-							log.warn(
-									"The received message with sender number '{}' does not fit to any participant, skip it",
-									receivedMessage.getSender());
-							continue;
-						}
-
-						val dialogMessage = interventionExecutionManagerService
-								.getDialogMessageByParticipantAndStatus(
-										dialogOption.getParticipant(),
-										DialogMessageStatusTypes.SENT);
-
-						if (dialogMessage == null) {
-							log.debug(
-									"Received an unexpected SMS from '{}', store it and mark it as unexpected",
-									receivedMessage.getSender());
-							interventionExecutionManagerService
-									.dialogMessageCreateAsUnexpectedReceived(
-											dialogOption.getParticipant(),
-											receivedMessage);
-
-							continue;
-						}
-
 						interventionExecutionManagerService
-								.dialogMessageSetStatus(
-										dialogMessage.getId(),
-										DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
-										receivedMessage.getReceivedTimestamp(),
-										receivedMessage.getMessage());
+								.handleReceivedMessage(receivedMessage);
 					} catch (final Exception e) {
 						log.error("Could not handle  received message: {}",
 								e.getMessage());

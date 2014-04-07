@@ -215,20 +215,6 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(intervention);
 	}
 
-	public void interventionSetStatus(final Intervention intervention,
-			final boolean value) {
-		intervention.setActive(value);
-
-		databaseManagerService.saveModelObject(intervention);
-	}
-
-	public void interventionSetMonitoring(final Intervention intervention,
-			final boolean value) {
-		intervention.setMonitoringActive(value);
-
-		databaseManagerService.saveModelObject(intervention);
-	}
-
 	public Intervention interventionImport(final File file)
 			throws FileNotFoundException, IOException {
 		val importedModelObjects = modelObjectExchangeService
@@ -1012,14 +998,6 @@ public class InterventionAdministrationManagerService {
 			final List<Participant> participants, final String newValue) {
 		for (val participant : participants) {
 			participant.setOrganizationUnit(newValue);
-
-			databaseManagerService.saveModelObject(participant);
-		}
-	}
-
-	public void participantsSwitchMessaging(final List<Participant> participants) {
-		for (val participant : participants) {
-			participant.setMonitoringActive(!participant.isMonitoringActive());
 
 			databaseManagerService.saveModelObject(participant);
 		}
