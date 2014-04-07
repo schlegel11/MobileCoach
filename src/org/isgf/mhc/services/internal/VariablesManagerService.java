@@ -249,6 +249,11 @@ public class VariablesManagerService {
 				.values()) {
 			switch (variable) {
 				case participantMessageReply:
+					if (!variablesWithValues.containsKey(variable
+							.toVariableName())) {
+						addToHashtable(variablesWithValues,
+								variable.toVariableName(), "");
+					}
 					break;
 			}
 		}
@@ -278,14 +283,17 @@ public class VariablesManagerService {
 			final String variableName, final String variableValue)
 			throws WriteProtectedVariableException,
 			InvalidVariableNameException {
+		writeVariableValueOfParticipant(participant, variableName,
+				variableValue, false);
+	}
+
+	public void writeVariableValueOfParticipant(final Participant participant,
+			final String variableName, final String variableValue,
+			final boolean overwriteAllowed)
+			throws WriteProtectedVariableException,
+			InvalidVariableNameException {
 		log.debug("Storing variable {} with value {}", variableName,
 				variableValue);
-
-		val participantVariableWithValue = databaseManagerService
-				.findOneModelObject(
-						ParticipantVariableWithValue.class,
-						Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_VARIABLE_NAME,
-						participant.getId(), variableName);
 
 		if (!StringValidator.isValidVariableName(variableName)) {
 			throw new InvalidVariableNameException();
@@ -294,6 +302,12 @@ public class VariablesManagerService {
 		if (isWriteProtectedVariableName(variableName)) {
 			throw new WriteProtectedVariableException();
 		}
+
+		val participantVariableWithValue = databaseManagerService
+				.findOneModelObject(
+						ParticipantVariableWithValue.class,
+						Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_VARIABLE_NAME,
+						participant.getId(), variableName);
 
 		if (participantVariableWithValue == null) {
 			val newParticipantVariableWithValue = new ParticipantVariableWithValue(

@@ -32,6 +32,7 @@ import org.isgf.mhc.services.internal.VariablesManagerService;
 import org.isgf.mhc.services.threads.IncomingMessageWorker;
 import org.isgf.mhc.services.threads.MonitoringShedulingWorker;
 import org.isgf.mhc.services.threads.OutgoingMessageWorker;
+import org.isgf.mhc.services.types.SystemVariables;
 import org.isgf.mhc.tools.StringHelpers;
 
 /**
@@ -416,7 +417,7 @@ public class InterventionExecutionManagerService {
 						System.currentTimeMillis(), null);
 
 				// Handle message reply by participant if message is answered by
-				// participant and not a manually sent or reply rule based rule
+				// participant and not a manually sent
 				if (reactOnAnsweredMessages
 						&& dialogMessage.getRelatedMonitoringMessage() != null) {
 					log.debug("Managing message reply (because the message is answered and has a reference ot a monitoring message)");
@@ -431,10 +432,14 @@ public class InterventionExecutionManagerService {
 							&& !relatedMonitoringMessage
 									.getStoreValueToVariableWithName().equals(
 											"")) {
+
+						val cleanedMessageValue = StringHelpers
+								.cleanReceivedMessageString(dialogMessage
+										.getAnswerReceived());
 						log.debug(
-								"Store value '{}' of message to '{}' for participant {}",
+								"Store value '{}' (cleaned: '{}') of message to '{}' for participant {}",
 								dialogMessage.getAnswerReceived(),
-								relatedMonitoringMessage
+								cleanedMessageValue, relatedMonitoringMessage
 										.getStoreValueToVariableWithName(),
 								participant.getId());
 						try {
@@ -443,7 +448,13 @@ public class InterventionExecutionManagerService {
 											participant,
 											relatedMonitoringMessage
 													.getStoreValueToVariableWithName(),
-											dialogMessage.getAnswerReceived());
+											cleanedMessageValue);
+							variablesManagerService
+									.writeVariableValueOfParticipant(
+											participant,
+											SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantMessageReply
+													.toVariableName(),
+											cleanedMessageValue, true);
 						} catch (final Exception e) {
 							log.warn(
 									"Could not store value '{}' of message to '{}' for participant {}",
@@ -485,13 +496,16 @@ public class InterventionExecutionManagerService {
 					if (sendMessage) {
 						log.debug("Preparing reply message for sending for participant");
 
+						val monitoringMessage = recursiveRuleResolver
+								.getMonitoringMessageToSend();
 						val messageTextToSend = recursiveRuleResolver
 								.getMessageTextToSend();
 
 						// Prepare message for sending
 						dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
 								participant, messageTextToSend, false,
-								System.currentTimeMillis(), null, null);
+								System.currentTimeMillis(), null,
+								monitoringMessage);
 					}
 				}
 			}

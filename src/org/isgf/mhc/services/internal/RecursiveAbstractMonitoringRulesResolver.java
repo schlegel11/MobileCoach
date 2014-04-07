@@ -65,8 +65,22 @@ public class RecursiveAbstractMonitoringRulesResolver {
 	}
 
 	public void resolve() {
-		// TODO Auto-generated method stub
+		// recursive method
+		// look for three cases:
+		// * montioring rules
+		// * reply rules true of monitoring rules and the same with false
 
+		// at best: Starting point with null, then recurive
+
+		// Use Stack class --> has is root
+
+		// loop until finished or sending message
+
+		// cleanup
+
+		// Achtung: Immer daran denken es auf die Intervention einzuschränken
+
+		// TODO Auto-generated method stub
 	}
 
 	/*
