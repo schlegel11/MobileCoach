@@ -39,6 +39,7 @@ import org.isgf.mhc.services.types.ScreeningSurveySlideTemplateFieldTypes;
 import org.isgf.mhc.services.types.ScreeningSurveySlideTemplateLayoutTypes;
 import org.isgf.mhc.services.types.SystemVariables;
 import org.isgf.mhc.tools.GlobalUniqueIdGenerator;
+import org.isgf.mhc.tools.InternalDateTime;
 import org.isgf.mhc.tools.RuleEvaluator;
 import org.isgf.mhc.tools.StringHelpers;
 import org.isgf.mhc.tools.VariableStringReplacer;
@@ -99,8 +100,9 @@ public class ScreeningSurveyExecutionManagerService {
 	// Participant
 	private Participant participantCreate(final ScreeningSurvey screeningSurvey) {
 		val participant = new Participant(screeningSurvey.getIntervention(),
-				System.currentTimeMillis(), "", screeningSurvey.getId(),
-				screeningSurvey.getGlobalUniqueId(), null, null, false, "", "");
+				InternalDateTime.currentTimeMillis(), "",
+				screeningSurvey.getId(), screeningSurvey.getGlobalUniqueId(),
+				null, null, false, "", "");
 
 		databaseManagerService.saveModelObject(participant);
 
@@ -162,7 +164,7 @@ public class ScreeningSurveyExecutionManagerService {
 
 		if (!dialogStatus.isScreeningSurveyPerformed()) {
 			dialogStatus.setScreeningSurveyPerformed(true);
-			dialogStatus.setScreeningSurveyPerformedTimestamp(System
+			dialogStatus.setScreeningSurveyPerformedTimestamp(InternalDateTime
 					.currentTimeMillis());
 
 			databaseManagerService.saveModelObject(dialogStatus);

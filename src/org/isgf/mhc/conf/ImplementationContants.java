@@ -31,6 +31,8 @@ public class ImplementationContants {
 	public static final long	MAILING_SEND_RETRIES											= 2;
 	public static final long	MAILING_SEND_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS			= 5 * 60;
 
+	public static final long	SIMULATOR_TIME_UPDATE_INTERVAL_IN_SECONDS						= 20;
+
 	public static final int		SCREENING_SURVEY_FILE_CACHE_IN_MINUTES							= 3600;
 
 	public static final String	FILE_STREAMING_SERVLET_PATH										= "files";

@@ -14,7 +14,8 @@ public class GlobalUniqueIdGenerator {
 	 * @return
 	 */
 	public static String createGlobalUniqueId() {
-		final String partOne = String.valueOf(System.currentTimeMillis());
+		final String partOne = String.valueOf(InternalDateTime
+				.currentTimeMillis());
 		final String partTwo = RandomStringUtils.randomAlphanumeric(200);
 		return partOne + "-" + partTwo;
 	}

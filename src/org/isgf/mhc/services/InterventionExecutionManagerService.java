@@ -33,6 +33,7 @@ import org.isgf.mhc.services.threads.IncomingMessageWorker;
 import org.isgf.mhc.services.threads.MonitoringShedulingWorker;
 import org.isgf.mhc.services.threads.OutgoingMessageWorker;
 import org.isgf.mhc.services.types.SystemVariables;
+import org.isgf.mhc.tools.InternalDateTime;
 import org.isgf.mhc.tools.StringHelpers;
 
 /**
@@ -377,8 +378,8 @@ public class InterventionExecutionManagerService {
 				participantId);
 
 		dialogStatus.setMonitoringPerformed(true);
-		dialogStatus
-				.setMonitoringPerformedTimestamp(System.currentTimeMillis());
+		dialogStatus.setMonitoringPerformedTimestamp(InternalDateTime
+				.currentTimeMillis());
 
 		databaseManagerService.saveModelObject(dialogStatus);
 	}
@@ -414,7 +415,7 @@ public class InterventionExecutionManagerService {
 				// Set new message status
 				dialogMessageStatusChangesAfterSending(dialogMessage.getId(),
 						DialogMessageStatusTypes.PROCESSED,
-						System.currentTimeMillis(), null);
+						InternalDateTime.currentTimeMillis(), null);
 
 				// Handle message reply by participant if message is answered by
 				// participant and not a manually sent
@@ -504,7 +505,7 @@ public class InterventionExecutionManagerService {
 						// Prepare message for sending
 						dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
 								participant, messageTextToSend, false,
-								System.currentTimeMillis(), null,
+								InternalDateTime.currentTimeMillis(), null,
 								monitoringMessage);
 					}
 				}
@@ -567,6 +568,8 @@ public class InterventionExecutionManagerService {
 					final int hourToSendMessage = monitoringRule
 							.getHourToSendMessage();
 					final Calendar timeToSendMessage = Calendar.getInstance();
+					timeToSendMessage.setTimeInMillis(InternalDateTime
+							.currentTimeMillis());
 					timeToSendMessage.set(Calendar.HOUR_OF_DAY,
 							hourToSendMessage);
 					timeToSendMessage.set(Calendar.MINUTE, 0);
@@ -590,7 +593,7 @@ public class InterventionExecutionManagerService {
 	public void handleReceivedMessage(final ReceivedMessage receivedMessage) {
 		val dialogOption = getDialogOptionByTypeAndDataOfActiveInterventions(
 				communicationManagerService.getSupportedDialogOptionType(),
-				StringHelpers.cleanPhoneNumber(receivedMessage.getSender()));
+				receivedMessage.getSender());
 
 		if (dialogOption == null) {
 			log.warn(
@@ -732,7 +735,8 @@ public class InterventionExecutionManagerService {
 											Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_SHOULD_BE_SENT_TIMESTAMP_LOWER,
 											participant.getId(),
 											DialogMessageStatusTypes.PREPARED_FOR_SENDING,
-											System.currentTimeMillis());
+											InternalDateTime
+													.currentTimeMillis());
 
 							CollectionUtils.addAll(
 									dialogMessagesWaitingToBeSend,
@@ -756,7 +760,7 @@ public class InterventionExecutionManagerService {
 						Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_UNANSWERED_AFTER_TIMESTAMP_LOWER,
 						Queries.DIALOG_MESSAGE__SORT_BY_ORDER_DESC,
 						participantId, DialogMessageStatusTypes.SENT,
-						System.currentTimeMillis());
+						InternalDateTime.currentTimeMillis());
 
 		return dialogMessages;
 	}

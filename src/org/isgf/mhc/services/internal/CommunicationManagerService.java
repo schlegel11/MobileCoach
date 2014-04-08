@@ -30,6 +30,7 @@ import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.Constants;
@@ -39,6 +40,9 @@ import org.isgf.mhc.model.persistent.DialogOption;
 import org.isgf.mhc.model.persistent.types.DialogMessageStatusTypes;
 import org.isgf.mhc.model.persistent.types.DialogOptionTypes;
 import org.isgf.mhc.services.InterventionExecutionManagerService;
+import org.isgf.mhc.tools.InternalDateTime;
+import org.isgf.mhc.tools.Simulator;
+import org.isgf.mhc.tools.StringHelpers;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
@@ -93,7 +97,7 @@ public class CommunicationManagerService {
 		smsEmailTo = Constants.getSmsEmailTo();
 		smsUserKey = Constants.getSmsUserKey();
 		smsUserPassword = Constants.getSmsUserPassword();
-		smsPhoneNumberFrom = Constants.getSmsPhoneNumberFrom();
+		smsPhoneNumberFrom = "+" + Constants.getSmsPhoneNumberFrom();
 
 		// General properties
 		val properties = new Properties();
@@ -168,7 +172,7 @@ public class CommunicationManagerService {
 		interventionExecutionManagerService
 				.dialogMessageStatusChangesForSending(dialogMessageId,
 						DialogMessageStatusTypes.SENDING,
-						System.currentTimeMillis());
+						InternalDateTime.currentTimeMillis());
 
 		synchronized (runningMailingThreads) {
 			runningMailingThreads.add(mailingThread);
@@ -184,6 +188,10 @@ public class CommunicationManagerService {
 	 */
 	public List<ReceivedMessage> receiveMessages() {
 		val receivedMessages = new ArrayList<ReceivedMessage>();
+
+		// Add simulated messages if available
+		CollectionUtils.addAll(receivedMessages, Simulator.getInstance()
+				.getSimulatedReceivedMessages());
 
 		Store store = null;
 		Folder folder = null;
@@ -212,18 +220,18 @@ public class CommunicationManagerService {
 					val sender = ((NodeList) xPath.evaluate(
 							"/aspsms/Originator/PhoneNumber",
 							document.getDocumentElement(),
-							XPathConstants.NODESET)).item(0).getTextContent()
-							.replaceAll("^00", "+");
+							XPathConstants.NODESET)).item(0).getTextContent();
 
-					receivedMessage.setSender(sender);
+					receivedMessage.setSender(StringHelpers
+							.cleanPhoneNumber(sender));
 
 					val recipient = ((NodeList) xPath.evaluate(
 							"/aspsms/Recipient/PhoneNumber",
 							document.getDocumentElement(),
-							XPathConstants.NODESET)).item(0).getTextContent()
-							.replaceAll("^00", "+");
+							XPathConstants.NODESET)).item(0).getTextContent();
 
-					receivedMessage.setRecipient(recipient);
+					receivedMessage.setRecipient(StringHelpers
+							.cleanPhoneNumber(recipient));
 
 					val receivedTimestampString = ((NodeList) xPath.evaluate(
 							"/aspsms/DateReceived",
@@ -233,7 +241,13 @@ public class CommunicationManagerService {
 					val receivedTimestamp = receiverDateFormat.parse(
 							receivedTimestampString).getTime();
 
-					receivedMessage.setReceivedTimestamp(receivedTimestamp);
+					// Abjust for simulated date and time
+					if (Constants.isSimulatedDateAndTime()) {
+						receivedMessage.setReceivedTimestamp(InternalDateTime
+								.currentTimeMillis());
+					} else {
+						receivedMessage.setReceivedTimestamp(receivedTimestamp);
+					}
 
 					val messageStringEncoded = ((NodeList) xPath.evaluate(
 							"/aspsms/MessageData",
@@ -317,7 +331,7 @@ public class CommunicationManagerService {
 				interventionExecutionManagerService
 						.dialogMessageStatusChangesForSending(dialogMessageId,
 								DialogMessageStatusTypes.SENT,
-								System.currentTimeMillis());
+								InternalDateTime.currentTimeMillis());
 
 				removeFromList();
 
@@ -341,7 +355,7 @@ public class CommunicationManagerService {
 							.dialogMessageStatusChangesForSending(
 									dialogMessageId,
 									DialogMessageStatusTypes.PREPARED_FOR_SENDING,
-									System.currentTimeMillis());
+									InternalDateTime.currentTimeMillis());
 
 					return;
 				}
@@ -353,7 +367,7 @@ public class CommunicationManagerService {
 							.dialogMessageStatusChangesForSending(
 									dialogMessageId,
 									DialogMessageStatusTypes.SENT,
-									System.currentTimeMillis());
+									InternalDateTime.currentTimeMillis());
 
 					removeFromList();
 
@@ -370,7 +384,7 @@ public class CommunicationManagerService {
 			interventionExecutionManagerService
 					.dialogMessageStatusChangesForSending(dialogMessageId,
 							DialogMessageStatusTypes.PREPARED_FOR_SENDING,
-							System.currentTimeMillis());
+							InternalDateTime.currentTimeMillis());
 
 			removeFromList();
 		}
@@ -395,18 +409,25 @@ public class CommunicationManagerService {
 			log.debug("Sending mail for outgoing SMS to {} with text {}",
 					dialogOption.getData(), message);
 
-			val mailMessage = new MimeMessage(outgoingMailSession);
+			if (dialogOption.getData().equals(
+					Constants.getSmsSimulationNumber())) {
+				log.debug("IT'S ONLY SIMULATED");
+				Simulator.getInstance().simulateSMSBySystem(message);
+			} else {
+				val mailMessage = new MimeMessage(outgoingMailSession);
 
-			mailMessage.setFrom(new InternetAddress(smsEmailFrom));
-			mailMessage.addRecipient(Message.RecipientType.TO,
-					new InternetAddress(smsEmailTo));
-			mailMessage.setSubject("UserKey=" + smsUserKey + ",Password="
-					+ smsUserPassword + ",Recipient=" + dialogOption.getData()
-					+ ",Originator=" + smsPhoneNumberFrom + ",Notify=none");
-			mailMessage.setText(message, "ISO-8859-1");
+				mailMessage.setFrom(new InternetAddress(smsEmailFrom));
+				mailMessage.addRecipient(Message.RecipientType.TO,
+						new InternetAddress(smsEmailTo));
+				mailMessage.setSubject("UserKey=" + smsUserKey + ",Password="
+						+ smsUserPassword + ",Recipient=+"
+						+ dialogOption.getData() + ",Originator="
+						+ smsPhoneNumberFrom + ",Notify=none");
+				mailMessage.setText(message, "ISO-8859-1");
 
-			mailMessage.setText(message);
-			Transport.send(mailMessage);
+				mailMessage.setText(message);
+				Transport.send(mailMessage);
+			}
 
 			log.debug("Message sent to {}", dialogOption.getData());
 		}

@@ -6,8 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import lombok.val;
@@ -32,6 +32,7 @@ import org.isgf.mhc.services.internal.ModelObjectExchangeService;
 import org.isgf.mhc.services.internal.VariablesManagerService;
 import org.isgf.mhc.services.types.ModelObjectExchangeFormatTypes;
 import org.isgf.mhc.tools.GlobalUniqueIdGenerator;
+import org.isgf.mhc.tools.InternalDateTime;
 import org.isgf.mhc.tools.StringValidator;
 import org.isgf.mhc.ui.NotificationMessageException;
 
@@ -166,7 +167,8 @@ public class ScreeningSurveyAdministrationManagerService {
 				val dateFormat = DateFormat.getDateTimeInstance(
 						DateFormat.MEDIUM, DateFormat.MEDIUM,
 						Constants.getAdminLocale());
-				val date = dateFormat.format(Calendar.getInstance().getTime());
+				val date = dateFormat.format(new Date(InternalDateTime
+						.currentTimeMillis()));
 				screeningSurvey.setName(screeningSurvey.getName() + " (" + date
 						+ ")");
 

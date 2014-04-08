@@ -26,6 +26,7 @@ import org.isgf.mhc.model.persistent.ScreeningSurveySlide;
 import org.isgf.mhc.model.persistent.concepts.AbstractVariableWithValue;
 import org.isgf.mhc.model.persistent.types.DialogOptionTypes;
 import org.isgf.mhc.services.types.SystemVariables;
+import org.isgf.mhc.tools.InternalDateTime;
 import org.isgf.mhc.tools.StringValidator;
 
 /**
@@ -192,7 +193,7 @@ public class VariablesManagerService {
 		}
 
 		// Add all read only system variables
-		val date = new Date(System.currentTimeMillis());
+		val date = new Date(InternalDateTime.currentTimeMillis());
 		for (val variable : SystemVariables.READ_ONLY_SYSTEM_VARIABLES.values()) {
 			switch (variable) {
 				case systemDayInWeek:

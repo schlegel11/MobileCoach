@@ -59,7 +59,7 @@ public class StringHelpers {
 	}
 
 	public static String createStringTimeStamp() {
-		val date = new Date(System.currentTimeMillis());
+		val date = new Date(InternalDateTime.currentTimeMillis());
 
 		return simpleDateFormat.format(date);
 	}

@@ -5,8 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import lombok.val;
@@ -41,6 +41,7 @@ import org.isgf.mhc.services.internal.ModelObjectExchangeService;
 import org.isgf.mhc.services.internal.VariablesManagerService;
 import org.isgf.mhc.services.types.ModelObjectExchangeFormatTypes;
 import org.isgf.mhc.tools.BCrypt;
+import org.isgf.mhc.tools.InternalDateTime;
 import org.isgf.mhc.tools.StringValidator;
 import org.isgf.mhc.ui.NotificationMessageException;
 
@@ -192,8 +193,8 @@ public class InterventionAdministrationManagerService {
 
 	// Intervention
 	public Intervention interventionCreate(final String name) {
-		val intervention = new Intervention(name, System.currentTimeMillis(),
-				false, false);
+		val intervention = new Intervention(name,
+				InternalDateTime.currentTimeMillis(), false, false);
 
 		if (name.equals("")) {
 			intervention.setName(ImplementationContants.DEFAULT_OBJECT_NAME);
@@ -228,7 +229,8 @@ public class InterventionAdministrationManagerService {
 				val dateFormat = DateFormat.getDateTimeInstance(
 						DateFormat.MEDIUM, DateFormat.MEDIUM,
 						Constants.getAdminLocale());
-				val date = dateFormat.format(Calendar.getInstance().getTime());
+				val date = dateFormat.format(new Date(InternalDateTime
+						.currentTimeMillis()));
 				intervention
 						.setName(intervention.getName() + " (" + date + ")");
 
