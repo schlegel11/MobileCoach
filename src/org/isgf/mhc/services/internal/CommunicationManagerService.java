@@ -97,7 +97,7 @@ public class CommunicationManagerService {
 		smsEmailTo = Constants.getSmsEmailTo();
 		smsUserKey = Constants.getSmsUserKey();
 		smsUserPassword = Constants.getSmsUserPassword();
-		smsPhoneNumberFrom = "+" + Constants.getSmsPhoneNumberFrom();
+		smsPhoneNumberFrom = Constants.getSmsPhoneNumberFrom();
 
 		// General properties
 		val properties = new Properties();
@@ -420,7 +420,7 @@ public class CommunicationManagerService {
 				mailMessage.addRecipient(Message.RecipientType.TO,
 						new InternetAddress(smsEmailTo));
 				mailMessage.setSubject("UserKey=" + smsUserKey + ",Password="
-						+ smsUserPassword + ",Recipient=+"
+						+ smsUserPassword + ",Recipient="
 						+ dialogOption.getData() + ",Originator="
 						+ smsPhoneNumberFrom + ",Notify=none");
 				mailMessage.setText(message, "ISO-8859-1");
