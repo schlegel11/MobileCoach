@@ -155,7 +155,8 @@ public class InterventionExecutionManagerService {
 		val dialogMessage = new DialogMessage(participant.getId(), 0,
 				DialogMessageStatusTypes.PREPARED_FOR_SENDING, message,
 				timestampToSendMessage, -1, -1, -1, null, false,
-				relatedMonitoringRule.getId(),
+				relatedMonitoringRule == null ? null : relatedMonitoringRule
+						.getId(),
 				relatedMonitoringMessage.getId(), false, manuallySent);
 
 		// Check linked media object
@@ -421,7 +422,7 @@ public class InterventionExecutionManagerService {
 				// participant and not a manually sent
 				if (reactOnAnsweredMessages
 						&& dialogMessage.getRelatedMonitoringMessage() != null) {
-					log.debug("Managing message reply (because the message is answered and has a reference ot a monitoring message)");
+					log.debug("Managing message reply (because the message is answered and has a reference to a monitoring message)");
 
 					val relatedMonitoringMessage = databaseManagerService
 							.getModelObjectById(MonitoringMessage.class,
@@ -458,11 +459,11 @@ public class InterventionExecutionManagerService {
 											cleanedMessageValue, true);
 						} catch (final Exception e) {
 							log.warn(
-									"Could not store value '{}' of message to '{}' for participant {}",
+									"Could not store value '{}' of message to '{}' for participant {}: {}",
 									dialogMessage.getAnswerReceived(),
 									relatedMonitoringMessage
 											.getStoreValueToVariableWithName(),
-									participant.getId());
+									participant.getId(), e.getMessage());
 						}
 					}
 				}

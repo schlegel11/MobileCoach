@@ -25,6 +25,14 @@ public class OutgoingMessageWorker extends Thread {
 
 	@Override
 	public void run() {
+		try {
+			TimeUnit.SECONDS
+					.sleep(ImplementationContants.MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS);
+		} catch (final InterruptedException e) {
+			interrupt();
+			log.debug("Outgoing message worker received signal to stop (before first run)");
+		}
+
 		while (!isInterrupted()) {
 			log.debug("Executing new run of outgoing message worker...started");
 

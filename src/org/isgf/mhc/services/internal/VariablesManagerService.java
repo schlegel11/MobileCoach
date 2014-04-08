@@ -166,9 +166,9 @@ public class VariablesManagerService {
 		// Retrieve all stored variables
 		val participantVariablesWithValues = databaseManagerService
 				.findModelObjects(
-						InterventionVariableWithValue.class,
+						ParticipantVariableWithValue.class,
 						Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT,
-						participant.getIntervention());
+						participant.getId());
 		val interventionVariablesWithValues = databaseManagerService
 				.findModelObjects(
 						InterventionVariableWithValue.class,
@@ -300,7 +300,8 @@ public class VariablesManagerService {
 			throw new InvalidVariableNameException();
 		}
 
-		if (isWriteProtectedVariableName(variableName)) {
+		if (!overwriteAllowed && isWriteProtectedVariableName(variableName)) {
+			log.warn("{} is a write protected variable name", variableName);
 			throw new WriteProtectedVariableException();
 		}
 
@@ -311,14 +312,20 @@ public class VariablesManagerService {
 						participant.getId(), variableName);
 
 		if (participantVariableWithValue == null) {
+			log.debug("Creating new variable");
 			val newParticipantVariableWithValue = new ParticipantVariableWithValue(
 					participant.getId(), variableName,
 					variableValue == null ? "" : variableValue);
+
 			databaseManagerService
 					.saveModelObject(newParticipantVariableWithValue);
 		} else {
+			log.debug("Changing existing variable");
 			participantVariableWithValue.setValue(variableValue == null ? ""
 					: variableValue);
+
+			databaseManagerService
+					.saveModelObject(participantVariableWithValue);
 		}
 	}
 

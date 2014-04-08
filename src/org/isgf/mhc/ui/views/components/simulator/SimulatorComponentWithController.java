@@ -17,7 +17,7 @@ import org.isgf.mhc.tools.InternalDateTime;
 import org.isgf.mhc.tools.Simulator;
 import org.isgf.mhc.tools.Simulator.SimulatorListener;
 
-import com.vaadin.data.util.BeanContainer;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 
@@ -31,26 +31,24 @@ import com.vaadin.ui.Button.ClickEvent;
 public class SimulatorComponentWithController extends SimulatorComponent
 		implements SimulatorListener {
 
-	private int													lastMessage	= 0;
+	private final BeanItemContainer<UISimulatedMessage>	beanContainer;
 
-	private final BeanContainer<Integer, UISimulatedMessage>	beanContainer;
-
-	private final DateFormat									dateFormat;
+	private final DateFormat							dateFormat;
 
 	public SimulatorComponentWithController() {
 		super();
+
 		// init date format
 		dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
 				DateFormat.MEDIUM, Constants.getAdminLocale());
 
 		// table options
 		val messagesTable = getMessagesTable();
-		messagesTable.setReadOnly(true);
 		messagesTable.setImmediate(true);
 		messagesTable.setSortEnabled(false);
 
 		// table content
-		beanContainer = new BeanContainer<Integer, UISimulatedMessage>(
+		beanContainer = new BeanItemContainer<UISimulatedMessage>(
 				UISimulatedMessage.class);
 
 		messagesTable.setContainerDataSource(beanContainer);
@@ -152,10 +150,12 @@ public class SimulatorComponentWithController extends SimulatorComponent
 	}
 
 	@Override
+	@Synchronized
 	public void newSimulatedMessageFromSystem(final String message) {
 		addMessageToTable(true, message);
 	}
 
+	@Synchronized
 	private void addMessageToTable(final boolean isSystemMessage,
 			final String message) {
 		log.debug("Adding message to table");
@@ -167,9 +167,6 @@ public class SimulatorComponentWithController extends SimulatorComponent
 								.getAdminString(AdminMessageStrings.SIMULATOR_COMPONENT__PARTICIPANT),
 				message);
 
-		synchronized (beanContainer) {
-			beanContainer.addItem(lastMessage++, uiSimulatedMessage);
-			getMessagesTable().sort();
-		}
+		beanContainer.addItem(uiSimulatedMessage);
 	}
 }

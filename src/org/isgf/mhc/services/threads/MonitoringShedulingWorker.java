@@ -27,6 +27,14 @@ public class MonitoringShedulingWorker extends Thread {
 
 	@Override
 	public void run() {
+		try {
+			TimeUnit.MINUTES
+					.sleep(ImplementationContants.MASTER_RULE_EVALUTION_WORKER_MINUTES_SLEEP_BETWEEN_CHECK_CYCLES);
+		} catch (final InterruptedException e) {
+			interrupt();
+			log.debug("Monitoring sheduling worker received signal to stop (before first run)");
+		}
+
 		while (!isInterrupted()) {
 			log.debug("Executing new run of monitoring sheduling worker...started");
 

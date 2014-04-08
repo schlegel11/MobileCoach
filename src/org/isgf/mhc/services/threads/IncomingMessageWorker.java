@@ -30,6 +30,14 @@ public class IncomingMessageWorker extends Thread {
 
 	@Override
 	public void run() {
+		try {
+			TimeUnit.SECONDS
+					.sleep(ImplementationContants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS);
+		} catch (final InterruptedException e) {
+			interrupt();
+			log.debug("Incoming message worker received signal to stop (before first run)");
+		}
+
 		while (!isInterrupted()) {
 			log.debug("Executing new run of incoming message worker...started");
 

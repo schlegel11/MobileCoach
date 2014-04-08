@@ -1,12 +1,19 @@
 package org.isgf.mhc.services.internal;
 
+import java.util.Collections;
+import java.util.List;
+
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.collections.IteratorUtils;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.Queries;
+import org.isgf.mhc.model.persistent.DialogMessage;
 import org.isgf.mhc.model.persistent.Intervention;
 import org.isgf.mhc.model.persistent.MonitoringMessage;
+import org.isgf.mhc.model.persistent.MonitoringMessageGroup;
+import org.isgf.mhc.model.persistent.MonitoringReplyRule;
 import org.isgf.mhc.model.persistent.MonitoringRule;
 import org.isgf.mhc.model.persistent.Participant;
 import org.isgf.mhc.model.persistent.concepts.AbstractMonitoringRule;
@@ -40,7 +47,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 	private final Intervention				intervention;
 
 	// Only relevant for MonitoringReplyRules
-	private final MonitoringRule			relatedMonitoringRuleForReplyRuleCase;
+	private MonitoringRule					relatedMonitoringRuleForReplyRuleCase					= null;
 	private final boolean					monitoringReplyRuleCaseIsTrue;
 
 	/*
@@ -81,9 +88,11 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				Intervention.class, participant.getIntervention());
 
 		this.isMonitoringRule = isMonitoringRule;
-		this.relatedMonitoringRuleForReplyRuleCase = databaseManagerService
-				.getModelObjectById(MonitoringRule.class,
-						relatedMonitoringRuleForReplyRuleCase);
+		if (!isMonitoringRule) {
+			this.relatedMonitoringRuleForReplyRuleCase = databaseManagerService
+					.getModelObjectById(MonitoringRule.class,
+							relatedMonitoringRuleForReplyRuleCase);
+		}
 		monitoringReplyRuleCaseIsTrue = monitoringReplyRuleCase;
 	}
 
@@ -116,7 +125,6 @@ public class RecursiveAbstractMonitoringRulesResolver {
 			monitoringMessageToSend = determinedMontioringMessageToSend;
 
 			// Determine message text to send
-
 			val variablesWithValues = variablesManagerService
 					.getAllVariablesWithValuesOfParticipantAndSystem(participant);
 			messageTextToSend = VariableStringReplacer
@@ -148,7 +156,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				if (monitoringReplyRuleCaseIsTrue) {
 					rulesOnCurrentLevel = databaseManagerService
 							.findSortedModelObjects(
-									MonitoringRule.class,
+									MonitoringReplyRule.class,
 									Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_ANSWER,
 									Queries.MONITORING_REPLY_RULE__SORT_BY_ORDER_ASC,
 									relatedMonitoringRuleForReplyRuleCase
@@ -156,7 +164,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				} else {
 					rulesOnCurrentLevel = databaseManagerService
 							.findSortedModelObjects(
-									MonitoringRule.class,
+									MonitoringReplyRule.class,
 									Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_NO_ANSWER,
 									Queries.MONITORING_REPLY_RULE__SORT_BY_ORDER_ASC,
 									relatedMonitoringRuleForReplyRuleCase
@@ -175,7 +183,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				if (monitoringReplyRuleCaseIsTrue) {
 					rulesOnCurrentLevel = databaseManagerService
 							.findSortedModelObjects(
-									MonitoringRule.class,
+									MonitoringReplyRule.class,
 									Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_ANSWER,
 									Queries.MONITORING_REPLY_RULE__SORT_BY_ORDER_ASC,
 									relatedMonitoringRuleForReplyRuleCase
@@ -183,7 +191,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				} else {
 					rulesOnCurrentLevel = databaseManagerService
 							.findSortedModelObjects(
-									MonitoringRule.class,
+									MonitoringReplyRule.class,
 									Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_NO_ANSWER,
 									Queries.MONITORING_REPLY_RULE__SORT_BY_ORDER_ASC,
 									relatedMonitoringRuleForReplyRuleCase
@@ -298,7 +306,36 @@ public class RecursiveAbstractMonitoringRulesResolver {
 	 * @return
 	 */
 	private MonitoringMessage determineMessageToSend() {
-		// TODO check messages groups of participant
+		val messageGroup = databaseManagerService.getModelObjectById(
+				MonitoringMessageGroup.class,
+				ruleMatched.getRelatedMonitoringMessageGroup());
+		val iterableMessages = databaseManagerService.findSortedModelObjects(
+				MonitoringMessage.class,
+				Queries.MONITORING_MESSAGE__BY_MONITORING_MESSAGE_GROUP,
+				Queries.MONITORING_MESSAGE__SORT_BY_ORDER_ASC,
+				messageGroup.getId());
+
+		@SuppressWarnings("unchecked")
+		final List<MonitoringMessage> messages = IteratorUtils
+				.toList(iterableMessages.iterator());
+
+		if (messageGroup.isSendInRandomOrder()) {
+			Collections.shuffle(messages);
+		}
+
+		for (val message : messages) {
+			val dialogMessage = databaseManagerService
+					.findOneModelObject(
+							DialogMessage.class,
+							Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_RELATED_MONITORING_MESSAGE,
+							participant.getId(), message.getId());
+			if (dialogMessage == null) {
+				log.debug(
+						"Monitoring message {} was not used for participant, yet",
+						message.getId());
+				return message;
+			}
+		}
 
 		return null;
 	}

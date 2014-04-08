@@ -150,8 +150,8 @@ public class ScreeningSurveyExecutionManagerService {
 
 	// Dialog status
 	private void dialogStatusCreate(final ObjectId participantId) {
-		val dialogStatus = new DialogStatus(participantId,
-				StringHelpers.createStringTimeStamp(), false, 0, false, 0, 0);
+		val dialogStatus = new DialogStatus(participantId, "", false, 0, false,
+				0, 0);
 
 		databaseManagerService.saveModelObject(dialogStatus);
 	}

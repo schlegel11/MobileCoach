@@ -10,7 +10,7 @@ public class Queries {
 	public static final String	ALL																							= "{}";
 
 	public static final String	INTERVENTION__ACTIVE_TRUE																	= "{'active':true}";
-	public static final String	INTERVENTION__ACTIVE_TRUE_MONITORING_ACTIVE_TRUE											= "{'active':true,'monitoring':true}";
+	public static final String	INTERVENTION__ACTIVE_TRUE_MONITORING_ACTIVE_TRUE											= "{'active':true,'monitoringActive':true}";
 
 	public static final String	SCREENING_SURVEY__ACTIVE_TRUE																= "{'active':true}";
 	public static final String	SCREENING_SURVEY__BY_INTERVENTION_AND_ACTIVE_TRUE											= "{'intervention':#,'active':true}";
@@ -108,6 +108,7 @@ public class Queries {
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_UNANSWERED_AFTER_TIMESTAMP_HIGHER				= "{'participant':#,'status':#,'isUnansweredAfterTimestamp':{$gt:#}}";
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_UNANSWERED_AFTER_TIMESTAMP_LOWER				= "{'participant':#,'status':#,'isUnansweredAfterTimestamp':{$lt:#}}";
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_SHOULD_BE_SENT_TIMESTAMP_LOWER				= "{'participant':#,'status':#,'shouldBeSentTimestamp':{$lt:#}}";
+	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_RELATED_MONITORING_MESSAGE								= "{'participant':#,'relatedMonitoringMessage':#}";
 	public static final String	DIALOG_MESSAGE__BY_STATUS																	= "{'status':#}";
 	public static final String	DIALOG_MESSAGE__SORT_BY_ORDER_DESC															= "{'order':-1}";
 }
