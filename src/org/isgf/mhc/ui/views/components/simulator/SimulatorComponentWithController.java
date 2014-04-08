@@ -35,20 +35,19 @@ public class SimulatorComponentWithController extends SimulatorComponent
 
 	private final BeanContainer<Integer, UISimulatedMessage>	beanContainer;
 
-	private final DateFormat									dateFormat	= DateFormat
-																					.getDateTimeInstance(
-																							DateFormat.MEDIUM,
-																							DateFormat.MEDIUM,
-																							Constants
-																									.getAdminLocale());
+	private final DateFormat									dateFormat;
 
 	public SimulatorComponentWithController() {
 		super();
+		// init date format
+		dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
+				DateFormat.MEDIUM, Constants.getAdminLocale());
 
 		// table options
 		val messagesTable = getMessagesTable();
 		messagesTable.setReadOnly(true);
 		messagesTable.setImmediate(true);
+		messagesTable.setSortEnabled(false);
 
 		// table content
 		beanContainer = new BeanContainer<Integer, UISimulatedMessage>(
@@ -66,7 +65,6 @@ public class SimulatorComponentWithController extends SimulatorComponent
 			@Override
 			public void run() {
 				while (!isInterrupted()) {
-					log.debug("Updating time...");
 					try {
 						updateTime();
 					} catch (final Exception e) {
@@ -142,8 +140,15 @@ public class SimulatorComponentWithController extends SimulatorComponent
 	}
 
 	public void sendMessage() {
-		// TODO Auto-generated method stub
+		log.debug("Sending simulated message...");
+		val newMessageTextField = getNewMessageTextField();
+		val messageToSend = newMessageTextField.getValue();
 
+		newMessageTextField.setValue("");
+
+		addMessageToTable(false, messageToSend);
+
+		Simulator.getInstance().simulateSMSReplyByParticipant(messageToSend);
 	}
 
 	@Override
@@ -164,6 +169,7 @@ public class SimulatorComponentWithController extends SimulatorComponent
 
 		synchronized (beanContainer) {
 			beanContainer.addItem(lastMessage++, uiSimulatedMessage);
+			getMessagesTable().sort();
 		}
 	}
 }
