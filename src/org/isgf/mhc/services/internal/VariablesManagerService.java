@@ -293,8 +293,8 @@ public class VariablesManagerService {
 			final boolean overwriteAllowed)
 			throws WriteProtectedVariableException,
 			InvalidVariableNameException {
-		log.debug("Storing variable {} with value {}", variableName,
-				variableValue);
+		log.debug("Storing variable {} with value {} for participant {}",
+				variableName, variableValue, participant.getId());
 
 		if (!StringValidator.isValidVariableName(variableName)) {
 			throw new InvalidVariableNameException();

@@ -472,17 +472,18 @@ public class InterventionExecutionManagerService {
 				if (dialogMessage.getRelatedMonitoringRuleForReplyRules() != null) {
 					log.debug("Caring for reply rules resolving");
 
-					val recursiveRuleResolver = new RecursiveAbstractMonitoringRulesResolver(
-							databaseManagerService, variablesManagerService,
-							participant,
-
-							false,
-							dialogMessage
-									.getRelatedMonitoringRuleForReplyRules(),
-							reactOnAnsweredMessages);
-
 					// Resolve rules
+					RecursiveAbstractMonitoringRulesResolver recursiveRuleResolver;
 					try {
+						recursiveRuleResolver = new RecursiveAbstractMonitoringRulesResolver(
+								databaseManagerService,
+								variablesManagerService,
+								participant,
+								false,
+								dialogMessage
+										.getRelatedMonitoringRuleForReplyRules(),
+								reactOnAnsweredMessages);
+
 						recursiveRuleResolver.resolve();
 					} catch (final Exception e) {
 						log.error(
@@ -532,12 +533,13 @@ public class InterventionExecutionManagerService {
 						"Participant {} has not been sheduled today! Start sheduling...",
 						participant.getId());
 
-				val recursiveRuleResolver = new RecursiveAbstractMonitoringRulesResolver(
-						databaseManagerService, variablesManagerService,
-						participant, true, null, false);
-
 				// Resolve rules
+				RecursiveAbstractMonitoringRulesResolver recursiveRuleResolver;
 				try {
+					recursiveRuleResolver = new RecursiveAbstractMonitoringRulesResolver(
+							databaseManagerService, variablesManagerService,
+							participant, true, null, false);
+
 					recursiveRuleResolver.resolve();
 				} catch (final Exception e) {
 					log.error("Could not resolve rules for participant {}: {}",

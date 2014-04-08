@@ -91,7 +91,7 @@ public class MonitoringMessageEditComponent extends
 				AdminMessageStrings.MONITORING_MESSAGE_EDITING__INTEGRATED_MEDIA_OBJECT);
 		localize(
 				storeVariableLabel,
-				AdminMessageStrings.MONITORING_MESSAGE_EDITING__STORE_RESULT_TO_VARIABLE);
+				AdminMessageStrings.MONITORING_MESSAGE_EDITING__STORE_MESSAGE_REPLY_TO_VARIABLE);
 		localize(closeButton, AdminMessageStrings.GENERAL__CLOSE);
 	}
 

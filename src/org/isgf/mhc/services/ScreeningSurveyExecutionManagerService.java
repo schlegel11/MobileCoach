@@ -692,8 +692,10 @@ public class ScreeningSurveyExecutionManagerService {
 						variablesWithValues.values());
 
 				if (!ruleResult.isEvaluatedSuccessful()) {
-					log.error("Error when validating rule: "
-							+ ruleResult.getErrorMessage());
+					log.error(
+							"Error when validating rule {} of intervention: {}",
+							formerSlideRule.getId(),
+							ruleResult.getErrorMessage());
 					continue;
 				}
 

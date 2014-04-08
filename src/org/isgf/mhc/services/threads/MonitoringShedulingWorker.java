@@ -20,6 +20,7 @@ public class MonitoringShedulingWorker extends Thread {
 	public MonitoringShedulingWorker(
 			final InterventionExecutionManagerService interventionExecutionManagerService) {
 		setName("Monitoring Sheduling Worker");
+		setPriority(NORM_PRIORITY - 2);
 
 		this.interventionExecutionManagerService = interventionExecutionManagerService;
 	}
