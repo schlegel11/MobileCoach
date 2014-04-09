@@ -142,7 +142,7 @@ public class AbstractRuleEditComponentWithController extends
 				break;
 		}
 		showModalStringValueEditWindow(
-				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_TEXT_WITH_PLACEHOLDERS,
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_RULE_WITH_PLACEHOLDERS,
 				rule.getRuleWithPlaceholders(), allPossibleVariables,
 				new PlaceholderStringEditComponent(),
 				new ExtendableButtonClickListener() {
