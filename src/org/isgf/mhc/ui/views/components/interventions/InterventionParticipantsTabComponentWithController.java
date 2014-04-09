@@ -24,8 +24,10 @@ import org.isgf.mhc.model.persistent.Participant;
 import org.isgf.mhc.model.ui.UIParticipant;
 import org.isgf.mhc.tools.OnDemandFileDownloader;
 import org.isgf.mhc.tools.OnDemandFileDownloader.OnDemandStreamResource;
+import org.isgf.mhc.tools.StringValidator;
 import org.isgf.mhc.ui.views.components.basics.FileUploadComponentWithController;
 import org.isgf.mhc.ui.views.components.basics.FileUploadComponentWithController.UploadListener;
+import org.isgf.mhc.ui.views.components.basics.PlaceholderStringEditComponent;
 import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -110,6 +112,8 @@ public class InterventionParticipantsTabComponentWithController extends
 				buttonClickListener);
 		participantsEditComponent.getSwitchMessagingButton().addClickListener(
 				buttonClickListener);
+		participantsEditComponent.getSendMessageButton().addClickListener(
+				buttonClickListener);
 		participantsEditComponent.getDeleteButton().addClickListener(
 				buttonClickListener);
 		participantsEditComponent.getRefreshButton().addClickListener(
@@ -181,6 +185,9 @@ public class InterventionParticipantsTabComponentWithController extends
 			} else if (event.getButton() == interventionScreeningSurveyEditComponent
 					.getSwitchMessagingButton()) {
 				switchMessaging();
+			} else if (event.getButton() == interventionScreeningSurveyEditComponent
+					.getSendMessageButton()) {
+				sendMessage();
 			} else if (event.getButton() == interventionScreeningSurveyEditComponent
 					.getDeleteButton()) {
 				deleteParticipants();
@@ -354,6 +361,53 @@ public class InterventionParticipantsTabComponentWithController extends
 				closeWindow();
 			}
 		}, null);
+	}
+
+	public void sendMessage() {
+		log.debug("Send manual message");
+		val allPossibleMessageVariables = getInterventionAdministrationManagerService()
+				.getAllPossibleMonitoringRuleVariablesOfIntervention(
+						intervention.getId());
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__SEND_MESSAGE_TO_ALL_SELECTED_PARTICIPANTS,
+				"", allPossibleMessageVariables,
+				new PlaceholderStringEditComponent(),
+				new ExtendableButtonClickListener() {
+
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						// Check if message contains only valid strings
+						if (!StringValidator.isValidVariableText(
+								getStringValue(), allPossibleMessageVariables)) {
+
+							getAdminUI()
+									.showWarningNotification(
+											AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
+
+							return;
+						} else {
+							val interventionExecutionManagerService = MHC
+									.getInstance()
+									.getInterventionExecutionManagerService();
+							for (val participantId : selectedUIParticipantsIds) {
+								val participant = beanContainer
+										.getItem(participantId)
+										.getBean()
+										.getRelatedModelObject(
+												Participant.class);
+								interventionExecutionManagerService
+										.sendManualMessage(participant,
+												getStringValue());
+							}
+						}
+
+						getAdminUI()
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__THE_MESSAGES_WILL_BE_SENT_IN_THE_NEXT_MINUTES);
+
+						closeWindow();
+					}
+				}, null);
 	}
 
 	public void deleteParticipants() {

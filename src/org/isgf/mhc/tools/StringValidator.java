@@ -22,7 +22,7 @@ public class StringValidator {
 	 * @return
 	 */
 	public static boolean isValidRule(final String rule) {
-		log.debug("Testing if {} is a valid rule", rule);
+		log.debug("Testing if '{}' is a valid rule", rule);
 
 		// Check null or empty
 		if (rule == null || rule.equals("")) {
@@ -49,7 +49,7 @@ public class StringValidator {
 	 * @return
 	 */
 	public static boolean isValidVariableName(final String name) {
-		log.debug("Testing if {} is a valid variable name", name);
+		log.debug("Testing if '{}' is a valid variable name", name);
 
 		// Check null or empty
 		if (name == null || name.equals("")) {
@@ -77,7 +77,7 @@ public class StringValidator {
 	 */
 	public static boolean isValidVariableText(String textWithPlaceholders,
 			final List<String> allPossibleMessageVariables) {
-		log.debug("Testing if {} is a valid variable text",
+		log.debug("Testing if '{}' is a valid variable text",
 				textWithPlaceholders);
 
 		for (final val variable : allPossibleMessageVariables) {

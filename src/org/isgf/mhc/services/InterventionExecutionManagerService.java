@@ -35,6 +35,7 @@ import org.isgf.mhc.services.threads.OutgoingMessageWorker;
 import org.isgf.mhc.services.types.SystemVariables;
 import org.isgf.mhc.tools.InternalDateTime;
 import org.isgf.mhc.tools.StringHelpers;
+import org.isgf.mhc.tools.VariableStringReplacer;
 
 /**
  * Cares for the orchestration of the {@link Intervention}s as well as all
@@ -146,7 +147,7 @@ public class InterventionExecutionManagerService {
 
 	// Dialog message
 	@Synchronized
-	public void dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
+	private void dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
 			final Participant participant, final String message,
 			final boolean manuallySent, final long timestampToSendMessage,
 			final MonitoringRule relatedMonitoringRule,
@@ -157,7 +158,8 @@ public class InterventionExecutionManagerService {
 				timestampToSendMessage, -1, -1, -1, null, false,
 				relatedMonitoringRule == null ? null : relatedMonitoringRule
 						.getId(),
-				relatedMonitoringMessage.getId(), false, manuallySent);
+				relatedMonitoringMessage == null ? null
+						: relatedMonitoringMessage.getId(), false, manuallySent);
 
 		// Check linked media object
 		MediaObject linkedMediaObject = null;
@@ -692,6 +694,26 @@ public class InterventionExecutionManagerService {
 				MediaObjectParticipantShortURL.class,
 				Queries.MEDIA_OBJECT_PARTICIPANT_SHORT_URL__BY_SHORT_ID,
 				shortId);
+	}
+
+	/**
+	 * Sends a manual message
+	 * 
+	 * @param participant
+	 * @param messageWithPlaceholders
+	 */
+	@Synchronized
+	public void sendManualMessage(final Participant participant,
+			final String messageWithPlaceholders) {
+		val variablesWithValues = variablesManagerService
+				.getAllVariablesWithValuesOfParticipantAndSystem(participant);
+
+		val messageToSend = VariableStringReplacer
+				.findVariablesAndReplaceWithTextValues(messageWithPlaceholders,
+						variablesWithValues.values(), "");
+		dialogMessageCreateManuallyOrByRulesIncludingMediaObject(participant,
+				messageToSend, true, InternalDateTime.currentTimeMillis(),
+				null, null);
 	}
 
 	/*
