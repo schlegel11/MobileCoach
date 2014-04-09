@@ -389,12 +389,10 @@ public class InterventionParticipantsTabComponentWithController extends
 							val interventionExecutionManagerService = MHC
 									.getInstance()
 									.getInterventionExecutionManagerService();
-							for (val participantId : selectedUIParticipantsIds) {
-								val participant = beanContainer
-										.getItem(participantId)
-										.getBean()
-										.getRelatedModelObject(
-												Participant.class);
+
+							val selectedParticipants = convertSelectedToParticipantsList();
+
+							for (val participant : selectedParticipants) {
 								interventionExecutionManagerService
 										.sendManualMessage(participant,
 												getStringValue());
