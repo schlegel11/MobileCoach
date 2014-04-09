@@ -227,7 +227,7 @@ public class VariablesManagerService {
 		int participationInWeeks = 0;
 		if (dialogStatus != null) {
 			participationInDays = dialogStatus.getMonitoringDaysParticipated();
-			participationInWeeks = Math.floorDiv(participationInDays, 7);
+			participationInWeeks = (int) Math.floor(participationInDays / 7);
 		}
 		for (val variable : SystemVariables.READ_ONLY_PARTICIPANT_VARIABLES
 				.values()) {
