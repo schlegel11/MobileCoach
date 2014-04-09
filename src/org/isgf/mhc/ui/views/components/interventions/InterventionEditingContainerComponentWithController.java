@@ -75,12 +75,12 @@ public class InterventionEditingContainerComponentWithController extends
 				ThemeImageStrings.COMPONENT_ICON));
 
 		// Add intervention participants tab
-		registerToSetEditingDependingOnMessaging(addPointableTab(
+		addPointableTab(
 				getContentAccordion(),
 				new InterventionParticipantsTabComponentWithController(
 						intervention),
 				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__PARTICIPANTS_TAB,
-				ThemeImageStrings.COMPONENT_ICON));
+				ThemeImageStrings.COMPONENT_ICON);
 
 		// Add intervention variables tab
 		registerToSetEditingDependingOnMessaging(addPointableTab(

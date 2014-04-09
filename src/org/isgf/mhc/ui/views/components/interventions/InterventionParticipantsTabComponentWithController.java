@@ -46,6 +46,7 @@ public class InterventionParticipantsTabComponentWithController extends
 		InterventionParticipantsTabComponent {
 
 	private final Intervention								intervention;
+	private boolean											isOneScreeningSurveyActive;
 
 	private Collection<ObjectId>							selectedUIParticipantsIds;
 
@@ -90,11 +91,10 @@ public class InterventionParticipantsTabComponentWithController extends
 			public void valueChange(final ValueChangeEvent event) {
 				selectedUIParticipantsIds = (Collection<ObjectId>) participantsTable
 						.getValue();
-				if (selectedUIParticipantsIds.size() == 0) {
-					participantsEditComponent.setNothingSelected();
-				} else {
-					participantsEditComponent.setSomethingSelected();
-				}
+				getInterventionParticipantsEditComponent().updateButtonStatus(
+						selectedUIParticipantsIds,
+						intervention.isMonitoringActive(),
+						isOneScreeningSurveyActive);
 			}
 		});
 
@@ -145,17 +145,15 @@ public class InterventionParticipantsTabComponentWithController extends
 
 	public void adjust() {
 		log.debug("Check access rights for participants based on scrrening surveys");
-		val isOneScreeningSurveyActive = getScreeningSurveyAdministrationManagerService()
+		isOneScreeningSurveyActive = getScreeningSurveyAdministrationManagerService()
 				.isOneScreeningSurveyOfInterventionActive(intervention.getId());
+
+		getInterventionParticipantsEditComponent().updateButtonStatus(
+				selectedUIParticipantsIds, intervention.isMonitoringActive(),
+				isOneScreeningSurveyActive);
 
 		val participantsTable = getInterventionParticipantsEditComponent()
 				.getParticipantsTable();
-		if (isOneScreeningSurveyActive == !participantsTable.isReadOnly()) {
-			participantsTable.setValue(null);
-			getInterventionParticipantsEditComponent().setNothingSelected();
-			getInterventionParticipantsEditComponent().getParticipantsTable()
-					.setReadOnly(isOneScreeningSurveyActive);
-		}
 
 		log.debug("Update participants");
 		refreshBeanContainer(beanContainer, UIParticipant.class,

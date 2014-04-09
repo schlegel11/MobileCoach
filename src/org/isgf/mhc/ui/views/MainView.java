@@ -74,7 +74,7 @@ public class MainView extends AbstractView implements View, LayoutClickListener 
 	public void layoutClick(final LayoutClickEvent event) {
 		Component clickedComponent = event.getClickedComponent();
 
-		// Go through component tree to find out which button has beend clicked
+		// Go through component tree to find out which button has been clicked
 		componentLoop: while (clickedComponent != null) {
 			if (clickedComponent == mainViewComponent.getWelcomeButton()) {
 				log.debug("WELCOME button clicked");
