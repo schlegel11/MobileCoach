@@ -10,6 +10,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
+import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.conf.ImplementationContants;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
@@ -47,6 +48,8 @@ import org.isgf.mhc.tools.VariableStringReplacer;
 public class InterventionExecutionManagerService {
 	private static InterventionExecutionManagerService	instance	= null;
 
+	private final String[]								acceptedStopWords;
+
 	private final DatabaseManagerService				databaseManagerService;
 	private final VariablesManagerService				variablesManagerService;
 	final CommunicationManagerService					communicationManagerService;
@@ -65,6 +68,9 @@ public class InterventionExecutionManagerService {
 		this.databaseManagerService = databaseManagerService;
 		this.variablesManagerService = variablesManagerService;
 		this.communicationManagerService = communicationManagerService;
+
+		// Remember stop words
+		acceptedStopWords = Constants.getAcceptedStopWords();
 
 		// Reset all messages which could not be sent the last times
 		dialogMessagesResetStatusAfterRestart();
@@ -605,6 +611,17 @@ public class InterventionExecutionManagerService {
 					"The received message with sender number '{}' does not fit to any participant of an active intervention, skip it",
 					receivedMessage.getSender());
 			return;
+		}
+
+		// Check if received messages is a "stop"-message
+		for (val stopWord : acceptedStopWords) {
+			if (receivedMessage.getMessage().trim().toLowerCase()
+					.equals(stopWord)) {
+				log.debug("Received stop message by participant {}",
+						dialogOption.getParticipant());
+				dialogStatusSetMonitoringFinished(dialogOption.getParticipant());
+				return;
+			}
 		}
 
 		val dialogMessage = getDialogMessageOfParticipantWaitingForAnswer(

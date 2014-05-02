@@ -46,33 +46,40 @@ public class Constants {
 	@Getter
 	private static String		mediaObjectLinkingBaseURL			= "https://f.mobile-coach.eu/";
 
+	private static String		acceptedStopWordsSeparatedByComma	= "stop,stopp";
+
+	public static String[] getAcceptedStopWords() {
+		return acceptedStopWordsSeparatedByComma.trim().toLowerCase()
+				.split(",");
+	}
+
 	/**
 	 * Admin configuration
 	 */
 	@Getter
-	private static String		defaultAdminUsername				= "admin";
+	private static String	defaultAdminUsername				= "admin";
 	@Getter
-	private static String		defaultAdminPassword				= "admin";
+	private static String	defaultAdminPassword				= "admin";
 
 	/**
 	 * CAUTION: Do NEVER activate this on public servers! It's only for
 	 * development.
 	 */
 	@Getter
-	private static boolean		automaticallyLoginAsDefaultAdmin	= false;
+	private static boolean	automaticallyLoginAsDefaultAdmin	= false;
 
 	@Getter
-	private static Locale		adminLocale							= Locale.ENGLISH;
+	private static Locale	adminLocale							= Locale.ENGLISH;
 
 	@Getter
-	private static String		loggingFolder						= "/mhc_data/logs";
+	private static String	loggingFolder						= "/mhc_data/logs";
 	@Getter
-	private static String		storageFolder						= "/mhc_data/FileStorage";
+	private static String	storageFolder						= "/mhc_data/FileStorage";
 	@Getter
-	private static String		templatesFolder						= "/mhc_data/templates";
+	private static String	templatesFolder						= "/mhc_data/templates";
 
 	@Getter
-	private static String		fileExtension						= ".mhc";
+	private static String	fileExtension						= ".mhc";
 
 	/**
 	 * Simulation configuration
@@ -85,9 +92,9 @@ public class Constants {
 	 * another system.
 	 */
 	@Getter
-	private static boolean		simulatedDateAndTime				= true;
+	private static boolean	simulatedDateAndTime				= true;
 
-	private static String		smsSimulationNumber					= "+99999";
+	private static String	smsSimulationNumber					= "+99999";
 
 	public static String getSmsSimulationNumber() {
 		return StringHelpers.cleanPhoneNumber(smsSimulationNumber);
