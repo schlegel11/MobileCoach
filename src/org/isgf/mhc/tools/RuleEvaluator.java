@@ -160,6 +160,32 @@ public class RuleEvaluator {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
+				case TEXT_VALUE_MATCHES_REGULAR_EXPRESSION:
+					if (ruleEvaluationResult
+							.getTextRuleValue()
+							.trim()
+							.toLowerCase()
+							.matches(
+									ruleEvaluationResult
+											.getTextRuleComparisonTermValue()
+											.trim())) {
+						ruleEvaluationResult.setRuleMatchesEquationSign(true);
+					}
+					break;
+				case TEXT_VALUE_NOT_MATCHES_REGULAR_EXPRESSION:
+					if (!ruleEvaluationResult
+							.getTextRuleValue()
+							.trim()
+							.toLowerCase()
+							.matches(
+									ruleEvaluationResult
+											.getTextRuleComparisonTermValue()
+											.trim())) {
+						ruleEvaluationResult.setRuleMatchesEquationSign(true);
+					}
+					break;
+				default:
+					break;
 			}
 
 			// Evaluation of rule was successful
