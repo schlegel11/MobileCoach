@@ -66,7 +66,9 @@ public class MonitoringMessageGroupEditComponentWithController extends
 		monitoringMessageTable.setSortAscending(true);
 		monitoringMessageTable.setSortEnabled(false);
 
-		// check box
+		// check boxes
+		getMessagesExpectAnswerCheckBox().setValue(
+				monitoringMessageGroup.isMessagesExpectAnswer());
 		getRandomOrderCheckBox().setValue(
 				monitoringMessageGroup.isSendInRandomOrder());
 
@@ -90,13 +92,25 @@ public class MonitoringMessageGroupEditComponentWithController extends
 				});
 
 		// handle check box change
+		getMessagesExpectAnswerCheckBox().addValueChangeListener(
+				new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						getInterventionAdministrationManagerService()
+								.monitoringMessageGroupSetMessagesExceptAnswer(
+										monitoringMessageGroup,
+										getMessagesExpectAnswerCheckBox()
+												.getValue());
+					}
+				});
 		getRandomOrderCheckBox().addValueChangeListener(
 				new ValueChangeListener() {
 
 					@Override
 					public void valueChange(final ValueChangeEvent event) {
 						getInterventionAdministrationManagerService()
-								.monitoringMessageGroupSetSentOrder(
+								.monitoringMessageGroupSetSendOrder(
 										monitoringMessageGroup,
 										getRandomOrderCheckBox().getValue());
 					}

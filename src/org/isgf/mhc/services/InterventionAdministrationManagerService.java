@@ -367,11 +367,22 @@ public class InterventionAdministrationManagerService {
 	public MonitoringMessageGroup monitoringMessageGroupCreate(
 			final String groupName, final ObjectId interventionId) {
 		val monitoringMessageGroup = new MonitoringMessageGroup(interventionId,
-				groupName, false);
+				groupName, 0, false, false);
 
 		if (monitoringMessageGroup.getName().equals("")) {
 			monitoringMessageGroup
 					.setName(ImplementationContants.DEFAULT_OBJECT_NAME);
+		}
+
+		val highestOrderMessageGroup = databaseManagerService
+				.findOneSortedModelObject(MonitoringMessageGroup.class,
+						Queries.MONITORING_MESSAGE_GROUP__BY_INTERVENTION,
+						Queries.MONITORING_MESSAGE_GROUP__SORT_BY_ORDER_DESC,
+						interventionId);
+
+		if (highestOrderMessageGroup != null) {
+			monitoringMessageGroup
+					.setOrder(highestOrderMessageGroup.getOrder() + 1);
 		}
 
 		databaseManagerService.saveModelObject(monitoringMessageGroup);
@@ -379,7 +390,15 @@ public class InterventionAdministrationManagerService {
 		return monitoringMessageGroup;
 	}
 
-	public void monitoringMessageGroupSetSentOrder(
+	public void monitoringMessageGroupSetMessagesExceptAnswer(
+			final MonitoringMessageGroup monitoringMessageGroup,
+			final boolean newValue) {
+		monitoringMessageGroup.setMessagesExpectAnswer(newValue);
+
+		databaseManagerService.saveModelObject(monitoringMessageGroup);
+	}
+
+	public void monitoringMessageGroupSetSendOrder(
 			final MonitoringMessageGroup monitoringMessageGroup,
 			final boolean newValue) {
 		monitoringMessageGroup.setSendInRandomOrder(newValue);
@@ -1101,7 +1120,7 @@ public class InterventionAdministrationManagerService {
 		return databaseManagerService.findSortedModelObjects(
 				MonitoringMessageGroup.class,
 				Queries.MONITORING_MESSAGE_GROUP__BY_INTERVENTION,
-				Queries.MONITORING_MESSAGE_GROUP__SORT_BY_NAME_ASC,
+				Queries.MONITORING_MESSAGE_GROUP__SORT_BY_ORDER_ASC,
 				interventionId);
 	}
 

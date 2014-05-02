@@ -113,7 +113,7 @@ public class MonitoringRuleEditComponentWithController extends
 				.setMax(ImplementationContants.HOUR_TO_SEND_MESSAGE_MAX);
 		hourToSendSlider.addValueChangeListener(valueChangeListener);
 
-		val hoursUntilHandledAsNotAnsweredSlider = getHoursUntillHandledAsNotAnsweredSlider();
+		val hoursUntilHandledAsNotAnsweredSlider = getHoursUntilHandledAsNotAnsweredSlider();
 		hoursUntilHandledAsNotAnsweredSlider.setImmediate(true);
 		hoursUntilHandledAsNotAnsweredSlider
 				.setMin(ImplementationContants.HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MIN);
@@ -203,8 +203,8 @@ public class MonitoringRuleEditComponentWithController extends
 			getMessageGroupComboBox().setEnabled(true);
 			getHourToSendMessageLabel().setEnabled(true);
 			getHourToSendMessageSlider().setEnabled(true);
-			getHoursUntillHandledAsNotAnsweredLabel().setEnabled(true);
-			getHoursUntillHandledAsNotAnsweredSlider().setEnabled(true);
+			getHoursUntilHandledAsNotAnsweredLabel().setEnabled(true);
+			getHoursUntilHandledAsNotAnsweredSlider().setEnabled(true);
 
 			getReplyRulesTabSheet().setEnabled(true);
 
@@ -219,8 +219,8 @@ public class MonitoringRuleEditComponentWithController extends
 			getMessageGroupComboBox().setEnabled(false);
 			getHourToSendMessageLabel().setEnabled(false);
 			getHourToSendMessageSlider().setEnabled(false);
-			getHoursUntillHandledAsNotAnsweredLabel().setEnabled(false);
-			getHoursUntillHandledAsNotAnsweredSlider().setEnabled(false);
+			getHoursUntilHandledAsNotAnsweredLabel().setEnabled(false);
+			getHoursUntilHandledAsNotAnsweredSlider().setEnabled(false);
 
 			getReplyRulesTabSheet().setEnabled(false);
 
@@ -243,12 +243,20 @@ public class MonitoringRuleEditComponentWithController extends
 		} catch (final Exception e) {
 			// Do nothing
 		}
+		final int daysUntilMessageIsHandledAsUnanswered = (int) Math
+				.floor(monitoringRule
+						.getHoursUntilMessageIsHandledAsUnanswered() / 24);
+		final int hoursWithoutDaysUntilMessageIsHandledAsUnanswered = monitoringRule
+				.getHoursUntilMessageIsHandledAsUnanswered()
+				- daysUntilMessageIsHandledAsUnanswered * 24;
+
 		localize(
-				getHoursUntillHandledAsNotAnsweredSlider(),
-				AdminMessageStrings.MONITORING_RULE_EDITING__HOURS_AFTER_SENDING_UNTIL_HANDLED_AS_NOT_ANSWERED_VALUE,
-				monitoringRule.getHoursUntilMessageIsHandledAsUnanswered());
+				getHoursUntilHandledAsNotAnsweredSlider(),
+				AdminMessageStrings.MONITORING_RULE_EDITING__DAYS_AND_HOURS_AFTER_SENDING_UNTIL_HANDLED_AS_NOT_ANSWERED_VALUE,
+				daysUntilMessageIsHandledAsUnanswered,
+				hoursWithoutDaysUntilMessageIsHandledAsUnanswered);
 		try {
-			getHoursUntillHandledAsNotAnsweredSlider().setValue(
+			getHoursUntilHandledAsNotAnsweredSlider().setValue(
 					(double) monitoringRule
 							.getHoursUntilMessageIsHandledAsUnanswered());
 		} catch (final Exception e) {
@@ -293,7 +301,7 @@ public class MonitoringRuleEditComponentWithController extends
 								monitoringRule,
 								((Double) event.getProperty().getValue())
 										.intValue());
-			} else if (event.getProperty() == getHoursUntillHandledAsNotAnsweredSlider()) {
+			} else if (event.getProperty() == getHoursUntilHandledAsNotAnsweredSlider()) {
 				getInterventionAdministrationManagerService()
 						.monitoringRuleChangeHoursUntilMessageIsHandledAsUnanswered(
 								monitoringRule,

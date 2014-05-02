@@ -44,6 +44,14 @@ public class MonitoringMessageGroup extends ModelObject {
 	private String		name;
 
 	/**
+	 * The position of the {@link MonitoringMessageGroup} compared to all other
+	 * {@link MonitoringMessageGroup}s
+	 */
+	@Getter
+	@Setter
+	private int			order;
+
+	/**
 	 * Defines if the {@link MonitoringMessage}s in the group will be sent in
 	 * random order or in
 	 * the order as they are stored in the {@link MonitoringMessageGroup}
@@ -51,6 +59,15 @@ public class MonitoringMessageGroup extends ModelObject {
 	@Getter
 	@Setter
 	private boolean		sendInRandomOrder;
+
+	/**
+	 * Defines if the {@link MonitoringMessage}s in the group expect to be
+	 * answeres by the {@link Participant}
+	 * 
+	 */
+	@Getter
+	@Setter
+	private boolean		messagesExpectAnswer;
 
 	/*
 	 * (non-Javadoc)
