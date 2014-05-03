@@ -5,6 +5,7 @@ import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.ui.views.components.AbstractStringValueEditComponent;
@@ -31,6 +32,7 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 @Data
 @EqualsAndHashCode(callSuper = false)
+@Log4j2
 public class PlaceholderStringEditComponent extends
 		AbstractStringValueEditComponent {
 
@@ -81,13 +83,31 @@ public class PlaceholderStringEditComponent extends
 				final String selectedVariable = (String) event.getProperty()
 						.getValue();
 				if (selectedVariable != null) {
-					stringTextArea.setValue(stringTextArea.getValue()
-							.substring(0, stringTextArea.getCursorPosition())
-							+ selectedVariable
-							+ stringTextArea.getValue().substring(
-									stringTextArea.getCursorPosition()));
-					stringTextArea.setCursorPosition(stringTextArea
-							.getCursorPosition() + selectedVariable.length());
+					log.debug(
+							"Former text value of string text area is {} and cursor position is {}",
+							stringTextArea.getValue(),
+							stringTextArea.getCursorPosition());
+					try {
+						stringTextArea.setValue(stringTextArea.getValue()
+								.substring(0,
+										stringTextArea.getCursorPosition())
+								+ selectedVariable
+								+ stringTextArea.getValue().substring(
+										stringTextArea.getCursorPosition()));
+
+						stringTextArea.setCursorPosition(stringTextArea
+								.getCursorPosition()
+								+ selectedVariable.length());
+					} catch (final Exception e) {
+						log.warn("Error occured while setting variable to string text area...fixing by setting text to the beginning (Workaround for Vaadin time shift)");
+
+						stringTextArea.setValue(stringTextArea.getValue()
+								+ selectedVariable);
+
+						stringTextArea.setCursorPosition(stringTextArea
+								.getValue().length());
+					}
+
 					variableListSelect.unselect(selectedVariable);
 				}
 			}
