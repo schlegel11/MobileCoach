@@ -1124,6 +1124,16 @@ public class InterventionAdministrationManagerService {
 				interventionId);
 	}
 
+	public Iterable<MonitoringMessageGroup> getAllMonitoringMessageGroupsExpectingNoAnswerOfIntervention(
+			final ObjectId interventionId) {
+		return databaseManagerService
+				.findSortedModelObjects(
+						MonitoringMessageGroup.class,
+						Queries.MONITORING_MESSAGE_GROUP__BY_INTERVENTION_AND_EXPECTING_ANSWER,
+						Queries.MONITORING_MESSAGE_GROUP__SORT_BY_ORDER_ASC,
+						interventionId, false);
+	}
+
 	public Iterable<MonitoringMessage> getAllMonitoringMessagesOfMonitoringMessageGroup(
 			final ObjectId monitoringMessageGroupId) {
 		return databaseManagerService.findSortedModelObjects(

@@ -160,14 +160,15 @@ public class CommunicationManagerService {
 	 */
 	@Synchronized
 	public void sendMessage(final DialogOption dialogOption,
-			final ObjectId dialogMessageId, final String message) {
+			final ObjectId dialogMessageId, final String message,
+			final boolean messageExpectsAnswer) {
 		if (interventionExecutionManagerService == null) {
 			interventionExecutionManagerService = MHC.getInstance()
 					.getInterventionExecutionManagerService();
 		}
 
 		val mailingThread = new MailingThread(dialogOption, dialogMessageId,
-				message);
+				message, messageExpectsAnswer);
 
 		interventionExecutionManagerService
 				.dialogMessageStatusChangesForSending(dialogMessageId,
@@ -314,13 +315,16 @@ public class CommunicationManagerService {
 		private final DialogOption	dialogOption;
 		private final ObjectId		dialogMessageId;
 		private final String		message;
+		private final boolean		messageExpectsAnswer;
 
 		public MailingThread(final DialogOption dialogOption,
-				final ObjectId dialogMessageId, final String message) {
+				final ObjectId dialogMessageId, final String message,
+				final boolean messageExpectsAnswer) {
 			setName("Mailing Thread " + dialogOption.getData());
 			this.dialogOption = dialogOption;
 			this.dialogMessageId = dialogMessageId;
 			this.message = message;
+			this.messageExpectsAnswer = messageExpectsAnswer;
 		}
 
 		@Override
@@ -328,10 +332,19 @@ public class CommunicationManagerService {
 			try {
 				sendMessage(dialogOption, message);
 
-				interventionExecutionManagerService
-						.dialogMessageStatusChangesForSending(dialogMessageId,
-								DialogMessageStatusTypes.SENT,
-								InternalDateTime.currentTimeMillis());
+				if (messageExpectsAnswer) {
+					interventionExecutionManagerService
+							.dialogMessageStatusChangesForSending(
+									dialogMessageId,
+									DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
+									InternalDateTime.currentTimeMillis());
+				} else {
+					interventionExecutionManagerService
+							.dialogMessageStatusChangesForSending(
+									dialogMessageId,
+									DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
+									InternalDateTime.currentTimeMillis());
+				}
 
 				removeFromList();
 
@@ -363,11 +376,19 @@ public class CommunicationManagerService {
 				try {
 					sendMessage(dialogOption, message);
 
-					interventionExecutionManagerService
-							.dialogMessageStatusChangesForSending(
-									dialogMessageId,
-									DialogMessageStatusTypes.SENT,
-									InternalDateTime.currentTimeMillis());
+					if (messageExpectsAnswer) {
+						interventionExecutionManagerService
+								.dialogMessageStatusChangesForSending(
+										dialogMessageId,
+										DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
+										InternalDateTime.currentTimeMillis());
+					} else {
+						interventionExecutionManagerService
+								.dialogMessageStatusChangesForSending(
+										dialogMessageId,
+										DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
+										InternalDateTime.currentTimeMillis());
+					}
 
 					removeFromList();
 

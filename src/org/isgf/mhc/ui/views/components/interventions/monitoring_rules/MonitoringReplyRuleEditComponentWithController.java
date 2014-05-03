@@ -49,11 +49,11 @@ public class MonitoringReplyRuleEditComponentWithController extends
 		 * Adjust own components
 		 */
 		// Handle combo box
-		val allMonitoringMessageGroupsOfIntervention = getInterventionAdministrationManagerService()
-				.getAllMonitoringMessageGroupsOfIntervention(
+		val allMonitoringMessageGroupsExpectingNoAnswerOfIntervention = getInterventionAdministrationManagerService()
+				.getAllMonitoringMessageGroupsExpectingNoAnswerOfIntervention(
 						intervention.getId());
 		val monitoringMessageComboBox = getMessageGroupComboBox();
-		for (val monitoringMessageGroup : allMonitoringMessageGroupsOfIntervention) {
+		for (val monitoringMessageGroup : allMonitoringMessageGroupsExpectingNoAnswerOfIntervention) {
 			val uiMonitoringMessageGroup = monitoringMessageGroup
 					.toUIModelObject();
 			monitoringMessageComboBox.addItem(uiMonitoringMessageGroup);

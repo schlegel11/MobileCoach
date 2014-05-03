@@ -69,6 +69,13 @@ public class DialogMessage extends ModelObject {
 	private long						sentTimestamp;
 
 	/**
+	 * Defines if an answer to this message is expected
+	 */
+	@Getter
+	@Setter
+	private boolean						messageExpectsAnswer;
+
+	/**
 	 * Timestamp when the {@link DialogMessage} is handled as unanswered
 	 */
 	@Getter

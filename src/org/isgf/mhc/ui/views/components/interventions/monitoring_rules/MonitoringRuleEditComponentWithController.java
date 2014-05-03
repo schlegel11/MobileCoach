@@ -36,6 +36,8 @@ public class MonitoringRuleEditComponentWithController extends
 
 	private final MonitoringRule									monitoringRule;
 
+	private MonitoringMessageGroup									currentMonitoringMessageGroup;
+
 	public MonitoringRuleEditComponentWithController(
 			final Intervention intervention, final ObjectId monitoringRuleId) {
 		super();
@@ -59,6 +61,7 @@ public class MonitoringRuleEditComponentWithController extends
 		 * Adjust own components
 		 */
 		// Handle combo box
+		currentMonitoringMessageGroup = null;
 		val allMonitoringMessageGroupsOfIntervention = getInterventionAdministrationManagerService()
 				.getAllMonitoringMessageGroupsOfIntervention(
 						intervention.getId());
@@ -70,6 +73,7 @@ public class MonitoringRuleEditComponentWithController extends
 			if (monitoringMessageGroup.getId().equals(
 					monitoringRule.getRelatedMonitoringMessageGroup())) {
 				monitoringMessageComboBox.select(uiMonitoringMessageGroup);
+				currentMonitoringMessageGroup = monitoringMessageGroup;
 			}
 		}
 		monitoringMessageComboBox
@@ -83,10 +87,11 @@ public class MonitoringRuleEditComponentWithController extends
 						ObjectId newMonitoringMessageGroupId;
 						if (uiMonitoringMessageGroup == null) {
 							newMonitoringMessageGroupId = null;
+							currentMonitoringMessageGroup = null;
 						} else {
-							newMonitoringMessageGroupId = uiMonitoringMessageGroup
-									.getRelatedModelObject(
-											MonitoringMessageGroup.class)
+							currentMonitoringMessageGroup = uiMonitoringMessageGroup
+									.getRelatedModelObject(MonitoringMessageGroup.class);
+							newMonitoringMessageGroupId = currentMonitoringMessageGroup
 									.getId();
 						}
 
@@ -203,22 +208,50 @@ public class MonitoringRuleEditComponentWithController extends
 			getMessageGroupComboBox().setEnabled(true);
 			getHourToSendMessageLabel().setEnabled(true);
 			getHourToSendMessageSlider().setEnabled(true);
-			getHoursUntilHandledAsNotAnsweredLabel().setEnabled(true);
-			getHoursUntilHandledAsNotAnsweredSlider().setEnabled(true);
 
-			getReplyRulesTabSheet().setEnabled(true);
+			if (currentMonitoringMessageGroup != null
+					&& !currentMonitoringMessageGroup.isMessagesExpectAnswer()) {
+				getHoursUntilHandledAsNotAnsweredLabel().setEnabled(false);
+				getHoursUntilHandledAsNotAnsweredSlider().setEnabled(false);
 
-			getReplyRulesIfAnswerLabel().setEnabled(true);
-			getMonitoringReplyRulesEditComponentWithControllerIfAnswer()
-					.setEnabled(true);
-			getReplyRulesIfNoAnswerLabel().setEnabled(true);
-			getMonitoringReplyRulesEditComponentWithControllerIfNoAnswer()
-					.setEnabled(true);
+				getReplyRulesTabSheet().setEnabled(false);
+
+				getReplyRulesIfAnswerLabel().setEnabled(false);
+				getMonitoringReplyRulesEditComponentWithControllerIfAnswer()
+						.setEnabled(false);
+				getMonitoringReplyRulesEditComponentWithControllerIfAnswer()
+						.getRulesTree().setEnabled(false);
+
+				getReplyRulesIfNoAnswerLabel().setEnabled(false);
+				getMonitoringReplyRulesEditComponentWithControllerIfNoAnswer()
+						.setEnabled(false);
+				getMonitoringReplyRulesEditComponentWithControllerIfNoAnswer()
+						.getRulesTree().setEnabled(false);
+			} else {
+				getHoursUntilHandledAsNotAnsweredLabel().setEnabled(true);
+				getHoursUntilHandledAsNotAnsweredSlider().setEnabled(true);
+
+				getReplyRulesTabSheet().setEnabled(true);
+
+				getReplyRulesIfAnswerLabel().setEnabled(true);
+				getMonitoringReplyRulesEditComponentWithControllerIfAnswer()
+						.setEnabled(true);
+				getMonitoringReplyRulesEditComponentWithControllerIfAnswer()
+						.getRulesTree().setEnabled(true);
+
+				getReplyRulesIfNoAnswerLabel().setEnabled(true);
+				getMonitoringReplyRulesEditComponentWithControllerIfNoAnswer()
+						.setEnabled(true);
+				getMonitoringReplyRulesEditComponentWithControllerIfNoAnswer()
+						.getRulesTree().setEnabled(true);
+			}
+
 		} else {
 			getMessageGroupLabel().setEnabled(false);
 			getMessageGroupComboBox().setEnabled(false);
 			getHourToSendMessageLabel().setEnabled(false);
 			getHourToSendMessageSlider().setEnabled(false);
+
 			getHoursUntilHandledAsNotAnsweredLabel().setEnabled(false);
 			getHoursUntilHandledAsNotAnsweredSlider().setEnabled(false);
 
@@ -227,9 +260,14 @@ public class MonitoringRuleEditComponentWithController extends
 			getReplyRulesIfAnswerLabel().setEnabled(false);
 			getMonitoringReplyRulesEditComponentWithControllerIfAnswer()
 					.setEnabled(false);
+			getMonitoringReplyRulesEditComponentWithControllerIfAnswer()
+					.getRulesTree().setEnabled(false);
+
 			getReplyRulesIfNoAnswerLabel().setEnabled(false);
 			getMonitoringReplyRulesEditComponentWithControllerIfNoAnswer()
 					.setEnabled(false);
+			getMonitoringReplyRulesEditComponentWithControllerIfNoAnswer()
+					.getRulesTree().setEnabled(false);
 		}
 
 		// Adjust sliders

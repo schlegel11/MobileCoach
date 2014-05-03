@@ -76,7 +76,8 @@ public class MonitoringMessageGroup extends ModelObject {
 	 */
 	@Override
 	public UIModelObject toUIModelObject() {
-		final val monitoringMessageGroup = new UIMonitoringMessageGroup(name);
+		final val monitoringMessageGroup = new UIMonitoringMessageGroup(name,
+				messagesExpectAnswer);
 
 		monitoringMessageGroup.setRelatedModelObject(this);
 

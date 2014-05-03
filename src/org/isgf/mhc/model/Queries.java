@@ -27,6 +27,7 @@ public class Queries {
 	public static final String	INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME									= "{'intervention':#,'name':#}";
 
 	public static final String	MONITORING_MESSAGE_GROUP__BY_INTERVENTION													= "{'intervention':#}";
+	public static final String	MONITORING_MESSAGE_GROUP__BY_INTERVENTION_AND_EXPECTING_ANSWER								= "{'intervention':#,'messagesExpectAnswer':#}";
 	public static final String	MONITORING_MESSAGE_GROUP__SORT_BY_ORDER_ASC													= "{'order':1}";
 	public static final String	MONITORING_MESSAGE_GROUP__SORT_BY_ORDER_DESC												= "{'order':-1}";
 

@@ -157,13 +157,14 @@ public class InterventionExecutionManagerService {
 			final Participant participant, final String message,
 			final boolean manuallySent, final long timestampToSendMessage,
 			final MonitoringRule relatedMonitoringRule,
-			final MonitoringMessage relatedMonitoringMessage) {
+			final MonitoringMessage relatedMonitoringMessage,
+			final boolean answerExpected) {
 		log.debug("Create message and prepare for sending");
 		val dialogMessage = new DialogMessage(participant.getId(), 0,
 				DialogMessageStatusTypes.PREPARED_FOR_SENDING, message,
-				timestampToSendMessage, -1, -1, -1, null, false,
-				relatedMonitoringRule == null ? null : relatedMonitoringRule
-						.getId(),
+				timestampToSendMessage, -1, answerExpected, -1, -1, null,
+				false, relatedMonitoringRule == null ? null
+						: relatedMonitoringRule.getId(),
 				relatedMonitoringMessage == null ? null
 						: relatedMonitoringMessage.getId(), false, manuallySent);
 
@@ -227,7 +228,8 @@ public class InterventionExecutionManagerService {
 	}
 
 	/**
-	 * Handles states form "PREPARED_FOR_SENDING" to "SENT"
+	 * Handles states form "PREPARED_FOR_SENDING" to
+	 * "SENT_AND_WAITING_FOR_ANSWER" or "SENT_AND_WAITING_FOR_ANSWER"
 	 * 
 	 * @param dialogMessageId
 	 * @param newStatus
@@ -244,7 +246,7 @@ public class InterventionExecutionManagerService {
 		dialogMessage.setStatus(newStatus);
 
 		// Adjust for sent
-		if (newStatus == DialogMessageStatusTypes.SENT) {
+		if (newStatus == DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER) {
 			if (dialogMessage.getRelatedMonitoringRuleForReplyRules() != null) {
 				val monitoringRule = databaseManagerService.getModelObjectById(
 						MonitoringRule.class,
@@ -297,8 +299,8 @@ public class InterventionExecutionManagerService {
 	private void dialogMessageCreateAsUnexpectedReceived(
 			final ObjectId participantId, final ReceivedMessage receivedMessage) {
 		val dialogMessage = new DialogMessage(participantId, 0,
-				DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY, "", -1, -1, -1,
-				receivedMessage.getReceivedTimestamp(),
+				DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY, "", -1, -1,
+				false, -1, receivedMessage.getReceivedTimestamp(),
 				receivedMessage.getMessage(), true, null, null, false, false);
 
 		val highestOrderMessage = databaseManagerService
@@ -331,7 +333,7 @@ public class InterventionExecutionManagerService {
 	}
 
 	/**
-	 * Handles states form "SENT" till end
+	 * Handles states form "SENT_AND_ANSWERED_BY_PARTICIPANT" till end
 	 * 
 	 * @param dialogMessageId
 	 * @param newStatus
@@ -358,7 +360,7 @@ public class InterventionExecutionManagerService {
 			case SENT_BUT_NOT_ANSWERED_BY_PARTICIPANT:
 				// no changes necessary
 				break;
-			case PROCESSED:
+			case SENT_AND_ANSWERED_AND_PROCESSED:
 				// no changes necessary
 				break;
 		}
@@ -422,8 +424,9 @@ public class InterventionExecutionManagerService {
 			// Handle messages
 			for (val dialogMessage : dialogMessages) {
 				// Set new message status
-				dialogMessageStatusChangesAfterSending(dialogMessage.getId(),
-						DialogMessageStatusTypes.PROCESSED,
+				dialogMessageStatusChangesAfterSending(
+						dialogMessage.getId(),
+						DialogMessageStatusTypes.SENT_AND_ANSWERED_AND_PROCESSED,
 						InternalDateTime.currentTimeMillis(), null);
 
 				// Handle message reply by participant if message is answered by
@@ -516,7 +519,7 @@ public class InterventionExecutionManagerService {
 						dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
 								participant, messageTextToSend, false,
 								InternalDateTime.currentTimeMillis(), null,
-								monitoringMessage);
+								monitoringMessage, false);
 					}
 				}
 			}
@@ -572,6 +575,7 @@ public class InterventionExecutionManagerService {
 							.getRuleThatCausedMessageSending();
 					val monitoringMessage = recursiveRuleResolver
 							.getMonitoringMessageToSend();
+					val monitoringMessageExpectsAnswer = false; // TODO
 					val messageTextToSend = recursiveRuleResolver
 							.getMessageTextToSend();
 
@@ -591,7 +595,8 @@ public class InterventionExecutionManagerService {
 					dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
 							participant, messageTextToSend, false,
 							timeToSendMessage.getTimeInMillis(),
-							monitoringRule, monitoringMessage);
+							monitoringRule, monitoringMessage,
+							monitoringMessageExpectsAnswer);
 				}
 
 				// Update status and status values
@@ -660,7 +665,8 @@ public class InterventionExecutionManagerService {
 							dialogOption.getData());
 					communicationManagerService.sendMessage(dialogOption,
 							dialogMessageToSend.getId(),
-							dialogMessageToSend.getMessage());
+							dialogMessageToSend.getMessage(),
+							dialogMessageToSend.isMessageExpectsAnswer());
 				} else {
 					log.error("Could not send prepared message, because there was no valid dialog option to send message to participant; solution: deactive messaging for participant and removing current dialog message");
 
@@ -730,7 +736,7 @@ public class InterventionExecutionManagerService {
 						variablesWithValues.values(), "");
 		dialogMessageCreateManuallyOrByRulesIncludingMediaObject(participant,
 				messageToSend, true, InternalDateTime.currentTimeMillis(),
-				null, null);
+				null, null, false);
 	}
 
 	/*
@@ -801,7 +807,8 @@ public class InterventionExecutionManagerService {
 						DialogMessage.class,
 						Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_UNANSWERED_AFTER_TIMESTAMP_LOWER,
 						Queries.DIALOG_MESSAGE__SORT_BY_ORDER_DESC,
-						participantId, DialogMessageStatusTypes.SENT,
+						participantId,
+						DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
 						InternalDateTime.currentTimeMillis());
 
 		return dialogMessages;
@@ -828,7 +835,8 @@ public class InterventionExecutionManagerService {
 						DialogMessage.class,
 						Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_UNANSWERED_AFTER_TIMESTAMP_HIGHER,
 						Queries.DIALOG_MESSAGE__SORT_BY_ORDER_DESC,
-						participantId, DialogMessageStatusTypes.SENT,
+						participantId,
+						DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
 						latestTimestampAnswerIsAccepted);
 
 		return dialogMessage;
