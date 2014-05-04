@@ -205,63 +205,78 @@ public class CommunicationManagerService {
 			for (val message : folder.getMessages()) {
 				// Only handle messages who match the subject pattern
 				if (message.getSubject().startsWith(mailSubjectStartsWith)) {
-					log.debug("Mail received with subject '{}'",
-							message.getSubject());
-					val receivedMessage = new ReceivedMessage();
+					try {
 
-					// Parse message content
-					val documentBuilder = documentBuilderFactory
-							.newDocumentBuilder();
-					val inputSource = new InputSource(new StringReader(
-							String.class.cast(message.getContent())));
-					val document = documentBuilder.parse(inputSource);
+						log.debug("Mail received with subject '{}'",
+								message.getSubject());
+						val receivedMessage = new ReceivedMessage();
 
-					final XPath xPath = XPathFactory.newInstance().newXPath();
+						// Parse message content
+						val documentBuilder = documentBuilderFactory
+								.newDocumentBuilder();
+						val inputSource = new InputSource(new StringReader(
+								String.class.cast(message.getContent())));
+						val document = documentBuilder.parse(inputSource);
 
-					val sender = ((NodeList) xPath.evaluate(
-							"/aspsms/Originator/PhoneNumber",
-							document.getDocumentElement(),
-							XPathConstants.NODESET)).item(0).getTextContent();
+						final XPath xPath = XPathFactory.newInstance()
+								.newXPath();
 
-					receivedMessage.setSender(StringHelpers
-							.cleanPhoneNumber(sender));
+						val sender = ((NodeList) xPath.evaluate(
+								"/aspsms/Originator/PhoneNumber",
+								document.getDocumentElement(),
+								XPathConstants.NODESET)).item(0)
+								.getTextContent();
 
-					val recipient = ((NodeList) xPath.evaluate(
-							"/aspsms/Recipient/PhoneNumber",
-							document.getDocumentElement(),
-							XPathConstants.NODESET)).item(0).getTextContent();
+						receivedMessage.setSender(StringHelpers
+								.cleanPhoneNumber(sender));
 
-					receivedMessage.setRecipient(StringHelpers
-							.cleanPhoneNumber(recipient));
+						val recipient = ((NodeList) xPath.evaluate(
+								"/aspsms/Recipient/PhoneNumber",
+								document.getDocumentElement(),
+								XPathConstants.NODESET)).item(0)
+								.getTextContent();
 
-					val receivedTimestampString = ((NodeList) xPath.evaluate(
-							"/aspsms/DateReceived",
-							document.getDocumentElement(),
-							XPathConstants.NODESET)).item(0).getTextContent();
+						receivedMessage.setRecipient(StringHelpers
+								.cleanPhoneNumber(recipient));
 
-					val receivedTimestamp = receiverDateFormat.parse(
-							receivedTimestampString).getTime();
+						val receivedTimestampString = ((NodeList) xPath
+								.evaluate("/aspsms/DateReceived",
+										document.getDocumentElement(),
+										XPathConstants.NODESET)).item(0)
+								.getTextContent();
 
-					// Abjust for simulated date and time
-					if (Constants.isSimulatedDateAndTime()) {
-						receivedMessage.setReceivedTimestamp(InternalDateTime
-								.currentTimeMillis());
-					} else {
-						receivedMessage.setReceivedTimestamp(receivedTimestamp);
+						val receivedTimestamp = receiverDateFormat.parse(
+								receivedTimestampString).getTime();
+
+						// Abjust for simulated date and time
+						if (Constants.isSimulatedDateAndTime()) {
+							receivedMessage
+									.setReceivedTimestamp(InternalDateTime
+											.currentTimeMillis());
+						} else {
+							receivedMessage
+									.setReceivedTimestamp(receivedTimestamp);
+						}
+
+						val messageStringEncoded = ((NodeList) xPath.evaluate(
+								"/aspsms/MessageData",
+								document.getDocumentElement(),
+								XPathConstants.NODESET)).item(0)
+								.getTextContent();
+						val messageString = URLDecoder.decode(
+								messageStringEncoded, "ISO-8859-1");
+
+						receivedMessage.setMessage(messageString);
+
+						log.debug("Mail parsed as {}",
+								receivedMessage.toString());
+
+						receivedMessages.add(receivedMessage);
+					} catch (final Exception e) {
+						log.error(
+								"Could not parse message, so remove it unparsed. Reason: {}",
+								e.getMessage());
 					}
-
-					val messageStringEncoded = ((NodeList) xPath.evaluate(
-							"/aspsms/MessageData",
-							document.getDocumentElement(),
-							XPathConstants.NODESET)).item(0).getTextContent();
-					val messageString = URLDecoder.decode(messageStringEncoded,
-							"ISO-8859-1");
-
-					receivedMessage.setMessage(messageString);
-
-					log.debug("Mail parsed as {}", receivedMessage.toString());
-
-					receivedMessages.add(receivedMessage);
 				}
 
 				// Delete also messages not matching the subject pattern

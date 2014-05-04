@@ -263,6 +263,8 @@ public class InterventionExecutionManagerService {
 				}
 			}
 			dialogMessage.setSentTimestamp(timeStampOfEvent);
+		} else if (newStatus == DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER) {
+			dialogMessage.setSentTimestamp(timeStampOfEvent);
 		}
 
 		databaseManagerService.saveModelObject(dialogMessage);
@@ -357,9 +359,6 @@ public class InterventionExecutionManagerService {
 				dialogMessage.setAnswerReceivedTimestamp(timeStampOfEvent);
 				dialogMessage.setAnswerReceived(dataOfEvent);
 				break;
-			case SENT_BUT_NOT_ANSWERED_BY_PARTICIPANT:
-				// no changes necessary
-				break;
 			case SENT_AND_ANSWERED_AND_PROCESSED:
 				// no changes necessary
 				break;
@@ -424,13 +423,21 @@ public class InterventionExecutionManagerService {
 			// Handle messages
 			for (val dialogMessage : dialogMessages) {
 				// Set new message status
-				dialogMessageStatusChangesAfterSending(
-						dialogMessage.getId(),
-						DialogMessageStatusTypes.SENT_AND_ANSWERED_AND_PROCESSED,
-						InternalDateTime.currentTimeMillis(), null);
+				if (reactOnAnsweredMessages) {
+					dialogMessageStatusChangesAfterSending(
+							dialogMessage.getId(),
+							DialogMessageStatusTypes.SENT_AND_ANSWERED_AND_PROCESSED,
+							InternalDateTime.currentTimeMillis(), null);
+				} else {
+					dialogMessageStatusChangesAfterSending(
+							dialogMessage.getId(),
+							DialogMessageStatusTypes.SENT_AND_NOT_ANSWERED_AND_PROCESSED,
+							InternalDateTime.currentTimeMillis(), null);
+				}
 
-				// Handle message reply by participant if message is answered by
-				// participant and not a manually sent
+				// Handle message reply (the text sent) by participant if
+				// message is answered by
+				// participant and not manually sent
 				if (reactOnAnsweredMessages
 						&& dialogMessage.getRelatedMonitoringMessage() != null) {
 					log.debug("Managing message reply (because the message is answered and has a reference to a monitoring message)");
@@ -499,27 +506,27 @@ public class InterventionExecutionManagerService {
 						recursiveRuleResolver.resolve();
 					} catch (final Exception e) {
 						log.error(
-								"Could not resolve rules for participant {}: {}",
+								"Could not resolve reply rules for participant {}: {}",
 								participant.getId(), e.getMessage());
 						continue;
 					}
 
-					val sendMessage = recursiveRuleResolver
-							.shouldAMessageBeSentAfterThisResolving();
+					for (val messageToSendTask : recursiveRuleResolver
+							.getMessageSendingResultForMonitoringReplyRules()) {
+						if (messageToSendTask.getMessageTextToSend() != null) {
+							log.debug("Preparing reply message for sending for participant");
 
-					if (sendMessage) {
-						log.debug("Preparing reply message for sending for participant");
+							val monitoringMessage = messageToSendTask
+									.getMonitoringMessageToSend();
+							val messageTextToSend = messageToSendTask
+									.getMessageTextToSend();
 
-						val monitoringMessage = recursiveRuleResolver
-								.getMonitoringMessageToSend();
-						val messageTextToSend = recursiveRuleResolver
-								.getMessageTextToSend();
-
-						// Prepare message for sending
-						dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
-								participant, messageTextToSend, false,
-								InternalDateTime.currentTimeMillis(), null,
-								monitoringMessage, false);
+							// Prepare message for sending
+							dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
+									participant, messageTextToSend, false,
+									InternalDateTime.currentTimeMillis(), null,
+									monitoringMessage, false);
+						}
 					}
 				}
 			}
@@ -562,45 +569,50 @@ public class InterventionExecutionManagerService {
 				val finishIntervention = recursiveRuleResolver
 						.isInterventionFinishedForParticipantAfterThisResolving();
 
-				val sendMessage = recursiveRuleResolver
-						.shouldAMessageBeSentAfterThisResolving();
-
 				if (finishIntervention) {
 					log.debug("Finishing intervention for participant");
 					dialogStatusSetMonitoringFinished(participant.getId());
-				} else if (sendMessage) {
-					log.debug("Preparing message for sending for participant");
+				} else {
+					for (val messageToSendTask : recursiveRuleResolver
+							.getMessageSendingResultForMonitoringRules()) {
+						if (messageToSendTask.getMessageTextToSend() != null) {
 
-					val monitoringRule = recursiveRuleResolver
-							.getRuleThatCausedMessageSending();
-					val monitoringMessage = recursiveRuleResolver
-							.getMonitoringMessageToSend();
-					val monitoringMessageExpectsAnswer = false; // TODO
-					val messageTextToSend = recursiveRuleResolver
-							.getMessageTextToSend();
+							log.debug("Preparing message for sending for participant");
 
-					// Calculate time to send message
-					final int hourToSendMessage = monitoringRule
-							.getHourToSendMessage();
-					final Calendar timeToSendMessage = Calendar.getInstance();
-					timeToSendMessage.setTimeInMillis(InternalDateTime
-							.currentTimeMillis());
-					timeToSendMessage.set(Calendar.HOUR_OF_DAY,
-							hourToSendMessage);
-					timeToSendMessage.set(Calendar.MINUTE, 0);
-					timeToSendMessage.set(Calendar.SECOND, 0);
-					timeToSendMessage.set(Calendar.MILLISECOND, 0);
+							val monitoringRule = messageToSendTask
+									.getMonitoringRuleThatCausedMessageSending();
+							val monitoringMessage = messageToSendTask
+									.getMonitoringMessageToSend();
+							val monitoringMessageExpectsAnswer = messageToSendTask
+									.isMonitoringRuleExpectsAnswer();
+							val messageTextToSend = messageToSendTask
+									.getMessageTextToSend();
 
-					// Prepare message for sending
-					dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
-							participant, messageTextToSend, false,
-							timeToSendMessage.getTimeInMillis(),
-							monitoringRule, monitoringMessage,
-							monitoringMessageExpectsAnswer);
+							// Calculate time to send message
+							final int hourToSendMessage = monitoringRule
+									.getHourToSendMessage();
+							final Calendar timeToSendMessage = Calendar
+									.getInstance();
+							timeToSendMessage.setTimeInMillis(InternalDateTime
+									.currentTimeMillis());
+							timeToSendMessage.set(Calendar.HOUR_OF_DAY,
+									hourToSendMessage);
+							timeToSendMessage.set(Calendar.MINUTE, 0);
+							timeToSendMessage.set(Calendar.SECOND, 0);
+							timeToSendMessage.set(Calendar.MILLISECOND, 0);
+
+							// Prepare message for sending
+							dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
+									participant, messageTextToSend, false,
+									timeToSendMessage.getTimeInMillis(),
+									monitoringRule, monitoringMessage,
+									monitoringMessageExpectsAnswer);
+						}
+					}
+
+					// Update status and status values
+					dialogStatusUpdate(dialogStatus.getId(), dateIndex);
 				}
-
-				// Update status and status values
-				dialogStatusUpdate(dialogStatus.getId(), dateIndex);
 			}
 		}
 	}

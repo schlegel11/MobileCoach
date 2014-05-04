@@ -1,8 +1,11 @@
 package org.isgf.mhc.services.internal;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
@@ -33,7 +36,6 @@ public class RecursiveAbstractMonitoringRulesResolver {
 	private final VariablesManagerService	variablesManagerService;
 
 	// Internal objects
-	private AbstractMonitoringRule			ruleMatched;
 	private boolean							completelyStop											= false;
 
 	// Relevant for both cases
@@ -58,20 +60,45 @@ public class RecursiveAbstractMonitoringRulesResolver {
 	private boolean							interventionIsFinishedForParticipantAfterThisResolving	= false;
 
 	/*
-	 * Values to resolve related to message sending
+	 * Helper classes containing resolved values about messages to send
 	 */
 
-	// Relevant for both cases
-	private boolean							messageShouldBeSentAfterThisResolving					= false;
+	private abstract class AbstractMessageSendingResultForAbstractMontoringRule {
+		@Getter
+		@Setter
+		private String					messageTextToSend								= "";
 
-	// Only relevant for MonitoringRules and if
-	// messageShouldBeSentAfterThisResolving is true
-	private MonitoringRule					abstractMonitoringRuleThatCausedMessageSending			= null;
-	private MonitoringMessage				monitoringMessageToSend									= null;
+		@Getter
+		@Setter
+		private MonitoringMessage		monitoringMessageToSend							= null;
 
-	// Relevant for both cases and if messageShouldBeSentAfterThisResolving is
-	// true
-	private String							messageTextToSend										= "";
+		@Getter
+		@Setter
+		private AbstractMonitoringRule	abstractMonitoringRuleRequiredToPrepareMessage	= null;
+
+		@Getter
+		@Setter
+		private boolean					monitoringRuleExpectsAnswer						= false;
+	}
+
+	public class MessageSendingResultForMonitoringRule extends
+			AbstractMessageSendingResultForAbstractMontoringRule {
+		@Getter
+		@Setter
+		private MonitoringRule	monitoringRuleThatCausedMessageSending	= null;
+	}
+
+	public class MessageSendingResultForMonitoringReplyRule extends
+			AbstractMessageSendingResultForAbstractMontoringRule {
+	}
+
+	/*
+	 * Values to resolve
+	 */
+	@Getter
+	private final List<MessageSendingResultForMonitoringRule>		messageSendingResultForMonitoringRules		= new ArrayList<RecursiveAbstractMonitoringRulesResolver.MessageSendingResultForMonitoringRule>();
+	@Getter
+	private final List<MessageSendingResultForMonitoringReplyRule>	messageSendingResultForMonitoringReplyRules	= new ArrayList<RecursiveAbstractMonitoringRulesResolver.MessageSendingResultForMonitoringReplyRule>();
 
 	public RecursiveAbstractMonitoringRulesResolver(
 			final DatabaseManagerService databaseManagerService,
@@ -96,41 +123,85 @@ public class RecursiveAbstractMonitoringRulesResolver {
 		monitoringReplyRuleCaseIsTrue = monitoringReplyRuleCase;
 	}
 
-	public void resolve() throws Exception {
+	public void resolve() {
 		// Recursively check all rules
 		executeRules(null);
 
-		if (messageShouldBeSentAfterThisResolving) {
-			if (ruleMatched.getRelatedMonitoringMessageGroup() == null) {
-				throw new NullPointerException(
-						"There are no more messages available in group "
-								+ ruleMatched
-										.getRelatedMonitoringMessageGroup()
-								+ " to send to participant "
-								+ participant.getId());
+		final List<? extends AbstractMessageSendingResultForAbstractMontoringRule> resultsToCreateMessagesFor;
+
+		if (isMonitoringRule) {
+			resultsToCreateMessagesFor = messageSendingResultForMonitoringRules;
+		} else {
+			resultsToCreateMessagesFor = messageSendingResultForMonitoringReplyRules;
+		}
+
+		for (val resultToCreateMessageFor : resultsToCreateMessagesFor) {
+			if (resultToCreateMessageFor
+					.getAbstractMonitoringRuleRequiredToPrepareMessage()
+					.getRelatedMonitoringMessageGroup() == null) {
+				log.warn(
+						"There is no message group defined in rule {} to send a message to participant {}",
+						resultToCreateMessageFor
+								.getAbstractMonitoringRuleRequiredToPrepareMessage(),
+						participant.getId());
+
+				resultToCreateMessageFor.setMessageTextToSend(null);
+
+				continue;
 			}
 
 			// Determine message to send by checking message groups for already
 			// sent messages
-			val determinedMontioringMessageToSend = determineMessageToSend();
-			if (determinedMontioringMessageToSend == null) {
-				throw new NullPointerException(
-						"There are no more messages available in group "
-								+ ruleMatched
-										.getRelatedMonitoringMessageGroup()
-								+ " to send to participant "
-								+ participant.getId());
+			val monitoringMessageGroup = databaseManagerService
+					.getModelObjectById(
+							MonitoringMessageGroup.class,
+							resultToCreateMessageFor
+									.getAbstractMonitoringRuleRequiredToPrepareMessage()
+									.getRelatedMonitoringMessageGroup());
+
+			if (monitoringMessageGroup == null) {
+				log.warn(
+						"The monitoring message group {} for participant {} could not be found",
+						resultToCreateMessageFor
+								.getAbstractMonitoringRuleRequiredToPrepareMessage()
+								.getRelatedMonitoringMessageGroup(),
+						participant.getId());
+
+				continue;
 			}
 
-			monitoringMessageToSend = determinedMontioringMessageToSend;
+			resultToCreateMessageFor
+					.setMonitoringRuleExpectsAnswer(monitoringMessageGroup
+							.isMessagesExpectAnswer());
+
+			val determinedMonitoringMessageToSend = determineMessageToSend(monitoringMessageGroup);
+			if (determinedMonitoringMessageToSend == null) {
+				log.warn(
+						"There are no more messages left in message group {} to send a message to participant {}",
+						resultToCreateMessageFor
+								.getAbstractMonitoringRuleRequiredToPrepareMessage()
+								.getRelatedMonitoringMessageGroup(),
+						participant.getId());
+
+				resultToCreateMessageFor.setMessageTextToSend(null);
+
+				continue;
+			}
+
+			// Remember message that will be sent
+			resultToCreateMessageFor
+					.setMonitoringMessageToSend(determinedMonitoringMessageToSend);
 
 			// Determine message text to send
 			val variablesWithValues = variablesManagerService
 					.getAllVariablesWithValuesOfParticipantAndSystem(participant);
-			messageTextToSend = VariableStringReplacer
+			val messageTextToSend = VariableStringReplacer
 					.findVariablesAndReplaceWithTextValues(
-							monitoringMessageToSend.getTextWithPlaceholders(),
+							determinedMonitoringMessageToSend
+									.getTextWithPlaceholders(),
 							variablesWithValues.values(), "");
+
+			resultToCreateMessageFor.setMessageTextToSend(messageTextToSend);
 		}
 	}
 
@@ -140,8 +211,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 	 * @param parent
 	 * @throws Exception
 	 */
-	private void executeRules(final AbstractMonitoringRule parent)
-			throws Exception {
+	private void executeRules(final AbstractMonitoringRule parent) {
 		// Start with the whole process
 		Iterable<? extends AbstractMonitoringRule> rulesOnCurrentLevel;
 		if (parent == null) {
@@ -216,7 +286,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				// Check children (recursion)
 				executeRules(nextRule);
 
-				// If one of the childrens decided to cancel execution, stop
+				// If one of the children decided to cancel execution, stop
 				// execution, otherwise go on
 				if (completelyStop) {
 					return;
@@ -235,8 +305,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 	 * @return
 	 * @throws Exception
 	 */
-	private boolean executeRule(final AbstractMonitoringRule rule)
-			throws Exception {
+	private boolean executeRule(final AbstractMonitoringRule rule) {
 		val variablesWithValues = variablesManagerService
 				.getAllVariablesWithValuesOfParticipantAndSystem(participant);
 
@@ -249,11 +318,8 @@ public class RecursiveAbstractMonitoringRulesResolver {
 					ruleResult.getErrorMessage());
 			log.error("Stopping rule execution for participant {}",
 					participant.getId());
-			throw new Exception(
-					"Could not execute rule: Error when validating rule "
-							+ rule.getId() + " of participant "
-							+ participant.getId() + ": "
-							+ ruleResult.getErrorMessage());
+
+			return false;
 		}
 
 		log.debug("Checked rule and result is {}",
@@ -262,12 +328,16 @@ public class RecursiveAbstractMonitoringRulesResolver {
 		// Store result if it should be stored
 		if (rule.getStoreValueToVariableWithName() != null
 				&& !rule.getStoreValueToVariableWithName().equals("")) {
-			variablesManagerService.writeVariableValueOfParticipant(
-					participant,
-					rule.getStoreValueToVariableWithName(),
-					ruleResult.isCalculatedRule() ? String.valueOf(ruleResult
-							.getCalculatedRuleValue()) : ruleResult
-							.getTextRuleValue());
+			try {
+				variablesManagerService.writeVariableValueOfParticipant(
+						participant,
+						rule.getStoreValueToVariableWithName(),
+						ruleResult.isCalculatedRule() ? String
+								.valueOf(ruleResult.getCalculatedRuleValue())
+								: ruleResult.getTextRuleValue());
+			} catch (final Exception e) {
+				log.warn("Could not write variable value: {}", e.getMessage());
+			}
 		}
 
 		if (ruleResult.isRuleMatchesEquationSign()
@@ -275,14 +345,20 @@ public class RecursiveAbstractMonitoringRulesResolver {
 			// Stop execution when rule is sending message
 			log.debug("Rule will send message!");
 
-			messageShouldBeSentAfterThisResolving = true;
-
 			if (isMonitoringRule) {
-				abstractMonitoringRuleThatCausedMessageSending = (MonitoringRule) rule;
-			}
+				final MessageSendingResultForMonitoringRule result = new MessageSendingResultForMonitoringRule();
 
-			ruleMatched = rule;
-			completelyStop = true;
+				result.setMonitoringRuleThatCausedMessageSending((MonitoringRule) rule);
+				result.setAbstractMonitoringRuleRequiredToPrepareMessage(rule);
+
+				messageSendingResultForMonitoringRules.add(result);
+			} else {
+				final MessageSendingResultForMonitoringReplyRule result = new MessageSendingResultForMonitoringReplyRule();
+
+				result.setAbstractMonitoringRuleRequiredToPrepareMessage(rule);
+
+				messageSendingResultForMonitoringReplyRules.add(result);
+			}
 		} else if (isMonitoringRule && ruleResult.isRuleMatchesEquationSign()
 				&& ((MonitoringRule) rule).isStopInterventionWhenTrue()) {
 			// Stop execution when rule is finalizing rule
@@ -290,7 +366,6 @@ public class RecursiveAbstractMonitoringRulesResolver {
 
 			interventionIsFinishedForParticipantAfterThisResolving = true;
 
-			ruleMatched = rule;
 			completelyStop = true;
 		}
 
@@ -305,10 +380,8 @@ public class RecursiveAbstractMonitoringRulesResolver {
 	 * 
 	 * @return
 	 */
-	private MonitoringMessage determineMessageToSend() {
-		val messageGroup = databaseManagerService.getModelObjectById(
-				MonitoringMessageGroup.class,
-				ruleMatched.getRelatedMonitoringMessageGroup());
+	private MonitoringMessage determineMessageToSend(
+			final MonitoringMessageGroup messageGroup) {
 		val iterableMessages = databaseManagerService.findSortedModelObjects(
 				MonitoringMessage.class,
 				Queries.MONITORING_MESSAGE__BY_MONITORING_MESSAGE_GROUP,
@@ -345,21 +418,5 @@ public class RecursiveAbstractMonitoringRulesResolver {
 	 */
 	public boolean isInterventionFinishedForParticipantAfterThisResolving() {
 		return interventionIsFinishedForParticipantAfterThisResolving;
-	}
-
-	public boolean shouldAMessageBeSentAfterThisResolving() {
-		return messageShouldBeSentAfterThisResolving;
-	}
-
-	public MonitoringRule getRuleThatCausedMessageSending() {
-		return abstractMonitoringRuleThatCausedMessageSending;
-	}
-
-	public MonitoringMessage getMonitoringMessageToSend() {
-		return monitoringMessageToSend;
-	}
-
-	public String getMessageTextToSend() {
-		return messageTextToSend;
 	}
 }

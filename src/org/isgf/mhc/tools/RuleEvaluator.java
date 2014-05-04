@@ -132,10 +132,10 @@ public class RuleEvaluator {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
-				case CREATE_TEXT_BUT_RESULT_IS_ALWAYS_FALSE:
+				case CREATE_TEXT_BUT_RESULT_IS_ALWAYS_TRUE:
 					ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					break;
-				case CREATE_TEXT_BUT_RESULT_IS_ALWAYS_TRUE:
+				case CREATE_TEXT_BUT_RESULT_IS_ALWAYS_FALSE:
 					ruleEvaluationResult.setRuleMatchesEquationSign(false);
 					break;
 				case TEXT_VALUE_EQUALS:
