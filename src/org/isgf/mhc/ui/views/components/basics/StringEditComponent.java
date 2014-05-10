@@ -18,7 +18,7 @@ import com.vaadin.ui.TextArea;
 import com.vaadin.ui.VerticalLayout;
 
 /**
- * Provides the about window component
+ * Provides a string edit window
  * 
  * @author Andreas Filler
  */

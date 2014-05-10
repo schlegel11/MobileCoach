@@ -1265,6 +1265,54 @@ public class InterventionAdministrationManagerService {
 		return variables;
 	}
 
+	public List<String> getAllWritableMessageVariablesOfIntervention(
+			final ObjectId interventionId) {
+		val variables = new ArrayList<String>();
+
+		variables.addAll(variablesManagerService
+				.getAllWritableSystemVariableNames());
+
+		variables.addAll(variablesManagerService
+				.getAllInterventionVariableNamesOfIntervention(interventionId));
+		variables
+				.addAll(variablesManagerService
+						.getAllScreeningSurveyVariableNamesOfIntervention(interventionId));
+		variables
+				.addAll(variablesManagerService
+						.getAllMonitoringMessageVariableNamesOfIntervention(interventionId));
+		variables
+				.addAll(variablesManagerService
+						.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(interventionId));
+
+		Collections.sort(variables);
+
+		return variables;
+	}
+
+	public List<String> getAllWritableMonitoringRuleVariablesOfIntervention(
+			final ObjectId interventionId) {
+		val variables = new ArrayList<String>();
+
+		variables.addAll(variablesManagerService
+				.getAllWritableSystemVariableNames());
+
+		variables.addAll(variablesManagerService
+				.getAllInterventionVariableNamesOfIntervention(interventionId));
+		variables
+				.addAll(variablesManagerService
+						.getAllScreeningSurveyVariableNamesOfIntervention(interventionId));
+		variables
+				.addAll(variablesManagerService
+						.getAllMonitoringMessageVariableNamesOfIntervention(interventionId));
+		variables
+				.addAll(variablesManagerService
+						.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(interventionId));
+
+		Collections.sort(variables);
+
+		return variables;
+	}
+
 	public DialogStatus getDialogStatusOfParticipant(
 			final ObjectId participantId) {
 		return databaseManagerService.findOneModelObject(DialogStatus.class,

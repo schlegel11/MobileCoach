@@ -12,7 +12,7 @@ import org.isgf.mhc.model.persistent.MonitoringRule;
 import org.isgf.mhc.model.ui.UIMonitoringMessageGroup;
 import org.isgf.mhc.ui.views.components.basics.AbstractRuleEditComponentWithController;
 import org.isgf.mhc.ui.views.components.basics.AbstractRuleEditComponentWithController.TYPES;
-import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;
+import org.isgf.mhc.ui.views.components.basics.ShortPlaceholderStringEditComponent;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -28,6 +28,7 @@ import com.vaadin.ui.Button.ClickEvent;
 @Log4j2
 public class MonitoringRuleEditComponentWithController extends
 		MonitoringRuleEditComponent {
+	private final ObjectId											interventionId;
 
 	private final AbstractRuleEditComponentWithController			ruleEditComponent;
 
@@ -41,6 +42,8 @@ public class MonitoringRuleEditComponentWithController extends
 	public MonitoringRuleEditComponentWithController(
 			final Intervention intervention, final ObjectId monitoringRuleId) {
 		super();
+
+		interventionId = intervention.getId();
 
 		// Configure integrated components
 		monitoringRule = getInterventionAdministrationManagerService()
@@ -304,10 +307,14 @@ public class MonitoringRuleEditComponentWithController extends
 
 	public void editStoreResultVariable() {
 		log.debug("Edit store result to variable");
+		val allPossibleVariables = getInterventionAdministrationManagerService()
+				.getAllWritableMonitoringRuleVariablesOfIntervention(
+						interventionId);
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_VARIABLE,
-				monitoringRule.getStoreValueToVariableWithName(), null,
-				new ShortStringEditComponent(),
+				monitoringRule.getStoreValueToVariableWithName(),
+				allPossibleVariables,
+				new ShortPlaceholderStringEditComponent(),
 				new ExtendableButtonClickListener() {
 
 					@Override

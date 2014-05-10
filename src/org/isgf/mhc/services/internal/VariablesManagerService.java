@@ -42,6 +42,7 @@ public class VariablesManagerService {
 
 	private final HashSet<String>			allSystemVariableNames;
 	private final HashSet<String>			allSystemVariableNamesRelevantForSlides;
+	private final HashSet<String>			writableVariableNames;
 	private final HashSet<String>			writeProtectedVariableNames;
 
 	private static SimpleDateFormat			dayInWeekFormatter	= new SimpleDateFormat(
@@ -71,6 +72,16 @@ public class VariablesManagerService {
 		for (val variable : SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES
 				.values()) {
 			writeProtectedVariableNames.add(variable.toVariableName());
+		}
+
+		writableVariableNames = new HashSet<String>();
+		for (val variable : SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES
+				.values()) {
+			writableVariableNames.add(variable.toVariableName());
+		}
+		for (val variable : SystemVariables.READ_WRITE_SYSTEM_VARIABLES
+				.values()) {
+			writableVariableNames.add(variable.toVariableName());
 		}
 
 		allSystemVariableNames = new HashSet<String>();
@@ -342,6 +353,10 @@ public class VariablesManagerService {
 
 	public Set<String> getAllSystemVariableNamesRelevantForSlides() {
 		return allSystemVariableNamesRelevantForSlides;
+	}
+
+	public Set<String> getAllWritableSystemVariableNames() {
+		return writableVariableNames;
 	}
 
 	public Set<String> getAllInterventionVariableNamesOfIntervention(

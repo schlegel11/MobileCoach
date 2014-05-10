@@ -18,7 +18,7 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
 /**
- * Provides the about window component
+ * Provides a string edit window for short strings
  * 
  * @author Andreas Filler
  */

@@ -189,6 +189,8 @@ public class MonitoringMessageGroupsTabComponentWithController extends
 
 				// Adapt UI
 				val tab = getMonitoringMessageGroupsTabSheet();
+				monitoringMessageGroups.remove(tab.getTabPosition(tab
+						.getTab(tab.getSelectedTab())));
 				tab.removeTab(tab.getTab(tab.getSelectedTab()));
 
 				val selectedTab = tab.getSelectedTab();
@@ -209,5 +211,4 @@ public class MonitoringMessageGroupsTabComponentWithController extends
 			}
 		}, null);
 	}
-
 }

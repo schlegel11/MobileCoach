@@ -17,6 +17,7 @@ import org.isgf.mhc.tools.StringValidator;
 import org.isgf.mhc.ui.NotificationMessageException;
 import org.isgf.mhc.ui.views.components.basics.MediaObjectIntegrationComponentWithController.MediaObjectCreationOrDeleteionListener;
 import org.isgf.mhc.ui.views.components.basics.PlaceholderStringEditComponent;
+import org.isgf.mhc.ui.views.components.basics.ShortPlaceholderStringEditComponent;
 import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -628,10 +629,14 @@ public class ScreeningSurveySlideEditComponentWithController extends
 
 	public void changeStoreResultVariable() {
 		log.debug("Edit store result to variable");
+		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
+				.getAllWritableScreenigSurveyVariablesOfScreeningSurvey(
+						screeningSurveySlide.getScreeningSurvey());
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_VARIABLE,
-				screeningSurveySlide.getStoreValueToVariableWithName(), null,
-				new ShortStringEditComponent(),
+				screeningSurveySlide.getStoreValueToVariableWithName(),
+				allPossibleVariables,
+				new ShortPlaceholderStringEditComponent(),
 				new ExtendableButtonClickListener() {
 
 					@Override

@@ -8,7 +8,7 @@ import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.model.persistent.MonitoringMessage;
 import org.isgf.mhc.ui.views.components.basics.MediaObjectIntegrationComponentWithController.MediaObjectCreationOrDeleteionListener;
 import org.isgf.mhc.ui.views.components.basics.PlaceholderStringEditComponent;
-import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;
+import org.isgf.mhc.ui.views.components.basics.ShortPlaceholderStringEditComponent;
 
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -111,10 +111,13 @@ public class MonitoringMessageEditComponentWithController extends
 
 	public void editStoreResultToVariable() {
 		log.debug("Edit store result to variable");
+		val allPossibleMessageVariables = getInterventionAdministrationManagerService()
+				.getAllWritableMessageVariablesOfIntervention(interventionId);
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_VARIABLE,
-				monitoringMessage.getStoreValueToVariableWithName(), null,
-				new ShortStringEditComponent(),
+				monitoringMessage.getStoreValueToVariableWithName(),
+				allPossibleMessageVariables,
+				new ShortPlaceholderStringEditComponent(),
 				new ExtendableButtonClickListener() {
 
 					@Override

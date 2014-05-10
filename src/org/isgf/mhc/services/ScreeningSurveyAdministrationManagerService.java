@@ -782,4 +782,26 @@ public class ScreeningSurveyAdministrationManagerService {
 
 		return variables;
 	}
+
+	public List<String> getAllWritableScreenigSurveyVariablesOfScreeningSurvey(
+			final ObjectId screeningSurveyId) {
+		val variables = new ArrayList<String>();
+
+		variables.addAll(variablesManagerService
+				.getAllWritableSystemVariableNames());
+
+		val screeningSurvey = databaseManagerService.getModelObjectById(
+				ScreeningSurvey.class, screeningSurveyId);
+
+		variables.addAll(variablesManagerService
+				.getAllInterventionVariableNamesOfIntervention(screeningSurvey
+						.getIntervention()));
+		variables
+				.addAll(variablesManagerService
+						.getAllScreeningSurveyVariableNamesOfScreeningSurvey(screeningSurveyId));
+
+		Collections.sort(variables);
+
+		return variables;
+	}
 }
