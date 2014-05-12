@@ -636,7 +636,12 @@ public class InterventionExecutionManagerService {
 					.equals(stopWord)) {
 				log.debug("Received stop message by participant {}",
 						dialogOption.getParticipant());
+
+				dialogMessageCreateAsUnexpectedReceived(
+						dialogOption.getParticipant(), receivedMessage);
+
 				dialogStatusSetMonitoringFinished(dialogOption.getParticipant());
+
 				return;
 			}
 		}
