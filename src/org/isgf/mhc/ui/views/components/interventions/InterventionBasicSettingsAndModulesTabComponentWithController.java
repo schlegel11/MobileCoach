@@ -16,8 +16,8 @@ import com.vaadin.ui.Button.ClickEvent;
  */
 @SuppressWarnings("serial")
 @Log4j2
-public class InterventionBasicSettingsTabComponentWithController extends
-		InterventionBasicSettingsTabComponent {
+public class InterventionBasicSettingsAndModulesTabComponentWithController extends
+		InterventionBasicSettingsAndModulesTabComponent {
 
 	private final Intervention											intervention;
 
@@ -25,7 +25,7 @@ public class InterventionBasicSettingsTabComponentWithController extends
 
 	private boolean														lastInterventionMonitoringState	= false;
 
-	public InterventionBasicSettingsTabComponentWithController(
+	public InterventionBasicSettingsAndModulesTabComponentWithController(
 			final Intervention intervention,
 			final InterventionEditingContainerComponentWithController interventionEditingContainerComponentWithController) {
 		super();
@@ -41,7 +41,7 @@ public class InterventionBasicSettingsTabComponentWithController extends
 						.isMonitoringActive());
 
 		// Handle buttons
-		val interventionBasicSettingsComponent = getInterventionBasicSettingsComponent();
+		val interventionBasicSettingsComponent = getInterventionBasicSettingsAndModulesComponent();
 
 		val buttonClickListener = new ButtonClickListener();
 		interventionBasicSettingsComponent.getSwitchInterventionButton()
@@ -54,8 +54,8 @@ public class InterventionBasicSettingsTabComponentWithController extends
 	}
 
 	private void adjust() {
-		getInterventionBasicSettingsComponent().adjust(intervention.isActive(),
-				intervention.isMonitoringActive());
+		getInterventionBasicSettingsAndModulesComponent().adjust(
+				intervention.isActive(), intervention.isMonitoringActive());
 
 		if (lastInterventionMonitoringState != intervention
 				.isMonitoringActive()) {
@@ -72,7 +72,7 @@ public class InterventionBasicSettingsTabComponentWithController extends
 
 		@Override
 		public void buttonClick(final ClickEvent event) {
-			val interventionBasicSettingsComponent = getInterventionBasicSettingsComponent();
+			val interventionBasicSettingsComponent = getInterventionBasicSettingsAndModulesComponent();
 
 			if (event.getButton() == interventionBasicSettingsComponent
 					.getSwitchInterventionButton()) {

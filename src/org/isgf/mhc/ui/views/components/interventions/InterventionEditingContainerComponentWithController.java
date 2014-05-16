@@ -61,9 +61,9 @@ public class InterventionEditingContainerComponentWithController extends
 		// Add basic settings tab
 		addPointableTab(
 				getContentAccordion(),
-				new InterventionBasicSettingsTabComponentWithController(
+				new InterventionBasicSettingsAndModulesTabComponentWithController(
 						intervention, this),
-				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__BASIC_SETTINGS_TAB,
+				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__BASIC_SETTINGS_AND_MODULES_TAB,
 				ThemeImageStrings.COMPONENT_ICON);
 
 		// Add intervention screening surveys tab
