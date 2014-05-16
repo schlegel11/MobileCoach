@@ -95,7 +95,8 @@ public class StringHelpers {
 	 * @return
 	 */
 	public static String cleanReceivedMessageString(final String messageString) {
-		val newValue = messageString.trim().replaceAll("[^A-Za-z0-9\\s]", "");
+		val newValue = messageString.trim().toLowerCase()
+				.replaceAll("[^a-z0-9\\s]", "");
 		return newValue;
 	}
 }

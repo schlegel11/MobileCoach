@@ -632,8 +632,8 @@ public class InterventionExecutionManagerService {
 
 		// Check if received messages is a "stop"-message
 		for (val stopWord : acceptedStopWords) {
-			if (receivedMessage.getMessage().trim().toLowerCase()
-					.equals(stopWord)) {
+			if (StringHelpers.cleanReceivedMessageString(
+					receivedMessage.getMessage()).equals(stopWord)) {
 				log.debug("Received stop message by participant {}",
 						dialogOption.getParticipant());
 
