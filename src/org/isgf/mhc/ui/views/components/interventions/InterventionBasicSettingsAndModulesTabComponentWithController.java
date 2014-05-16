@@ -3,9 +3,15 @@ package org.isgf.mhc.ui.views.components.interventions;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.bson.types.ObjectId;
 import org.isgf.mhc.MHC;
 import org.isgf.mhc.model.persistent.Intervention;
+import org.isgf.mhc.model.ui.UIModule;
+import org.isgf.mhc.modules.AbstractModule;
 
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.BeanContainer;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 
@@ -16,14 +22,18 @@ import com.vaadin.ui.Button.ClickEvent;
  */
 @SuppressWarnings("serial")
 @Log4j2
-public class InterventionBasicSettingsAndModulesTabComponentWithController extends
-		InterventionBasicSettingsAndModulesTabComponent {
+public class InterventionBasicSettingsAndModulesTabComponentWithController
+		extends InterventionBasicSettingsAndModulesTabComponent {
 
 	private final Intervention											intervention;
 
 	private final InterventionEditingContainerComponentWithController	interventionEditingContainerComponentWithController;
 
 	private boolean														lastInterventionMonitoringState	= false;
+
+	private AbstractModule												selectedModule					= null;
+
+	private final BeanContainer<AbstractModule, UIModule>				beanContainer;
 
 	public InterventionBasicSettingsAndModulesTabComponentWithController(
 			final Intervention intervention,
@@ -40,13 +50,56 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController exten
 				.setEditingDependingOnMessaging(!intervention
 						.isMonitoringActive());
 
-		// Handle buttons
 		val interventionBasicSettingsComponent = getInterventionBasicSettingsAndModulesComponent();
 
+		// Handle modules table
+		beanContainer = new BeanContainer<AbstractModule, UIModule>(
+				UIModule.class);
+
+		val modules = getInterventionAdministrationManagerService()
+				.getRegisteredModules();
+		val modulesTable = interventionBasicSettingsComponent.getModulesTable();
+		modulesTable.setImmediate(true);
+		modulesTable.setSelectable(true);
+		modulesTable.setContainerDataSource(beanContainer);
+		modulesTable.setSortContainerPropertyId(UIModule.getSortColumn());
+		modulesTable.setVisibleColumns(UIModule.getVisibleColumns());
+		modulesTable.setColumnHeaders(UIModule.getColumnHeaders());
+
+		for (val moduleClass : modules) {
+			AbstractModule module;
+			try {
+				module = moduleClass.getDeclaredConstructor(ObjectId.class)
+						.newInstance(intervention.getId());
+				beanContainer.addItem(module, module.toUIModule());
+			} catch (final Exception e) {
+				log.error("Error when creating new module instance: {}",
+						e.getMessage());
+			}
+		}
+
+		// Handle table selection change
+		modulesTable.addValueChangeListener(new ValueChangeListener() {
+
+			@Override
+			public void valueChange(final ValueChangeEvent event) {
+				val objectId = modulesTable.getValue();
+				if (objectId == null) {
+					selectedModule = null;
+				} else {
+					selectedModule = (AbstractModule) modulesTable.getValue();
+				}
+				adjust();
+			}
+		});
+
+		// Handle buttons
 		val buttonClickListener = new ButtonClickListener();
 		interventionBasicSettingsComponent.getSwitchInterventionButton()
 				.addClickListener(buttonClickListener);
 		interventionBasicSettingsComponent.getSwitchMessagingButton()
+				.addClickListener(buttonClickListener);
+		interventionBasicSettingsComponent.getOpenModuleButton()
 				.addClickListener(buttonClickListener);
 
 		// Set start state
@@ -55,7 +108,8 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController exten
 
 	private void adjust() {
 		getInterventionBasicSettingsAndModulesComponent().adjust(
-				intervention.isActive(), intervention.isMonitoringActive());
+				intervention.isActive(), intervention.isMonitoringActive(),
+				selectedModule);
 
 		if (lastInterventionMonitoringState != intervention
 				.isMonitoringActive()) {
@@ -80,6 +134,9 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController exten
 			} else if (event.getButton() == interventionBasicSettingsComponent
 					.getSwitchMessagingButton()) {
 				switchMessaging();
+			} else if (event.getButton() == interventionBasicSettingsComponent
+					.getOpenModuleButton()) {
+				openModule();
 			}
 		}
 	}
@@ -131,5 +188,12 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController exten
 				closeWindow();
 			}
 		}, null);
+	}
+
+	public void openModule() {
+		log.debug("Open module");
+
+		showModalClosableEditWindow(selectedModule.getName(), selectedModule,
+				null);
 	}
 }

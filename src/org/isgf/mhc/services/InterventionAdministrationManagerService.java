@@ -35,6 +35,8 @@ import org.isgf.mhc.model.persistent.ScreeningSurvey;
 import org.isgf.mhc.model.persistent.concepts.AbstractRule;
 import org.isgf.mhc.model.persistent.types.MediaObjectTypes;
 import org.isgf.mhc.model.persistent.types.RuleEquationSignTypes;
+import org.isgf.mhc.modules.AbstractModule;
+import org.isgf.mhc.modules.QuizModule;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.ModelObjectExchangeService;
@@ -60,6 +62,8 @@ public class InterventionAdministrationManagerService {
 	private final VariablesManagerService					variablesManagerService;
 	private final ModelObjectExchangeService				modelObjectExchangeService;
 
+	private final List<Class<? extends AbstractModule>>		modules;
+
 	private InterventionAdministrationManagerService(
 			final DatabaseManagerService databaseManagerService,
 			final FileStorageManagerService fileStorageManagerService,
@@ -72,6 +76,10 @@ public class InterventionAdministrationManagerService {
 		this.fileStorageManagerService = fileStorageManagerService;
 		this.variablesManagerService = variablesManagerService;
 		this.modelObjectExchangeService = modelObjectExchangeService;
+
+		log.info("Registering modules...");
+		modules = new ArrayList<Class<? extends AbstractModule>>();
+		modules.add(QuizModule.class);
 
 		log.info("Started.");
 	}
@@ -1348,5 +1356,9 @@ public class InterventionAdministrationManagerService {
 			final ObjectId participantId) {
 		return databaseManagerService.findOneModelObject(DialogStatus.class,
 				Queries.DIALOG_STATUS__BY_PARTICIPANT, participantId);
+	}
+
+	public List<Class<? extends AbstractModule>> getRegisteredModules() {
+		return modules;
 	}
 }
