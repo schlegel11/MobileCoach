@@ -406,6 +406,37 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(monitoringMessageGroup);
 	}
 
+	public MonitoringMessageGroup monitoringMessageGroupMove(
+			final MonitoringMessageGroup monitoringMessageGroup,
+			final boolean moveLeft) {
+		// Find monitoring message to swap with
+		val monitoringMessageGroupToSwapWith = databaseManagerService
+				.findOneSortedModelObject(
+						MonitoringMessageGroup.class,
+						moveLeft ? Queries.MONITORING_MESSAGE_GROUP__BY_INTERVENTION_AND_ORDER_LOWER
+								: Queries.MONITORING_MESSAGE_GROUP__BY_INTERVENTION_AND_ORDER_HIGHER,
+						moveLeft ? Queries.MONITORING_MESSAGE_GROUP__SORT_BY_ORDER_DESC
+								: Queries.MONITORING_MESSAGE_GROUP__SORT_BY_ORDER_ASC,
+						monitoringMessageGroup.getIntervention(),
+						monitoringMessageGroup.getOrder());
+
+		if (monitoringMessageGroupToSwapWith == null) {
+			return null;
+		}
+
+		// Swap order
+		final int order = monitoringMessageGroup.getOrder();
+		monitoringMessageGroup.setOrder(monitoringMessageGroupToSwapWith
+				.getOrder());
+		monitoringMessageGroupToSwapWith.setOrder(order);
+
+		databaseManagerService.saveModelObject(monitoringMessageGroup);
+		databaseManagerService
+				.saveModelObject(monitoringMessageGroupToSwapWith);
+
+		return monitoringMessageGroupToSwapWith;
+	}
+
 	public void monitoringMessageGroupChangeName(
 			final MonitoringMessageGroup monitoringMessageGroup,
 			final String newName) {

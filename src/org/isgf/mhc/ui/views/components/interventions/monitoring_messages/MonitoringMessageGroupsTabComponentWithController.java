@@ -1,11 +1,11 @@
 package org.isgf.mhc.ui.views.components.interventions.monitoring_messages;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Hashtable;
 
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.model.persistent.Intervention;
 import org.isgf.mhc.model.persistent.MonitoringMessageGroup;
@@ -13,8 +13,10 @@ import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;
 
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
 import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
+import com.vaadin.ui.TabSheet.Tab;
 
 /**
  * Extends the monitoring message groups tab with a controller
@@ -26,17 +28,19 @@ import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
 public class MonitoringMessageGroupsTabComponentWithController extends
 		MonitoringMessageGroupsTabComponent {
 
-	private final Intervention					intervention;
+	private final Intervention				intervention;
 
-	private MonitoringMessageGroup				selectedMonitoringMessageGroup	= null;
+	private MonitoringMessageGroup			selectedMonitoringMessageGroup	= null;
 
-	private final List<MonitoringMessageGroup>	monitoringMessageGroups			= new ArrayList<MonitoringMessageGroup>();
+	private final Hashtable<Tab, ObjectId>	tabsWithObjectIdsOfMessageGroup;
 
 	public MonitoringMessageGroupsTabComponentWithController(
 			final Intervention intervention) {
 		super();
 
 		this.intervention = intervention;
+
+		tabsWithObjectIdsOfMessageGroup = new Hashtable<TabSheet.Tab, ObjectId>();
 
 		// Retrieve monitoring message groups to set current and fill tabs
 		final Iterable<MonitoringMessageGroup> monitoringMessageGroupsIterable = getInterventionAdministrationManagerService()
@@ -46,7 +50,9 @@ public class MonitoringMessageGroupsTabComponentWithController extends
 		for (val monitoringMessageGroup : monitoringMessageGroupsIterable) {
 			val newTab = addTabComponent(monitoringMessageGroup,
 					intervention.getId());
-			monitoringMessageGroups.add(monitoringMessageGroup);
+
+			tabsWithObjectIdsOfMessageGroup.put(newTab,
+					monitoringMessageGroup.getId());
 
 			if (getMonitoringMessageGroupsTabSheet().getComponentCount() == 1) {
 				// First tab added
@@ -69,11 +75,14 @@ public class MonitoringMessageGroupsTabComponentWithController extends
 							setNothingSelected();
 							selectedMonitoringMessageGroup = null;
 						} else {
-							selectedMonitoringMessageGroup = monitoringMessageGroups
-									.get(event.getTabSheet().getTabPosition(
-											event.getTabSheet().getTab(
-													event.getTabSheet()
-															.getSelectedTab())));
+							val selectedTabObject = event.getTabSheet().getTab(
+									selectedTab);
+							val monitoringMessageGroupObjectId = tabsWithObjectIdsOfMessageGroup
+									.get(selectedTabObject);
+							selectedMonitoringMessageGroup = getInterventionAdministrationManagerService()
+									.getMonitoringMessageGroup(
+											monitoringMessageGroupObjectId);
+
 							setSomethingSelected();
 						}
 					}
@@ -83,6 +92,8 @@ public class MonitoringMessageGroupsTabComponentWithController extends
 		val buttonClickListener = new ButtonClickListener();
 		getNewGroupButton().addClickListener(buttonClickListener);
 		getRenameGroupButton().addClickListener(buttonClickListener);
+		getMoveGroupLeftButton().addClickListener(buttonClickListener);
+		getMoveGroupRightButton().addClickListener(buttonClickListener);
 		getDeleteGroupButton().addClickListener(buttonClickListener);
 	}
 
@@ -91,6 +102,10 @@ public class MonitoringMessageGroupsTabComponentWithController extends
 		public void buttonClick(final ClickEvent event) {
 			if (event.getButton() == getNewGroupButton()) {
 				createGroup();
+			} else if (event.getButton() == getMoveGroupLeftButton()) {
+				moveGroup(true);
+			} else if (event.getButton() == getMoveGroupRightButton()) {
+				moveGroup(false);
 			} else if (event.getButton() == getRenameGroupButton()) {
 				renameGroup();
 			} else if (event.getButton() == getDeleteGroupButton()) {
@@ -121,9 +136,13 @@ public class MonitoringMessageGroupsTabComponentWithController extends
 
 						// Adapt UI
 						selectedMonitoringMessageGroup = newMonitoringMessageGroup;
-						monitoringMessageGroups.add(newMonitoringMessageGroup);
+
 						val newTab = addTabComponent(newMonitoringMessageGroup,
 								intervention.getId());
+
+						tabsWithObjectIdsOfMessageGroup.put(newTab,
+								newMonitoringMessageGroup.getId());
+
 						getMonitoringMessageGroupsTabSheet().setSelectedTab(
 								newTab);
 						getAdminUI()
@@ -133,6 +152,32 @@ public class MonitoringMessageGroupsTabComponentWithController extends
 						closeWindow();
 					}
 				}, null);
+	}
+
+	public void moveGroup(final boolean moveLeft) {
+		log.debug("Move group {}", moveLeft ? "left" : "right");
+
+		val swappedMonitoringMessageGroup = getInterventionAdministrationManagerService()
+				.monitoringMessageGroupMove(selectedMonitoringMessageGroup,
+						moveLeft);
+
+		if (swappedMonitoringMessageGroup == null) {
+			log.debug("Message group is already at beginning/end of list");
+			return;
+		}
+
+		val tabSheet = getMonitoringMessageGroupsTabSheet();
+		val currentPosition = tabSheet.getTabPosition(tabSheet.getTab(tabSheet
+				.getSelectedTab()));
+		if (moveLeft) {
+			tabSheet.setTabPosition(tabSheet.getTab(tabSheet.getSelectedTab()),
+					currentPosition - 1);
+		} else {
+			tabSheet.setTabPosition(tabSheet.getTab(tabSheet.getSelectedTab()),
+					currentPosition + 1);
+		}
+
+		setSomethingSelected();
 	}
 
 	public void renameGroup() {
@@ -188,18 +233,24 @@ public class MonitoringMessageGroupsTabComponentWithController extends
 				}
 
 				// Adapt UI
-				val tab = getMonitoringMessageGroupsTabSheet();
-				monitoringMessageGroups.remove(tab.getTabPosition(tab
-						.getTab(tab.getSelectedTab())));
-				tab.removeTab(tab.getTab(tab.getSelectedTab()));
+				val tabSheet = getMonitoringMessageGroupsTabSheet();
 
-				val selectedTab = tab.getSelectedTab();
+				tabsWithObjectIdsOfMessageGroup.remove(tabSheet.getTab(tabSheet
+						.getSelectedTab()));
+
+				tabSheet.removeTab(tabSheet.getTab(tabSheet.getSelectedTab()));
+
+				val selectedTab = tabSheet.getSelectedTab();
 				if (selectedTab == null) {
 					setNothingSelected();
 					selectedMonitoringMessageGroup = null;
 				} else {
-					selectedMonitoringMessageGroup = monitoringMessageGroups.get(tab
-							.getTabPosition(tab.getTab(tab.getSelectedTab())));
+					val selectedTabObject = tabSheet.getTab(selectedTab);
+					val monitoringMessageGroupObjectId = tabsWithObjectIdsOfMessageGroup.get(selectedTabObject);
+					selectedMonitoringMessageGroup = getInterventionAdministrationManagerService()
+							.getMonitoringMessageGroup(
+									monitoringMessageGroupObjectId);
+
 					setSomethingSelected();
 				}
 
