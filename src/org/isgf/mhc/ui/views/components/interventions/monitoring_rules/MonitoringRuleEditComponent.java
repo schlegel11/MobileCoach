@@ -361,8 +361,8 @@ public class MonitoringRuleEditComponent extends AbstractClosableEditComponent {
 		hoursUntilHandledAsNotAnsweredSlider.setWidth("350px");
 		hoursUntilHandledAsNotAnsweredSlider.setHeight("-1px");
 		gridLayout2.addComponent(hoursUntilHandledAsNotAnsweredSlider, 1, 2);
-		gridLayout2.setComponentAlignment(
-				hoursUntilHandledAsNotAnsweredSlider, new Alignment(34));
+		gridLayout2.setComponentAlignment(hoursUntilHandledAsNotAnsweredSlider,
+				new Alignment(34));
 
 		return gridLayout2;
 	}

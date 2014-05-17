@@ -394,7 +394,7 @@ public class ScreeningSurveyAdministrationManagerService {
 	public ScreeningSurveySlideRule screeningSurveySlideRuleCreate(
 			final ObjectId screeningSurveySlideId) {
 		val screeningSurveySlideRule = new ScreeningSurveySlideRule(
-				screeningSurveySlideId, 0, null, null, "",
+				screeningSurveySlideId, 0, "", null, null, "",
 				RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "");
 
 		val highestOrderSlideRule = databaseManagerService
@@ -412,6 +412,32 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurveySlideRule);
 
 		return screeningSurveySlideRule;
+	}
+
+	public void screeningSurveySlideRuleChangeStoreResultToVariable(
+			final ScreeningSurveySlideRule screeningSurveySlideRule,
+			final String variableName) throws NotificationMessageException {
+		if (variableName == null || variableName.equals("")) {
+			screeningSurveySlideRule.setStoreValueToVariableWithName(null);
+
+			databaseManagerService.saveModelObject(screeningSurveySlideRule);
+		} else {
+			if (!StringValidator.isValidVariableName(variableName)) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_NOT_VALID);
+			}
+
+			if (variablesManagerService
+					.isWriteProtectedVariableName(variableName)) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
+			}
+
+			screeningSurveySlideRule
+					.setStoreValueToVariableWithName(variableName);
+
+			databaseManagerService.saveModelObject(screeningSurveySlideRule);
+		}
 	}
 
 	public ScreeningSurveySlideRule screeningSurveySlideRuleMove(

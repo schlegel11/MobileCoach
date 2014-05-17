@@ -35,6 +35,7 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 	 */
 	public ScreeningSurveySlideRule(
 			final ObjectId belongingScreeningSurveySlide, final int order,
+			final String storeValueToVariableWithName,
 			final ObjectId nextScreeningSurveySlideWhenTrue,
 			final ObjectId nextScreeningSurveySlideWhenFalse,
 			final String ruleWithPlaceholders,
@@ -45,6 +46,7 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 
 		this.belongingScreeningSurveySlide = belongingScreeningSurveySlide;
 		this.order = order;
+		this.storeValueToVariableWithName = storeValueToVariableWithName;
 		this.nextScreeningSurveySlideWhenTrue = nextScreeningSurveySlideWhenTrue;
 		this.nextScreeningSurveySlideWhenFalse = nextScreeningSurveySlideWhenFalse;
 	}
@@ -66,6 +68,16 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 	@Getter
 	@Setter
 	private int			order;
+
+	/**
+	 * <strong>OPTIONAL:</strong> If the result of the
+	 * {@link ScreeningSurveySlideRule} should be stored, the name of the
+	 * appropriate
+	 * variable can be set here.
+	 */
+	@Getter
+	@Setter
+	private String		storeValueToVariableWithName;
 
 	/**
 	 * <strong>OPTIONAL:</strong> If the rule result is <strong>true</strong>
@@ -95,6 +107,9 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 		val screeningSurveySlide = new UIScreeningSurveySlideRule(
 				order,
 				StringHelpers.createRuleName(this),
+				storeValueToVariableWithName == null ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+						: storeValueToVariableWithName,
 				nextScreeningSurveySlideWhenTrue != null ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
 						: Messages
@@ -103,7 +118,6 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
 						: Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__NO));
-		;
 
 		screeningSurveySlide.setRelatedModelObject(this);
 

@@ -359,7 +359,6 @@ public class ScreeningSurveyExecutionManagerService {
 		}
 
 		ScreeningSurveySlide nextSlide;
-		Hashtable<String, AbstractVariableWithValue> variablesWithValues;
 
 		if (formerSlideId != null
 				&& !session
@@ -367,11 +366,6 @@ public class ScreeningSurveyExecutionManagerService {
 								ScreeningSurveySessionAttributeTypes.SCREENING_SURVEY_CONSISTENCY_CHECK_VALUE
 										.toString()).equals(checkValue)) {
 			log.debug("Consistency check failed; show same page again");
-
-			// Retrieve all required variables to generate slide and execute
-			// rules
-			variablesWithValues = variablesManagerService
-					.getAllVariablesWithValuesOfParticipantAndSystem(participant);
 
 			// Next slide is former slide
 			nextSlide = formerSlide;
@@ -395,17 +389,12 @@ public class ScreeningSurveyExecutionManagerService {
 				}
 			}
 
-			// Retrieve all required variables to generate slide and execute
-			// rules
-			variablesWithValues = variablesManagerService
-					.getAllVariablesWithValuesOfParticipantAndSystem(participant);
-
 			// Determine next slide
 			if (formerSlide != null && formerSlide.isLastSlide()) {
 				nextSlide = null;
 			} else {
-				nextSlide = getNextScreeningSurveySlide(screeningSurvey,
-						formerSlide, variablesWithValues);
+				nextSlide = getNextScreeningSurveySlide(participant,
+						screeningSurvey, formerSlide);
 			}
 		}
 
@@ -487,6 +476,10 @@ public class ScreeningSurveyExecutionManagerService {
 									.toVariable(), true);
 					break;
 			}
+
+			// Retrieve all required variables to generate slide
+			final Hashtable<String, AbstractVariableWithValue> variablesWithValues = variablesManagerService
+					.getAllVariablesWithValuesOfParticipantAndSystem(participant);
 
 			// Check variable
 			templateVariables
@@ -664,9 +657,9 @@ public class ScreeningSurveyExecutionManagerService {
 	 * @return
 	 */
 	private ScreeningSurveySlide getNextScreeningSurveySlide(
+			final Participant participant,
 			final ScreeningSurvey screeningSurvey,
-			final ScreeningSurveySlide formerSlide,
-			final Hashtable<String, AbstractVariableWithValue> variablesWithValues) {
+			final ScreeningSurveySlide formerSlide) {
 		if (formerSlide == null) {
 			val nextSlide = databaseManagerService.findOneSortedModelObject(
 					ScreeningSurveySlide.class,
@@ -685,9 +678,15 @@ public class ScreeningSurveyExecutionManagerService {
 							Queries.SCREENING_SURVEY_SLIDE_RULE__SORT_BY_ORDER_ASC,
 							formerSlide.getId());
 
+			// Retrieve all required variables to execute
+			// rules
+			Hashtable<String, AbstractVariableWithValue> variablesWithValues = variablesManagerService
+					.getAllVariablesWithValuesOfParticipantAndSystem(participant);
+
 			// Executing slide rules
 			log.debug("Executing slide rules");
 			for (val formerSlideRule : formerSlideRules) {
+
 				val ruleResult = RuleEvaluator.evaluateRule(formerSlideRule,
 						variablesWithValues.values());
 
@@ -697,6 +696,24 @@ public class ScreeningSurveyExecutionManagerService {
 							formerSlideRule.getId(),
 							ruleResult.getErrorMessage());
 					continue;
+				}
+
+				// Store value if relevant
+				if (formerSlideRule.getStoreValueToVariableWithName() != null) {
+					log.debug("Storing rule result to variable {}",
+							formerSlideRule.getStoreValueToVariableWithName());
+
+					val ruleResultString = ruleResult.isCalculatedRule() ? String
+							.valueOf(ruleResult.getCalculatedRuleValue())
+							: ruleResult.getTextRuleValue();
+
+					storeResultToVariable(participant,
+							formerSlideRule.getStoreValueToVariableWithName(),
+							ruleResultString);
+
+					log.debug("Refrehsing variables");
+					variablesWithValues = variablesManagerService
+							.getAllVariablesWithValuesOfParticipantAndSystem(participant);
 				}
 
 				// Check if true rule matches
@@ -720,6 +737,7 @@ public class ScreeningSurveyExecutionManagerService {
 										.getNextScreeningSurveySlideWhenTrue());
 					}
 				}
+
 				// Check if false rule matches
 				if (!ruleResult.isRuleMatchesEquationSign()
 						&& formerSlideRule

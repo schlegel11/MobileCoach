@@ -4,14 +4,18 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
+import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.model.persistent.ScreeningSurveySlide;
 import org.isgf.mhc.model.persistent.ScreeningSurveySlideRule;
 import org.isgf.mhc.model.ui.UIScreeningSurveySlide;
 import org.isgf.mhc.ui.views.components.basics.AbstractRuleEditComponentWithController;
 import org.isgf.mhc.ui.views.components.basics.AbstractRuleEditComponentWithController.TYPES;
+import org.isgf.mhc.ui.views.components.basics.ShortPlaceholderStringEditComponent;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 
 /**
  * Extends the screening survey slid rule edit component with a controller
@@ -26,6 +30,8 @@ public class ScreeningSurveySlideRuleEditComponentWithController extends
 	private final AbstractRuleEditComponentWithController	ruleEditComponent;
 
 	private final ScreeningSurveySlideRule					screeningSurveySlideRule;
+
+	private final ObjectId									screeningSurveyId;
 
 	private class JumpIfTrueFalseValueChangeListener implements
 			ValueChangeListener {
@@ -59,6 +65,7 @@ public class ScreeningSurveySlideRuleEditComponentWithController extends
 		super();
 
 		this.screeningSurveySlideRule = screeningSurveySlideRule;
+		this.screeningSurveyId = screeningSurveyId;
 
 		// Configure integrated components
 		ruleEditComponent = getAbstractRuleEditComponentWithController();
@@ -90,6 +97,12 @@ public class ScreeningSurveySlideRuleEditComponentWithController extends
 			}
 		}
 
+		// Handle buttons
+		val buttonClickListener = new ButtonClickListener();
+		getStoreVariableTextFieldComponent().getButton().addClickListener(
+				buttonClickListener);
+
+		// Handle combo boxes
 		val jumpIfTrueValueChangeListener = new JumpIfTrueFalseValueChangeListener();
 		jumpIfTrueValueChangeListener.setCase(true);
 		val jumpIfFalseValueChangeListener = new JumpIfTrueFalseValueChangeListener();
@@ -98,5 +111,55 @@ public class ScreeningSurveySlideRuleEditComponentWithController extends
 				.addValueChangeListener(jumpIfTrueValueChangeListener);
 		jumpIfFalseComboBox
 				.addValueChangeListener(jumpIfFalseValueChangeListener);
+
+		adjust();
+	}
+
+	private void adjust() {
+		// Adjust variable text fields
+		getStoreVariableTextFieldComponent().setValue(
+				screeningSurveySlideRule.getStoreValueToVariableWithName());
+	}
+
+	private class ButtonClickListener implements Button.ClickListener {
+		@Override
+		public void buttonClick(final ClickEvent event) {
+			if (event.getButton() == getStoreVariableTextFieldComponent()
+					.getButton()) {
+				changeStoreResultVariable();
+			}
+		}
+	}
+
+	public void changeStoreResultVariable() {
+		log.debug("Edit store result to variable");
+		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
+				.getAllWritableScreenigSurveyVariablesOfScreeningSurvey(
+						screeningSurveyId);
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_VARIABLE,
+				screeningSurveySlideRule.getStoreValueToVariableWithName(),
+				allPossibleVariables,
+				new ShortPlaceholderStringEditComponent(),
+				new ExtendableButtonClickListener() {
+
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Change store result to variable
+							getScreeningSurveyAdministrationManagerService()
+									.screeningSurveySlideRuleChangeStoreResultToVariable(
+											screeningSurveySlideRule,
+											getStringValue());
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						adjust();
+
+						closeWindow();
+					}
+				}, null);
 	}
 }
