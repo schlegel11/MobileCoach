@@ -35,6 +35,7 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 	 */
 	public ScreeningSurveySlideRule(
 			final ObjectId belongingScreeningSurveySlide, final int order,
+			final String valueToStoreToVariable,
 			final String storeValueToVariableWithName,
 			final ObjectId nextScreeningSurveySlideWhenTrue,
 			final ObjectId nextScreeningSurveySlideWhenFalse,
@@ -46,6 +47,7 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 
 		this.belongingScreeningSurveySlide = belongingScreeningSurveySlide;
 		this.order = order;
+		this.valueToStoreToVariable = valueToStoreToVariable;
 		this.storeValueToVariableWithName = storeValueToVariableWithName;
 		this.nextScreeningSurveySlideWhenTrue = nextScreeningSurveySlideWhenTrue;
 		this.nextScreeningSurveySlideWhenFalse = nextScreeningSurveySlideWhenFalse;
@@ -70,10 +72,20 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 	private int			order;
 
 	/**
-	 * <strong>OPTIONAL:</strong> If the result of the
-	 * {@link ScreeningSurveySlideRule} should be stored, the name of the
-	 * appropriate
-	 * variable can be set here.
+	 * <strong>OPTIONAL:</strong> If the former value of the
+	 * {@link ScreeningSurveySlideRule} should be stored in the case the rule
+	 * matches, the name of the
+	 * appropriate variable can be set here.
+	 */
+	@Getter
+	@Setter
+	private String		valueToStoreToVariable;
+
+	/**
+	 * <strong>OPTIONAL:</strong> If the former value of the
+	 * {@link ScreeningSurveySlideRule} should be stored in the case the rule
+	 * matches, the name of the
+	 * appropriate variable can be set here.
 	 */
 	@Getter
 	@Setter
@@ -109,7 +121,11 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 				StringHelpers.createRuleName(this),
 				storeValueToVariableWithName == null ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: storeValueToVariableWithName,
+						: Messages
+								.getAdminString(
+										AdminMessageStrings.SCREENING_SURVEY_SLIDE_RULE_EDITING__VALUE_TO_VARIABLE,
+										valueToStoreToVariable,
+										storeValueToVariableWithName),
 				nextScreeningSurveySlideWhenTrue != null ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
 						: Messages

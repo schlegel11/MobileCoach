@@ -699,17 +699,14 @@ public class ScreeningSurveyExecutionManagerService {
 				}
 
 				// Store value if relevant
-				if (formerSlideRule.getStoreValueToVariableWithName() != null) {
+				if (ruleResult.isRuleMatchesEquationSign()
+						&& formerSlideRule.getStoreValueToVariableWithName() != null) {
 					log.debug("Storing rule result to variable {}",
 							formerSlideRule.getStoreValueToVariableWithName());
 
-					val ruleResultString = ruleResult.isCalculatedRule() ? String
-							.valueOf(ruleResult.getCalculatedRuleValue())
-							: ruleResult.getTextRuleValue();
-
 					storeResultToVariable(participant,
 							formerSlideRule.getStoreValueToVariableWithName(),
-							ruleResultString);
+							formerSlideRule.getValueToStoreToVariable());
 
 					log.debug("Refrehsing variables");
 					variablesWithValues = variablesManagerService

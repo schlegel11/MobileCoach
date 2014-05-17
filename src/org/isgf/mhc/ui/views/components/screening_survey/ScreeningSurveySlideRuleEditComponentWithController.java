@@ -11,6 +11,7 @@ import org.isgf.mhc.model.ui.UIScreeningSurveySlide;
 import org.isgf.mhc.ui.views.components.basics.AbstractRuleEditComponentWithController;
 import org.isgf.mhc.ui.views.components.basics.AbstractRuleEditComponentWithController.TYPES;
 import org.isgf.mhc.ui.views.components.basics.ShortPlaceholderStringEditComponent;
+import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -101,6 +102,8 @@ public class ScreeningSurveySlideRuleEditComponentWithController extends
 		val buttonClickListener = new ButtonClickListener();
 		getStoreVariableTextFieldComponent().getButton().addClickListener(
 				buttonClickListener);
+		getStoreValueTextFieldComponent().getButton().addClickListener(
+				buttonClickListener);
 
 		// Handle combo boxes
 		val jumpIfTrueValueChangeListener = new JumpIfTrueFalseValueChangeListener();
@@ -119,6 +122,8 @@ public class ScreeningSurveySlideRuleEditComponentWithController extends
 		// Adjust variable text fields
 		getStoreVariableTextFieldComponent().setValue(
 				screeningSurveySlideRule.getStoreValueToVariableWithName());
+		getStoreValueTextFieldComponent().setValue(
+				screeningSurveySlideRule.getValueToStoreToVariable());
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
@@ -126,13 +131,16 @@ public class ScreeningSurveySlideRuleEditComponentWithController extends
 		public void buttonClick(final ClickEvent event) {
 			if (event.getButton() == getStoreVariableTextFieldComponent()
 					.getButton()) {
-				changeStoreResultVariable();
+				changeVariableToStoreValueTo();
+			} else if (event.getButton() == getStoreValueTextFieldComponent()
+					.getButton()) {
+				changeValueToStore();
 			}
 		}
 	}
 
-	public void changeStoreResultVariable() {
-		log.debug("Edit store result to variable");
+	public void changeVariableToStoreValueTo() {
+		log.debug("Edit variable to store value to");
 		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
 				.getAllWritableScreenigSurveyVariablesOfScreeningSurvey(
 						screeningSurveyId);
@@ -146,9 +154,38 @@ public class ScreeningSurveySlideRuleEditComponentWithController extends
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						try {
-							// Change store result to variable
+							// Change variable to store value to
 							getScreeningSurveyAdministrationManagerService()
-									.screeningSurveySlideRuleChangeStoreResultToVariable(
+									.screeningSurveySlideRuleChangeVariableToStoreValueTo(
+											screeningSurveySlideRule,
+											getStringValue());
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						adjust();
+
+						closeWindow();
+					}
+				}, null);
+	}
+
+	public void changeValueToStore() {
+		log.debug("Edit value to store to variable");
+
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_VALUE,
+				screeningSurveySlideRule.getValueToStoreToVariable(), null,
+				new ShortStringEditComponent(),
+				new ExtendableButtonClickListener() {
+
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Change value to store to variable
+							getScreeningSurveyAdministrationManagerService()
+									.screeningSurveySlideRuleChangeValueToStoreToVariable(
 											screeningSurveySlideRule,
 											getStringValue());
 						} catch (final Exception e) {
