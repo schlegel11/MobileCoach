@@ -241,7 +241,7 @@ public class ScreeningSurveySlideEditComponent extends
 		answersTable = new Table();
 		answersTable.setImmediate(false);
 		answersTable.setWidth("100.0%");
-		answersTable.setHeight("100px");
+		answersTable.setHeight("150px");
 		mainLayout.addComponent(answersTable);
 
 		// answersButtionsLayout

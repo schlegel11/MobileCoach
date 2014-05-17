@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.isgf.mhc.conf.ImplementationContants;
 import org.isgf.mhc.model.persistent.concepts.AbstractVariableWithValue;
 
 /**
@@ -111,7 +112,7 @@ public class VariableStringReplacer {
 		}
 
 		// Find variables in rule
-		final String variableFindPatternString = "\\$[a-zA-Z_]+";
+		final String variableFindPatternString = ImplementationContants.REGULAR_EXPRESSION_TO_MATCH_VARIABLES_IN_STRING;
 		val variableFindPattern = Pattern.compile(variableFindPatternString);
 		final Matcher variableFindMatcher = variableFindPattern
 				.matcher(stringWithVariables);

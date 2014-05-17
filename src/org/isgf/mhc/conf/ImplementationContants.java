@@ -58,5 +58,6 @@ public class ImplementationContants {
 
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_ONE_OBJECT_ID						= "[A-Za-z0-9]+";
 	public static final String	REGULAR_EXPRESSION_TO_VALIDATE_RULE								= "^[\\$a-zA-Z0-9_\\+\\-%*/^().,]*$";
-	public static final String	REGULAR_EXPRESSION_TO_VALIDATE_VARIABLE_NAME					= "^\\$[a-zA-Z_]*$";
+	public static final String	REGULAR_EXPRESSION_TO_VALIDATE_VARIABLE_NAME					= "^\\$[a-zA-Z0-9_]*$";
+	public static final String	REGULAR_EXPRESSION_TO_MATCH_VARIABLES_IN_STRING					= "\\$[a-zA-Z0-9_]+";
 }
