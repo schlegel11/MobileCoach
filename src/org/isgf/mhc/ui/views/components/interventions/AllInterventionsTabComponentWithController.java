@@ -105,6 +105,8 @@ public class AllInterventionsTabComponentWithController extends
 				buttonClickListener);
 		allInterventionsEditComponent.getRenameButton().addClickListener(
 				buttonClickListener);
+		allInterventionsEditComponent.getResultsButton().addClickListener(
+				buttonClickListener);
 		allInterventionsEditComponent.getEditButton().addClickListener(
 				buttonClickListener);
 		allInterventionsEditComponent.getDuplicateButton().addClickListener(
@@ -153,6 +155,9 @@ public class AllInterventionsTabComponentWithController extends
 			} else if (event.getButton() == allInterventionsEditComponent
 					.getRenameButton()) {
 				renameIntervention();
+			} else if (event.getButton() == allInterventionsEditComponent
+					.getResultsButton()) {
+				openResults();
 			} else if (event.getButton() == allInterventionsEditComponent
 					.getEditButton()) {
 				editIntervention();
@@ -329,6 +334,17 @@ public class AllInterventionsTabComponentWithController extends
 						closeWindow();
 					}
 				}, null);
+	}
+
+	public void openResults() {
+		val intervention = selectedUIIntervention
+				.getRelatedModelObject(Intervention.class);
+
+		log.debug("Open results of intervention {}", intervention.getId());
+
+		showModalClosableEditWindow(AdminMessageStrings.RESULTS__TITLE,
+				new InterventionResultsComponentWithController(intervention),
+				null, intervention.getName());
 	}
 
 	public void editIntervention() {

@@ -166,7 +166,7 @@ public class InterventionBasicSettingsAndModulesComponent extends
 		modulesTable = new Table();
 		modulesTable.setImmediate(false);
 		modulesTable.setWidth("100.0%");
-		modulesTable.setHeight("100px");
+		modulesTable.setHeight("150px");
 		mainLayout.addComponent(modulesTable);
 
 		// openModuleButton

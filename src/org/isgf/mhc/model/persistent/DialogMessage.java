@@ -8,9 +8,13 @@ import lombok.Setter;
 import lombok.val;
 
 import org.bson.types.ObjectId;
+import org.isgf.mhc.conf.AdminMessageStrings;
+import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.persistent.types.DialogMessageStatusTypes;
+import org.isgf.mhc.model.ui.UIDialogMessage;
+import org.isgf.mhc.tools.StringHelpers;
 
 /**
  * {@link ModelObject} to represent an {@link DialogMessage}
@@ -137,6 +141,43 @@ public class DialogMessage extends ModelObject {
 	@Getter
 	@Setter
 	private boolean						manuallySent;
+
+	/**
+	 * Create a UIDialogMessage with the belonging {@link Participant}
+	 * 
+	 * @param participantId
+	 * @param participantName
+	 * @return
+	 */
+	public UIDialogMessage toUIDialogMessage(final String participantId,
+			final String participantName) {
+		final val dialogMessage = new UIDialogMessage(
+				participantId,
+				participantName,
+				String.valueOf(order + 1),
+				status.toString(),
+				message == null || message.equals("") ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+						: message,
+				StringHelpers.createStringTimeStamp(shouldBeSentTimestamp),
+				StringHelpers.createStringTimeStamp(sentTimestamp),
+				answerReceived == null || answerReceived.equals("") ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+						: answerReceived,
+				StringHelpers.createStringTimeStamp(answerReceivedTimestamp),
+				manuallySent ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
+				mediaContentViewed ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NO));
+
+		dialogMessage.setRelatedModelObject(this);
+
+		return dialogMessage;
+	}
 
 	/*
 	 * (non-Javadoc)

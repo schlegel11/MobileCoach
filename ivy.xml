@@ -6,7 +6,7 @@
 	<!ENTITY commons-io.version "1.3.2">
 	<!ENTITY geronimo-validation_1.0_spec.version "1.1">
 	<!ENTITY bval-bundle.version "0.5">
-	<!ENTITY vaadin.version "7.1.15">
+	<!ENTITY vaadin.version "7.2.0">
 	<!ENTITY jongo.version "1.0">
 	<!ENTITY mongodb-driver.version "2.11.4">
 	<!ENTITY jena.version "2.11.0">
@@ -14,6 +14,7 @@
 	<!ENTITY lombok.version "1.12.6">
 	<!ENTITY mustache.java.version "0.8.14">
 	<!ENTITY java.mail.version "1.4.7">
+	<!ENTITY jcsv.version "1.4.0">
 ]>
 <ivy-module version="2.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -92,5 +93,8 @@
 		
 		<!-- JavaMail -->
 		<dependency org="javax.mail" name="mail" rev="&java.mail.version;"/>
+		
+		<!-- jcsv -->
+		<dependency org="com.googlecode.jcsv" name="jcsv" rev="&jcsv.version;"/>
 	</dependencies>
 </ivy-module>

@@ -5,7 +5,9 @@ import java.util.Date;
 
 import lombok.val;
 
+import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.ImplementationContants;
+import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.persistent.concepts.AbstractRule;
 import org.isgf.mhc.model.persistent.types.RuleEquationSignTypes;
 
@@ -17,6 +19,8 @@ import org.isgf.mhc.model.persistent.types.RuleEquationSignTypes;
 public class StringHelpers {
 	private static SimpleDateFormat	simpleDateFormat	= new SimpleDateFormat(
 																"yyyy-MM-dd");
+	private static SimpleDateFormat	longDateFormat		= new SimpleDateFormat(
+																"yyyy-MM-dd HH:mm:ss");
 
 	/**
 	 * Creates a readable name representation of a rule's name
@@ -58,10 +62,21 @@ public class StringHelpers {
 		return name.toString();
 	}
 
-	public static String createStringTimeStamp() {
+	public static String createDailyUniqueIndex() {
 		val date = new Date(InternalDateTime.currentTimeMillis());
 
 		return simpleDateFormat.format(date);
+	}
+
+	public static String createStringTimeStamp(final long timeStamp) {
+		if (timeStamp <= 0) {
+			return Messages
+					.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET);
+		}
+
+		val date = new Date(timeStamp);
+
+		return longDateFormat.format(date);
 	}
 
 	/**

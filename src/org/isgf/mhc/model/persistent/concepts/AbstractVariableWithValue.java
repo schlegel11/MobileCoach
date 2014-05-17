@@ -8,7 +8,9 @@ import lombok.Setter;
 import lombok.val;
 
 import org.isgf.mhc.model.ModelObject;
+import org.isgf.mhc.model.persistent.Participant;
 import org.isgf.mhc.model.ui.UIModelObject;
+import org.isgf.mhc.model.ui.UIParticipantVariable;
 import org.isgf.mhc.model.ui.UIVariable;
 
 /**
@@ -45,6 +47,22 @@ public abstract class AbstractVariableWithValue extends ModelObject {
 	@Override
 	public UIModelObject toUIModelObject() {
 		final val variable = new UIVariable(name, value);
+
+		variable.setRelatedModelObject(this);
+
+		return variable;
+	}
+
+	/**
+	 * Creates a UIParticipantVariable with the belonging {@link Participant}
+	 * 
+	 * @param participantName
+	 * @return
+	 */
+	public UIParticipantVariable toUIParticipantVariable(
+			final String participantId, final String participantName) {
+		final val variable = new UIParticipantVariable(participantId,
+				participantName, name, value);
 
 		variable.setRelatedModelObject(this);
 

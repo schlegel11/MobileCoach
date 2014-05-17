@@ -538,7 +538,7 @@ public class InterventionExecutionManagerService {
 		log.debug("Create a list of all relevant participants for sheduling of monitoring messages");
 		val participants = getAllParticipantsRelevantForAnsweredInTimeChecksAndMonitoringSheduling();
 
-		val dateIndex = StringHelpers.createStringTimeStamp();
+		val dateIndex = StringHelpers.createDailyUniqueIndex();
 		for (val participant : participants) {
 
 			// Check if participant has already been sheduled today

@@ -7,6 +7,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.List;
 
 import lombok.val;
@@ -21,6 +22,7 @@ import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.persistent.Author;
 import org.isgf.mhc.model.persistent.AuthorInterventionAccess;
+import org.isgf.mhc.model.persistent.DialogMessage;
 import org.isgf.mhc.model.persistent.DialogStatus;
 import org.isgf.mhc.model.persistent.Feedback;
 import org.isgf.mhc.model.persistent.Intervention;
@@ -33,6 +35,7 @@ import org.isgf.mhc.model.persistent.MonitoringRule;
 import org.isgf.mhc.model.persistent.Participant;
 import org.isgf.mhc.model.persistent.ScreeningSurvey;
 import org.isgf.mhc.model.persistent.concepts.AbstractRule;
+import org.isgf.mhc.model.persistent.concepts.AbstractVariableWithValue;
 import org.isgf.mhc.model.persistent.types.MediaObjectTypes;
 import org.isgf.mhc.model.persistent.types.RuleEquationSignTypes;
 import org.isgf.mhc.modules.AbstractModule;
@@ -1360,5 +1363,26 @@ public class InterventionAdministrationManagerService {
 
 	public List<Class<? extends AbstractModule>> getRegisteredModules() {
 		return modules;
+	}
+
+	public Hashtable<String, AbstractVariableWithValue> getAllVariablesWithValuesOfParticipantAndSystem(
+			final ObjectId participantId) {
+		val participant = databaseManagerService.getModelObjectById(
+				Participant.class, participantId);
+
+		return variablesManagerService
+				.getAllVariablesWithValuesOfParticipantAndSystem(participant);
+	}
+
+	public Participant getParticipant(final ObjectId participantId) {
+		return databaseManagerService.getModelObjectById(Participant.class,
+				participantId);
+	}
+
+	public Iterable<DialogMessage> getAllDialogMessagesOfParticipant(
+			final ObjectId participantId) {
+		return databaseManagerService.findSortedModelObjects(
+				DialogMessage.class, Queries.DIALOG_MESSAGE__BY_PARTICIPANT,
+				Queries.DIALOG_MESSAGE__SORT_BY_ORDER_ASC, participantId);
 	}
 }

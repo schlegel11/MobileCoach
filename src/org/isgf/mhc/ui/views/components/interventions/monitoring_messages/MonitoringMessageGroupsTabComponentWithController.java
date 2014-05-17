@@ -58,9 +58,11 @@ public class MonitoringMessageGroupsTabComponentWithController extends
 				// First tab added
 				selectedMonitoringMessageGroup = monitoringMessageGroup;
 				getMonitoringMessageGroupsTabSheet().setSelectedTab(newTab);
-
-				setSomethingSelected();
 			}
+		}
+
+		if (getMonitoringMessageGroupsTabSheet().getComponentCount() > 0) {
+			setSomethingSelected();
 		}
 
 		// handle tab selection change

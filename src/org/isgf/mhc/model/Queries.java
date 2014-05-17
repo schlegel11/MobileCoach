@@ -114,5 +114,6 @@ public class Queries {
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_SHOULD_BE_SENT_TIMESTAMP_LOWER				= "{'participant':#,'status':#,'shouldBeSentTimestamp':{$lt:#}}";
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_RELATED_MONITORING_MESSAGE								= "{'participant':#,'relatedMonitoringMessage':#}";
 	public static final String	DIALOG_MESSAGE__BY_STATUS																	= "{'status':#}";
+	public static final String	DIALOG_MESSAGE__SORT_BY_ORDER_ASC															= "{'order':1}";
 	public static final String	DIALOG_MESSAGE__SORT_BY_ORDER_DESC															= "{'order':-1}";
 }
