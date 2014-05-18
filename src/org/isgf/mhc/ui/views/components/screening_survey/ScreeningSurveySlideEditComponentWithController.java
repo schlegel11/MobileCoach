@@ -385,7 +385,7 @@ public class ScreeningSurveySlideEditComponentWithController extends
 		log.debug("New answer has id {}", newId);
 		val uiAnswer = new UIAnswer(newId,
 				ImplementationContants.DEFAULT_ANSWER_NAME,
-				ImplementationContants.DEFAULT_ANSWER_VALUE);
+				String.valueOf(answersBeanContainer.size() + 1));
 
 		answersBeanContainer.addItem(newId, uiAnswer);
 		answersTable.select(newId);
