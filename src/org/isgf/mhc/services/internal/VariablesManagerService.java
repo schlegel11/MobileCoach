@@ -23,6 +23,7 @@ import org.isgf.mhc.model.persistent.Participant;
 import org.isgf.mhc.model.persistent.ParticipantVariableWithValue;
 import org.isgf.mhc.model.persistent.ScreeningSurvey;
 import org.isgf.mhc.model.persistent.ScreeningSurveySlide;
+import org.isgf.mhc.model.persistent.ScreeningSurveySlideRule;
 import org.isgf.mhc.model.persistent.concepts.AbstractVariableWithValue;
 import org.isgf.mhc.model.persistent.types.DialogOptionTypes;
 import org.isgf.mhc.services.types.SystemVariables;
@@ -396,6 +397,21 @@ public class VariablesManagerService {
 					variables.add(screeningSurveySlideModelObject
 							.getStoreValueToVariableWithName());
 				}
+
+				val screeningSurveySlideRuleModelObjects = databaseManagerService
+						.findModelObjects(
+								ScreeningSurveySlideRule.class,
+								Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE,
+								screeningSurveySlideModelObject.getId());
+
+				for (val screeningSurveySlideRuleModelObject : screeningSurveySlideRuleModelObjects) {
+					if (screeningSurveySlideRuleModelObject
+							.getStoreValueToVariableWithName() != null) {
+						variables.add(screeningSurveySlideRuleModelObject
+								.getStoreValueToVariableWithName());
+					}
+
+				}
 			}
 		}
 
@@ -416,6 +432,21 @@ public class VariablesManagerService {
 					.getStoreValueToVariableWithName() != null) {
 				variables.add(screeningSurveySlideModelObject
 						.getStoreValueToVariableWithName());
+			}
+
+			val screeningSurveySlideRuleModelObjects = databaseManagerService
+					.findModelObjects(
+							ScreeningSurveySlideRule.class,
+							Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE,
+							screeningSurveySlideModelObject.getId());
+
+			for (val screeningSurveySlideRuleModelObject : screeningSurveySlideRuleModelObjects) {
+				if (screeningSurveySlideRuleModelObject
+						.getStoreValueToVariableWithName() != null) {
+					variables.add(screeningSurveySlideRuleModelObject
+							.getStoreValueToVariableWithName());
+				}
+
 			}
 		}
 
