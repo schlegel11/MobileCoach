@@ -195,8 +195,7 @@ public class DialogMessage extends ModelObject {
 			final String participantId, final String participantName) {
 		final val dialogMessage = new UIDialogMessageReducedWithParticipant(
 				participantId, participantName, status.toString(),
-				answerReceivedTimestamp <= 0 ? null : new Date(
-						answerReceivedTimestamp),
+				sentTimestamp <= 0 ? null : new Date(sentTimestamp),
 				answerReceived == null || answerReceived.equals("") ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 						: answerReceived, answerReceivedTimestamp <= 0 ? null
