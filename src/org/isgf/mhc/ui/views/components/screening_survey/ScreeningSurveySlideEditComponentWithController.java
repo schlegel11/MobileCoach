@@ -243,6 +243,8 @@ public class ScreeningSurveySlideEditComponentWithController extends
 		getEditRuleButton().addClickListener(buttonClickListener);
 		getMoveUpRuleButton().addClickListener(buttonClickListener);
 		getMoveDownRuleButton().addClickListener(buttonClickListener);
+		getLevelUpButton().addClickListener(buttonClickListener);
+		getLevelDownButton().addClickListener(buttonClickListener);
 		getDeleteRuleButton().addClickListener(buttonClickListener);
 
 		getTitleWithPlaceholdersTextFieldComponent().getButton()
@@ -355,6 +357,10 @@ public class ScreeningSurveySlideEditComponentWithController extends
 				moveRule(true);
 			} else if (event.getButton() == getMoveDownRuleButton()) {
 				moveRule(false);
+			} else if (event.getButton() == getLevelUpButton()) {
+				changeRuleLevel(true);
+			} else if (event.getButton() == getLevelDownButton()) {
+				changeRuleLevel(false);
 			} else if (event.getButton() == getDeleteRuleButton()) {
 				deleteRule();
 			} else if (event.getButton() == getTitleWithPlaceholdersTextFieldComponent()
@@ -732,6 +738,22 @@ public class ScreeningSurveySlideEditComponentWithController extends
 
 		removeAndAddModelObjectToBeanContainer(rulesBeanContainer,
 				swappedScreeningSurveySlideRule);
+		removeAndAddModelObjectToBeanContainer(rulesBeanContainer,
+				selectedScreeningSurveySlideRule);
+		rulesTable.sort();
+		rulesTable.select(selectedScreeningSurveySlideRule.getId());
+	}
+
+	public void changeRuleLevel(final boolean moveUp) {
+		log.debug("Change rule level {}", moveUp ? "up" : "down");
+
+		val selectedScreeningSurveySlideRule = selectedUIScreeningSurveySlideRule
+				.getRelatedModelObject(ScreeningSurveySlideRule.class);
+
+		getScreeningSurveyAdministrationManagerService()
+				.screeningSurveySlideRuleChangeLevel(
+						selectedScreeningSurveySlideRule, moveUp);
+
 		removeAndAddModelObjectToBeanContainer(rulesBeanContainer,
 				selectedScreeningSurveySlideRule);
 		rulesTable.sort();

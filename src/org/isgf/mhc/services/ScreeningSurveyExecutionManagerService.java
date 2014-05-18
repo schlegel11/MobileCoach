@@ -685,8 +685,19 @@ public class ScreeningSurveyExecutionManagerService {
 
 			// Executing slide rules
 			log.debug("Executing slide rules");
+			int formerSlideRuleLevel = 0;
+			boolean formerSlideRuleResult = true;
 			for (val formerSlideRule : formerSlideRules) {
+				if (formerSlideRule.getLevel() > formerSlideRuleLevel
+						&& formerSlideRuleResult != true) {
+					log.debug("Skipping rule because of level");
+					continue;
+				}
 
+				// Remember new level
+				formerSlideRuleLevel = formerSlideRule.getLevel();
+
+				// Evaluate rule
 				val ruleResult = RuleEvaluator.evaluateRule(formerSlideRule,
 						variablesWithValues.values());
 
@@ -695,8 +706,13 @@ public class ScreeningSurveyExecutionManagerService {
 							"Error when validating rule {} of intervention: {}",
 							formerSlideRule.getId(),
 							ruleResult.getErrorMessage());
+
+					formerSlideRuleResult = false;
 					continue;
 				}
+
+				// Remember result
+				formerSlideRuleResult = ruleResult.isRuleMatchesEquationSign();
 
 				// Store value if relevant
 				if (ruleResult.isRuleMatchesEquationSign()

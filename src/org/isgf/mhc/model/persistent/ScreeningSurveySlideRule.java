@@ -8,6 +8,7 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.val;
 
+import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Messages;
@@ -35,7 +36,7 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 	 */
 	public ScreeningSurveySlideRule(
 			final ObjectId belongingScreeningSurveySlide, final int order,
-			final String valueToStoreToVariable,
+			final int level, final String valueToStoreToVariable,
 			final String storeValueToVariableWithName,
 			final ObjectId nextScreeningSurveySlideWhenTrue,
 			final ObjectId nextScreeningSurveySlideWhenFalse,
@@ -47,6 +48,7 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 
 		this.belongingScreeningSurveySlide = belongingScreeningSurveySlide;
 		this.order = order;
+		this.level = level;
 		this.valueToStoreToVariable = valueToStoreToVariable;
 		this.storeValueToVariableWithName = storeValueToVariableWithName;
 		this.nextScreeningSurveySlideWhenTrue = nextScreeningSurveySlideWhenTrue;
@@ -70,6 +72,14 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 	@Getter
 	@Setter
 	private int			order;
+
+	/**
+	 * The rule will only be evaluated if the level is the same or lower as the
+	 * former rule or if the former rule evaluated as true.
+	 */
+	@Getter
+	@Setter
+	private int			level;
 
 	/**
 	 * <strong>OPTIONAL:</strong> If the former value of the
@@ -118,7 +128,8 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 	public UIModelObject toUIModelObject() {
 		val screeningSurveySlide = new UIScreeningSurveySlideRule(
 				order,
-				StringHelpers.createRuleName(this),
+				StringUtils.repeat(" » ", level)
+						+ StringHelpers.createRuleName(this),
 				storeValueToVariableWithName == null ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 						: Messages

@@ -394,7 +394,7 @@ public class ScreeningSurveyAdministrationManagerService {
 	public ScreeningSurveySlideRule screeningSurveySlideRuleCreate(
 			final ObjectId screeningSurveySlideId) {
 		val screeningSurveySlideRule = new ScreeningSurveySlideRule(
-				screeningSurveySlideId, 0, "", null, null, null, "",
+				screeningSurveySlideId, 0, 0, "", null, null, null, "",
 				RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "");
 
 		val highestOrderSlideRule = databaseManagerService
@@ -426,6 +426,20 @@ public class ScreeningSurveyAdministrationManagerService {
 
 			databaseManagerService.saveModelObject(screeningSurveySlideRule);
 		}
+	}
+
+	public void screeningSurveySlideRuleChangeLevel(
+			final ScreeningSurveySlideRule screeningSurveySlideRule,
+			final boolean up) {
+		if (up) {
+			screeningSurveySlideRule.setLevel(screeningSurveySlideRule
+					.getLevel() + 1);
+		} else if (screeningSurveySlideRule.getLevel() > 0) {
+			screeningSurveySlideRule.setLevel(screeningSurveySlideRule
+					.getLevel() - 1);
+		}
+
+		databaseManagerService.saveModelObject(screeningSurveySlideRule);
 	}
 
 	public void screeningSurveySlideRuleChangeVariableToStoreValueTo(
