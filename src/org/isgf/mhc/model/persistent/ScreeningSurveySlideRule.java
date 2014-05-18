@@ -128,7 +128,7 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 	public UIModelObject toUIModelObject() {
 		val screeningSurveySlide = new UIScreeningSurveySlideRule(
 				order,
-				StringUtils.repeat(" » ", level)
+				StringUtils.repeat(" → ", level)
 						+ StringHelpers.createRuleName(this),
 				storeValueToVariableWithName == null ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
