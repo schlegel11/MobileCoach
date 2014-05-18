@@ -76,7 +76,8 @@ public class InterventionBasicSettingsAndModulesComponent extends
 	}
 
 	protected void adjust(final boolean interventionStatus,
-			final boolean messagingStatus, final AbstractModule selectedModule) {
+			final boolean messagingStatus,
+			final Class<? extends AbstractModule> selectedModule) {
 		// Adjust intervention status
 		if (interventionStatus) {
 			switchInterventionButton.setIcon(new ThemeResource(

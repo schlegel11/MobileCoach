@@ -25,15 +25,15 @@ import com.vaadin.ui.Button.ClickEvent;
 public class InterventionBasicSettingsAndModulesTabComponentWithController
 		extends InterventionBasicSettingsAndModulesTabComponent {
 
-	private final Intervention											intervention;
+	private final Intervention												intervention;
 
-	private final InterventionEditingContainerComponentWithController	interventionEditingContainerComponentWithController;
+	private final InterventionEditingContainerComponentWithController		interventionEditingContainerComponentWithController;
 
-	private boolean														lastInterventionMonitoringState	= false;
+	private boolean															lastInterventionMonitoringState	= false;
 
-	private AbstractModule												selectedModule					= null;
+	private Class<? extends AbstractModule>									selectedModule					= null;
 
-	private final BeanContainer<AbstractModule, UIModule>				beanContainer;
+	private final BeanContainer<Class<? extends AbstractModule>, UIModule>	beanContainer;
 
 	public InterventionBasicSettingsAndModulesTabComponentWithController(
 			final Intervention intervention,
@@ -53,7 +53,7 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 		val interventionBasicSettingsComponent = getInterventionBasicSettingsAndModulesComponent();
 
 		// Handle modules table
-		beanContainer = new BeanContainer<AbstractModule, UIModule>(
+		beanContainer = new BeanContainer<Class<? extends AbstractModule>, UIModule>(
 				UIModule.class);
 
 		val modules = getInterventionAdministrationManagerService()
@@ -71,7 +71,7 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 			try {
 				module = moduleClass.getDeclaredConstructor(ObjectId.class)
 						.newInstance(intervention.getId());
-				beanContainer.addItem(module, module.toUIModule());
+				beanContainer.addItem(moduleClass, module.toUIModule());
 			} catch (final Exception e) {
 				log.error("Error when creating new module instance: {}",
 						e.getMessage());
@@ -81,13 +81,15 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 		// Handle table selection change
 		modulesTable.addValueChangeListener(new ValueChangeListener() {
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public void valueChange(final ValueChangeEvent event) {
 				val objectId = modulesTable.getValue();
 				if (objectId == null) {
 					selectedModule = null;
 				} else {
-					selectedModule = (AbstractModule) modulesTable.getValue();
+					selectedModule = (Class<? extends AbstractModule>) modulesTable
+							.getValue();
 				}
 				adjust();
 			}
@@ -193,7 +195,19 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 	public void openModule() {
 		log.debug("Open module");
 
-		showModalClosableEditWindow(selectedModule.getName(), selectedModule,
-				null);
+		@val
+		org.isgf.mhc.modules.AbstractModule selectedModuleInstance;
+		try {
+			selectedModuleInstance = selectedModule.getDeclaredConstructor(
+					ObjectId.class).newInstance(intervention.getId());
+
+			selectedModuleInstance.prepareToShow();
+
+			showModalClosableEditWindow(selectedModuleInstance.getName(),
+					selectedModuleInstance, null);
+		} catch (final Exception e) {
+			log.error("Error when creating new module instance: {}",
+					e.getMessage());
+		}
 	}
 }

@@ -10,8 +10,8 @@ import lombok.val;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.persistent.Participant;
 import org.isgf.mhc.model.ui.UIModelObject;
-import org.isgf.mhc.model.ui.UIParticipantVariable;
 import org.isgf.mhc.model.ui.UIVariable;
+import org.isgf.mhc.model.ui.UIVariableWithParticipant;
 
 /**
  * {@link ModelObject} to represent a variable value combination
@@ -54,14 +54,15 @@ public abstract class AbstractVariableWithValue extends ModelObject {
 	}
 
 	/**
-	 * Creates a UIParticipantVariable with the belonging {@link Participant}
+	 * Creates a {@link UIVariableWithParticipant} with the belonging
+	 * {@link Participant}
 	 * 
 	 * @param participantName
 	 * @return
 	 */
-	public UIParticipantVariable toUIParticipantVariable(
+	public UIVariableWithParticipant toUIVariableWithParticipant(
 			final String participantId, final String participantName) {
-		final val variable = new UIParticipantVariable(participantId,
+		final val variable = new UIVariableWithParticipant(participantId,
 				participantName, name, value);
 
 		variable.setRelatedModelObject(this);

@@ -17,9 +17,9 @@ import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.persistent.Intervention;
 import org.isgf.mhc.model.persistent.Participant;
-import org.isgf.mhc.model.ui.UIDialogMessage;
+import org.isgf.mhc.model.ui.UIDialogMessageWithParticipant;
 import org.isgf.mhc.model.ui.UIParticipant;
-import org.isgf.mhc.model.ui.UIParticipantVariable;
+import org.isgf.mhc.model.ui.UIVariableWithParticipant;
 import org.isgf.mhc.tools.CSVExporter;
 import org.isgf.mhc.tools.OnDemandFileDownloader;
 import org.isgf.mhc.tools.OnDemandFileDownloader.OnDemandStreamResource;
@@ -48,8 +48,8 @@ public class InterventionResultsComponentWithController extends
 
 	private final BeanContainer<ObjectId, UIParticipant>		beanContainer;
 
-	private final BeanContainer<Integer, UIParticipantVariable>	variablesBeanContainer;
-	private final BeanContainer<Integer, UIDialogMessage>		messageDialogBeanContainer;
+	private final BeanContainer<Integer, UIVariableWithParticipant>	variablesBeanContainer;
+	private final BeanContainer<Integer, UIDialogMessageWithParticipant>		messageDialogBeanContainer;
 
 	public InterventionResultsComponentWithController(
 			final Intervention intervention) {
@@ -90,26 +90,26 @@ public class InterventionResultsComponentWithController extends
 					}
 				});
 
-		variablesBeanContainer = new BeanContainer<Integer, UIParticipantVariable>(
-				UIParticipantVariable.class);
+		variablesBeanContainer = new BeanContainer<Integer, UIVariableWithParticipant>(
+				UIVariableWithParticipant.class);
 
 		variablesTable.setContainerDataSource(variablesBeanContainer);
-		variablesTable.setSortContainerPropertyId(UIParticipantVariable
+		variablesTable.setSortContainerPropertyId(UIVariableWithParticipant
 				.getSortColumn());
-		variablesTable.setVisibleColumns(UIParticipantVariable
+		variablesTable.setVisibleColumns(UIVariableWithParticipant
 				.getVisibleColumns());
-		variablesTable.setColumnHeaders(UIParticipantVariable
+		variablesTable.setColumnHeaders(UIVariableWithParticipant
 				.getColumnHeaders());
 
-		messageDialogBeanContainer = new BeanContainer<Integer, UIDialogMessage>(
-				UIDialogMessage.class);
+		messageDialogBeanContainer = new BeanContainer<Integer, UIDialogMessageWithParticipant>(
+				UIDialogMessageWithParticipant.class);
 
 		messageDialogTable.setContainerDataSource(messageDialogBeanContainer);
-		messageDialogTable.setSortContainerPropertyId(UIDialogMessage
+		messageDialogTable.setSortContainerPropertyId(UIDialogMessageWithParticipant
 				.getSortColumn());
-		messageDialogTable.setVisibleColumns(UIDialogMessage
+		messageDialogTable.setVisibleColumns(UIDialogMessageWithParticipant
 				.getVisibleColumns());
-		messageDialogTable.setColumnHeaders(UIDialogMessage.getColumnHeaders());
+		messageDialogTable.setColumnHeaders(UIDialogMessageWithParticipant.getColumnHeaders());
 
 		// handle selection change
 		participantsTable.addValueChangeListener(new ValueChangeListener() {
@@ -134,7 +134,7 @@ public class InterventionResultsComponentWithController extends
 
 					@Override
 					public InputStream getStream() {
-						final List<UIParticipantVariable> items = new ArrayList<UIParticipantVariable>();
+						final List<UIVariableWithParticipant> items = new ArrayList<UIVariableWithParticipant>();
 
 						for (val itemId : variablesBeanContainer.getItemIds()) {
 							items.add(variablesBeanContainer.getItem(itemId)
@@ -168,7 +168,7 @@ public class InterventionResultsComponentWithController extends
 
 					@Override
 					public InputStream getStream() {
-						final List<UIDialogMessage> items = new ArrayList<UIDialogMessage>();
+						final List<UIDialogMessageWithParticipant> items = new ArrayList<UIDialogMessageWithParticipant>();
 
 						for (val itemId : messageDialogBeanContainer
 								.getItemIds()) {
@@ -245,7 +245,7 @@ public class InterventionResultsComponentWithController extends
 						.addItem(
 								i++,
 								variableOfParticipant
-										.toUIParticipantVariable(
+										.toUIVariableWithParticipant(
 												participant.getId().toString(),
 												participant.getNickname()
 														.equals("") ? Messages
@@ -273,7 +273,7 @@ public class InterventionResultsComponentWithController extends
 						.addItem(
 								i++,
 								dialogMessageOfParticipant
-										.toUIDialogMessage(
+										.toUIDialogMessageWithParticipant(
 												participant.getId().toString(),
 												participant.getNickname()
 														.equals("") ? Messages

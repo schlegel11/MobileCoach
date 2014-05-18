@@ -1,5 +1,7 @@
 package org.isgf.mhc.model.persistent;
 
+import java.util.Date;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,7 +15,8 @@ import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.persistent.types.DialogMessageStatusTypes;
-import org.isgf.mhc.model.ui.UIDialogMessage;
+import org.isgf.mhc.model.ui.UIDialogMessageReducedWithParticipant;
+import org.isgf.mhc.model.ui.UIDialogMessageWithParticipant;
 import org.isgf.mhc.tools.StringHelpers;
 
 /**
@@ -143,15 +146,16 @@ public class DialogMessage extends ModelObject {
 	private boolean						manuallySent;
 
 	/**
-	 * Create a UIDialogMessage with the belonging {@link Participant}
+	 * Create a {@link UIDialogMessageWithParticipant} with the belonging
+	 * {@link Participant}
 	 * 
 	 * @param participantId
 	 * @param participantName
 	 * @return
 	 */
-	public UIDialogMessage toUIDialogMessage(final String participantId,
-			final String participantName) {
-		final val dialogMessage = new UIDialogMessage(
+	public UIDialogMessageWithParticipant toUIDialogMessageWithParticipant(
+			final String participantId, final String participantName) {
+		final val dialogMessage = new UIDialogMessageWithParticipant(
 				participantId,
 				participantName,
 				String.valueOf(order + 1),
@@ -173,6 +177,28 @@ public class DialogMessage extends ModelObject {
 						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
 						: Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__NO));
+
+		dialogMessage.setRelatedModelObject(this);
+
+		return dialogMessage;
+	}
+
+	/**
+	 * Create a {@link UIDialogMessageReducedWithParticipant} with the belonging
+	 * {@link Participant}
+	 * 
+	 * @param participantId
+	 * @param participantName
+	 * @return
+	 */
+	public UIDialogMessageReducedWithParticipant toUIDialogMessageReducedWithParticipant(
+			final String participantId, final String participantName) {
+		final val dialogMessage = new UIDialogMessageReducedWithParticipant(
+				participantId, participantName, status.toString(),
+				answerReceived == null || answerReceived.equals("") ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+						: answerReceived, answerReceivedTimestamp <= 0 ? null
+						: new Date(answerReceivedTimestamp));
 
 		dialogMessage.setRelatedModelObject(this);
 

@@ -11,7 +11,7 @@ import com.vaadin.data.fieldgroup.PropertyId;
 @AllArgsConstructor
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class UIParticipantVariable extends UIModelObject {
+public class UIVariableWithParticipant extends UIModelObject {
 	// NOTE: The String values have to fit the name of the variables
 	public static final String	PARTICIPANT_ID		= "participantId";
 	public static final String	PARTICIPANT_NAME	= "participantName";

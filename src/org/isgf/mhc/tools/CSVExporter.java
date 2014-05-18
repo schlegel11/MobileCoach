@@ -6,9 +6,9 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.List;
 
-import org.isgf.mhc.model.ui.UIDialogMessage;
+import org.isgf.mhc.model.ui.UIDialogMessageWithParticipant;
 import org.isgf.mhc.model.ui.UIModelObject;
-import org.isgf.mhc.model.ui.UIParticipantVariable;
+import org.isgf.mhc.model.ui.UIVariableWithParticipant;
 
 import com.googlecode.jcsv.writer.CSVWriter;
 import com.googlecode.jcsv.writer.internal.CSVWriterBuilder;
@@ -20,10 +20,10 @@ import com.googlecode.jcsv.writer.internal.CSVWriterBuilder;
  */
 public class CSVExporter {
 	public static InputStream convertUIParticipantVariableToCSV(
-			final List<UIParticipantVariable> items) throws IOException {
+			final List<UIVariableWithParticipant> items) throws IOException {
 		final StringWriter stringWriter = new StringWriter();
 
-		final CSVWriter<UIParticipantVariable> csvWriter = new CSVWriterBuilder<UIParticipantVariable>(
+		final CSVWriter<UIVariableWithParticipant> csvWriter = new CSVWriterBuilder<UIVariableWithParticipant>(
 				stringWriter).entryConverter(
 				new CSVUIParticipantVariableEntryConverter()).build();
 
@@ -38,10 +38,10 @@ public class CSVExporter {
 	}
 
 	public static InputStream convertUIDialogMessageToCSV(
-			final List<UIDialogMessage> items) throws IOException {
+			final List<UIDialogMessageWithParticipant> items) throws IOException {
 		final StringWriter stringWriter = new StringWriter();
 
-		final CSVWriter<UIDialogMessage> csvWriter = new CSVWriterBuilder<UIDialogMessage>(
+		final CSVWriter<UIDialogMessageWithParticipant> csvWriter = new CSVWriterBuilder<UIDialogMessageWithParticipant>(
 				stringWriter).entryConverter(
 				new CSVUIPDialogMessageEntryConverter()).build();
 

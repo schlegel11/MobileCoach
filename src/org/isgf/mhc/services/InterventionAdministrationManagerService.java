@@ -39,7 +39,7 @@ import org.isgf.mhc.model.persistent.concepts.AbstractVariableWithValue;
 import org.isgf.mhc.model.persistent.types.MediaObjectTypes;
 import org.isgf.mhc.model.persistent.types.RuleEquationSignTypes;
 import org.isgf.mhc.modules.AbstractModule;
-import org.isgf.mhc.modules.QuizModule;
+import org.isgf.mhc.modules.quiz.QuizModuleWithController;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.ModelObjectExchangeService;
@@ -82,7 +82,7 @@ public class InterventionAdministrationManagerService {
 
 		log.info("Registering modules...");
 		modules = new ArrayList<Class<? extends AbstractModule>>();
-		modules.add(QuizModule.class);
+		modules.add(QuizModuleWithController.class);
 
 		log.info("Started.");
 	}
@@ -1384,5 +1384,14 @@ public class InterventionAdministrationManagerService {
 		return databaseManagerService.findSortedModelObjects(
 				DialogMessage.class, Queries.DIALOG_MESSAGE__BY_PARTICIPANT,
 				Queries.DIALOG_MESSAGE__SORT_BY_ORDER_ASC, participantId);
+	}
+
+	public Iterable<DialogMessage> getAllDialogMessagesOfRelatedMonitoringMessage(
+			final ObjectId relatedMonitoringMessage) {
+		return databaseManagerService.findSortedModelObjects(
+				DialogMessage.class,
+				Queries.DIALOG_MESSAGE__BY_RELATED_MONITORING_MESSAGE,
+				Queries.DIALOG_MESSAGE__SORT_BY_ANSWER_RECEIVED_TIMESTAMP_DESC,
+				relatedMonitoringMessage);
 	}
 }

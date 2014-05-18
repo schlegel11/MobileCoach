@@ -28,6 +28,11 @@ public abstract class AbstractModule extends AbstractClosableEditComponent {
 	}
 
 	/**
+	 * Called before the window itself is shown
+	 */
+	public abstract void prepareToShow();
+
+	/**
 	 * The name of the module
 	 * 
 	 * @return
