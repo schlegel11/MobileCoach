@@ -109,7 +109,7 @@ public abstract class QuizModule extends AbstractModule {
 		relevantDialogMessagesLabel.setWidth("-1px");
 		relevantDialogMessagesLabel.setHeight("-1px");
 		relevantDialogMessagesLabel
-				.setValue("!!! The following messages have been sent to participants in the near past:");
+				.setValue("!!! The following messages have been sent to participants in the last 14 days:");
 		mainLayout.addComponent(relevantDialogMessagesLabel);
 
 		// relevantDialogMessagesTable

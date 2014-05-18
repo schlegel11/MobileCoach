@@ -1386,12 +1386,16 @@ public class InterventionAdministrationManagerService {
 				Queries.DIALOG_MESSAGE__SORT_BY_ORDER_ASC, participantId);
 	}
 
-	public Iterable<DialogMessage> getAllDialogMessagesOfRelatedMonitoringMessage(
+	public Iterable<DialogMessage> getAllDialogMessagesOfRelatedMonitoringMessageSentWithinLast14Days(
 			final ObjectId relatedMonitoringMessage) {
-		return databaseManagerService.findSortedModelObjects(
-				DialogMessage.class,
-				Queries.DIALOG_MESSAGE__BY_RELATED_MONITORING_MESSAGE,
-				Queries.DIALOG_MESSAGE__SORT_BY_ANSWER_RECEIVED_TIMESTAMP_DESC,
-				relatedMonitoringMessage);
+		return databaseManagerService
+				.findSortedModelObjects(
+						DialogMessage.class,
+						Queries.DIALOG_MESSAGE__BY_RELATED_MONITORING_MESSAGE_AND_SENT_AFTER_TIMESTAMP,
+						Queries.DIALOG_MESSAGE__SORT_BY_SENT_TIMESTAMP_DESC,
+						relatedMonitoringMessage,
+						InternalDateTime.currentTimeMillis()
+								- ImplementationContants.DAYS_TO_TIME_IN_MILLIS_MULTIPLICATOR
+								* 14);
 	}
 }

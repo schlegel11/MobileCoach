@@ -19,6 +19,8 @@ public class UIDialogMessageReducedWithParticipant extends UIModelObject {
 	public static final String	PARTICIPANT_NAME			= "participantName";
 	public static final String	STATUS						= "status";
 
+	public static final String	SENT_TIMESTAMP				= "sentTimestamp";
+
 	public static final String	ANSWER						= "answer";
 	public static final String	ANSWER_RECEIVED_TIMESTAMP	= "answerReceivedTimestamp";
 
@@ -31,6 +33,9 @@ public class UIDialogMessageReducedWithParticipant extends UIModelObject {
 	@PropertyId(STATUS)
 	private String				status;
 
+	@PropertyId(SENT_TIMESTAMP)
+	private Date				sentTimestamp;
+
 	@PropertyId(ANSWER)
 	private String				answer;
 
@@ -38,8 +43,8 @@ public class UIDialogMessageReducedWithParticipant extends UIModelObject {
 	private Date				answerReceivedTimestamp;
 
 	public static Object[] getVisibleColumns() {
-		return new Object[] { PARTICIPANT_ID, PARTICIPANT_NAME, STATUS, ANSWER,
-				ANSWER_RECEIVED_TIMESTAMP };
+		return new Object[] { PARTICIPANT_ID, PARTICIPANT_NAME, STATUS,
+				SENT_TIMESTAMP, ANSWER, ANSWER_RECEIVED_TIMESTAMP };
 	}
 
 	public static String[] getColumnHeaders() {
@@ -47,11 +52,12 @@ public class UIDialogMessageReducedWithParticipant extends UIModelObject {
 				localize(AdminMessageStrings.UI_COLUMNS__PARTICIPANT_ID),
 				localize(AdminMessageStrings.UI_COLUMNS__PARTICIPANT_NAME),
 				localize(AdminMessageStrings.UI_COLUMNS__STATUS),
+				localize(AdminMessageStrings.UI_COLUMNS__SENT_TIMESTAMP),
 				localize(AdminMessageStrings.UI_COLUMNS__ANSWER),
 				localize(AdminMessageStrings.UI_COLUMNS__ANSWER_RECEIVED_TIMESTAMP) };
 	}
 
 	public static String getSortColumn() {
-		return ANSWER_RECEIVED_TIMESTAMP;
+		return SENT_TIMESTAMP;
 	}
 }

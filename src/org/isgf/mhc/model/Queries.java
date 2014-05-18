@@ -108,7 +108,7 @@ public class Queries {
 	public static final String	PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_VARIABLE_NAME							= "{'participant':#,'name':#}";
 
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT																= "{'participant':#}";
-	public static final String	DIALOG_MESSAGE__BY_RELATED_MONITORING_MESSAGE												= "{'relatedMonitoringMessage':#}";
+	public static final String	DIALOG_MESSAGE__BY_RELATED_MONITORING_MESSAGE_AND_SENT_AFTER_TIMESTAMP						= "{'relatedMonitoringMessage':#,'sentTimestamp':{$gt:#}}";
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS													= "{'participant':#,'status':#}";
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_UNANSWERED_AFTER_TIMESTAMP_HIGHER				= "{'participant':#,'status':#,'isUnansweredAfterTimestamp':{$gt:#}}";
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_UNANSWERED_AFTER_TIMESTAMP_LOWER				= "{'participant':#,'status':#,'isUnansweredAfterTimestamp':{$lt:#}}";
@@ -117,5 +117,5 @@ public class Queries {
 	public static final String	DIALOG_MESSAGE__BY_STATUS																	= "{'status':#}";
 	public static final String	DIALOG_MESSAGE__SORT_BY_ORDER_ASC															= "{'order':1}";
 	public static final String	DIALOG_MESSAGE__SORT_BY_ORDER_DESC															= "{'order':-1}";
-	public static final String	DIALOG_MESSAGE__SORT_BY_ANSWER_RECEIVED_TIMESTAMP_DESC										= "{'answerReceivedTimestamp':-1}";
+	public static final String	DIALOG_MESSAGE__SORT_BY_SENT_TIMESTAMP_DESC													= "{'sentTimestamp':-1}";
 }

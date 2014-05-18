@@ -22,6 +22,7 @@ public class ImplementationContants {
 	public static final int		DEFAULT_HOUR_TO_SEND_MESSAGE									= 16;
 
 	public static final int		HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR							= 60 * 60 * 1000;
+	public static final int		DAYS_TO_TIME_IN_MILLIS_MULTIPLICATOR							= 24 * 60 * 60 * 1000;
 
 	// TODO Still debugging values
 	public static final long	MASTER_RULE_EVALUTION_WORKER_MINUTES_SLEEP_BETWEEN_CHECK_CYCLES	= 1;

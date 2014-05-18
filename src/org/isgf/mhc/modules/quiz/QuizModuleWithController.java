@@ -118,6 +118,17 @@ public class QuizModuleWithController extends QuizModule {
 								return dateFormat;
 							}
 						});
+		dialogMessageTable.setConverter(
+				UIDialogMessageReducedWithParticipant.SENT_TIMESTAMP,
+				new StringToDateConverter() {
+					@Override
+					protected DateFormat getFormat(final Locale locale) {
+						val dateFormat = DateFormat.getDateTimeInstance(
+								DateFormat.MEDIUM, DateFormat.MEDIUM,
+								Constants.getAdminLocale());
+						return dateFormat;
+					}
+				});
 
 		// handle button
 		val buttonClickListener = new ButtonClickListener();
@@ -176,13 +187,12 @@ public class QuizModuleWithController extends QuizModule {
 
 		if (relatedMonitoringMessage != null) {
 			log.debug("Fill table with reduced dialog messages");
-			log.debug(">>{}", relatedMonitoringMessage.getId());
+
 			val dialogMessages = getInterventionAdministrationManagerService()
-					.getAllDialogMessagesOfRelatedMonitoringMessage(
+					.getAllDialogMessagesOfRelatedMonitoringMessageSentWithinLast14Days(
 							relatedMonitoringMessage.getId());
 
 			for (val dialogMessage : dialogMessages) {
-				log.debug("aa");
 				val participant = getInterventionAdministrationManagerService()
 						.getParticipant(dialogMessage.getParticipant());
 
