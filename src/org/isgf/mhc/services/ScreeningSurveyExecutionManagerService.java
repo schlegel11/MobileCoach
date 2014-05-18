@@ -704,9 +704,25 @@ public class ScreeningSurveyExecutionManagerService {
 					log.debug("Storing rule result to variable {}",
 							formerSlideRule.getStoreValueToVariableWithName());
 
-					storeResultToVariable(participant,
-							formerSlideRule.getStoreValueToVariableWithName(),
-							formerSlideRule.getValueToStoreToVariable());
+					if (formerSlideRule.getValueToStoreToVariable() == null
+							|| formerSlideRule.getValueToStoreToVariable()
+									.equals("")) {
+						// Store rule result
+						storeResultToVariable(
+								participant,
+								formerSlideRule
+										.getStoreValueToVariableWithName(),
+								ruleResult.isCalculatedRule() ? String
+										.valueOf(ruleResult
+												.getCalculatedRuleValue())
+										: ruleResult.getTextRuleValue());
+					} else {
+						// Store fix value
+						storeResultToVariable(participant,
+								formerSlideRule
+										.getStoreValueToVariableWithName(),
+								formerSlideRule.getValueToStoreToVariable());
+					}
 
 					log.debug("Refrehsing variables");
 					variablesWithValues = variablesManagerService

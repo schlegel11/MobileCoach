@@ -174,7 +174,7 @@ public class ScreeningSurveySlideRuleEditComponent extends
 		storeVariableLabel.setWidth("-1px");
 		storeVariableLabel.setHeight("-1px");
 		storeVariableLabel
-				.setValue("!!! Store fix value to variable (if required and rule is TRUE):");
+				.setValue("!!! Store fix value (if assigned) OR rule result to variable (if required and only if rule is TRUE):");
 		variableLabelLayout.addComponent(storeVariableLabel);
 
 		return variableLabelLayout;
