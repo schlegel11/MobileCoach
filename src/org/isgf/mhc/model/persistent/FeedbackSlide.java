@@ -110,7 +110,7 @@ public class FeedbackSlide extends ModelObject {
 	 * (java.util.List)
 	 */
 	@Override
-	protected void collectThisAndRelatedModelObjectsForExport(
+	public void collectThisAndRelatedModelObjectsForExport(
 			final List<ModelObject> exportList) {
 		exportList.add(this);
 

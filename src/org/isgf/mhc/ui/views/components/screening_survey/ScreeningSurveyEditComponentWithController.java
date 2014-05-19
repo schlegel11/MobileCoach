@@ -1,8 +1,11 @@
 package org.isgf.mhc.ui.views.components.screening_survey;
 
+import java.io.File;
+
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.lang.NullArgumentException;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.ThemeImageStrings;
@@ -148,6 +151,7 @@ public class ScreeningSurveyEditComponentWithController extends
 		val buttonClickListener = new ButtonClickListener();
 		getNewButton().addClickListener(buttonClickListener);
 		getEditButton().addClickListener(buttonClickListener);
+		getDuplicateButton().addClickListener(buttonClickListener);
 		getMoveUpButton().addClickListener(buttonClickListener);
 		getMoveDownButton().addClickListener(buttonClickListener);
 		getDeleteButton().addClickListener(buttonClickListener);
@@ -204,6 +208,8 @@ public class ScreeningSurveyEditComponentWithController extends
 				createSlide();
 			} else if (event.getButton() == getEditButton()) {
 				editSlide();
+			} else if (event.getButton() == getDuplicateButton()) {
+				duplicateSlide();
 			} else if (event.getButton() == getMoveUpButton()) {
 				moveSlide(true);
 			} else if (event.getButton() == getMoveDownButton()) {
@@ -329,6 +335,44 @@ public class ScreeningSurveyEditComponentWithController extends
 						closeWindow();
 					}
 				}, screeningSurvey.getName());
+	}
+
+	public void duplicateSlide() {
+		log.debug("Duplicate slide");
+
+		final File temporaryBackupFile = getScreeningSurveyAdministrationManagerService()
+				.screeningSurveySlideExport(
+						selectedUIScreeningSurveySlide
+								.getRelatedModelObject(ScreeningSurveySlide.class));
+
+		try {
+			final ScreeningSurveySlide importedScreeningSurveySlide = getScreeningSurveyAdministrationManagerService()
+					.screeningSurveySlideImport(temporaryBackupFile);
+
+			if (importedScreeningSurveySlide == null) {
+				throw new NullArgumentException(
+						"Imported slide not found in import");
+			}
+
+			// Adapt UI
+			slidesBeanContainer.addItem(importedScreeningSurveySlide.getId(),
+					UIScreeningSurveySlide.class
+							.cast(importedScreeningSurveySlide
+									.toUIModelObject()));
+			slidesTable.select(importedScreeningSurveySlide.getId());
+
+			getAdminUI().showInformationNotification(
+					AdminMessageStrings.NOTIFICATION__SLIDE_DUPLICATED);
+		} catch (final Exception e) {
+			getAdminUI().showWarningNotification(
+					AdminMessageStrings.NOTIFICATION__SLIDE_DUPLICATION_FAILED);
+		}
+
+		try {
+			temporaryBackupFile.delete();
+		} catch (final Exception f) {
+			// Do nothing
+		}
 	}
 
 	public void moveSlide(final boolean moveUp) {

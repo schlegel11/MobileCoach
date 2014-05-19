@@ -1,8 +1,11 @@
 package org.isgf.mhc.ui.views.components.feedback;
 
+import java.io.File;
+
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.lang.NullArgumentException;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.model.persistent.Feedback;
@@ -100,6 +103,7 @@ public class FeedbackEditComponentWithController extends FeedbackEditComponent {
 		val buttonClickListener = new ButtonClickListener();
 		getNewButton().addClickListener(buttonClickListener);
 		getEditButton().addClickListener(buttonClickListener);
+		getDuplicateButton().addClickListener(buttonClickListener);
 		getMoveUpButton().addClickListener(buttonClickListener);
 		getMoveDownButton().addClickListener(buttonClickListener);
 		getDeleteButton().addClickListener(buttonClickListener);
@@ -112,6 +116,8 @@ public class FeedbackEditComponentWithController extends FeedbackEditComponent {
 				createSlide();
 			} else if (event.getButton() == getEditButton()) {
 				editSlide();
+			} else if (event.getButton() == getDuplicateButton()) {
+				duplicateSlide();
 			} else if (event.getButton() == getMoveUpButton()) {
 				moveSlide(true);
 			} else if (event.getButton() == getMoveDownButton()) {
@@ -172,6 +178,43 @@ public class FeedbackEditComponentWithController extends FeedbackEditComponent {
 						closeWindow();
 					}
 				}, feedback.getName());
+	}
+
+	public void duplicateSlide() {
+		log.debug("Duplicate slide");
+
+		final File temporaryBackupFile = getScreeningSurveyAdministrationManagerService()
+				.feedbackSlideExport(
+						selectedUIFeedbackSlide
+								.getRelatedModelObject(FeedbackSlide.class));
+
+		try {
+			final FeedbackSlide importedFeedbackSlide = getScreeningSurveyAdministrationManagerService()
+					.feedbackSlideImport(temporaryBackupFile);
+
+			if (importedFeedbackSlide == null) {
+				throw new NullArgumentException(
+						"Imported slide not found in import");
+			}
+
+			// Adapt UI
+			slidesBeanContainer.addItem(importedFeedbackSlide.getId(),
+					UIFeedbackSlide.class.cast(importedFeedbackSlide
+							.toUIModelObject()));
+			slidesTable.select(importedFeedbackSlide.getId());
+
+			getAdminUI().showInformationNotification(
+					AdminMessageStrings.NOTIFICATION__SLIDE_DUPLICATED);
+		} catch (final Exception e) {
+			getAdminUI().showWarningNotification(
+					AdminMessageStrings.NOTIFICATION__SLIDE_DUPLICATION_FAILED);
+		}
+
+		try {
+			temporaryBackupFile.delete();
+		} catch (final Exception f) {
+			// Do nothing
+		}
 	}
 
 	public void moveSlide(final boolean moveUp) {

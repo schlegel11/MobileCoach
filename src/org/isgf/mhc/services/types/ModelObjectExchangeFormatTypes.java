@@ -8,5 +8,5 @@ import org.isgf.mhc.model.ModelObject;
  * @author Andreas Filler
  */
 public enum ModelObjectExchangeFormatTypes {
-	INTERVENTION, SCREENING_SURVEY, PARTICIPANTS
+	INTERVENTION, SCREENING_SURVEY, PARTICIPANTS, SCREENING_SURVEY_SLIDE, FEEDBACK_SLIDE;
 }

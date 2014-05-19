@@ -43,7 +43,7 @@ public class VariableStringReplacer {
 		}
 
 		// Find variables in rule
-		final String variableFindPatternString = "\\$[a-zA-Z_]+";
+		final String variableFindPatternString = ImplementationContants.REGULAR_EXPRESSION_TO_MATCH_VARIABLES_IN_STRING;
 		val variableFindPattern = Pattern.compile(variableFindPatternString);
 		final Matcher variableFindMatcher = variableFindPattern
 				.matcher(stringWithVariables);

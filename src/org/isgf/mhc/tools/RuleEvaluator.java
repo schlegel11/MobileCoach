@@ -1,7 +1,13 @@
 package org.isgf.mhc.tools;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
@@ -9,7 +15,9 @@ import org.isgf.mhc.model.memory.RuleEvaluationResult;
 import org.isgf.mhc.model.persistent.concepts.AbstractRule;
 import org.isgf.mhc.model.persistent.concepts.AbstractVariableWithValue;
 
+import com.fathzer.soft.javaluator.AbstractEvaluator;
 import com.fathzer.soft.javaluator.DoubleEvaluator;
+import com.fathzer.soft.javaluator.Function;
 
 /**
  * Evaluates calculated and text based rules
@@ -230,9 +238,78 @@ public class RuleEvaluator {
 
 		// Evaluate rule
 		log.debug("Evaluating rule {}", rule);
-		val doubleEvaluator = new DoubleEvaluator();
+		val params = DoubleEvaluator.getDefaultParameters();
 
-		val result = doubleEvaluator.evaluate(rule);
+		final Function firstPosition = new Function("first", 1,
+				Integer.MAX_VALUE);
+		final Function secondPosition = new Function("second", 1,
+				Integer.MAX_VALUE);
+		final Function thirdPosition = new Function("third", 1,
+				Integer.MAX_VALUE);
+
+		params.add(firstPosition);
+		params.add(secondPosition);
+		params.add(thirdPosition);
+
+		final AbstractEvaluator<Double> evaluator = new DoubleEvaluator(params) {
+			@Override
+			protected Double evaluate(final Function function,
+					final Iterator<Double> arguments,
+					final Object evaluationContext) {
+				if (function == firstPosition) {
+					return positionEvaluation(0, arguments);
+				} else if (function == secondPosition) {
+					return positionEvaluation(1, arguments);
+				} else if (function == thirdPosition) {
+					return positionEvaluation(2, arguments);
+				} else {
+					// If it's another function, pass it to DoubleEvaluator
+					return super.evaluate(function, arguments,
+							evaluationContext);
+				}
+			}
+
+			@AllArgsConstructor
+			final class PositionItem implements Comparable<PositionItem> {
+				@Getter
+				@Setter
+				private int		position;
+				@Getter
+				@Setter
+				private double	value;
+
+				@Override
+				public int compareTo(final PositionItem anotherInstance) {
+					return (int) (anotherInstance.getValue() - value);
+				}
+
+			}
+
+			/**
+			 * Determines the position of the 1st, 2nd, 3rd highest value in the
+			 * list; The result is randomized if all/several values would fit
+			 * 
+			 * @param i
+			 * @param arguments
+			 * @return
+			 */
+			private Double positionEvaluation(final int position,
+					final Iterator<Double> arguments) {
+				val positionItems = new ArrayList<PositionItem>();
+
+				int i = 0;
+				while (arguments.hasNext()) {
+					i++;
+					positionItems.add(new PositionItem(i, arguments.next()));
+				}
+
+				Collections.sort(positionItems);
+
+				return (double) positionItems.get(position).getPosition();
+			}
+		};
+
+		val result = evaluator.evaluate(rule);
 		log.debug("Result of rule {} is {}", rule, result);
 
 		return result;

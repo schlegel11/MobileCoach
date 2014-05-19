@@ -10,7 +10,9 @@ import lombok.val;
 
 import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
+import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.AdminMessageStrings;
+import org.isgf.mhc.conf.ImplementationContants;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.persistent.concepts.AbstractRule;
@@ -126,6 +128,32 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 	 */
 	@Override
 	public UIModelObject toUIModelObject() {
+		String slideNameWhenTrue = Messages
+				.getAdminString(AdminMessageStrings.UI_MODEL__UNKNOWN);
+		String slideNameWhenFalse = Messages
+				.getAdminString(AdminMessageStrings.UI_MODEL__UNKNOWN);
+
+		if (nextScreeningSurveySlideWhenTrue != null) {
+			val slideWhenTrue = MHC.getInstance()
+					.getScreeningSurveyAdministrationManagerService()
+					.getScreeningSurveySlide(nextScreeningSurveySlideWhenTrue);
+			if (slideWhenTrue != null) {
+				slideNameWhenTrue = slideWhenTrue.getTitleWithPlaceholders()
+						.equals("") ? ImplementationContants.DEFAULT_OBJECT_NAME
+						: slideWhenTrue.getTitleWithPlaceholders();
+			}
+		}
+		if (nextScreeningSurveySlideWhenFalse != null) {
+			val slideWhenFalse = MHC.getInstance()
+					.getScreeningSurveyAdministrationManagerService()
+					.getScreeningSurveySlide(nextScreeningSurveySlideWhenTrue);
+			if (slideWhenFalse != null) {
+				slideNameWhenFalse = slideWhenFalse.getTitleWithPlaceholders()
+						.equals("") ? ImplementationContants.DEFAULT_OBJECT_NAME
+						: slideWhenFalse.getTitleWithPlaceholders();
+			}
+		}
+
 		val screeningSurveySlide = new UIScreeningSurveySlideRule(
 				order,
 				StringUtils.repeat(" → ", level)
@@ -139,12 +167,12 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 										storeValueToVariableWithName),
 				nextScreeningSurveySlideWhenTrue != null ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
+						+ ": " + slideNameWhenTrue : Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NO),
 				nextScreeningSurveySlideWhenFalse != null ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NO));
+						+ ": " + slideNameWhenFalse : Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NO));
 
 		screeningSurveySlide.setRelatedModelObject(this);
 

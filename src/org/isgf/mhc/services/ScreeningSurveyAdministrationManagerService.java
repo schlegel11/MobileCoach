@@ -231,6 +231,50 @@ public class ScreeningSurveyAdministrationManagerService {
 		return screeningSurveySlide;
 	}
 
+	public ScreeningSurveySlide screeningSurveySlideImport(final File file)
+			throws FileNotFoundException, IOException {
+		val importedModelObjects = modelObjectExchangeService
+				.importModelObjects(file,
+						ModelObjectExchangeFormatTypes.SCREENING_SURVEY_SLIDE);
+
+		for (val modelObject : importedModelObjects) {
+			if (modelObject instanceof ScreeningSurveySlide) {
+				val slide = (ScreeningSurveySlide) modelObject;
+
+				slide.setOrder(0);
+
+				val highestOrderSlide = databaseManagerService
+						.findOneSortedModelObject(
+								ScreeningSurveySlide.class,
+								Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY,
+								Queries.SCREENING_SURVEY_SLIDE__SORT_BY_ORDER_DESC,
+								slide.getScreeningSurvey());
+
+				if (highestOrderSlide != null) {
+					slide.setOrder(highestOrderSlide.getOrder() + 1);
+				}
+
+				databaseManagerService.saveModelObject(slide);
+
+				return slide;
+			}
+		}
+
+		return null;
+	}
+
+	public File screeningSurveySlideExport(final ScreeningSurveySlide slide) {
+		final List<ModelObject> modelObjectsToExport = new ArrayList<ModelObject>();
+
+		log.debug("Recursively collect all model objects related to the slide");
+		slide.collectThisAndRelatedModelObjectsForExport(modelObjectsToExport);
+
+		log.debug("Export slide");
+		return modelObjectExchangeService.exportModelObjects(
+				modelObjectsToExport,
+				ModelObjectExchangeFormatTypes.SCREENING_SURVEY_SLIDE);
+	}
+
 	public void screeningSurveySlideChangeTitle(
 			final ScreeningSurveySlide screeningSurveySlide,
 			final String textWithPlaceholders,
@@ -703,6 +747,49 @@ public class ScreeningSurveyAdministrationManagerService {
 		return feedback;
 	}
 
+	public FeedbackSlide feedbackSlideImport(final File file)
+			throws FileNotFoundException, IOException {
+		val importedModelObjects = modelObjectExchangeService
+				.importModelObjects(file,
+						ModelObjectExchangeFormatTypes.FEEDBACK_SLIDE);
+
+		for (val modelObject : importedModelObjects) {
+			if (modelObject instanceof FeedbackSlide) {
+				val slide = (FeedbackSlide) modelObject;
+
+				slide.setOrder(0);
+
+				val highestOrderSlide = databaseManagerService
+						.findOneSortedModelObject(ScreeningSurveySlide.class,
+								Queries.FEEDBACK_SLIDE__BY_FEEDBACK,
+								Queries.FEEDBACK_SLIDE__SORT_BY_ORDER_DESC,
+								slide.getFeedback());
+
+				if (highestOrderSlide != null) {
+					slide.setOrder(highestOrderSlide.getOrder() + 1);
+				}
+
+				databaseManagerService.saveModelObject(slide);
+
+				return slide;
+			}
+		}
+
+		return null;
+	}
+
+	public File feedbackSlideExport(final FeedbackSlide slide) {
+		final List<ModelObject> modelObjectsToExport = new ArrayList<ModelObject>();
+
+		log.debug("Recursively collect all model objects related to the slide");
+		slide.collectThisAndRelatedModelObjectsForExport(modelObjectsToExport);
+
+		log.debug("Export slide");
+		return modelObjectExchangeService.exportModelObjects(
+				modelObjectsToExport,
+				ModelObjectExchangeFormatTypes.FEEDBACK_SLIDE);
+	}
+
 	public void feedbackChangeName(final Feedback feedback, final String newName) {
 		if (newName.equals("")) {
 			feedback.setName(DEFAULT_OBJECT_NAME);
@@ -857,5 +944,10 @@ public class ScreeningSurveyAdministrationManagerService {
 		Collections.sort(variables);
 
 		return variables;
+	}
+
+	public ScreeningSurveySlide getScreeningSurveySlide(final ObjectId objectId) {
+		return databaseManagerService.getModelObjectById(
+				ScreeningSurveySlide.class, objectId);
 	}
 }
