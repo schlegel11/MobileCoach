@@ -10,6 +10,7 @@ import lombok.Setter;
 import lombok.val;
 
 import org.bson.types.ObjectId;
+import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
@@ -150,6 +151,21 @@ public class ScreeningSurveySlide extends ModelObject {
 	 */
 	@Override
 	public UIModelObject toUIModelObject() {
+		int slideRules = 0;
+		val screeningSurveySlideRules = MHC.getInstance()
+				.getScreeningSurveyAdministrationManagerService()
+				.getAllScreeningSurveySlideRulesOfScreeningSurveySlide(getId());
+
+		if (screeningSurveySlideRules != null) {
+			val screeningSurveySlideRulesIterator = screeningSurveySlideRules
+					.iterator();
+
+			while (screeningSurveySlideRulesIterator.hasNext()) {
+				screeningSurveySlideRulesIterator.next();
+				slideRules++;
+			}
+		}
+
 		val screeningSurveySlide = new UIScreeningSurveySlide(
 				order,
 				titleWithPlaceholders.equals("") ? Messages
@@ -158,7 +174,8 @@ public class ScreeningSurveySlide extends ModelObject {
 				questionType.toString(),
 				storeValueToVariableWithName != null ? storeValueToVariableWithName
 						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET));
+								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET),
+				slideRules);
 
 		screeningSurveySlide.setRelatedModelObject(this);
 
