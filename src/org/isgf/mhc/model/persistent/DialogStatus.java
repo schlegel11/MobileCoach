@@ -48,6 +48,14 @@ public class DialogStatus extends ModelObject {
 	private boolean		screeningSurveyPerformed;
 
 	/**
+	 * Stores if the {@link Participant} has all information stored that are
+	 * required to participate in the Monitoring
+	 */
+	@Getter
+	@Setter
+	private boolean		dataForMonitoringParticipationAvailable;
+
+	/**
 	 * Timestamp when the user finished the {@link ScreeningSurvey}
 	 */
 	@Getter

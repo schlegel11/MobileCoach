@@ -340,7 +340,7 @@ public class InterventionParticipantsTabComponentWithController extends
 				try {
 					// Change organization
 					MHC.getInstance().getInterventionExecutionManagerService()
-							.participantsSwitchMessaging(selectedParticipants);
+							.participantsSwitchMonitoring(selectedParticipants);
 				} catch (final Exception e) {
 					handleException(e);
 					return;

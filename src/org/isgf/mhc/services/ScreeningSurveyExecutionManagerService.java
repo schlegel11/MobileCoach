@@ -150,8 +150,8 @@ public class ScreeningSurveyExecutionManagerService {
 
 	// Dialog status
 	private void dialogStatusCreate(final ObjectId participantId) {
-		val dialogStatus = new DialogStatus(participantId, "", false, 0, false,
-				0, 0);
+		val dialogStatus = new DialogStatus(participantId, "", false, false, 0,
+				false, 0, 0);
 
 		databaseManagerService.saveModelObject(dialogStatus);
 	}
@@ -169,11 +169,41 @@ public class ScreeningSurveyExecutionManagerService {
 
 			databaseManagerService.saveModelObject(dialogStatus);
 		}
+
+		if (!dialogStatus.isDataForMonitoringParticipationAvailable()) {
+			val dataForMonitoringParticipationAvailable = checkForDataForMonitoringParticipation(participantId);
+
+			dialogStatus
+					.setDataForMonitoringParticipationAvailable(dataForMonitoringParticipationAvailable);
+
+			databaseManagerService.saveModelObject(dialogStatus);
+		}
 	}
 
 	/*
 	 * Special methods
 	 */
+	/**
+	 * Checks variables of participant if all relevant information for
+	 * monitoring is available
+	 * 
+	 * @param participantId
+	 * @return
+	 */
+	private boolean checkForDataForMonitoringParticipation(
+			final ObjectId participantId) {
+
+		val dialogOptions = databaseManagerService.findModelObjects(
+				DialogOption.class, Queries.DIALOG_OPTION__BY_PARTICIPANT,
+				participantId);
+
+		if (dialogOptions != null && dialogOptions.iterator().hasNext()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	/**
 	 * Returns if the requested {@link ScreeningSurvey} is currently accessible
 	 * (means the the {@link Intervention} and {@link ScreeningSurvey} are both

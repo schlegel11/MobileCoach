@@ -143,9 +143,24 @@ public class InterventionExecutionManagerService {
 
 	// Participant
 	@Synchronized
-	public void participantsSwitchMessaging(final List<Participant> participants) {
+	public void participantsSwitchMonitoring(
+			final List<Participant> participants) {
 		for (val participant : participants) {
-			participant.setMonitoringActive(!participant.isMonitoringActive());
+
+			if (participant.isMonitoringActive()) {
+				participant.setMonitoringActive(false);
+			} else {
+				val dialogStatus = databaseManagerService.findOneModelObject(
+						DialogStatus.class,
+						Queries.DIALOG_STATUS__BY_PARTICIPANT,
+						participant.getId());
+
+				if (dialogStatus != null
+						&& dialogStatus
+								.isDataForMonitoringParticipationAvailable()) {
+					participant.setMonitoringActive(true);
+				}
+			}
 
 			databaseManagerService.saveModelObject(participant);
 		}

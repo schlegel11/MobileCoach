@@ -139,6 +139,7 @@ public class Participant extends ModelObject {
 		}
 
 		boolean screeningSurveyStatus = false;
+		boolean dataForMonitoringAvailable = false;
 		boolean monitoringStatus = false;
 
 		val dialogStatus = MHC.getInstance()
@@ -147,9 +148,12 @@ public class Participant extends ModelObject {
 
 		if (dialogStatus == null) {
 			screeningSurveyStatus = false;
+			dataForMonitoringAvailable = false;
 			monitoringStatus = false;
 		} else {
 			screeningSurveyStatus = dialogStatus.isScreeningSurveyPerformed();
+			dataForMonitoringAvailable = dialogStatus
+					.isDataForMonitoringParticipationAvailable();
 			monitoringStatus = dialogStatus.isMonitoringPerformed();
 		}
 
@@ -166,6 +170,11 @@ public class Participant extends ModelObject {
 						: Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_FINISHED),
 				screeningSurveyStatus,
+				dataForMonitoringAvailable ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
+				dataForMonitoringAvailable,
 				monitoringStatus ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__FINISHED)
 						: Messages

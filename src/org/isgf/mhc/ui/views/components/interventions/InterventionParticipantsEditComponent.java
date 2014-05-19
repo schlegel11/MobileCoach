@@ -110,6 +110,15 @@ public class InterventionParticipantsEditComponent extends
 							return "inactive";
 						}
 					} else if (propertyId
+							.equals(UIParticipant.DATA_FOR_MONITORING_AVAILABLE)) {
+						val uiParticipant = getUIModelObjectFromTableByObjectId(
+								source, UIParticipant.class, itemId);
+						if (uiParticipant.isBooleanDataForMonitoringAvailable()) {
+							return "active";
+						} else {
+							return "inactive";
+						}
+					} else if (propertyId
 							.equals(UIParticipant.INTERVENTION_STATUS)) {
 						val uiParticipant = getUIModelObjectFromTableByObjectId(
 								source, UIParticipant.class, itemId);

@@ -174,7 +174,7 @@ public class FeedbackSlideEditComponent extends AbstractClosableEditComponent {
 		rulesTable = new Table();
 		rulesTable.setImmediate(false);
 		rulesTable.setWidth("100.0%");
-		rulesTable.setHeight("100px");
+		rulesTable.setHeight("150px");
 		mainLayout.addComponent(rulesTable);
 
 		// rulesButtonsLayout

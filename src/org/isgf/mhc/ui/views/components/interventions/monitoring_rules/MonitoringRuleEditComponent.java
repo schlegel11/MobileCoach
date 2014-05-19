@@ -138,7 +138,7 @@ public class MonitoringRuleEditComponent extends AbstractClosableEditComponent {
 				AdminMessageStrings.MONITORING_MESSAGE_EDITING__STORE_RESULT_TO_VARIABLE);
 		localize(
 				stopRuleExecutionIfTrueComboBox,
-				AdminMessageStrings.MONITORING_RULE_EDITING__STOP_RULE_EXECUTION_AND_SEND_MESSAGE_IF_TRUE);
+				AdminMessageStrings.MONITORING_RULE_EDITING__SEND_MESSAGE_IF_TRUE);
 		localize(
 				stopRuleExecutionAndFinishInterventionIfTrueComboBox,
 				AdminMessageStrings.MONITORING_RULE_EDITING__STOP_RULE_EXECUTION_AND_FINISH_INTERVENTION_IF_TRUE);
