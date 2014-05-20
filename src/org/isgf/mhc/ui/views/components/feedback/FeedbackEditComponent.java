@@ -150,7 +150,7 @@ public class FeedbackEditComponent extends AbstractClosableEditComponent {
 		feedbackSlidesTable = new Table();
 		feedbackSlidesTable.setImmediate(false);
 		feedbackSlidesTable.setWidth("100.0%");
-		feedbackSlidesTable.setHeight("150px");
+		feedbackSlidesTable.setHeight("300px");
 		mainLayout.addComponent(feedbackSlidesTable);
 
 		// buttonLayout
