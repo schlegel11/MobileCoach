@@ -21,6 +21,7 @@ import org.isgf.mhc.model.persistent.MonitoringRule;
 import org.isgf.mhc.model.persistent.Participant;
 import org.isgf.mhc.model.persistent.concepts.AbstractMonitoringRule;
 import org.isgf.mhc.tools.RuleEvaluator;
+import org.isgf.mhc.tools.StringHelpers;
 import org.isgf.mhc.tools.VariableStringReplacer;
 
 /**
@@ -332,9 +333,10 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				variablesManagerService.writeVariableValueOfParticipant(
 						participant,
 						rule.getStoreValueToVariableWithName(),
-						ruleResult.isCalculatedRule() ? String
-								.valueOf(ruleResult.getCalculatedRuleValue())
-								: ruleResult.getTextRuleValue());
+						ruleResult.isCalculatedRule() ? StringHelpers
+								.cleanDoubleValue(ruleResult
+										.getCalculatedRuleValue()) : ruleResult
+								.getTextRuleValue());
 			} catch (final Exception e) {
 				log.warn("Could not write variable value: {}", e.getMessage());
 			}

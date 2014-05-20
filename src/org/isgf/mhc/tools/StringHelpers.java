@@ -114,4 +114,15 @@ public class StringHelpers {
 				.replaceAll("[^a-z0-9\\s]", "");
 		return newValue;
 	}
+
+	/**
+	 * Creates a clean {@link String} of the given double value
+	 * 
+	 * @param doubleValue
+	 * @return
+	 */
+	public static String cleanDoubleValue(final double doubleValue) {
+		val stringValue = String.valueOf(doubleValue).replaceAll("\\.0+$", "");
+		return stringValue;
+	}
 }

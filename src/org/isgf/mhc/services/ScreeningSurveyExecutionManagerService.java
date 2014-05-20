@@ -758,8 +758,8 @@ public class ScreeningSurveyExecutionManagerService {
 								participant,
 								formerSlideRule
 										.getStoreValueToVariableWithName(),
-								ruleResult.isCalculatedRule() ? String
-										.valueOf(ruleResult
+								ruleResult.isCalculatedRule() ? StringHelpers
+										.cleanDoubleValue(ruleResult
 												.getCalculatedRuleValue())
 										: ruleResult.getTextRuleValue());
 					} else {
