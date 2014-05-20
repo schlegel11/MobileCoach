@@ -760,7 +760,7 @@ public class ScreeningSurveyAdministrationManagerService {
 				slide.setOrder(0);
 
 				val highestOrderSlide = databaseManagerService
-						.findOneSortedModelObject(ScreeningSurveySlide.class,
+						.findOneSortedModelObject(FeedbackSlide.class,
 								Queries.FEEDBACK_SLIDE__BY_FEEDBACK,
 								Queries.FEEDBACK_SLIDE__SORT_BY_ORDER_DESC,
 								slide.getFeedback());
