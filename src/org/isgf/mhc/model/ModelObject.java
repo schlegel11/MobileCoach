@@ -7,6 +7,7 @@ import java.util.NoSuchElementException;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
@@ -74,16 +75,18 @@ public abstract class ModelObject {
 	 */
 	@JsonIgnore
 	public String toJSONString() {
-		val stringWriter = new StringWriter();
+		synchronized (objectMapper) {
+			val stringWriter = new StringWriter();
 
-		try {
-			objectMapper.writeValue(stringWriter, this);
-		} catch (final IOException e) {
-			log.warn("Could not create JSON of {}!", this.getClass());
-			return "{ \"Error\" : \"JSON object could not be serialized\" }";
+			try {
+				objectMapper.writeValue(stringWriter, this);
+			} catch (final IOException e) {
+				log.warn("Could not create JSON of {}!", this.getClass());
+				return "{ \"Error\" : \"JSON object could not be serialized\" }";
+			}
+
+			return stringWriter.toString();
 		}
-
-		return stringWriter.toString();
 	}
 
 	/*
@@ -136,13 +139,15 @@ public abstract class ModelObject {
 	 */
 	@JsonIgnore
 	protected void save() {
-		final MongoCollection collection = db.getCollection(this.getClass()
-				.getSimpleName());
+		synchronized (db) {
+			final MongoCollection collection = db.getCollection(this.getClass()
+					.getSimpleName());
 
-		collection.save(this);
+			collection.save(this);
 
-		log.debug("Saved {} with id {}: {}", this.getClass().getSimpleName(),
-				id, this);
+			log.debug("Saved {} with id {}: {}", this.getClass()
+					.getSimpleName(), id, this);
+		}
 	}
 
 	/**
@@ -158,20 +163,22 @@ public abstract class ModelObject {
 	@JsonIgnore
 	protected static final <ModelObjectSubclass extends ModelObject> ModelObjectSubclass get(
 			final Class<ModelObjectSubclass> clazz, final ObjectId id) {
-		final MongoCollection collection = db.getCollection(clazz
-				.getSimpleName());
+		synchronized (db) {
+			final MongoCollection collection = db.getCollection(clazz
+					.getSimpleName());
 
-		ModelObjectSubclass modelObject = null;
-		try {
-			modelObject = collection.findOne(id).as(clazz);
-			log.debug("Retrieved {} with id {}: {}", clazz.getSimpleName(), id,
-					modelObject);
-		} catch (final Exception e) {
-			log.warn("Could not retrieve {} with id {}: {}",
-					clazz.getSimpleName(), id, e.getMessage());
+			ModelObjectSubclass modelObject = null;
+			try {
+				modelObject = collection.findOne(id).as(clazz);
+				log.debug("Retrieved {} with id {}: {}", clazz.getSimpleName(),
+						id, modelObject);
+			} catch (final Exception e) {
+				log.warn("Could not retrieve {} with id {}: {}",
+						clazz.getSimpleName(), id, e.getMessage());
+			}
+
+			return modelObject;
 		}
-
-		return modelObject;
 	}
 
 	/**
@@ -187,29 +194,32 @@ public abstract class ModelObject {
 			return;
 		}
 
-		final MongoCollection collection = db.getCollection(modelObject
-				.getClass().getSimpleName());
+		synchronized (db) {
+			final MongoCollection collection = db.getCollection(modelObject
+					.getClass().getSimpleName());
 
-		try {
-			if (modelObject != null) {
-				log.debug("Perform additionnal deletion steps on class {}...",
-						modelObject.getClass().getSimpleName());
-				modelObject.performOnDelete();
-				log.debug("Additionnal deletion steps done on class {}",
-						modelObject.getClass().getSimpleName());
+			try {
+				if (modelObject != null) {
+					log.debug(
+							"Perform additionnal deletion steps on class {}...",
+							modelObject.getClass().getSimpleName());
+					modelObject.performOnDelete();
+					log.debug("Additionnal deletion steps done on class {}",
+							modelObject.getClass().getSimpleName());
+				}
+			} catch (final Exception e) {
+				log.warn("Error at recursive deletion: {}", e.getMessage());
 			}
-		} catch (final Exception e) {
-			log.warn("Error at recursive deletion: {}", e.getMessage());
-		}
 
-		try {
-			collection.remove(modelObject.getId());
-			log.debug("Removed {} with id {}", modelObject.getClass()
-					.getSimpleName(), modelObject.getId());
-		} catch (final Exception e) {
-			log.warn("Could not delete {} with id {}: {}", modelObject
-					.getClass().getSimpleName(), modelObject.getId(), e
-					.getMessage());
+			try {
+				collection.remove(modelObject.getId());
+				log.debug("Removed {} with id {}", modelObject.getClass()
+						.getSimpleName(), modelObject.getId());
+			} catch (final Exception e) {
+				log.warn("Could not delete {} with id {}: {}", modelObject
+						.getClass().getSimpleName(), modelObject.getId(), e
+						.getMessage());
+			}
 		}
 	}
 
@@ -224,28 +234,31 @@ public abstract class ModelObject {
 	@JsonIgnore
 	protected static final void delete(
 			final Class<? extends ModelObject> clazz, final ObjectId id) {
-		final MongoCollection collection = db.getCollection(clazz
-				.getSimpleName());
+		synchronized (db) {
+			final MongoCollection collection = db.getCollection(clazz
+					.getSimpleName());
 
-		try {
-			final ModelObject modelObject = get(clazz, id);
-			if (modelObject != null) {
-				log.debug("Perform additionnal deletion steps on class {}...",
-						modelObject.getClass().getSimpleName());
-				modelObject.performOnDelete();
-				log.debug("Additionnal deletion steps done on class {}",
-						modelObject.getClass().getSimpleName());
+			try {
+				final ModelObject modelObject = get(clazz, id);
+				if (modelObject != null) {
+					log.debug(
+							"Perform additionnal deletion steps on class {}...",
+							modelObject.getClass().getSimpleName());
+					modelObject.performOnDelete();
+					log.debug("Additionnal deletion steps done on class {}",
+							modelObject.getClass().getSimpleName());
+				}
+			} catch (final Exception e) {
+				log.warn("Error at recursive deletion: {}", e.getMessage());
 			}
-		} catch (final Exception e) {
-			log.warn("Error at recursive deletion: {}", e.getMessage());
-		}
 
-		try {
-			collection.remove(id);
-			log.debug("Removed {} with id {}", clazz.getSimpleName(), id);
-		} catch (final Exception e) {
-			log.warn("Could not delete {} with id {}: {}",
-					clazz.getSimpleName(), id, e.getMessage());
+			try {
+				collection.remove(id);
+				log.debug("Removed {} with id {}", clazz.getSimpleName(), id);
+			} catch (final Exception e) {
+				log.warn("Could not delete {} with id {}: {}",
+						clazz.getSimpleName(), id, e.getMessage());
+			}
 		}
 	}
 
@@ -277,29 +290,34 @@ public abstract class ModelObject {
 	 *         found
 	 */
 	@JsonIgnore
+	@Synchronized
 	protected static final <ModelObjectSubclass extends ModelObject> ModelObjectSubclass findOne(
 			final Class<ModelObjectSubclass> clazz, final String query,
 			final Object... parameters) {
-		final MongoCollection collection = db.getCollection(clazz
-				.getSimpleName());
+		synchronized (db) {
+			final MongoCollection collection = db.getCollection(clazz
+					.getSimpleName());
 
-		ModelObjectSubclass modelObject = null;
-		try {
-			if (parameters != null && parameters.length > 0) {
-				modelObject = collection.findOne(query, parameters).as(clazz);
-			} else {
-				modelObject = collection.findOne(query).as(clazz);
+			ModelObjectSubclass modelObject = null;
+			try {
+				if (parameters != null && parameters.length > 0) {
+					modelObject = collection.findOne(query, parameters).as(
+							clazz);
+				} else {
+					modelObject = collection.findOne(query).as(clazz);
+				}
+				log.debug(
+						"Retrieved {} with find one query {} and parameters {}: {}",
+						clazz.getSimpleName(), query, parameters, modelObject);
+			} catch (final Exception e) {
+				log.warn(
+						"Could not retrieve {} with find one query {} and parameters {}: {}",
+						clazz.getSimpleName(), query, parameters,
+						e.getMessage());
 			}
-			log.debug(
-					"Retrieved {} with find one query {} and parameters {}: {}",
-					clazz.getSimpleName(), query, parameters, modelObject);
-		} catch (final Exception e) {
-			log.warn(
-					"Could not retrieve {} with find one query {} and parameters {}: {}",
-					clazz.getSimpleName(), query, parameters, e.getMessage());
-		}
 
-		return modelObject;
+			return modelObject;
+		}
 	}
 
 	/**
@@ -318,38 +336,43 @@ public abstract class ModelObject {
 	 *         found
 	 */
 	@JsonIgnore
+	@Synchronized
 	protected static final <ModelObjectSubclass extends ModelObject> ModelObjectSubclass findOneSorted(
 			final Class<ModelObjectSubclass> clazz, final String query,
 			final String sort, final Object... parameters) {
-		final MongoCollection collection = db.getCollection(clazz
-				.getSimpleName());
+		synchronized (db) {
+			final MongoCollection collection = db.getCollection(clazz
+					.getSimpleName());
 
-		ModelObjectSubclass modelObject = null;
-		try {
+			ModelObjectSubclass modelObject = null;
 			try {
-				if (parameters != null && parameters.length > 0) {
-					modelObject = collection.find(query, parameters).sort(sort)
-							.limit(1).as(clazz).iterator().next();
-				} else {
-					modelObject = collection.find(query).sort(sort).limit(1)
-							.as(clazz).iterator().next();
+				try {
+					if (parameters != null && parameters.length > 0) {
+						modelObject = collection.find(query, parameters)
+								.sort(sort).limit(1).as(clazz).iterator()
+								.next();
+					} else {
+						modelObject = collection.find(query).sort(sort)
+								.limit(1).as(clazz).iterator().next();
+					}
+				} catch (final NullPointerException f) {
+					modelObject = null;
+				} catch (final NoSuchElementException f) {
+					modelObject = null;
 				}
-			} catch (final NullPointerException f) {
-				modelObject = null;
-			} catch (final NoSuchElementException f) {
-				modelObject = null;
+				log.debug(
+						"Retrieved {} with find one query {}, sort query {} and parameters {}: {}",
+						clazz.getSimpleName(), query, sort, parameters,
+						modelObject);
+			} catch (final Exception e) {
+				log.warn(
+						"Could not retrieve {} with find one query {}, sort query {} and parameters {}: {}",
+						clazz.getSimpleName(), query, sort, parameters,
+						e.getMessage());
 			}
-			log.debug(
-					"Retrieved {} with find one query {}, sort query {} and parameters {}: {}",
-					clazz.getSimpleName(), query, sort, parameters, modelObject);
-		} catch (final Exception e) {
-			log.warn(
-					"Could not retrieve {} with find one query {}, sort query {} and parameters {}: {}",
-					clazz.getSimpleName(), query, sort, parameters,
-					e.getMessage());
-		}
 
-		return modelObject;
+			return modelObject;
+		}
 	}
 
 	/**
@@ -365,28 +388,32 @@ public abstract class ModelObject {
 	 *         {@link Iterable} (which contains no items if none has been found)
 	 */
 	@JsonIgnore
+	@Synchronized
 	protected static final <ModelObjectSubclass extends ModelObject> Iterable<ModelObjectSubclass> find(
 			final Class<ModelObjectSubclass> clazz, final String query,
 			final Object... parameters) {
-		final MongoCollection collection = db.getCollection(clazz
-				.getSimpleName());
+		synchronized (db) {
+			final MongoCollection collection = db.getCollection(clazz
+					.getSimpleName());
 
-		Iterable<ModelObjectSubclass> iteratable = null;
-		try {
-			if (parameters != null && parameters.length > 0) {
-				iteratable = collection.find(query, parameters).as(clazz);
-			} else {
-				iteratable = collection.find(query).as(clazz);
+			Iterable<ModelObjectSubclass> iteratable = null;
+			try {
+				if (parameters != null && parameters.length > 0) {
+					iteratable = collection.find(query, parameters).as(clazz);
+				} else {
+					iteratable = collection.find(query).as(clazz);
+				}
+				log.debug("Retrieved {} with find query {} and parameters {}",
+						clazz.getSimpleName(), query, parameters);
+			} catch (final Exception e) {
+				log.warn(
+						"Could not retrieve {} with find query {} and parameters {}: {}",
+						clazz.getSimpleName(), query, parameters,
+						e.getMessage());
 			}
-			log.debug("Retrieved {} with find query {} and parameters {}",
-					clazz.getSimpleName(), query, parameters);
-		} catch (final Exception e) {
-			log.warn(
-					"Could not retrieve {} with find query {} and parameters {}: {}",
-					clazz.getSimpleName(), query, parameters, e.getMessage());
-		}
 
-		return iteratable;
+			return iteratable;
+		}
 	}
 
 	/**
@@ -404,30 +431,33 @@ public abstract class ModelObject {
 	 *         {@link Iterable} (which contains no items if none has been found)
 	 */
 	@JsonIgnore
+	@Synchronized
 	protected static final <ModelObjectSubclass extends ModelObject> Iterable<ModelObjectSubclass> findSorted(
 			final Class<ModelObjectSubclass> clazz, final String query,
 			final String sort, final Object... parameters) {
-		final MongoCollection collection = db.getCollection(clazz
-				.getSimpleName());
+		synchronized (db) {
+			final MongoCollection collection = db.getCollection(clazz
+					.getSimpleName());
 
-		Iterable<ModelObjectSubclass> iteratable = null;
-		try {
-			if (parameters != null && parameters.length > 0) {
-				iteratable = collection.find(query, parameters).sort(sort)
-						.as(clazz);
-			} else {
-				iteratable = collection.find(query).sort(sort).as(clazz);
+			Iterable<ModelObjectSubclass> iteratable = null;
+			try {
+				if (parameters != null && parameters.length > 0) {
+					iteratable = collection.find(query, parameters).sort(sort)
+							.as(clazz);
+				} else {
+					iteratable = collection.find(query).sort(sort).as(clazz);
+				}
+				log.debug(
+						"Retrieved {} with find query {}, sort query {} and parameters {}",
+						clazz.getSimpleName(), query, sort, parameters);
+			} catch (final Exception e) {
+				log.warn(
+						"Could not retrieve {} with find query {}, sort query {} and parameters {}: {}",
+						clazz.getSimpleName(), query, sort, parameters,
+						e.getMessage());
 			}
-			log.debug(
-					"Retrieved {} with find query {}, sort query {} and parameters {}",
-					clazz.getSimpleName(), query, sort, parameters);
-		} catch (final Exception e) {
-			log.warn(
-					"Could not retrieve {} with find query {}, sort query {} and parameters {}: {}",
-					clazz.getSimpleName(), query, sort, parameters,
-					e.getMessage());
-		}
 
-		return iteratable;
+			return iteratable;
+		}
 	}
 }

@@ -168,5 +168,7 @@ public class SimulatorComponentWithController extends SimulatorComponent
 				message);
 
 		beanContainer.addItem(uiSimulatedMessage);
+
+		getAdminUI().push();
 	}
 }
