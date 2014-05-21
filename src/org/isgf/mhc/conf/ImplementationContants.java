@@ -60,4 +60,11 @@ public class ImplementationContants {
 	public static final String	REGULAR_EXPRESSION_TO_VALIDATE_RULE								= "^[\\$a-zA-Z0-9_\\+\\-%*/^().,]*$";
 	public static final String	REGULAR_EXPRESSION_TO_VALIDATE_VARIABLE_NAME					= "^\\$[a-zA-Z0-9_]*$";
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_VARIABLES_IN_STRING					= "\\$[a-zA-Z0-9_]+";
+	public static final String	VARIABLE_MATCH_MODIFIER											= "#";
+	public static final String	REGULAR_EXPRESSION_TO_MATCH_MODIFIED_VARIABLES_IN_STRING		= VARIABLE_MATCH_MODIFIER
+																										+ "[a-zA-Z0-9_]+"
+																										+ VARIABLE_MATCH_MODIFIER;
+	public static final String	VARIABLE_VALUE_MODIFIER_START									= "{";
+	public static final String	VARIABLE_VALUE_MODIFIER_END										= "}";
+	public static final String	REGULAR_EXPRESSION_TO_MATCH_VALUE_MODIFIER						= "\\{[^\\}]+\\}";
 }
