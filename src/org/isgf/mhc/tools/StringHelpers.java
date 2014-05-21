@@ -86,10 +86,16 @@ public class StringHelpers {
 	 * @return
 	 */
 	public static String cleanPhoneNumber(final String phoneNumber) {
-		val newValue = "00"
-				+ phoneNumber.trim().replaceAll("[^\\d]", "")
-						.replaceAll("^0+", "");
-		return newValue;
+		String numberWithoutZeros = phoneNumber.trim().replaceAll("[^\\d]", "")
+				.replaceAll("^0+", "");
+
+		// TODO Need to be more international using the configuration (at best:
+		// per intervention project)
+		if (!numberWithoutZeros.startsWith("4")) {
+			numberWithoutZeros = "41" + numberWithoutZeros;
+		}
+
+		return "00" + numberWithoutZeros;
 	}
 
 	/**
