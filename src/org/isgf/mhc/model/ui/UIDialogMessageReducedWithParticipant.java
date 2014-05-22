@@ -22,6 +22,7 @@ public class UIDialogMessageReducedWithParticipant extends UIModelObject {
 	public static final String	SENT_TIMESTAMP				= "sentTimestamp";
 
 	public static final String	ANSWER						= "answer";
+	public static final String	RAW_ANSWER					= "rawAnswer";
 	public static final String	ANSWER_RECEIVED_TIMESTAMP	= "answerReceivedTimestamp";
 
 	@PropertyId(PARTICIPANT_ID)
@@ -39,12 +40,15 @@ public class UIDialogMessageReducedWithParticipant extends UIModelObject {
 	@PropertyId(ANSWER)
 	private String				answer;
 
+	@PropertyId(RAW_ANSWER)
+	private String				rawAnswer;
+
 	@PropertyId(ANSWER_RECEIVED_TIMESTAMP)
 	private Date				answerReceivedTimestamp;
 
 	public static Object[] getVisibleColumns() {
 		return new Object[] { PARTICIPANT_ID, PARTICIPANT_NAME, STATUS,
-				SENT_TIMESTAMP, ANSWER, ANSWER_RECEIVED_TIMESTAMP };
+				SENT_TIMESTAMP, ANSWER, RAW_ANSWER, ANSWER_RECEIVED_TIMESTAMP };
 	}
 
 	public static String[] getColumnHeaders() {
@@ -54,6 +58,7 @@ public class UIDialogMessageReducedWithParticipant extends UIModelObject {
 				localize(AdminMessageStrings.UI_COLUMNS__STATUS),
 				localize(AdminMessageStrings.UI_COLUMNS__SENT_TIMESTAMP),
 				localize(AdminMessageStrings.UI_COLUMNS__ANSWER),
+				localize(AdminMessageStrings.UI_COLUMNS__RAW_ANSWER),
 				localize(AdminMessageStrings.UI_COLUMNS__ANSWER_RECEIVED_TIMESTAMP) };
 	}
 

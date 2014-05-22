@@ -104,6 +104,13 @@ public class DialogMessage extends ModelObject {
 	private String						answerReceived;
 
 	/**
+	 * The uncleaned response retrieved from the {@link Participant}
+	 */
+	@Getter
+	@Setter
+	private String						answerReceivedRaw;
+
+	/**
 	 * Marker showing if a response to a {@link DialogMessage} can not be
 	 * automatically processed by the system
 	 */
@@ -168,6 +175,9 @@ public class DialogMessage extends ModelObject {
 				answerReceived == null || answerReceived.equals("") ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 						: answerReceived,
+				answerReceivedRaw == null || answerReceivedRaw.equals("") ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+						: answerReceivedRaw,
 				StringHelpers.createStringTimeStamp(answerReceivedTimestamp),
 				manuallySent ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
@@ -194,12 +204,18 @@ public class DialogMessage extends ModelObject {
 	public UIDialogMessageReducedWithParticipant toUIDialogMessageReducedWithParticipant(
 			final String participantId, final String participantName) {
 		final val dialogMessage = new UIDialogMessageReducedWithParticipant(
-				participantId, participantName, status.toString(),
+				participantId,
+				participantName,
+				status.toString(),
 				sentTimestamp <= 0 ? null : new Date(sentTimestamp),
 				answerReceived == null || answerReceived.equals("") ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: answerReceived, answerReceivedTimestamp <= 0 ? null
-						: new Date(answerReceivedTimestamp));
+						: answerReceived,
+				answerReceivedRaw == null || answerReceivedRaw.equals("") ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+						: answerReceivedRaw,
+				answerReceivedTimestamp <= 0 ? null : new Date(
+						answerReceivedTimestamp));
 
 		dialogMessage.setRelatedModelObject(this);
 

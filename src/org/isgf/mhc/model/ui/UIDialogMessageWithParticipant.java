@@ -23,6 +23,7 @@ public class UIDialogMessageWithParticipant extends UIModelObject {
 	public static final String	SENT_TIMESTAMP				= "sentTimestamp";
 
 	public static final String	ANSWER						= "answer";
+	public static final String	RAW_ANSWER					= "rawAnswer";
 	public static final String	ANSWER_RECEIVED_TIMESTAMP	= "answerReceivedTimestamp";
 
 	public static final String	MANUALLY_SENT				= "manuallySent";
@@ -52,6 +53,9 @@ public class UIDialogMessageWithParticipant extends UIModelObject {
 	@PropertyId(ANSWER)
 	private String				answer;
 
+	@PropertyId(RAW_ANSWER)
+	private String				rawAnswer;
+
 	@PropertyId(ANSWER_RECEIVED_TIMESTAMP)
 	private String				answerReceivedTimestamp;
 
@@ -63,7 +67,8 @@ public class UIDialogMessageWithParticipant extends UIModelObject {
 	public static Object[] getVisibleColumns() {
 		return new Object[] { PARTICIPANT_ID, PARTICIPANT_NAME, ORDER, STATUS,
 				MESSAGE, SHOULD_BE_SENT_TIMESTAMP, SENT_TIMESTAMP, ANSWER,
-				ANSWER_RECEIVED_TIMESTAMP, MANUALLY_SENT, MEDIA_CONTENT_VIEWED };
+				RAW_ANSWER, ANSWER_RECEIVED_TIMESTAMP, MANUALLY_SENT,
+				MEDIA_CONTENT_VIEWED };
 	}
 
 	public static String[] getColumnHeaders() {
@@ -76,6 +81,7 @@ public class UIDialogMessageWithParticipant extends UIModelObject {
 				localize(AdminMessageStrings.UI_COLUMNS__SHOULD_BE_SENT_TIMESTAMP),
 				localize(AdminMessageStrings.UI_COLUMNS__SENT_TIMESTAMP),
 				localize(AdminMessageStrings.UI_COLUMNS__ANSWER),
+				localize(AdminMessageStrings.UI_COLUMNS__RAW_ANSWER),
 				localize(AdminMessageStrings.UI_COLUMNS__ANSWER_RECEIVED_TIMESTAMP),
 				localize(AdminMessageStrings.UI_COLUMNS__MANUALLY_SENT),
 				localize(AdminMessageStrings.UI_COLUMNS__MEDIA_CONTENT_VIEWED) };

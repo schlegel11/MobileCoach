@@ -378,7 +378,7 @@ public class InterventionAdministrationManagerService {
 	public MonitoringMessageGroup monitoringMessageGroupCreate(
 			final String groupName, final ObjectId interventionId) {
 		val monitoringMessageGroup = new MonitoringMessageGroup(interventionId,
-				groupName, 0, false, false, false);
+				groupName, null, 0, false, false, false);
 
 		if (monitoringMessageGroup.getName().equals("")) {
 			monitoringMessageGroup
@@ -464,6 +464,18 @@ public class InterventionAdministrationManagerService {
 					.setName(ImplementationContants.DEFAULT_OBJECT_NAME);
 		} else {
 			monitoringMessageGroup.setName(newName);
+		}
+
+		databaseManagerService.saveModelObject(monitoringMessageGroup);
+	}
+
+	public void monitoringMessageGroupChangeValidationExpression(
+			final MonitoringMessageGroup monitoringMessageGroup,
+			final String newExpression) {
+		if (newExpression.equals("")) {
+			monitoringMessageGroup.setValidationExpression(null);
+		} else {
+			monitoringMessageGroup.setValidationExpression(newExpression);
 		}
 
 		databaseManagerService.saveModelObject(monitoringMessageGroup);

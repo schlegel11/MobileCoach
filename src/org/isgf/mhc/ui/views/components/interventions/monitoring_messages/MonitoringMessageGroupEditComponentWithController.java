@@ -8,6 +8,7 @@ import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.model.persistent.MonitoringMessage;
 import org.isgf.mhc.model.persistent.MonitoringMessageGroup;
 import org.isgf.mhc.model.ui.UIMonitoringMessage;
+import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -73,6 +74,10 @@ public class MonitoringMessageGroupEditComponentWithController extends
 				monitoringMessageGroup.isSendInRandomOrder());
 		getSendSamePositionIfSendingAsReplyCheckBox().setValue(
 				monitoringMessageGroup.isSendSamePositionIfSendingAsReply());
+
+		// validation expression
+		getValidationExpressionTextFieldComponent().setValue(
+				monitoringMessageGroup.getValidationExpression());
 
 		// handle table selection change
 		monitoringMessageTable
@@ -150,6 +155,8 @@ public class MonitoringMessageGroupEditComponentWithController extends
 		getMoveUpButton().addClickListener(buttonClickListener);
 		getMoveDownButton().addClickListener(buttonClickListener);
 		getDeleteButton().addClickListener(buttonClickListener);
+		getValidationExpressionTextFieldComponent().getButton()
+				.addClickListener(buttonClickListener);
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
@@ -165,6 +172,9 @@ public class MonitoringMessageGroupEditComponentWithController extends
 				moveMessage(false);
 			} else if (event.getButton() == getDeleteButton()) {
 				deleteMessage();
+			} else if (event.getButton() == getValidationExpressionTextFieldComponent()
+					.getButton()) {
+				editValidationExpression();
 			}
 		}
 	}
@@ -273,5 +283,33 @@ public class MonitoringMessageGroupEditComponentWithController extends
 				closeWindow();
 			}
 		}, null);
+	}
+
+	public void editValidationExpression() {
+		log.debug("Edit validation expression");
+
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_VALIDATION_EXPRESSION,
+				monitoringMessageGroup.getValidationExpression(), null,
+				new ShortStringEditComponent(),
+				new ExtendableButtonClickListener() {
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						// Adapt UI
+						getInterventionAdministrationManagerService()
+								.monitoringMessageGroupChangeValidationExpression(
+										monitoringMessageGroup,
+										getStringValue());
+
+						getValidationExpressionTextFieldComponent().setValue(
+								monitoringMessageGroup
+										.getValidationExpression());
+						getAdminUI()
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__VALIDATION_EXPRESSION_UPDATED);
+
+						closeWindow();
+					}
+				}, null);
 	}
 }

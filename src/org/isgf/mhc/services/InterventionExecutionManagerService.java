@@ -22,6 +22,7 @@ import org.isgf.mhc.model.persistent.Intervention;
 import org.isgf.mhc.model.persistent.MediaObject;
 import org.isgf.mhc.model.persistent.MediaObjectParticipantShortURL;
 import org.isgf.mhc.model.persistent.MonitoringMessage;
+import org.isgf.mhc.model.persistent.MonitoringMessageGroup;
 import org.isgf.mhc.model.persistent.MonitoringRule;
 import org.isgf.mhc.model.persistent.Participant;
 import org.isgf.mhc.model.persistent.types.DialogMessageStatusTypes;
@@ -177,7 +178,7 @@ public class InterventionExecutionManagerService {
 		log.debug("Create message and prepare for sending");
 		val dialogMessage = new DialogMessage(participant.getId(), 0,
 				DialogMessageStatusTypes.PREPARED_FOR_SENDING, message,
-				timestampToSendMessage, -1, answerExpected, -1, -1, null,
+				timestampToSendMessage, -1, answerExpected, -1, -1, null, null,
 				false, relatedMonitoringRule == null ? null
 						: relatedMonitoringRule.getId(),
 				relatedMonitoringMessage == null ? null
@@ -238,6 +239,18 @@ public class InterventionExecutionManagerService {
 				DialogMessage.class, dialogMessageId);
 
 		dialogMessage.setMediaContentViewed(true);
+
+		databaseManagerService.saveModelObject(dialogMessage);
+	}
+
+	private void setDialogMessageSetNotAutomaticallyProcessable(
+			final ObjectId dialogMessageId) {
+		log.debug("Marking dialog message {} as not automatically parsable");
+
+		val dialogMessage = databaseManagerService.getModelObjectById(
+				DialogMessage.class, dialogMessageId);
+
+		dialogMessage.setAnswerNotAutomaticallyProcessable(true);
 
 		databaseManagerService.saveModelObject(dialogMessage);
 	}
@@ -318,7 +331,8 @@ public class InterventionExecutionManagerService {
 		val dialogMessage = new DialogMessage(participantId, 0,
 				DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY, "", -1, -1,
 				false, -1, receivedMessage.getReceivedTimestamp(),
-				receivedMessage.getMessage(), true, null, null, false, false);
+				receivedMessage.getMessage(), receivedMessage.getMessage(),
+				true, null, null, false, false);
 
 		val highestOrderMessage = databaseManagerService
 				.findOneSortedModelObject(DialogMessage.class,
@@ -372,7 +386,9 @@ public class InterventionExecutionManagerService {
 			case SENT_AND_ANSWERED_BY_PARTICIPANT:
 				// setting timestamp and answer received
 				dialogMessage.setAnswerReceivedTimestamp(timeStampOfEvent);
-				dialogMessage.setAnswerReceived(dataOfEvent);
+				dialogMessage.setAnswerReceived(StringHelpers
+						.cleanReceivedMessageString(dataOfEvent));
+				dialogMessage.setAnswerReceivedRaw(dataOfEvent);
 				break;
 			case SENT_AND_ANSWERED_AND_PROCESSED:
 				// no changes necessary
@@ -423,7 +439,7 @@ public class InterventionExecutionManagerService {
 				reactOnAnsweredMessages ? "answered" : "unanswered");
 		val participants = getAllParticipantsRelevantForAnsweredInTimeChecksAndMonitoringSheduling();
 
-		for (val participant : participants) {
+		participantLoop: for (val participant : participants) {
 
 			// Get relevant messages of participant
 			Iterable<DialogMessage> dialogMessages;
@@ -449,16 +465,31 @@ public class InterventionExecutionManagerService {
 							.getModelObjectById(MonitoringMessage.class,
 									dialogMessage.getRelatedMonitoringMessage());
 
-					if (relatedMonitoringMessage != null
-							&& relatedMonitoringMessage
-									.getStoreValueToVariableWithName() != null
-							&& !relatedMonitoringMessage
-									.getStoreValueToVariableWithName().equals(
-											"")) {
+					// Store value to variable (which is only relevant if a
+					// reply is expected = related monitoring message is
+					// available
+					if (relatedMonitoringMessage != null) {
+						val cleanedMessageValue = dialogMessage
+								.getAnswerReceived();
 
-						val cleanedMessageValue = StringHelpers
-								.cleanReceivedMessageString(dialogMessage
-										.getAnswerReceived());
+						// Check if result is in general automatically
+						// processable
+						val relatedMonitoringMessageGroup = databaseManagerService
+								.getModelObjectById(
+										MonitoringMessageGroup.class,
+										relatedMonitoringMessage
+												.getMonitoringMessageGroup());
+						if (relatedMonitoringMessageGroup
+								.getValidationExpression() != null
+								&& !cleanedMessageValue
+										.matches(relatedMonitoringMessageGroup
+												.getValidationExpression())) {
+							setDialogMessageSetNotAutomaticallyProcessable(dialogMessage
+									.getId());
+
+							continue participantLoop;
+						}
+
 						log.debug(
 								"Store value '{}' (cleaned: '{}') of message to '{}' for participant {}",
 								dialogMessage.getAnswerReceived(),
@@ -466,12 +497,18 @@ public class InterventionExecutionManagerService {
 										.getStoreValueToVariableWithName(),
 								participant.getId());
 						try {
-							variablesManagerService
-									.writeVariableValueOfParticipant(
-											participant,
-											relatedMonitoringMessage
-													.getStoreValueToVariableWithName(),
-											cleanedMessageValue);
+							if (relatedMonitoringMessage
+									.getStoreValueToVariableWithName() != null
+									&& !relatedMonitoringMessage
+											.getStoreValueToVariableWithName()
+											.equals("")) {
+								variablesManagerService
+										.writeVariableValueOfParticipant(
+												participant,
+												relatedMonitoringMessage
+														.getStoreValueToVariableWithName(),
+												cleanedMessageValue);
+							}
 							variablesManagerService
 									.writeVariableValueOfParticipant(
 											participant,
@@ -485,6 +522,11 @@ public class InterventionExecutionManagerService {
 									relatedMonitoringMessage
 											.getStoreValueToVariableWithName(),
 									participant.getId(), e.getMessage());
+
+							setDialogMessageSetNotAutomaticallyProcessable(dialogMessage
+									.getId());
+
+							continue participantLoop;
 						}
 					}
 				}
@@ -963,7 +1005,16 @@ public class InterventionExecutionManagerService {
 						if (dialogStatus != null
 								&& dialogStatus.isScreeningSurveyPerformed()
 								&& !dialogStatus.isMonitoringPerformed()) {
-							relevantParticipants.add(participant);
+							val dialogMessagesNotProcessable = databaseManagerService
+									.findModelObjects(
+											DialogMessage.class,
+											Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_NOT_AUTOMATICALLY_PROCESSABLE,
+											participant.getId(), true);
+
+							if (!dialogMessagesNotProcessable.iterator()
+									.hasNext()) {
+								relevantParticipants.add(participant);
+							}
 						}
 					}
 				}

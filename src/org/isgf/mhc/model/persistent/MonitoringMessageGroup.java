@@ -44,6 +44,13 @@ public class MonitoringMessageGroup extends ModelObject {
 	private String		name;
 
 	/**
+	 * Regular expression to validate result
+	 */
+	@Getter
+	@Setter
+	private String		validationExpression;
+
+	/**
 	 * The position of the {@link MonitoringMessageGroup} compared to all other
 	 * {@link MonitoringMessageGroup}s
 	 */
