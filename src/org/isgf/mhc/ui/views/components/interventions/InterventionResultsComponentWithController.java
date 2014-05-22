@@ -42,14 +42,14 @@ import com.vaadin.ui.Button.ClickEvent;
 public class InterventionResultsComponentWithController extends
 		InterventionResultsComponent {
 
-	private final Intervention									intervention;
+	private final Intervention												intervention;
 
-	private Collection<ObjectId>								selectedUIParticipantsIds;
+	private Collection<ObjectId>											selectedUIParticipantsIds;
 
-	private final BeanContainer<ObjectId, UIParticipant>		beanContainer;
+	private final BeanContainer<ObjectId, UIParticipant>					beanContainer;
 
-	private final BeanContainer<Integer, UIVariableWithParticipant>	variablesBeanContainer;
-	private final BeanContainer<Integer, UIDialogMessageWithParticipant>		messageDialogBeanContainer;
+	private final BeanContainer<Integer, UIVariableWithParticipant>			variablesBeanContainer;
+	private final BeanContainer<Integer, UIDialogMessageWithParticipant>	messageDialogBeanContainer;
 
 	public InterventionResultsComponentWithController(
 			final Intervention intervention) {
@@ -105,11 +105,13 @@ public class InterventionResultsComponentWithController extends
 				UIDialogMessageWithParticipant.class);
 
 		messageDialogTable.setContainerDataSource(messageDialogBeanContainer);
-		messageDialogTable.setSortContainerPropertyId(UIDialogMessageWithParticipant
-				.getSortColumn());
+		messageDialogTable
+				.setSortContainerPropertyId(UIDialogMessageWithParticipant
+						.getSortColumn());
 		messageDialogTable.setVisibleColumns(UIDialogMessageWithParticipant
 				.getVisibleColumns());
-		messageDialogTable.setColumnHeaders(UIDialogMessageWithParticipant.getColumnHeaders());
+		messageDialogTable.setColumnHeaders(UIDialogMessageWithParticipant
+				.getColumnHeaders());
 
 		// handle selection change
 		participantsTable.addValueChangeListener(new ValueChangeListener() {
@@ -279,7 +281,18 @@ public class InterventionResultsComponentWithController extends
 														.equals("") ? Messages
 														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 														: participant
-																.getNickname()));
+																.getNickname(),
+												participant.getOrganization()
+														.equals("") ? Messages
+														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+														: participant
+																.getOrganization(),
+												participant
+														.getOrganizationUnit()
+														.equals("") ? Messages
+														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+														: participant
+																.getOrganizationUnit()));
 			}
 		}
 

@@ -15,6 +15,8 @@ public class UIDialogMessageWithParticipant extends UIModelObject {
 	// NOTE: The String values have to fit the name of the variables
 	public static final String	PARTICIPANT_ID				= "participantId";
 	public static final String	PARTICIPANT_NAME			= "participantName";
+	public static final String	ORGANIZATION				= "organization";
+	public static final String	ORGANIZATION_UNIT			= "organizationUnit";
 	public static final String	ORDER						= "order";
 	public static final String	STATUS						= "status";
 
@@ -34,6 +36,12 @@ public class UIDialogMessageWithParticipant extends UIModelObject {
 
 	@PropertyId(PARTICIPANT_NAME)
 	private String				participantName;
+
+	@PropertyId(ORGANIZATION)
+	private String				organization;
+
+	@PropertyId(ORGANIZATION_UNIT)
+	private String				organizationUnit;
 
 	@PropertyId(ORDER)
 	private String				order;
@@ -65,16 +73,18 @@ public class UIDialogMessageWithParticipant extends UIModelObject {
 	private String				mediaContentViewed;
 
 	public static Object[] getVisibleColumns() {
-		return new Object[] { PARTICIPANT_ID, PARTICIPANT_NAME, ORDER, STATUS,
-				MESSAGE, SHOULD_BE_SENT_TIMESTAMP, SENT_TIMESTAMP, ANSWER,
-				RAW_ANSWER, ANSWER_RECEIVED_TIMESTAMP, MANUALLY_SENT,
-				MEDIA_CONTENT_VIEWED };
+		return new Object[] { PARTICIPANT_ID, PARTICIPANT_NAME, ORGANIZATION,
+				ORGANIZATION_UNIT, ORDER, STATUS, MESSAGE,
+				SHOULD_BE_SENT_TIMESTAMP, SENT_TIMESTAMP, ANSWER, RAW_ANSWER,
+				ANSWER_RECEIVED_TIMESTAMP, MANUALLY_SENT, MEDIA_CONTENT_VIEWED };
 	}
 
 	public static String[] getColumnHeaders() {
 		return new String[] {
 				localize(AdminMessageStrings.UI_COLUMNS__PARTICIPANT_ID),
 				localize(AdminMessageStrings.UI_COLUMNS__PARTICIPANT_NAME),
+				localize(AdminMessageStrings.UI_COLUMNS__ORGANIZATION),
+				localize(AdminMessageStrings.UI_COLUMNS__ORGANIZATION_UNIT),
 				localize(AdminMessageStrings.UI_COLUMNS__ORDER),
 				localize(AdminMessageStrings.UI_COLUMNS__STATUS),
 				localize(AdminMessageStrings.UI_COLUMNS__MESSAGE),

@@ -161,10 +161,13 @@ public class DialogMessage extends ModelObject {
 	 * @return
 	 */
 	public UIDialogMessageWithParticipant toUIDialogMessageWithParticipant(
-			final String participantId, final String participantName) {
+			final String participantId, final String participantName,
+			final String organization, final String organizationUnit) {
 		final val dialogMessage = new UIDialogMessageWithParticipant(
 				participantId,
 				participantName,
+				organization,
+				organizationUnit,
 				String.valueOf(order + 1),
 				status.toString(),
 				message == null || message.equals("") ? Messages
@@ -202,10 +205,13 @@ public class DialogMessage extends ModelObject {
 	 * @return
 	 */
 	public UIDialogMessageReducedWithParticipant toUIDialogMessageReducedWithParticipant(
-			final String participantId, final String participantName) {
+			final String participantId, final String participantName,
+			final String organization, final String organizationUnit) {
 		final val dialogMessage = new UIDialogMessageReducedWithParticipant(
 				participantId,
 				participantName,
+				organization,
+				organizationUnit,
 				status.toString(),
 				sentTimestamp <= 0 ? null : new Date(sentTimestamp),
 				answerReceived == null || answerReceived.equals("") ? Messages

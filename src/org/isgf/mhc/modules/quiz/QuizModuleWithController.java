@@ -201,7 +201,13 @@ public class QuizModuleWithController extends QuizModule {
 								participant.getId().toString(),
 								participant.getNickname().equals("") ? Messages
 										.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-										: participant.getNickname());
+										: participant.getNickname(),
+								participant.getOrganization().equals("") ? Messages
+										.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+										: participant.getOrganization(),
+								participant.getOrganizationUnit().equals("") ? Messages
+										.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+										: participant.getOrganizationUnit());
 
 				beanContainer.addItem(dialogMessage.getId(), uiDialogMessage);
 			}
