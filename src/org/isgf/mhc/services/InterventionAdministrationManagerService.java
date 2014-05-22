@@ -378,7 +378,7 @@ public class InterventionAdministrationManagerService {
 	public MonitoringMessageGroup monitoringMessageGroupCreate(
 			final String groupName, final ObjectId interventionId) {
 		val monitoringMessageGroup = new MonitoringMessageGroup(interventionId,
-				groupName, 0, false, false);
+				groupName, 0, false, false, false);
 
 		if (monitoringMessageGroup.getName().equals("")) {
 			monitoringMessageGroup
@@ -409,10 +409,18 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(monitoringMessageGroup);
 	}
 
-	public void monitoringMessageGroupSetSendOrder(
+	public void monitoringMessageGroupSetRandomSendOrder(
 			final MonitoringMessageGroup monitoringMessageGroup,
 			final boolean newValue) {
 		monitoringMessageGroup.setSendInRandomOrder(newValue);
+
+		databaseManagerService.saveModelObject(monitoringMessageGroup);
+	}
+
+	public void monitoringMessageGroupSetSendSamePositionIfSendingAsReply(
+			final MonitoringMessageGroup monitoringMessageGroup,
+			final boolean newValue) {
+		monitoringMessageGroup.setSendSamePositionIfSendingAsReply(newValue);
 
 		databaseManagerService.saveModelObject(monitoringMessageGroup);
 	}

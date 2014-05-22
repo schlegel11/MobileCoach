@@ -50,6 +50,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 	private final Intervention				intervention;
 
 	// Only relevant for MonitoringReplyRules
+	private MonitoringMessage				relatedMonitoringMessageForReplyRuleCase				= null;
 	private MonitoringRule					relatedMonitoringRuleForReplyRuleCase					= null;
 	private final boolean					monitoringReplyRuleCaseIsTrue;
 
@@ -105,6 +106,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 			final DatabaseManagerService databaseManagerService,
 			final VariablesManagerService variablesManagerService,
 			final Participant participant, final boolean isMonitoringRule,
+			final ObjectId relatedMonitoringMessageForReplyRuleCase,
 			final ObjectId relatedMonitoringRuleForReplyRuleCase,
 			final boolean monitoringReplyRuleCase) {
 		this.databaseManagerService = databaseManagerService;
@@ -117,6 +119,9 @@ public class RecursiveAbstractMonitoringRulesResolver {
 
 		this.isMonitoringRule = isMonitoringRule;
 		if (!isMonitoringRule) {
+			this.relatedMonitoringMessageForReplyRuleCase = databaseManagerService
+					.getModelObjectById(MonitoringMessage.class,
+							relatedMonitoringMessageForReplyRuleCase);
 			this.relatedMonitoringRuleForReplyRuleCase = databaseManagerService
 					.getModelObjectById(MonitoringRule.class,
 							relatedMonitoringRuleForReplyRuleCase);
@@ -394,21 +399,50 @@ public class RecursiveAbstractMonitoringRulesResolver {
 		final List<MonitoringMessage> messages = IteratorUtils
 				.toList(iterableMessages.iterator());
 
-		if (messageGroup.isSendInRandomOrder()) {
-			Collections.shuffle(messages);
-		}
+		if (!isMonitoringRule
+				&& messageGroup.isSendSamePositionIfSendingAsReply()) {
+			val originalMessageGroupId = relatedMonitoringMessageForReplyRuleCase
+					.getMonitoringMessageGroup();
+			val originalIterableMessages = databaseManagerService
+					.findSortedModelObjects(
+							MonitoringMessage.class,
+							Queries.MONITORING_MESSAGE__BY_MONITORING_MESSAGE_GROUP,
+							Queries.MONITORING_MESSAGE__SORT_BY_ORDER_ASC,
+							originalMessageGroupId);
 
-		for (val message : messages) {
-			val dialogMessage = databaseManagerService
-					.findOneModelObject(
-							DialogMessage.class,
-							Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_RELATED_MONITORING_MESSAGE,
-							participant.getId(), message.getId());
-			if (dialogMessage == null) {
-				log.debug(
-						"Monitoring message {} was not used for participant, yet",
-						message.getId());
-				return message;
+			@SuppressWarnings("unchecked")
+			final List<MonitoringMessage> originalMessages = IteratorUtils
+					.toList(originalIterableMessages.iterator());
+
+			for (int i = 0; i < originalMessages.size(); i++) {
+				if (originalMessages.get(i).getId()
+						.equals(relatedMonitoringMessageForReplyRuleCase)
+						&& i < messages.size()) {
+					val message = messages.get(i);
+					log.debug(
+							"Monitoring message {} is at the same position as monitoring message {} and will thereofore be used as reply on answer",
+							message.getId(),
+							relatedMonitoringMessageForReplyRuleCase.getId());
+					return message;
+				}
+			}
+		} else {
+			if (messageGroup.isSendInRandomOrder()) {
+				Collections.shuffle(messages);
+			}
+
+			for (val message : messages) {
+				val dialogMessage = databaseManagerService
+						.findOneModelObject(
+								DialogMessage.class,
+								Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_RELATED_MONITORING_MESSAGE,
+								participant.getId(), message.getId());
+				if (dialogMessage == null) {
+					log.debug(
+							"Monitoring message {} was not used for participant, yet",
+							message.getId());
+					return message;
+				}
 			}
 		}
 

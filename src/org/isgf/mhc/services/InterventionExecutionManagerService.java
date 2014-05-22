@@ -437,20 +437,8 @@ public class InterventionExecutionManagerService {
 
 			// Handle messages
 			for (val dialogMessage : dialogMessages) {
-				// Set new message status
-				if (reactOnAnsweredMessages) {
-					dialogMessageStatusChangesAfterSending(
-							dialogMessage.getId(),
-							DialogMessageStatusTypes.SENT_AND_ANSWERED_AND_PROCESSED,
-							InternalDateTime.currentTimeMillis(), null);
-				} else {
-					dialogMessageStatusChangesAfterSending(
-							dialogMessage.getId(),
-							DialogMessageStatusTypes.SENT_AND_NOT_ANSWERED_AND_PROCESSED,
-							InternalDateTime.currentTimeMillis(), null);
-				}
-
-				// Handle message reply (the text sent) by participant if
+				// Handle storing if message reply (the text sent) by
+				// participant if
 				// message is answered by
 				// participant and not manually sent
 				if (reactOnAnsweredMessages
@@ -501,6 +489,19 @@ public class InterventionExecutionManagerService {
 					}
 				}
 
+				// Set new message status
+				if (reactOnAnsweredMessages) {
+					dialogMessageStatusChangesAfterSending(
+							dialogMessage.getId(),
+							DialogMessageStatusTypes.SENT_AND_ANSWERED_AND_PROCESSED,
+							InternalDateTime.currentTimeMillis(), null);
+				} else {
+					dialogMessageStatusChangesAfterSending(
+							dialogMessage.getId(),
+							DialogMessageStatusTypes.SENT_AND_NOT_ANSWERED_AND_PROCESSED,
+							InternalDateTime.currentTimeMillis(), null);
+				}
+
 				// Handle rule actions if rule was not sent manually or
 				// based on reply rules
 				if (dialogMessage.getRelatedMonitoringRuleForReplyRules() != null) {
@@ -514,6 +515,7 @@ public class InterventionExecutionManagerService {
 								variablesManagerService,
 								participant,
 								false,
+								dialogMessage.getRelatedMonitoringMessage(),
 								dialogMessage
 										.getRelatedMonitoringRuleForReplyRules(),
 								reactOnAnsweredMessages);
@@ -572,7 +574,7 @@ public class InterventionExecutionManagerService {
 				try {
 					recursiveRuleResolver = new RecursiveAbstractMonitoringRulesResolver(
 							databaseManagerService, variablesManagerService,
-							participant, true, null, false);
+							participant, true, null, null, false);
 
 					recursiveRuleResolver.resolve();
 				} catch (final Exception e) {

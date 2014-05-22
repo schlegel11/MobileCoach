@@ -71,6 +71,8 @@ public class MonitoringMessageGroupEditComponentWithController extends
 				monitoringMessageGroup.isMessagesExpectAnswer());
 		getRandomOrderCheckBox().setValue(
 				monitoringMessageGroup.isSendInRandomOrder());
+		getSendSamePositionIfSendingAsReplyCheckBox().setValue(
+				monitoringMessageGroup.isSendSamePositionIfSendingAsReply());
 
 		// handle table selection change
 		monitoringMessageTable
@@ -110,9 +112,34 @@ public class MonitoringMessageGroupEditComponentWithController extends
 					@Override
 					public void valueChange(final ValueChangeEvent event) {
 						getInterventionAdministrationManagerService()
-								.monitoringMessageGroupSetSendOrder(
+								.monitoringMessageGroupSetRandomSendOrder(
 										monitoringMessageGroup,
 										getRandomOrderCheckBox().getValue());
+
+						if (monitoringMessageGroup.isSendInRandomOrder()
+								&& monitoringMessageGroup
+										.isSendSamePositionIfSendingAsReply()) {
+							getSendSamePositionIfSendingAsReplyCheckBox()
+									.setValue(false);
+						}
+					}
+				});
+		getSendSamePositionIfSendingAsReplyCheckBox().addValueChangeListener(
+				new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						getInterventionAdministrationManagerService()
+								.monitoringMessageGroupSetSendSamePositionIfSendingAsReply(
+										monitoringMessageGroup,
+										getSendSamePositionIfSendingAsReplyCheckBox()
+												.getValue());
+
+						if (monitoringMessageGroup.isSendInRandomOrder()
+								&& monitoringMessageGroup
+										.isSendSamePositionIfSendingAsReply()) {
+							getRandomOrderCheckBox().setValue(false);
+						}
 					}
 				});
 

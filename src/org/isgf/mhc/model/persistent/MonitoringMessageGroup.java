@@ -59,6 +59,14 @@ public class MonitoringMessageGroup extends ModelObject {
 	@Getter
 	@Setter
 	private boolean		sendInRandomOrder;
+	/**
+	 * Defines if the message is sent from the same position in this
+	 * {@link MonitoringMessageGroup} as the original message if
+	 * {@link MonitoringMessage} is sending as reply
+	 */
+	@Getter
+	@Setter
+	private boolean		sendSamePositionIfSendingAsReply;
 
 	/**
 	 * Defines if the {@link MonitoringMessage}s in the group expect to be
