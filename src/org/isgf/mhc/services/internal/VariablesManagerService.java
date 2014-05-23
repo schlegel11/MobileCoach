@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
 
+import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
@@ -277,21 +278,21 @@ public class VariablesManagerService {
 		hashtable.put(variable, newVariableWithValue);
 	}
 
-	public void writeVariableValueOfParticipant(final Participant participant,
+	public void writeVariableValueOfParticipant(final ObjectId participantId,
 			final String variableName, final String variableValue)
 			throws WriteProtectedVariableException,
 			InvalidVariableNameException {
-		writeVariableValueOfParticipant(participant, variableName,
+		writeVariableValueOfParticipant(participantId, variableName,
 				variableValue, false);
 	}
 
-	public void writeVariableValueOfParticipant(final Participant participant,
+	public void writeVariableValueOfParticipant(final ObjectId participantId,
 			final String variableName, final String variableValue,
 			final boolean overwriteAllowed)
 			throws WriteProtectedVariableException,
 			InvalidVariableNameException {
 		log.debug("Storing variable {} with value {} for participant {}",
-				variableName, variableValue, participant.getId());
+				variableName, variableValue, participantId);
 
 		if (!StringValidator.isValidVariableName(variableName)) {
 			throw new InvalidVariableNameException();
@@ -310,19 +311,19 @@ public class VariablesManagerService {
 			switch (readWriteVariableName) {
 				case participantDialogOptionEmailData:
 					log.debug("Setting variable 'participantDialogOptionEmailData'");
-					participantSetDialogOption(participant,
+					participantSetDialogOption(participantId,
 							DialogOptionTypes.EMAIL,
 							StringHelpers.cleanEmailAddress(variableValue));
 					break;
 				case participantDialogOptionSMSData:
 					log.debug("Setting variable 'participantDialogOptionSMSData'");
-					participantSetDialogOption(participant,
+					participantSetDialogOption(participantId,
 							DialogOptionTypes.SMS,
 							StringHelpers.cleanPhoneNumber(variableValue));
 					break;
 				case participantName:
 					log.debug("Setting variable 'participantName'");
-					participantSetName(participant, variableValue);
+					participantSetName(participantId, variableValue);
 					break;
 			}
 		} else {
@@ -330,13 +331,13 @@ public class VariablesManagerService {
 					.findOneModelObject(
 							ParticipantVariableWithValue.class,
 							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_VARIABLE_NAME,
-							participant.getId(), variableName);
+							participantId, variableName);
 
 			if (participantVariableWithValue == null) {
 				log.debug("Creating new variable");
 				val newParticipantVariableWithValue = new ParticipantVariableWithValue(
-						participant.getId(), variableName,
-						variableValue == null ? "" : variableValue);
+						participantId, variableName, variableValue == null ? ""
+								: variableValue);
 
 				databaseManagerService
 						.saveModelObject(newParticipantVariableWithValue);
@@ -351,24 +352,29 @@ public class VariablesManagerService {
 		}
 	}
 
-	private void participantSetName(final Participant participant,
+	@Synchronized
+	private void participantSetName(final ObjectId participantId,
 			final String participantName) {
+		val participant = databaseManagerService.getModelObjectById(
+				Participant.class, participantId);
+
 		participant.setNickname(participantName);
 
 		databaseManagerService.saveModelObject(participant);
 	}
 
-	private void participantSetDialogOption(final Participant participant,
+	@Synchronized
+	private void participantSetDialogOption(final ObjectId participantId,
 			final DialogOptionTypes dialogOptionType,
 			final String dialogOptionData) {
 		DialogOption dialogOption = databaseManagerService.findOneModelObject(
 				DialogOption.class,
-				Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
-				participant.getId(), dialogOptionType);
+				Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE, participantId,
+				dialogOptionType);
 
 		if (dialogOption == null) {
-			dialogOption = new DialogOption(participant.getId(),
-					dialogOptionType, dialogOptionData);
+			dialogOption = new DialogOption(participantId, dialogOptionType,
+					dialogOptionData);
 		}
 
 		dialogOption.setData(dialogOptionData);

@@ -519,14 +519,14 @@ public class InterventionExecutionManagerService {
 											.equals("")) {
 								variablesManagerService
 										.writeVariableValueOfParticipant(
-												participant,
+												participant.getId(),
 												relatedMonitoringMessage
 														.getStoreValueToVariableWithName(),
 												cleanedMessageValue);
 							}
 							variablesManagerService
 									.writeVariableValueOfParticipant(
-											participant,
+											participant.getId(),
 											SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantMessageReply
 													.toVariableName(),
 											cleanedMessageValue, true);
@@ -711,10 +711,25 @@ public class InterventionExecutionManagerService {
 				log.debug("Received stop message by participant {}",
 						dialogOption.getParticipant());
 
-				dialogMessageCreateAsUnexpectedReceived(
-						dialogOption.getParticipant(), receivedMessage);
-
-				dialogStatusSetMonitoringFinished(dialogOption.getParticipant());
+				// FIXME Emergency solution for first intervention
+				try {
+					variablesManagerService
+							.writeVariableValueOfParticipant(
+									dialogOption.getParticipant(),
+									ImplementationContants.VARIABLE_DEFINING_PARTICIPATION_IN_MOBILE_COACH_PLUS,
+									"0");
+				} catch (final Exception e) {
+					log.warn(
+							"Caution: Error when performing MobileCoach+ fix: {}",
+							e.getMessage());
+				}
+				/*
+				 * dialogMessageCreateAsUnexpectedReceived(
+				 * dialogOption.getParticipant(), receivedMessage);
+				 * 
+				 * dialogStatusSetMonitoringFinished(dialogOption.getParticipant(
+				 * ));
+				 */
 
 				return;
 			}
@@ -1047,7 +1062,7 @@ public class InterventionExecutionManagerService {
 
 		try {
 			variablesManagerService.writeVariableValueOfParticipant(
-					participant, variableName, variableValue);
+					participant.getId(), variableName, variableValue);
 		} catch (final Exception e) {
 			return false;
 		}

@@ -388,8 +388,9 @@ public class ScreeningSurveyExecutionManagerService {
 							formerSlideId, variableName, resultValue);
 					try {
 						variablesManagerService
-								.writeVariableValueOfParticipant(participant,
-										variableName, resultValue);
+								.writeVariableValueOfParticipant(
+										participant.getId(), variableName,
+										resultValue);
 					} catch (final Exception e) {
 						log.warn("The variable {} could not be written: {}",
 								variableName, e.getMessage());
@@ -702,7 +703,7 @@ public class ScreeningSurveyExecutionManagerService {
 						try {
 							variablesManagerService
 									.writeVariableValueOfParticipant(
-											participant,
+											participant.getId(),
 											formerSlideRule
 													.getStoreValueToVariableWithName(),
 											ruleResult.isCalculatedRule() ? StringHelpers
@@ -722,7 +723,7 @@ public class ScreeningSurveyExecutionManagerService {
 						try {
 							variablesManagerService
 									.writeVariableValueOfParticipant(
-											participant,
+											participant.getId(),
 											formerSlideRule
 													.getStoreValueToVariableWithName(),
 											formerSlideRule

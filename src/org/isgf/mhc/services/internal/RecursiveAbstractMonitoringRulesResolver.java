@@ -336,7 +336,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				&& !rule.getStoreValueToVariableWithName().equals("")) {
 			try {
 				variablesManagerService.writeVariableValueOfParticipant(
-						participant,
+						participant.getId(),
 						rule.getStoreValueToVariableWithName(),
 						ruleResult.isCalculatedRule() ? StringHelpers
 								.cleanDoubleValue(ruleResult

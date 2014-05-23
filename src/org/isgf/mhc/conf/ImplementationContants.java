@@ -38,6 +38,9 @@ public class ImplementationContants {
 	// public static final long MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS =
 	// 2*60;
 
+	// FIXME Emergency solution for first intervention
+	public static String		VARIABLE_DEFINING_PARTICIPATION_IN_MOBILE_COACH_PLUS			= "$plusParticipation";
+
 	public static final long	MAILING_SEND_RETRIES											= 2;
 	public static final long	MAILING_SEND_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS			= 5 * 60;
 
