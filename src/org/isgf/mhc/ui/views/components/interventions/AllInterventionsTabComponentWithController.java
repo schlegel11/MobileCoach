@@ -107,6 +107,8 @@ public class AllInterventionsTabComponentWithController extends
 				buttonClickListener);
 		allInterventionsEditComponent.getResultsButton().addClickListener(
 				buttonClickListener);
+		allInterventionsEditComponent.getProblemsButton().addClickListener(
+				buttonClickListener);
 		allInterventionsEditComponent.getEditButton().addClickListener(
 				buttonClickListener);
 		allInterventionsEditComponent.getDuplicateButton().addClickListener(
@@ -158,6 +160,9 @@ public class AllInterventionsTabComponentWithController extends
 			} else if (event.getButton() == allInterventionsEditComponent
 					.getResultsButton()) {
 				openResults();
+			} else if (event.getButton() == allInterventionsEditComponent
+					.getProblemsButton()) {
+				openProblems();
 			} else if (event.getButton() == allInterventionsEditComponent
 					.getEditButton()) {
 				editIntervention();
@@ -344,6 +349,17 @@ public class AllInterventionsTabComponentWithController extends
 
 		showModalClosableEditWindow(AdminMessageStrings.RESULTS__TITLE,
 				new InterventionResultsComponentWithController(intervention),
+				null, intervention.getName());
+	}
+
+	public void openProblems() {
+		val intervention = selectedUIIntervention
+				.getRelatedModelObject(Intervention.class);
+
+		log.debug("Open problems of intervention {}", intervention.getId());
+
+		showModalClosableEditWindow(AdminMessageStrings.PROBLEMS__TITLE,
+				new InterventionProblemsComponentWithController(intervention),
 				null, intervention.getName());
 	}
 

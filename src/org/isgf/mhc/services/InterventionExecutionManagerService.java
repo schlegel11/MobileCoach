@@ -243,14 +243,29 @@ public class InterventionExecutionManagerService {
 		databaseManagerService.saveModelObject(dialogMessage);
 	}
 
+	@Synchronized
 	private void setDialogMessageSetNotAutomaticallyProcessable(
 			final ObjectId dialogMessageId) {
-		log.debug("Marking dialog message {} as not automatically parsable");
+		log.debug("Marking dialog message {} as not automatically processable");
 
 		val dialogMessage = databaseManagerService.getModelObjectById(
 				DialogMessage.class, dialogMessageId);
 
 		dialogMessage.setAnswerNotAutomaticallyProcessable(true);
+
+		databaseManagerService.saveModelObject(dialogMessage);
+	}
+
+	@Synchronized
+	public void dialogMessageSetProblemSolved(final ObjectId dialogMessageId,
+			final String newCleanedResult) {
+		log.debug("Marking dialog message {} as problem solved");
+
+		val dialogMessage = databaseManagerService.getModelObjectById(
+				DialogMessage.class, dialogMessageId);
+
+		dialogMessage.setAnswerReceived(newCleanedResult);
+		dialogMessage.setAnswerNotAutomaticallyProcessable(false);
 
 		databaseManagerService.saveModelObject(dialogMessage);
 	}

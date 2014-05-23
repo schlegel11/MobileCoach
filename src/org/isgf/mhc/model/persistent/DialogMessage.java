@@ -15,6 +15,7 @@ import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.persistent.types.DialogMessageStatusTypes;
+import org.isgf.mhc.model.ui.UIDialogMessageProblemViewWithParticipant;
 import org.isgf.mhc.model.ui.UIDialogMessageReducedWithParticipant;
 import org.isgf.mhc.model.ui.UIDialogMessageWithParticipant;
 import org.isgf.mhc.tools.StringHelpers;
@@ -213,6 +214,38 @@ public class DialogMessage extends ModelObject {
 				organization,
 				organizationUnit,
 				status.toString(),
+				sentTimestamp <= 0 ? null : new Date(sentTimestamp),
+				answerReceived == null || answerReceived.equals("") ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+						: answerReceived,
+				answerReceivedRaw == null || answerReceivedRaw.equals("") ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+						: answerReceivedRaw,
+				answerReceivedTimestamp <= 0 ? null : new Date(
+						answerReceivedTimestamp));
+
+		dialogMessage.setRelatedModelObject(this);
+
+		return dialogMessage;
+	}
+
+	/**
+	 * Create a {@link UIDialogMessageProblemViewWithParticipant} with the
+	 * belonging {@link Participant}
+	 * 
+	 * @param participantId
+	 * @param participantName
+	 * @return
+	 */
+	public UIDialogMessageProblemViewWithParticipant toUIDialogMessageProblemViewWithParticipant(
+			final String participantId, final String participantName,
+			final String organization, final String organizationUnit) {
+		final val dialogMessage = new UIDialogMessageProblemViewWithParticipant(
+				participantId,
+				participantName,
+				organization,
+				organizationUnit,
+				message,
 				sentTimestamp <= 0 ? null : new Date(sentTimestamp),
 				answerReceived == null || answerReceived.equals("") ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)

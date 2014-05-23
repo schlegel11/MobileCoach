@@ -204,8 +204,6 @@ public class InterventionResultsComponentWithController extends
 	}
 
 	private void adjust() {
-		log.debug("Check access rights for participants based on scrrening surveys");
-
 		updateButtonStatus(selectedUIParticipantsIds);
 
 		val participantsTable = getParticipantsTable();

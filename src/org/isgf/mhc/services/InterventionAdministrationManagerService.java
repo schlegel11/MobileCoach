@@ -13,6 +13,7 @@ import java.util.List;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
@@ -1417,5 +1418,27 @@ public class InterventionAdministrationManagerService {
 						InternalDateTime.currentTimeMillis()
 								- ImplementationContants.DAYS_TO_TIME_IN_MILLIS_MULTIPLICATOR
 								* 14);
+	}
+
+	public List<DialogMessage> getAllDialogMessagesWithBlockingProblemsOfIntervention(
+			final ObjectId interventionid) {
+		val dialogMessages = new ArrayList<DialogMessage>();
+
+		val participantsOfIntervention = databaseManagerService
+				.findModelObjects(Participant.class,
+						Queries.PARTICIPANT__BY_INTERVENTION, interventionid);
+
+		for (val participant : participantsOfIntervention) {
+			val dialogMessagesOfParticipant = databaseManagerService
+					.findModelObjects(
+							DialogMessage.class,
+							Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_NOT_AUTOMATICALLY_PROCESSABLE,
+							participant.getId(), true);
+
+			CollectionUtils.addAll(dialogMessages,
+					dialogMessagesOfParticipant.iterator());
+		}
+
+		return dialogMessages;
 	}
 }
