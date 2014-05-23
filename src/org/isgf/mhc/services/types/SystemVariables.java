@@ -14,14 +14,6 @@ public class SystemVariables {
 		}
 	};
 
-	public enum READ_WRITE_SYSTEM_VARIABLES {
-		;
-
-		public String toVariableName() {
-			return "$" + toString();
-		}
-	};
-
 	public enum READ_ONLY_PARTICIPANT_VARIABLES {
 		participantParticipationInWeeks, participantParticipationInDays;
 

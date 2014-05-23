@@ -12,21 +12,25 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
+import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.persistent.Intervention;
 import org.isgf.mhc.model.persistent.Participant;
+import org.isgf.mhc.model.persistent.concepts.AbstractVariableWithValue;
 import org.isgf.mhc.model.ui.UIDialogMessageWithParticipant;
 import org.isgf.mhc.model.ui.UIParticipant;
 import org.isgf.mhc.model.ui.UIVariableWithParticipant;
 import org.isgf.mhc.tools.CSVExporter;
 import org.isgf.mhc.tools.OnDemandFileDownloader;
 import org.isgf.mhc.tools.OnDemandFileDownloader.OnDemandStreamResource;
+import org.isgf.mhc.ui.views.components.basics.ShortStringEditComponent;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanContainer;
+import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.converter.StringToDateConverter;
 import com.vaadin.shared.ui.MultiSelectMode;
 import com.vaadin.ui.Button;
@@ -45,6 +49,8 @@ public class InterventionResultsComponentWithController extends
 	private final Intervention												intervention;
 
 	private Collection<ObjectId>											selectedUIParticipantsIds;
+	private UIVariableWithParticipant										selectedUIVariableWithParticipant			= null;
+	private BeanItem<UIVariableWithParticipant>								selectedUIVariableWithParticipantBeanItem	= null;
 
 	private final BeanContainer<ObjectId, UIParticipant>					beanContainer;
 
@@ -66,6 +72,7 @@ public class InterventionResultsComponentWithController extends
 
 		val variablesTable = getVariablesTable();
 		variablesTable.setImmediate(true);
+		variablesTable.setSelectable(true);
 
 		val messageDialogTable = getMessageDialogTable();
 		messageDialogTable.setImmediate(true);
@@ -126,9 +133,31 @@ public class InterventionResultsComponentWithController extends
 			}
 		});
 
+		variablesTable.addValueChangeListener(new ValueChangeListener() {
+
+			@Override
+			public void valueChange(final ValueChangeEvent event) {
+				val objectId = variablesTable.getValue();
+				if (objectId == null) {
+					selectedUIVariableWithParticipant = null;
+					selectedUIVariableWithParticipantBeanItem = null;
+					setVariableWithParticipantSelected(false);
+				} else {
+					selectedUIVariableWithParticipant = getUIModelObjectFromTableByObjectId(
+							variablesTable, UIVariableWithParticipant.class,
+							objectId);
+					selectedUIVariableWithParticipantBeanItem = getBeanItemFromTableByObjectId(
+							variablesTable, UIVariableWithParticipant.class,
+							objectId);
+					setVariableWithParticipantSelected(true);
+				}
+			}
+		});
+
 		// handle buttons
 		val buttonClickListener = new ButtonClickListener();
 		getRefreshButton().addClickListener(buttonClickListener);
+		getEditButton().addClickListener(buttonClickListener);
 
 		// Special handle for export buttons
 		val variablesExportOnDemandFileDownloader = new OnDemandFileDownloader(
@@ -223,12 +252,17 @@ public class InterventionResultsComponentWithController extends
 
 			if (event.getButton() == getRefreshButton()) {
 				adjust();
+			} else if (event.getButton() == getEditButton()) {
+				editVariableValue();
 			}
 		}
 	}
 
 	private void updateTables() {
 		log.debug("Update variables of participant");
+
+		getVariablesTable().select(null);
+
 		variablesBeanContainer.removeAllItems();
 
 		int i = 0;
@@ -295,6 +329,51 @@ public class InterventionResultsComponentWithController extends
 		}
 
 		getVariablesTable().sort();
+	}
+
+	public void editVariableValue() {
+		log.debug("Edit variable value");
+		val abstractVariableWithValue = selectedUIVariableWithParticipant
+				.getRelatedModelObject(AbstractVariableWithValue.class);
+
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_VALUE_FOR_VARIABLE,
+				abstractVariableWithValue.getValue(), null,
+				new ShortStringEditComponent(),
+				new ExtendableButtonClickListener() {
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						// Change value
+						val changeSuceeded = MHC
+								.getInstance()
+								.getInterventionExecutionManagerService()
+								.participantAdjustVariableValue(
+										new ObjectId(
+												selectedUIVariableWithParticipant
+														.getParticipantId()),
+										abstractVariableWithValue.getName(),
+										getStringValue());
+
+						if (changeSuceeded) {
+							getStringItemProperty(
+									selectedUIVariableWithParticipantBeanItem,
+									UIVariableWithParticipant.VALUE).setValue(
+									getStringValue());
+
+							selectedUIVariableWithParticipant
+									.setValue(getStringValue());
+
+							getAdminUI()
+									.showInformationNotification(
+											AdminMessageStrings.NOTIFICATION__VARIABLE_VALUE_CHANGED);
+						} else {
+							getAdminUI()
+									.showWarningNotification(
+											AdminMessageStrings.NOTIFICATION__SYSTEM_RESERVED_VARIABLE);
+						}
+						closeWindow();
+					}
+				}, null);
 	}
 
 	protected List<Participant> convertSelectedToParticipantsList() {

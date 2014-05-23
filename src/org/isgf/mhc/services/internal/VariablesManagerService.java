@@ -28,6 +28,7 @@ import org.isgf.mhc.model.persistent.concepts.AbstractVariableWithValue;
 import org.isgf.mhc.model.persistent.types.DialogOptionTypes;
 import org.isgf.mhc.services.types.SystemVariables;
 import org.isgf.mhc.tools.InternalDateTime;
+import org.isgf.mhc.tools.StringHelpers;
 import org.isgf.mhc.tools.StringValidator;
 
 /**
@@ -80,18 +81,10 @@ public class VariablesManagerService {
 				.values()) {
 			writableVariableNames.add(variable.toVariableName());
 		}
-		for (val variable : SystemVariables.READ_WRITE_SYSTEM_VARIABLES
-				.values()) {
-			writableVariableNames.add(variable.toVariableName());
-		}
 
 		allSystemVariableNames = new HashSet<String>();
 		allSystemVariableNames.addAll(writeProtectedVariableNames);
 		for (val variable : SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES
-				.values()) {
-			allSystemVariableNames.add(variable.toVariableName());
-		}
-		for (val variable : SystemVariables.READ_WRITE_SYSTEM_VARIABLES
 				.values()) {
 			allSystemVariableNames.add(variable.toVariableName());
 		}
@@ -129,14 +122,6 @@ public class VariablesManagerService {
 			final Participant participant) {
 		val variablesWithValues = new Hashtable<String, AbstractVariableWithValue>();
 
-		// Add all read/write system variables (to become overwritten, if
-		// required)
-		for (val variable : SystemVariables.READ_WRITE_SYSTEM_VARIABLES
-				.values()) {
-			switch (variable) {
-			// nothing
-			}
-		}
 		// Add all read/write participant variables (to become overwritten, if
 		// required)
 		for (val variable : SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES
@@ -317,28 +302,78 @@ public class VariablesManagerService {
 			throw new WriteProtectedVariableException();
 		}
 
-		val participantVariableWithValue = databaseManagerService
-				.findOneModelObject(
-						ParticipantVariableWithValue.class,
-						Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_VARIABLE_NAME,
-						participant.getId(), variableName);
+		// Care for read write participants variable
+		if (isWritableVariableName(variableName)) {
+			val readWriteVariableName = SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES
+					.valueOf(variableName);
 
-		if (participantVariableWithValue == null) {
-			log.debug("Creating new variable");
-			val newParticipantVariableWithValue = new ParticipantVariableWithValue(
-					participant.getId(), variableName,
-					variableValue == null ? "" : variableValue);
-
-			databaseManagerService
-					.saveModelObject(newParticipantVariableWithValue);
+			switch (readWriteVariableName) {
+				case participantDialogOptionEmailData:
+					log.debug("Setting variable 'participantDialogOptionEmailData'");
+					participantSetDialogOption(participant,
+							DialogOptionTypes.EMAIL,
+							StringHelpers.cleanEmailAddress(variableValue));
+					break;
+				case participantDialogOptionSMSData:
+					log.debug("Setting variable 'participantDialogOptionSMSData'");
+					participantSetDialogOption(participant,
+							DialogOptionTypes.SMS,
+							StringHelpers.cleanPhoneNumber(variableValue));
+					break;
+				case participantName:
+					log.debug("Setting variable 'participantName'");
+					participantSetName(participant, variableValue);
+					break;
+			}
 		} else {
-			log.debug("Changing existing variable");
-			participantVariableWithValue.setValue(variableValue == null ? ""
-					: variableValue);
+			val participantVariableWithValue = databaseManagerService
+					.findOneModelObject(
+							ParticipantVariableWithValue.class,
+							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_VARIABLE_NAME,
+							participant.getId(), variableName);
 
-			databaseManagerService
-					.saveModelObject(participantVariableWithValue);
+			if (participantVariableWithValue == null) {
+				log.debug("Creating new variable");
+				val newParticipantVariableWithValue = new ParticipantVariableWithValue(
+						participant.getId(), variableName,
+						variableValue == null ? "" : variableValue);
+
+				databaseManagerService
+						.saveModelObject(newParticipantVariableWithValue);
+			} else {
+				log.debug("Changing existing variable");
+				participantVariableWithValue
+						.setValue(variableValue == null ? "" : variableValue);
+
+				databaseManagerService
+						.saveModelObject(participantVariableWithValue);
+			}
 		}
+	}
+
+	private void participantSetName(final Participant participant,
+			final String participantName) {
+		participant.setNickname(participantName);
+
+		databaseManagerService.saveModelObject(participant);
+	}
+
+	private void participantSetDialogOption(final Participant participant,
+			final DialogOptionTypes dialogOptionType,
+			final String dialogOptionData) {
+		DialogOption dialogOption = databaseManagerService.findOneModelObject(
+				DialogOption.class,
+				Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
+				participant.getId(), dialogOptionType);
+
+		if (dialogOption == null) {
+			dialogOption = new DialogOption(participant.getId(),
+					dialogOptionType, dialogOptionData);
+		}
+
+		dialogOption.setData(dialogOptionData);
+
+		databaseManagerService.saveModelObject(dialogOption);
 	}
 
 	/*
@@ -346,6 +381,10 @@ public class VariablesManagerService {
 	 */
 	public boolean isWriteProtectedVariableName(final String variable) {
 		return writeProtectedVariableNames.contains(variable);
+	}
+
+	public boolean isWritableVariableName(final String variable) {
+		return writableVariableNames.contains(variable);
 	}
 
 	public Set<String> getAllSystemVariableNames() {

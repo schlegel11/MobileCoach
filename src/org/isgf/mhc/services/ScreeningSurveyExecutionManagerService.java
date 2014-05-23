@@ -27,7 +27,6 @@ import org.isgf.mhc.model.persistent.ScreeningSurvey;
 import org.isgf.mhc.model.persistent.ScreeningSurveySlide;
 import org.isgf.mhc.model.persistent.ScreeningSurveySlideRule;
 import org.isgf.mhc.model.persistent.concepts.AbstractVariableWithValue;
-import org.isgf.mhc.model.persistent.types.DialogOptionTypes;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.VariablesManagerService;
@@ -37,7 +36,6 @@ import org.isgf.mhc.services.types.GeneralSlideTemplateFieldTypes;
 import org.isgf.mhc.services.types.ScreeningSurveySessionAttributeTypes;
 import org.isgf.mhc.services.types.ScreeningSurveySlideTemplateFieldTypes;
 import org.isgf.mhc.services.types.ScreeningSurveySlideTemplateLayoutTypes;
-import org.isgf.mhc.services.types.SystemVariables;
 import org.isgf.mhc.tools.GlobalUniqueIdGenerator;
 import org.isgf.mhc.tools.InternalDateTime;
 import org.isgf.mhc.tools.RuleEvaluator;
@@ -111,13 +109,6 @@ public class ScreeningSurveyExecutionManagerService {
 		return participant;
 	}
 
-	private void participantSetName(final Participant participant,
-			final String participantName) {
-		participant.setNickname(participantName);
-
-		databaseManagerService.saveModelObject(participant);
-	}
-
 	private void participantSetFeedback(final Participant participant,
 			final ObjectId feedbackId) {
 		val feedback = databaseManagerService.getModelObjectById(
@@ -128,24 +119,6 @@ public class ScreeningSurveyExecutionManagerService {
 				.getGlobalUniqueId());
 
 		databaseManagerService.saveModelObject(participant);
-	}
-
-	private void participantSetDialogOption(final Participant participant,
-			final DialogOptionTypes dialogOptionType,
-			final String dialogOptionData) {
-		DialogOption dialogOption = databaseManagerService.findOneModelObject(
-				DialogOption.class,
-				Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
-				participant.getId(), dialogOptionType);
-
-		if (dialogOption == null) {
-			dialogOption = new DialogOption(participant.getId(),
-					dialogOptionType, dialogOptionData);
-		}
-
-		dialogOption.setData(dialogOptionData);
-
-		databaseManagerService.saveModelObject(dialogOption);
 	}
 
 	// Dialog status
@@ -413,9 +386,14 @@ public class ScreeningSurveyExecutionManagerService {
 					log.debug(
 							"Storing result of screening survey slide {} to variable {} as value {}",
 							formerSlideId, variableName, resultValue);
-					storeResultToVariable(participant, variableName,
-							resultValue);
-
+					try {
+						variablesManagerService
+								.writeVariableValueOfParticipant(participant,
+										variableName, resultValue);
+					} catch (final Exception e) {
+						log.warn("The variable {} could not be written: {}",
+								variableName, e.getMessage());
+					}
 				}
 			}
 
@@ -644,39 +622,6 @@ public class ScreeningSurveyExecutionManagerService {
 		return templateVariables;
 	}
 
-	private void storeResultToVariable(final Participant participant,
-			final java.lang.String variableName, final String variableValue) {
-		// Set special variable or create regular variable entry for
-		// participant
-		if (variableName
-				.equals(SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES.participantName
-						.toVariableName())) {
-			log.debug("Setting variable 'participantName'");
-			participantSetName(participant, variableValue);
-		} else if (variableName
-				.equals(SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES.participantDialogOptionSMSData
-						.toVariableName())) {
-			log.debug("Setting variable 'participantDialogOptionSMSData'");
-			participantSetDialogOption(participant, DialogOptionTypes.SMS,
-					StringHelpers.cleanPhoneNumber(variableValue));
-		} else if (variableName
-				.equals(SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES.participantDialogOptionEmailData
-						.toVariableName())) {
-			log.debug("Setting variable 'participantDialogOptionEmailData'");
-			participantSetDialogOption(participant, DialogOptionTypes.EMAIL,
-					StringHelpers.cleanEmailAddress(variableValue));
-		} else {
-			// It's a regular variable, so store it
-			try {
-				variablesManagerService.writeVariableValueOfParticipant(
-						participant, variableName, variableValue);
-			} catch (final Exception e) {
-				log.error("Error when storing variable '{}': {}", variableName,
-						e.getMessage());
-			}
-		}
-	}
-
 	/**
 	 * Determines which {@link ScreeningSurveySlide} is the next slide to
 	 * present to the user
@@ -754,20 +699,41 @@ public class ScreeningSurveyExecutionManagerService {
 							|| formerSlideRule.getValueToStoreToVariable()
 									.equals("")) {
 						// Store rule result
-						storeResultToVariable(
-								participant,
-								formerSlideRule
-										.getStoreValueToVariableWithName(),
-								ruleResult.isCalculatedRule() ? StringHelpers
-										.cleanDoubleValue(ruleResult
-												.getCalculatedRuleValue())
-										: ruleResult.getTextRuleValue());
+						try {
+							variablesManagerService
+									.writeVariableValueOfParticipant(
+											participant,
+											formerSlideRule
+													.getStoreValueToVariableWithName(),
+											ruleResult.isCalculatedRule() ? StringHelpers
+													.cleanDoubleValue(ruleResult
+															.getCalculatedRuleValue())
+													: ruleResult
+															.getTextRuleValue());
+						} catch (final Exception e) {
+							log.warn(
+									"The variable {} could not be written: {}",
+									formerSlideRule
+											.getStoreValueToVariableWithName(),
+									e.getMessage());
+						}
 					} else {
 						// Store fix value
-						storeResultToVariable(participant,
-								formerSlideRule
-										.getStoreValueToVariableWithName(),
-								formerSlideRule.getValueToStoreToVariable());
+						try {
+							variablesManagerService
+									.writeVariableValueOfParticipant(
+											participant,
+											formerSlideRule
+													.getStoreValueToVariableWithName(),
+											formerSlideRule
+													.getValueToStoreToVariable());
+						} catch (final Exception e) {
+							log.warn(
+									"The variable {} could not be written: {}",
+									formerSlideRule
+											.getStoreValueToVariableWithName(),
+									e.getMessage());
+						}
 					}
 
 					log.debug("Refrehsing variables");

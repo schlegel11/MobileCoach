@@ -1038,4 +1038,20 @@ public class InterventionExecutionManagerService {
 
 		return relevantParticipants;
 	}
+
+	@Synchronized
+	public boolean participantAdjustVariableValue(final ObjectId participantId,
+			final String variableName, final String variableValue) {
+		val participant = databaseManagerService.getModelObjectById(
+				Participant.class, participantId);
+
+		try {
+			variablesManagerService.writeVariableValueOfParticipant(
+					participant, variableName, variableValue);
+		} catch (final Exception e) {
+			return false;
+		}
+
+		return true;
+	}
 }
