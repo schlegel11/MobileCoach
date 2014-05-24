@@ -174,9 +174,10 @@ public class RuleEvaluator {
 							.trim()
 							.toLowerCase()
 							.matches(
-									ruleEvaluationResult
-											.getTextRuleComparisonTermValue()
-											.trim())) {
+									"^"
+											+ ruleEvaluationResult
+													.getTextRuleComparisonTermValue()
+													.trim() + "$")) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
@@ -186,9 +187,10 @@ public class RuleEvaluator {
 							.trim()
 							.toLowerCase()
 							.matches(
-									ruleEvaluationResult
-											.getTextRuleComparisonTermValue()
-											.trim())) {
+									"^"
+											+ ruleEvaluationResult
+													.getTextRuleComparisonTermValue()
+													.trim() + "$")) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;

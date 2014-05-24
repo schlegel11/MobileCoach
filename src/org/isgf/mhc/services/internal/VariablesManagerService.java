@@ -306,7 +306,7 @@ public class VariablesManagerService {
 		// Care for read write participants variable
 		if (isWritableVariableName(variableName)) {
 			val readWriteVariableName = SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES
-					.valueOf(variableName);
+					.valueOf(variableName.substring(1));
 
 			switch (readWriteVariableName) {
 				case participantDialogOptionEmailData:
