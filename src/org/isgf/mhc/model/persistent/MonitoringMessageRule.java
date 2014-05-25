@@ -12,46 +12,47 @@ import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.persistent.concepts.AbstractRule;
 import org.isgf.mhc.model.persistent.types.RuleEquationSignTypes;
-import org.isgf.mhc.model.ui.UIFeedbackSlideRule;
 import org.isgf.mhc.model.ui.UIModelObject;
+import org.isgf.mhc.model.ui.UIMonitoringMessageRule;
 import org.isgf.mhc.tools.StringHelpers;
 
 /**
- * {@link ModelObject} to represent an {@link FeedbackSlideRule}
+ * {@link ModelObject} to represent an {@link MonitoringMessageRule}
  * 
- * A {@link FeedbackSlideRule} can evaluate if the belonging
- * {@link FeedbackSlide} should be shown. If all {@link FeedbackSlideRule}s
- * return true a specific {@link FeedbackSlide} is shown.
+ * A {@link MonitoringMessageRule} can evaluate if the belonging
+ * {@link MonitoringMessage} should be send. If all
+ * {@link MonitoringMessageRule}s
+ * return true a specific {@link MonitoringMessage} is send.
  * 
  * @author Andreas Filler
  */
 @NoArgsConstructor
-public class FeedbackSlideRule extends AbstractRule {
+public class MonitoringMessageRule extends AbstractRule {
 	/**
 	 * Default constructor
 	 */
-	public FeedbackSlideRule(final ObjectId belongingFeedbackSlide,
+	public MonitoringMessageRule(final ObjectId belongingMonitoringMessage,
 			final int order, final String ruleWithPlaceholders,
 			final RuleEquationSignTypes ruleEquationSign,
 			final String ruleComparisonTermWithPlaceholders) {
 		super(ruleWithPlaceholders, ruleEquationSign,
 				ruleComparisonTermWithPlaceholders);
 
-		this.belongingFeedbackSlide = belongingFeedbackSlide;
+		this.belongingMonitoringMessage = belongingMonitoringMessage;
 		this.order = order;
 	}
 
 	/**
-	 * The {@link FeedbackSlide} this rule belongs to
+	 * The {@link MonitoringMessage} this rule belongs to
 	 */
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId	belongingFeedbackSlide;
+	private ObjectId	belongingMonitoringMessage;
 
 	/**
-	 * The position of the {@link FeedbackSlideRule} compared to all
-	 * other {@link FeedbackSlideRule}s; the first rule will be called
+	 * The position of the {@link MonitoringMessageRule} compared to all
+	 * other {@link MonitoringMessageRule}s; the first rule will be called
 	 * first
 	 */
 	@Getter
@@ -65,12 +66,12 @@ public class FeedbackSlideRule extends AbstractRule {
 	 */
 	@Override
 	public UIModelObject toUIModelObject() {
-		val screeningSurveySlide = new UIFeedbackSlideRule(order,
+		val monitoringMessage = new UIMonitoringMessageRule(order,
 				StringHelpers.createRuleName(this));
 
-		screeningSurveySlide.setRelatedModelObject(this);
+		monitoringMessage.setRelatedModelObject(this);
 
-		return screeningSurveySlide;
+		return monitoringMessage;
 	}
 
 	/*

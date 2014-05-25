@@ -39,6 +39,12 @@ public class Queries {
 	public static final String	MONITORING_MESSAGE__SORT_BY_ORDER_ASC														= "{'order':1}";
 	public static final String	MONITORING_MESSAGE__SORT_BY_ORDER_DESC														= "{'order':-1}";
 
+	public static final String	MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE												= "{'belongingMonitoringMessage':#}";
+	public static final String	MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE_AND_ORDER_LOWER								= "{'belongingMonitoringMessage':#,'order':{$lt:#}}";
+	public static final String	MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE_AND_ORDER_HIGHER								= "{'belongingMonitoringMessage':#,'order':{$gt:#}}";
+	public static final String	MONITORING_MESSAGE_RULE__SORT_BY_ORDER_ASC													= "{'order':1}";
+	public static final String	MONITORING_MESSAGE_RULE__SORT_BY_ORDER_DESC													= "{'order':-1}";
+
 	public static final String	SCREENING_SURVEY__BY_INTERVENTION															= "{'intervention':#}";
 
 	public static final String	SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY													= "{'screeningSurvey':#}";

@@ -658,11 +658,11 @@ public class ScreeningSurveyAdministrationManagerService {
 	}
 
 	public void feedbackSlideSetLinkedMediaObject(
-			final ScreeningSurveySlide screeningSurveySlide,
+			final FeedbackSlide feedbackSlide,
 			final ObjectId linkedMediaObjectId) {
-		screeningSurveySlide.setLinkedMediaObject(linkedMediaObjectId);
+		feedbackSlide.setLinkedMediaObject(linkedMediaObjectId);
 
-		databaseManagerService.saveModelObject(screeningSurveySlide);
+		databaseManagerService.saveModelObject(feedbackSlide);
 	}
 
 	public void feedbackSlideDelete(final FeedbackSlide feedbackSlide) {
@@ -716,14 +716,6 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(feedbackSlideRuleToSwapWith);
 
 		return feedbackSlideRuleToSwapWith;
-	}
-
-	public void feedbackSlideSetLinkedMediaObject(
-			final FeedbackSlide feedbackSlide,
-			final ObjectId linkedMediaObjectId) {
-		feedbackSlide.setLinkedMediaObject(linkedMediaObjectId);
-
-		databaseManagerService.saveModelObject(feedbackSlide);
 	}
 
 	public void feedbackSlideRuleDelete(

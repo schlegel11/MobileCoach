@@ -23,7 +23,7 @@ public class FeedbackSlideRuleEditComponentWithController extends
 
 		// Configure integrated components
 		ruleEditComponent = getAbstractRuleEditComponentWithController();
-		ruleEditComponent.init(screeningSurveyId, TYPES.SCREENING_SURVEY_RULES);
+		ruleEditComponent.init(screeningSurveyId, TYPES.FEEDBACK_RULES);
 		ruleEditComponent.adjust(feedbackSlideRule);
 
 		/*

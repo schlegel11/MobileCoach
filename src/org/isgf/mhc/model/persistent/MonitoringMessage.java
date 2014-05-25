@@ -10,9 +10,11 @@ import lombok.Setter;
 import lombok.val;
 
 import org.bson.types.ObjectId;
+import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
+import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.ui.UIModelObject;
 import org.isgf.mhc.model.ui.UIMonitoringMessage;
 
@@ -77,6 +79,20 @@ public class MonitoringMessage extends ModelObject {
 	 */
 	@Override
 	public UIModelObject toUIModelObject() {
+		int messageRules = 0;
+		val monitoringRules = MHC.getInstance()
+				.getInterventionAdministrationManagerService()
+				.getAllMonitoringMessageRulesOfMonitoringMessage(getId());
+
+		if (monitoringRules != null) {
+			val screeningSurveySlideRulesIterator = monitoringRules.iterator();
+
+			while (screeningSurveySlideRulesIterator.hasNext()) {
+				screeningSurveySlideRulesIterator.next();
+				messageRules++;
+			}
+		}
+
 		final val monitoringMessage = new UIMonitoringMessage(
 				order,
 				textWithPlaceholders.length() > 160 ? textWithPlaceholders
@@ -87,7 +103,7 @@ public class MonitoringMessage extends ModelObject {
 						: Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
 				storeValueToVariableWithName != null ? storeValueToVariableWithName
-						: "");
+						: "", messageRules);
 
 		monitoringMessage.setRelatedModelObject(this);
 
@@ -111,6 +127,15 @@ public class MonitoringMessage extends ModelObject {
 			exportList.add(ModelObject
 					.get(MediaObject.class, linkedMediaObject));
 		}
+
+		// Add monitoring message rule
+		for (val monitoringMessageRule : ModelObject
+				.find(MonitoringMessageRule.class,
+						Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE,
+						getId())) {
+			monitoringMessageRule
+					.collectThisAndRelatedModelObjectsForExport(exportList);
+		}
 	}
 
 	/*
@@ -128,5 +153,13 @@ public class MonitoringMessage extends ModelObject {
 				ModelObject.delete(mediaObjectToDelete);
 			}
 		}
+
+		// Delete sub rules
+		val rulesToDelete = ModelObject
+				.find(MonitoringMessageRule.class,
+						Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE,
+						getId());
+		ModelObject.delete(rulesToDelete);
 	}
+
 }

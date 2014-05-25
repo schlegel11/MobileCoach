@@ -2,6 +2,7 @@ package org.isgf.mhc.services.internal;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Hashtable;
 import java.util.List;
 
 import lombok.Getter;
@@ -16,10 +17,12 @@ import org.isgf.mhc.model.persistent.DialogMessage;
 import org.isgf.mhc.model.persistent.Intervention;
 import org.isgf.mhc.model.persistent.MonitoringMessage;
 import org.isgf.mhc.model.persistent.MonitoringMessageGroup;
+import org.isgf.mhc.model.persistent.MonitoringMessageRule;
 import org.isgf.mhc.model.persistent.MonitoringReplyRule;
 import org.isgf.mhc.model.persistent.MonitoringRule;
 import org.isgf.mhc.model.persistent.Participant;
 import org.isgf.mhc.model.persistent.concepts.AbstractMonitoringRule;
+import org.isgf.mhc.model.persistent.concepts.AbstractVariableWithValue;
 import org.isgf.mhc.tools.RuleEvaluator;
 import org.isgf.mhc.tools.StringHelpers;
 import org.isgf.mhc.tools.VariableStringReplacer;
@@ -401,6 +404,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 
 		if (!isMonitoringRule
 				&& messageGroup.isSendSamePositionIfSendingAsReply()) {
+			// Send in same position if sending as reply
 			val originalMessageGroupId = relatedMonitoringMessageForReplyRuleCase
 					.getMonitoringMessageGroup();
 			val originalIterableMessages = databaseManagerService
@@ -427,11 +431,14 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				}
 			}
 		} else {
+			// Send in random order?
 			if (messageGroup.isSendInRandomOrder()) {
 				Collections.shuffle(messages);
 			}
 
-			for (val message : messages) {
+			Hashtable<String, AbstractVariableWithValue> variablesWithValues = null;
+
+			messageLoop: for (val message : messages) {
 				val dialogMessage = databaseManagerService
 						.findOneModelObject(
 								DialogMessage.class,
@@ -441,6 +448,37 @@ public class RecursiveAbstractMonitoringRulesResolver {
 					log.debug(
 							"Monitoring message {} was not used for participant, yet",
 							message.getId());
+
+					// Check rules of message for execution
+					val rules = databaseManagerService
+							.findSortedModelObjects(
+									MonitoringMessageRule.class,
+									Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE,
+									Queries.MONITORING_MESSAGE_RULE__SORT_BY_ORDER_ASC,
+									message.getId());
+
+					for (val rule : rules) {
+						if (variablesWithValues == null) {
+							variablesWithValues = variablesManagerService
+									.getAllVariablesWithValuesOfParticipantAndSystem(participant);
+						}
+
+						val ruleResult = RuleEvaluator.evaluateRule(rule,
+								variablesWithValues.values());
+
+						if (!ruleResult.isEvaluatedSuccessful()) {
+							log.error("Error when validating rule: "
+									+ ruleResult.getErrorMessage());
+							continue;
+						}
+
+						// Check if true rule matches
+						if (!ruleResult.isRuleMatchesEquationSign()) {
+							log.debug("Rule does not match, so skip this message");
+							continue messageLoop;
+						}
+					}
+
 					return message;
 				}
 			}

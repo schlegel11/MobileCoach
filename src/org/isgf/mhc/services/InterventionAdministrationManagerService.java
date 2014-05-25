@@ -31,6 +31,7 @@ import org.isgf.mhc.model.persistent.InterventionVariableWithValue;
 import org.isgf.mhc.model.persistent.MediaObject;
 import org.isgf.mhc.model.persistent.MonitoringMessage;
 import org.isgf.mhc.model.persistent.MonitoringMessageGroup;
+import org.isgf.mhc.model.persistent.MonitoringMessageRule;
 import org.isgf.mhc.model.persistent.MonitoringReplyRule;
 import org.isgf.mhc.model.persistent.MonitoringRule;
 import org.isgf.mhc.model.persistent.Participant;
@@ -596,6 +597,64 @@ public class InterventionAdministrationManagerService {
 	public void monitoringMessageDelete(
 			final MonitoringMessage monitoringMessage) {
 		databaseManagerService.deleteModelObject(monitoringMessage);
+	}
+
+	// Monitoring Message Rule
+	public MonitoringMessageRule monitoringMessageRuleCreate(
+			final ObjectId monitoringMessageId) {
+		val monitoringMessageRule = new MonitoringMessageRule(
+				monitoringMessageId, 0, "",
+				RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "");
+
+		val highestOrderSlideRule = databaseManagerService
+				.findOneSortedModelObject(MonitoringMessageRule.class,
+						Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE,
+						Queries.MONITORING_MESSAGE_RULE__SORT_BY_ORDER_DESC,
+						monitoringMessageId);
+
+		if (highestOrderSlideRule != null) {
+			monitoringMessageRule
+					.setOrder(highestOrderSlideRule.getOrder() + 1);
+		}
+
+		databaseManagerService.saveModelObject(monitoringMessageRule);
+
+		return monitoringMessageRule;
+	}
+
+	public MonitoringMessageRule monitoringMessageRuleMove(
+			final MonitoringMessageRule monitoringMessageRule,
+			final boolean moveUp) {
+		// Find feedback slide rule to swap with
+		val monitoringMessageRuleToSwapWith = databaseManagerService
+				.findOneSortedModelObject(
+						MonitoringMessageRule.class,
+						moveUp ? Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE_AND_ORDER_LOWER
+								: Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE_AND_ORDER_HIGHER,
+						moveUp ? Queries.MONITORING_MESSAGE_RULE__SORT_BY_ORDER_DESC
+								: Queries.MONITORING_MESSAGE_RULE__SORT_BY_ORDER_ASC,
+						monitoringMessageRule.getBelongingMonitoringMessage(),
+						monitoringMessageRule.getOrder());
+
+		if (monitoringMessageRuleToSwapWith == null) {
+			return null;
+		}
+
+		// Swap order
+		final int order = monitoringMessageRule.getOrder();
+		monitoringMessageRule.setOrder(monitoringMessageRuleToSwapWith
+				.getOrder());
+		monitoringMessageRuleToSwapWith.setOrder(order);
+
+		databaseManagerService.saveModelObject(monitoringMessageRule);
+		databaseManagerService.saveModelObject(monitoringMessageRuleToSwapWith);
+
+		return monitoringMessageRuleToSwapWith;
+	}
+
+	public void monitoringMessageRuleDelete(
+			final MonitoringMessageRule monitoringMessageRule) {
+		databaseManagerService.deleteModelObject(monitoringMessageRule);
 	}
 
 	// Media Object
@@ -1216,6 +1275,15 @@ public class InterventionAdministrationManagerService {
 			final ObjectId monitoringMessageGroupId) {
 		return databaseManagerService.getModelObjectById(
 				MonitoringMessageGroup.class, monitoringMessageGroupId);
+	}
+
+	public Iterable<MonitoringMessageRule> getAllMonitoringMessageRulesOfMonitoringMessage(
+			final ObjectId monitoringMessageId) {
+		return databaseManagerService.findSortedModelObjects(
+				MonitoringMessageRule.class,
+				Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE,
+				Queries.MONITORING_MESSAGE_RULE__SORT_BY_ORDER_ASC,
+				monitoringMessageId);
 	}
 
 	public Iterable<MonitoringRule> getAllMonitoringRulesOfIntervention(

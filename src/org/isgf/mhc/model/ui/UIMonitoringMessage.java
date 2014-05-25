@@ -17,6 +17,7 @@ public class UIMonitoringMessage extends UIModelObject {
 	public static final String	TEXT_WITH_PLACEHOLDERS	= "textWithPlaceholders";
 	public static final String	HAS_LINKED_MEDIA_OBJECT	= "hasLinkedMediaObject";
 	public static final String	RESULT_VARIABLE			= "resultVariable";
+	public static final String	CONTAINS_RULES			= "containsRules";
 
 	@PropertyId(ORDER)
 	private int					order;
@@ -32,16 +33,20 @@ public class UIMonitoringMessage extends UIModelObject {
 	@PropertyId(RESULT_VARIABLE)
 	private String				resultVariable;
 
+	@PropertyId(CONTAINS_RULES)
+	private int					containsRules;
+
 	public static Object[] getVisibleColumns() {
 		return new Object[] { TEXT_WITH_PLACEHOLDERS, HAS_LINKED_MEDIA_OBJECT,
-				RESULT_VARIABLE };
+				RESULT_VARIABLE, CONTAINS_RULES };
 	}
 
 	public static String[] getColumnHeaders() {
 		return new String[] {
 				localize(AdminMessageStrings.UI_COLUMNS__MESSAGE_TEXT),
 				localize(AdminMessageStrings.UI_COLUMNS__HAS_LINKED_MEDIA_OBJECT),
-				localize(AdminMessageStrings.UI_COLUMNS__RESULT_VARIABLE) };
+				localize(AdminMessageStrings.UI_COLUMNS__RESULT_VARIABLE),
+				localize(AdminMessageStrings.UI_COLUMNS__CONTAINS_RULES) };
 	}
 
 	public static String getSortColumn() {

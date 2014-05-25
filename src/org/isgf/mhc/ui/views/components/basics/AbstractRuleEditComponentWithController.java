@@ -27,7 +27,7 @@ public class AbstractRuleEditComponentWithController extends
 		AbstractRuleEditComponent implements ValueChangeListener {
 
 	public enum TYPES {
-		MONITORING_RULES, SCREENING_SURVEY_RULES, FEEDBACK_RULES
+		MONITORING_RULES, SCREENING_SURVEY_RULES, FEEDBACK_RULES, MONITORING_MESSAGE_RULES
 	};
 
 	private TYPES								type;
@@ -131,15 +131,19 @@ public class AbstractRuleEditComponentWithController extends
 		final List<String> allPossibleVariables;
 		switch (type) {
 			case MONITORING_RULES:
+			case MONITORING_MESSAGE_RULES:
 				allPossibleVariables = getInterventionAdministrationManagerService()
 						.getAllPossibleMonitoringRuleVariablesOfIntervention(
 								rulesRelatedModelObjectId);
 				break;
-			default:
+			case SCREENING_SURVEY_RULES:
+			case FEEDBACK_RULES:
 				allPossibleVariables = getScreeningSurveyAdministrationManagerService()
 						.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 								rulesRelatedModelObjectId);
 				break;
+			default:
+				allPossibleVariables = null;
 		}
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_RULE_WITH_PLACEHOLDERS,
@@ -172,15 +176,19 @@ public class AbstractRuleEditComponentWithController extends
 		final List<String> allPossibleVariables;
 		switch (type) {
 			case MONITORING_RULES:
+			case MONITORING_MESSAGE_RULES:
 				allPossibleVariables = getInterventionAdministrationManagerService()
 						.getAllPossibleMonitoringRuleVariablesOfIntervention(
 								rulesRelatedModelObjectId);
 				break;
-			default:
+			case SCREENING_SURVEY_RULES:
+			case FEEDBACK_RULES:
 				allPossibleVariables = getScreeningSurveyAdministrationManagerService()
 						.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 								rulesRelatedModelObjectId);
 				break;
+			default:
+				allPossibleVariables = null;
 		}
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_TEXT_WITH_PLACEHOLDERS,
@@ -207,5 +215,4 @@ public class AbstractRuleEditComponentWithController extends
 					}
 				}, null);
 	}
-
 }
