@@ -16,8 +16,7 @@ import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.persistent.types.DialogMessageStatusTypes;
 import org.isgf.mhc.model.ui.UIDialogMessageProblemViewWithParticipant;
-import org.isgf.mhc.model.ui.UIDialogMessageReducedWithParticipant;
-import org.isgf.mhc.model.ui.UIDialogMessageWithParticipant;
+import org.isgf.mhc.model.ui.results.UIDialogMessageWithParticipantForResults;
 import org.isgf.mhc.tools.StringHelpers;
 
 /**
@@ -154,17 +153,17 @@ public class DialogMessage extends ModelObject {
 	private boolean						manuallySent;
 
 	/**
-	 * Create a {@link UIDialogMessageWithParticipant} with the belonging
+	 * Create a {@link UIDialogMessageWithParticipantForResults} with the belonging
 	 * {@link Participant}
 	 * 
 	 * @param participantId
 	 * @param participantName
 	 * @return
 	 */
-	public UIDialogMessageWithParticipant toUIDialogMessageWithParticipant(
+	public UIDialogMessageWithParticipantForResults toUIDialogMessageWithParticipant(
 			final String participantId, final String participantName,
 			final String organization, final String organizationUnit) {
-		final val dialogMessage = new UIDialogMessageWithParticipant(
+		final val dialogMessage = new UIDialogMessageWithParticipantForResults(
 				participantId,
 				participantName,
 				organization,
@@ -191,38 +190,6 @@ public class DialogMessage extends ModelObject {
 						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
 						: Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__NO));
-
-		dialogMessage.setRelatedModelObject(this);
-
-		return dialogMessage;
-	}
-
-	/**
-	 * Create a {@link UIDialogMessageReducedWithParticipant} with the belonging
-	 * {@link Participant}
-	 * 
-	 * @param participantId
-	 * @param participantName
-	 * @return
-	 */
-	public UIDialogMessageReducedWithParticipant toUIDialogMessageReducedWithParticipant(
-			final String participantId, final String participantName,
-			final String organization, final String organizationUnit) {
-		final val dialogMessage = new UIDialogMessageReducedWithParticipant(
-				participantId,
-				participantName,
-				organization,
-				organizationUnit,
-				status.toString(),
-				sentTimestamp <= 0 ? null : new Date(sentTimestamp),
-				answerReceived == null || answerReceived.equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: answerReceived,
-				answerReceivedRaw == null || answerReceivedRaw.equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: answerReceivedRaw,
-				answerReceivedTimestamp <= 0 ? null : new Date(
-						answerReceivedTimestamp));
 
 		dialogMessage.setRelatedModelObject(this);
 

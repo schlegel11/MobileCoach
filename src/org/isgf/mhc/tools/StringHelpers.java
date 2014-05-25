@@ -89,7 +89,7 @@ public class StringHelpers {
 		String numberWithoutZeros = phoneNumber.trim().replaceAll("[^\\d]", "")
 				.replaceAll("^0+", "");
 
-		// TODO Need to be more international using the configuration (at best:
+		// FIXME Need to be more international using the configuration (at best:
 		// per intervention project)
 		if (!numberWithoutZeros.startsWith("4")) {
 			numberWithoutZeros = "41" + numberWithoutZeros;

@@ -1,5 +1,6 @@
 package org.isgf.mhc.model.persistent;
 
+import java.util.Date;
 import java.util.List;
 
 import lombok.Getter;
@@ -10,11 +11,13 @@ import lombok.Setter;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.persistent.concepts.AbstractVariableWithValue;
+import org.isgf.mhc.model.ui.UIVariableWithParticipant;
 
 /**
  * {@link ModelObject} to represent an {@link ParticipantVariableWithValue}
  * 
- * SystemVariables belong to the referenced {@link Participant} and consist of a name
+ * SystemVariables belong to the referenced {@link Participant} and consist of a
+ * name
  * and a value.
  * 
  * @author Andreas Filler
@@ -25,10 +28,11 @@ public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 	 * Default constructor
 	 */
 	public ParticipantVariableWithValue(final ObjectId participant,
-			final String name, final String value) {
+			final long lastUpdated, final String name, final String value) {
 		super(name, value);
 
 		this.participant = participant;
+		this.lastUpdated = lastUpdated;
 	}
 
 	/**
@@ -38,6 +42,34 @@ public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 	@Setter
 	@NonNull
 	private ObjectId	participant;
+
+	/**
+	 * The moment in time when the variable was updated the last time
+	 */
+	@Getter
+	@Setter
+	private long		lastUpdated;
+
+	/**
+	 * Creates a {@link UIVariableWithParticipant} with the belonging
+	 * {@link Participant}
+	 * 
+	 * @param participantName
+	 * @return
+	 */
+	public UIVariableWithParticipant toUIVariableWithParticipant(
+			final String participantId, final String participantName,
+			final String organization, final String organizationUnit) {
+		final UIVariableWithParticipant variable;
+
+		variable = new UIVariableWithParticipant(participantId,
+				participantName, organization, organizationUnit, getName(),
+				getValue(), new Date(getLastUpdated()));
+
+		variable.setRelatedModelObject(this);
+
+		return variable;
+	}
 
 	/*
 	 * (non-Javadoc)

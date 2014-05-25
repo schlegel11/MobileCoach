@@ -6,9 +6,9 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.List;
 
-import org.isgf.mhc.model.ui.UIDialogMessageWithParticipant;
 import org.isgf.mhc.model.ui.UIModelObject;
-import org.isgf.mhc.model.ui.UIVariableWithParticipant;
+import org.isgf.mhc.model.ui.results.UIDialogMessageWithParticipantForResults;
+import org.isgf.mhc.model.ui.results.UIVariableWithParticipantForResults;
 
 import com.googlecode.jcsv.writer.CSVWriter;
 import com.googlecode.jcsv.writer.internal.CSVWriterBuilder;
@@ -19,11 +19,12 @@ import com.googlecode.jcsv.writer.internal.CSVWriterBuilder;
  * @author Andreas Filler
  */
 public class CSVExporter {
-	public static InputStream convertUIParticipantVariableToCSV(
-			final List<UIVariableWithParticipant> items) throws IOException {
+	public static InputStream convertUIParticipantVariableForResultsToCSV(
+			final List<UIVariableWithParticipantForResults> items)
+			throws IOException {
 		final StringWriter stringWriter = new StringWriter();
 
-		final CSVWriter<UIVariableWithParticipant> csvWriter = new CSVWriterBuilder<UIVariableWithParticipant>(
+		final CSVWriter<UIVariableWithParticipantForResults> csvWriter = new CSVWriterBuilder<UIVariableWithParticipantForResults>(
 				stringWriter).entryConverter(
 				new CSVUIParticipantVariableEntryConverter()).build();
 
@@ -37,11 +38,12 @@ public class CSVExporter {
 		return new ByteArrayInputStream(stringWriter.toString().getBytes());
 	}
 
-	public static InputStream convertUIDialogMessageToCSV(
-			final List<UIDialogMessageWithParticipant> items) throws IOException {
+	public static InputStream convertUIDialogMessageForResultsToCSV(
+			final List<UIDialogMessageWithParticipantForResults> items)
+			throws IOException {
 		final StringWriter stringWriter = new StringWriter();
 
-		final CSVWriter<UIDialogMessageWithParticipant> csvWriter = new CSVWriterBuilder<UIDialogMessageWithParticipant>(
+		final CSVWriter<UIDialogMessageWithParticipantForResults> csvWriter = new CSVWriterBuilder<UIDialogMessageWithParticipantForResults>(
 				stringWriter).entryConverter(
 				new CSVUIPDialogMessageEntryConverter()).build();
 

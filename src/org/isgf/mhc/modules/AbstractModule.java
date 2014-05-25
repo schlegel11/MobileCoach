@@ -4,8 +4,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 
 import org.bson.types.ObjectId;
-import org.isgf.mhc.conf.AdminMessageStrings;
-import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ui.UIModule;
 import org.isgf.mhc.ui.views.components.AbstractClosableEditComponent;
 
@@ -37,7 +35,7 @@ public abstract class AbstractModule extends AbstractClosableEditComponent {
 	 * 
 	 * @return
 	 */
-	public abstract AdminMessageStrings getName();
+	public abstract String getName();
 
 	/**
 	 * The button to close the module
@@ -57,8 +55,7 @@ public abstract class AbstractModule extends AbstractClosableEditComponent {
 	}
 
 	public UIModule toUIModule() {
-		final UIModule uiModule = new UIModule(
-				Messages.getAdminString(getName()), getClass());
+		final UIModule uiModule = new UIModule(getName(), getClass());
 		return uiModule;
 	}
 }

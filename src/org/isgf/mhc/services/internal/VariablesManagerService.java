@@ -278,6 +278,7 @@ public class VariablesManagerService {
 		hashtable.put(variable, newVariableWithValue);
 	}
 
+	@Synchronized
 	public void writeVariableValueOfParticipant(final ObjectId participantId,
 			final String variableName, final String variableValue)
 			throws WriteProtectedVariableException,
@@ -286,6 +287,7 @@ public class VariablesManagerService {
 				variableValue, false);
 	}
 
+	@Synchronized
 	public void writeVariableValueOfParticipant(final ObjectId participantId,
 			final String variableName, final String variableValue,
 			final boolean overwriteAllowed)
@@ -336,7 +338,8 @@ public class VariablesManagerService {
 			if (participantVariableWithValue == null) {
 				log.debug("Creating new variable");
 				val newParticipantVariableWithValue = new ParticipantVariableWithValue(
-						participantId, variableName, variableValue == null ? ""
+						participantId, InternalDateTime.currentTimeMillis(),
+						variableName, variableValue == null ? ""
 								: variableValue);
 
 				databaseManagerService
@@ -345,6 +348,8 @@ public class VariablesManagerService {
 				log.debug("Changing existing variable");
 				participantVariableWithValue
 						.setValue(variableValue == null ? "" : variableValue);
+				participantVariableWithValue.setLastUpdated(InternalDateTime
+						.currentTimeMillis());
 
 				databaseManagerService
 						.saveModelObject(participantVariableWithValue);

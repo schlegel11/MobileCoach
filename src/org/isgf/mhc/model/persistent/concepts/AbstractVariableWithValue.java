@@ -11,7 +11,7 @@ import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.persistent.Participant;
 import org.isgf.mhc.model.ui.UIModelObject;
 import org.isgf.mhc.model.ui.UIVariable;
-import org.isgf.mhc.model.ui.UIVariableWithParticipant;
+import org.isgf.mhc.model.ui.results.UIVariableWithParticipantForResults;
 
 /**
  * {@link ModelObject} to represent a variable value combination
@@ -54,15 +54,17 @@ public abstract class AbstractVariableWithValue extends ModelObject {
 	}
 
 	/**
-	 * Creates a {@link UIVariableWithParticipant} with the belonging
+	 * Creates a {@link UIVariableWithParticipantForResults} with the belonging
 	 * {@link Participant}
 	 * 
 	 * @param participantName
 	 * @return
 	 */
-	public UIVariableWithParticipant toUIVariableWithParticipant(
+	public UIVariableWithParticipantForResults toUIVariableWithParticipantForResults(
 			final String participantId, final String participantName) {
-		final val variable = new UIVariableWithParticipant(participantId,
+		final UIVariableWithParticipantForResults variable;
+
+		variable = new UIVariableWithParticipantForResults(participantId,
 				participantName, name, value);
 
 		variable.setRelatedModelObject(this);

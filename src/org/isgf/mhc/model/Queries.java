@@ -112,6 +112,7 @@ public class Queries {
 
 	public static final String	PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT												= "{'participant':#}";
 	public static final String	PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_VARIABLE_NAME							= "{'participant':#,'name':#}";
+	public static final String	PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_VARIABLE_NAME_AND_LAST_UPDATED_HIGHER	= "{'participant':#,'name':#,'lastUpdated':{$gt:#}}";
 
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT																= "{'participant':#}";
 	public static final String	DIALOG_MESSAGE__BY_RELATED_MONITORING_MESSAGE_AND_SENT_AFTER_TIMESTAMP						= "{'relatedMonitoringMessage':#,'sentTimestamp':{$gt:#}}";

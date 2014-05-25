@@ -19,9 +19,10 @@ import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.persistent.Intervention;
 import org.isgf.mhc.model.persistent.Participant;
 import org.isgf.mhc.model.persistent.concepts.AbstractVariableWithValue;
-import org.isgf.mhc.model.ui.UIDialogMessageWithParticipant;
 import org.isgf.mhc.model.ui.UIParticipant;
 import org.isgf.mhc.model.ui.UIVariableWithParticipant;
+import org.isgf.mhc.model.ui.results.UIDialogMessageWithParticipantForResults;
+import org.isgf.mhc.model.ui.results.UIVariableWithParticipantForResults;
 import org.isgf.mhc.tools.CSVExporter;
 import org.isgf.mhc.tools.OnDemandFileDownloader;
 import org.isgf.mhc.tools.OnDemandFileDownloader.OnDemandStreamResource;
@@ -46,16 +47,16 @@ import com.vaadin.ui.Button.ClickEvent;
 public class InterventionResultsComponentWithController extends
 		InterventionResultsComponent {
 
-	private final Intervention												intervention;
+	private final Intervention														intervention;
 
-	private Collection<ObjectId>											selectedUIParticipantsIds;
-	private UIVariableWithParticipant										selectedUIVariableWithParticipant			= null;
-	private BeanItem<UIVariableWithParticipant>								selectedUIVariableWithParticipantBeanItem	= null;
+	private Collection<ObjectId>													selectedUIParticipantsIds;
+	private UIVariableWithParticipantForResults										selectedUIVariableWithParticipant			= null;
+	private BeanItem<UIVariableWithParticipantForResults>							selectedUIVariableWithParticipantBeanItem	= null;
 
-	private final BeanContainer<ObjectId, UIParticipant>					beanContainer;
+	private final BeanContainer<ObjectId, UIParticipant>							beanContainer;
 
-	private final BeanContainer<Integer, UIVariableWithParticipant>			variablesBeanContainer;
-	private final BeanContainer<Integer, UIDialogMessageWithParticipant>	messageDialogBeanContainer;
+	private final BeanContainer<Integer, UIVariableWithParticipantForResults>		variablesBeanContainer;
+	private final BeanContainer<Integer, UIDialogMessageWithParticipantForResults>	messageDialogBeanContainer;
 
 	public InterventionResultsComponentWithController(
 			final Intervention intervention) {
@@ -97,28 +98,31 @@ public class InterventionResultsComponentWithController extends
 					}
 				});
 
-		variablesBeanContainer = new BeanContainer<Integer, UIVariableWithParticipant>(
-				UIVariableWithParticipant.class);
+		variablesBeanContainer = new BeanContainer<Integer, UIVariableWithParticipantForResults>(
+				UIVariableWithParticipantForResults.class);
 
 		variablesTable.setContainerDataSource(variablesBeanContainer);
-		variablesTable.setSortContainerPropertyId(UIVariableWithParticipant
-				.getSortColumn());
-		variablesTable.setVisibleColumns(UIVariableWithParticipant
+		variablesTable
+				.setSortContainerPropertyId(UIVariableWithParticipantForResults
+						.getSortColumn());
+		variablesTable.setVisibleColumns(UIVariableWithParticipantForResults
 				.getVisibleColumns());
-		variablesTable.setColumnHeaders(UIVariableWithParticipant
+		variablesTable.setColumnHeaders(UIVariableWithParticipantForResults
 				.getColumnHeaders());
 
-		messageDialogBeanContainer = new BeanContainer<Integer, UIDialogMessageWithParticipant>(
-				UIDialogMessageWithParticipant.class);
+		messageDialogBeanContainer = new BeanContainer<Integer, UIDialogMessageWithParticipantForResults>(
+				UIDialogMessageWithParticipantForResults.class);
 
 		messageDialogTable.setContainerDataSource(messageDialogBeanContainer);
 		messageDialogTable
-				.setSortContainerPropertyId(UIDialogMessageWithParticipant
+				.setSortContainerPropertyId(UIDialogMessageWithParticipantForResults
 						.getSortColumn());
-		messageDialogTable.setVisibleColumns(UIDialogMessageWithParticipant
-				.getVisibleColumns());
-		messageDialogTable.setColumnHeaders(UIDialogMessageWithParticipant
-				.getColumnHeaders());
+		messageDialogTable
+				.setVisibleColumns(UIDialogMessageWithParticipantForResults
+						.getVisibleColumns());
+		messageDialogTable
+				.setColumnHeaders(UIDialogMessageWithParticipantForResults
+						.getColumnHeaders());
 
 		// handle selection change
 		participantsTable.addValueChangeListener(new ValueChangeListener() {
@@ -144,11 +148,11 @@ public class InterventionResultsComponentWithController extends
 					setVariableWithParticipantSelected(false);
 				} else {
 					selectedUIVariableWithParticipant = getUIModelObjectFromTableByObjectId(
-							variablesTable, UIVariableWithParticipant.class,
-							objectId);
+							variablesTable,
+							UIVariableWithParticipantForResults.class, objectId);
 					selectedUIVariableWithParticipantBeanItem = getBeanItemFromTableByObjectId(
-							variablesTable, UIVariableWithParticipant.class,
-							objectId);
+							variablesTable,
+							UIVariableWithParticipantForResults.class, objectId);
 					setVariableWithParticipantSelected(true);
 				}
 			}
@@ -165,7 +169,7 @@ public class InterventionResultsComponentWithController extends
 
 					@Override
 					public InputStream getStream() {
-						final List<UIVariableWithParticipant> items = new ArrayList<UIVariableWithParticipant>();
+						final List<UIVariableWithParticipantForResults> items = new ArrayList<UIVariableWithParticipantForResults>();
 
 						for (val itemId : variablesBeanContainer.getItemIds()) {
 							items.add(variablesBeanContainer.getItem(itemId)
@@ -174,7 +178,7 @@ public class InterventionResultsComponentWithController extends
 
 						try {
 							return CSVExporter
-									.convertUIParticipantVariableToCSV(items);
+									.convertUIParticipantVariableForResultsToCSV(items);
 						} catch (final IOException e) {
 							log.error("Error at creating CSV: {}",
 									e.getMessage());
@@ -199,7 +203,7 @@ public class InterventionResultsComponentWithController extends
 
 					@Override
 					public InputStream getStream() {
-						final List<UIDialogMessageWithParticipant> items = new ArrayList<UIDialogMessageWithParticipant>();
+						final List<UIDialogMessageWithParticipantForResults> items = new ArrayList<UIDialogMessageWithParticipantForResults>();
 
 						for (val itemId : messageDialogBeanContainer
 								.getItemIds()) {
@@ -209,7 +213,7 @@ public class InterventionResultsComponentWithController extends
 
 						try {
 							return CSVExporter
-									.convertUIDialogMessageToCSV(items);
+									.convertUIDialogMessageForResultsToCSV(items);
 						} catch (final IOException e) {
 							log.error("Error at creating CSV: {}",
 									e.getMessage());
@@ -279,7 +283,7 @@ public class InterventionResultsComponentWithController extends
 						.addItem(
 								i++,
 								variableOfParticipant
-										.toUIVariableWithParticipant(
+										.toUIVariableWithParticipantForResults(
 												participant.getId().toString(),
 												participant.getNickname()
 														.equals("") ? Messages

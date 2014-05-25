@@ -195,8 +195,34 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 			final AbstractClosableEditComponent closableEditComponent,
 			final ExtendableButtonClickListener closeButtonClickListener,
 			final Object... titleValues) {
-		val modalWindow = new Window(
-				Messages.getAdminString(title, titleValues));
+		return showModalClosableEditWindow(
+				Messages.getAdminString(title, titleValues),
+				closableEditComponent, closeButtonClickListener, titleValues);
+	}
+
+	/**
+	 * Shows a model and closable edit window
+	 * 
+	 * @param title
+	 *            The title of the window
+	 * @param modelObjectToEdit
+	 *            The {@link ModelObject} to edit
+	 * @param closableEditComponent
+	 *            The appropriate {@link AbstractStringValueEditComponent} to
+	 *            create
+	 * @param okButtonClickListener
+	 *            The listener for the OK button
+	 * @param cancelButtonClickListener
+	 *            The listener for the Cancel button
+	 * @param titleValues
+	 *            The placeholders to use in the title
+	 * @return The shown window
+	 */
+	protected Window showModalClosableEditWindow(final String title,
+			final AbstractClosableEditComponent closableEditComponent,
+			final ExtendableButtonClickListener closeButtonClickListener,
+			final Object... titleValues) {
+		val modalWindow = new Window(title);
 		modalWindow.setModal(true);
 		modalWindow.setResizable(false);
 		modalWindow.setClosable(false);

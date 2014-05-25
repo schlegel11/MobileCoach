@@ -35,13 +35,15 @@ import org.isgf.mhc.model.persistent.MonitoringMessageRule;
 import org.isgf.mhc.model.persistent.MonitoringReplyRule;
 import org.isgf.mhc.model.persistent.MonitoringRule;
 import org.isgf.mhc.model.persistent.Participant;
+import org.isgf.mhc.model.persistent.ParticipantVariableWithValue;
 import org.isgf.mhc.model.persistent.ScreeningSurvey;
 import org.isgf.mhc.model.persistent.concepts.AbstractRule;
 import org.isgf.mhc.model.persistent.concepts.AbstractVariableWithValue;
 import org.isgf.mhc.model.persistent.types.MediaObjectTypes;
 import org.isgf.mhc.model.persistent.types.RuleEquationSignTypes;
 import org.isgf.mhc.modules.AbstractModule;
-import org.isgf.mhc.modules.quiz.QuizModuleWithController;
+import org.isgf.mhc.modules.quiz.MessageContestMotivationalMessage;
+import org.isgf.mhc.modules.quiz.MessageContestQuitMessage;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.ModelObjectExchangeService;
@@ -83,8 +85,10 @@ public class InterventionAdministrationManagerService {
 		this.modelObjectExchangeService = modelObjectExchangeService;
 
 		log.info("Registering modules...");
+		// FIXME Should be done cleaner
 		modules = new ArrayList<Class<? extends AbstractModule>>();
-		modules.add(QuizModuleWithController.class);
+		modules.add(MessageContestMotivationalMessage.class);
+		modules.add(MessageContestQuitMessage.class);
 
 		log.info("Started.");
 	}
@@ -1475,14 +1479,14 @@ public class InterventionAdministrationManagerService {
 				Queries.DIALOG_MESSAGE__SORT_BY_ORDER_ASC, participantId);
 	}
 
-	public Iterable<DialogMessage> getAllDialogMessagesOfRelatedMonitoringMessageSentWithinLast14Days(
-			final ObjectId relatedMonitoringMessage) {
+	public Iterable<ParticipantVariableWithValue> getAllParticipantVariablesUpdatedWithinLast14Days(
+			final ObjectId participantId, final String variableName) {
 		return databaseManagerService
-				.findSortedModelObjects(
-						DialogMessage.class,
-						Queries.DIALOG_MESSAGE__BY_RELATED_MONITORING_MESSAGE_AND_SENT_AFTER_TIMESTAMP,
-						Queries.DIALOG_MESSAGE__SORT_BY_SENT_TIMESTAMP_DESC,
-						relatedMonitoringMessage,
+				.findModelObjects(
+						ParticipantVariableWithValue.class,
+						Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_VARIABLE_NAME_AND_LAST_UPDATED_HIGHER,
+						participantId,
+						variableName,
 						InternalDateTime.currentTimeMillis()
 								- ImplementationContants.DAYS_TO_TIME_IN_MILLIS_MULTIPLICATOR
 								* 14);
