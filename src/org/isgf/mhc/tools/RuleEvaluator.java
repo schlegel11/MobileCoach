@@ -1,9 +1,11 @@
 package org.isgf.mhc.tools;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -194,6 +196,40 @@ public class RuleEvaluator {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
+				case DATE_DIFFERENCE_VALUE_EQUALS:
+					val calendarDiff = Calendar.getInstance();
+					val dateParts = ruleEvaluationResult.getTextRuleValue()
+							.trim().split("\\.");
+					val calendarNow = Calendar.getInstance();
+					calendarNow.setTimeInMillis(InternalDateTime
+							.currentTimeMillis());
+					if (dateParts.length > 2 && dateParts[2].length() > 2) {
+						calendarDiff.set(Integer.parseInt(dateParts[2]),
+								Integer.parseInt(dateParts[1]) - 1,
+								Integer.parseInt(dateParts[0]));
+					} else {
+						calendarDiff.set(calendarNow.get(Calendar.YEAR),
+								Integer.parseInt(dateParts[1]) - 1,
+								Integer.parseInt(dateParts[0]));
+					}
+					calendarNow.set(Calendar.HOUR_OF_DAY,
+							calendarDiff.get(Calendar.HOUR_OF_DAY));
+					calendarNow.set(Calendar.MINUTE,
+							calendarDiff.get(Calendar.MINUTE));
+					calendarNow.set(Calendar.SECOND,
+							calendarDiff.get(Calendar.SECOND));
+					calendarNow.set(Calendar.MILLISECOND,
+							calendarDiff.get(Calendar.MILLISECOND));
+
+					final long diff = calendarNow.getTimeInMillis()
+							- calendarDiff.getTimeInMillis();
+
+					if (TimeUnit.MILLISECONDS.toDays(diff) == Integer
+							.parseInt(ruleEvaluationResult
+									.getTextRuleComparisonTermValue())) {
+						ruleEvaluationResult.setRuleMatchesEquationSign(true);
+					}
+					break;
 				default:
 					break;
 			}
@@ -204,6 +240,7 @@ public class RuleEvaluator {
 			ruleEvaluationResult.setEvaluatedSuccessful(false);
 			ruleEvaluationResult.setErrorMessage("Could not evaluate rule: "
 					+ e.getMessage());
+			log.warn("Error when evaluation rule: {}", e.getMessage());
 		}
 
 		return ruleEvaluationResult;

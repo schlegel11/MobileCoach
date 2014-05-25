@@ -86,8 +86,11 @@ public class StringHelpers {
 	 * @return
 	 */
 	public static String cleanPhoneNumber(final String phoneNumber) {
-		String numberWithoutZeros = phoneNumber.trim().replaceAll("[^\\d]", "")
-				.replaceAll("^0+", "");
+		String numberWithoutZeros = phoneNumber
+				.trim()
+				.replaceAll(
+						ImplementationContants.REGULAR_EXPRESSION_TO_CLEAN_PHONE_NUMBERS,
+						"").replaceAll("^0+", "");
 
 		// FIXME Need to be more international using the configuration (at best:
 		// per intervention project)
@@ -116,8 +119,12 @@ public class StringHelpers {
 	 * @return
 	 */
 	public static String cleanReceivedMessageString(final String messageString) {
-		val newValue = messageString.trim().toLowerCase()
-				.replaceAll("[^a-z0-9\\s]", "");
+		val newValue = messageString
+				.trim()
+				.toLowerCase()
+				.replaceAll(
+						ImplementationContants.REGULAR_EXPRESSION_TO_CLEAN_RECEIVED_MESSAGE,
+						"");
 		return newValue;
 	}
 
@@ -128,7 +135,11 @@ public class StringHelpers {
 	 * @return
 	 */
 	public static String cleanDoubleValue(final double doubleValue) {
-		val stringValue = String.valueOf(doubleValue).replaceAll("\\.0+$", "");
+		val stringValue = String
+				.valueOf(doubleValue)
+				.replaceAll(
+						ImplementationContants.REGULAR_EXPRESSION_TO_CLEAN_DOUBLE_VALUES,
+						"");
 		return stringValue;
 	}
 }

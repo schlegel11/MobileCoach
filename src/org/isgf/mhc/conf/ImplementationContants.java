@@ -76,4 +76,8 @@ public class ImplementationContants {
 	public static final String	VARIABLE_VALUE_MODIFIER_START									= "{";
 	public static final String	VARIABLE_VALUE_MODIFIER_END										= "}";
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_VALUE_MODIFIER						= "\\{[^\\}]+\\}";
+
+	public static final String	REGULAR_EXPRESSION_TO_CLEAN_PHONE_NUMBERS						= "[^\\d]";
+	public static final String	REGULAR_EXPRESSION_TO_CLEAN_RECEIVED_MESSAGE					= "[^a-z0-9\\s\\.]";
+	public static final String	REGULAR_EXPRESSION_TO_CLEAN_DOUBLE_VALUES						= "\\.0+$";
 }
