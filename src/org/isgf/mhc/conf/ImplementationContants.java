@@ -39,13 +39,13 @@ public class ImplementationContants {
 	// 2*60;
 
 	// FIXME Emergency solution for first intervention
-	public static String		VARIABLE_DEFINING_PARTICIPATION_IN_MOBILE_COACH_PLUS			= "$plusParticipation";
+	public static String		VARIABLE_DEFINING_PARTICIPATION_IN_MOBILE_COACH_EXTRA			= "$participation_extra";
 
 	// FIXME Emergency solution for first intervention
-	public static final String	MESSAGE_CONTEST_QUIT_RESULT_VARIABLE							= "$quitMessageResult";
-	public static final String	MESSAGE_CONTEST_QUIT_RELEVANT_VARIABLE							= "$quitMessage";
-	public static final String	MESSAGE_CONTEST_MOTIVATIONAL_RESULT_VARIABLE					= "$motivationalMessageResult";
-	public static final String	MESSAGE_CONTEST_MOTIVATIONAL_RELEVANT_VARIABLE					= "$motivationalMessage";
+	public static final String	MESSAGE_CONTEST_QUIT_RESULT_VARIABLE							= "$contest_quit_message_result";
+	public static final String	MESSAGE_CONTEST_QUIT_RELEVANT_VARIABLE							= "$contest_quit_message";
+	public static final String	MESSAGE_CONTEST_MOTIVATIONAL_RESULT_VARIABLE					= "$contest_motivational_message_result";
+	public static final String	MESSAGE_CONTEST_MOTIVATIONAL_RELEVANT_VARIABLE					= "$contest_motivational_message";
 
 	public static final long	MAILING_SEND_RETRIES											= 2;
 	public static final long	MAILING_SEND_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS			= 5 * 60;

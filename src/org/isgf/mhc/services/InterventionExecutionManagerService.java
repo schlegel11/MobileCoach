@@ -1,7 +1,9 @@
 package org.isgf.mhc.services;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import lombok.Synchronized;
@@ -47,7 +49,10 @@ import org.isgf.mhc.tools.VariableStringReplacer;
  */
 @Log4j2
 public class InterventionExecutionManagerService {
-	private static InterventionExecutionManagerService	instance	= null;
+	private static InterventionExecutionManagerService	instance			= null;
+
+	private static SimpleDateFormat						dayInWeekFormatter	= new SimpleDateFormat(
+																					"u");
 
 	private final String[]								acceptedStopWords;
 
@@ -608,22 +613,35 @@ public class InterventionExecutionManagerService {
 	}
 
 	@Synchronized
-	public void sheduleMessagesForSending() {
+	public void scheduleMessagesForSending() {
 		log.debug("Create a list of all relevant participants for sheduling of monitoring messages");
 		val participants = getAllParticipantsRelevantForAnsweredInTimeChecksAndMonitoringSheduling();
 
 		val dateIndex = StringHelpers.createDailyUniqueIndex();
+		val dateToday = new Date(InternalDateTime.currentTimeMillis());
+		val todayDayIndex = Integer.parseInt(dayInWeekFormatter
+				.format(dateToday));
 		for (val participant : participants) {
 
-			// Check if participant has already been sheduled today
+			// Check if participant has already been scheduled today
 			val dialogStatus = getDialogStatusByParticipant(participant.getId());
+
+			// Only start interventions on monday
+			if (dialogStatus != null
+					&& dialogStatus.getMonitoringDaysParticipated() == 0
+					&& todayDayIndex == 1) {
+				log.debug(
+						"Participant {} has not been scheduled at all! Wait until next monday to start with sheduling...",
+						participant.getId());
+				continue;
+			}
 
 			if (dialogStatus != null
 					&& !dialogStatus
 							.getDateIndexOfLastDailyMonitoringProcessing()
 							.equals(dateIndex)) {
 				log.debug(
-						"Participant {} has not been sheduled today! Start sheduling...",
+						"Participant {} has not been scheduled today! Start sheduling...",
 						participant.getId());
 
 				// Resolve rules
@@ -716,7 +734,7 @@ public class InterventionExecutionManagerService {
 					variablesManagerService
 							.writeVariableValueOfParticipant(
 									dialogOption.getParticipant(),
-									ImplementationContants.VARIABLE_DEFINING_PARTICIPATION_IN_MOBILE_COACH_PLUS,
+									ImplementationContants.VARIABLE_DEFINING_PARTICIPATION_IN_MOBILE_COACH_EXTRA,
 									"0");
 				} catch (final Exception e) {
 					log.warn(

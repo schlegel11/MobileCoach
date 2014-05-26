@@ -58,7 +58,7 @@ public class MonitoringShedulingWorker extends Thread {
 				try {
 					log.debug("Sheduling new messages");
 					interventionExecutionManagerService
-							.sheduleMessagesForSending();
+							.scheduleMessagesForSending();
 				} catch (final Exception e) {
 					log.error("Could not shedule new monitoring messages: {}",
 							e.getMessage());
