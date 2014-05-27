@@ -200,35 +200,83 @@ public class RuleEvaluator {
 					val calendarDiff = Calendar.getInstance();
 					val dateParts = ruleEvaluationResult.getTextRuleValue()
 							.trim().split("\\.");
-					val calendarNow = Calendar.getInstance();
-					calendarNow.setTimeInMillis(InternalDateTime
+					val calendar2 = Calendar.getInstance();
+					calendar2.setTimeInMillis(InternalDateTime
 							.currentTimeMillis());
 					if (dateParts.length > 2 && dateParts[2].length() > 2) {
 						calendarDiff.set(Integer.parseInt(dateParts[2]),
 								Integer.parseInt(dateParts[1]) - 1,
 								Integer.parseInt(dateParts[0]));
 					} else {
-						calendarDiff.set(calendarNow.get(Calendar.YEAR),
+						calendarDiff.set(calendar2.get(Calendar.YEAR),
 								Integer.parseInt(dateParts[1]) - 1,
 								Integer.parseInt(dateParts[0]));
 					}
-					calendarNow.set(Calendar.HOUR_OF_DAY,
+					calendar2.set(Calendar.HOUR_OF_DAY,
 							calendarDiff.get(Calendar.HOUR_OF_DAY));
-					calendarNow.set(Calendar.MINUTE,
+					calendar2.set(Calendar.MINUTE,
 							calendarDiff.get(Calendar.MINUTE));
-					calendarNow.set(Calendar.SECOND,
+					calendar2.set(Calendar.SECOND,
 							calendarDiff.get(Calendar.SECOND));
-					calendarNow.set(Calendar.MILLISECOND,
+					calendar2.set(Calendar.MILLISECOND,
 							calendarDiff.get(Calendar.MILLISECOND));
 
-					final long diff = calendarNow.getTimeInMillis()
+					final long equalDiff = calendar2.getTimeInMillis()
 							- calendarDiff.getTimeInMillis();
 
-					if (TimeUnit.MILLISECONDS.toDays(diff) == Integer
-							.parseInt(ruleEvaluationResult
+					if (TimeUnit.MILLISECONDS.toDays(equalDiff) == Long
+							.parseLong(ruleEvaluationResult
 									.getTextRuleComparisonTermValue())) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
+				case CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_TRUE_IF_ZERO:
+					val calendarNow = Calendar.getInstance();
+					val calendarDiff1 = Calendar.getInstance();
+					val calendarDiff2 = Calendar.getInstance();
+					val dateParts1 = ruleEvaluationResult.getTextRuleValue()
+							.trim().split("\\.");
+					val dateParts2 = ruleEvaluationResult
+							.getTextRuleComparisonTermValue().trim()
+							.split("\\.");
+					if (dateParts1.length > 2 && dateParts1[2].length() > 2) {
+						calendarDiff1.set(Integer.parseInt(dateParts1[2]),
+								Integer.parseInt(dateParts1[1]) - 1,
+								Integer.parseInt(dateParts1[0]));
+					} else {
+						calendarDiff1.set(calendarNow.get(Calendar.YEAR),
+								Integer.parseInt(dateParts1[1]) - 1,
+								Integer.parseInt(dateParts1[0]));
+					}
+					if (dateParts2.length > 2 && dateParts2[2].length() > 2) {
+						calendarDiff2.set(Integer.parseInt(dateParts2[2]),
+								Integer.parseInt(dateParts2[1]) - 1,
+								Integer.parseInt(dateParts2[0]));
+					} else {
+						calendarDiff2.set(calendarNow.get(Calendar.YEAR),
+								Integer.parseInt(dateParts2[1]) - 1,
+								Integer.parseInt(dateParts2[0]));
+					}
+					calendarDiff2.set(Calendar.HOUR_OF_DAY,
+							calendarDiff1.get(Calendar.HOUR_OF_DAY));
+					calendarDiff2.set(Calendar.MINUTE,
+							calendarDiff1.get(Calendar.MINUTE));
+					calendarDiff2.set(Calendar.SECOND,
+							calendarDiff1.get(Calendar.SECOND));
+					calendarDiff2.set(Calendar.MILLISECOND,
+							calendarDiff1.get(Calendar.MILLISECOND));
+
+					final long calcDiff = calendarDiff2.getTimeInMillis()
+							- calendarDiff1.getTimeInMillis();
+
+					final int calcDaysDiff = (int) TimeUnit.MILLISECONDS
+							.toDays(calcDiff);
+					if (calcDaysDiff == 0) {
+						ruleEvaluationResult.setRuleMatchesEquationSign(true);
+					}
+
+					ruleEvaluationResult.setCalculatedRuleValue(calcDaysDiff);
+					ruleEvaluationResult.setTextRuleValue(String
+							.valueOf(calcDaysDiff));
 					break;
 				default:
 					break;

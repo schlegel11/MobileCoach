@@ -385,7 +385,8 @@ public class RecursiveAbstractMonitoringRulesResolver {
 	}
 
 	/**
-	 * Checks message groups which groups and messages are already used and
+	 * Checks message groups which groups and messages are (1) already used //
+	 * (2) used less // (3) simply fit and
 	 * returns the {@link MonitoringMessage} to send or null if there are no
 	 * messages in the group
 	 * left
@@ -445,7 +446,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 			MonitoringMessage messageToStartWithInFallbackCase = null;
 			int timesMessageAlreadyUsed = Integer.MAX_VALUE;
 
-			for (int i = 0; i < 2; i++) {
+			for (int i = 0; i < 3; i++) {
 				messageLoop: for (val message : messages) {
 					if (i == 1 && message != messageToStartWithInFallbackCase) {
 						continue messageLoop;
@@ -470,14 +471,18 @@ public class RecursiveAbstractMonitoringRulesResolver {
 						}
 					}
 
-					if (i == 1 || dialogMessages.size() == 0) {
+					if (i >= 1 || dialogMessages.size() == 0) {
 						if (i == 0) {
 							log.debug(
 									"Monitoring message {} was not used for participant, yet",
 									message.getId());
-						} else {
+						} else if (i == 1) {
 							log.debug(
 									"Monitoring message {} was LESS used for participant",
+									message.getId());
+						} else if (i == 2) {
+							log.debug(
+									"Monitoring message {} was could be used for participant as last option",
 									message.getId());
 						}
 
