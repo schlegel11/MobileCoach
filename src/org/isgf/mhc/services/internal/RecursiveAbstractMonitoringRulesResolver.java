@@ -10,6 +10,7 @@ import lombok.Setter;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.IteratorUtils;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.model.Queries;
@@ -29,7 +30,8 @@ import org.isgf.mhc.tools.VariableStringReplacer;
 
 /**
  * Helps to recursively resolve tree-based rule structures of
- * {@link AbstractMonitoringRule}s
+ * {@link AbstractMonitoringRule}s and to determine the messages that should be
+ * send to a {@link Participant}
  * 
  * @author Andreas Filler
  */
@@ -438,49 +440,82 @@ public class RecursiveAbstractMonitoringRulesResolver {
 
 			Hashtable<String, AbstractVariableWithValue> variablesWithValues = null;
 
-			messageLoop: for (val message : messages) {
-				val dialogMessage = databaseManagerService
-						.findOneModelObject(
-								DialogMessage.class,
-								Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_RELATED_MONITORING_MESSAGE,
-								participant.getId(), message.getId());
-				if (dialogMessage == null) {
-					log.debug(
-							"Monitoring message {} was not used for participant, yet",
-							message.getId());
+			// Loop over all messages until an appropriate message has been
+			// found
+			MonitoringMessage messageToStartWithInFallbackCase = null;
+			int timesMessageAlreadyUsed = Integer.MAX_VALUE;
 
-					// Check rules of message for execution
-					val rules = databaseManagerService
-							.findSortedModelObjects(
-									MonitoringMessageRule.class,
-									Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE,
-									Queries.MONITORING_MESSAGE_RULE__SORT_BY_ORDER_ASC,
-									message.getId());
+			for (int i = 0; i < 2; i++) {
+				messageLoop: for (val message : messages) {
+					if (i == 1 && message != messageToStartWithInFallbackCase) {
+						continue messageLoop;
+					}
 
-					for (val rule : rules) {
-						if (variablesWithValues == null) {
-							variablesWithValues = variablesManagerService
-									.getAllVariablesWithValuesOfParticipantAndSystem(participant);
-						}
+					val dialogMessages = new ArrayList<DialogMessage>();
+					if (i == 0) {
+						val dialogMessagesIterator = databaseManagerService
+								.findModelObjects(
+										DialogMessage.class,
+										Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_RELATED_MONITORING_MESSAGE,
+										participant.getId(), message.getId())
+								.iterator();
 
-						val ruleResult = RuleEvaluator.evaluateRule(rule,
-								variablesWithValues.values());
+						CollectionUtils.addAll(dialogMessages,
+								dialogMessagesIterator);
 
-						if (!ruleResult.isEvaluatedSuccessful()) {
-							log.error("Error when validating rule: "
-									+ ruleResult.getErrorMessage());
-							continue;
-						}
-
-						// Check if true rule matches
-						if (!ruleResult.isRuleMatchesEquationSign()) {
-							log.debug("Rule does not match, so skip this message");
-							continue messageLoop;
+						if (dialogMessages.size() < timesMessageAlreadyUsed) {
+							// Remember this message as least used message
+							messageToStartWithInFallbackCase = message;
+							timesMessageAlreadyUsed = dialogMessages.size();
 						}
 					}
 
-					return message;
+					if (i == 1 || dialogMessages.size() == 0) {
+						if (i == 0) {
+							log.debug(
+									"Monitoring message {} was not used for participant, yet",
+									message.getId());
+						} else {
+							log.debug(
+									"Monitoring message {} was LESS used for participant",
+									message.getId());
+						}
+
+						// Check rules of message for execution
+						val rules = databaseManagerService
+								.findSortedModelObjects(
+										MonitoringMessageRule.class,
+										Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE,
+										Queries.MONITORING_MESSAGE_RULE__SORT_BY_ORDER_ASC,
+										message.getId());
+
+						for (val rule : rules) {
+							if (variablesWithValues == null) {
+								variablesWithValues = variablesManagerService
+										.getAllVariablesWithValuesOfParticipantAndSystem(participant);
+							}
+
+							val ruleResult = RuleEvaluator.evaluateRule(rule,
+									variablesWithValues.values());
+
+							if (!ruleResult.isEvaluatedSuccessful()) {
+								log.error("Error when validating rule: "
+										+ ruleResult.getErrorMessage());
+								continue;
+							}
+
+							// Check if true rule matches
+							if (!ruleResult.isRuleMatchesEquationSign()) {
+								log.debug("Rule does not match, so skip this message");
+								continue messageLoop;
+							}
+						}
+
+						return message;
+					}
 				}
+
+				log.debug("All message in this group were already used for the participant...so start over and use least used message");
 			}
 		}
 
