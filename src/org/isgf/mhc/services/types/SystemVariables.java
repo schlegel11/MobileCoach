@@ -15,7 +15,7 @@ public class SystemVariables {
 	};
 
 	public enum READ_ONLY_PARTICIPANT_VARIABLES {
-		participantParticipationInWeeks, participantParticipationInDays;
+		participantParticipationInWeeks, participantParticipationInDays, participantFeedbackURL;
 
 		public String toVariableName() {
 			return "$" + toString();

@@ -11,6 +11,7 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
+import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.memory.MemoryVariable;
 import org.isgf.mhc.model.persistent.DialogOption;
@@ -223,9 +224,14 @@ public class VariablesManagerService {
 				participant.getId());
 		int participationInDays = 0;
 		int participationInWeeks = 0;
+		String participantFeedbackURL = "";
 		if (dialogStatus != null) {
 			participationInDays = dialogStatus.getMonitoringDaysParticipated();
 			participationInWeeks = (int) Math.floor(participationInDays / 7);
+		}
+		if (participant.getAssignedFeedback() != null) {
+			participantFeedbackURL = Constants.getFeedbackLinkingBaseURL()
+					+ participant.getId();
 		}
 		for (val variable : SystemVariables.READ_ONLY_PARTICIPANT_VARIABLES
 				.values()) {
@@ -239,6 +245,10 @@ public class VariablesManagerService {
 					addToHashtable(variablesWithValues,
 							variable.toVariableName(),
 							String.valueOf(participationInWeeks));
+					break;
+				case participantFeedbackURL:
+					addToHashtable(variablesWithValues,
+							variable.toVariableName(), participantFeedbackURL);
 					break;
 			}
 		}

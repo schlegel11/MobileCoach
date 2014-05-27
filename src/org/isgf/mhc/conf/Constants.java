@@ -45,6 +45,8 @@ public class Constants {
 
 	@Getter
 	private static String		mediaObjectLinkingBaseURL			= "https://f.mobile-coach.eu/";
+	@Getter
+	private static String		feedbackLinkingBaseURL				= "https://fb.mobile-coach.eu/";
 
 	private static String		acceptedStopWordsSeparatedByComma	= "stop,stopp";
 
