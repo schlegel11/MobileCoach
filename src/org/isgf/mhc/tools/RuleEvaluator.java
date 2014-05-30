@@ -411,7 +411,8 @@ public class RuleEvaluator {
 			 * @return
 			 */
 			private Double positionReturner(final Iterator<Double> arguments) {
-				argumentsArrays = (Double[]) IteratorUtils.toArray(arguments);
+				argumentsArrays = (Double[]) IteratorUtils.toArray(arguments,
+						Double.class);
 
 				return argumentsArrays[argumentsArrays[0].intValue()];
 			}

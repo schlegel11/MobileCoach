@@ -83,6 +83,28 @@ public class TestServlet extends HttpServlet {
 
 	private void runTestcases() {
 		// TODO OPTIONAL: Testcases could be defined here
+		// final MonitoringMessageRule m = new MonitoringMessageRule(
+		// null,
+		// 0,
+		// "03.04.2014",
+		// RuleEquationSignTypes.CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_TRUE_IF_ZERO,
+		// "01.04.2014");
+		// val x = RuleEvaluator.evaluateRule(m,
+		// new ArrayList<AbstractVariableWithValue>());
+		// log.debug(">>" + x.getCalculatedRuleValue());
+
+		// val variables = new ArrayList<AbstractVariableWithValue>();
+		// variables.add(new InterventionVariableWithValue(null,
+		// "$fieldWithValues", "5,42,3"));
+		// final MonitoringMessageRule m = new MonitoringMessageRule(
+		// null,
+		// 0,
+		// "position(1,$fieldWithValues)",
+		// RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
+		// "");
+		// final val x = RuleEvaluator.evaluateRule(m, variables);
+		// log.debug(">>" + x.getCalculatedRuleValue());
+
 	}
 
 	private void logToWeb(final String logMessage) {
