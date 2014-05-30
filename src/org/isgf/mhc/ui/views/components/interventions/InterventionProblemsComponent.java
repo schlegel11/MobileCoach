@@ -112,7 +112,7 @@ public class InterventionProblemsComponent extends
 		messageDialogProblemsLabel.setWidth("-1px");
 		messageDialogProblemsLabel.setHeight("-1px");
 		messageDialogProblemsLabel
-				.setValue("!!! The following replies block the monitoring because their answers could not be automatically processed:");
+				.setValue("!!! The following replies could not be automatically processed:");
 		mainLayout.addComponent(messageDialogProblemsLabel);
 
 		// dialogMessagesTable

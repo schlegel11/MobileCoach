@@ -39,6 +39,7 @@ import org.isgf.mhc.model.persistent.ParticipantVariableWithValue;
 import org.isgf.mhc.model.persistent.ScreeningSurvey;
 import org.isgf.mhc.model.persistent.concepts.AbstractRule;
 import org.isgf.mhc.model.persistent.concepts.AbstractVariableWithValue;
+import org.isgf.mhc.model.persistent.types.DialogMessageStatusTypes;
 import org.isgf.mhc.model.persistent.types.MediaObjectTypes;
 import org.isgf.mhc.model.persistent.types.RuleEquationSignTypes;
 import org.isgf.mhc.modules.AbstractModule;
@@ -1492,7 +1493,7 @@ public class InterventionAdministrationManagerService {
 								* 14);
 	}
 
-	public List<DialogMessage> getAllDialogMessagesWithBlockingProblemsOfIntervention(
+	public List<DialogMessage> getAllDialogMessagesWhichAreNotAutomaticallyProcessableButAreNotProcessedOfIntervention(
 			final ObjectId interventionid) {
 		val dialogMessages = new ArrayList<DialogMessage>();
 
@@ -1504,8 +1505,10 @@ public class InterventionAdministrationManagerService {
 			val dialogMessagesOfParticipant = databaseManagerService
 					.findModelObjects(
 							DialogMessage.class,
-							Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_NOT_AUTOMATICALLY_PROCESSABLE,
-							participant.getId(), true);
+							Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_NOT_AUTOMATICALLY_PROCESSABLE,
+							participant.getId(),
+							DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
+							true);
 
 			CollectionUtils.addAll(dialogMessages,
 					dialogMessagesOfParticipant.iterator());

@@ -13,6 +13,7 @@ import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.persistent.DialogMessage;
 import org.isgf.mhc.model.persistent.Intervention;
+import org.isgf.mhc.model.persistent.types.DialogMessageStatusTypes;
 import org.isgf.mhc.model.ui.UIDialogMessageProblemViewWithParticipant;
 import org.isgf.mhc.tools.StringValidator;
 import org.isgf.mhc.ui.views.components.basics.PlaceholderStringEditComponent;
@@ -127,7 +128,7 @@ public class InterventionProblemsComponentWithController extends
 		beanContainer.removeAllItems();
 
 		val dialogMessages = getInterventionAdministrationManagerService()
-				.getAllDialogMessagesWithBlockingProblemsOfIntervention(
+				.getAllDialogMessagesWhichAreNotAutomaticallyProcessableButAreNotProcessedOfIntervention(
 						intervention.getId());
 
 		for (val dialogMessage : dialogMessages) {
@@ -173,34 +174,74 @@ public class InterventionProblemsComponentWithController extends
 		val dialogMessage = selectedUIDialogMessageProblemViewWithParticipant
 				.getRelatedModelObject(DialogMessage.class);
 
-		showModalStringValueEditWindow(
-				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_CLEANED_ANSWER,
-				dialogMessage.getAnswerReceived(), null,
-				new ShortStringEditComponent(),
-				new ExtendableButtonClickListener() {
-					@Override
-					public void buttonClick(final ClickEvent event) {
-						try {
-							// Set case as solved
-							MHC.getInstance()
-									.getInterventionExecutionManagerService()
-									.dialogMessageSetProblemSolved(
-											dialogMessage.getId(),
-											getStringValue());
+		if (dialogMessage.getStatus() == DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY) {
+			showConfirmationWindow(new ExtendableButtonClickListener() {
+				@Override
+				public void buttonClick(final ClickEvent event) {
+					try {
+						// Set case as solved
+						MHC.getInstance()
+								.getInterventionExecutionManagerService()
+								.dialogMessageSetProblemSolved(
+										dialogMessage.getId(), null);
 
-						} catch (final Exception e) {
-							handleException(e);
-							return;
-						}
+					} catch (final Exception e) {
+						handleException(e);
 
 						// Adapt UI
 						beanContainer.removeItem(dialogMessage.getId());
 
-						getAdminUI().showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__CASE_SOLVED);
 						closeWindow();
+
+						return;
 					}
-				}, null);
+
+					// Adapt UI
+					beanContainer.removeItem(dialogMessage.getId());
+
+					getAdminUI().showInformationNotification(
+							AdminMessageStrings.NOTIFICATION__CASE_SOLVED);
+					closeWindow();
+				}
+			}, null);
+
+		} else {
+			showModalStringValueEditWindow(
+					AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_CLEANED_ANSWER,
+					dialogMessage.getAnswerReceived(), null,
+					new ShortStringEditComponent(),
+					new ExtendableButtonClickListener() {
+						@Override
+						public void buttonClick(final ClickEvent event) {
+							try {
+								// Set case as solved
+								MHC.getInstance()
+										.getInterventionExecutionManagerService()
+										.dialogMessageSetProblemSolved(
+												dialogMessage.getId(),
+												getStringValue());
+
+							} catch (final Exception e) {
+								handleException(e);
+
+								// Adapt UI
+								beanContainer.removeItem(dialogMessage.getId());
+
+								closeWindow();
+
+								return;
+							}
+
+							// Adapt UI
+							beanContainer.removeItem(dialogMessage.getId());
+
+							getAdminUI()
+									.showInformationNotification(
+											AdminMessageStrings.NOTIFICATION__CASE_SOLVED);
+							closeWindow();
+						}
+					}, null);
+		}
 	}
 
 	public void sendMessage() {
