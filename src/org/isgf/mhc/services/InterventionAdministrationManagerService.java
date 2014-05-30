@@ -43,8 +43,8 @@ import org.isgf.mhc.model.persistent.types.DialogMessageStatusTypes;
 import org.isgf.mhc.model.persistent.types.MediaObjectTypes;
 import org.isgf.mhc.model.persistent.types.RuleEquationSignTypes;
 import org.isgf.mhc.modules.AbstractModule;
-import org.isgf.mhc.modules.quiz.MessageContestMotivationalMessage;
-import org.isgf.mhc.modules.quiz.MessageContestQuitMessage;
+import org.isgf.mhc.modules.message_contest.MessageContestMotivationalMessage;
+import org.isgf.mhc.modules.message_contest.MessageContestQuitMessage;
 import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.ModelObjectExchangeService;
@@ -334,6 +334,27 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(interventionVariableWithValue);
 
 		return interventionVariableWithValue;
+	}
+
+	public void interventionVariableWithValueCreateOrUpdate(
+			final ObjectId interventionId, final String variableName,
+			final String variableValue) {
+
+		val interventionVariable = databaseManagerService
+				.findOneModelObject(
+						InterventionVariableWithValue.class,
+						Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME,
+						interventionId, variableName);
+
+		if (interventionVariable == null) {
+			final InterventionVariableWithValue interventionVariableWithValue = new InterventionVariableWithValue(
+					interventionId, variableName, variableValue);
+			databaseManagerService
+					.saveModelObject(interventionVariableWithValue);
+		} else {
+			interventionVariable.setValue(variableValue);
+			databaseManagerService.saveModelObject(interventionVariable);
+		}
 	}
 
 	public void interventionVariableWithValueChangeName(
@@ -1480,7 +1501,7 @@ public class InterventionAdministrationManagerService {
 				Queries.DIALOG_MESSAGE__SORT_BY_ORDER_ASC, participantId);
 	}
 
-	public Iterable<ParticipantVariableWithValue> getAllParticipantVariablesUpdatedWithinLast14Days(
+	public Iterable<ParticipantVariableWithValue> getAllParticipantVariablesUpdatedWithinLast28Days(
 			final ObjectId participantId, final String variableName) {
 		return databaseManagerService
 				.findModelObjects(
@@ -1490,7 +1511,7 @@ public class InterventionAdministrationManagerService {
 						variableName,
 						InternalDateTime.currentTimeMillis()
 								- ImplementationContants.DAYS_TO_TIME_IN_MILLIS_MULTIPLICATOR
-								* 14);
+								* 28);
 	}
 
 	public List<DialogMessage> getAllDialogMessagesWhichAreNotAutomaticallyProcessableButAreNotProcessedOfIntervention(

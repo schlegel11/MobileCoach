@@ -1,4 +1,4 @@
-package org.isgf.mhc.modules.quiz;
+package org.isgf.mhc.modules.message_contest;
 
 import java.text.DateFormat;
 import java.util.Collection;
@@ -99,7 +99,7 @@ public abstract class MessageContestModuleWithController extends
 
 		for (val participant : participants) {
 			val variables = getInterventionAdministrationManagerService()
-					.getAllParticipantVariablesUpdatedWithinLast14Days(
+					.getAllParticipantVariablesUpdatedWithinLast28Days(
 							participant.getId(), getRelevantVariable());
 
 			for (val variable : variables) {
@@ -194,6 +194,12 @@ public abstract class MessageContestModuleWithController extends
 										.getBean()
 										.getRelatedModelObject(
 												ParticipantVariableWithValue.class);
+
+								getInterventionAdministrationManagerService()
+										.interventionVariableWithValueCreateOrUpdate(
+												interventionId,
+												getResultVariable(),
+												getStringValue());
 
 								interventionExecutionManagerService
 										.participantAdjustVariableValue(

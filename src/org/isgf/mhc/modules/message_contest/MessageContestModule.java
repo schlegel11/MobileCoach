@@ -1,4 +1,4 @@
-package org.isgf.mhc.modules.quiz;
+package org.isgf.mhc.modules.message_contest;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -81,7 +81,7 @@ public abstract class MessageContestModule extends AbstractModule {
 		relevantDialogMessagesLabel.setWidth("-1px");
 		relevantDialogMessagesLabel.setHeight("-1px");
 		relevantDialogMessagesLabel
-				.setValue("!!! Messages and replies within the last 14 days:");
+				.setValue("!!! Messages and replies within the last 28 days:");
 		mainLayout.addComponent(relevantDialogMessagesLabel);
 
 		// relevantVariablesTable

@@ -1,4 +1,4 @@
-package org.isgf.mhc.modules.quiz;
+package org.isgf.mhc.modules.message_contest;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
