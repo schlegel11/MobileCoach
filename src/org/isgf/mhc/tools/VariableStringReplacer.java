@@ -91,8 +91,13 @@ public class VariableStringReplacer {
 					}
 
 					// Replace variable with value in rule
-					stringWithVariables = stringWithVariables.replace(variable,
-							"(" + value + ")");
+					if (value.contains(",")) {
+						stringWithVariables = stringWithVariables.replace(
+								variable, value);
+					} else {
+						stringWithVariables = stringWithVariables.replace(
+								variable, "(" + value + ")");
+					}
 					log.debug("Replaced {} with {}", variable, value);
 					continue variableSearchLoop;
 				}

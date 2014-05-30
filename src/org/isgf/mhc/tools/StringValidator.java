@@ -31,7 +31,7 @@ public class StringValidator {
 		}
 
 		// Check letters
-		final String pattern = ImplementationContants.REGULAR_EXPRESSION_TO_VALIDATE_RULE;
+		final String pattern = ImplementationContants.REGULAR_EXPRESSION_TO_VALIDATE_CALCULATED_RULE;
 		if (!Pattern.matches(pattern, rule)) {
 			log.debug("No");
 			return false;

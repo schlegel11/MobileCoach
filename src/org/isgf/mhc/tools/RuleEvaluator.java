@@ -13,6 +13,7 @@ import lombok.Setter;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.collections.IteratorUtils;
 import org.isgf.mhc.model.memory.RuleEvaluationResult;
 import org.isgf.mhc.model.persistent.concepts.AbstractRule;
 import org.isgf.mhc.model.persistent.concepts.AbstractVariableWithValue;
@@ -327,28 +328,36 @@ public class RuleEvaluator {
 		log.debug("Evaluating rule {}", rule);
 		val params = DoubleEvaluator.getDefaultParameters();
 
+		// Own functions
 		final Function firstPosition = new Function("first", 1,
 				Integer.MAX_VALUE);
 		final Function secondPosition = new Function("second", 1,
 				Integer.MAX_VALUE);
 		final Function thirdPosition = new Function("third", 1,
 				Integer.MAX_VALUE);
+		final Function positionInArray = new Function("position", 2,
+				Integer.MAX_VALUE);
 
 		params.add(firstPosition);
 		params.add(secondPosition);
 		params.add(thirdPosition);
+		params.add(positionInArray);
 
 		final AbstractEvaluator<Double> evaluator = new DoubleEvaluator(params) {
+			private Double[]	argumentsArrays;
+
 			@Override
 			protected Double evaluate(final Function function,
 					final Iterator<Double> arguments,
 					final Object evaluationContext) {
 				if (function == firstPosition) {
-					return positionEvaluation(0, arguments);
+					return topPositionEvaluation(0, arguments);
 				} else if (function == secondPosition) {
-					return positionEvaluation(1, arguments);
+					return topPositionEvaluation(1, arguments);
 				} else if (function == thirdPosition) {
-					return positionEvaluation(2, arguments);
+					return topPositionEvaluation(2, arguments);
+				} else if (function == positionInArray) {
+					return positionReturner(arguments);
 				} else {
 					// If it's another function, pass it to DoubleEvaluator
 					return super.evaluate(function, arguments,
@@ -380,7 +389,7 @@ public class RuleEvaluator {
 			 * @param arguments
 			 * @return
 			 */
-			private Double positionEvaluation(final int position,
+			private Double topPositionEvaluation(final int position,
 					final Iterator<Double> arguments) {
 				val positionItems = new ArrayList<PositionItem>();
 
@@ -393,6 +402,18 @@ public class RuleEvaluator {
 				Collections.sort(positionItems);
 
 				return (double) positionItems.get(position).getPosition();
+			}
+
+			/**
+			 * Returns the object at the given position in the array
+			 * 
+			 * @param arguments
+			 * @return
+			 */
+			private Double positionReturner(final Iterator<Double> arguments) {
+				argumentsArrays = (Double[]) IteratorUtils.toArray(arguments);
+
+				return argumentsArrays[argumentsArrays[0].intValue()];
 			}
 		};
 
