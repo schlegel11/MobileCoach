@@ -30,9 +30,9 @@ import com.vaadin.server.VaadinServlet;
  */
 @SuppressWarnings("serial")
 @WebServlet(displayName = "Admin UI", value = { "/admin/*", "/VAADIN/*" }, initParams = {
-		@WebInitParam(name = "pushmode", value = "manual"),
+		@WebInitParam(name = "pushmode", value = "automatic"),
 		@WebInitParam(name = "closeIdleSessions", value = "true"),
-		@WebInitParam(name = "heartbeatInterval", value = "300") }, asyncSupported = false, loadOnStartup = 1)
+		@WebInitParam(name = "heartbeatInterval", value = "300") }, asyncSupported = true, loadOnStartup = 1)
 @VaadinServletConfiguration(productionMode = Constants.IS_LIVE_SYSTEM, ui = AdminNavigatorUI.class)
 @Log4j2
 public class AdminServlet extends VaadinServlet implements SessionInitListener,
