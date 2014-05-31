@@ -796,7 +796,6 @@ public class InterventionAdministrationManagerService {
 							monitoringRuleIdToMove);
 			monitoringRuleToMove.setIsSubRuleOfMonitoringRule(referenceTarget
 					.getIsSubRuleOfMonitoringRule());
-			log.debug("> " + referenceTarget.getIsSubRuleOfMonitoringRule());
 
 			if (movement == 1) {
 				// Set order to former order of target
@@ -895,7 +894,7 @@ public class InterventionAdministrationManagerService {
 
 		val highestOrderRule = databaseManagerService
 				.findOneSortedModelObject(
-						MonitoringRule.class,
+						MonitoringReplyRule.class,
 						isGotAnswerRule ? Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_ANSWER
 								: Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_NO_ANSWER,
 						Queries.MONITORING_REPLY_RULE__SORT_BY_ORDER_DESC,
