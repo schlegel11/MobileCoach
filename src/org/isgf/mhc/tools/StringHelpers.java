@@ -2,6 +2,7 @@ package org.isgf.mhc.tools;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.regex.Pattern;
 
 import lombok.val;
 
@@ -141,5 +142,25 @@ public class StringHelpers {
 						ImplementationContants.REGULAR_EXPRESSION_TO_CLEAN_DOUBLE_VALUES,
 						"");
 		return stringValue;
+	}
+
+	/**
+	 * Replaces the simple commands within the text with HTML commands
+	 * 
+	 * @param text
+	 * @return
+	 */
+	public static String parseHTMLFormatting(String text) {
+		val pattern = Pattern
+				.compile(ImplementationContants.REGULAR_EXPRESSION_TO_FIND_BOLD_STRING_PARTS);
+		val matcher = pattern.matcher(text);
+
+		while (matcher.find()) {
+			text = text.substring(0, matcher.start()) + "<strong>"
+					+ matcher.group(1) + "</strong>"
+					+ text.substring(matcher.end());
+		}
+
+		return text;
 	}
 }

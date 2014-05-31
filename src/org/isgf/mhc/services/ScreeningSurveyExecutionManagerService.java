@@ -391,6 +391,9 @@ public class ScreeningSurveyExecutionManagerService {
 								.writeVariableValueOfParticipant(
 										participant.getId(), variableName,
 										resultValue);
+						participant = databaseManagerService
+								.getModelObjectById(Participant.class,
+										participant.getId());
 					} catch (final Exception e) {
 						log.warn("The variable {} could not be written: {}",
 								variableName, e.getMessage());
@@ -633,8 +636,7 @@ public class ScreeningSurveyExecutionManagerService {
 	 * @return
 	 */
 	private ScreeningSurveySlide getNextScreeningSurveySlide(
-			final Participant participant,
-			final ScreeningSurvey screeningSurvey,
+			Participant participant, final ScreeningSurvey screeningSurvey,
 			final ScreeningSurveySlide formerSlide) {
 		if (formerSlide == null) {
 			val nextSlide = databaseManagerService.findOneSortedModelObject(
@@ -711,6 +713,9 @@ public class ScreeningSurveyExecutionManagerService {
 															.getCalculatedRuleValue())
 													: ruleResult
 															.getTextRuleValue());
+							participant = databaseManagerService
+									.getModelObjectById(Participant.class,
+											participant.getId());
 						} catch (final Exception e) {
 							log.warn(
 									"The variable {} could not be written: {}",
@@ -728,6 +733,9 @@ public class ScreeningSurveyExecutionManagerService {
 													.getStoreValueToVariableWithName(),
 											formerSlideRule
 													.getValueToStoreToVariable());
+							participant = databaseManagerService
+									.getModelObjectById(Participant.class,
+											participant.getId());
 						} catch (final Exception e) {
 							log.warn(
 									"The variable {} could not be written: {}",

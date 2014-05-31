@@ -66,7 +66,7 @@ public class ImplementationContants {
 	public static final String	FEEDBACK_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE				= "MHC_ConsistencyCheckValue";
 
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_ONE_OBJECT_ID						= "[A-Za-z0-9]+";
-	public static final String	REGULAR_EXPRESSION_TO_VALIDATE_CALCULATED_RULE								= "^[\\$a-zA-Z0-9_\\+\\-%*/^().,]*$";
+	public static final String	REGULAR_EXPRESSION_TO_VALIDATE_CALCULATED_RULE					= "^[\\$a-zA-Z0-9_\\+\\-%*/^().,]*$";
 	public static final String	REGULAR_EXPRESSION_TO_VALIDATE_VARIABLE_NAME					= "^\\$[a-zA-Z0-9_]*$";
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_VARIABLES_IN_STRING					= "\\$[a-zA-Z0-9_]+";
 	public static final String	VARIABLE_MATCH_MODIFIER											= "#";
@@ -80,4 +80,6 @@ public class ImplementationContants {
 	public static final String	REGULAR_EXPRESSION_TO_CLEAN_PHONE_NUMBERS						= "[^\\d]";
 	public static final String	REGULAR_EXPRESSION_TO_CLEAN_RECEIVED_MESSAGE					= "[^a-z0-9\\s\\.]";
 	public static final String	REGULAR_EXPRESSION_TO_CLEAN_DOUBLE_VALUES						= "\\.0+$";
+
+	public static final String	REGULAR_EXPRESSION_TO_FIND_BOLD_STRING_PARTS					= "\\*([\\w\\s]+)\\*";
 }
