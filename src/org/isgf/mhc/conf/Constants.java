@@ -94,7 +94,7 @@ public class Constants {
 	 * another system.
 	 */
 	@Getter
-	private static boolean	simulatedDateAndTime				= true;
+	private static boolean	simulatedDateAndTime				= false;
 
 	private static String	smsSimulationNumber					= "+99999";
 

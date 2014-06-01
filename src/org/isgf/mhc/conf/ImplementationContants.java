@@ -18,7 +18,7 @@ public class ImplementationContants {
 
 	public static final int		HOUR_TO_SEND_MESSAGE_MIN										= 1;
 	public static final int		HOUR_TO_SEND_MESSAGE_MAX										= 23;
-	public static final int		DEFAULT_HOUR_TO_SEND_MESSAGE									= 16;
+	public static final int		DEFAULT_HOUR_TO_SEND_MESSAGE									= 18;
 
 	public static final int		HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR							= 60 * 60 * 1000;
 	public static final int		DAYS_TO_TIME_IN_MILLIS_MULTIPLICATOR							= 24 * 60 * 60 * 1000;
@@ -50,7 +50,7 @@ public class ImplementationContants {
 	public static final long	MAILING_SEND_RETRIES											= 2;
 	public static final long	MAILING_SEND_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS			= 5 * 60;
 
-	public static final long	SIMULATOR_TIME_UPDATE_INTERVAL_IN_SECONDS						= 20;
+	public static final long	SIMULATOR_TIME_UPDATE_INTERVAL_IN_SECONDS						= 10;
 
 	public static final int		SCREENING_SURVEY_FILE_CACHE_IN_MINUTES							= 3600;
 
