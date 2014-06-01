@@ -24,17 +24,17 @@ public class ImplementationContants {
 	public static final int		DAYS_TO_TIME_IN_MILLIS_MULTIPLICATOR							= 24 * 60 * 60 * 1000;
 
 	// TODO Still debugging values
-	public static final long	MASTER_RULE_EVALUTION_WORKER_MINUTES_SLEEP_BETWEEN_CHECK_CYCLES	= 1;
+	public static final long	MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES	= 30;
 	// public static final long
-	// MASTER_RULE_EVALUTION_WORKER_MINUTES_SLEEP_BETWEEN_CHECK_CYCLES = 10;
+	// MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES = 5*60;
 
 	// TODO Still debugging values
-	public static final long	MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS					= 30;
+	public static final long	MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS					= 15;
 	// public static final long MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS =
 	// 2*60;
 
 	// TODO Still debugging values
-	public static final long	MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS					= 30;
+	public static final long	MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS					= 15;
 	// public static final long MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS =
 	// 2*60;
 

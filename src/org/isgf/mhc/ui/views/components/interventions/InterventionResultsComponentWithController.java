@@ -247,6 +247,10 @@ public class InterventionResultsComponentWithController extends
 						.getAllParticipantsOfIntervention(intervention.getId()));
 
 		participantsTable.sort();
+
+		if (selectedUIParticipantsIds != null) {
+			updateTables();
+		}
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {

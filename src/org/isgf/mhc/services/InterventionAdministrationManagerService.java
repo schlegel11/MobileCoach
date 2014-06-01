@@ -1525,9 +1525,10 @@ public class InterventionAdministrationManagerService {
 			val dialogMessagesOfParticipant = databaseManagerService
 					.findModelObjects(
 							DialogMessage.class,
-							Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_NOT_AUTOMATICALLY_PROCESSABLE,
+							Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_OR_STATUS_AND_NOT_AUTOMATICALLY_PROCESSABLE,
 							participant.getId(),
 							DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
+							DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY,
 							true);
 
 			CollectionUtils.addAll(dialogMessages,
