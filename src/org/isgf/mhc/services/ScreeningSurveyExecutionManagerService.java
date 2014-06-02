@@ -100,7 +100,7 @@ public class ScreeningSurveyExecutionManagerService {
 		val participant = new Participant(screeningSurvey.getIntervention(),
 				InternalDateTime.currentTimeMillis(), "",
 				screeningSurvey.getId(), screeningSurvey.getGlobalUniqueId(),
-				null, null, false, "", "");
+				null, null, true, "", "");
 
 		databaseManagerService.saveModelObject(participant);
 

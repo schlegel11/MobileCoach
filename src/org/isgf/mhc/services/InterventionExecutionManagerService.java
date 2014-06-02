@@ -1066,18 +1066,7 @@ public class InterventionExecutionManagerService {
 								&& dialogStatus
 										.isDataForMonitoringParticipationAvailable()
 								&& !dialogStatus.isMonitoringPerformed()) {
-							// FIXME Eventually relevant later
-							// val dialogMessagesNotProcessable =
-							// databaseManagerService
-							// .findModelObjects(
-							// DialogMessage.class,
-							// Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_NOT_AUTOMATICALLY_PROCESSABLE,
-							// participant.getId(), true);
-							//
-							// if (!dialogMessagesNotProcessable.iterator()
-							// .hasNext()) {
 							relevantParticipants.add(participant);
-							// }
 						}
 					}
 				}
