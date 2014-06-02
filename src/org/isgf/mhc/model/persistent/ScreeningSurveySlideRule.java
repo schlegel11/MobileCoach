@@ -146,7 +146,7 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 		if (nextScreeningSurveySlideWhenFalse != null) {
 			val slideWhenFalse = MHC.getInstance()
 					.getScreeningSurveyAdministrationManagerService()
-					.getScreeningSurveySlide(nextScreeningSurveySlideWhenTrue);
+					.getScreeningSurveySlide(nextScreeningSurveySlideWhenFalse);
 			if (slideWhenFalse != null) {
 				slideNameWhenFalse = slideWhenFalse.getTitleWithPlaceholders()
 						.equals("") ? ImplementationContants.DEFAULT_OBJECT_NAME

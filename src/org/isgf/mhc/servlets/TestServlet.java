@@ -93,6 +93,13 @@ public class TestServlet extends HttpServlet {
 		// new ArrayList<AbstractVariableWithValue>());
 		// log.debug(">>" + x.getCalculatedRuleValue());
 
+		// final MonitoringMessageRule m = new MonitoringMessageRule(null, 0,
+		// "3.06.2014",
+		// RuleEquationSignTypes.DATE_DIFFERENCE_VALUE_EQUALS, "-1");
+		// final val x = RuleEvaluator.evaluateRule(m,
+		// new ArrayList<AbstractVariableWithValue>());
+		// log.debug(">>" + x.isRuleMatchesEquationSign());
+
 		// val variables = new ArrayList<AbstractVariableWithValue>();
 		// variables.add(new InterventionVariableWithValue(null,
 		// "$fieldWithValues", "5,42,3"));

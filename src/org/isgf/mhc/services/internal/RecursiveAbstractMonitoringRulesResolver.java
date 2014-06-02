@@ -408,6 +408,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 		if (!isMonitoringRule
 				&& messageGroup.isSendSamePositionIfSendingAsReply()) {
 			// Send in same position if sending as reply
+			log.debug("Searching message on same position as former message in other message group...");
 			val originalMessageGroupId = relatedMonitoringMessageForReplyRuleCase
 					.getMonitoringMessageGroup();
 			val originalIterableMessages = databaseManagerService
@@ -422,8 +423,11 @@ public class RecursiveAbstractMonitoringRulesResolver {
 					.toList(originalIterableMessages.iterator());
 
 			for (int i = 0; i < originalMessages.size(); i++) {
-				if (originalMessages.get(i).getId()
-						.equals(relatedMonitoringMessageForReplyRuleCase)
+				if (originalMessages
+						.get(i)
+						.getId()
+						.equals(relatedMonitoringMessageForReplyRuleCase
+								.getId())
 						&& i < messages.size()) {
 					val message = messages.get(i);
 					log.debug(
@@ -436,7 +440,10 @@ public class RecursiveAbstractMonitoringRulesResolver {
 		} else {
 			// Send in random order?
 			if (messageGroup.isSendInRandomOrder()) {
+				log.debug("Searching random message...");
 				Collections.shuffle(messages);
+			} else {
+				log.debug("Searching appropriate message...");
 			}
 
 			Hashtable<String, AbstractVariableWithValue> variablesWithValues = null;

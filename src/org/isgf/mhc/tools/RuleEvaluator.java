@@ -45,6 +45,7 @@ public class RuleEvaluator {
 			final Collection<AbstractVariableWithValue> variablesWithValues) {
 		val ruleEvaluationResult = new RuleEvaluationResult();
 
+		log.debug("Rule of type '{}'", rule.getRuleEquationSign());
 		try {
 			if (rule.getRuleEquationSign().isCalculatedEquationSignType()) {
 				log.debug("It's a calculated rule");
@@ -230,6 +231,7 @@ public class RuleEvaluator {
 									.getTextRuleComparisonTermValue())) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
+					break;
 				case CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_TRUE_IF_ZERO:
 					val calendarNow = Calendar.getInstance();
 					val calendarDiff1 = Calendar.getInstance();

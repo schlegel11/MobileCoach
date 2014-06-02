@@ -96,13 +96,13 @@ public class InterventionProblemsComponent extends
 		// common part: create layout
 		mainLayout = new VerticalLayout();
 		mainLayout.setImmediate(false);
-		mainLayout.setWidth("100%");
+		mainLayout.setWidth("900px");
 		mainLayout.setHeight("-1px");
 		mainLayout.setMargin(true);
 		mainLayout.setSpacing(true);
 
 		// top-level component properties
-		setWidth("100.0%");
+		setWidth("900px");
 		setHeight("-1px");
 
 		// messageDialogProblemsLabel
