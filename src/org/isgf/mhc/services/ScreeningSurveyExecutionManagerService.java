@@ -13,7 +13,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
-import org.isgf.mhc.conf.ImplementationContants;
+import org.isgf.mhc.conf.ImplementationConstants;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.persistent.DialogOption;
 import org.isgf.mhc.model.persistent.DialogStatus;
@@ -497,7 +497,7 @@ public class ScreeningSurveyExecutionManagerService {
 			templateVariables
 					.put(GeneralSlideTemplateFieldTypes.HIDDEN_CHECK_VARIABLE
 							.toVariable(),
-							ImplementationContants.SCREENING_SURVEY_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE);
+							ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE);
 			templateVariables.put(
 					GeneralSlideTemplateFieldTypes.HIDDEN_CHECK_VARIABLE_VALUE
 							.toVariable(), newCheckValue);
@@ -876,7 +876,7 @@ public class ScreeningSurveyExecutionManagerService {
 		boolean showNextSlide = true;
 		if (navigationValue != null
 				&& navigationValue
-						.equals(ImplementationContants.FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE_VALUE_PREVIOUS)) {
+						.equals(ImplementationConstants.FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE_VALUE_PREVIOUS)) {
 			showNextSlide = false;
 		}
 
@@ -933,21 +933,21 @@ public class ScreeningSurveyExecutionManagerService {
 			templateVariables
 					.put(FeedbackSlideTemplateFieldTypes.HIDDEN_NAVIGATION_VARIABLE
 							.toVariable(),
-							ImplementationContants.FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE);
+							ImplementationConstants.FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE);
 			templateVariables
 					.put(FeedbackSlideTemplateFieldTypes.HIDDEN_NAVIGATION_VARIABLE_NAVIGATE_NEXT
 							.toVariable(),
-							ImplementationContants.FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE_VALUE_NEXT);
+							ImplementationConstants.FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE_VALUE_NEXT);
 			templateVariables
 					.put(FeedbackSlideTemplateFieldTypes.HIDDEN_NAVIGATION_VARIABLE_NAVIGATE_PREVIOUS
 							.toVariable(),
-							ImplementationContants.FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE_VALUE_PREVIOUS);
+							ImplementationConstants.FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE_VALUE_PREVIOUS);
 
 			// Check variable
 			templateVariables
 					.put(GeneralSlideTemplateFieldTypes.HIDDEN_CHECK_VARIABLE
 							.toVariable(),
-							ImplementationContants.FEEDBACK_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE);
+							ImplementationConstants.FEEDBACK_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE);
 			templateVariables.put(
 					GeneralSlideTemplateFieldTypes.HIDDEN_CHECK_VARIABLE_VALUE
 							.toVariable(), newCheckValue);

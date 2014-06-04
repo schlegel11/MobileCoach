@@ -8,7 +8,7 @@ import lombok.val;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.isgf.mhc.conf.Constants;
-import org.isgf.mhc.conf.ImplementationContants;
+import org.isgf.mhc.conf.ImplementationConstants;
 
 /**
  * Sets logging folder as folder for Log4j2 log files and adjusts configuration
@@ -24,11 +24,11 @@ public class FirstInitializations implements ServletContextListener {
 		loggerContext.reconfigure();
 
 		val thread = Thread.currentThread();
-		thread.setName(ImplementationContants.LOGGING_APPLICATION_NAME);
+		thread.setName(ImplementationConstants.LOGGING_APPLICATION_NAME);
 
 		Constants
 				.injectConfiguration(System
-						.getProperty(ImplementationContants.SYSTEM_CONFIGURATION_PROPERTY));
+						.getProperty(ImplementationConstants.SYSTEM_CONFIGURATION_PROPERTY));
 	}
 
 	@Override

@@ -13,7 +13,7 @@ import lombok.val;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.AdminMessageStrings;
-import org.isgf.mhc.conf.ImplementationContants;
+import org.isgf.mhc.conf.ImplementationConstants;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
@@ -133,7 +133,7 @@ public class Participant extends ModelObject {
 			screeningSurveyName = Messages
 					.getAdminString(AdminMessageStrings.UI_MODEL__UNKNOWN);
 		} else if (screeningSurvey.getName().equals("")) {
-			screeningSurveyName = ImplementationContants.DEFAULT_OBJECT_NAME;
+			screeningSurveyName = ImplementationConstants.DEFAULT_OBJECT_NAME;
 		} else {
 			screeningSurveyName = screeningSurvey.getName();
 		}

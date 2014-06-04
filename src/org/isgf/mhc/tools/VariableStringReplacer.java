@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
-import org.isgf.mhc.conf.ImplementationContants;
+import org.isgf.mhc.conf.ImplementationConstants;
 import org.isgf.mhc.model.persistent.concepts.AbstractVariableWithValue;
 
 /**
@@ -44,17 +44,17 @@ public class VariableStringReplacer {
 
 		// Adjust variables in rule to be unique for later replacement
 		val variablePreFindPattern = Pattern
-				.compile(ImplementationContants.REGULAR_EXPRESSION_TO_MATCH_VARIABLES_IN_STRING);
+				.compile(ImplementationConstants.REGULAR_EXPRESSION_TO_MATCH_VARIABLES_IN_STRING);
 		Matcher variablePreFindMatcher = variablePreFindPattern
 				.matcher(stringWithVariables);
 
 		while (variablePreFindMatcher.find()) {
 			stringWithVariables = stringWithVariables.substring(0,
 					variablePreFindMatcher.start())
-					+ ImplementationContants.VARIABLE_MATCH_MODIFIER
+					+ ImplementationConstants.VARIABLE_MATCH_MODIFIER
 					+ variablePreFindMatcher.group().substring(1,
 							variablePreFindMatcher.group().length())
-					+ ImplementationContants.VARIABLE_MATCH_MODIFIER
+					+ ImplementationConstants.VARIABLE_MATCH_MODIFIER
 					+ stringWithVariables.substring(variablePreFindMatcher
 							.end());
 
@@ -64,7 +64,7 @@ public class VariableStringReplacer {
 
 		// Find variables in rule
 		val variableFindPattern = Pattern
-				.compile(ImplementationContants.REGULAR_EXPRESSION_TO_MATCH_MODIFIED_VARIABLES_IN_STRING);
+				.compile(ImplementationConstants.REGULAR_EXPRESSION_TO_MATCH_MODIFIED_VARIABLES_IN_STRING);
 		final Matcher variableFindMatcher = variableFindPattern
 				.matcher(stringWithVariables);
 
@@ -79,10 +79,10 @@ public class VariableStringReplacer {
 		variableSearchLoop: for (final String variable : variablesFoundInRule) {
 			for (val variableWithValue : variablesWithValues) {
 				if (variable
-						.equals(ImplementationContants.VARIABLE_MATCH_MODIFIER
+						.equals(ImplementationConstants.VARIABLE_MATCH_MODIFIER
 								+ variableWithValue.getName().substring(1,
 										variableWithValue.getName().length())
-								+ ImplementationContants.VARIABLE_MATCH_MODIFIER)) {
+								+ ImplementationConstants.VARIABLE_MATCH_MODIFIER)) {
 					String value = variableWithValue.getValue();
 
 					// Correct value
@@ -142,17 +142,17 @@ public class VariableStringReplacer {
 
 		// Adjust variables in rule to be unique for later replacement
 		val variablePreFindPattern = Pattern
-				.compile(ImplementationContants.REGULAR_EXPRESSION_TO_MATCH_VARIABLES_IN_STRING);
+				.compile(ImplementationConstants.REGULAR_EXPRESSION_TO_MATCH_VARIABLES_IN_STRING);
 		Matcher variablePreFindMatcher = variablePreFindPattern
 				.matcher(stringWithVariables);
 
 		while (variablePreFindMatcher.find()) {
 			stringWithVariables = stringWithVariables.substring(0,
 					variablePreFindMatcher.start())
-					+ ImplementationContants.VARIABLE_MATCH_MODIFIER
+					+ ImplementationConstants.VARIABLE_MATCH_MODIFIER
 					+ variablePreFindMatcher.group().substring(1,
 							variablePreFindMatcher.group().length())
-					+ ImplementationContants.VARIABLE_MATCH_MODIFIER
+					+ ImplementationConstants.VARIABLE_MATCH_MODIFIER
 					+ stringWithVariables.substring(variablePreFindMatcher
 							.end());
 
@@ -162,7 +162,7 @@ public class VariableStringReplacer {
 
 		// Find variables in rule
 		val variableFindPattern = Pattern
-				.compile(ImplementationContants.REGULAR_EXPRESSION_TO_MATCH_MODIFIED_VARIABLES_IN_STRING);
+				.compile(ImplementationConstants.REGULAR_EXPRESSION_TO_MATCH_MODIFIED_VARIABLES_IN_STRING);
 		final Matcher variableFindMatcher = variableFindPattern
 				.matcher(stringWithVariables);
 
@@ -173,7 +173,7 @@ public class VariableStringReplacer {
 
 			// Check for modifiers
 			val variableModifierFindPattern = Pattern
-					.compile(ImplementationContants.REGULAR_EXPRESSION_TO_MATCH_VALUE_MODIFIER);
+					.compile(ImplementationConstants.REGULAR_EXPRESSION_TO_MATCH_VALUE_MODIFIER);
 			final Matcher variableModifierFindMatcher = variableModifierFindPattern
 					.matcher(stringWithVariables.substring(variableFindMatcher
 							.end()));
@@ -200,10 +200,10 @@ public class VariableStringReplacer {
 			val modifier = variablesFoundInRuleModifiers.get(i);
 			for (val variableWithValue : variablesWithValues) {
 				if (variable
-						.equals(ImplementationContants.VARIABLE_MATCH_MODIFIER
+						.equals(ImplementationConstants.VARIABLE_MATCH_MODIFIER
 								+ variableWithValue.getName().substring(1,
 										variableWithValue.getName().length())
-								+ ImplementationContants.VARIABLE_MATCH_MODIFIER)) {
+								+ ImplementationConstants.VARIABLE_MATCH_MODIFIER)) {
 					String value = variableWithValue.getValue();
 
 					// Correct value
@@ -215,9 +215,9 @@ public class VariableStringReplacer {
 					if (modifier != null) {
 						// Replace variable with modified value in rule
 						val formattedVariable = variable
-								+ ImplementationContants.VARIABLE_VALUE_MODIFIER_START
+								+ ImplementationConstants.VARIABLE_VALUE_MODIFIER_START
 								+ modifier
-								+ ImplementationContants.VARIABLE_VALUE_MODIFIER_END;
+								+ ImplementationConstants.VARIABLE_VALUE_MODIFIER_END;
 						try {
 							val formattedValue = String.format(modifier,
 									Double.parseDouble(value));

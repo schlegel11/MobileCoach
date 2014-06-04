@@ -14,7 +14,7 @@ import lombok.extern.log4j.Log4j2;
 import net.balusc.webapp.FileServletWrapper;
 
 import org.isgf.mhc.MHC;
-import org.isgf.mhc.conf.ImplementationContants;
+import org.isgf.mhc.conf.ImplementationConstants;
 import org.isgf.mhc.model.persistent.MediaObject;
 import org.isgf.mhc.model.persistent.MediaObjectParticipantShortURL;
 import org.isgf.mhc.services.InterventionAdministrationManagerService;
@@ -38,7 +38,7 @@ import org.isgf.mhc.services.InterventionExecutionManagerService;
  */
 @SuppressWarnings("serial")
 @WebServlet(displayName = "Short URL based Media Object File Streaming", value = "/"
-		+ ImplementationContants.SHORT_ID_FILE_STREAMING_SERVLET_PATH + "/*", asyncSupported = true, loadOnStartup = 1)
+		+ ImplementationConstants.SHORT_ID_FILE_STREAMING_SERVLET_PATH + "/*", asyncSupported = true, loadOnStartup = 1)
 @Log4j2
 public class ShortURLMediaObjectFileStreamingServlet extends HttpServlet {
 	private InterventionAdministrationManagerService	interventionAdministrationManagerService;

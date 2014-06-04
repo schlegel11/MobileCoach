@@ -1,6 +1,6 @@
 package org.isgf.mhc.tools;
 
-import org.isgf.mhc.conf.ImplementationContants;
+import org.isgf.mhc.conf.ImplementationConstants;
 
 /**
  * Helper class to simulate timestamps in the future
@@ -10,7 +10,7 @@ import org.isgf.mhc.conf.ImplementationContants;
 public class InternalDateTime {
 	private static int			hourOffsetCount	= 0;
 
-	private final static long	hourOffset		= ImplementationContants.HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR;
+	private final static long	hourOffset		= ImplementationConstants.HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR;
 
 	/**
 	 * Returns the current simulated time

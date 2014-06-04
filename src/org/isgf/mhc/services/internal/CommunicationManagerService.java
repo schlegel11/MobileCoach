@@ -34,7 +34,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.Constants;
-import org.isgf.mhc.conf.ImplementationContants;
+import org.isgf.mhc.conf.ImplementationConstants;
 import org.isgf.mhc.model.memory.ReceivedMessage;
 import org.isgf.mhc.model.persistent.DialogOption;
 import org.isgf.mhc.model.persistent.types.DialogMessageStatusTypes;
@@ -368,14 +368,14 @@ public class CommunicationManagerService {
 				log.warn(
 						"Could not send mail to {}, retrying later another {} times: ",
 						dialogOption.getData(),
-						ImplementationContants.MAILING_SEND_RETRIES,
+						ImplementationConstants.MAILING_SEND_RETRIES,
 						e.getMessage());
 			}
 
-			for (int i = 0; i < ImplementationContants.MAILING_SEND_RETRIES; i++) {
+			for (int i = 0; i < ImplementationConstants.MAILING_SEND_RETRIES; i++) {
 				try {
 					TimeUnit.SECONDS
-							.sleep(ImplementationContants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS);
+							.sleep(ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS);
 				} catch (final InterruptedException e) {
 					log.warn("Interrupted messaging sending approach {}", i);
 

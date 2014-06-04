@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 import lombok.extern.log4j.Log4j2;
 
-import org.isgf.mhc.conf.ImplementationContants;
+import org.isgf.mhc.conf.ImplementationConstants;
 import org.isgf.mhc.services.InterventionExecutionManagerService;
 
 /**
@@ -27,7 +27,7 @@ public class OutgoingMessageWorker extends Thread {
 	public void run() {
 		try {
 			TimeUnit.SECONDS
-					.sleep(ImplementationContants.MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS);
+					.sleep(ImplementationConstants.MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS);
 		} catch (final InterruptedException e) {
 			interrupt();
 			log.debug("Outgoing message worker received signal to stop (before first run)");
@@ -47,7 +47,7 @@ public class OutgoingMessageWorker extends Thread {
 
 			try {
 				TimeUnit.SECONDS
-						.sleep(ImplementationContants.MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS);
+						.sleep(ImplementationConstants.MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS);
 			} catch (final InterruptedException e) {
 				interrupt();
 				log.debug("Outgoing message worker received signal to stop");

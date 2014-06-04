@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 import lombok.val;
 
 import org.isgf.mhc.conf.AdminMessageStrings;
-import org.isgf.mhc.conf.ImplementationContants;
+import org.isgf.mhc.conf.ImplementationConstants;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.persistent.concepts.AbstractRule;
 import org.isgf.mhc.model.persistent.types.RuleEquationSignTypes;
@@ -38,7 +38,7 @@ public class StringHelpers {
 					&& abstractRule.getRuleEquationSign() != RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_FALSE
 					&& abstractRule.getRuleEquationSign() != RuleEquationSignTypes.CREATE_TEXT_BUT_RESULT_IS_ALWAYS_TRUE
 					&& abstractRule.getRuleEquationSign() != RuleEquationSignTypes.CREATE_TEXT_BUT_RESULT_IS_ALWAYS_FALSE) {
-				name.append(ImplementationContants.DEFAULT_OBJECT_NAME + " ");
+				name.append(ImplementationConstants.DEFAULT_OBJECT_NAME + " ");
 			}
 		} else {
 			name.append(abstractRule.getRuleWithPlaceholders() + " ");
@@ -53,7 +53,7 @@ public class StringHelpers {
 					&& abstractRule.getRuleEquationSign() != RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_FALSE
 					&& abstractRule.getRuleEquationSign() != RuleEquationSignTypes.CREATE_TEXT_BUT_RESULT_IS_ALWAYS_TRUE
 					&& abstractRule.getRuleEquationSign() != RuleEquationSignTypes.CREATE_TEXT_BUT_RESULT_IS_ALWAYS_FALSE) {
-				name.append(" " + ImplementationContants.DEFAULT_OBJECT_NAME);
+				name.append(" " + ImplementationConstants.DEFAULT_OBJECT_NAME);
 			}
 		} else {
 			name.append(" "
@@ -90,7 +90,7 @@ public class StringHelpers {
 		String numberWithoutZeros = phoneNumber
 				.trim()
 				.replaceAll(
-						ImplementationContants.REGULAR_EXPRESSION_TO_CLEAN_PHONE_NUMBERS,
+						ImplementationConstants.REGULAR_EXPRESSION_TO_CLEAN_PHONE_NUMBERS,
 						"").replaceAll("^0+", "");
 
 		// FIXME Need to be more international using the configuration (at best:
@@ -124,7 +124,7 @@ public class StringHelpers {
 				.trim()
 				.toLowerCase()
 				.replaceAll(
-						ImplementationContants.REGULAR_EXPRESSION_TO_CLEAN_RECEIVED_MESSAGE,
+						ImplementationConstants.REGULAR_EXPRESSION_TO_CLEAN_RECEIVED_MESSAGE,
 						"");
 		return newValue;
 	}
@@ -139,7 +139,7 @@ public class StringHelpers {
 		val stringValue = String
 				.valueOf(doubleValue)
 				.replaceAll(
-						ImplementationContants.REGULAR_EXPRESSION_TO_CLEAN_DOUBLE_VALUES,
+						ImplementationConstants.REGULAR_EXPRESSION_TO_CLEAN_DOUBLE_VALUES,
 						"");
 		return stringValue;
 	}
@@ -152,7 +152,7 @@ public class StringHelpers {
 	 */
 	public static String parseHTMLFormatting(String text) {
 		val pattern = Pattern
-				.compile(ImplementationContants.REGULAR_EXPRESSION_TO_FIND_BOLD_STRING_PARTS);
+				.compile(ImplementationConstants.REGULAR_EXPRESSION_TO_FIND_BOLD_STRING_PARTS);
 		val matcher = pattern.matcher(text);
 
 		while (matcher.find()) {

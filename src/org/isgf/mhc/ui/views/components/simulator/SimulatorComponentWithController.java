@@ -10,7 +10,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Constants;
-import org.isgf.mhc.conf.ImplementationContants;
+import org.isgf.mhc.conf.ImplementationConstants;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ui.UISimulatedMessage;
 import org.isgf.mhc.tools.InternalDateTime;
@@ -71,7 +71,7 @@ public class SimulatorComponentWithController extends SimulatorComponent
 
 					try {
 						TimeUnit.SECONDS
-								.sleep(ImplementationContants.SIMULATOR_TIME_UPDATE_INTERVAL_IN_SECONDS);
+								.sleep(ImplementationConstants.SIMULATOR_TIME_UPDATE_INTERVAL_IN_SECONDS);
 					} catch (final InterruptedException e) {
 						interrupt();
 					}

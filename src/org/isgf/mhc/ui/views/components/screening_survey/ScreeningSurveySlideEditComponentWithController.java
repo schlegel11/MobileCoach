@@ -5,7 +5,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
-import org.isgf.mhc.conf.ImplementationContants;
+import org.isgf.mhc.conf.ImplementationConstants;
 import org.isgf.mhc.model.persistent.Feedback;
 import org.isgf.mhc.model.persistent.ScreeningSurveySlide;
 import org.isgf.mhc.model.persistent.ScreeningSurveySlideRule;
@@ -390,7 +390,7 @@ public class ScreeningSurveySlideEditComponentWithController extends
 
 		log.debug("New answer has id {}", newId);
 		val uiAnswer = new UIAnswer(newId,
-				ImplementationContants.DEFAULT_ANSWER_NAME,
+				ImplementationConstants.DEFAULT_ANSWER_NAME,
 				String.valueOf(answersBeanContainer.size() + 1));
 
 		answersBeanContainer.addItem(newId, uiAnswer);

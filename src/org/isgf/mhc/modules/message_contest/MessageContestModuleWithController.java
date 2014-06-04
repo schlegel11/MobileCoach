@@ -14,8 +14,7 @@ import org.isgf.mhc.conf.Constants;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.persistent.ParticipantVariableWithValue;
 import org.isgf.mhc.model.ui.UIVariableWithParticipant;
-import org.isgf.mhc.tools.StringValidator;
-import org.isgf.mhc.ui.views.components.basics.PlaceholderStringEditComponent;
+import org.isgf.mhc.ui.views.components.basics.StringEditComponent;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -162,52 +161,38 @@ public abstract class MessageContestModuleWithController extends
 
 	public void setResultValue() {
 		log.debug("Store variable values");
-		val allPossibleMessageVariables = getInterventionAdministrationManagerService()
-				.getAllPossibleMonitoringRuleVariablesOfIntervention(
-						interventionId);
+
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__SET_RESULT_VARIABLE_FOR_SELECTED_PARTICIPANTS,
-				"", allPossibleMessageVariables,
-				new PlaceholderStringEditComponent(),
+				"", null, new StringEditComponent(),
 				new ExtendableButtonClickListener() {
 
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						// Check if message contains only valid strings
-						if (!StringValidator.isValidVariableText(
-								getStringValue(), allPossibleMessageVariables)) {
+						val interventionExecutionManagerService = MHC
+								.getInstance()
+								.getInterventionExecutionManagerService();
 
-							getAdminUI()
-									.showWarningNotification(
-											AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
+						for (val selectedUIVariableWithParticipant : selectedVariableIds) {
+							val participantVariableWithValue = beanContainer
+									.getItem(selectedUIVariableWithParticipant)
+									.getBean()
+									.getRelatedModelObject(
+											ParticipantVariableWithValue.class);
 
-							return;
-						} else {
-							val interventionExecutionManagerService = MHC
-									.getInstance()
-									.getInterventionExecutionManagerService();
+							getInterventionAdministrationManagerService()
+									.interventionVariableWithValueCreateOrUpdate(
+											interventionId,
+											getResultVariable(),
+											getStringValue());
 
-							for (val selectedUIVariableWithParticipant : selectedVariableIds) {
-								val participantVariableWithValue = beanContainer
-										.getItem(
-												selectedUIVariableWithParticipant)
-										.getBean()
-										.getRelatedModelObject(
-												ParticipantVariableWithValue.class);
-
-								getInterventionAdministrationManagerService()
-										.interventionVariableWithValueCreateOrUpdate(
-												interventionId,
-												getResultVariable(),
-												getStringValue());
-
-								interventionExecutionManagerService
-										.participantAdjustVariableValue(
-												participantVariableWithValue
-														.getParticipant(),
-												getResultVariable(),
-												getStringValue());
-							}
+							interventionExecutionManagerService
+									.participantAdjustVariableValue(
+											participantVariableWithValue
+													.getParticipant(),
+											getResultVariable(),
+											getStringValue());
 						}
 
 						getAdminUI()

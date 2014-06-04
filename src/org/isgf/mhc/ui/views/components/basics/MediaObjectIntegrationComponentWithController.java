@@ -12,7 +12,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
-import org.isgf.mhc.conf.ImplementationContants;
+import org.isgf.mhc.conf.ImplementationConstants;
 import org.isgf.mhc.conf.ThemeImageStrings;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.persistent.MediaObject;
@@ -78,7 +78,7 @@ public class MediaObjectIntegrationComponentWithController extends
 			getUploadComponent().setEnabled(true);
 			getDeleteButton().setEnabled(false);
 		} else {
-			val externalReference = ImplementationContants.FILE_STREAMING_SERVLET_PATH
+			val externalReference = ImplementationConstants.FILE_STREAMING_SERVLET_PATH
 					+ "/" + mediaObject.getId() + "/" + mediaObject.getName();
 			log.debug("Streaming file {} with file servlet", externalReference);
 			adjustEmbeddedMediaObject(mediaObject.getType(),

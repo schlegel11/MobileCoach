@@ -214,43 +214,50 @@ public class AllInterventionsTabComponentWithController extends
 
 	public void duplicateIntervention() {
 		log.debug("Duplicate intervention");
+		showConfirmationWindow(new ExtendableButtonClickListener() {
 
-		final File temporaryBackupFile = getInterventionAdministrationManagerService()
-				.interventionExport(
-						selectedUIIntervention
-								.getRelatedModelObject(Intervention.class));
+			@Override
+			public void buttonClick(final ClickEvent event) {
+				final File temporaryBackupFile = getInterventionAdministrationManagerService()
+						.interventionExport(
+								selectedUIIntervention
+										.getRelatedModelObject(Intervention.class));
 
-		try {
-			final Intervention importedIntervention = getInterventionAdministrationManagerService()
-					.interventionImport(temporaryBackupFile);
+				try {
+					final Intervention importedIntervention = getInterventionAdministrationManagerService()
+							.interventionImport(temporaryBackupFile);
 
-			if (importedIntervention == null) {
-				throw new NullArgumentException(
-						"Imported intervention not found in import");
+					if (importedIntervention == null) {
+						throw new NullArgumentException(
+								"Imported intervention not found in import");
+					}
+
+					// Adapt UI
+					beanContainer.addItem(importedIntervention.getId(),
+							UIIntervention.class.cast(importedIntervention
+									.toUIModelObject()));
+					getAllInterventionsEditComponent()
+							.getAllInterventionsTable().select(
+									importedIntervention.getId());
+					getAllInterventionsEditComponent()
+							.getAllInterventionsTable().sort();
+
+					getAdminUI()
+							.showInformationNotification(
+									AdminMessageStrings.NOTIFICATION__INTERVENTION_DUPLICATED);
+				} catch (final Exception e) {
+					getAdminUI()
+							.showWarningNotification(
+									AdminMessageStrings.NOTIFICATION__INTERVENTION_DUPLICATION_FAILED);
+				}
+
+				try {
+					temporaryBackupFile.delete();
+				} catch (final Exception f) {
+					// Do nothing
+				}
 			}
-
-			// Adapt UI
-			beanContainer.addItem(importedIntervention.getId(),
-					UIIntervention.class.cast(importedIntervention
-							.toUIModelObject()));
-			getAllInterventionsEditComponent().getAllInterventionsTable()
-					.select(importedIntervention.getId());
-			getAllInterventionsEditComponent().getAllInterventionsTable()
-					.sort();
-
-			getAdminUI().showInformationNotification(
-					AdminMessageStrings.NOTIFICATION__INTERVENTION_DUPLICATED);
-		} catch (final Exception e) {
-			getAdminUI()
-					.showWarningNotification(
-							AdminMessageStrings.NOTIFICATION__INTERVENTION_DUPLICATION_FAILED);
-		}
-
-		try {
-			temporaryBackupFile.delete();
-		} catch (final Exception f) {
-			// Do nothing
-		}
+		}, null);
 	}
 
 	public void importIntervention() {

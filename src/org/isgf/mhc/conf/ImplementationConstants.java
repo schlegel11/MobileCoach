@@ -5,7 +5,7 @@ package org.isgf.mhc.conf;
  * 
  * @author Andreas Filler
  */
-public class ImplementationContants {
+public class ImplementationConstants {
 	public static final String	SYSTEM_CONFIGURATION_PROPERTY									= "mhc.configuration";
 	public static final String	LOGGING_APPLICATION_NAME										= "MHC";
 
@@ -20,8 +20,8 @@ public class ImplementationContants {
 	public static final int		HOUR_TO_SEND_MESSAGE_MAX										= 23;
 	public static final int		DEFAULT_HOUR_TO_SEND_MESSAGE									= 18;
 
-	public static final int		HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR							= 60 * 60 * 1000;
-	public static final int		DAYS_TO_TIME_IN_MILLIS_MULTIPLICATOR							= 24 * 60 * 60 * 1000;
+	public static final long	HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR							= 60 * 60 * 1000;
+	public static final long	DAYS_TO_TIME_IN_MILLIS_MULTIPLICATOR							= 24 * 60 * 60 * 1000;
 
 	// TODO Still debugging values
 	public static final long	MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES	= 30;

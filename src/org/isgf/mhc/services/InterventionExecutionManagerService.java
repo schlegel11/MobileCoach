@@ -14,7 +14,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Constants;
-import org.isgf.mhc.conf.ImplementationContants;
+import org.isgf.mhc.conf.ImplementationConstants;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.memory.ReceivedMessage;
@@ -302,7 +302,7 @@ public class InterventionExecutionManagerService {
 					final long isUnansweredAfterTimestamp = timeStampOfEvent
 							+ monitoringRule
 									.getHoursUntilMessageIsHandledAsUnanswered()
-							* ImplementationContants.HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR;
+							* ImplementationConstants.HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR;
 
 					dialogMessage
 							.setIsUnansweredAfterTimestamp(isUnansweredAfterTimestamp);
@@ -719,7 +719,7 @@ public class InterventionExecutionManagerService {
 					variablesManagerService
 							.writeVariableValueOfParticipant(
 									dialogOption.getParticipant(),
-									ImplementationContants.VARIABLE_DEFINING_PARTICIPATION_IN_MOBILE_COACH_EXTRA,
+									ImplementationConstants.VARIABLE_DEFINING_PARTICIPATION_IN_MOBILE_COACH_EXTRA,
 									"0");
 				} catch (final Exception e) {
 					log.warn(

@@ -25,7 +25,7 @@ import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.Constants;
-import org.isgf.mhc.conf.ImplementationContants;
+import org.isgf.mhc.conf.ImplementationConstants;
 import org.isgf.mhc.model.persistent.Feedback;
 import org.isgf.mhc.model.persistent.ScreeningSurvey;
 import org.isgf.mhc.model.persistent.ScreeningSurveySlide;
@@ -226,11 +226,11 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			response.setHeader(
 					"Cache-Control",
 					"max-age="
-							+ ImplementationContants.SCREENING_SURVEY_FILE_CACHE_IN_MINUTES);
+							+ ImplementationConstants.SCREENING_SURVEY_FILE_CACHE_IN_MINUTES);
 			response.setDateHeader(
 					"Expires",
 					System.currentTimeMillis()
-							+ ImplementationContants.SCREENING_SURVEY_FILE_CACHE_IN_MINUTES
+							+ ImplementationConstants.SCREENING_SURVEY_FILE_CACHE_IN_MINUTES
 							* 1000);
 		} else {
 			response.setHeader("Pragma", "No-cache");
@@ -369,7 +369,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			String resultValue;
 			try {
 				resultValue = request
-						.getParameter(ImplementationContants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLE);
+						.getParameter(ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLE);
 			} catch (final Exception e) {
 				resultValue = null;
 			}
@@ -378,7 +378,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			String checkValue;
 			try {
 				checkValue = request
-						.getParameter(ImplementationContants.SCREENING_SURVEY_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE);
+						.getParameter(ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE);
 			} catch (final Exception e) {
 				checkValue = null;
 			}
@@ -418,7 +418,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			String navigationValue;
 			try {
 				navigationValue = request
-						.getParameter(ImplementationContants.FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE);
+						.getParameter(ImplementationConstants.FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE);
 			} catch (final Exception e) {
 				navigationValue = null;
 			}
@@ -427,7 +427,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			String checkValue;
 			try {
 				checkValue = request
-						.getParameter(ImplementationContants.FEEDBACK_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE);
+						.getParameter(ImplementationConstants.FEEDBACK_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE);
 			} catch (final Exception e) {
 				checkValue = null;
 			}
@@ -477,7 +477,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		final String normalizedBaseURL = baseURL
 				.replaceAll(
 						"/"
-								+ ImplementationContants.REGULAR_EXPRESSION_TO_MATCH_ONE_OBJECT_ID
+								+ ImplementationConstants.REGULAR_EXPRESSION_TO_MATCH_ONE_OBJECT_ID
 								+ "/$", "/");
 
 		templateVariables.put(
@@ -485,7 +485,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		templateVariables
 				.put(ScreeningSurveySlideTemplateFieldTypes.RESULT_VARIABLE
 						.toVariable(),
-						ImplementationContants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLE);
+						ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLE);
 
 		// Slide type
 		if (screeningSurveyId != null) {
@@ -532,7 +532,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 					.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL
 							.toVariable(),
 							normalizedBaseURL
-									+ ImplementationContants.FILE_STREAMING_SERVLET_PATH
+									+ ImplementationConstants.FILE_STREAMING_SERVLET_PATH
 									+ "/"
 									+ templateVariables
 											.get(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL

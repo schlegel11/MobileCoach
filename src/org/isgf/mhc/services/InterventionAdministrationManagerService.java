@@ -18,7 +18,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
 import org.isgf.mhc.conf.Constants;
-import org.isgf.mhc.conf.ImplementationContants;
+import org.isgf.mhc.conf.ImplementationConstants;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.Queries;
 import org.isgf.mhc.model.persistent.Author;
@@ -215,7 +215,7 @@ public class InterventionAdministrationManagerService {
 				InternalDateTime.currentTimeMillis(), false, false);
 
 		if (name.equals("")) {
-			intervention.setName(ImplementationContants.DEFAULT_OBJECT_NAME);
+			intervention.setName(ImplementationConstants.DEFAULT_OBJECT_NAME);
 		}
 
 		databaseManagerService.saveModelObject(intervention);
@@ -226,7 +226,7 @@ public class InterventionAdministrationManagerService {
 	public void interventionChangeName(final Intervention intervention,
 			final String newName) {
 		if (newName.equals("")) {
-			intervention.setName(ImplementationContants.DEFAULT_OBJECT_NAME);
+			intervention.setName(ImplementationConstants.DEFAULT_OBJECT_NAME);
 		} else {
 			intervention.setName(newName);
 		}
@@ -410,7 +410,7 @@ public class InterventionAdministrationManagerService {
 
 		if (monitoringMessageGroup.getName().equals("")) {
 			monitoringMessageGroup
-					.setName(ImplementationContants.DEFAULT_OBJECT_NAME);
+					.setName(ImplementationConstants.DEFAULT_OBJECT_NAME);
 		}
 
 		val highestOrderMessageGroup = databaseManagerService
@@ -489,7 +489,7 @@ public class InterventionAdministrationManagerService {
 			final String newName) {
 		if (newName.equals("")) {
 			monitoringMessageGroup
-					.setName(ImplementationContants.DEFAULT_OBJECT_NAME);
+					.setName(ImplementationConstants.DEFAULT_OBJECT_NAME);
 		} else {
 			monitoringMessageGroup.setName(newName);
 		}
@@ -719,8 +719,8 @@ public class InterventionAdministrationManagerService {
 				false,
 				null,
 				interventionId,
-				ImplementationContants.DEFAULT_HOUR_TO_SEND_MESSAGE,
-				ImplementationContants.DEFAULT_HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED,
+				ImplementationConstants.DEFAULT_HOUR_TO_SEND_MESSAGE,
+				ImplementationConstants.DEFAULT_HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED,
 				false);
 
 		val highestOrderRule = databaseManagerService.findOneSortedModelObject(
@@ -1509,7 +1509,7 @@ public class InterventionAdministrationManagerService {
 						participantId,
 						variableName,
 						InternalDateTime.currentTimeMillis()
-								- ImplementationContants.DAYS_TO_TIME_IN_MILLIS_MULTIPLICATOR
+								- ImplementationConstants.DAYS_TO_TIME_IN_MILLIS_MULTIPLICATOR
 								* 28);
 	}
 

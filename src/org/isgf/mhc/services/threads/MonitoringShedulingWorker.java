@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 import lombok.extern.log4j.Log4j2;
 
-import org.isgf.mhc.conf.ImplementationContants;
+import org.isgf.mhc.conf.ImplementationConstants;
 import org.isgf.mhc.services.InterventionExecutionManagerService;
 
 /**
@@ -29,7 +29,7 @@ public class MonitoringShedulingWorker extends Thread {
 	public void run() {
 		try {
 			TimeUnit.SECONDS
-					.sleep(ImplementationContants.MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
+					.sleep(ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
 		} catch (final InterruptedException e) {
 			interrupt();
 			log.debug("Monitoring sheduling worker received signal to stop (before first run)");
@@ -72,7 +72,7 @@ public class MonitoringShedulingWorker extends Thread {
 
 			try {
 				TimeUnit.SECONDS
-						.sleep(ImplementationContants.MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
+						.sleep(ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
 			} catch (final InterruptedException e) {
 				interrupt();
 				log.debug("Monitoring sheduling worker received signal to stop");

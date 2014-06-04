@@ -5,7 +5,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 import org.isgf.mhc.conf.AdminMessageStrings;
-import org.isgf.mhc.conf.ImplementationContants;
+import org.isgf.mhc.conf.ImplementationConstants;
 import org.isgf.mhc.model.persistent.Intervention;
 import org.isgf.mhc.model.persistent.MonitoringMessageGroup;
 import org.isgf.mhc.model.persistent.MonitoringRule;
@@ -116,17 +116,17 @@ public class MonitoringRuleEditComponentWithController extends
 		val hourToSendSlider = getHourToSendMessageSlider();
 		hourToSendSlider.setImmediate(true);
 		hourToSendSlider
-				.setMin(ImplementationContants.HOUR_TO_SEND_MESSAGE_MIN);
+				.setMin(ImplementationConstants.HOUR_TO_SEND_MESSAGE_MIN);
 		hourToSendSlider
-				.setMax(ImplementationContants.HOUR_TO_SEND_MESSAGE_MAX);
+				.setMax(ImplementationConstants.HOUR_TO_SEND_MESSAGE_MAX);
 		hourToSendSlider.addValueChangeListener(valueChangeListener);
 
 		val hoursUntilHandledAsNotAnsweredSlider = getHoursUntilHandledAsNotAnsweredSlider();
 		hoursUntilHandledAsNotAnsweredSlider.setImmediate(true);
 		hoursUntilHandledAsNotAnsweredSlider
-				.setMin(ImplementationContants.HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MIN);
+				.setMin(ImplementationConstants.HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MIN);
 		hoursUntilHandledAsNotAnsweredSlider
-				.setMax(ImplementationContants.HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX);
+				.setMax(ImplementationConstants.HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX);
 		hoursUntilHandledAsNotAnsweredSlider
 				.addValueChangeListener(valueChangeListener);
 

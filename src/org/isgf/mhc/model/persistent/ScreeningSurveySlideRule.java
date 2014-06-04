@@ -12,7 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
 import org.isgf.mhc.MHC;
 import org.isgf.mhc.conf.AdminMessageStrings;
-import org.isgf.mhc.conf.ImplementationContants;
+import org.isgf.mhc.conf.ImplementationConstants;
 import org.isgf.mhc.conf.Messages;
 import org.isgf.mhc.model.ModelObject;
 import org.isgf.mhc.model.persistent.concepts.AbstractRule;
@@ -139,7 +139,7 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 					.getScreeningSurveySlide(nextScreeningSurveySlideWhenTrue);
 			if (slideWhenTrue != null) {
 				slideNameWhenTrue = slideWhenTrue.getTitleWithPlaceholders()
-						.equals("") ? ImplementationContants.DEFAULT_OBJECT_NAME
+						.equals("") ? ImplementationConstants.DEFAULT_OBJECT_NAME
 						: slideWhenTrue.getTitleWithPlaceholders();
 			}
 		}
@@ -149,7 +149,7 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 					.getScreeningSurveySlide(nextScreeningSurveySlideWhenFalse);
 			if (slideWhenFalse != null) {
 				slideNameWhenFalse = slideWhenFalse.getTitleWithPlaceholders()
-						.equals("") ? ImplementationContants.DEFAULT_OBJECT_NAME
+						.equals("") ? ImplementationConstants.DEFAULT_OBJECT_NAME
 						: slideWhenFalse.getTitleWithPlaceholders();
 			}
 		}

@@ -42,7 +42,7 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 
 	private final Intervention									intervention;
 
-	private UIScreeningSurvey									selectedUIScreeningSurvey		= null;
+	private UIScreeningSurvey									selectedUIScreeningSurvey			= null;
 	private BeanItem<UIScreeningSurvey>							selectedUIScreeningSurveyBeanItem	= null;
 
 	private final BeanContainer<ObjectId, UIScreeningSurvey>	beanContainer;
@@ -213,50 +213,56 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 
 	public void duplicateScreeningSurvey() {
 		log.debug("Duplicate screening survey");
+		showConfirmationWindow(new ExtendableButtonClickListener() {
 
-		final File temporaryBackupFile = getScreeningSurveyAdministrationManagerService()
-				.screeningSurveyExport(
-						selectedUIScreeningSurvey
-								.getRelatedModelObject(ScreeningSurvey.class));
+			@Override
+			public void buttonClick(final ClickEvent event) {
+				final File temporaryBackupFile = getScreeningSurveyAdministrationManagerService()
+						.screeningSurveyExport(
+								selectedUIScreeningSurvey
+										.getRelatedModelObject(ScreeningSurvey.class));
 
-		try {
-			final ScreeningSurvey importedScreeningSurvey = getScreeningSurveyAdministrationManagerService()
-					.screeningSurveyImport(temporaryBackupFile,
-							intervention.getId());
+				try {
+					final ScreeningSurvey importedScreeningSurvey = getScreeningSurveyAdministrationManagerService()
+							.screeningSurveyImport(temporaryBackupFile,
+									intervention.getId());
 
-			if (importedScreeningSurvey == null) {
-				throw new NullArgumentException(
-						"Imported screening survey not found in import");
-			} else {
-				getScreeningSurveyAdministrationManagerService()
-						.screeningSurveyRecreateGlobalUniqueId(
-								importedScreeningSurvey);
+					if (importedScreeningSurvey == null) {
+						throw new NullArgumentException(
+								"Imported screening survey not found in import");
+					} else {
+						getScreeningSurveyAdministrationManagerService()
+								.screeningSurveyRecreateGlobalUniqueId(
+										importedScreeningSurvey);
+					}
+
+					// Adapt UI
+					beanContainer.addItem(importedScreeningSurvey.getId(),
+							UIScreeningSurvey.class
+									.cast(importedScreeningSurvey
+											.toUIModelObject()));
+					getInterventionScreeningSurveyEditComponent()
+							.getScreeningSurveysTable().select(
+									importedScreeningSurvey.getId());
+					getInterventionScreeningSurveyEditComponent()
+							.getScreeningSurveysTable().sort();
+
+					getAdminUI()
+							.showInformationNotification(
+									AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_DUPLICATED);
+				} catch (final Exception e) {
+					getAdminUI()
+							.showWarningNotification(
+									AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_DUPLICATION_FAILED);
+				}
+
+				try {
+					temporaryBackupFile.delete();
+				} catch (final Exception f) {
+					// Do nothing
+				}
 			}
-
-			// Adapt UI
-			beanContainer.addItem(importedScreeningSurvey.getId(),
-					UIScreeningSurvey.class.cast(importedScreeningSurvey
-							.toUIModelObject()));
-			getInterventionScreeningSurveyEditComponent()
-					.getScreeningSurveysTable().select(
-							importedScreeningSurvey.getId());
-			getInterventionScreeningSurveyEditComponent()
-					.getScreeningSurveysTable().sort();
-
-			getAdminUI()
-					.showInformationNotification(
-							AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_DUPLICATED);
-		} catch (final Exception e) {
-			getAdminUI()
-					.showWarningNotification(
-							AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_DUPLICATION_FAILED);
-		}
-
-		try {
-			temporaryBackupFile.delete();
-		} catch (final Exception f) {
-			// Do nothing
-		}
+		}, null);
 	}
 
 	public void importScreeningSurvey() {
@@ -336,7 +342,8 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 						}
 
 						// Adapt UI
-						getStringItemProperty(selectedUIScreeningSurveyBeanItem,
+						getStringItemProperty(
+								selectedUIScreeningSurveyBeanItem,
 								UIScreeningSurvey.SCREENING_SURVEY_NAME)
 								.setValue(
 										selectedUIScreeningSurvey
