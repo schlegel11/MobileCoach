@@ -17,6 +17,7 @@ import org.isgf.mhc.services.internal.DatabaseManagerService;
 import org.isgf.mhc.services.internal.FileStorageManagerService;
 import org.isgf.mhc.services.internal.ModelObjectExchangeService;
 import org.isgf.mhc.services.internal.VariablesManagerService;
+import org.isgf.mhc.tools.InternalDateTime;
 
 /**
  * @author Andreas Filler
@@ -105,6 +106,8 @@ public class MHC implements ServletContextListener {
 	@Override
 	public void contextDestroyed(final ServletContextEvent event) {
 		log.info("Stopping services...");
+
+		InternalDateTime.setFastForwardMode(false);
 
 		try {
 			screeningSurveyExecutionManagerService.stop();

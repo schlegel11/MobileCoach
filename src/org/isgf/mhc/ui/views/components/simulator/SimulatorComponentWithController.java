@@ -84,6 +84,9 @@ public class SimulatorComponentWithController extends SimulatorComponent
 		val instance = this;
 		val buttonClickListener = new ButtonClickListener();
 		getSendSimulatedMessageButton().addClickListener(buttonClickListener);
+		getActivateFastForwadModeButton().addClickListener(buttonClickListener);
+		getDeactivateFastForwardModeButton().addClickListener(
+				buttonClickListener);
 		getNextHourButton().addClickListener(buttonClickListener);
 
 		if (Constants.isSimulatedDateAndTime()) {
@@ -115,7 +118,10 @@ public class SimulatorComponentWithController extends SimulatorComponent
 						Messages.getAdminString(
 								AdminMessageStrings.SIMULATOR_COMPONENT__THE_CURRENT_SIMULATED_TIME_IS_X,
 								dateFormat.format(new Date(InternalDateTime
-										.currentTimeMillis()))));
+										.currentTimeMillis())),
+								InternalDateTime.isFastForwardMode()));
+
+		getAdminUI().push();
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
@@ -126,6 +132,10 @@ public class SimulatorComponentWithController extends SimulatorComponent
 				sendMessage();
 			} else if (event.getButton() == getNextHourButton()) {
 				jumpToNextHour();
+			} else if (event.getButton() == getActivateFastForwadModeButton()) {
+				setFastForwardMode(true);
+			} else if (event.getButton() == getDeactivateFastForwardModeButton()) {
+				setFastForwardMode(false);
 			}
 		}
 	}
@@ -133,6 +143,13 @@ public class SimulatorComponentWithController extends SimulatorComponent
 	public void jumpToNextHour() {
 		log.debug("Set time to one hour in the future...");
 		InternalDateTime.nextHour();
+
+		updateTime();
+	}
+
+	public void setFastForwardMode(final boolean active) {
+		log.debug("Set fast forward mode {}", active ? "active" : "inactive");
+		InternalDateTime.setFastForwardMode(active);
 
 		updateTime();
 	}
