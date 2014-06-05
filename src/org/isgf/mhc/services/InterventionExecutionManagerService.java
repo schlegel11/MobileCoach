@@ -982,11 +982,18 @@ public class InterventionExecutionManagerService {
 	private DialogOption getDialogOptionByTypeAndDataOfActiveInterventions(
 			final DialogOptionTypes dialogOptionType,
 			final String dialogOptionData) {
-		val dialogOption = databaseManagerService.findOneModelObject(
+		val dialogOptions = databaseManagerService.findModelObjects(
 				DialogOption.class, Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
 				dialogOptionType, dialogOptionData);
 
-		if (dialogOption != null) {
+		long highestCreatedTimestamp = 0;
+		DialogOption appropriateDialogOption = null;
+
+		for (val dialogOption : dialogOptions) {
+			if (dialogOption == null) {
+				continue;
+			}
+
 			val participant = databaseManagerService.getModelObjectById(
 					Participant.class, dialogOption.getParticipant());
 
@@ -996,19 +1003,24 @@ public class InterventionExecutionManagerService {
 
 				if (intervention != null) {
 					if (intervention.isActive()) {
-						return dialogOption;
+						if (participant.getCreatedTimestamp() > highestCreatedTimestamp) {
+							highestCreatedTimestamp = participant
+									.getCreatedTimestamp();
+							appropriateDialogOption = dialogOption;
+							continue;
+						}
 					} else {
-						return null;
+						continue;
 					}
 				} else {
-					return null;
+					continue;
 				}
 			} else {
-				return null;
+				continue;
 			}
-		} else {
-			return null;
 		}
+
+		return appropriateDialogOption;
 	}
 
 	@Synchronized
