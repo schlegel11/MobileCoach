@@ -1,0 +1,350 @@
+/* Import the reindeer theme.*/
+
+/* This only allows us to use the mixins defined in it and does not add any styles by itself. */
+
+@import "../reindeer/reindeer.scss";
+
+/* This contains all of your theme.*/
+
+/* If somebody wants to extend the theme she will include this mixin. */
+
+body {
+    min-width: 1100px;
+    min-height: 650px;
+    overflow: auto;
+}
+input.gwt-FileUpload {
+    width: 292px;
+}
+@mixin mc {
+    /* Include all the styles from the reindeer theme */
+    @include reindeer;
+    /* Insert your theme rules here */
+    /* Variables */
+    $selection-active-color: #ebebeb;
+    $selection-inactive-color: #ffffff;
+    $link-active-color: #4e4e4e;
+    $link-color: #2a2a2a;
+    $tab-color: $selection-active-color;
+    /* No selection */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    /* Basic stlyles */
+    .bold {
+        font-weight: bold;
+    }
+    .center {
+        text-align: center;
+    }
+    .right {
+        text-align: right;
+    }
+    .bigger {
+        font-size: 16px;
+    }
+    .biggest {
+        font-size: 20px;
+    }
+    .pointable {
+        cursor: pointer;
+    }
+    .unpointable {
+        cursor: default;
+    }
+    .styled-border {
+        border-bottom-color: rgb(210, 211, 212);
+        border-bottom-left-radius: 3px;
+        border-bottom-right-radius: 3px;
+        border-bottom-style: solid;
+        border-bottom-width: 1px;
+        border-left-color: rgb(188, 189, 190);
+        border-left-style: solid;
+        border-left-width: 1px;
+        border-right-color: rgb(188, 189, 190);
+        border-right-style: solid;
+        border-right-width: 1px;
+        border-top-color: rgb(162, 163, 164);
+        border-top-left-radius: 3px;
+        border-top-right-radius: 3px;
+        border-top-style: solid;
+        border-top-width: 1px;
+        box-sizing: border-box;
+        color: rgb(34, 34, 34);
+    }
+    .styled-border-active {
+        border-bottom-color: rgb(92, 160, 223);
+        border-bottom-left-radius: 3px;
+        border-bottom-right-radius: 3px;
+        border-bottom-style: solid;
+        border-bottom-width: 1px;
+        border-left-color: rgb(91, 151, 208);
+        border-left-style: solid;
+        border-left-width: 1px;
+        border-right-color: rgb(91, 151, 208);
+        border-right-style: solid;
+        border-right-width: 1px;
+        border-top-color: rgb(79, 131, 180);
+        border-top-left-radius: 3px;
+        border-top-right-radius: 3px;
+        border-top-style: solid;
+        border-top-width: 1px;
+        box-sizing: border-box;
+        color: rgb(34, 34, 34);
+    }
+    .radial-background {
+        background: #c9c9c9;
+        /* Old browsers */
+        background: -moz-radial-gradient(center, ellipse cover, #c9c9c9 0%, #7d7e7d 100%);
+        /* FF3.6+ */
+        background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%, #c9c9c9), color-stop(100%, #7d7e7d));
+        /* Chrome,Safari4+ */
+        background: -webkit-radial-gradient(center, ellipse cover, #c9c9c9 0%, #7d7e7d 100%);
+        /* Chrome10+,Safari5.1+ */
+        background: -o-radial-gradient(center, ellipse cover, #c9c9c9 0%, #7d7e7d 100%);
+        /* Opera 12+ */
+        background: -ms-radial-gradient(center, ellipse cover, #c9c9c9 0%, #7d7e7d 100%);
+        /* IE10+ */
+        background: radial-gradient(ellipse at center, #c9c9c9 0%, #7d7e7d 100%);
+        /* W3C */
+        filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#c9c9c9', endColorstr='#7d7e7d', GradientType=1);
+        /* IE6-9 fallback on horizontal gradient */
+    }
+    /* Global styles */
+    .v-loading-indicator {
+        margin-right: 10px;
+        margin-top: 10px;
+    }
+    .v-button,
+    .v-button .v-button-wrap {
+        @extend .pointable;
+    }
+    .v-disabled.v-button,
+    .v-disabled.v-button .v-button-wrap {
+        @extend .unpointable;
+    }
+    .v-button,
+    .v-button .v-button-wrap,
+    .v-disabled.v-button,
+    .v-disabled.v-button .v-button-wrap {
+        background-image: none;
+    }
+    .v-button,
+    .v-disabled.v-button {
+        height: 26px;
+        @extend .styled-border;
+    }
+    .v-button:focus {
+        background-image: none;
+        @extend .styled-border-active;
+    }
+    .v-disabled.v-button:focus {
+        @extend .styled-border;
+    }
+    .v-button:focus .v-button-wrap {
+        background-image: none;
+    }
+    .v-button:active,
+    .v-button.v-pressed {
+        background-image: none;
+        background-color: $selection-active-color;
+        @extend .styled-border-active;
+    }
+    .v-disabled.v-button:active,
+    .v-disabled.v-button.v-pressed {
+        background-image: none;
+        background-color: $selection-inactive-color;
+        @extend .styled-border;
+    }
+    .v-button-link,
+    .v-button-link:focus,
+    .v-button-link:active,
+    .v-button-link.v-pressed {
+        border: 0px;
+    }
+    .v-link a:hover {
+        color: $link-active-color;
+    }
+    .v-button-link span.v-button-caption,
+    .v-link a span,
+    .v-link a span:visited {
+        text-decoration: none;
+        color: $link-color;
+    }
+    .v-button-link span.v-button-caption:hover,
+    .v-link a:hover span {
+        text-decoration: underline;
+        color: $link-active-color;
+    }
+    .v-table-cell-content-inactive {
+        color: rgb(150, 28, 0);
+        background-image: url("img/inactive-icon-small.png");
+        background-repeat: no-repeat;
+        background-position: 5px;
+        text-indent: 20px;
+    }
+    .v-table-cell-content-active {
+        color: rgb(119, 169, 66);
+        background-image: url("img/active-icon-small.png");
+        background-repeat: no-repeat;
+        background-position: 5px;
+        text-indent: 20px;
+    }
+    /* Own styles */
+    /* about-window */
+    .about-window .about-text {
+        padding-left: 15px;
+        padding-right: 15px;
+        a {
+            color: $link-color;
+        }
+        a:hover,
+        a:active,
+        a:visited {
+            color: $link-active-color;
+        }
+    }
+    /* login-view */
+    .login-view {
+        @extend .radial-background;
+    }
+    .login-view {
+        .v-panel {
+            background: #fff;
+            -webkit-border-radius: 4px;
+            -moz-border-radius: 4px;
+            border-radius: 4px;
+            -webkit-box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            -moz-box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            padding: 1em 1em 2em;
+        }
+        .v-panel-content,
+        .v-panel-deco {
+            border: 0px;
+        }
+        .title-label {
+            @extend .bold;
+            @extend .right;
+            @extend .biggest;
+        }
+    }
+    /* error-view */
+    .error-view {
+        @extend .radial-background;
+        .title-label {
+            @extend .bold;
+            @extend .center;
+            @extend .biggest;
+        }
+    }
+    /* main-view */
+    .main-view {
+        .title-label {
+            @extend .bold;
+            @extend .center;
+            @extend .bigger;
+        }
+        .menu-panel {
+            background-color: rgb(247, 247, 247);
+        }
+        .v-accordion-item-caption {
+            padding-bottom: 15px;
+            padding-top: 15px;
+            padding-left: 10px;
+            background-image: none;
+            background-color: $tab-color;
+        }
+        .v-accordion-item-caption .v-captiontext {
+            @extend .bigger;
+        }
+        .button-label {
+            @extend .center;
+            @extend .bigger;
+            @extend .pointable;
+        }
+        .menu-button {
+            @extend .styled-border;
+            @extend .pointable;
+        }
+        .menu-button:focus {
+            @extend .styled-border-active;
+        }
+        .menu-button:active {
+            @extend .styled-border-active;
+            background-color: $selection-active-color;
+        }
+        .active {
+            .menu-button {
+                @extend .styled-border-active;
+                background-color: $selection-active-color;
+            }
+            .menu-button:focus {
+                @extend .styled-border-active;
+                background-color: $selection-active-color;
+            }
+            .menu-button:active {
+                @extend .styled-border-active;
+                background-color: $selection-active-color;
+            }
+        }
+    }
+    /* intervention-container */
+    .intervention-container .title-label {
+        @extend bigger;
+        margin-left: 10px;
+        text-align: left;
+    }
+    /* accordion */
+    .v-accordion {
+        border: none;
+        border-top: 1px solid #bebebe;
+    }
+    .v-accordion-item-caption .v-icon {
+        margin-top: -10px;
+        margin-right: 10px;
+    }
+    .v-accordion-item-pointable .v-accordion-item-caption {
+        @extend .pointable;
+        .v-caption {
+            @extend .pointable;
+        }
+    }
+    /* welcome-tab */
+    .welcome-tab .welcome-label {
+        @extend .bold;
+        @extend .center;
+        @extend .biggest;
+    }
+    /* upload-component */
+    .upload-component .v-button {
+        width: 100px;
+    }
+    /* media-object-description */
+    .media-object-description ul {
+        padding-left: 30px;
+    }
+    /* media-content */
+    .media-content {
+        @extend .center;
+    }
+    /* read-only textfield */
+    .v-textfield.read-only {
+        padding: 5px;
+        text-overflow: ellipsis;
+        -o-text-overflow: ellipsis;
+        -icab-text-overflow: ellipsis;
+        -khtml-text-overflow: ellipsis;
+        -moz-text-overflow: ellipsis;
+        -webkit-text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+    /* indent-left */
+    .v-label.indent-left {
+        margin-left: 18px;
+    }
+}

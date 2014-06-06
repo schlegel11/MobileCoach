@@ -4,13 +4,13 @@
 		<Console name="Console" target="SYSTEM_OUT">
 			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %40.40c [%t] - %m%n" />
 		</Console>
-		<File name="File" fileName="${sys:mhc_logging_folder}/mhc.log" bufferedIO="false"
+		<File name="File" fileName="${sys:mc_logging_folder}/mc.log" bufferedIO="false"
 			append="true">
 			<PatternLayout
 				pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} [%80.80t] %-5p %80.80c %x - %m%n" />
 		</File>
-		<RollingFile name="RollingFile" fileName="${sys:mhc_logging_folder}/mhc-everything.log"
-			filePattern="${sys:mhc_logging_folder}/mhc-everything-%d{yyyy-MM-dd}_%i.log" bufferedIO="false">
+		<RollingFile name="RollingFile" fileName="${sys:mc_logging_folder}/mc-everything.log"
+			filePattern="${sys:mc_logging_folder}/mc-everything-%d{yyyy-MM-dd}_%i.log" bufferedIO="false">
 			<PatternLayout
 				pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} [%80.80t] %-5p %80.80c %x - %m%n" />
 			<Policies>
@@ -26,7 +26,7 @@
 			<AppenderRef ref="File" />
 			<AppenderRef ref="RollingFile" />
 		</Root>
-		<Logger name="org.isgf.mhc" level="DEBUG" additivity="false">
+		<Logger name="ch.ethz.mc" level="DEBUG" additivity="false">
 			<AppenderRef ref="Console" />
 			<AppenderRef ref="File" level="WARN" />
 			<AppenderRef ref="RollingFile" level="DEBUG" />

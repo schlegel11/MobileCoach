@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project default="javadoc" xmlns:ivy="antlib:org.apache.ivy.ant">
 	<description>
-		Mobile Health Coach - MHC: JavaDoc creation
+		MobileCoach (MC): JavaDoc creation
 	</description>
 
 	<path id="javadoc-lib">

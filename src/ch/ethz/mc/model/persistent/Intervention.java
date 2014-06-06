@@ -1,0 +1,177 @@
+package ch.ethz.mc.model.persistent;
+
+import java.util.List;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.val;
+import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.conf.Messages;
+import ch.ethz.mc.model.ModelObject;
+import ch.ethz.mc.model.Queries;
+import ch.ethz.mc.model.ui.UIIntervention;
+import ch.ethz.mc.model.ui.UIModelObject;
+
+/**
+ * {@link ModelObject} to represent an {@link Intervention}
+ * 
+ * An {@link Intervention} describes the whole project consisting of a
+ * {@link ScreeningSurvey}, {@link MonitoringRule}s and {@link Participant}s.
+ * It's the heart of the whole system.
+ * 
+ * @author Andreas Filler
+ */
+/**
+ * @author Andreas Filler
+ * 
+ */
+@NoArgsConstructor
+@AllArgsConstructor
+public class Intervention extends ModelObject {
+	/**
+	 * The name of the {@link Intervention} as shown in the backend
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private String	name;
+
+	/**
+	 * Timestamp when the {@link Intervention} has been created
+	 */
+	@Getter
+	@Setter
+	private long	created;
+
+	/**
+	 * Defines if the whole intervention is active. If this value is false, also
+	 * the messaging and the {@link ScreeningSurvey}s of the intervention are
+	 * not accessable.
+	 */
+	@Getter
+	@Setter
+	private boolean	active;
+
+	/**
+	 * Defines if the monitoring in this {@link Intervention} is active. If not
+	 * the rule execution will not be executed also if the intervention is
+	 * active.
+	 */
+	@Getter
+	@Setter
+	private boolean	monitoringActive;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ch.ethz.mc.model.ModelObject#toUIModelObject()
+	 */
+	@Override
+	public UIModelObject toUIModelObject() {
+		val intervention = new UIIntervention(
+				name,
+				active,
+				active ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE),
+				monitoringActive,
+				monitoringActive ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE));
+
+		intervention.setRelatedModelObject(this);
+
+		return intervention;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * ch.ethz.mc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
+	 * (java.util.List)
+	 */
+	@Override
+	public void collectThisAndRelatedModelObjectsForExport(
+			final List<ModelObject> exportList) {
+		exportList.add(this);
+
+		// Add screening surveys
+		for (val screeningSurvey : ModelObject.find(ScreeningSurvey.class,
+				Queries.SCREENING_SURVEY__BY_INTERVENTION, getId())) {
+			screeningSurvey
+					.collectThisAndRelatedModelObjectsForExport(exportList);
+		}
+
+		// Add intervention variables with values
+		for (val interventionVariableWithValue : ModelObject.find(
+				InterventionVariableWithValue.class,
+				Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION,
+				getId())) {
+			interventionVariableWithValue
+					.collectThisAndRelatedModelObjectsForExport(exportList);
+		}
+
+		// Add monitoring rules
+		for (val monitoringRules : ModelObject.find(MonitoringRule.class,
+				Queries.MONITORING_RULE__BY_INTERVENTION, getId())) {
+			monitoringRules
+					.collectThisAndRelatedModelObjectsForExport(exportList);
+		}
+
+		// Add monitoring message groups
+		for (val monitoringMessageGroups : ModelObject.find(
+				MonitoringMessageGroup.class,
+				Queries.MONITORING_MESSAGE_GROUP__BY_INTERVENTION, getId())) {
+			monitoringMessageGroups
+					.collectThisAndRelatedModelObjectsForExport(exportList);
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ch.ethz.mc.model.ModelObject#performOnDelete()
+	 */
+	@Override
+	public void performOnDelete() {
+		// Delete participant
+		val participantsToDelete = ModelObject.find(Participant.class,
+				Queries.PARTICIPANT__BY_INTERVENTION, getId());
+		ModelObject.delete(participantsToDelete);
+
+		// Delete intervention variables with values
+		val interventionVariablesWithValuesToDelete = ModelObject.find(
+				InterventionVariableWithValue.class,
+				Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION,
+				getId());
+		ModelObject.delete(interventionVariablesWithValuesToDelete);
+
+		// Delete author intervention access
+		val authorInterventionAccessToDelete = ModelObject.find(
+				AuthorInterventionAccess.class,
+				Queries.AUTHOR_INTERVENTION_ACCESS__BY_INTERVENTION, getId());
+		ModelObject.delete(authorInterventionAccessToDelete);
+
+		// Delete monitoring rules
+		val monitoringRulesToDelete = ModelObject.find(MonitoringRule.class,
+				Queries.MONITORING_RULE__BY_INTERVENTION, getId());
+		ModelObject.delete(monitoringRulesToDelete);
+
+		// Delete monitoring message groups
+		val monitoringMessageGroupsToDelete = ModelObject.find(
+				MonitoringMessageGroup.class,
+				Queries.MONITORING_MESSAGE_GROUP__BY_INTERVENTION, getId());
+		ModelObject.delete(monitoringMessageGroupsToDelete);
+
+		// Delete screening surveys
+		val screeningSurveysToDelete = ModelObject.find(ScreeningSurvey.class,
+				Queries.SCREENING_SURVEY__BY_INTERVENTION, getId());
+		ModelObject.delete(screeningSurveysToDelete);
+	}
+}
