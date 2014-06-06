@@ -85,7 +85,7 @@ public class InternalDateTime {
 				nextHour();
 
 				try {
-					TimeUnit.SECONDS.sleep(20);
+					TimeUnit.SECONDS.sleep(10);
 				} catch (final InterruptedException e) {
 					interrupt();
 				}
