@@ -262,6 +262,20 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			IOException {
 		log.debug("Handling request for all open screening surveys");
 
+		log.debug("Clearing session");
+		val session = request.getSession(true);
+		for (val attribute : ScreeningSurveySessionAttributeTypes.values()) {
+			val sessionObject = session.getAttribute(attribute.toString());
+			if (sessionObject != null) {
+				session.removeAttribute(attribute.toString());
+			}
+		}
+
+		val sessionAttributeNames = session.getAttributeNames();
+		while (sessionAttributeNames.hasMoreElements()) {
+			log.debug("> " + sessionAttributeNames.nextElement());
+		}
+
 		log.debug("Setting no-cache headers");
 		// Set header information (e.g. for no caching)
 		response.setHeader("Pragma", "No-cache");
@@ -276,8 +290,10 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			val activeScreeningSurveys = screeningSurveyExecutionManagerService
 					.getActiveScreeningSurveys();
 
+			// FIXME Should be made more generic
 			if (activeScreeningSurveys != null) {
-				templateVariables.put("title", "Active surveys:");
+				templateVariables.put("title",
+						"Hier geht es zur Eingangsbefragung...");
 
 				val surveysData = new ArrayList<HashMap<String, String>>();
 
@@ -296,10 +312,11 @@ public class ScreeningSurveyServlet extends HttpServlet {
 
 				templateVariables.put("surveys", surveysData);
 			} else {
-				templateVariables.put("title", "No survey active.");
+				templateVariables
+						.put("title", "Keine Eingansgbefragung aktiv.");
 			}
 		} else {
-			templateVariables.put("title", "Listing not active.");
+			templateVariables.put("title", "Auflistung nicht aktiv.");
 		}
 
 		@Cleanup
