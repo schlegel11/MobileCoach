@@ -23,13 +23,13 @@ public class ImplementationConstants {
 	public static final long	HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR							= 60 * 60 * 1000;
 	public static final long	DAYS_TO_TIME_IN_MILLIS_MULTIPLICATOR							= 24 * 60 * 60 * 1000;
 
-	public static final long	MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES	= 20;
+	public static final long	MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES	= 60;
 
 	// TODO Still debugging values
-	public static final long	MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS					= 15;
+	public static final long	MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS					= 30;
 
 	// TODO Still debugging values
-	public static final long	MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS					= 15;
+	public static final long	MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS					= 30;
 
 	// FIXME Emergency solution for first intervention
 	public static String		VARIABLE_DEFINING_PARTICIPATION_IN_MOBILE_COACH_EXTRA			= "$participation_extra";
