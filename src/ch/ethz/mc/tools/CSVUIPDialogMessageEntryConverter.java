@@ -19,17 +19,23 @@ public class CSVUIPDialogMessageEntryConverter implements
 		return new String[] { uiDialogMessage.getParticipantId(),
 				uiDialogMessage.getParticipantName(),
 				uiDialogMessage.getOrder(), uiDialogMessage.getStatus(),
-				uiDialogMessage.getMessage(),
+				clean(uiDialogMessage.getMessage()),
 				uiDialogMessage.getShouldBeSentTimestamp(),
 				uiDialogMessage.getSentTimestamp(),
-				uiDialogMessage.getAnswer(), uiDialogMessage.getRawAnswer(),
+				clean(uiDialogMessage.getAnswer()),
+				clean(uiDialogMessage.getRawAnswer()),
 				uiDialogMessage.getAnswerReceivedTimestamp(),
 				uiDialogMessage.getManuallySent(),
 				uiDialogMessage.getMediaContentViewed() };
 	}
 
+	private String clean(final String value) {
+		return value.replace("\n", "").replace("\r", "");
+	}
+
 	public static UIDialogMessageWithParticipantForResults getHeaders() {
-		val columnHeaders = UIDialogMessageWithParticipantForResults.getColumnHeaders();
+		val columnHeaders = UIDialogMessageWithParticipantForResults
+				.getColumnHeaders();
 		return new UIDialogMessageWithParticipantForResults(columnHeaders[0],
 				columnHeaders[1], columnHeaders[2], columnHeaders[3],
 				columnHeaders[4], columnHeaders[5], columnHeaders[6],

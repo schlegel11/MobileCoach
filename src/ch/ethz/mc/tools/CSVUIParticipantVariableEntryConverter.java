@@ -20,7 +20,11 @@ public class CSVUIParticipantVariableEntryConverter implements
 		return new String[] { uiParticipantVariable.getParticipantId(),
 				uiParticipantVariable.getParticipantName(),
 				uiParticipantVariable.getName(),
-				uiParticipantVariable.getValue() };
+				clean(uiParticipantVariable.getValue()) };
+	}
+
+	private String clean(final String value) {
+		return value.replace("\n", "").replace("\r", "");
 	}
 
 	public static UIVariableWithParticipantForResults getHeaders() {
