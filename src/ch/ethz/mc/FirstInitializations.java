@@ -26,8 +26,10 @@ public class FirstInitializations implements ServletContextListener {
 	@Override
 	public void contextInitialized(final ServletContextEvent event) {
 		val loggingFolder = getLoggingFolder();
+		val loggingConsoleLevel = getLoggingConsoleLevel();
 
 		System.setProperty("mc_logging_folder", loggingFolder);
+		System.setProperty("mc_logging_console_level", loggingConsoleLevel);
 		val loggerContext = (LoggerContext) LogManager.getContext(false);
 		loggerContext.reconfigure();
 
@@ -75,6 +77,45 @@ public class FirstInitializations implements ServletContextListener {
 		}
 
 		return Constants.getLoggingFolder();
+	}
+
+	/**
+	 * Reads the logging level of the console from configuration file before the
+	 * configuration
+	 * file is officially parsed for the system
+	 * 
+	 * @return
+	 */
+	private String getLoggingConsoleLevel() {
+		val configurationsFileString = System
+				.getProperty(ImplementationConstants.SYSTEM_CONFIGURATION_PROPERTY);
+
+		if (configurationsFileString == null) {
+			return Constants.getLoggingConsoleLevel();
+		}
+
+		val configurationFile = new File(configurationsFileString);
+
+		if (!configurationFile.exists()) {
+			return Constants.getLoggingConsoleLevel();
+		}
+
+		// Configuration file provided and exists
+		val properties = new Properties();
+		try {
+			@Cleanup
+			val fileInputStream = new FileInputStream(configurationFile);
+			properties.load(fileInputStream);
+		} catch (final Exception e) {
+			return Constants.getLoggingConsoleLevel();
+		}
+
+		if (properties.getProperty("loggingConsoleLevel") != null
+				&& !properties.getProperty("loggingConsoleLevel").equals("")) {
+			return properties.getProperty("loggingConsoleLevel");
+		}
+
+		return Constants.getLoggingConsoleLevel();
 	}
 
 	@Override

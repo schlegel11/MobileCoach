@@ -80,6 +80,9 @@ public class Constants {
 	private static String	templatesFolder						= "/mc_data/templates";
 
 	@Getter
+	private static String	loggingConsoleLevel					= "DEBUG";
+
+	@Getter
 	private static String	fileExtension						= ".mc";
 
 	/**

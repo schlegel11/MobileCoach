@@ -33,7 +33,7 @@ public class OutgoingMessageWorker extends Thread {
 		}
 
 		while (!isInterrupted()) {
-			log.debug("Executing new run of outgoing message worker...started");
+			log.info("Executing new run of outgoing message worker...started");
 
 			try {
 				interventionExecutionManagerService.handleOutgoingMessages();
@@ -42,7 +42,7 @@ public class OutgoingMessageWorker extends Thread {
 						e.getMessage());
 			}
 
-			log.debug("Executing new run of outgoing message worker...done");
+			log.info("Executing new run of outgoing message worker...done");
 
 			try {
 				TimeUnit.SECONDS

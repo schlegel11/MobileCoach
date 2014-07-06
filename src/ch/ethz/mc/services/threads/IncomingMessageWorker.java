@@ -38,7 +38,7 @@ public class IncomingMessageWorker extends Thread {
 		}
 
 		while (!isInterrupted()) {
-			log.debug("Executing new run of incoming message worker...started");
+			log.info("Executing new run of incoming message worker...started");
 
 			try {
 				val receivedMessages = communicationManagerService
@@ -59,7 +59,7 @@ public class IncomingMessageWorker extends Thread {
 						e.getMessage());
 			}
 
-			log.debug("Executing new run of incoming message worker...done");
+			log.info("Executing new run of incoming message worker...done");
 			try {
 				TimeUnit.SECONDS
 						.sleep(ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS);

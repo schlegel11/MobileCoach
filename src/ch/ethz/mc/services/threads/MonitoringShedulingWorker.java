@@ -35,7 +35,7 @@ public class MonitoringShedulingWorker extends Thread {
 		}
 
 		while (!isInterrupted()) {
-			log.debug("Executing new run of monitoring sheduling worker...started");
+			log.info("Executing new run of monitoring sheduling worker...started");
 
 			try {
 				try {
@@ -67,7 +67,7 @@ public class MonitoringShedulingWorker extends Thread {
 						e.getMessage());
 			}
 
-			log.debug("Executing new run of monitoring sheduling worker...done");
+			log.info("Executing new run of monitoring sheduling worker...done");
 
 			try {
 				TimeUnit.SECONDS
