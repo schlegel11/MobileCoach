@@ -886,7 +886,7 @@ public class InterventionExecutionManagerService {
 	 * - the belonging intervention is active
 	 * - the belonging intervention monitoring is active
 	 * - the participant has monitoring active
-	 * - the participant finished screening survey
+	 * - the participant has all data for monitoring available
 	 * - the participant not finished monitoring
 	 * - the message should have the status PREPARED_FOR_SENDING
 	 * - the should be sent timestamp should be lower than the current time
@@ -911,7 +911,8 @@ public class InterventionExecutionManagerService {
 									Queries.DIALOG_STATUS__BY_PARTICIPANT,
 									participant.getId())) {
 						if (dialogStatus != null
-								&& dialogStatus.isScreeningSurveyPerformed()
+								&& dialogStatus
+										.isDataForMonitoringParticipationAvailable()
 								&& !dialogStatus.isMonitoringPerformed()) {
 
 							val dialogMessagesWaitingToBeSendOfParticipant = databaseManagerService
@@ -1053,7 +1054,7 @@ public class InterventionExecutionManagerService {
 	 * - the belonging intervention is active
 	 * - the belonging intervention monitoring is active
 	 * - the participant has monitoring active
-	 * - the participant finished screening survey
+	 * - the participant has all data for monitoring available
 	 * - the participant not finished monitoring
 	 * 
 	 * @return
