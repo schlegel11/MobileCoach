@@ -141,7 +141,7 @@ public class InterventionParticipantsEditComponent extends
 			final boolean interventionMonitoringActive,
 			final boolean oneScreeningSurveyActive) {
 		// Import button
-		if (interventionMonitoringActive || oneScreeningSurveyActive) {
+		if (interventionMonitoringActive) {
 			importButton.setEnabled(false);
 		} else {
 			importButton.setEnabled(true);
@@ -152,7 +152,7 @@ public class InterventionParticipantsEditComponent extends
 				|| selectedUIParticipantsIds.size() == 0) {
 			setNothingSelected();
 		} else {
-			if (!oneScreeningSurveyActive && interventionMonitoringActive) {
+			if (interventionMonitoringActive) {
 				sendMessageButton.setEnabled(true);
 			} else {
 				sendMessageButton.setEnabled(false);
