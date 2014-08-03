@@ -343,6 +343,39 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
 
+	public void screeningSurveySlideChangeDefaultVariableValue(
+			final ScreeningSurveySlide screeningSurveySlide, final String text)
+			throws NotificationMessageException {
+		if (text == null) {
+			screeningSurveySlide.setDefaultValue("");
+		} else {
+			screeningSurveySlide.setDefaultValue(text);
+		}
+
+		databaseManagerService.saveModelObject(screeningSurveySlide);
+	}
+
+	public void screeningSurveySlideChangeValidationErrorMessage(
+			final ScreeningSurveySlide screeningSurveySlide,
+			final String textWithPlaceholders,
+			final List<String> allPossibleMessageVariables)
+			throws NotificationMessageException {
+		if (textWithPlaceholders == null) {
+			screeningSurveySlide.setValidationErrorMessage("");
+		} else {
+			if (!StringValidator.isValidVariableText(textWithPlaceholders,
+					allPossibleMessageVariables)) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
+			}
+
+			screeningSurveySlide
+					.setValidationErrorMessage(textWithPlaceholders);
+		}
+
+		databaseManagerService.saveModelObject(screeningSurveySlide);
+	}
+
 	public void screeningSurveySlideChangeStoreResultToVariable(
 			final ScreeningSurveySlide screeningSurveySlide,
 			final String variableName) throws NotificationMessageException {
@@ -512,6 +545,15 @@ public class ScreeningSurveyAdministrationManagerService {
 
 			databaseManagerService.saveModelObject(screeningSurveySlideRule);
 		}
+	}
+
+	public void screeningSurveySlideRuleChangeShowSameSlideBecauseValueNotValidWhenTrue(
+			final ScreeningSurveySlideRule screeningSurveySlideRule,
+			final boolean newValue) {
+		screeningSurveySlideRule
+				.setShowSameSlideBecauseValueNotValidWhenTrue(newValue);
+
+		databaseManagerService.saveModelObject(screeningSurveySlideRule);
 	}
 
 	public ScreeningSurveySlideRule screeningSurveySlideRuleMove(

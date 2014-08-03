@@ -16,10 +16,10 @@ import ch.ethz.mc.model.ui.UIFeedback;
 import ch.ethz.mc.model.ui.UIScreeningSurveySlideRule;
 import ch.ethz.mc.tools.StringValidator;
 import ch.ethz.mc.ui.NotificationMessageException;
+import ch.ethz.mc.ui.views.components.basics.MediaObjectIntegrationComponentWithController.MediaObjectCreationOrDeleteionListener;
 import ch.ethz.mc.ui.views.components.basics.PlaceholderStringEditComponent;
 import ch.ethz.mc.ui.views.components.basics.ShortPlaceholderStringEditComponent;
 import ch.ethz.mc.ui.views.components.basics.ShortStringEditComponent;
-import ch.ethz.mc.ui.views.components.basics.MediaObjectIntegrationComponentWithController.MediaObjectCreationOrDeleteionListener;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -254,6 +254,10 @@ public class ScreeningSurveySlideEditComponentWithController extends
 				.addClickListener(buttonClickListener);
 		getQuestionTextWithPlaceholdersTextField().getButton()
 				.addClickListener(buttonClickListener);
+		getValidationErrorMessageTextFieldComponent().getButton()
+				.addClickListener(buttonClickListener);
+		getDefaultVariableValueTextFieldComponent().getButton()
+				.addClickListener(buttonClickListener);
 		getStoreVariableTextFieldComponent().getButton().addClickListener(
 				buttonClickListener);
 
@@ -321,6 +325,10 @@ public class ScreeningSurveySlideEditComponentWithController extends
 						.getOptionalLayoutAttributeWithPlaceholders());
 		getQuestionTextWithPlaceholdersTextField().setValue(
 				screeningSurveySlide.getQuestionWithPlaceholders());
+		getValidationErrorMessageTextFieldComponent().setValue(
+				screeningSurveySlide.getValidationErrorMessage());
+		getDefaultVariableValueTextFieldComponent().setValue(
+				screeningSurveySlide.getDefaultValue());
 		getStoreVariableTextFieldComponent().setValue(
 				screeningSurveySlide.getStoreValueToVariableWithName());
 
@@ -373,6 +381,12 @@ public class ScreeningSurveySlideEditComponentWithController extends
 			} else if (event.getButton() == getQuestionTextWithPlaceholdersTextField()
 					.getButton()) {
 				changeQuestionWithPlaceholders();
+			} else if (event.getButton() == getValidationErrorMessageTextFieldComponent()
+					.getButton()) {
+				changeValidationErrorMessage();
+			} else if (event.getButton() == getDefaultVariableValueTextFieldComponent()
+					.getButton()) {
+				changeDefaultVariableValue();
 			} else if (event.getButton() == getStoreVariableTextFieldComponent()
 					.getButton()) {
 				changeStoreResultVariable();
@@ -622,6 +636,67 @@ public class ScreeningSurveySlideEditComponentWithController extends
 											screeningSurveySlide,
 											getStringValue(),
 											allPossibleVariables);
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						adjust();
+
+						closeWindow();
+					}
+				}, null);
+	}
+
+	public void changeValidationErrorMessage() {
+		log.debug("Edit validation error message");
+		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
+				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
+						screeningSurveySlide.getScreeningSurvey());
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_VALIDATION_ERROR_MESSAGE,
+				screeningSurveySlide.getValidationErrorMessage(),
+				allPossibleVariables, new PlaceholderStringEditComponent(),
+				new ExtendableButtonClickListener() {
+
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Change validation error message
+							getScreeningSurveyAdministrationManagerService()
+									.screeningSurveySlideChangeValidationErrorMessage(
+											screeningSurveySlide,
+											getStringValue(),
+											allPossibleVariables);
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						adjust();
+
+						closeWindow();
+					}
+				}, null);
+	}
+
+	public void changeDefaultVariableValue() {
+		log.debug("Edit default variable value");
+
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_DEFAULT_VARIABLE_VALUE,
+				screeningSurveySlide.getDefaultValue(), null,
+				new ShortStringEditComponent(),
+				new ExtendableButtonClickListener() {
+
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Change default variable value
+							getScreeningSurveyAdministrationManagerService()
+									.screeningSurveySlideChangeDefaultVariableValue(
+											screeningSurveySlide,
+											getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;

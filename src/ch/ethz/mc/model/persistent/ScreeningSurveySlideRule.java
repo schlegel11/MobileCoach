@@ -177,6 +177,10 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 										AdminMessageStrings.SCREENING_SURVEY_SLIDE_RULE_EDITING__VALUE_TO_VARIABLE,
 										valueToStoreToVariable,
 										storeValueToVariableWithName),
+				isShowSameSlideBecauseValueNotValidWhenTrue() ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
 				nextScreeningSurveySlideWhenTrue != null ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
 						+ ": " + slideNameWhenTrue : Messages

@@ -10,9 +10,9 @@ import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlideRule;
 import ch.ethz.mc.model.ui.UIScreeningSurveySlide;
 import ch.ethz.mc.ui.views.components.basics.AbstractRuleEditComponentWithController;
+import ch.ethz.mc.ui.views.components.basics.AbstractRuleEditComponentWithController.TYPES;
 import ch.ethz.mc.ui.views.components.basics.ShortPlaceholderStringEditComponent;
 import ch.ethz.mc.ui.views.components.basics.ShortStringEditComponent;
-import ch.ethz.mc.ui.views.components.basics.AbstractRuleEditComponentWithController.TYPES;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -99,6 +99,22 @@ public class ScreeningSurveySlideRuleEditComponentWithController extends
 			}
 		}
 
+		// Handle checkbox
+		getInvalidWhenTrueCheckbox().addValueChangeListener(
+				new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						val newValue = (Boolean) event.getProperty().getValue();
+
+						getScreeningSurveyAdministrationManagerService()
+								.screeningSurveySlideRuleChangeShowSameSlideBecauseValueNotValidWhenTrue(
+										screeningSurveySlideRule, newValue);
+
+						adjust();
+					}
+				});
+
 		// Handle buttons
 		val buttonClickListener = new ButtonClickListener();
 		getStoreVariableTextFieldComponent().getButton().addClickListener(
@@ -125,6 +141,19 @@ public class ScreeningSurveySlideRuleEditComponentWithController extends
 				screeningSurveySlideRule.getStoreValueToVariableWithName());
 		getStoreValueTextFieldComponent().setValue(
 				screeningSurveySlideRule.getValueToStoreToVariable());
+
+		// Adjust checkbox
+		getInvalidWhenTrueCheckbox().setValue(
+				screeningSurveySlideRule
+						.isShowSameSlideBecauseValueNotValidWhenTrue());
+
+		if (getInvalidWhenTrueCheckbox().getValue() == true) {
+			getJumpIfFalseComboBox().setEnabled(false);
+			getJumpIfTrueComboBox().setEnabled(false);
+		} else {
+			getJumpIfFalseComboBox().setEnabled(true);
+			getJumpIfTrueComboBox().setEnabled(true);
+		}
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
