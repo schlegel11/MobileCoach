@@ -50,6 +50,7 @@ public class Queries {
 	public static final String	SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY																			= "{'screeningSurvey':#}";
 	public static final String	SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY_AND_ORDER_LOWER															= "{'screeningSurvey':#,'order':{$lt:#}}";
 	public static final String	SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY_AND_ORDER_HIGHER														= "{'screeningSurvey':#,'order':{$gt:#}}";
+	public static final String	SCREENING_SURVEY_SLIDE__BY_GLOBAL_UNIQUE_ID																			= "{'globalUniqueId':#}";
 	public static final String	SCREENING_SURVEY_SLIDE__SORT_BY_ORDER_ASC																			= "{'order':1}";
 	public static final String	SCREENING_SURVEY_SLIDE__SORT_BY_ORDER_DESC																			= "{'order':-1}";
 
@@ -126,4 +127,16 @@ public class Queries {
 	public static final String	DIALOG_MESSAGE__SORT_BY_ORDER_ASC																					= "{'order':1}";
 	public static final String	DIALOG_MESSAGE__SORT_BY_ORDER_DESC																					= "{'order':-1}";
 	public static final String	DIALOG_MESSAGE__SORT_BY_SENT_TIMESTAMP_DESC																			= "{'sentTimestamp':-1}";
+
+	// Special
+	public static final String	EVERYTHING																											= "{ }";
+	public static final String	UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_1																			= "{ $set: { 'screeningSurveyStartedTimestamp' : 0 } }";
+	public static final String	UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_2																			= "{ $set: { 'monitoringStartedTimestamp' : 0 } }";
+	public static final String	UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_3																			= "{ $set: { 'lastVisitedScreeningSurveySlide' : null } }";
+	public static final String	UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_4																			= "{ $set: { 'lastVisitedScreeningSurveySlideGlobalUniqueId' : null } }";
+	public static final String	UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_5																			= "{ $set: { 'lastVisitedScreeningSurveySlideTimestamp' : 0 } }";
+	public static final String	UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE__CHANGE_1																	= "{ $set: { 'globalUniqueId' : '---' } }";
+	public static final String	UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE__CHANGE_2																	= "{ $set: { 'validationErrorMessage' : '' } }";
+	public static final String	UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE__CHANGE_3																	= "{ $set: { 'defaultValue' : '' } }";
+	public static final String	UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE_RULE__CHANGE_1																= "{ $set: { 'showSameSlideBecauseValueNotValidWhenTrue' : false } }";
 }

@@ -65,7 +65,8 @@ public class MC implements ServletContextListener {
 		log.info("Starting up services...");
 		try {
 			// Internal services
-			databaseManagerService = DatabaseManagerService.start();
+			databaseManagerService = DatabaseManagerService
+					.start(Constants.DATA_MODEL_VERSION);
 			fileStorageManagerService = FileStorageManagerService
 					.start(databaseManagerService);
 			variablesManagerService = VariablesManagerService

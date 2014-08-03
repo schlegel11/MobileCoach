@@ -41,12 +41,29 @@ public class DialogStatus extends ModelObject {
 	private String		dateIndexOfLastDailyMonitoringProcessing;
 
 	/**
-	 * Stores if the {@link Participant} already performed a
-	 * {@link ScreeningSurvey} of the related {@link Intervention}
+	 * The last {@link ScreeningSurveySlide} the {@link Participant} visited
 	 */
 	@Getter
 	@Setter
-	private boolean		screeningSurveyPerformed;
+	private ObjectId	lastVisitedScreeningSurveySlide;
+
+	/**
+	 * Stores the reference to the {@link ScreeningSurveySlide} last visited by
+	 * the {@link Participant} in an independent way; This enables to reference
+	 * a {@link ScreeningSurveySlide} also after independent export/import
+	 * to/from another system
+	 */
+	@Getter
+	@Setter
+	private String		lastVisitedScreeningSurveySlideGlobalUniqueId;
+
+	/**
+	 * The timestamp when the last {@link ScreeningSurveySlide} was visited by
+	 * the {@link Participant}
+	 */
+	@Getter
+	@Setter
+	private long		lastVisitedScreeningSurveySlideTimestamp;
 
 	/**
 	 * Stores if the {@link Participant} has all information stored that are
@@ -57,11 +74,40 @@ public class DialogStatus extends ModelObject {
 	private boolean		dataForMonitoringParticipationAvailable;
 
 	/**
+	 * Timestamp when the user started the {@link ScreeningSurvey}
+	 */
+	@Getter
+	@Setter
+	private long		screeningSurveyStartedTimestamp;
+
+	/**
 	 * Timestamp when the user finished the {@link ScreeningSurvey}
 	 */
 	@Getter
 	@Setter
 	private long		screeningSurveyPerformedTimestamp;
+
+	/**
+	 * Stores if the {@link Participant} already performed a
+	 * {@link ScreeningSurvey} of the related {@link Intervention}
+	 */
+	@Getter
+	@Setter
+	private boolean		screeningSurveyPerformed;
+
+	/**
+	 * Timestamp when the user started the monitoring
+	 */
+	@Getter
+	@Setter
+	private long		monitoringStartedTimestamp;
+
+	/**
+	 * Timestamp when the user finished the monitoring
+	 */
+	@Getter
+	@Setter
+	private long		monitoringPerformedTimestamp;
 
 	/**
 	 * Stores if the {@link Participant} performed the whole
@@ -70,13 +116,6 @@ public class DialogStatus extends ModelObject {
 	@Getter
 	@Setter
 	private boolean		monitoringPerformed;
-
-	/**
-	 * Timestamp when the user finished the monitoring
-	 */
-	@Getter
-	@Setter
-	private long		monitoringPerformedTimestamp;
 
 	/**
 	 * Number of days the {@link Participant} participated in the monitoring

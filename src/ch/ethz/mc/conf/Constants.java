@@ -37,6 +37,19 @@ public class Constants {
 	public static final boolean	RUN_TESTS_AT_STARTUP				= false;
 
 	/**
+	 * Data model version
+	 * 
+	 * CAUTION: Can NOT be defined in configuration file
+	 */
+	public static final int		DATA_MODEL_VERSION					= 1;
+	/**
+	 * Data model configuration collection
+	 * 
+	 * CAUTION: Can NOT be defined in configuration file
+	 */
+	public static final String	DATA_MODEL_CONFIGURATION			= "DataModelConfiguration";
+
+	/**
 	 * Basic configuration
 	 */
 	@Getter

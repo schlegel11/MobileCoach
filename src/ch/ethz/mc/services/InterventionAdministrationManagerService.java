@@ -38,6 +38,7 @@ import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.ParticipantVariableWithValue;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
+import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.persistent.concepts.AbstractRule;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
@@ -1096,7 +1097,33 @@ public class InterventionAdministrationManagerService {
 						ModelObjectExchangeFormatTypes.PARTICIPANTS);
 
 		for (val modelObject : importedModelObjects) {
+			// Adjust dialog status regarding last visited slide
+			if (modelObject instanceof DialogStatus) {
+				val dialogStatus = (DialogStatus) modelObject;
+
+				if (dialogStatus
+						.getLastVisitedScreeningSurveySlideGlobalUniqueId() != null) {
+					val screeningSurveySlide = databaseManagerService
+							.findOneModelObject(
+									ScreeningSurveySlide.class,
+									Queries.SCREENING_SURVEY_SLIDE__BY_GLOBAL_UNIQUE_ID,
+									dialogStatus
+											.getLastVisitedScreeningSurveySlideGlobalUniqueId());
+					if (screeningSurveySlide != null) {
+						dialogStatus
+								.setLastVisitedScreeningSurveySlide(screeningSurveySlide
+										.getId());
+					} else {
+						dialogStatus.setLastVisitedScreeningSurveySlide(null);
+						dialogStatus
+								.setLastVisitedScreeningSurveySlideGlobalUniqueId(null);
+					}
+					databaseManagerService.saveModelObject(dialogStatus);
+				}
+			}
+
 			if (modelObject instanceof Participant) {
+				// Adjust participant regarding screening survey and feedback
 				val participant = (Participant) modelObject;
 
 				val screeningSurvey = databaseManagerService

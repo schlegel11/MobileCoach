@@ -43,6 +43,7 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 			final String storeValueToVariableWithName,
 			final ObjectId nextScreeningSurveySlideWhenTrue,
 			final ObjectId nextScreeningSurveySlideWhenFalse,
+			final boolean showSameSlideBecauseValueNotValidWhenTrue,
 			final String ruleWithPlaceholders,
 			final RuleEquationSignTypes ruleEquationSign,
 			final String ruleComparisonTermWithPlaceholders) {
@@ -56,6 +57,7 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 		this.storeValueToVariableWithName = storeValueToVariableWithName;
 		this.nextScreeningSurveySlideWhenTrue = nextScreeningSurveySlideWhenTrue;
 		this.nextScreeningSurveySlideWhenFalse = nextScreeningSurveySlideWhenFalse;
+		this.showSameSlideBecauseValueNotValidWhenTrue = showSameSlideBecauseValueNotValidWhenTrue;
 	}
 
 	/**
@@ -121,6 +123,15 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 	@Getter
 	@Setter
 	private ObjectId	nextScreeningSurveySlideWhenFalse;
+
+	/**
+	 * If the rule result is <strong>true</strong> and this value is
+	 * <strong>true</strong> as well the rule execution will be stopped and the
+	 * same slide will be shown again
+	 */
+	@Getter
+	@Setter
+	private boolean		showSameSlideBecauseValueNotValidWhenTrue;
 
 	/*
 	 * (non-Javadoc)

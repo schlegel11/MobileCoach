@@ -33,6 +33,16 @@ import ch.ethz.mc.model.ui.UIScreeningSurveySlide;
 @AllArgsConstructor
 public class ScreeningSurveySlide extends ModelObject {
 	/**
+	 * A absolutely unique Id to enable to reference a {@link ScreeningSurvey}
+	 * also after independent export/import to/from
+	 * another system
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private String								globalUniqueId;
+
+	/**
 	 * The {@link ScreeningSurvey} the {@link ScreeningSurveySlide} belongs to
 	 */
 	@Getter
@@ -144,6 +154,25 @@ public class ScreeningSurveySlide extends ModelObject {
 	@Getter
 	@Setter
 	private String								storeValueToVariableWithName;
+
+	/**
+	 * <strong>OPTIONAL:</strong> The value the variable should have if the
+	 * screening survey is executed automatically, because the participant
+	 * stopped filling it manually
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private String								defaultValue;
+
+	/**
+	 * The error message to show if the value does not match the validation
+	 * steps realized as rules
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private String								validationErrorMessage;
 
 	/*
 	 * (non-Javadoc)

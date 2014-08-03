@@ -8,6 +8,7 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.jongo.Jongo;
+import org.jongo.MongoCollection;
 
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.AbstractModelObjectAccessService;
@@ -15,7 +16,9 @@ import ch.ethz.mc.model.Indices;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.Author;
+import ch.ethz.mc.model.persistent.consistency.DataModelConfiguration;
 import ch.ethz.mc.tools.BCrypt;
+import ch.ethz.mc.tools.DataModelUpdateManager;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
@@ -28,7 +31,7 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 	private MongoClient						mongoClient;
 	private Jongo							jongo;
 
-	private DatabaseManagerService() throws Exception {
+	private DatabaseManagerService(final int expectedVersion) throws Exception {
 		log.info("Starting service...");
 		try {
 			// Creating MongoDB driver object
@@ -75,6 +78,14 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 		// Give Jongo object to model object
 		configure(jongo);
 
+		// Doing database updates
+		try {
+			updateDataToVersionIfNecessary(expectedVersion);
+		} catch (final Exception e) {
+			log.error("Error at updating database: {}", e.getMessage());
+			throw new Exception("Error at updating database: " + e.getMessage());
+		}
+
 		// Checking for admin account
 		val authors = findModelObjects(Author.class, Queries.AUTHOR__ADMIN_TRUE);
 		if (!authors.iterator().hasNext()) {
@@ -92,9 +103,38 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 		log.info("Started.");
 	}
 
-	public static DatabaseManagerService start() throws Exception {
+	/**
+	 * Update data to appropriate version
+	 * 
+	 * @param versionToBeReached
+	 */
+	private void updateDataToVersionIfNecessary(final int versionToBeReached) {
+		log.debug("Retrieving current data model version from database...");
+
+		// -1 if no version available = first DB setup
+		int currentVersion = -1;
+
+		// get current version if available in DB
+		final MongoCollection configurationCollection = jongo
+				.getCollection(Constants.DATA_MODEL_CONFIGURATION);
+		final DataModelConfiguration configuration = configurationCollection
+				.findOne().as(DataModelConfiguration.class);
+
+		if (configuration != null) {
+			currentVersion = configuration.getVersion();
+		}
+
+		// perform update
+		DataModelUpdateManager.updateDataFromVersionToVersion(currentVersion,
+				versionToBeReached, jongo);
+
+		log.info("Database is on data model version {}", versionToBeReached);
+	}
+
+	public static DatabaseManagerService start(final int expectedVersion)
+			throws Exception {
 		if (instance == null) {
-			instance = new DatabaseManagerService();
+			instance = new DatabaseManagerService(expectedVersion);
 		}
 		return instance;
 	}

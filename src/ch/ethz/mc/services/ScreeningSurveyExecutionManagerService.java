@@ -124,8 +124,10 @@ public class ScreeningSurveyExecutionManagerService {
 
 	// Dialog status
 	private void dialogStatusCreate(final ObjectId participantId) {
-		val dialogStatus = new DialogStatus(participantId, "", false, false, 0,
-				false, 0, 0);
+		final long currentTimestamp = InternalDateTime.currentTimeMillis();
+		val dialogStatus = new DialogStatus(participantId, "", null, null,
+				currentTimestamp, false, currentTimestamp, 0, false, 0, 0,
+				false, 0);
 
 		databaseManagerService.saveModelObject(dialogStatus);
 	}

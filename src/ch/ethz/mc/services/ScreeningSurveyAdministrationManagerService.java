@@ -212,10 +212,11 @@ public class ScreeningSurveyAdministrationManagerService {
 	// Screening Survey Slide
 	public ScreeningSurveySlide screeningSurveySlideCreate(
 			final ObjectId screeningSurveyId) {
-		val screeningSurveySlide = new ScreeningSurveySlide(screeningSurveyId,
-				0, "", "", null, "",
+		val screeningSurveySlide = new ScreeningSurveySlide(
+				GlobalUniqueIdGenerator.createGlobalUniqueId(),
+				screeningSurveyId, 0, "", "", null, "",
 				ScreeningSurveySlideQuestionTypes.TEXT_ONLY, false, null,
-				new String[0], new String[0], -1, null);
+				new String[0], new String[0], -1, null, "", "");
 
 		val highestOrderSlide = databaseManagerService
 				.findOneSortedModelObject(ScreeningSurveySlide.class,
@@ -439,7 +440,7 @@ public class ScreeningSurveyAdministrationManagerService {
 	public ScreeningSurveySlideRule screeningSurveySlideRuleCreate(
 			final ObjectId screeningSurveySlideId) {
 		val screeningSurveySlideRule = new ScreeningSurveySlideRule(
-				screeningSurveySlideId, 0, 0, "", null, null, null, "",
+				screeningSurveySlideId, 0, 0, "", null, null, null, false, "",
 				RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "");
 
 		val highestOrderSlideRule = databaseManagerService
