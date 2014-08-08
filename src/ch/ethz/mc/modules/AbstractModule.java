@@ -1,7 +1,6 @@
 package ch.ethz.mc.modules;
 
-import lombok.AccessLevel;
-import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 
@@ -18,18 +17,17 @@ import com.vaadin.ui.Button.ClickListener;
  * 
  */
 @SuppressWarnings("serial")
+@Log4j2
 public abstract class AbstractModule extends AbstractClosableEditComponent {
-	@Getter(value = AccessLevel.PRIVATE)
-	private static ObjectId	interventionId;
 
-	public AbstractModule(final ObjectId interventionId) {
-		AbstractModule.interventionId = interventionId;
+	public AbstractModule() {
+		log.debug("Abstract module prepared to show in list");
 	}
 
 	/**
 	 * Called before the window itself is shown
 	 */
-	public abstract void prepareToShow();
+	public abstract void prepareToShow(final ObjectId interventionId);
 
 	/**
 	 * The name of the module

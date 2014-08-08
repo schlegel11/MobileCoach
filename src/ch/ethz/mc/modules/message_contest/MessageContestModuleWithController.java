@@ -36,17 +36,11 @@ import com.vaadin.ui.Button.ClickEvent;
 public abstract class MessageContestModuleWithController extends
 		MessageContestModule {
 
-	private final ObjectId										interventionId;
+	private ObjectId											interventionId;
 
 	private BeanContainer<ObjectId, UIVariableWithParticipant>	beanContainer	= null;
 
 	private Collection<ObjectId>								selectedVariableIds;
-
-	public MessageContestModuleWithController(final ObjectId interventionId) {
-		super(interventionId);
-
-		this.interventionId = interventionId;
-	}
 
 	/**
 	 * Returns the name of the variable to store for the selected partipants
@@ -63,7 +57,9 @@ public abstract class MessageContestModuleWithController extends
 	protected abstract String getRelevantVariable();
 
 	@Override
-	public void prepareToShow() {
+	public void prepareToShow(final ObjectId interventionId) {
+		this.interventionId = interventionId;
+
 		// Table options
 		val relevantVariablesTable = getRelevantVariablesTable();
 		relevantVariablesTable.setSelectable(true);

@@ -16,12 +16,14 @@ import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.ui.UIIntervention;
+import ch.ethz.mc.model.ui.UIModule;
+import ch.ethz.mc.modules.AbstractModule;
 import ch.ethz.mc.tools.OnDemandFileDownloader;
 import ch.ethz.mc.tools.OnDemandFileDownloader.OnDemandStreamResource;
 import ch.ethz.mc.ui.views.MainView;
 import ch.ethz.mc.ui.views.components.basics.FileUploadComponentWithController;
-import ch.ethz.mc.ui.views.components.basics.ShortStringEditComponent;
 import ch.ethz.mc.ui.views.components.basics.FileUploadComponentWithController.UploadListener;
+import ch.ethz.mc.ui.views.components.basics.ShortStringEditComponent;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -40,12 +42,16 @@ import com.vaadin.ui.Button.ClickEvent;
 public class AllInterventionsTabComponentWithController extends
 		AllInterventionsTabComponent {
 
-	private final MainView									mainView;
+	private final MainView													mainView;
 
-	private UIIntervention									selectedUIIntervention			= null;
-	private BeanItem<UIIntervention>						selectedUIInterventionBeanItem	= null;
+	private UIIntervention													selectedUIIntervention			= null;
+	private BeanItem<UIIntervention>										selectedUIInterventionBeanItem	= null;
 
-	private final BeanContainer<ObjectId, UIIntervention>	beanContainer;
+	private final BeanContainer<ObjectId, UIIntervention>					interventionsBeanContainer;
+
+	private final BeanContainer<Class<? extends AbstractModule>, UIModule>	modulesBeanContainer;
+
+	private Class<? extends AbstractModule>									selectedModule					= null;
 
 	public AllInterventionsTabComponentWithController(final MainView mainView) {
 		super();
@@ -65,10 +71,11 @@ public class AllInterventionsTabComponentWithController extends
 				: getInterventionAdministrationManagerService()
 						.getAllInterventionsForAuthor(
 								getUISession().getCurrentAuthorId());
-		beanContainer = createBeanContainerForModelObjects(
+		interventionsBeanContainer = createBeanContainerForModelObjects(
 				UIIntervention.class, allRelevantIntervention);
 
-		allInterventionsTable.setContainerDataSource(beanContainer);
+		allInterventionsTable
+				.setContainerDataSource(interventionsBeanContainer);
 		allInterventionsTable.setSortContainerPropertyId(UIIntervention
 				.getSortColumn());
 		allInterventionsTable.setVisibleColumns(UIIntervention
@@ -83,7 +90,6 @@ public class AllInterventionsTabComponentWithController extends
 			public void valueChange(final ValueChangeEvent event) {
 				val objectId = allInterventionsTable.getValue();
 				if (objectId == null) {
-					allInterventionsEditComponent.setNothingSelected();
 					selectedUIIntervention = null;
 					selectedUIInterventionBeanItem = null;
 				} else {
@@ -93,8 +99,54 @@ public class AllInterventionsTabComponentWithController extends
 					selectedUIInterventionBeanItem = getBeanItemFromTableByObjectId(
 							allInterventionsTable, UIIntervention.class,
 							objectId);
-					allInterventionsEditComponent.setSomethingSelected();
 				}
+
+				allInterventionsEditComponent.adjust(
+						selectedUIIntervention != null, selectedModule != null);
+			}
+		});
+
+		// Handle modules table
+		modulesBeanContainer = new BeanContainer<Class<? extends AbstractModule>, UIModule>(
+				UIModule.class);
+
+		val modules = getInterventionAdministrationManagerService()
+				.getRegisteredModules();
+		val modulesTable = allInterventionsEditComponent.getModulesTable();
+		modulesTable.setImmediate(true);
+		modulesTable.setSelectable(true);
+		modulesTable.setContainerDataSource(modulesBeanContainer);
+		modulesTable.setSortContainerPropertyId(UIModule.getSortColumn());
+		modulesTable.setVisibleColumns(UIModule.getVisibleColumns());
+		modulesTable.setColumnHeaders(UIModule.getColumnHeaders());
+
+		for (val moduleClass : modules) {
+			AbstractModule module;
+			try {
+				module = moduleClass.newInstance();
+				modulesBeanContainer.addItem(moduleClass, module.toUIModule());
+			} catch (final Exception e) {
+				log.error("Error when creating new module instance: {}",
+						e.getMessage());
+			}
+		}
+
+		// Handle table selection change
+		modulesTable.addValueChangeListener(new ValueChangeListener() {
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public void valueChange(final ValueChangeEvent event) {
+				val objectId = modulesTable.getValue();
+				if (objectId == null) {
+					selectedModule = null;
+				} else {
+					selectedModule = (Class<? extends AbstractModule>) modulesTable
+							.getValue();
+				}
+
+				allInterventionsEditComponent.adjust(
+						selectedUIIntervention != null, selectedModule != null);
 			}
 		});
 
@@ -115,6 +167,8 @@ public class AllInterventionsTabComponentWithController extends
 		allInterventionsEditComponent.getDuplicateButton().addClickListener(
 				buttonClickListener);
 		allInterventionsEditComponent.getDeleteButton().addClickListener(
+				buttonClickListener);
+		allInterventionsEditComponent.getOpenModuleButton().addClickListener(
 				buttonClickListener);
 
 		// Special handle for export button
@@ -173,6 +227,9 @@ public class AllInterventionsTabComponentWithController extends
 			} else if (event.getButton() == allInterventionsEditComponent
 					.getDeleteButton()) {
 				deleteIntervention();
+			} else if (event.getButton() == allInterventionsEditComponent
+					.getOpenModuleButton()) {
+				openModule();
 			}
 		}
 	}
@@ -198,9 +255,9 @@ public class AllInterventionsTabComponentWithController extends
 						}
 
 						// Adapt UI
-						beanContainer.addItem(newIntervention.getId(),
-								UIIntervention.class.cast(newIntervention
-										.toUIModelObject()));
+						interventionsBeanContainer.addItem(newIntervention
+								.getId(), UIIntervention.class
+								.cast(newIntervention.toUIModelObject()));
 						getAllInterventionsEditComponent()
 								.getAllInterventionsTable().select(
 										newIntervention.getId());
@@ -234,9 +291,9 @@ public class AllInterventionsTabComponentWithController extends
 					}
 
 					// Adapt UI
-					beanContainer.addItem(importedIntervention.getId(),
-							UIIntervention.class.cast(importedIntervention
-									.toUIModelObject()));
+					interventionsBeanContainer.addItem(importedIntervention
+							.getId(), UIIntervention.class
+							.cast(importedIntervention.toUIModelObject()));
 					getAllInterventionsEditComponent()
 							.getAllInterventionsTable().select(
 									importedIntervention.getId());
@@ -280,9 +337,9 @@ public class AllInterventionsTabComponentWithController extends
 					}
 
 					// Adapt UI
-					beanContainer.addItem(importedIntervention.getId(),
-							UIIntervention.class.cast(importedIntervention
-									.toUIModelObject()));
+					interventionsBeanContainer.addItem(importedIntervention
+							.getId(), UIIntervention.class
+							.cast(importedIntervention.toUIModelObject()));
 					getAllInterventionsEditComponent()
 							.getAllInterventionsTable().select(
 									importedIntervention.getId());
@@ -419,5 +476,25 @@ public class AllInterventionsTabComponentWithController extends
 				closeWindow();
 			}
 		}, null);
+	}
+
+	public void openModule() {
+		log.debug("Open module");
+		val intervention = selectedUIIntervention
+				.getRelatedModelObject(Intervention.class);
+
+		@val
+		ch.ethz.mc.modules.AbstractModule selectedModuleInstance;
+		try {
+			selectedModuleInstance = selectedModule.newInstance();
+
+			selectedModuleInstance.prepareToShow(intervention.getId());
+
+			showModalClosableEditWindow(selectedModuleInstance.getName(),
+					selectedModuleInstance, null);
+		} catch (final Exception e) {
+			log.error("Error when creating new module instance: {}",
+					e.getMessage());
+		}
 	}
 }

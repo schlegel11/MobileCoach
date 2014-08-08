@@ -1,7 +1,5 @@
 package ch.ethz.mc.modules.message_contest;
 
-import org.bson.types.ObjectId;
-
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.conf.Messages;
@@ -13,10 +11,6 @@ import ch.ethz.mc.conf.Messages;
 @SuppressWarnings("serial")
 public class MessageContestQuitMessage extends
 		MessageContestModuleWithController {
-
-	public MessageContestQuitMessage(final ObjectId interventionId) {
-		super(interventionId);
-	}
 
 	@Override
 	protected String getResultVariable() {
