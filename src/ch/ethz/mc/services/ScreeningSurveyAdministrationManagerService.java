@@ -553,6 +553,11 @@ public class ScreeningSurveyAdministrationManagerService {
 		screeningSurveySlideRule
 				.setShowSameSlideBecauseValueNotValidWhenTrue(newValue);
 
+		if (newValue) {
+			screeningSurveySlideRule.setNextScreeningSurveySlideWhenTrue(null);
+			screeningSurveySlideRule.setNextScreeningSurveySlideWhenFalse(null);
+		}
+
 		databaseManagerService.saveModelObject(screeningSurveySlideRule);
 	}
 

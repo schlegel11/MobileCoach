@@ -147,12 +147,16 @@ public class ScreeningSurveySlideRuleEditComponentWithController extends
 				screeningSurveySlideRule
 						.isShowSameSlideBecauseValueNotValidWhenTrue());
 
-		if (getInvalidWhenTrueCheckbox().getValue() == true) {
-			getJumpIfFalseComboBox().setEnabled(false);
+		// Adjust jump to slide combo boxes
+		if (screeningSurveySlideRule
+				.isShowSameSlideBecauseValueNotValidWhenTrue()) {
 			getJumpIfTrueComboBox().setEnabled(false);
+			getJumpIfFalseComboBox().setEnabled(false);
+			getJumpIfTrueComboBox().setValue(null);
+			getJumpIfFalseComboBox().setValue(null);
 		} else {
-			getJumpIfFalseComboBox().setEnabled(true);
 			getJumpIfTrueComboBox().setEnabled(true);
+			getJumpIfFalseComboBox().setEnabled(true);
 		}
 	}
 
