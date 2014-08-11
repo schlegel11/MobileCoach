@@ -64,6 +64,14 @@ public class Intervention extends ModelObject {
 	@Setter
 	private boolean	monitoringActive;
 
+	/**
+	 * The sender identification used to send messages to the
+	 * {@link Participant}s
+	 */
+	@Getter
+	@Setter
+	private String	assignedSenderIdentification;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -82,7 +90,10 @@ public class Intervention extends ModelObject {
 				monitoringActive ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
 						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE));
+								.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE),
+				assignedSenderIdentification == null ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+						: assignedSenderIdentification);
 
 		intervention.setRelatedModelObject(this);
 

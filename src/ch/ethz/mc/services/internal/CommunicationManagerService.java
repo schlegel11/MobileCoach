@@ -64,7 +64,6 @@ public class CommunicationManagerService {
 	private final String						smsEmailTo;
 	private final String						smsUserKey;
 	private final String						smsUserPassword;
-	private final String						smsPhoneNumberFrom;
 
 	private final DocumentBuilderFactory		documentBuilderFactory;
 	private final SimpleDateFormat				receiverDateFormat;
@@ -98,7 +97,6 @@ public class CommunicationManagerService {
 		smsEmailTo = Constants.getSmsEmailTo();
 		smsUserKey = Constants.getSmsUserKey();
 		smsUserPassword = Constants.getSmsUserPassword();
-		smsPhoneNumberFrom = Constants.getSmsPhoneNumberFrom();
 
 		// General properties
 		val properties = new Properties();
@@ -161,15 +159,15 @@ public class CommunicationManagerService {
 	 */
 	@Synchronized
 	public void sendMessage(final DialogOption dialogOption,
-			final ObjectId dialogMessageId, final String message,
-			final boolean messageExpectsAnswer) {
+			final ObjectId dialogMessageId, final String messageSender,
+			final String message, final boolean messageExpectsAnswer) {
 		if (interventionExecutionManagerService == null) {
 			interventionExecutionManagerService = MC.getInstance()
 					.getInterventionExecutionManagerService();
 		}
 
 		val mailingThread = new MailingThread(dialogOption, dialogMessageId,
-				message, messageExpectsAnswer);
+				messageSender, message, messageExpectsAnswer);
 
 		interventionExecutionManagerService
 				.dialogMessageStatusChangesForSending(dialogMessageId,
@@ -330,15 +328,18 @@ public class CommunicationManagerService {
 	private class MailingThread extends Thread {
 		private final DialogOption	dialogOption;
 		private final ObjectId		dialogMessageId;
+		private final String		messageSender;
 		private final String		message;
 		private final boolean		messageExpectsAnswer;
 
 		public MailingThread(final DialogOption dialogOption,
-				final ObjectId dialogMessageId, final String message,
+				final ObjectId dialogMessageId,
+				final String smsPhoneNumberFrom, final String message,
 				final boolean messageExpectsAnswer) {
 			setName("Mailing Thread " + dialogOption.getData());
 			this.dialogOption = dialogOption;
 			this.dialogMessageId = dialogMessageId;
+			this.messageSender = smsPhoneNumberFrom;
 			this.message = message;
 			this.messageExpectsAnswer = messageExpectsAnswer;
 		}
@@ -346,7 +347,7 @@ public class CommunicationManagerService {
 		@Override
 		public void run() {
 			try {
-				sendMessage(dialogOption, message);
+				sendMessage(dialogOption, messageSender, message);
 
 				if (messageExpectsAnswer) {
 					interventionExecutionManagerService
@@ -390,7 +391,7 @@ public class CommunicationManagerService {
 				}
 
 				try {
-					sendMessage(dialogOption, message);
+					sendMessage(dialogOption, messageSender, message);
 
 					if (messageExpectsAnswer) {
 						interventionExecutionManagerService
@@ -436,13 +437,14 @@ public class CommunicationManagerService {
 		 * Sends message using SMTP protocol
 		 * 
 		 * @param dialogOption
+		 * @param messageSender
 		 * @param message
 		 * @throws AddressException
 		 * @throws MessagingException
 		 */
 		private void sendMessage(final DialogOption dialogOption,
-				final String message) throws AddressException,
-				MessagingException {
+				final String messageSender, final String message)
+				throws AddressException, MessagingException {
 			log.debug("Sending mail for outgoing SMS to {} with text {}",
 					dialogOption.getData(), message);
 
@@ -459,7 +461,7 @@ public class CommunicationManagerService {
 				mailMessage.setSubject("UserKey=" + smsUserKey + ",Password="
 						+ smsUserPassword + ",Recipient="
 						+ dialogOption.getData() + ",Originator="
-						+ smsPhoneNumberFrom + ",Notify=none");
+						+ messageSender + ",Notify=none");
 				mailMessage.setText(message, "ISO-8859-1");
 
 				mailMessage.setText(message);

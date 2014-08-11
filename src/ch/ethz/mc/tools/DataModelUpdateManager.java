@@ -8,6 +8,7 @@ import org.jongo.Jongo;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.DialogStatus;
+import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlideRule;
 import ch.ethz.mc.model.persistent.consistency.DataModelConfiguration;
@@ -70,6 +71,11 @@ public class DataModelUpdateManager {
 	 * Changes for version 1:
 	 */
 	private static void updateToVersion1() {
+		val interventionCollection = jongo.getCollection(Intervention.class
+				.getSimpleName());
+		interventionCollection.update(Queries.EVERYTHING).multi()
+				.with(Queries.UPDATE_VERSION_1__INTERVENTION__CHANGE_1);
+
 		val dialogStatusCollection = jongo.getCollection(DialogStatus.class
 				.getSimpleName());
 		dialogStatusCollection.update(Queries.EVERYTHING).multi()

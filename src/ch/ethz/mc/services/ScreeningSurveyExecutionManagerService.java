@@ -145,12 +145,36 @@ public class ScreeningSurveyExecutionManagerService {
 
 			databaseManagerService.saveModelObject(dialogStatus);
 		}
+	}
 
+	private void dialogStatusUpdateAfterDeterminingNextSlide(
+			final ObjectId participantId, final ScreeningSurveySlide formerSlide) {
+		val dialogStatus = databaseManagerService.findOneModelObject(
+				DialogStatus.class, Queries.DIALOG_STATUS__BY_PARTICIPANT,
+				participantId);
+
+		// Check if all data for monitoring is available
 		if (!dialogStatus.isDataForMonitoringParticipationAvailable()) {
 			val dataForMonitoringParticipationAvailable = checkForDataForMonitoringParticipation(participantId);
 
+			if (dialogStatus.isDataForMonitoringParticipationAvailable() != dataForMonitoringParticipationAvailable) {
+				dialogStatus
+						.setDataForMonitoringParticipationAvailable(dataForMonitoringParticipationAvailable);
+
+				databaseManagerService.saveModelObject(dialogStatus);
+			}
+		}
+
+		// Remember former slide and timestamp
+		if (formerSlide != null) {
 			dialogStatus
-					.setDataForMonitoringParticipationAvailable(dataForMonitoringParticipationAvailable);
+					.setLastVisitedScreeningSurveySlide(formerSlide.getId());
+			dialogStatus
+					.setLastVisitedScreeningSurveySlideGlobalUniqueId(formerSlide
+							.getGlobalUniqueId());
+			dialogStatus
+					.setLastVisitedScreeningSurveySlideTimestamp(InternalDateTime
+							.currentTimeMillis());
 
 			databaseManagerService.saveModelObject(dialogStatus);
 		}
@@ -412,6 +436,9 @@ public class ScreeningSurveyExecutionManagerService {
 						screeningSurvey, formerSlide);
 			}
 		}
+
+		// Adjust dialog status
+		dialogStatusUpdateAfterDeterminingNextSlide(participantId, formerSlide);
 
 		if (nextSlide == null) {
 			// Screening survey done

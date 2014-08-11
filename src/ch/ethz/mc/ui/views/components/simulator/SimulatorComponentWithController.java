@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import lombok.Setter;
 import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -33,6 +34,9 @@ public class SimulatorComponentWithController extends SimulatorComponent
 	private final BeanItemContainer<UISimulatedMessage>	beanContainer;
 
 	private final DateFormat							dateFormat;
+
+	@Setter
+	private String										senderIdentification;
 
 	public SimulatorComponentWithController() {
 		super();
@@ -162,7 +166,8 @@ public class SimulatorComponentWithController extends SimulatorComponent
 
 		addMessageToTable(false, messageToSend);
 
-		Simulator.getInstance().simulateSMSReplyByParticipant(messageToSend);
+		Simulator.getInstance().simulateSMSReplyByParticipant(
+				senderIdentification, messageToSend);
 	}
 
 	@Override

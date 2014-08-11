@@ -63,14 +63,14 @@ public class Simulator {
 	}
 
 	@Synchronized
-	public void simulateSMSReplyByParticipant(final String message) {
+	public void simulateSMSReplyByParticipant(
+			final String senderIdentification, final String message) {
 		val simulatedReceivedMessage = new ReceivedMessage();
 		simulatedReceivedMessage.setMessage(message);
 		simulatedReceivedMessage.setReceivedTimestamp(InternalDateTime
 				.currentTimeMillis());
 		simulatedReceivedMessage.setSender(Constants.getSmsSimulationNumber());
-		simulatedReceivedMessage
-				.setRecipient(Constants.getSmsPhoneNumberFrom());
+		simulatedReceivedMessage.setRecipient(senderIdentification);
 		simulatedReceivedSMS.add(simulatedReceivedMessage);
 	}
 

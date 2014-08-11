@@ -130,6 +130,7 @@ public class Queries {
 
 	// Special
 	public static final String	EVERYTHING																											= "{ }";
+	public static final String	UPDATE_VERSION_1__INTERVENTION__CHANGE_1																			= "{ $set: { 'assignedSenderIdentification' : null } }";
 	public static final String	UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_1																			= "{ $set: { 'screeningSurveyStartedTimestamp' : 0 } }";
 	public static final String	UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_2																			= "{ $set: { 'monitoringStartedTimestamp' : 0 } }";
 	public static final String	UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_3																			= "{ $set: { 'lastVisitedScreeningSurveySlide' : null } }";

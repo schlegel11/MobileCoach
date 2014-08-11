@@ -2,6 +2,8 @@ package ch.ethz.mc.conf;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -162,8 +164,16 @@ public class Constants {
 	private static String	smsUserPassword			= "xyz";
 	private static String	smsPhoneNumberFrom		= "+4567890";
 
-	public static String getSmsPhoneNumberFrom() {
-		return StringHelpers.cleanPhoneNumber(smsPhoneNumberFrom);
+	public static List<String> getSmsPhoneNumberFrom() {
+		final List<String> smsPhoneNumbers = new ArrayList<String>();
+
+		val smsPhoneNumbersArray = smsPhoneNumberFrom.split(",");
+
+		for (final String smsPhoneNumber : smsPhoneNumbersArray) {
+			smsPhoneNumbers.add(StringHelpers.cleanPhoneNumber(smsPhoneNumber));
+		}
+
+		return smsPhoneNumbers;
 	}
 
 	/**

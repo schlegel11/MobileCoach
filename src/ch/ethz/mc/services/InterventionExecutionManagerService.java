@@ -10,7 +10,6 @@ import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
@@ -18,6 +17,7 @@ import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
+import ch.ethz.mc.model.memory.DialogMessageWithSenderIdentification;
 import ch.ethz.mc.model.memory.ReceivedMessage;
 import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogOption;
@@ -438,6 +438,11 @@ public class InterventionExecutionManagerService {
 		dialogStatus.setMonitoringDaysParticipated(dialogStatus
 				.getMonitoringDaysParticipated() + 1);
 
+		if (dialogStatus.getMonitoringStartedTimestamp() == 0) {
+			dialogStatus.setMonitoringStartedTimestamp(InternalDateTime
+					.currentTimeMillis());
+		}
+
 		databaseManagerService.saveModelObject(dialogStatus);
 	}
 
@@ -788,8 +793,10 @@ public class InterventionExecutionManagerService {
 
 	@Synchronized
 	public void handleOutgoingMessages() {
-		final val dialogMessagesToSend = getDialogMessagesWaitingToBeSentOfActiveInterventions();
-		for (val dialogMessageToSend : dialogMessagesToSend) {
+		val dialogMessagesWithSenderToSend = getDialogMessagesWithSenderWaitingToBeSentOfActiveInterventions();
+		for (val dialogMessageWithPhoneNumberToSend : dialogMessagesWithSenderToSend) {
+			final val dialogMessageToSend = dialogMessageWithPhoneNumberToSend
+					.getDialogMessage();
 			try {
 
 				val dialogOption = getDialogOptionByParticipantAndType(
@@ -802,6 +809,8 @@ public class InterventionExecutionManagerService {
 							dialogOption.getData());
 					communicationManagerService.sendMessage(dialogOption,
 							dialogMessageToSend.getId(),
+							dialogMessageWithPhoneNumberToSend
+									.getMessageSenderIdentification(),
 							dialogMessageToSend.getMessage(),
 							dialogMessageToSend.isMessageExpectsAnswer());
 				} else {
@@ -884,50 +893,59 @@ public class InterventionExecutionManagerService {
 	 * therefore are:
 	 * 
 	 * - the belonging intervention is active
+	 * - the belonging intervention has sender identification
 	 * - the belonging intervention monitoring is active
 	 * - the participant has monitoring active
 	 * - the participant has all data for monitoring available
-	 * - the participant not finished monitoring
+	 * - the participant has finished the screening survey
+	 * - the participant not finished the monitoring
 	 * - the message should have the status PREPARED_FOR_SENDING
 	 * - the should be sent timestamp should be lower than the current time
 	 * 
 	 * @return
 	 */
 	@Synchronized
-	private List<DialogMessage> getDialogMessagesWaitingToBeSentOfActiveInterventions() {
-		val dialogMessagesWaitingToBeSend = new ArrayList<DialogMessage>();
+	private List<DialogMessageWithSenderIdentification> getDialogMessagesWithSenderWaitingToBeSentOfActiveInterventions() {
+		val dialogMessagesWaitingToBeSend = new ArrayList<DialogMessageWithSenderIdentification>();
 
 		for (val intervention : databaseManagerService.findModelObjects(
 				Intervention.class,
 				Queries.INTERVENTION__ACTIVE_TRUE_MONITORING_ACTIVE_TRUE)) {
-			for (val participant : databaseManagerService
-					.findModelObjects(
-							Participant.class,
-							Queries.PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE,
-							intervention.getId())) {
-				if (participant != null) {
-					for (val dialogStatus : databaseManagerService
-							.findModelObjects(DialogStatus.class,
-									Queries.DIALOG_STATUS__BY_PARTICIPANT,
-									participant.getId())) {
-						if (dialogStatus != null
-								&& dialogStatus
-										.isDataForMonitoringParticipationAvailable()
-								&& !dialogStatus.isMonitoringPerformed()) {
+			if (intervention.getAssignedSenderIdentification() != null) {
+				for (val participant : databaseManagerService
+						.findModelObjects(
+								Participant.class,
+								Queries.PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE,
+								intervention.getId())) {
+					if (participant != null) {
+						for (val dialogStatus : databaseManagerService
+								.findModelObjects(DialogStatus.class,
+										Queries.DIALOG_STATUS__BY_PARTICIPANT,
+										participant.getId())) {
+							if (dialogStatus != null
+									&& dialogStatus
+											.isDataForMonitoringParticipationAvailable()
+									&& dialogStatus
+											.isScreeningSurveyPerformed()
+									&& !dialogStatus.isMonitoringPerformed()) {
 
-							val dialogMessagesWaitingToBeSendOfParticipant = databaseManagerService
-									.findModelObjects(
-											DialogMessage.class,
-											Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_SHOULD_BE_SENT_TIMESTAMP_LOWER,
-											participant.getId(),
-											DialogMessageStatusTypes.PREPARED_FOR_SENDING,
-											InternalDateTime
-													.currentTimeMillis());
+								val dialogMessagesWaitingToBeSendOfParticipant = databaseManagerService
+										.findModelObjects(
+												DialogMessage.class,
+												Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_SHOULD_BE_SENT_TIMESTAMP_LOWER,
+												participant.getId(),
+												DialogMessageStatusTypes.PREPARED_FOR_SENDING,
+												InternalDateTime
+														.currentTimeMillis());
 
-							CollectionUtils.addAll(
-									dialogMessagesWaitingToBeSend,
-									dialogMessagesWaitingToBeSendOfParticipant
-											.iterator());
+								for (val dialogMessageWaitingToBeSendOfParticipant : dialogMessagesWaitingToBeSendOfParticipant) {
+									dialogMessagesWaitingToBeSend
+											.add(new DialogMessageWithSenderIdentification(
+													dialogMessageWaitingToBeSendOfParticipant,
+													intervention
+															.getAssignedSenderIdentification()));
+								}
+							}
 						}
 					}
 				}
@@ -1052,10 +1070,12 @@ public class InterventionExecutionManagerService {
 	 * Parameters therefore are:
 	 * 
 	 * - the belonging intervention is active
+	 * - the belonging intervention has a sender identification
 	 * - the belonging intervention monitoring is active
 	 * - the participant has monitoring active
 	 * - the participant has all data for monitoring available
-	 * - the participant not finished monitoring
+	 * - the participant has finished the screening survey
+	 * - the participant not finished the monitoring
 	 * 
 	 * @return
 	 */
@@ -1066,21 +1086,25 @@ public class InterventionExecutionManagerService {
 		for (val intervention : databaseManagerService.findModelObjects(
 				Intervention.class,
 				Queries.INTERVENTION__ACTIVE_TRUE_MONITORING_ACTIVE_TRUE)) {
-			for (val participant : databaseManagerService
-					.findModelObjects(
-							Participant.class,
-							Queries.PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE,
-							intervention.getId())) {
-				if (participant != null) {
-					for (val dialogStatus : databaseManagerService
-							.findModelObjects(DialogStatus.class,
-									Queries.DIALOG_STATUS__BY_PARTICIPANT,
-									participant.getId())) {
-						if (dialogStatus != null
-								&& dialogStatus
-										.isDataForMonitoringParticipationAvailable()
-								&& !dialogStatus.isMonitoringPerformed()) {
-							relevantParticipants.add(participant);
+			if (intervention.getAssignedSenderIdentification() != null) {
+				for (val participant : databaseManagerService
+						.findModelObjects(
+								Participant.class,
+								Queries.PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE,
+								intervention.getId())) {
+					if (participant != null) {
+						for (val dialogStatus : databaseManagerService
+								.findModelObjects(DialogStatus.class,
+										Queries.DIALOG_STATUS__BY_PARTICIPANT,
+										participant.getId())) {
+							if (dialogStatus != null
+									&& dialogStatus
+											.isDataForMonitoringParticipationAvailable()
+									&& dialogStatus
+											.isScreeningSurveyPerformed()
+									&& !dialogStatus.isMonitoringPerformed()) {
+								relevantParticipants.add(participant);
+							}
 						}
 					}
 				}
