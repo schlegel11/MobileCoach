@@ -27,6 +27,8 @@ import ch.ethz.mc.model.ui.results.UIVariableWithParticipantForResults;
 import ch.ethz.mc.tools.CSVExporter;
 import ch.ethz.mc.tools.OnDemandFileDownloader;
 import ch.ethz.mc.tools.OnDemandFileDownloader.OnDemandStreamResource;
+import ch.ethz.mc.tools.StringValidator;
+import ch.ethz.mc.ui.views.components.basics.PlaceholderStringEditComponent;
 import ch.ethz.mc.ui.views.components.basics.ShortStringEditComponent;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -133,7 +135,8 @@ public class InterventionResultsComponentWithController extends
 			public void valueChange(final ValueChangeEvent event) {
 				selectedUIParticipantsIds = (Collection<ObjectId>) participantsTable
 						.getValue();
-				updateButtonStatus(selectedUIParticipantsIds);
+				updateButtonStatus(selectedUIParticipantsIds,
+						intervention.isMonitoringActive());
 				updateTables();
 			}
 		});
@@ -162,6 +165,7 @@ public class InterventionResultsComponentWithController extends
 		// handle buttons
 		val buttonClickListener = new ButtonClickListener();
 		getRefreshButton().addClickListener(buttonClickListener);
+		getSendMessageButton().addClickListener(buttonClickListener);
 		getEditButton().addClickListener(buttonClickListener);
 
 		// Special handle for export buttons
@@ -238,7 +242,8 @@ public class InterventionResultsComponentWithController extends
 	}
 
 	private void adjust() {
-		updateButtonStatus(selectedUIParticipantsIds);
+		updateButtonStatus(selectedUIParticipantsIds,
+				intervention.isMonitoringActive());
 
 		val participantsTable = getParticipantsTable();
 
@@ -261,6 +266,8 @@ public class InterventionResultsComponentWithController extends
 
 			if (event.getButton() == getRefreshButton()) {
 				adjust();
+			} else if (event.getButton() == getSendMessageButton()) {
+				sendMessage();
 			} else if (event.getButton() == getEditButton()) {
 				editVariableValue();
 			}
@@ -338,6 +345,53 @@ public class InterventionResultsComponentWithController extends
 		}
 
 		getVariablesTable().sort();
+	}
+
+	public void sendMessage() {
+		log.debug("Send manual message");
+		val allPossibleMessageVariables = getInterventionAdministrationManagerService()
+				.getAllPossibleMonitoringRuleVariablesOfIntervention(
+						intervention.getId());
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__SEND_MESSAGE_TO_ALL_SELECTED_PARTICIPANTS,
+				"", allPossibleMessageVariables,
+				new PlaceholderStringEditComponent(),
+				new ExtendableButtonClickListener() {
+
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						// Check if message contains only valid strings
+						if (!StringValidator.isValidVariableText(
+								getStringValue(), allPossibleMessageVariables)) {
+
+							getAdminUI()
+									.showWarningNotification(
+											AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
+
+							return;
+						} else {
+							val interventionExecutionManagerService = MC
+									.getInstance()
+									.getInterventionExecutionManagerService();
+
+							val selectedParticipants = convertSelectedToParticipantsList();
+
+							for (val participant : selectedParticipants) {
+								interventionExecutionManagerService
+										.sendManualMessage(participant,
+												getStringValue());
+							}
+						}
+
+						getAdminUI()
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__THE_MESSAGES_WILL_BE_SENT_IN_THE_NEXT_MINUTES);
+
+						adjust();
+
+						closeWindow();
+					}
+				}, null);
 	}
 
 	public void editVariableValue() {
