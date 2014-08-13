@@ -290,6 +290,11 @@ public class AllInterventionsTabComponentWithController extends
 								"Imported intervention not found in import");
 					}
 
+					// Recreate global unique IDs for subelements
+					getInterventionAdministrationManagerService()
+							.interventionRecreateGlobalUniqueIdsForSubelements(
+									importedIntervention);
+
 					// Adapt UI
 					interventionsBeanContainer.addItem(importedIntervention
 							.getId(), UIIntervention.class
@@ -314,6 +319,8 @@ public class AllInterventionsTabComponentWithController extends
 				} catch (final Exception f) {
 					// Do nothing
 				}
+
+				closeWindow();
 			}
 		}, null);
 	}

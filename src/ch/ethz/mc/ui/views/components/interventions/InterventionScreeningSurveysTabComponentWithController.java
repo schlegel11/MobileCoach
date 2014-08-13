@@ -20,8 +20,8 @@ import ch.ethz.mc.model.ui.UIScreeningSurvey;
 import ch.ethz.mc.tools.OnDemandFileDownloader;
 import ch.ethz.mc.tools.OnDemandFileDownloader.OnDemandStreamResource;
 import ch.ethz.mc.ui.views.components.basics.FileUploadComponentWithController;
-import ch.ethz.mc.ui.views.components.basics.ShortStringEditComponent;
 import ch.ethz.mc.ui.views.components.basics.FileUploadComponentWithController.UploadListener;
+import ch.ethz.mc.ui.views.components.basics.ShortStringEditComponent;
 import ch.ethz.mc.ui.views.components.screening_survey.ScreeningSurveyEditComponentWithController;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -232,6 +232,7 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 						throw new NullArgumentException(
 								"Imported screening survey not found in import");
 					} else {
+						// Recreate global unique ID
 						getScreeningSurveyAdministrationManagerService()
 								.screeningSurveyRecreateGlobalUniqueId(
 										importedScreeningSurvey);
@@ -262,6 +263,8 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 				} catch (final Exception f) {
 					// Do nothing
 				}
+
+				closeWindow();
 			}
 		}, null);
 	}
@@ -314,7 +317,6 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 		showModalClosableEditWindow(
 				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__IMPORT_SCREENING_SURVEY,
 				fileUploadComponentWithController, null);
-
 	}
 
 	public void renameScreeningSurvey() {

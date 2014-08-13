@@ -110,21 +110,32 @@ public class ScreeningSurveyAdministrationManagerService {
 	}
 
 	public void screeningSurveyRecreateGlobalUniqueId(
-			final ScreeningSurvey importedScreeningSurvey) {
-		importedScreeningSurvey.setGlobalUniqueId(GlobalUniqueIdGenerator
+			final ScreeningSurvey screeningSurvey) {
+		screeningSurvey.setGlobalUniqueId(GlobalUniqueIdGenerator
 				.createGlobalUniqueId());
 
 		val feedbacksOfScreeningSurvey = databaseManagerService
 				.findModelObjects(Feedback.class,
 						Queries.FEEDBACK__BY_SCREENING_SURVEY,
-						importedScreeningSurvey.getId());
+						screeningSurvey.getId());
 
 		for (val feedback : feedbacksOfScreeningSurvey) {
 			feedback.setGlobalUniqueId(GlobalUniqueIdGenerator
 					.createGlobalUniqueId());
 
-			databaseManagerService.saveModelObject(importedScreeningSurvey);
+			databaseManagerService.saveModelObject(feedback);
 		}
+
+		val screeningSurveySlidesOfScreeningSurvey = databaseManagerService
+				.findModelObjects(ScreeningSurveySlide.class,
+						Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY,
+						screeningSurvey.getId());
+
+		for (val screeningSurveySlide : screeningSurveySlidesOfScreeningSurvey) {
+			screeningSurveySlideRecreateGlobalUniqueId(screeningSurveySlide);
+		}
+
+		databaseManagerService.saveModelObject(screeningSurvey);
 	}
 
 	public void screeningSurveyChangeName(
@@ -231,6 +242,14 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurveySlide);
 
 		return screeningSurveySlide;
+	}
+
+	public void screeningSurveySlideRecreateGlobalUniqueId(
+			final ScreeningSurveySlide screeningSurveySlide) {
+		screeningSurveySlide.setGlobalUniqueId(GlobalUniqueIdGenerator
+				.createGlobalUniqueId());
+
+		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
 
 	public ScreeningSurveySlide screeningSurveySlideImport(final File file)

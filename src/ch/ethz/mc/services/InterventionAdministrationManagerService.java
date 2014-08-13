@@ -17,6 +17,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.bson.types.ObjectId;
 
+import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
@@ -223,6 +224,25 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(intervention);
 
 		return intervention;
+	}
+
+	public void interventionRecreateGlobalUniqueIdsForSubelements(
+			final Intervention intervention) {
+
+		val screeningSurveyAdministrationService = MC.getInstance()
+				.getScreeningSurveyAdministrationManagerService();
+
+		val screeningSurveysOfIntervention = databaseManagerService
+				.findModelObjects(ScreeningSurvey.class,
+						Queries.SCREENING_SURVEY__BY_INTERVENTION,
+						intervention.getId());
+
+		databaseManagerService.saveModelObject(intervention);
+
+		for (val screeningSurvey : screeningSurveysOfIntervention) {
+			screeningSurveyAdministrationService
+					.screeningSurveyRecreateGlobalUniqueId(screeningSurvey);
+		}
 	}
 
 	public void interventionChangeName(final Intervention intervention,

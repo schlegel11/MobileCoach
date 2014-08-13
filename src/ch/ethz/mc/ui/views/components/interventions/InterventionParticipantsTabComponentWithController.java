@@ -24,12 +24,12 @@ import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.ui.UIParticipant;
 import ch.ethz.mc.tools.OnDemandFileDownloader;
-import ch.ethz.mc.tools.StringValidator;
 import ch.ethz.mc.tools.OnDemandFileDownloader.OnDemandStreamResource;
+import ch.ethz.mc.tools.StringValidator;
 import ch.ethz.mc.ui.views.components.basics.FileUploadComponentWithController;
+import ch.ethz.mc.ui.views.components.basics.FileUploadComponentWithController.UploadListener;
 import ch.ethz.mc.ui.views.components.basics.PlaceholderStringEditComponent;
 import ch.ethz.mc.ui.views.components.basics.ShortStringEditComponent;
-import ch.ethz.mc.ui.views.components.basics.FileUploadComponentWithController.UploadListener;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
