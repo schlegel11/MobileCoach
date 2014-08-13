@@ -70,7 +70,8 @@ public class InterventionExecutionManagerService {
 	private InterventionExecutionManagerService(
 			final DatabaseManagerService databaseManagerService,
 			final VariablesManagerService variablesManagerService,
-			final CommunicationManagerService communicationManagerService)
+			final CommunicationManagerService communicationManagerService,
+			final ScreeningSurveyExecutionManagerService screeningSurveyExecutionManagerService)
 			throws Exception {
 		log.info("Starting service...");
 
@@ -89,7 +90,8 @@ public class InterventionExecutionManagerService {
 		incomingMessageWorker = new IncomingMessageWorker(this,
 				communicationManagerService);
 		incomingMessageWorker.start();
-		monitoringShedulingWorker = new MonitoringShedulingWorker(this);
+		monitoringShedulingWorker = new MonitoringShedulingWorker(this,
+				screeningSurveyExecutionManagerService);
 		monitoringShedulingWorker.start();
 
 		log.info("Started.");
@@ -98,12 +100,14 @@ public class InterventionExecutionManagerService {
 	public static InterventionExecutionManagerService start(
 			final DatabaseManagerService databaseManagerService,
 			final VariablesManagerService variablesManagerService,
-			final CommunicationManagerService communicationManagerService)
+			final CommunicationManagerService communicationManagerService,
+			final ScreeningSurveyExecutionManagerService screeningSurveyExecutionManagerService)
 			throws Exception {
 		if (instance == null) {
 			instance = new InterventionExecutionManagerService(
 					databaseManagerService, variablesManagerService,
-					communicationManagerService);
+					communicationManagerService,
+					screeningSurveyExecutionManagerService);
 		}
 		return instance;
 	}

@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 import lombok.extern.log4j.Log4j2;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
+import ch.ethz.mc.services.ScreeningSurveyExecutionManagerService;
 
 /**
  * Manages the sheduling of monitoring messages, i.e. intervention, monitoring
@@ -14,13 +15,16 @@ import ch.ethz.mc.services.InterventionExecutionManagerService;
  */
 @Log4j2
 public class MonitoringShedulingWorker extends Thread {
-	private final InterventionExecutionManagerService	interventionExecutionManagerService;
+	private final ScreeningSurveyExecutionManagerService	screeningSurveyExecutionManagerService;
+	private final InterventionExecutionManagerService		interventionExecutionManagerService;
 
 	public MonitoringShedulingWorker(
-			final InterventionExecutionManagerService interventionExecutionManagerService) {
+			final InterventionExecutionManagerService interventionExecutionManagerService,
+			final ScreeningSurveyExecutionManagerService screeningSurveyExecutionManagerService) {
 		setName("Monitoring Sheduling Worker");
 		setPriority(NORM_PRIORITY - 2);
 
+		this.screeningSurveyExecutionManagerService = screeningSurveyExecutionManagerService;
 		this.interventionExecutionManagerService = interventionExecutionManagerService;
 	}
 
@@ -39,11 +43,20 @@ public class MonitoringShedulingWorker extends Thread {
 
 			try {
 				try {
+					log.debug("Finishing unfinished screening surveys");
+					screeningSurveyExecutionManagerService
+							.finishUnfinishedScreeningSurveys();
+				} catch (final Exception e) {
+					log.error(
+							"Could not finish unfinished screening surveys: {}",
+							e.getMessage());
+				}
+				try {
 					log.debug("React on unanswered messages");
 					interventionExecutionManagerService
 							.reactOnAnsweredAndUnansweredMessages(false);
 				} catch (final Exception e) {
-					log.error("Could react on unanswered messages: {}",
+					log.error("Could not react on unanswered messages: {}",
 							e.getMessage());
 				}
 				try {
@@ -51,7 +64,7 @@ public class MonitoringShedulingWorker extends Thread {
 					interventionExecutionManagerService
 							.reactOnAnsweredAndUnansweredMessages(true);
 				} catch (final Exception e) {
-					log.error("Could react on answered messages: {}",
+					log.error("Could not react on answered messages: {}",
 							e.getMessage());
 				}
 				try {

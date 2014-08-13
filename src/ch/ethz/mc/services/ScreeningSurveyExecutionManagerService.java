@@ -148,7 +148,8 @@ public class ScreeningSurveyExecutionManagerService {
 	}
 
 	private void dialogStatusUpdateAfterDeterminingNextSlide(
-			final ObjectId participantId, final ScreeningSurveySlide formerSlide) {
+			final ObjectId participantId,
+			final ScreeningSurveySlide formerSlide, final boolean adjustTime) {
 		val dialogStatus = databaseManagerService.findOneModelObject(
 				DialogStatus.class, Queries.DIALOG_STATUS__BY_PARTICIPANT,
 				participantId);
@@ -172,9 +173,11 @@ public class ScreeningSurveyExecutionManagerService {
 			dialogStatus
 					.setLastVisitedScreeningSurveySlideGlobalUniqueId(formerSlide
 							.getGlobalUniqueId());
-			dialogStatus
-					.setLastVisitedScreeningSurveySlideTimestamp(InternalDateTime
-							.currentTimeMillis());
+			if (adjustTime) {
+				dialogStatus
+						.setLastVisitedScreeningSurveySlideTimestamp(InternalDateTime
+								.currentTimeMillis());
+			}
 
 			databaseManagerService.saveModelObject(dialogStatus);
 		}
@@ -377,7 +380,7 @@ public class ScreeningSurveyExecutionManagerService {
 			}
 		}
 
-		// Get last slide
+		// Get last visited slide
 		val formerSlideId = session
 				.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_FORMER_SCREENING_SURVEY_SLIDE_ID
 						.toString());
@@ -438,7 +441,8 @@ public class ScreeningSurveyExecutionManagerService {
 		}
 
 		// Adjust dialog status
-		dialogStatusUpdateAfterDeterminingNextSlide(participantId, formerSlide);
+		dialogStatusUpdateAfterDeterminingNextSlide(participantId, formerSlide,
+				true);
 
 		if (nextSlide == null) {
 			// Screening survey done
@@ -450,8 +454,6 @@ public class ScreeningSurveyExecutionManagerService {
 		} else {
 			// Check if it's the last slide
 			if (nextSlide.isLastSlide()) {
-				dialogStatusSetScreeningSurveyFinished(participantId);
-
 				// Set feedback URL to participant and session if required
 				if (nextSlide.getHandsOverToFeedback() != null) {
 					log.debug("Setting feedback {} for participant {}",
@@ -463,6 +465,8 @@ public class ScreeningSurveyExecutionManagerService {
 							ScreeningSurveySessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
 									.toString(), participantId);
 				}
+
+				dialogStatusSetScreeningSurveyFinished(participantId);
 			}
 
 			// Remember next slide as former slide
@@ -547,6 +551,18 @@ public class ScreeningSurveyExecutionManagerService {
 							variablesWithValues.values(), "");
 			templateVariables.put(
 					GeneralSlideTemplateFieldTypes.TITLE.toVariable(), title);
+
+			// Validation error message
+			if (formerSlide != null && nextSlide != null
+					&& formerSlide.getId().equals(nextSlide.getId())) {
+				val validationErrorMessage = VariableStringReplacer
+						.findVariablesAndReplaceWithTextValues(
+								nextSlide.getValidationErrorMessage(),
+								variablesWithValues.values(), "");
+				templateVariables
+						.put(ScreeningSurveySlideTemplateFieldTypes.VALIDATION_ERROR_MESSAGE
+								.toVariable(), validationErrorMessage);
+			}
 
 			// Media object URL and type
 			if (nextSlide.getLinkedMediaObject() != null) {
@@ -657,12 +673,190 @@ public class ScreeningSurveyExecutionManagerService {
 	}
 
 	/**
+	 * Tries to finish all unfinished {@link ScreeningSurvey}s of
+	 * {@link Participant} with the following state:
+	 * 
+	 * - the belonging intervention is active
+	 * - the participant has all data for monitoring available
+	 * - the participant has not finished the screening survey
+	 * - the participant has not finished the monitoring
+	 * 
+	 */
+	public void finishUnfinishedScreeningSurveys() {
+		for (val intervention : databaseManagerService.findModelObjects(
+				Intervention.class, Queries.INTERVENTION__ACTIVE_TRUE)) {
+			for (val participant : databaseManagerService.findModelObjects(
+					Participant.class, Queries.PARTICIPANT__BY_INTERVENTION,
+					intervention.getId())) {
+				if (participant != null) {
+					for (val dialogStatus : databaseManagerService
+							.findModelObjects(
+									DialogStatus.class,
+									Queries.DIALOG_STATUS__BY_PARTICIPANT_AND_LAST_VISITED_SCREENING_SURVEY_SLIDE_TIMESTAMP_LOWER,
+									participant.getId(),
+									InternalDateTime.currentTimeMillis()
+											- ImplementationConstants.HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR
+											* 2)) {
+						if (dialogStatus != null
+								&& dialogStatus
+										.isDataForMonitoringParticipationAvailable()
+								&& !dialogStatus.isScreeningSurveyPerformed()
+								&& !dialogStatus.isMonitoringPerformed()) {
+
+							log.debug("Trying to finish the screening survey for a participant who did not finish the screening survey");
+
+							try {
+								finishScreeningSurveyForParticipant(participant);
+								log.debug(
+										"Screening survey finished for participant {}",
+										participant.getId());
+							} catch (final Exception e) {
+								log.debug(
+										"Could not finish the screening survey for a participant who did not finish it: {}",
+										e.getMessage());
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Finishes a {@link ScreeningSurvey} for an already existing
+	 * {@link Participant}
+	 * 
+	 * @param participantId
+	 *            The {@link ObjectId} of the participant
+	 * @return
+	 */
+	private void finishScreeningSurveyForParticipant(Participant participant)
+			throws NullPointerException {
+		if (participant == null) {
+			log.warn("Could not finish screening survey for participant, because participant does not exist");
+			throw new NullPointerException();
+		}
+
+		log.debug("Finishing screening survey for participant {}",
+				participant.getId());
+
+		val screeningSurvey = getScreeningSurveyById(participant
+				.getAssignedScreeningSurvey());
+
+		if (screeningSurvey == null) {
+			log.warn("Could not finish screening survey for participant, because it does not exist");
+			throw new NullPointerException();
+		}
+
+		int i = 0;
+		do {
+			val dialogStatus = databaseManagerService.findOneModelObject(
+					DialogStatus.class, Queries.DIALOG_STATUS__BY_PARTICIPANT,
+					participant.getId());
+
+			if (dialogStatus == null
+					|| dialogStatus.isScreeningSurveyPerformed()) {
+				log.warn("Could not finish screening survey for participant, because dialog status does not exist or is already performed");
+				throw new NullPointerException();
+			}
+
+			// Get last visited slide
+			val formerSlideId = dialogStatus
+					.getLastVisitedScreeningSurveySlide();
+
+			ScreeningSurveySlide formerSlide = null;
+			if (formerSlideId != null) {
+				formerSlide = databaseManagerService.getModelObjectById(
+						ScreeningSurveySlide.class, formerSlideId);
+			}
+
+			if (formerSlide == null) {
+				log.warn("Could not finish screening survey for participant, because last slide could not be found");
+				throw new NullPointerException();
+			}
+
+			ScreeningSurveySlide nextSlide;
+
+			// If there was a former slide, store default value if provided
+			if (formerSlideId != null) {
+				if (formerSlide.getDefaultValue() != null
+						&& !formerSlide.getDefaultValue().equals("")
+						&& formerSlide.getStoreValueToVariableWithName() != null
+						&& !formerSlide.getStoreValueToVariableWithName()
+								.equals("")) {
+					val variableName = formerSlide
+							.getStoreValueToVariableWithName();
+
+					// Store result to variable
+					log.debug(
+							"Storing result of screening survey slide {} to variable {} as value {}",
+							formerSlideId, variableName,
+							formerSlide.getDefaultValue());
+					try {
+						variablesManagerService
+								.writeVariableValueOfParticipant(
+										participant.getId(), variableName,
+										formerSlide.getDefaultValue());
+						participant = databaseManagerService
+								.getModelObjectById(Participant.class,
+										participant.getId());
+					} catch (final Exception e) {
+						log.warn("The variable {} could not be written: {}",
+								variableName, e.getMessage());
+					}
+				}
+			}
+
+			// Determine next slide
+			if (formerSlide != null && formerSlide.isLastSlide()) {
+				nextSlide = null;
+			} else {
+				nextSlide = getNextScreeningSurveySlide(participant,
+						screeningSurvey, formerSlide);
+			}
+
+			// Adjust dialog status
+			dialogStatusUpdateAfterDeterminingNextSlide(participant.getId(),
+					nextSlide, false);
+
+			if (nextSlide == null) {
+				// Screening survey done
+				log.debug("No next slide found");
+
+				dialogStatusSetScreeningSurveyFinished(participant.getId());
+
+				return;
+			} else if (nextSlide.isLastSlide()) {
+				// Set feedback URL to participant and session if required
+				if (nextSlide.getHandsOverToFeedback() != null) {
+					log.debug("Setting feedback {} for participant {}",
+							nextSlide.getHandsOverToFeedback(),
+							participant.getId());
+					participantSetFeedback(participant,
+							nextSlide.getHandsOverToFeedback());
+				}
+
+				// Check if it's the last slide
+				dialogStatusSetScreeningSurveyFinished(participant.getId());
+
+				return;
+			}
+
+			i++;
+		} while (i < 1000);
+
+		log.error(
+				"Detected endless loop while trying to finish unfinished screening survey for participant {}",
+				participant.getId());
+	}
+
+	/**
 	 * Determines which {@link ScreeningSurveySlide} is the next slide to
 	 * present to the user
 	 * 
+	 * @param participant
 	 * @param screeningSurvey
 	 * @param formerSlide
-	 * @param variablesWithValues
 	 * @return
 	 */
 	private ScreeningSurveySlide getNextScreeningSurveySlide(
@@ -822,6 +1016,17 @@ public class ScreeningSurveyExecutionManagerService {
 								formerSlideRule
 										.getNextScreeningSurveySlideWhenFalse());
 					}
+				}
+
+				// Check if validation rule matches
+				if (ruleResult.isRuleMatchesEquationSign()
+						&& formerSlideRule
+								.isShowSameSlideBecauseValueNotValidWhenTrue()) {
+
+					log.debug("Rule matches (VALIDATION), next slide is '{}'",
+							formerSlide);
+					nextSlide = formerSlide;
+					break;
 				}
 			}
 

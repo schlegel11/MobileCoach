@@ -79,6 +79,11 @@ public enum ScreeningSurveySlideTemplateFieldTypes {
 	 */
 	RESULT_VARIABLE,
 	/**
+	 * <strong>OPTIONAL:</strong> Can contain the error message of the
+	 * validation
+	 */
+	VALIDATION_ERROR_MESSAGE,
+	/**
 	 * Is true, when the slide is the last slide of the screening survey
 	 */
 	IS_LAST_SLIDE;

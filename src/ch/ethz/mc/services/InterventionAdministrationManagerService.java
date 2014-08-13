@@ -17,7 +17,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.bson.types.ObjectId;
 
-import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
@@ -66,20 +65,23 @@ import ch.ethz.mc.ui.NotificationMessageException;
  */
 @Log4j2
 public class InterventionAdministrationManagerService {
-	private static InterventionAdministrationManagerService	instance	= null;
+	private static InterventionAdministrationManagerService		instance	= null;
 
-	private final DatabaseManagerService					databaseManagerService;
-	private final FileStorageManagerService					fileStorageManagerService;
-	private final VariablesManagerService					variablesManagerService;
-	private final ModelObjectExchangeService				modelObjectExchangeService;
+	private final DatabaseManagerService						databaseManagerService;
+	private final FileStorageManagerService						fileStorageManagerService;
+	private final VariablesManagerService						variablesManagerService;
+	private final ModelObjectExchangeService					modelObjectExchangeService;
 
-	private final List<Class<? extends AbstractModule>>		modules;
+	private final ScreeningSurveyAdministrationManagerService	screeningSurveyAdministrationManagerService;
+
+	private final List<Class<? extends AbstractModule>>			modules;
 
 	private InterventionAdministrationManagerService(
 			final DatabaseManagerService databaseManagerService,
 			final FileStorageManagerService fileStorageManagerService,
 			final VariablesManagerService variablesManagerService,
-			final ModelObjectExchangeService modelObjectExchangeService)
+			final ModelObjectExchangeService modelObjectExchangeService,
+			final ScreeningSurveyAdministrationManagerService screeningSurveyAdministrationManagerService)
 			throws Exception {
 		log.info("Starting service...");
 
@@ -87,6 +89,7 @@ public class InterventionAdministrationManagerService {
 		this.fileStorageManagerService = fileStorageManagerService;
 		this.variablesManagerService = variablesManagerService;
 		this.modelObjectExchangeService = modelObjectExchangeService;
+		this.screeningSurveyAdministrationManagerService = screeningSurveyAdministrationManagerService;
 
 		log.info("Registering modules...");
 		// FIXME Should be done cleaner
@@ -101,12 +104,14 @@ public class InterventionAdministrationManagerService {
 			final DatabaseManagerService databaseManagerService,
 			final FileStorageManagerService fileStorageManagerService,
 			final VariablesManagerService variablesManagerService,
-			final ModelObjectExchangeService modelObjectExchangeService)
+			final ModelObjectExchangeService modelObjectExchangeService,
+			final ScreeningSurveyAdministrationManagerService screeningSurveyAdministrationManagerService)
 			throws Exception {
 		if (instance == null) {
 			instance = new InterventionAdministrationManagerService(
 					databaseManagerService, fileStorageManagerService,
-					variablesManagerService, modelObjectExchangeService);
+					variablesManagerService, modelObjectExchangeService,
+					screeningSurveyAdministrationManagerService);
 		}
 		return instance;
 	}
@@ -228,10 +233,6 @@ public class InterventionAdministrationManagerService {
 
 	public void interventionRecreateGlobalUniqueIdsForSubelements(
 			final Intervention intervention) {
-
-		val screeningSurveyAdministrationService = MC.getInstance()
-				.getScreeningSurveyAdministrationManagerService();
-
 		val screeningSurveysOfIntervention = databaseManagerService
 				.findModelObjects(ScreeningSurvey.class,
 						Queries.SCREENING_SURVEY__BY_INTERVENTION,
@@ -240,7 +241,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(intervention);
 
 		for (val screeningSurvey : screeningSurveysOfIntervention) {
-			screeningSurveyAdministrationService
+			screeningSurveyAdministrationManagerService
 					.screeningSurveyRecreateGlobalUniqueId(screeningSurvey);
 		}
 	}

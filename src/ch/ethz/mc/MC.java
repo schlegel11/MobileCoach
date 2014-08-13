@@ -76,18 +76,21 @@ public class MC implements ServletContextListener {
 					databaseManagerService, fileStorageManagerService);
 
 			// Controller services
-			interventionAdministrationManagerService = InterventionAdministrationManagerService
-					.start(databaseManagerService, fileStorageManagerService,
-							variablesManagerService, modelObjectExchangeService);
 			screeningSurveyAdministrationManagerService = ScreeningSurveyAdministrationManagerService
 					.start(databaseManagerService, fileStorageManagerService,
 							variablesManagerService, modelObjectExchangeService);
-			interventionExecutionManagerService = InterventionExecutionManagerService
-					.start(databaseManagerService, variablesManagerService,
-							communicationManagerService);
+			interventionAdministrationManagerService = InterventionAdministrationManagerService
+					.start(databaseManagerService, fileStorageManagerService,
+							variablesManagerService,
+							modelObjectExchangeService,
+							screeningSurveyAdministrationManagerService);
 			screeningSurveyExecutionManagerService = ScreeningSurveyExecutionManagerService
 					.start(databaseManagerService, fileStorageManagerService,
 							variablesManagerService);
+			interventionExecutionManagerService = InterventionExecutionManagerService
+					.start(databaseManagerService, variablesManagerService,
+							communicationManagerService,
+							screeningSurveyExecutionManagerService);
 		} catch (final Exception e) {
 			noErrorsOccurred = false;
 			log.error("Error at starting services: {}", e);

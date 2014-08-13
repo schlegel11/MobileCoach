@@ -110,6 +110,7 @@ public class Queries {
 	public static final String	DIALOG_OPTION__BY_TYPE_AND_DATA																						= "{'type':#,'data':#}";
 
 	public static final String	DIALOG_STATUS__BY_PARTICIPANT																						= "{'participant':#}";
+	public static final String	DIALOG_STATUS__BY_PARTICIPANT_AND_LAST_VISITED_SCREENING_SURVEY_SLIDE_TIMESTAMP_LOWER								= "{'participant':#,'lastVisitedScreeningSurveySlideTimestamp':{$lt:#}}";
 
 	public static final String	PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT																		= "{'participant':#}";
 	public static final String	PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_VARIABLE_NAME													= "{'participant':#,'name':#}";
