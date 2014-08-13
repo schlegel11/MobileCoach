@@ -379,6 +379,11 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				accessGranted = (boolean) session
 						.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_ACCESS_GRANTED
 								.toString());
+
+				// Remember that user participated in screening survey
+				session.setAttribute(
+						ScreeningSurveySessionAttributeTypes.FROM_SCREENING_SURVEY
+								.toString(), true);
 			} catch (final Exception e) {
 				accessGranted = false;
 			}
@@ -392,7 +397,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				resultValue = null;
 			}
 
-			// Get consistence check value if available
+			// Get consistency check value if available
 			String checkValue;
 			try {
 				checkValue = request
@@ -514,6 +519,20 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			templateVariables.put(
 					FeedbackSlideTemplateFieldTypes.IS_FEEDBACK.toVariable(),
 					true);
+
+			if (session
+					.getAttribute(ScreeningSurveySessionAttributeTypes.FROM_SCREENING_SURVEY
+							.toString()) != null) {
+				templateVariables
+						.put(FeedbackSlideTemplateFieldTypes.FROM_SCREENING_SURVEY
+								.toVariable(),
+								session.getAttribute(ScreeningSurveySessionAttributeTypes.FROM_SCREENING_SURVEY
+										.toString()));
+			} else {
+				templateVariables.put(
+						FeedbackSlideTemplateFieldTypes.FROM_SCREENING_SURVEY
+								.toVariable(), true);
+			}
 		}
 
 		// Adjust feedback URL (only for screening survey slides)
@@ -525,7 +544,6 @@ public class ScreeningSurveyServlet extends HttpServlet {
 					.put(GeneralSlideTemplateFieldTypes.FEEDBACK_URL
 							.toVariable(),
 							normalizedBaseURL
-
 									+ session
 											.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
 													.toString()));

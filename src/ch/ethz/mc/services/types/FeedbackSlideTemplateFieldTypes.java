@@ -26,6 +26,11 @@ public enum FeedbackSlideTemplateFieldTypes {
 	 */
 	TEXT,
 	/**
+	 * Is true if the participant is directly coming form a screening survey in
+	 * the same session
+	 */
+	FROM_SCREENING_SURVEY,
+	/**
 	 * Contains the variable name and values of a hidden variable for
 	 * navigation; the variable has to occur in the form with one of the two
 	 * possible values
