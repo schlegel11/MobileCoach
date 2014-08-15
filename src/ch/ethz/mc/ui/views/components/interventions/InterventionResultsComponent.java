@@ -285,7 +285,7 @@ public class InterventionResultsComponent extends AbstractClosableEditComponent 
 		sendMessageButton.setCaption("!!! Send Message");
 		sendMessageButton.setIcon(new ThemeResource(
 				"img/message-icon-small.png"));
-		sendMessageButton.setImmediate(false);
+		sendMessageButton.setImmediate(true);
 		sendMessageButton.setWidth("150px");
 		sendMessageButton.setHeight("-1px");
 		buttonLayout.addComponent(sendMessageButton);

@@ -16,6 +16,7 @@ import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.ui.UIDialogMessageProblemViewWithParticipant;
+import ch.ethz.mc.model.ui.results.UIDialogMessageWithParticipantForResults;
 import ch.ethz.mc.tools.StringValidator;
 import ch.ethz.mc.ui.views.components.basics.PlaceholderStringEditComponent;
 import ch.ethz.mc.ui.views.components.basics.ShortStringEditComponent;
@@ -42,6 +43,7 @@ public class InterventionProblemsComponentWithController extends
 	private UIDialogMessageProblemViewWithParticipant									selectedUIDialogMessageProblemViewWithParticipant;
 
 	private final BeanContainer<ObjectId, UIDialogMessageProblemViewWithParticipant>	beanContainer;
+	private final BeanContainer<Integer, UIDialogMessageWithParticipantForResults>		messageDialogBeanContainer;
 
 	public InterventionProblemsComponentWithController(
 			final Intervention intervention) {
@@ -53,6 +55,9 @@ public class InterventionProblemsComponentWithController extends
 		val dialogMessagesTable = getDialogMessagesTable();
 		dialogMessagesTable.setSelectable(true);
 		dialogMessagesTable.setImmediate(true);
+
+		val messageDialogTable = getMessageDialogTable();
+		messageDialogTable.setImmediate(true);
 
 		// table content
 		beanContainer = createBeanContainerForModelObjects(
@@ -93,6 +98,20 @@ public class InterventionProblemsComponentWithController extends
 							}
 						});
 
+		messageDialogBeanContainer = new BeanContainer<Integer, UIDialogMessageWithParticipantForResults>(
+				UIDialogMessageWithParticipantForResults.class);
+
+		messageDialogTable.setContainerDataSource(messageDialogBeanContainer);
+		messageDialogTable
+				.setSortContainerPropertyId(UIDialogMessageWithParticipantForResults
+						.getSortColumn());
+		messageDialogTable
+				.setVisibleColumns(UIDialogMessageWithParticipantForResults
+						.getVisibleColumns());
+		messageDialogTable
+				.setColumnHeaders(UIDialogMessageWithParticipantForResults
+						.getColumnHeaders());
+
 		// handle selection change
 		dialogMessagesTable.addValueChangeListener(new ValueChangeListener() {
 
@@ -109,6 +128,8 @@ public class InterventionProblemsComponentWithController extends
 							UIDialogMessageProblemViewWithParticipant.class,
 							objectId);
 				}
+
+				updateTables();
 			}
 		});
 
@@ -153,6 +174,57 @@ public class InterventionProblemsComponentWithController extends
 		}
 
 		dialogMessagesTable.sort();
+
+		updateTables();
+	}
+
+	private void updateTables() {
+		log.debug("Update message dialog of participant");
+		messageDialogBeanContainer.removeAllItems();
+
+		ObjectId participantId = null;
+
+		if (selectedUIDialogMessageProblemViewWithParticipant != null) {
+			participantId = selectedUIDialogMessageProblemViewWithParticipant
+					.getRelatedModelObject(DialogMessage.class)
+					.getParticipant();
+		}
+
+		int i = 0;
+		if (participantId != null) {
+			val participant = getInterventionAdministrationManagerService()
+					.getParticipant(participantId);
+
+			val dialogMessagesOfParticipant = getInterventionAdministrationManagerService()
+					.getAllDialogMessagesOfParticipant(participantId);
+
+			for (val dialogMessageOfParticipant : dialogMessagesOfParticipant) {
+				messageDialogBeanContainer
+						.addItem(
+								i++,
+								dialogMessageOfParticipant
+										.toUIDialogMessageWithParticipant(
+												participant.getId().toString(),
+												participant.getNickname()
+														.equals("") ? Messages
+														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+														: participant
+																.getNickname(),
+												participant.getOrganization()
+														.equals("") ? Messages
+														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+														: participant
+																.getOrganization(),
+												participant
+														.getOrganizationUnit()
+														.equals("") ? Messages
+														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+														: participant
+																.getOrganizationUnit()));
+			}
+		}
+
+		getMessageDialogTable().sort();
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
@@ -192,6 +264,8 @@ public class InterventionProblemsComponentWithController extends
 						// Adapt UI
 						beanContainer.removeItem(dialogMessage.getId());
 
+						getDialogMessagesTable().select(null);
+
 						closeWindow();
 
 						return;
@@ -199,6 +273,8 @@ public class InterventionProblemsComponentWithController extends
 
 					// Adapt UI
 					beanContainer.removeItem(dialogMessage.getId());
+
+					getDialogMessagesTable().select(null);
 
 					getAdminUI().showInformationNotification(
 							AdminMessageStrings.NOTIFICATION__CASE_SOLVED);

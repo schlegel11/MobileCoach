@@ -344,7 +344,7 @@ public class InterventionResultsComponentWithController extends
 			}
 		}
 
-		getVariablesTable().sort();
+		getMessageDialogTable().sort();
 	}
 
 	public void sendMessage() {
