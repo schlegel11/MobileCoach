@@ -39,6 +39,8 @@ public class ImplementationConstants {
 	public static final String	MESSAGE_CONTEST_QUIT_RELEVANT_VARIABLE							= "$contest_quit_message";
 	public static final String	MESSAGE_CONTEST_MOTIVATIONAL_RESULT_VARIABLE					= "$contest_motivational_message_result";
 	public static final String	MESSAGE_CONTEST_MOTIVATIONAL_RELEVANT_VARIABLE					= "$contest_motivational_message";
+	public static final String	MESSAGE_CONTEST_DRINKING_RESULT_VARIABLE						= "$contest_drinking_message_result";
+	public static final String	MESSAGE_CONTEST_DRINKING_RELEVANT_VARIABLE						= "$contest_drinking_message";
 
 	public static final long	MAILING_SEND_RETRIES											= 2;
 	public static final long	MAILING_SEND_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS			= 5 * 60;

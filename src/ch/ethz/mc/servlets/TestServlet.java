@@ -81,6 +81,51 @@ public class TestServlet extends HttpServlet {
 	}
 
 	private void runTestcases() {
+		// val service = MC.getInstance()
+		// .getScreeningSurveyAdministrationManagerService();
+		// final String[] slides = { "53f38855cee8b9fcaee967f2",
+		// "53ef46c4cee8dca1eb0fc0c6", "53ef46c4cee8dca1eb0fbfdc",
+		// "53ef46c4cee8dca1eb0fc04c", "53f3871fcee8c4285c923867",
+		// "53f38724cee8c4285c92387a", "53f38727cee8c4285c92388d",
+		// "53f38728cee8c4285c9238a0" };
+		// final val slide1 = "53ef46c4cee8dca1eb0fc071";
+		//
+		// for (val slide : slides) {
+		// val delRules = service
+		// .getAllScreeningSurveySlideRulesOfScreeningSurveySlide(new ObjectId(
+		// slide));
+		// for (val delRule : delRules) {
+		// service.screeningSurveySlideRuleDelete(delRule);
+		// }
+		//
+		// val coolRules = service
+		// .getAllScreeningSurveySlideRulesOfScreeningSurveySlide(new ObjectId(
+		// slide1));
+		//
+		// for (val coolRule : coolRules) {
+		// val newRule = service
+		// .screeningSurveySlideRuleCreate(new ObjectId(slide));
+		// newRule.setLevel(coolRule.getLevel());
+		// newRule.setNextScreeningSurveySlideWhenTrue(coolRule
+		// .getNextScreeningSurveySlideWhenTrue());
+		// newRule.setNextScreeningSurveySlideWhenFalse(coolRule
+		// .getNextScreeningSurveySlideWhenFalse());
+		// newRule.setOrder(coolRule.getOrder());
+		// newRule.setRuleComparisonTermWithPlaceholders(coolRule
+		// .getRuleComparisonTermWithPlaceholders());
+		// newRule.setRuleEquationSign(coolRule.getRuleEquationSign());
+		// newRule.setRuleWithPlaceholders(coolRule
+		// .getRuleWithPlaceholders());
+		// newRule.setShowSameSlideBecauseValueNotValidWhenTrue(coolRule
+		// .isShowSameSlideBecauseValueNotValidWhenTrue());
+		// newRule.setStoreValueToVariableWithName(coolRule
+		// .getStoreValueToVariableWithName());
+		// newRule.setValueToStoreToVariable(coolRule
+		// .getValueToStoreToVariable());
+		// service.saveRule(newRule);
+		// }
+		// }
+		// System.out.println("DDOOOOOONNNEEEE");
 		// TODO OPTIONAL: Testcases could be defined here
 		// final MonitoringMessageRule m = new MonitoringMessageRule(
 		// null,

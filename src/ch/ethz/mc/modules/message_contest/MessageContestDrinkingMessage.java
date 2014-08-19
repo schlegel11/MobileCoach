@@ -9,19 +9,19 @@ import ch.ethz.mc.conf.Messages;
  * 
  */
 @SuppressWarnings("serial")
-public class MessageContestMotivationalMessage extends
+public class MessageContestDrinkingMessage extends
 		MessageContestModuleWithController {
 
 	@Override
 	protected String getResultVariable() {
 		// FIXME Should be done cleaner
-		return ImplementationConstants.MESSAGE_CONTEST_MOTIVATIONAL_RESULT_VARIABLE;
+		return ImplementationConstants.MESSAGE_CONTEST_DRINKING_RESULT_VARIABLE;
 	}
 
 	@Override
 	protected String getRelevantVariable() {
 		// FIXME Should be done cleaner
-		return ImplementationConstants.MESSAGE_CONTEST_MOTIVATIONAL_RELEVANT_VARIABLE;
+		return ImplementationConstants.MESSAGE_CONTEST_DRINKING_RELEVANT_VARIABLE;
 	}
 
 	@Override
@@ -29,7 +29,7 @@ public class MessageContestMotivationalMessage extends
 		// FIXME Should be done cleaner
 		return Messages.getAdminString(
 				AdminMessageStrings.MODULES__MESSAGE_CONTEST__NAME,
-				"Motivational Message (MC tobacco)");
+				"Drinking Message (MC alcohol)");
 	}
 
 }

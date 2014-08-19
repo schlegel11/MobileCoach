@@ -45,6 +45,7 @@ import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.MediaObjectTypes;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import ch.ethz.mc.modules.AbstractModule;
+import ch.ethz.mc.modules.message_contest.MessageContestDrinkingMessage;
 import ch.ethz.mc.modules.message_contest.MessageContestMotivationalMessage;
 import ch.ethz.mc.modules.message_contest.MessageContestQuitMessage;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
@@ -96,6 +97,7 @@ public class InterventionAdministrationManagerService {
 		modules = new ArrayList<Class<? extends AbstractModule>>();
 		modules.add(MessageContestMotivationalMessage.class);
 		modules.add(MessageContestQuitMessage.class);
+		modules.add(MessageContestDrinkingMessage.class);
 
 		log.info("Started.");
 	}

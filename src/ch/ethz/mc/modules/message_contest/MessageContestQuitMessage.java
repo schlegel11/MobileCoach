@@ -29,7 +29,7 @@ public class MessageContestQuitMessage extends
 		// FIXME Should be done cleaner
 		return Messages.getAdminString(
 				AdminMessageStrings.MODULES__MESSAGE_CONTEST__NAME,
-				"Quit Message");
+				"Quit Message (MC tobacco)");
 	}
 
 }
