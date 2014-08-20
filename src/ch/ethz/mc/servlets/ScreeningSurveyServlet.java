@@ -531,7 +531,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			} else {
 				templateVariables.put(
 						FeedbackSlideTemplateFieldTypes.FROM_SCREENING_SURVEY
-								.toVariable(), true);
+								.toVariable(), false);
 			}
 		}
 
