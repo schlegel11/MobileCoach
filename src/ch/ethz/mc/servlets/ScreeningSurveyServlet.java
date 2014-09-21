@@ -379,11 +379,6 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				accessGranted = (boolean) session
 						.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_ACCESS_GRANTED
 								.toString());
-
-				// Remember that user participated in screening survey
-				session.setAttribute(
-						ScreeningSurveySessionAttributeTypes.FROM_SCREENING_SURVEY
-								.toString(), true);
 			} catch (final Exception e) {
 				accessGranted = false;
 			}
@@ -405,6 +400,11 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			} catch (final Exception e) {
 				checkValue = null;
 			}
+
+			// Remember that user participated in screening survey
+			session.setAttribute(
+					ScreeningSurveySessionAttributeTypes.FROM_SCREENING_SURVEY
+							.toString(), true);
 
 			log.debug(
 					"Retrieved information from screening survey slide request: participant: {}, access granted: {}, screening survey: {}, result value: {}, check value: {}",
