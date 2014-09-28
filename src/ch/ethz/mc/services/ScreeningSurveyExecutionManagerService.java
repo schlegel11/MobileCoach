@@ -8,12 +8,14 @@ import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
+import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 
+import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.DialogOption;
@@ -54,6 +56,8 @@ import ch.ethz.mc.tools.VariableStringReplacer;
  */
 @Log4j2
 public class ScreeningSurveyExecutionManagerService {
+	private final Object									$lock;
+
 	private static ScreeningSurveyExecutionManagerService	instance	= null;
 
 	private final DatabaseManagerService					databaseManagerService;
@@ -65,6 +69,8 @@ public class ScreeningSurveyExecutionManagerService {
 			final FileStorageManagerService fileStorageManagerService,
 			final VariablesManagerService variablesManagerService)
 			throws Exception {
+		$lock = MC.getInstance();
+
 		log.info("Starting service...");
 
 		this.databaseManagerService = databaseManagerService;
@@ -97,6 +103,7 @@ public class ScreeningSurveyExecutionManagerService {
 	 * Modification methods
 	 */
 	// Participant
+	@Synchronized
 	private Participant participantCreate(final ScreeningSurvey screeningSurvey) {
 		val participant = new Participant(screeningSurvey.getIntervention(),
 				InternalDateTime.currentTimeMillis(), "",
@@ -110,6 +117,7 @@ public class ScreeningSurveyExecutionManagerService {
 		return participant;
 	}
 
+	@Synchronized
 	private void participantSetFeedback(final Participant participant,
 			final ObjectId feedbackId) {
 		val feedback = databaseManagerService.getModelObjectById(
@@ -123,6 +131,7 @@ public class ScreeningSurveyExecutionManagerService {
 	}
 
 	// Dialog status
+	@Synchronized
 	private void dialogStatusCreate(final ObjectId participantId) {
 		final long currentTimestamp = InternalDateTime.currentTimeMillis();
 		val dialogStatus = new DialogStatus(participantId, "", null, null,
@@ -132,6 +141,7 @@ public class ScreeningSurveyExecutionManagerService {
 		databaseManagerService.saveModelObject(dialogStatus);
 	}
 
+	@Synchronized
 	private void dialogStatusSetScreeningSurveyFinished(
 			final ObjectId participantId) {
 		val dialogStatus = databaseManagerService.findOneModelObject(
@@ -147,6 +157,7 @@ public class ScreeningSurveyExecutionManagerService {
 		}
 	}
 
+	@Synchronized
 	private void dialogStatusUpdateAfterDeterminingNextSlide(
 			final ObjectId participantId,
 			final ScreeningSurveySlide formerSlide, final boolean adjustTime) {
@@ -193,6 +204,7 @@ public class ScreeningSurveyExecutionManagerService {
 	 * @param participantId
 	 * @return
 	 */
+	@Synchronized
 	private boolean checkForDataForMonitoringParticipation(
 			final ObjectId participantId) {
 
@@ -215,6 +227,7 @@ public class ScreeningSurveyExecutionManagerService {
 	 * @param screeningSurveyId
 	 * @return
 	 */
+	@Synchronized
 	public boolean screeningSurveyCheckIfActive(final ObjectId screeningSurveyId) {
 		val screeningSurvey = databaseManagerService.getModelObjectById(
 				ScreeningSurvey.class, screeningSurveyId);
@@ -241,6 +254,7 @@ public class ScreeningSurveyExecutionManagerService {
 	 * @param screeningSurveyId
 	 * @return
 	 */
+	@Synchronized
 	public boolean feedbackCheckIfActiveByBelongingParticipant(
 			final ObjectId participantId) {
 		val participant = databaseManagerService.getModelObjectById(
@@ -291,6 +305,7 @@ public class ScreeningSurveyExecutionManagerService {
 	 * @param session
 	 * @return
 	 */
+	@Synchronized
 	public HashMap<String, Object> getAppropriateScreeningSurveySlide(
 			ObjectId participantId, final boolean accessGranted,
 			final ObjectId screeningSurveyId, final String resultValue,
@@ -682,6 +697,7 @@ public class ScreeningSurveyExecutionManagerService {
 	 * - the participant has not finished the monitoring
 	 * 
 	 */
+	@Synchronized
 	public void finishUnfinishedScreeningSurveys() {
 		for (val intervention : databaseManagerService.findModelObjects(
 				Intervention.class, Queries.INTERVENTION__ACTIVE_TRUE)) {
@@ -730,6 +746,7 @@ public class ScreeningSurveyExecutionManagerService {
 	 *            The {@link ObjectId} of the participant
 	 * @return
 	 */
+	@Synchronized
 	private void finishScreeningSurveyForParticipant(Participant participant)
 			throws NullPointerException {
 		if (participant == null) {
@@ -859,6 +876,7 @@ public class ScreeningSurveyExecutionManagerService {
 	 * @param formerSlide
 	 * @return
 	 */
+	@Synchronized
 	private ScreeningSurveySlide getNextScreeningSurveySlide(
 			Participant participant, final ScreeningSurvey screeningSurvey,
 			final ScreeningSurveySlide formerSlide) {
@@ -1055,6 +1073,7 @@ public class ScreeningSurveyExecutionManagerService {
 	 * @param session
 	 * @return
 	 */
+	@Synchronized
 	public HashMap<String, Object> getAppropriateFeedbackSlide(
 			final ObjectId feedbackParticipantId, final String navigationValue,
 			final String checkValue, final HttpSession session) {
@@ -1271,6 +1290,7 @@ public class ScreeningSurveyExecutionManagerService {
 	 * @param showNextSlide
 	 * @return
 	 */
+	@Synchronized
 	private FeedbackSlide getNextFeedbackSlide(
 			final FeedbackSlide formerSlide,
 			final ObjectId feedbackId,
@@ -1340,6 +1360,7 @@ public class ScreeningSurveyExecutionManagerService {
 	 * @param screeningSurveyId
 	 * @return
 	 */
+	@Synchronized
 	public ScreeningSurvey getScreeningSurveyById(
 			final ObjectId screeningSurveyId) {
 		return databaseManagerService.getModelObjectById(ScreeningSurvey.class,
@@ -1353,6 +1374,7 @@ public class ScreeningSurveyExecutionManagerService {
 	 * @param feedbackParticipantId
 	 * @return
 	 */
+	@Synchronized
 	public Feedback getFeedbackByBelongingParticipant(
 			final ObjectId feedbackParticipantId) {
 
@@ -1380,6 +1402,7 @@ public class ScreeningSurveyExecutionManagerService {
 	 * 
 	 * @return
 	 */
+	@Synchronized
 	public Iterable<ScreeningSurvey> getActiveScreeningSurveys() {
 		final Iterable<Intervention> activeInterventions = databaseManagerService
 				.findModelObjects(Intervention.class,
@@ -1405,6 +1428,7 @@ public class ScreeningSurveyExecutionManagerService {
 	 * 
 	 * @return
 	 */
+	@Synchronized
 	public File getTemplatePath() {
 		return fileStorageManagerService.getTemplatesFolder();
 	}

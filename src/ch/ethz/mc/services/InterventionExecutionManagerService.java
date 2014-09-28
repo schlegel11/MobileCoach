@@ -12,6 +12,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 
+import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
@@ -52,11 +53,12 @@ import ch.ethz.mc.ui.NotificationMessageException;
  */
 @Log4j2
 public class InterventionExecutionManagerService {
+	private final Object								$lock;
+
 	private static InterventionExecutionManagerService	instance			= null;
 
 	private static SimpleDateFormat						dayInWeekFormatter	= new SimpleDateFormat(
 																					"u");
-
 	private final String[]								acceptedStopWords;
 
 	private final DatabaseManagerService				databaseManagerService;
@@ -73,6 +75,8 @@ public class InterventionExecutionManagerService {
 			final CommunicationManagerService communicationManagerService,
 			final ScreeningSurveyExecutionManagerService screeningSurveyExecutionManagerService)
 			throws Exception {
+		$lock = MC.getInstance();
+
 		log.info("Starting service...");
 
 		this.databaseManagerService = databaseManagerService;

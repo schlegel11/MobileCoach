@@ -10,11 +10,13 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 
+import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.ModelObject;
@@ -45,6 +47,8 @@ import ch.ethz.mc.ui.NotificationMessageException;
  * @author Andreas Filler
  */
 public class ScreeningSurveyAdministrationManagerService {
+	private final Object										$lock;
+
 	private static final String									DEFAULT_OBJECT_NAME	= "---";
 
 	private static ScreeningSurveyAdministrationManagerService	instance			= null;
@@ -60,6 +64,8 @@ public class ScreeningSurveyAdministrationManagerService {
 			final VariablesManagerService variablesManagerService,
 			final ModelObjectExchangeService modelObjectExchangeService)
 			throws Exception {
+		$lock = MC.getInstance();
+
 		log.info("Starting service...");
 
 		this.databaseManagerService = databaseManagerService;
@@ -94,6 +100,7 @@ public class ScreeningSurveyAdministrationManagerService {
 	 * Modification methods
 	 */
 	// ScreeningSurvey
+	@Synchronized
 	public ScreeningSurvey screeningSurveyCreate(final String name,
 			final ObjectId interventionId) {
 		val screeningSurvey = new ScreeningSurvey(
@@ -109,6 +116,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		return screeningSurvey;
 	}
 
+	@Synchronized
 	public void screeningSurveyRecreateGlobalUniqueId(
 			final ScreeningSurvey screeningSurvey) {
 		screeningSurvey.setGlobalUniqueId(GlobalUniqueIdGenerator
@@ -138,6 +146,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurvey);
 	}
 
+	@Synchronized
 	public void screeningSurveyChangeName(
 			final ScreeningSurvey screeningSurvey, final String newName) {
 		if (newName.equals("")) {
@@ -149,6 +158,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurvey);
 	}
 
+	@Synchronized
 	public void screeningSurveyChangePassword(
 			final ScreeningSurvey screeningSurvey, final String newPassword) {
 		screeningSurvey.setPassword(newPassword);
@@ -156,6 +166,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurvey);
 	}
 
+	@Synchronized
 	public void screeningSurveyChangeTemplatePath(
 			final ScreeningSurvey screeningSurvey, final String newTemplatePath) {
 		screeningSurvey.setTemplatePath(newTemplatePath);
@@ -163,6 +174,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurvey);
 	}
 
+	@Synchronized
 	public ScreeningSurvey screeningSurveyImport(final File file,
 			final ObjectId interventionId) throws FileNotFoundException,
 			IOException {
@@ -193,6 +205,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		return null;
 	}
 
+	@Synchronized
 	public File screeningSurveyExport(final ScreeningSurvey screeningSurvey) {
 		final List<ModelObject> modelObjectsToExport = new ArrayList<ModelObject>();
 
@@ -206,6 +219,7 @@ public class ScreeningSurveyAdministrationManagerService {
 				ModelObjectExchangeFormatTypes.SCREENING_SURVEY);
 	}
 
+	@Synchronized
 	public void screeningSurveySetActive(final ScreeningSurvey screeningSurvey,
 			final boolean newValue) {
 		screeningSurvey.setActive(newValue);
@@ -213,6 +227,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurvey);
 	}
 
+	@Synchronized
 	public void screeningSurveyDelete(
 			final ScreeningSurvey screeningSurveyToDelete)
 			throws NotificationMessageException {
@@ -221,6 +236,7 @@ public class ScreeningSurveyAdministrationManagerService {
 	}
 
 	// Screening Survey Slide
+	@Synchronized
 	public ScreeningSurveySlide screeningSurveySlideCreate(
 			final ObjectId screeningSurveyId) {
 		val screeningSurveySlide = new ScreeningSurveySlide(
@@ -244,6 +260,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		return screeningSurveySlide;
 	}
 
+	@Synchronized
 	public void screeningSurveySlideRecreateGlobalUniqueId(
 			final ScreeningSurveySlide screeningSurveySlide) {
 		screeningSurveySlide.setGlobalUniqueId(GlobalUniqueIdGenerator
@@ -252,6 +269,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
 
+	@Synchronized
 	public ScreeningSurveySlide screeningSurveySlideImport(final File file)
 			throws FileNotFoundException, IOException {
 		val importedModelObjects = modelObjectExchangeService
@@ -284,6 +302,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		return null;
 	}
 
+	@Synchronized
 	public File screeningSurveySlideExport(final ScreeningSurveySlide slide) {
 		final List<ModelObject> modelObjectsToExport = new ArrayList<ModelObject>();
 
@@ -296,6 +315,7 @@ public class ScreeningSurveyAdministrationManagerService {
 				ModelObjectExchangeFormatTypes.SCREENING_SURVEY_SLIDE);
 	}
 
+	@Synchronized
 	public void screeningSurveySlideChangeTitle(
 			final ScreeningSurveySlide screeningSurveySlide,
 			final String textWithPlaceholders,
@@ -316,6 +336,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
 
+	@Synchronized
 	public void screeningSurveySlideChangeQuestion(
 			final ScreeningSurveySlide screeningSurveySlide,
 			final String textWithPlaceholders,
@@ -337,6 +358,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
 
+	@Synchronized
 	public void screeningSurveySlideChangeQuestionType(
 			final ScreeningSurveySlide screeningSurveySlide,
 			final ScreeningSurveySlideQuestionTypes screeningSurveySlideQuestionType) {
@@ -345,6 +367,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
 
+	@Synchronized
 	public void screeningSurveySlideChangeOptionalLayoutAttributeWithPlaceholders(
 			final ScreeningSurveySlide screeningSurveySlide,
 			final String optionalLayoutAttributeWithPlaceholders) {
@@ -362,6 +385,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
 
+	@Synchronized
 	public void screeningSurveySlideChangeDefaultVariableValue(
 			final ScreeningSurveySlide screeningSurveySlide, final String text)
 			throws NotificationMessageException {
@@ -374,6 +398,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
 
+	@Synchronized
 	public void screeningSurveySlideChangeValidationErrorMessage(
 			final ScreeningSurveySlide screeningSurveySlide,
 			final String textWithPlaceholders,
@@ -395,6 +420,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
 
+	@Synchronized
 	public void screeningSurveySlideChangeStoreResultToVariable(
 			final ScreeningSurveySlide screeningSurveySlide,
 			final String variableName) throws NotificationMessageException {
@@ -420,6 +446,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		}
 	}
 
+	@Synchronized
 	public void screeningSurveySlideChangeHandsOverToFeedback(
 			final ScreeningSurveySlide screeningSurveySlide,
 			final ObjectId feedbackId) {
@@ -428,6 +455,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
 
+	@Synchronized
 	public void screeningSurveySlideChangeStopScreeningSurvey(
 			final ScreeningSurveySlide screeningSurveySlide,
 			final boolean newValue) {
@@ -436,6 +464,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
 
+	@Synchronized
 	public void screeningSurveySlideSetAnswersWithPlaceholdersAndValues(
 			final ScreeningSurveySlide screeningSurveySlide,
 			final String[] answers, final String[] values) {
@@ -445,6 +474,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
 
+	@Synchronized
 	public ScreeningSurveySlide screeningSurveySlideMove(
 			final ScreeningSurveySlide screeningSurveySlide,
 			final boolean moveUp) {
@@ -475,6 +505,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		return screeningSurveySlideToSwapWith;
 	}
 
+	@Synchronized
 	public void screeningSurveySlideSetLinkedMediaObject(
 			final ScreeningSurveySlide screeningSurveySlide,
 			final ObjectId linkedMediaObjectId) {
@@ -483,12 +514,14 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
 
+	@Synchronized
 	public void screeningSurveySlideDelete(
 			final ScreeningSurveySlide screeningSurveySlide) {
 		databaseManagerService.deleteModelObject(screeningSurveySlide);
 	}
 
 	// Screening Survey Slide Rule
+	@Synchronized
 	public ScreeningSurveySlideRule screeningSurveySlideRuleCreate(
 			final ObjectId screeningSurveySlideId) {
 		val screeningSurveySlideRule = new ScreeningSurveySlideRule(
@@ -512,6 +545,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		return screeningSurveySlideRule;
 	}
 
+	@Synchronized
 	public void screeningSurveySlideRuleChangeValueToStoreToVariable(
 			final ScreeningSurveySlideRule screeningSurveySlideRule,
 			final String variableValue) throws NotificationMessageException {
@@ -526,6 +560,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		}
 	}
 
+	@Synchronized
 	public void screeningSurveySlideRuleChangeLevel(
 			final ScreeningSurveySlideRule screeningSurveySlideRule,
 			final boolean up) {
@@ -540,6 +575,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurveySlideRule);
 	}
 
+	@Synchronized
 	public void screeningSurveySlideRuleChangeVariableToStoreValueTo(
 			final ScreeningSurveySlideRule screeningSurveySlideRule,
 			final String variableName) throws NotificationMessageException {
@@ -566,6 +602,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		}
 	}
 
+	@Synchronized
 	public void screeningSurveySlideRuleChangeShowSameSlideBecauseValueNotValidWhenTrue(
 			final ScreeningSurveySlideRule screeningSurveySlideRule,
 			final boolean newValue) {
@@ -580,6 +617,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurveySlideRule);
 	}
 
+	@Synchronized
 	public ScreeningSurveySlideRule screeningSurveySlideRuleMove(
 			final ScreeningSurveySlideRule screeningSurveySlideRule,
 			final boolean moveUp) {
@@ -612,6 +650,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		return screeningSurveySlideRuleToSwapWith;
 	}
 
+	@Synchronized
 	public void screeningSurveySlideRuleSetJumpToSlide(
 			final ScreeningSurveySlideRule screeningSurveySlideRule,
 			final boolean isTrueCase,
@@ -633,6 +672,7 @@ public class ScreeningSurveyAdministrationManagerService {
 	}
 
 	// Feedback Slide
+	@Synchronized
 	public FeedbackSlide feedbackSlideCreate(final ObjectId feedbackId) {
 		val feedbackSlide = new FeedbackSlide(feedbackId, 0, "", "", null, "");
 
@@ -650,6 +690,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		return feedbackSlide;
 	}
 
+	@Synchronized
 	public void feedbackSlideChangeTitle(final FeedbackSlide feedbackSlide,
 			final String textWithPlaceholders,
 			final List<String> allPossibleFeedbackVariables)
@@ -669,6 +710,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(feedbackSlide);
 	}
 
+	@Synchronized
 	public void feedbackSlideChangeTextWithPlaceholders(
 			final FeedbackSlide feedbackSlide,
 			final String textWithPlaceholders,
@@ -689,6 +731,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(feedbackSlide);
 	}
 
+	@Synchronized
 	public void feedbackSlideChangeOptionalLayoutAttributeWithPlaceholders(
 			final FeedbackSlide feedbackSlide,
 			final String optionalLayoutAttributeWithPlaceholders) {
@@ -698,6 +741,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(feedbackSlide);
 	}
 
+	@Synchronized
 	public FeedbackSlide feedbackSlideMove(final FeedbackSlide feedbackSlide,
 			final boolean moveUp) {
 		// Find feedback slide to swap with
@@ -725,6 +769,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		return feedbackSlideToSwapWith;
 	}
 
+	@Synchronized
 	public void feedbackSlideSetLinkedMediaObject(
 			final FeedbackSlide feedbackSlide,
 			final ObjectId linkedMediaObjectId) {
@@ -733,11 +778,13 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(feedbackSlide);
 	}
 
+	@Synchronized
 	public void feedbackSlideDelete(final FeedbackSlide feedbackSlide) {
 		databaseManagerService.deleteModelObject(feedbackSlide);
 	}
 
 	// Feedback Slide Rule
+	@Synchronized
 	public FeedbackSlideRule feedbackSlideRuleCreate(
 			final ObjectId feedbackSlideId) {
 		val feedbackSlideRule = new FeedbackSlideRule(feedbackSlideId, 0, "",
@@ -758,6 +805,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		return feedbackSlideRule;
 	}
 
+	@Synchronized
 	public FeedbackSlideRule feedbackSlideRuleMove(
 			final FeedbackSlideRule feedbackSlideRule, final boolean moveUp) {
 		// Find feedback slide rule to swap with
@@ -786,12 +834,14 @@ public class ScreeningSurveyAdministrationManagerService {
 		return feedbackSlideRuleToSwapWith;
 	}
 
+	@Synchronized
 	public void feedbackSlideRuleDelete(
 			final FeedbackSlideRule feedbackSlideRule) {
 		databaseManagerService.deleteModelObject(feedbackSlideRule);
 	}
 
 	// Feedback
+	@Synchronized
 	public Feedback feedbackCreate(final String name,
 			final ObjectId screeningSurveyId) {
 		val feedback = new Feedback(
@@ -807,6 +857,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		return feedback;
 	}
 
+	@Synchronized
 	public FeedbackSlide feedbackSlideImport(final File file)
 			throws FileNotFoundException, IOException {
 		val importedModelObjects = modelObjectExchangeService
@@ -838,6 +889,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		return null;
 	}
 
+	@Synchronized
 	public File feedbackSlideExport(final FeedbackSlide slide) {
 		final List<ModelObject> modelObjectsToExport = new ArrayList<ModelObject>();
 
@@ -850,6 +902,7 @@ public class ScreeningSurveyAdministrationManagerService {
 				ModelObjectExchangeFormatTypes.FEEDBACK_SLIDE);
 	}
 
+	@Synchronized
 	public void feedbackChangeName(final Feedback feedback, final String newName) {
 		if (newName.equals("")) {
 			feedback.setName(DEFAULT_OBJECT_NAME);
@@ -860,6 +913,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(feedback);
 	}
 
+	@Synchronized
 	public void feedbackChangeTemplatePath(final Feedback feedback,
 			final String newTemplatePath) {
 		feedback.setTemplatePath(newTemplatePath);
@@ -867,6 +921,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(feedback);
 	}
 
+	@Synchronized
 	public void feedbackDelete(final Feedback feedback) {
 		databaseManagerService.deleteModelObject(feedback);
 	}
@@ -874,6 +929,7 @@ public class ScreeningSurveyAdministrationManagerService {
 	/*
 	 * Special methods
 	 */
+	@Synchronized
 	public boolean isOneScreeningSurveyOfInterventionActive(
 			final ObjectId interventionId) {
 
@@ -892,12 +948,14 @@ public class ScreeningSurveyAdministrationManagerService {
 	/*
 	 * Getter methods
 	 */
+	@Synchronized
 	public Iterable<ScreeningSurvey> getAllScreeningSurveysOfIntervention(
 			final ObjectId objectId) {
 		return databaseManagerService.findModelObjects(ScreeningSurvey.class,
 				Queries.SCREENING_SURVEY__BY_INTERVENTION, objectId);
 	}
 
+	@Synchronized
 	public Iterable<ScreeningSurveySlide> getAllScreeningSurveySlidesOfScreeningSurvey(
 			final ObjectId screeningSurveyId) {
 		return databaseManagerService.findSortedModelObjects(
@@ -907,6 +965,7 @@ public class ScreeningSurveyAdministrationManagerService {
 				screeningSurveyId);
 	}
 
+	@Synchronized
 	public Iterable<ScreeningSurveySlideRule> getAllScreeningSurveySlideRulesOfScreeningSurveySlide(
 			final ObjectId screeningSurveySlideId) {
 		return databaseManagerService.findSortedModelObjects(
@@ -916,6 +975,7 @@ public class ScreeningSurveyAdministrationManagerService {
 				screeningSurveySlideId);
 	}
 
+	@Synchronized
 	public Iterable<Feedback> getAllFeedbacksOfScreeningSurvey(
 			final ObjectId screeningSurveyId) {
 		return databaseManagerService.findSortedModelObjects(Feedback.class,
@@ -923,6 +983,7 @@ public class ScreeningSurveyAdministrationManagerService {
 				Queries.FEEDBACK__SORT_BY_ORDER_ASC, screeningSurveyId);
 	}
 
+	@Synchronized
 	public Iterable<FeedbackSlide> getAllFeedbackSlidesOfFeedback(
 			final ObjectId feedbackId) {
 		return databaseManagerService.findSortedModelObjects(
@@ -930,6 +991,7 @@ public class ScreeningSurveyAdministrationManagerService {
 				Queries.FEEDBACK_SLIDE__SORT_BY_ORDER_ASC, feedbackId);
 	}
 
+	@Synchronized
 	public Iterable<FeedbackSlideRule> getAllFeedbackSlideRulesOfFeedbackSlide(
 			final ObjectId feedbackSlideId) {
 		return databaseManagerService
@@ -939,6 +1001,7 @@ public class ScreeningSurveyAdministrationManagerService {
 						feedbackSlideId);
 	}
 
+	@Synchronized
 	public String[] getAllTemplatePaths() {
 		final File[] templateFolder = fileStorageManagerService
 				.getTemplatesFolder().listFiles(new FileFilter() {
@@ -962,6 +1025,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		return templateFolderStrings;
 	}
 
+	@Synchronized
 	public List<String> getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 			final ObjectId screeningSurveyId) {
 		val variables = new ArrayList<String>();
@@ -984,6 +1048,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		return variables;
 	}
 
+	@Synchronized
 	public List<String> getAllWritableScreenigSurveyVariablesOfScreeningSurvey(
 			final ObjectId screeningSurveyId) {
 		val variables = new ArrayList<String>();
@@ -1006,6 +1071,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		return variables;
 	}
 
+	@Synchronized
 	public ScreeningSurveySlide getScreeningSurveySlide(final ObjectId objectId) {
 		return databaseManagerService.getModelObjectById(
 				ScreeningSurveySlide.class, objectId);

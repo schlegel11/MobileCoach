@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 
+import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
@@ -17,6 +18,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.bson.types.ObjectId;
 
+import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
@@ -66,6 +68,8 @@ import ch.ethz.mc.ui.NotificationMessageException;
  */
 @Log4j2
 public class InterventionAdministrationManagerService {
+	private final Object										$lock;
+
 	private static InterventionAdministrationManagerService		instance	= null;
 
 	private final DatabaseManagerService						databaseManagerService;
@@ -84,6 +88,8 @@ public class InterventionAdministrationManagerService {
 			final ModelObjectExchangeService modelObjectExchangeService,
 			final ScreeningSurveyAdministrationManagerService screeningSurveyAdministrationManagerService)
 			throws Exception {
+		$lock = MC.getInstance();
+
 		log.info("Starting service...");
 
 		this.databaseManagerService = databaseManagerService;
@@ -128,6 +134,7 @@ public class InterventionAdministrationManagerService {
 	 * Modification methods
 	 */
 	// Author
+	@Synchronized
 	public Author authorCreate(final String username) {
 		val author = new Author(false, username, BCrypt.hashpw(
 				RandomStringUtils.randomAlphanumeric(128), BCrypt.gensalt()));
@@ -137,6 +144,7 @@ public class InterventionAdministrationManagerService {
 		return author;
 	}
 
+	@Synchronized
 	public Author authorAuthenticateAndReturn(final String username,
 			final String password) {
 		val author = databaseManagerService.findOneModelObject(Author.class,
@@ -156,12 +164,14 @@ public class InterventionAdministrationManagerService {
 		}
 	}
 
+	@Synchronized
 	public void authorSetAdmin(final Author author) {
 		author.setAdmin(true);
 
 		databaseManagerService.saveModelObject(author);
 	}
 
+	@Synchronized
 	public void authorSetAuthor(final Author author,
 			final ObjectId currentAuthor) throws NotificationMessageException {
 		if (author.getUsername().equals(Constants.getDefaultAdminUsername())) {
@@ -178,6 +188,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(author);
 	}
 
+	@Synchronized
 	public void authorChangePassword(final Author author,
 			final String newPassword) throws NotificationMessageException {
 		if (newPassword.length() < 5) {
@@ -189,6 +200,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(author);
 	}
 
+	@Synchronized
 	public void authorDelete(final ObjectId currentAuthorId,
 			final Author authorToDelete) throws NotificationMessageException {
 		if (authorToDelete.getId().equals(currentAuthorId)) {
@@ -204,6 +216,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.deleteModelObject(authorToDelete);
 	}
 
+	@Synchronized
 	public void authorCheckValidAndUnique(final String newUsername)
 			throws NotificationMessageException {
 		if (newUsername.length() < 3) {
@@ -220,6 +233,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	// Intervention
+	@Synchronized
 	public Intervention interventionCreate(final String name) {
 		val intervention = new Intervention(name,
 				InternalDateTime.currentTimeMillis(), false, false, null);
@@ -233,6 +247,7 @@ public class InterventionAdministrationManagerService {
 		return intervention;
 	}
 
+	@Synchronized
 	public void interventionRecreateGlobalUniqueIdsForSubelements(
 			final Intervention intervention) {
 		val screeningSurveysOfIntervention = databaseManagerService
@@ -248,6 +263,7 @@ public class InterventionAdministrationManagerService {
 		}
 	}
 
+	@Synchronized
 	public void interventionChangeName(final Intervention intervention,
 			final String newName) {
 		if (newName.equals("")) {
@@ -259,6 +275,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(intervention);
 	}
 
+	@Synchronized
 	public void interventionChangeSenderIdentification(
 			final Intervention intervention,
 			final String newSenderIdentification) {
@@ -267,6 +284,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(intervention);
 	}
 
+	@Synchronized
 	public Intervention interventionImport(final File file)
 			throws FileNotFoundException, IOException {
 		val importedModelObjects = modelObjectExchangeService
@@ -294,6 +312,7 @@ public class InterventionAdministrationManagerService {
 		return null;
 	}
 
+	@Synchronized
 	public File interventionExport(final Intervention intervention) {
 		final List<ModelObject> modelObjectsToExport = new ArrayList<ModelObject>();
 
@@ -307,6 +326,7 @@ public class InterventionAdministrationManagerService {
 				ModelObjectExchangeFormatTypes.INTERVENTION);
 	}
 
+	@Synchronized
 	public void interventionDelete(final Intervention interventionToDelete)
 			throws NotificationMessageException {
 
@@ -314,6 +334,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	// Author Intervention Access
+	@Synchronized
 	public AuthorInterventionAccess authorInterventionAccessCreate(
 			final ObjectId authorId, final ObjectId interventionId) {
 
@@ -325,6 +346,7 @@ public class InterventionAdministrationManagerService {
 		return authorInterventionAccess;
 	}
 
+	@Synchronized
 	public void authorInterventionAccessDelete(final ObjectId authorId,
 			final ObjectId interventionId) {
 		val authorInterventionAccess = databaseManagerService
@@ -337,6 +359,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	// Intervention Variable With Value
+	@Synchronized
 	public InterventionVariableWithValue interventionVariableWithValueCreate(
 			final String variableName, final ObjectId interventionId)
 			throws NotificationMessageException {
@@ -369,6 +392,7 @@ public class InterventionAdministrationManagerService {
 		return interventionVariableWithValue;
 	}
 
+	@Synchronized
 	public void interventionVariableWithValueCreateOrUpdate(
 			final ObjectId interventionId, final String variableName,
 			final String variableValue) {
@@ -390,6 +414,7 @@ public class InterventionAdministrationManagerService {
 		}
 	}
 
+	@Synchronized
 	public void interventionVariableWithValueChangeName(
 			final InterventionVariableWithValue interventionVariableWithValue,
 			final String newName) throws NotificationMessageException {
@@ -420,6 +445,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(interventionVariableWithValue);
 	}
 
+	@Synchronized
 	public void interventionVariableWithValueChangeValue(
 			final InterventionVariableWithValue interventionVariableWithValue,
 			final String newValue) throws NotificationMessageException {
@@ -429,6 +455,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(interventionVariableWithValue);
 	}
 
+	@Synchronized
 	public void interventionVariableWithValueDelete(
 			final InterventionVariableWithValue variableToDelete) {
 
@@ -436,6 +463,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	// Monitoring Message Group
+	@Synchronized
 	public MonitoringMessageGroup monitoringMessageGroupCreate(
 			final String groupName, final ObjectId interventionId) {
 		val monitoringMessageGroup = new MonitoringMessageGroup(interventionId,
@@ -462,6 +490,7 @@ public class InterventionAdministrationManagerService {
 		return monitoringMessageGroup;
 	}
 
+	@Synchronized
 	public void monitoringMessageGroupSetMessagesExceptAnswer(
 			final MonitoringMessageGroup monitoringMessageGroup,
 			final boolean newValue) {
@@ -470,6 +499,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(monitoringMessageGroup);
 	}
 
+	@Synchronized
 	public void monitoringMessageGroupSetRandomSendOrder(
 			final MonitoringMessageGroup monitoringMessageGroup,
 			final boolean newValue) {
@@ -478,6 +508,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(monitoringMessageGroup);
 	}
 
+	@Synchronized
 	public void monitoringMessageGroupSetSendSamePositionIfSendingAsReply(
 			final MonitoringMessageGroup monitoringMessageGroup,
 			final boolean newValue) {
@@ -486,6 +517,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(monitoringMessageGroup);
 	}
 
+	@Synchronized
 	public MonitoringMessageGroup monitoringMessageGroupMove(
 			final MonitoringMessageGroup monitoringMessageGroup,
 			final boolean moveLeft) {
@@ -517,6 +549,7 @@ public class InterventionAdministrationManagerService {
 		return monitoringMessageGroupToSwapWith;
 	}
 
+	@Synchronized
 	public void monitoringMessageGroupChangeName(
 			final MonitoringMessageGroup monitoringMessageGroup,
 			final String newName) {
@@ -530,6 +563,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(monitoringMessageGroup);
 	}
 
+	@Synchronized
 	public void monitoringMessageGroupChangeValidationExpression(
 			final MonitoringMessageGroup monitoringMessageGroup,
 			final String newExpression) {
@@ -542,6 +576,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(monitoringMessageGroup);
 	}
 
+	@Synchronized
 	public void monitoringMessageGroupDelete(
 			final MonitoringMessageGroup monitoringMessageGroupToDelete) {
 
@@ -550,6 +585,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	// Monitoring Message
+	@Synchronized
 	public MonitoringMessage monitoringMessageCreate(
 			final ObjectId monitoringMessageGroupId) {
 		val monitoringMessage = new MonitoringMessage(monitoringMessageGroupId,
@@ -571,6 +607,7 @@ public class InterventionAdministrationManagerService {
 		return monitoringMessage;
 	}
 
+	@Synchronized
 	public MonitoringMessage monitoringMessageMove(
 			final MonitoringMessage monitoringMessage, final boolean moveUp) {
 		// Find monitoring message to swap with
@@ -599,6 +636,7 @@ public class InterventionAdministrationManagerService {
 		return monitoringMessageToSwapWith;
 	}
 
+	@Synchronized
 	public void monitoringMessageSetLinkedMediaObject(
 			final MonitoringMessage monitoringMessage,
 			final ObjectId linkedMediaObjectId) {
@@ -607,6 +645,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(monitoringMessage);
 	}
 
+	@Synchronized
 	public void monitoringMessageSetTextWithPlaceholders(
 			final MonitoringMessage monitoringMessage,
 			final String textWithPlaceholders,
@@ -627,6 +666,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(monitoringMessage);
 	}
 
+	@Synchronized
 	public void monitoringMessageSetStoreResultToVariable(
 			final MonitoringMessage monitoringMessage, final String variableName)
 			throws NotificationMessageException {
@@ -653,12 +693,14 @@ public class InterventionAdministrationManagerService {
 		}
 	}
 
+	@Synchronized
 	public void monitoringMessageDelete(
 			final MonitoringMessage monitoringMessage) {
 		databaseManagerService.deleteModelObject(monitoringMessage);
 	}
 
 	// Monitoring Message Rule
+	@Synchronized
 	public MonitoringMessageRule monitoringMessageRuleCreate(
 			final ObjectId monitoringMessageId) {
 		val monitoringMessageRule = new MonitoringMessageRule(
@@ -681,6 +723,7 @@ public class InterventionAdministrationManagerService {
 		return monitoringMessageRule;
 	}
 
+	@Synchronized
 	public MonitoringMessageRule monitoringMessageRuleMove(
 			final MonitoringMessageRule monitoringMessageRule,
 			final boolean moveUp) {
@@ -711,12 +754,14 @@ public class InterventionAdministrationManagerService {
 		return monitoringMessageRuleToSwapWith;
 	}
 
+	@Synchronized
 	public void monitoringMessageRuleDelete(
 			final MonitoringMessageRule monitoringMessageRule) {
 		databaseManagerService.deleteModelObject(monitoringMessageRule);
 	}
 
 	// Media Object
+	@Synchronized
 	public MediaObject mediaObjectCreate(final File temporaryFile,
 			final String originalFileName,
 			final MediaObjectTypes originalFileType) {
@@ -735,11 +780,13 @@ public class InterventionAdministrationManagerService {
 		return mediaObject;
 	}
 
+	@Synchronized
 	public void mediaObjectDelete(final MediaObject mediaObject) {
 		databaseManagerService.deleteModelObject(mediaObject);
 	}
 
 	// Monitoring Rule
+	@Synchronized
 	public MonitoringRule monitoringRuleCreate(final ObjectId interventionId,
 			final ObjectId parentMonitoringRuleId) {
 		val monitoringRule = new MonitoringRule(
@@ -771,6 +818,7 @@ public class InterventionAdministrationManagerService {
 		return monitoringRule;
 	}
 
+	@Synchronized
 	public void monitoringRuleMove(final int movement,
 			final ObjectId monitoringRuleIdToMove,
 			final ObjectId referenceTargetId, final ObjectId interventionId) {
@@ -847,6 +895,7 @@ public class InterventionAdministrationManagerService {
 
 	}
 
+	@Synchronized
 	public void monitoringRuleChangeSendMessageIfTrue(
 			final MonitoringRule monitoringRule, final boolean newValue) {
 		monitoringRule.setSendMessageIfTrue(newValue);
@@ -854,6 +903,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(monitoringRule);
 	}
 
+	@Synchronized
 	public void monitoringRuleChangeStopInterventionIfTrue(
 			final MonitoringRule monitoringRule, final boolean newValue) {
 		monitoringRule.setStopInterventionWhenTrue(newValue);
@@ -861,6 +911,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(monitoringRule);
 	}
 
+	@Synchronized
 	public void monitoringRuleChangeRelatedMonitoringMessageGroup(
 			final MonitoringRule monitoringRule,
 			final ObjectId newMonitoringMessageGroupId) {
@@ -870,6 +921,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(monitoringRule);
 	}
 
+	@Synchronized
 	public void monitoringRuleSetStoreResultToVariable(
 			final MonitoringRule monitoringRule, final String variableName)
 			throws NotificationMessageException {
@@ -896,6 +948,7 @@ public class InterventionAdministrationManagerService {
 		}
 	}
 
+	@Synchronized
 	public void monitoringRuleChangeHourToSendMessage(
 			final MonitoringRule monitoringRule, final int newValue) {
 		monitoringRule.setHourToSendMessage(newValue);
@@ -903,6 +956,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(monitoringRule);
 	}
 
+	@Synchronized
 	public void monitoringRuleChangeHoursUntilMessageIsHandledAsUnanswered(
 			final MonitoringRule monitoringRule, final int newValue) {
 		monitoringRule.setHoursUntilMessageIsHandledAsUnanswered(newValue);
@@ -910,11 +964,13 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(monitoringRule);
 	}
 
+	@Synchronized
 	public void monitoringRuleDelete(final ObjectId monitoringRuleId) {
 		databaseManagerService.deleteModelObject(MonitoringRule.class,
 				monitoringRuleId);
 	}
 
+	@Synchronized
 	public MonitoringReplyRule monitoringReplyRuleCreate(
 			final ObjectId monitoringRuleId,
 			final ObjectId parentMonitoringReplyRuleId,
@@ -942,6 +998,7 @@ public class InterventionAdministrationManagerService {
 		return monitoringReplyRule;
 	}
 
+	@Synchronized
 	public void monitoringReplyRuleMove(final int movement,
 			final ObjectId monitoringReplyRuleIdToMove,
 			final ObjectId referenceTargetId, final ObjectId monitoringRuleId,
@@ -1022,6 +1079,7 @@ public class InterventionAdministrationManagerService {
 
 	}
 
+	@Synchronized
 	public void monitoringReplyRuleChangeSendMessageIfTrue(
 			final MonitoringReplyRule monitoringReplyRule,
 			final boolean newValue) {
@@ -1030,6 +1088,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(monitoringReplyRule);
 	}
 
+	@Synchronized
 	public void monitoringReplyRuleChangeRelatedMonitoringMessageGroup(
 			final MonitoringReplyRule monitoringReplyRule,
 			final ObjectId newMonitoringMessageGroupId) {
@@ -1039,6 +1098,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(monitoringReplyRule);
 	}
 
+	@Synchronized
 	public void monitoringReplyRuleSetStoreResultToVariable(
 			final MonitoringReplyRule monitoringReplyRule,
 			final String variableName) throws NotificationMessageException {
@@ -1065,12 +1125,14 @@ public class InterventionAdministrationManagerService {
 		}
 	}
 
+	@Synchronized
 	public void monitoringReplyRuleDelete(final ObjectId monitoringReplyRuleId) {
 		databaseManagerService.deleteModelObject(MonitoringReplyRule.class,
 				monitoringReplyRuleId);
 	}
 
 	// Abstract Rule
+	@Synchronized
 	public void abstractRuleChangeRuleWithPlaceholders(
 			final AbstractRule abstractRule, final String textWithPlaceholders,
 			final List<String> allPossibleVariables)
@@ -1090,6 +1152,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(abstractRule);
 	}
 
+	@Synchronized
 	public void abstractRuleChangeRuleComparisonTermWithPlaceholders(
 			final AbstractRule abstractRule, final String textWithPlaceholders,
 			final List<String> allPossibleVariables)
@@ -1110,6 +1173,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(abstractRule);
 	}
 
+	@Synchronized
 	public void abstractRuleChangeEquationSign(final AbstractRule abstractRule,
 			final RuleEquationSignTypes newType) {
 		abstractRule.setRuleEquationSign(newType);
@@ -1118,6 +1182,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	// Participant
+	@Synchronized
 	public List<Participant> participantsImport(final File file,
 			final ObjectId interventionId) throws FileNotFoundException,
 			IOException {
@@ -1205,6 +1270,7 @@ public class InterventionAdministrationManagerService {
 		return importedParticipants;
 	}
 
+	@Synchronized
 	public File participantsExport(final List<Participant> participants) {
 		final List<ModelObject> modelObjectsToExport = new ArrayList<ModelObject>();
 
@@ -1220,6 +1286,7 @@ public class InterventionAdministrationManagerService {
 				ModelObjectExchangeFormatTypes.PARTICIPANTS);
 	}
 
+	@Synchronized
 	public void participantsSetOrganization(
 			final List<Participant> participants, final String newValue) {
 		for (val participant : participants) {
@@ -1229,6 +1296,7 @@ public class InterventionAdministrationManagerService {
 		}
 	}
 
+	@Synchronized
 	public void participantsSetOrganizationUnit(
 			final List<Participant> participants, final String newValue) {
 		for (val participant : participants) {
@@ -1238,6 +1306,7 @@ public class InterventionAdministrationManagerService {
 		}
 	}
 
+	@Synchronized
 	public void participantsDelete(final List<Participant> participantsToDelete) {
 		for (val participantToDelete : participantsToDelete) {
 			databaseManagerService.deleteModelObject(participantToDelete);
@@ -1251,21 +1320,25 @@ public class InterventionAdministrationManagerService {
 	/*
 	 * Getter methods
 	 */
+	@Synchronized
 	public Author getAuthor(final ObjectId authorId) {
 		return databaseManagerService
 				.getModelObjectById(Author.class, authorId);
 	}
 
+	@Synchronized
 	public Iterable<Author> getAllAuthors() {
 		return databaseManagerService.findModelObjects(Author.class,
 				Queries.ALL);
 	}
 
+	@Synchronized
 	public Iterable<Intervention> getAllInterventions() {
 		return databaseManagerService.findModelObjects(Intervention.class,
 				Queries.ALL);
 	}
 
+	@Synchronized
 	public Iterable<Intervention> getAllInterventionsForAuthor(
 			final ObjectId authorId) {
 		val authorInterventionAccessForAuthor = databaseManagerService
@@ -1289,6 +1362,7 @@ public class InterventionAdministrationManagerService {
 		return interventions;
 	}
 
+	@Synchronized
 	public Iterable<Author> getAllAuthorsOfIntervention(
 			final ObjectId interventionId) {
 		val authorInterventionAccessForIntervention = databaseManagerService
@@ -1312,6 +1386,7 @@ public class InterventionAdministrationManagerService {
 		return authors;
 	}
 
+	@Synchronized
 	public Iterable<InterventionVariableWithValue> getAllInterventionVariablesOfIntervention(
 			final ObjectId interventionId) {
 
@@ -1321,6 +1396,7 @@ public class InterventionAdministrationManagerService {
 				interventionId);
 	}
 
+	@Synchronized
 	public Iterable<MonitoringMessageGroup> getAllMonitoringMessageGroupsOfIntervention(
 			final ObjectId interventionId) {
 		return databaseManagerService.findSortedModelObjects(
@@ -1330,6 +1406,7 @@ public class InterventionAdministrationManagerService {
 				interventionId);
 	}
 
+	@Synchronized
 	public Iterable<MonitoringMessageGroup> getAllMonitoringMessageGroupsExpectingNoAnswerOfIntervention(
 			final ObjectId interventionId) {
 		return databaseManagerService
@@ -1340,6 +1417,7 @@ public class InterventionAdministrationManagerService {
 						interventionId, false);
 	}
 
+	@Synchronized
 	public Iterable<MonitoringMessage> getAllMonitoringMessagesOfMonitoringMessageGroup(
 			final ObjectId monitoringMessageGroupId) {
 		return databaseManagerService.findSortedModelObjects(
@@ -1349,18 +1427,21 @@ public class InterventionAdministrationManagerService {
 				monitoringMessageGroupId);
 	}
 
+	@Synchronized
 	public MonitoringMessage getMonitoringMessage(
 			final ObjectId monitoringMessageId) {
 		return databaseManagerService.getModelObjectById(
 				MonitoringMessage.class, monitoringMessageId);
 	}
 
+	@Synchronized
 	public MonitoringMessageGroup getMonitoringMessageGroup(
 			final ObjectId monitoringMessageGroupId) {
 		return databaseManagerService.getModelObjectById(
 				MonitoringMessageGroup.class, monitoringMessageGroupId);
 	}
 
+	@Synchronized
 	public Iterable<MonitoringMessageRule> getAllMonitoringMessageRulesOfMonitoringMessage(
 			final ObjectId monitoringMessageId) {
 		return databaseManagerService.findSortedModelObjects(
@@ -1370,12 +1451,14 @@ public class InterventionAdministrationManagerService {
 				monitoringMessageId);
 	}
 
+	@Synchronized
 	public Iterable<MonitoringRule> getAllMonitoringRulesOfIntervention(
 			final ObjectId interventionId) {
 		return databaseManagerService.findModelObjects(MonitoringRule.class,
 				Queries.MONITORING_RULE__BY_INTERVENTION, interventionId);
 	}
 
+	@Synchronized
 	public Iterable<MonitoringRule> getAllMonitoringRulesOfInterventionAndParent(
 			final ObjectId interventionId, final ObjectId parentMonitoringRuleId) {
 		return databaseManagerService.findSortedModelObjects(
@@ -1385,11 +1468,13 @@ public class InterventionAdministrationManagerService {
 				parentMonitoringRuleId);
 	}
 
+	@Synchronized
 	public MonitoringRule getMonitoringRule(final ObjectId monitoringRuleId) {
 		return databaseManagerService.getModelObjectById(MonitoringRule.class,
 				monitoringRuleId);
 	}
 
+	@Synchronized
 	public Iterable<MonitoringReplyRule> getAllMonitoringReplyRulesOfMonitoringRule(
 			final ObjectId monitoringRuleId, final boolean isGotAnswerRule) {
 		return databaseManagerService
@@ -1400,6 +1485,7 @@ public class InterventionAdministrationManagerService {
 						monitoringRuleId);
 	}
 
+	@Synchronized
 	public Iterable<MonitoringReplyRule> getAllMonitoringReplyRulesOfMonitoringRuleAndParent(
 			final ObjectId monitoringRuleId,
 			final ObjectId parentMonitoringReplyRuleId,
@@ -1413,27 +1499,32 @@ public class InterventionAdministrationManagerService {
 						monitoringRuleId, parentMonitoringReplyRuleId);
 	}
 
+	@Synchronized
 	public Iterable<Participant> getAllParticipantsOfIntervention(
 			final ObjectId interventionId) {
 		return databaseManagerService.findModelObjects(Participant.class,
 				Queries.PARTICIPANT__BY_INTERVENTION, interventionId);
 	}
 
+	@Synchronized
 	public MonitoringReplyRule getMonitoringReplyRule(
 			final ObjectId monitoringReplyRuleId) {
 		return databaseManagerService.getModelObjectById(
 				MonitoringReplyRule.class, monitoringReplyRuleId);
 	}
 
+	@Synchronized
 	public MediaObject getMediaObject(final ObjectId mediaObjectId) {
 		return databaseManagerService.getModelObjectById(MediaObject.class,
 				mediaObjectId);
 	}
 
+	@Synchronized
 	public File getFileByReference(final String fileReference) {
 		return fileStorageManagerService.getFileByReference(fileReference);
 	}
 
+	@Synchronized
 	public List<String> getAllPossibleMessageVariablesOfIntervention(
 			final ObjectId interventionId) {
 		val variables = new ArrayList<String>();
@@ -1457,6 +1548,7 @@ public class InterventionAdministrationManagerService {
 		return variables;
 	}
 
+	@Synchronized
 	public List<String> getAllPossibleMonitoringRuleVariablesOfIntervention(
 			final ObjectId interventionId) {
 		val variables = new ArrayList<String>();
@@ -1480,6 +1572,7 @@ public class InterventionAdministrationManagerService {
 		return variables;
 	}
 
+	@Synchronized
 	public List<String> getAllWritableMessageVariablesOfIntervention(
 			final ObjectId interventionId) {
 		val variables = new ArrayList<String>();
@@ -1504,6 +1597,7 @@ public class InterventionAdministrationManagerService {
 		return variables;
 	}
 
+	@Synchronized
 	public List<String> getAllWritableMonitoringRuleVariablesOfIntervention(
 			final ObjectId interventionId) {
 		val variables = new ArrayList<String>();
@@ -1528,16 +1622,19 @@ public class InterventionAdministrationManagerService {
 		return variables;
 	}
 
+	@Synchronized
 	public DialogStatus getDialogStatusOfParticipant(
 			final ObjectId participantId) {
 		return databaseManagerService.findOneModelObject(DialogStatus.class,
 				Queries.DIALOG_STATUS__BY_PARTICIPANT, participantId);
 	}
 
+	@Synchronized
 	public List<Class<? extends AbstractModule>> getRegisteredModules() {
 		return modules;
 	}
 
+	@Synchronized
 	public Hashtable<String, AbstractVariableWithValue> getAllVariablesWithValuesOfParticipantAndSystem(
 			final ObjectId participantId) {
 		val participant = databaseManagerService.getModelObjectById(
@@ -1547,11 +1644,13 @@ public class InterventionAdministrationManagerService {
 				.getAllVariablesWithValuesOfParticipantAndSystem(participant);
 	}
 
+	@Synchronized
 	public Participant getParticipant(final ObjectId participantId) {
 		return databaseManagerService.getModelObjectById(Participant.class,
 				participantId);
 	}
 
+	@Synchronized
 	public Iterable<DialogMessage> getAllDialogMessagesOfParticipant(
 			final ObjectId participantId) {
 		return databaseManagerService.findSortedModelObjects(
@@ -1559,6 +1658,7 @@ public class InterventionAdministrationManagerService {
 				Queries.DIALOG_MESSAGE__SORT_BY_ORDER_ASC, participantId);
 	}
 
+	@Synchronized
 	public Iterable<ParticipantVariableWithValue> getAllParticipantVariablesUpdatedWithinLast28Days(
 			final ObjectId participantId, final String variableName) {
 		return databaseManagerService
@@ -1572,6 +1672,7 @@ public class InterventionAdministrationManagerService {
 								* 28);
 	}
 
+	@Synchronized
 	public List<DialogMessage> getAllDialogMessagesWhichAreNotAutomaticallyProcessableButAreNotProcessedOfIntervention(
 			final ObjectId interventionid) {
 		val dialogMessages = new ArrayList<DialogMessage>();
