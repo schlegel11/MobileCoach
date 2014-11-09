@@ -22,6 +22,7 @@ import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.Author;
@@ -57,6 +58,7 @@ import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.services.types.ModelObjectExchangeFormatTypes;
 import ch.ethz.mc.tools.BCrypt;
 import ch.ethz.mc.tools.InternalDateTime;
+import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.tools.StringValidator;
 import ch.ethz.mc.ui.NotificationMessageException;
 
@@ -1703,8 +1705,111 @@ public class InterventionAdministrationManagerService {
 			final ObjectId participantId) {
 		val values = new Hashtable<String, String>();
 
-		// TODO Variablen sammeln und mit sinnvollen Titeln versehen (bleiben in
-		// der Tabelle erhalten)
+		// Started finished times
+		val participant = getParticipant(participantId);
+		val dialogStatus = getDialogStatusOfParticipant(participantId);
+
+		values.put(Messages
+				.getAdminString(AdminMessageStrings.STATISTICS__CREATED),
+				StringHelpers.createStringTimeStamp(participant
+						.getCreatedTimestamp()));
+
+		if (dialogStatus != null) {
+			values.put(
+					Messages.getAdminString(AdminMessageStrings.STATISTICS__SCREENING_SURVEY_STARTED),
+					StringHelpers.createStringTimeStamp(dialogStatus
+							.getScreeningSurveyStartedTimestamp()));
+			values.put(
+					Messages.getAdminString(AdminMessageStrings.STATISTICS__SCREENING_SURVEY_PERFORMED),
+					StringHelpers.createStringTimeStamp(dialogStatus
+							.getScreeningSurveyPerformedTimestamp()));
+			values.put(
+					Messages.getAdminString(AdminMessageStrings.STATISTICS__MONITORING_STARTED),
+					StringHelpers.createStringTimeStamp(dialogStatus
+							.getMonitoringStartedTimestamp()));
+			values.put(
+					Messages.getAdminString(AdminMessageStrings.STATISTICS__MONITORING_PERFORMED),
+					StringHelpers.createStringTimeStamp(dialogStatus
+							.getMonitoringPerformedTimestamp()));
+		} else {
+			values.put(
+					Messages.getAdminString(AdminMessageStrings.STATISTICS__SCREENING_SURVEY_STARTED),
+					StringHelpers.createStringTimeStamp(0));
+			values.put(
+					Messages.getAdminString(AdminMessageStrings.STATISTICS__SCREENING_SURVEY_PERFORMED),
+					StringHelpers.createStringTimeStamp(0));
+			values.put(
+					Messages.getAdminString(AdminMessageStrings.STATISTICS__MONITORING_STARTED),
+					StringHelpers.createStringTimeStamp(0));
+			values.put(
+					Messages.getAdminString(AdminMessageStrings.STATISTICS__MONITORING_PERFORMED),
+					StringHelpers.createStringTimeStamp(0));
+		}
+
+		// Message counts
+		int totalSentMessages = 0;
+		int totalReceivedMessages = 0;
+		int answeredQuestions = 0;
+		int unansweredQuestions = 0;
+		int mediaObjectsViewed = 0;
+
+		val dialogMessages = databaseManagerService.findModelObjects(
+				DialogMessage.class, Queries.DIALOG_MESSAGE__BY_PARTICIPANT,
+				participantId);
+		for (val dialogMessage : dialogMessages) {
+			switch (dialogMessage.getStatus()) {
+				case IN_CREATION:
+					break;
+				case PREPARED_FOR_SENDING:
+					break;
+				case RECEIVED_UNEXPECTEDLY:
+					totalReceivedMessages++;
+					break;
+				case SENDING:
+					break;
+				case SENT_AND_ANSWERED_AND_PROCESSED:
+					totalSentMessages++;
+					totalReceivedMessages++;
+					answeredQuestions++;
+					break;
+				case SENT_AND_ANSWERED_BY_PARTICIPANT:
+					totalSentMessages++;
+					totalReceivedMessages++;
+					answeredQuestions++;
+					break;
+				case SENT_AND_NOT_ANSWERED_AND_PROCESSED:
+					totalSentMessages++;
+					unansweredQuestions++;
+					break;
+				case SENT_AND_WAITING_FOR_ANSWER:
+					totalSentMessages++;
+					break;
+				case SENT_BUT_NOT_WAITING_FOR_ANSWER:
+					totalSentMessages++;
+					break;
+			}
+
+			if (dialogMessage.isMediaContentViewed()) {
+				mediaObjectsViewed++;
+			}
+		}
+
+		values.put(
+				Messages.getAdminString(AdminMessageStrings.STATISTICS__TOTAL_MESSAGES_SENT),
+				String.valueOf(totalSentMessages));
+		values.put(
+				Messages.getAdminString(AdminMessageStrings.STATISTICS__TOTAL_MESSAGES_RECEIVED),
+				String.valueOf(totalReceivedMessages));
+		values.put(
+				Messages.getAdminString(AdminMessageStrings.STATISTICS__ANSWERED_QUESTIONS),
+				String.valueOf(answeredQuestions));
+		values.put(
+				Messages.getAdminString(AdminMessageStrings.STATISTICS__UNANSWERED_QUESTIONS),
+				String.valueOf(unansweredQuestions));
+		values.put(
+				Messages.getAdminString(AdminMessageStrings.STATISTICS__MEDIA_OBJECTS_VIEWED),
+				String.valueOf(mediaObjectsViewed));
+
 		return values;
 	}
 }

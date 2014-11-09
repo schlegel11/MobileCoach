@@ -3,6 +3,7 @@ package ch.ethz.mc.model.memory;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 
 import lombok.val;
@@ -12,8 +13,8 @@ import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Messages;
+import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
-import ch.ethz.mc.services.types.SystemVariables;
 
 /**
  * Required for in memory organization of variables for the CSV export
@@ -22,7 +23,9 @@ import ch.ethz.mc.services.types.SystemVariables;
  */
 @Log4j2
 public class DataTable {
-	private final List<ObjectId>													participants;
+	private final List<ObjectId>													participantIds;
+	private final Hashtable<ObjectId, Participant>									participants;
+
 	private final TreeSet<String>													statisticValuesHeaders;
 	private final TreeSet<String>													variablesHeaders;
 
@@ -30,7 +33,10 @@ public class DataTable {
 	private final Hashtable<ObjectId, Hashtable<String, AbstractVariableWithValue>>	variablesWithValuesOfParticipants;
 
 	public DataTable() {
-		participants = new ArrayList<ObjectId>();
+		log.debug("Creating new data table for export");
+		participantIds = new ArrayList<ObjectId>();
+		participants = new Hashtable<ObjectId, Participant>();
+
 		statisticValuesHeaders = new TreeSet<String>();
 		variablesHeaders = new TreeSet<String>();
 
@@ -66,7 +72,7 @@ public class DataTable {
 			}
 		}
 
-		public void addAll(final TreeSet<String> values) {
+		public void addAll(final Set<String> values) {
 			for (val value : values) {
 				add(value);
 			}
@@ -76,25 +82,21 @@ public class DataTable {
 	public List<DataEntry> getEntries() {
 		val entries = new ArrayList<DataEntry>();
 
-		for (val participant : participants) {
+		for (val participantId : participantIds) {
 			val entry = new DataEntry();
 
+			val participant = participants.get(participantId);
+
 			val statisticValuesOfParticipant = statisticValuesOfParticipants
-					.get(participant);
+					.get(participantId);
 			val variablesWithValuesOfParticipant = variablesWithValuesOfParticipants
-					.get(participant);
+					.get(participantId);
 
-			entry.add(participant.toString());
+			entry.add(participantId.toString());
 
-			val participantName = variablesWithValuesOfParticipant
-					.get(SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES.participantName
-							.toVariableName());
-			if (participantName == null) {
-				entry.add(Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET));
-			} else {
-				entry.add(participantName.getValue());
-			}
+			entry.add(participant.getNickname());
+			entry.add(participant.getOrganization());
+			entry.add(participant.getOrganizationUnit());
 
 			for (val staticValuesHeader : statisticValuesHeaders) {
 				entry.add(statisticValuesOfParticipant.get(staticValuesHeader));
@@ -125,6 +127,11 @@ public class DataTable {
 		dataEntry
 				.add(Messages
 						.getAdminString(AdminMessageStrings.UI_COLUMNS__PARTICIPANT_NAME));
+		dataEntry.add(Messages
+				.getAdminString(AdminMessageStrings.UI_COLUMNS__ORGANIZATION));
+		dataEntry
+				.add(Messages
+						.getAdminString(AdminMessageStrings.UI_COLUMNS__ORGANIZATION_UNIT));
 
 		dataEntry.addAll(statisticValuesHeaders);
 		dataEntry.addAll(variablesHeaders);
@@ -134,9 +141,11 @@ public class DataTable {
 
 	public void addEntry(
 			final ObjectId participantId,
+			final Participant participant,
 			final Hashtable<String, String> statisticValuesOfParticipant,
 			final Hashtable<String, AbstractVariableWithValue> variablesWithValuesOfParticipant) {
-		participants.add(participantId);
+		participantIds.add(participantId);
+		participants.put(participantId, participant);
 
 		statisticValuesOfParticipants.put(participantId,
 				statisticValuesOfParticipant);

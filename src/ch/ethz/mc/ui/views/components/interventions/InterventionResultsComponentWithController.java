@@ -178,13 +178,16 @@ public class InterventionResultsComponentWithController extends
 						final DataTable dataTable = new DataTable();
 
 						for (val participantId : selectedUIParticipantsIds) {
+							val participant = getInterventionAdministrationManagerService()
+									.getParticipant(participantId);
+
 							val variablesWithValuesOfParticipant = getInterventionAdministrationManagerService()
 									.getAllVariablesWithValuesOfParticipantAndSystem(
 											participantId);
 							val statisticValuesOfParticipant = getInterventionAdministrationManagerService()
 									.getAllStatisticValuesOfParticipant(
 											participantId);
-							dataTable.addEntry(participantId,
+							dataTable.addEntry(participantId, participant,
 									statisticValuesOfParticipant,
 									variablesWithValuesOfParticipant);
 						}
