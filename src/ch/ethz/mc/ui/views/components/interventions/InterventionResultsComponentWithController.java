@@ -17,6 +17,7 @@ import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.Messages;
+import ch.ethz.mc.model.memory.DataTable;
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
@@ -169,6 +170,45 @@ public class InterventionResultsComponentWithController extends
 		getEditButton().addClickListener(buttonClickListener);
 
 		// Special handle for export buttons
+		val allDataExportOnDemandFileDownloader = new OnDemandFileDownloader(
+				new OnDemandStreamResource() {
+
+					@Override
+					public InputStream getStream() {
+						final DataTable dataTable = new DataTable();
+
+						for (val participantId : selectedUIParticipantsIds) {
+							val variablesWithValuesOfParticipant = getInterventionAdministrationManagerService()
+									.getAllVariablesWithValuesOfParticipantAndSystem(
+											participantId);
+							val statisticValuesOfParticipant = getInterventionAdministrationManagerService()
+									.getAllStatisticValuesOfParticipant(
+											participantId);
+							dataTable.addEntry(participantId,
+									statisticValuesOfParticipant,
+									variablesWithValuesOfParticipant);
+						}
+
+						try {
+							return CSVExporter.convertDataTableToCSV(dataTable);
+						} catch (final IOException e) {
+							log.error("Error at creating CSV: {}",
+									e.getMessage());
+						}
+
+						return null;
+					}
+
+					@Override
+					public String getFilename() {
+						return "Intervention_"
+								+ intervention.getName().replaceAll(
+										"[^A-Za-z0-9_. ]+", "_")
+								+ "_Participant_All_Data.csv";
+					}
+				});
+		allDataExportOnDemandFileDownloader.extend(getExportDataButton());
+
 		val variablesExportOnDemandFileDownloader = new OnDemandFileDownloader(
 				new OnDemandStreamResource() {
 

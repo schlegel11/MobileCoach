@@ -1697,4 +1697,14 @@ public class InterventionAdministrationManagerService {
 
 		return dialogMessages;
 	}
+
+	@Synchronized
+	public Hashtable<String, String> getAllStatisticValuesOfParticipant(
+			final ObjectId participantId) {
+		val values = new Hashtable<String, String>();
+
+		// TODO Variablen sammeln und mit sinnvollen Titeln versehen (bleiben in
+		// der Tabelle erhalten)
+		return values;
+	}
 }

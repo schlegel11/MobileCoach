@@ -456,12 +456,17 @@ public class RecursiveAbstractMonitoringRulesResolver {
 
 			for (int i = 0; i < 3; i++) {
 				messageLoop: for (val message : messages) {
+					// Fallback solution 1: Start with less used message (case
+					// i==1)
 					if (i == 1 && message != messageToStartWithInFallbackCase) {
+						// Skip messages until you reach less used message
 						continue messageLoop;
 					}
 
+					// Try to find next message (case i==0)
 					val dialogMessages = new ArrayList<DialogMessage>();
 					if (i == 0) {
+						// Determine how often the message has already been used
 						val dialogMessagesIterator = databaseManagerService
 								.findModelObjects(
 										DialogMessage.class,
@@ -479,6 +484,8 @@ public class RecursiveAbstractMonitoringRulesResolver {
 						}
 					}
 
+					// In case of fallback 1 or 2, or if the message has never
+					// been used
 					if (i >= 1 || dialogMessages.size() == 0) {
 						if (i == 0) {
 							log.debug(
@@ -490,7 +497,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 									message.getId());
 						} else if (i == 2) {
 							log.debug(
-									"Monitoring message {} was could be used for participant as last option",
+									"Monitoring message {} could be used for participant as last option",
 									message.getId());
 						}
 
