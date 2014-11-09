@@ -4,20 +4,23 @@
 		<Console name="Console" target="SYSTEM_OUT">
 			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %40.40c [%t] - %m%n" />
 		</Console>
-		<File name="File" fileName="${sys:mc_logging_folder}/mc.log" bufferedIO="false"
-			append="true">
+		<File name="File" fileName="${sys:mc_logging_folder}/mc.log"
+			bufferedIO="false" append="true">
 			<PatternLayout
 				pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} [%80.80t] %-5p %80.80c %x - %m%n" />
 		</File>
-		<RollingFile name="RollingFile" fileName="${sys:mc_logging_folder}/mc-everything.log"
-			filePattern="${sys:mc_logging_folder}/mc-everything-%d{yyyy-MM-dd}_%i.log" bufferedIO="false">
+		<RollingFile name="RollingFile"
+			fileName="${sys:mc_logging_folder}/mc-everything.log"
+			filePattern="${sys:mc_logging_folder}/mc-everything-%d{yyyy-MM-dd}_%i.log.zip"
+			bufferedIO="false">
 			<PatternLayout
 				pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} [%80.80t] %-5p %80.80c %x - %m%n" />
 			<Policies>
-				<TimeBasedTriggeringPolicy interval="1" modulate="false"/>
-				<SizeBasedTriggeringPolicy size="10 MB"/>
+				<TimeBasedTriggeringPolicy interval="1"
+					modulate="false" />
+				<SizeBasedTriggeringPolicy size="100 MB" />
 			</Policies>
-			<DefaultRolloverStrategy max="20" />
+			<DefaultRolloverStrategy max="999999" />
 		</RollingFile>
 	</Appenders>
 	<Loggers>
@@ -27,7 +30,7 @@
 			<AppenderRef ref="RollingFile" />
 		</Root>
 		<Logger name="ch.ethz.mc" level="DEBUG" additivity="false">
-			<AppenderRef ref="Console" level="${sys:mc_logging_console_level}"/>
+			<AppenderRef ref="Console" level="${sys:mc_logging_console_level}" />
 			<AppenderRef ref="File" level="WARN" />
 			<AppenderRef ref="RollingFile" level="DEBUG" />
 		</Logger>
