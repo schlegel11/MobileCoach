@@ -1,24 +1,33 @@
 package ch.ethz.mc.services.threads;
 
+import java.io.File;
 import java.util.concurrent.TimeUnit;
 
+import lombok.val;
 import lombok.extern.log4j.Log4j2;
+import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
 import ch.ethz.mc.services.ScreeningSurveyExecutionManagerService;
+import ch.ethz.mc.tools.StringHelpers;
 
 /**
- * Manages the sheduling of monitoring messages, i.e. intervention, monitoring
+ * Manages the scheduling of monitoring messages, i.e. intervention, monitoring
  * messages, rules, participants and all other relevant parts in this system
  * 
  * @author Andreas Filler
  */
 @Log4j2
-public class MonitoringShedulingWorker extends Thread {
+public class MonitoringSchedulingWorker extends Thread {
 	private final ScreeningSurveyExecutionManagerService	screeningSurveyExecutionManagerService;
 	private final InterventionExecutionManagerService		interventionExecutionManagerService;
 
-	public MonitoringShedulingWorker(
+	private final boolean									statisticsEnabled;
+	private String											lastStatisticsCreation	= "";
+
+	private static File										statisticsFile			= null;
+
+	public MonitoringSchedulingWorker(
 			final InterventionExecutionManagerService interventionExecutionManagerService,
 			final ScreeningSurveyExecutionManagerService screeningSurveyExecutionManagerService) {
 		setName("Monitoring Sheduling Worker");
@@ -26,6 +35,10 @@ public class MonitoringShedulingWorker extends Thread {
 
 		this.screeningSurveyExecutionManagerService = screeningSurveyExecutionManagerService;
 		this.interventionExecutionManagerService = interventionExecutionManagerService;
+		statisticsEnabled = Constants.isStatisticsFileEnabled();
+		if (statisticsEnabled) {
+			statisticsFile = new File(Constants.getStatisticsFile());
+		}
 	}
 
 	@Override
@@ -42,6 +55,21 @@ public class MonitoringShedulingWorker extends Thread {
 			log.info("Executing new run of monitoring sheduling worker...started");
 
 			try {
+				if (statisticsEnabled) {
+					try {
+						val dailyUniqueIndex = StringHelpers
+								.createDailyUniqueIndex();
+						if (!lastStatisticsCreation.equals(dailyUniqueIndex)) {
+							log.debug("It's a new day so create statistics");
+							lastStatisticsCreation = dailyUniqueIndex;
+							interventionExecutionManagerService
+									.createStatistics(statisticsFile);
+						}
+					} catch (final Exception e) {
+						log.error("Could not create statistics file: {}",
+								e.getMessage());
+					}
+				}
 				try {
 					log.debug("Finishing unfinished screening surveys");
 					screeningSurveyExecutionManagerService

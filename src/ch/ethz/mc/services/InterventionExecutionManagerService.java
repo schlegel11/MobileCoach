@@ -1,11 +1,20 @@
 package ch.ethz.mc.services;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.Properties;
+import java.util.TreeSet;
 
+import lombok.Cleanup;
 import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -37,7 +46,7 @@ import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.RecursiveAbstractMonitoringRulesResolver;
 import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.services.threads.IncomingMessageWorker;
-import ch.ethz.mc.services.threads.MonitoringShedulingWorker;
+import ch.ethz.mc.services.threads.MonitoringSchedulingWorker;
 import ch.ethz.mc.services.threads.OutgoingMessageWorker;
 import ch.ethz.mc.services.types.SystemVariables;
 import ch.ethz.mc.tools.InternalDateTime;
@@ -67,7 +76,7 @@ public class InterventionExecutionManagerService {
 
 	private final IncomingMessageWorker					incomingMessageWorker;
 	private final OutgoingMessageWorker					outgoingMessageWorker;
-	private final MonitoringShedulingWorker				monitoringShedulingWorker;
+	private final MonitoringSchedulingWorker			monitoringSchedulingWorker;
 
 	private InterventionExecutionManagerService(
 			final DatabaseManagerService databaseManagerService,
@@ -94,9 +103,9 @@ public class InterventionExecutionManagerService {
 		incomingMessageWorker = new IncomingMessageWorker(this,
 				communicationManagerService);
 		incomingMessageWorker.start();
-		monitoringShedulingWorker = new MonitoringShedulingWorker(this,
+		monitoringSchedulingWorker = new MonitoringSchedulingWorker(this,
 				screeningSurveyExecutionManagerService);
-		monitoringShedulingWorker.start();
+		monitoringSchedulingWorker.start();
 
 		log.info("Started.");
 	}
@@ -120,9 +129,9 @@ public class InterventionExecutionManagerService {
 		log.info("Stopping service...");
 
 		log.debug("Stopping master rule evaluation worker...");
-		synchronized (monitoringShedulingWorker) {
-			monitoringShedulingWorker.interrupt();
-			monitoringShedulingWorker.join();
+		synchronized (monitoringSchedulingWorker) {
+			monitoringSchedulingWorker.interrupt();
+			monitoringSchedulingWorker.join();
 		}
 		log.debug("Stopping incoming message worker...");
 		synchronized (incomingMessageWorker) {
@@ -1148,5 +1157,124 @@ public class InterventionExecutionManagerService {
 		}
 
 		return true;
+	}
+
+	@Synchronized
+	public void createStatistics(final File statisticsFile) throws IOException {
+		final Properties statistics = new Properties() {
+			private static final long	serialVersionUID	= -478652106406702866L;
+
+			@Override
+			public synchronized Enumeration<Object> keys() {
+				return Collections.enumeration(new TreeSet<Object>(super
+						.keySet()));
+			}
+		};
+
+		statistics.setProperty("created",
+				StringHelpers.createDailyUniqueIndex());
+		val activeInterventions = databaseManagerService.findModelObjects(
+				Intervention.class, Queries.INTERVENTION__ACTIVE_TRUE);
+
+		int activeInterventionsCount = 0;
+		// Create statistics of all active interventions
+		for (val intervention : activeInterventions) {
+			activeInterventionsCount++;
+
+			// Check all relevant participants
+			val participants = databaseManagerService
+					.findModelObjects(
+							Participant.class,
+							Queries.PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE,
+							intervention.getId());
+
+			// Message counts
+			int totalSentMessages = 0;
+			int totalReceivedMessages = 0;
+			int answeredQuestions = 0;
+			int unansweredQuestions = 0;
+			int mediaObjectsViewed = 0;
+
+			for (val participant : participants) {
+				val dialogMessages = databaseManagerService.findModelObjects(
+						DialogMessage.class,
+						Queries.DIALOG_MESSAGE__BY_PARTICIPANT,
+						participant.getId());
+				for (val dialogMessage : dialogMessages) {
+					switch (dialogMessage.getStatus()) {
+						case IN_CREATION:
+							break;
+						case PREPARED_FOR_SENDING:
+							break;
+						case RECEIVED_UNEXPECTEDLY:
+							totalReceivedMessages++;
+							break;
+						case SENDING:
+							break;
+						case SENT_AND_ANSWERED_AND_PROCESSED:
+							totalSentMessages++;
+							totalReceivedMessages++;
+							answeredQuestions++;
+							break;
+						case SENT_AND_ANSWERED_BY_PARTICIPANT:
+							totalSentMessages++;
+							totalReceivedMessages++;
+							answeredQuestions++;
+							break;
+						case SENT_AND_NOT_ANSWERED_AND_PROCESSED:
+							totalSentMessages++;
+							unansweredQuestions++;
+							break;
+						case SENT_AND_WAITING_FOR_ANSWER:
+							totalSentMessages++;
+							break;
+						case SENT_BUT_NOT_WAITING_FOR_ANSWER:
+							totalSentMessages++;
+							break;
+					}
+
+					if (dialogMessage.isMediaContentViewed()) {
+						mediaObjectsViewed++;
+					}
+				}
+			}
+
+			// Write values
+			statistics.setProperty("intervention_" + intervention.getId()
+					+ ".name", intervention.getName());
+
+			statistics.setProperty("intervention_" + intervention.getId()
+					+ ".totalSentMessages", String.valueOf(totalSentMessages));
+			statistics.setProperty("intervention_" + intervention.getId()
+					+ ".totalReceivedMessages",
+					String.valueOf(totalReceivedMessages));
+			statistics.setProperty("intervention_" + intervention.getId()
+					+ ".answeredQuestions", String.valueOf(answeredQuestions));
+			statistics.setProperty("intervention_" + intervention.getId()
+					+ ".unansweredQuestions",
+					String.valueOf(unansweredQuestions));
+			statistics
+					.setProperty("intervention_" + intervention.getId()
+							+ ".mediaObjectsViewed",
+							String.valueOf(mediaObjectsViewed));
+		}
+
+		statistics.setProperty("activeInterventions",
+				String.valueOf(activeInterventionsCount));
+
+		@Cleanup
+		val fileWriter = new FileWriter(statisticsFile);
+		statistics.store(fileWriter,
+				ImplementationConstants.LOGGING_APPLICATION_NAME
+						+ " Statistics File");
+		fileWriter.flush();
+
+		@Cleanup
+		val stringWriter = new StringWriter();
+		statistics.store(stringWriter,
+				ImplementationConstants.LOGGING_APPLICATION_NAME
+						+ " Statistics File");
+		stringWriter.flush();
+		log.debug(stringWriter.toString());
 	}
 }

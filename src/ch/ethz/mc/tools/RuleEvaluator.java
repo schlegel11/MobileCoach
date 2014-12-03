@@ -210,6 +210,11 @@ public class RuleEvaluator {
 						calendarDiff.set(Integer.parseInt(dateParts[2]),
 								Integer.parseInt(dateParts[1]) - 1,
 								Integer.parseInt(dateParts[0]));
+					} else if (dateParts.length > 2
+							&& dateParts[2].length() == 2) {
+						calendarDiff.set(Integer.parseInt(dateParts[2] + 2000),
+								Integer.parseInt(dateParts[1]) - 1,
+								Integer.parseInt(dateParts[0]));
 					} else {
 						calendarDiff.set(calendar2.get(Calendar.YEAR),
 								Integer.parseInt(dateParts[1]) - 1,
@@ -246,6 +251,12 @@ public class RuleEvaluator {
 						calendarDiff1.set(Integer.parseInt(dateParts1[2]),
 								Integer.parseInt(dateParts1[1]) - 1,
 								Integer.parseInt(dateParts1[0]));
+					} else if (dateParts1.length > 2
+							&& dateParts1[2].length() == 2) {
+						calendarDiff1.set(
+								Integer.parseInt(dateParts1[2] + 2000),
+								Integer.parseInt(dateParts1[1]) - 1,
+								Integer.parseInt(dateParts1[0]));
 					} else {
 						calendarDiff1.set(calendarNow.get(Calendar.YEAR),
 								Integer.parseInt(dateParts1[1]) - 1,
@@ -253,6 +264,12 @@ public class RuleEvaluator {
 					}
 					if (dateParts2.length > 2 && dateParts2[2].length() > 2) {
 						calendarDiff2.set(Integer.parseInt(dateParts2[2]),
+								Integer.parseInt(dateParts2[1]) - 1,
+								Integer.parseInt(dateParts2[0]));
+					} else if (dateParts2.length > 2
+							&& dateParts2[2].length() == 2) {
+						calendarDiff2.set(
+								Integer.parseInt(dateParts2[2] + 2000),
 								Integer.parseInt(dateParts2[1]) - 1,
 								Integer.parseInt(dateParts2[0]));
 					} else {

@@ -535,7 +535,16 @@ public class RecursiveAbstractMonitoringRulesResolver {
 					}
 				}
 
-				log.debug("All message in this group were already used for the participant...so start over and use least used message");
+				if (i == 0) {
+					log.debug("All message in this group were already used for the participant...so start over and use least used message");
+				} else if (i == 1) {
+					log.debug("All messages were already used for the participant and no least used message could be determined...so start over and use ANY message that fits the rules");
+				} else if (i == 2) {
+					log.warn(
+							"No message fits the rules! Message group {} ({}) should be checked for participant {}",
+							messageGroup.getId(), messageGroup.getName(),
+							participant.getId());
+				}
 			}
 		}
 

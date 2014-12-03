@@ -101,8 +101,16 @@ public class Constants {
 	private static String	fileExtension						= ".mc";
 
 	/**
+	 * Statistics configuration
+	 */
+	@Getter
+	private static boolean	statisticsFileEnabled				= false;
+
+	@Getter
+	private static String	statisticsFile						= "/mc_data/statistics.properties";
+
+	/**
 	 * Simulation configuration
-	 * 
 	 */
 	/**
 	 * CAUTION: Simulated date and time should only be used on SEPARATE
