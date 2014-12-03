@@ -801,7 +801,13 @@ public class InterventionExecutionManagerService {
 
 	@Synchronized
 	public void handleOutgoingMessages() {
+		if (communicationManagerService.getMessagingThreadCount() > ImplementationConstants.MAILING_MAXIMUM_THREAD_COUNT) {
+			log.warn("Too many messages currently prepared for sending...delay until the next run");
+			return;
+		}
+
 		val dialogMessagesWithSenderToSend = getDialogMessagesWithSenderWaitingToBeSentOfActiveInterventions();
+		int sentMessages = 0;
 		for (val dialogMessageWithPhoneNumberToSend : dialogMessagesWithSenderToSend) {
 			final val dialogMessageToSend = dialogMessageWithPhoneNumberToSend
 					.getDialogMessage();
@@ -821,6 +827,12 @@ public class InterventionExecutionManagerService {
 									.getMessageSenderIdentification(),
 							dialogMessageToSend.getMessage(),
 							dialogMessageToSend.isMessageExpectsAnswer());
+					sentMessages++;
+
+					if (sentMessages > ImplementationConstants.MAILING_MAXIMUM_THREAD_COUNT) {
+						log.debug("Too many messages currently prepared for sending...delay until the next run");
+						break;
+					}
 				} else {
 					log.error("Could not send prepared message, because there was no valid dialog option to send message to participant; solution: deactive messaging for participant and removing current dialog message");
 

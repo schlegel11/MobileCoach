@@ -339,7 +339,7 @@ public class CommunicationManagerService {
 			setName("Mailing Thread " + dialogOption.getData());
 			this.dialogOption = dialogOption;
 			this.dialogMessageId = dialogMessageId;
-			this.messageSender = smsPhoneNumberFrom;
+			messageSender = smsPhoneNumberFrom;
 			this.message = message;
 			this.messageExpectsAnswer = messageExpectsAnswer;
 		}
@@ -474,5 +474,9 @@ public class CommunicationManagerService {
 
 	public DialogOptionTypes getSupportedDialogOptionType() {
 		return DialogOptionTypes.SMS;
+	}
+
+	public int getMessagingThreadCount() {
+		return runningMailingThreads.size();
 	}
 }

@@ -158,6 +158,20 @@ public class ScreeningSurveyExecutionManagerService {
 	}
 
 	@Synchronized
+	private void dialogStatusSetDataForMonitoringNotAvailable(
+			final ObjectId participantId) {
+		val dialogStatus = databaseManagerService.findOneModelObject(
+				DialogStatus.class, Queries.DIALOG_STATUS__BY_PARTICIPANT,
+				participantId);
+
+		if (!dialogStatus.isScreeningSurveyPerformed()) {
+			dialogStatus.setDataForMonitoringParticipationAvailable(false);
+
+			databaseManagerService.saveModelObject(dialogStatus);
+		}
+	}
+
+	@Synchronized
 	private void dialogStatusUpdateAfterDeterminingNextSlide(
 			final ObjectId participantId,
 			final ScreeningSurveySlide formerSlide, final boolean adjustTime) {
@@ -788,7 +802,7 @@ public class ScreeningSurveyExecutionManagerService {
 			}
 
 			if (formerSlide == null) {
-				log.warn("Could not finish screening survey for participant, because last slide could not be found");
+				log.warn("Could not finish screening survey for participant, because last visited slide could not be found");
 				throw new NullPointerException();
 			}
 
@@ -860,8 +874,10 @@ public class ScreeningSurveyExecutionManagerService {
 			}
 
 			i++;
-		} while (i < 1000);
+		} while (i < ImplementationConstants.SCREENING_SURVEY_SLIDE_AUTOMATIC_EXECUTION_LOOP_DETECTION_THRESHOLD);
 
+		// Set participant to data not available for monitoring
+		dialogStatusSetDataForMonitoringNotAvailable(participant.getId());
 		log.error(
 				"Detected endless loop while trying to finish unfinished screening survey for participant {}",
 				participant.getId());
