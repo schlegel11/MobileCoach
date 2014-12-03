@@ -1240,21 +1240,23 @@ public class InterventionExecutionManagerService {
 			}
 
 			// Write values
-			statistics.setProperty("intervention_" + intervention.getId()
+			statistics.setProperty("intervention." + activeInterventionsCount
 					+ ".name", intervention.getName());
+			statistics.setProperty("intervention." + activeInterventionsCount
+					+ ".id", intervention.getId().toString());
 
-			statistics.setProperty("intervention_" + intervention.getId()
+			statistics.setProperty("intervention." + activeInterventionsCount
 					+ ".totalSentMessages", String.valueOf(totalSentMessages));
-			statistics.setProperty("intervention_" + intervention.getId()
+			statistics.setProperty("intervention." + activeInterventionsCount
 					+ ".totalReceivedMessages",
 					String.valueOf(totalReceivedMessages));
-			statistics.setProperty("intervention_" + intervention.getId()
+			statistics.setProperty("intervention." + activeInterventionsCount
 					+ ".answeredQuestions", String.valueOf(answeredQuestions));
-			statistics.setProperty("intervention_" + intervention.getId()
+			statistics.setProperty("intervention." + activeInterventionsCount
 					+ ".unansweredQuestions",
 					String.valueOf(unansweredQuestions));
 			statistics
-					.setProperty("intervention_" + intervention.getId()
+					.setProperty("intervention." + activeInterventionsCount
 							+ ".mediaObjectsViewed",
 							String.valueOf(mediaObjectsViewed));
 		}
