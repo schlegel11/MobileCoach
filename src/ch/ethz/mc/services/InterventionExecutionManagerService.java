@@ -1240,25 +1240,26 @@ public class InterventionExecutionManagerService {
 			}
 
 			// Write values
-			statistics.setProperty("intervention." + activeInterventionsCount
-					+ ".name", intervention.getName());
-			statistics.setProperty("intervention." + activeInterventionsCount
-					+ ".id", intervention.getId().toString());
+			statistics.setProperty("intervention."
+					+ intervention.getId().toString() + ".name",
+					intervention.getName());
 
-			statistics.setProperty("intervention." + activeInterventionsCount
-					+ ".totalSentMessages", String.valueOf(totalSentMessages));
-			statistics.setProperty("intervention." + activeInterventionsCount
+			statistics.setProperty("intervention."
+					+ intervention.getId().toString() + ".totalSentMessages",
+					String.valueOf(totalSentMessages));
+			statistics.setProperty("intervention."
+					+ intervention.getId().toString()
 					+ ".totalReceivedMessages",
 					String.valueOf(totalReceivedMessages));
-			statistics.setProperty("intervention." + activeInterventionsCount
-					+ ".answeredQuestions", String.valueOf(answeredQuestions));
-			statistics.setProperty("intervention." + activeInterventionsCount
-					+ ".unansweredQuestions",
+			statistics.setProperty("intervention."
+					+ intervention.getId().toString() + ".answeredQuestions",
+					String.valueOf(answeredQuestions));
+			statistics.setProperty("intervention."
+					+ intervention.getId().toString() + ".unansweredQuestions",
 					String.valueOf(unansweredQuestions));
-			statistics
-					.setProperty("intervention." + activeInterventionsCount
-							+ ".mediaObjectsViewed",
-							String.valueOf(mediaObjectsViewed));
+			statistics.setProperty("intervention."
+					+ intervention.getId().toString() + ".mediaObjectsViewed",
+					String.valueOf(mediaObjectsViewed));
 		}
 
 		statistics.setProperty("activeInterventions",
