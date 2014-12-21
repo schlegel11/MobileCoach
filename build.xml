@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<project name="MobileCoach Release" basedir="." default="release">
+	<description>
+		MobileCoach release version creation
+	</description>
+
+	<import file="javadoc.xml" />
+
+	<target name="release" depends="javadoc">
+		<!-- Preparation -->
+		<delete dir="git-temp" />
+		<mkdir dir="git-temp/.git" />
+		<copy todir="git-temp/.git" preservelastmodified="true" force="true">
+			<fileset dir="release/.git" />
+		</copy>
+
+		<delete dir="release" />
+
+		<!-- Copy -->
+		<copy todir="release" preservelastmodified="true" force="true">
+			<fileset dir=".">
+				<exclude name="build.xml" />
+				<exclude name=".gitignore" />
+				<exclude name=".git/**" />
+				<exclude name="out/**" />
+				<exclude name="build/**" />
+				<exclude name="git-temp/**" />
+			</fileset>
+		</copy>
+
+		<!-- Adjustments -->
+		<delete file="release/stats.sh" />
+
+		<!-- Cleanup -->
+		<mkdir dir="release/.git" />
+
+		<copy todir="release/.git" preservelastmodified="true" force="true">
+			<fileset dir="git-temp/.git" />
+		</copy>
+		<delete dir="git-temp" />
+	</target>
+
+</project>

@@ -35,6 +35,7 @@ The *MobileCoach* system consists of several components, which are available in 
 The **FileServletWrapper** is an optional component for the MobileCoach system. To be used it needs to be added to the library path of the *MobileCoach* system, e.g. using the build path settings in the **Eclipse** development environment.
 
 
+### Version 1.10.0
 ........
 
 ## How to use MC?

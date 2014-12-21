@@ -20,8 +20,10 @@ limitations under the License.
 This software uses the following software components, which are
 also available under the Apache License:
 
-   * Log4j 2
+   * Apache Log4j 2
      http://logging.apache.org/log4j/2.x/
+   * Apache Ivy
+     http://ant.apache.org/ivy/
    * Apache Commons Lang
      http://commons.apache.org/proper/commons-lang/
    * Apache Commons Collections
