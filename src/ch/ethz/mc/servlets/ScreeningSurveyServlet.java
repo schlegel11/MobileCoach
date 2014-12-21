@@ -308,7 +308,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			val activeScreeningSurveys = screeningSurveyExecutionManagerService
 					.getActiveScreeningSurveys();
 
-			// FIXME Should be made more generic
+			// FIXME Should be done more generic
 			if (activeScreeningSurveys != null) {
 				templateVariables.put("title",
 						"Hier geht es zur Eingangsbefragung...");

@@ -755,7 +755,7 @@ public class InterventionExecutionManagerService {
 				log.debug("Received stop message by participant {}",
 						dialogOption.getParticipant());
 
-				// FIXME Emergency solution for first intervention
+				// FIXME Special solution for MC tobacco
 				try {
 					variablesManagerService
 							.writeVariableValueOfParticipant(

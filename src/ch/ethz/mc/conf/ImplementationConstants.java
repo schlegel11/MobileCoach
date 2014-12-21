@@ -43,16 +43,14 @@ public class ImplementationConstants {
 
 	public static final long	MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES		= 60;
 
-	// TODO Still debugging values
 	public static final long	MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS						= 30;
 
-	// TODO Still debugging values
 	public static final long	MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS						= 30;
 
-	// FIXME Emergency solution for first intervention
+	// FIXME Special solution for MC tobacco
 	public static String		VARIABLE_DEFINING_PARTICIPATION_IN_MOBILE_COACH_EXTRA				= "$participation_extra";
 
-	// FIXME Emergency solution for first intervention
+	// FIXME Special solution for first MC interventions
 	public static final String	MESSAGE_CONTEST_QUIT_RESULT_VARIABLE								= "$contest_quit_message_result";
 	public static final String	MESSAGE_CONTEST_QUIT_RELEVANT_VARIABLE								= "$contest_quit_message";
 	public static final String	MESSAGE_CONTEST_MOTIVATIONAL_RESULT_VARIABLE						= "$contest_motivational_message_result";
