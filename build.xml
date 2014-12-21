@@ -30,6 +30,7 @@
 
 		<!-- Adjustments -->
 		<delete file="release/stats.sh" />
+		<delete file="release/WebContent/WEB-INF/lib/FileServletWrapper.jar" />
 
 		<!-- Cleanup -->
 		<mkdir dir="release/.git" />
