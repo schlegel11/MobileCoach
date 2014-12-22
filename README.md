@@ -8,12 +8,14 @@ For further information visit the *MobileCoach* Website at [https://www.mobile-c
 
 ## Team of the release version
 
+### Health-IS Lab
+
 * **Andreas Filler** - afiller (AT) ethz (DOT) ch
 * **Tobias Kowatsch** - tobias (DOT) kowatsch (AT) unisg (DOT) ch
 * **Jost Schweinfurther** - jschweinfurther (AT) ethz (DOT) ch
 * **Prof. Dr. Elgar Fleisch** - efleisch (AT) ethz (DOT) ch
 
-## Behavioral intervention experts of the release version
+### Swiss Research Institute for Public Health and Addiction
 
 * **Dr. Severin Haug** - severin (DOT) haug (AT) isgf (DOT) uzh (DOT) ch
 * **Raquel Paz Castro** - raquel (DOT) paz (AT) isgf (DOT) uzh (DOT) ch
