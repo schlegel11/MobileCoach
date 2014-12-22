@@ -1,6 +1,6 @@
 package ch.ethz.mc.services.internal;
 /*
- * Copyright (C) 2013-2015 MobileCoach Team at the Health IS-Lab
+ * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
  * 
  * For details see README.md file in the root folder of this project.
  * 
