@@ -1,18 +1,22 @@
 # Welcome to the *MobileCoach*!
 
-*MobileCoach* is the novel Open Source Behavioral Intervention Platform designed by **ETH Zurich**, the **University of St. Gallen** and the **Swiss Research Institute for Public Health and Addiction**.
+*MobileCoach* is the Open Source Behavioral Intervention Platform designed by **ETH Zurich**, the **University of St. Gallen** and the **Swiss Research Institute for Public Health and Addiction**.
 
-&copy; 2014-2015 [Health-IS Lab](http://www.health-is.ch) at the [Institute of Technology Management](http://www.item.unisg.ch) and [University of St. Gallen](http://www.unisg.ch)   
+© 2013-2015 [Health-IS Lab](http://www.health-is.ch) a joined initiative of the [Institute of Technology Management](http://www.item.unisg.ch) at [University of St. Gallen](http://www.unisg.ch) and the [Department of Management, Technology and Economics](http://mtec.ethz.ch) at [ETH Zurich](http://www.ethz.ch).   
 
 For further information visit the *MobileCoach* Website at [https://www.mobile-coach.eu](https://www.mobile-coach.eu)!
 
-## Team of the Release Version
+## Team of the release version
 
 * **Andreas Filler** - afiller (AT) ethz (DOT) ch
-* **Tobias Kowatsch** - tkowatsch (AT) ethz (DOT) ch
-* **Dr. Severin Haug** - severin (DOT) haug (AT) isgf (DOT) uzh (dot) ch
-* **Jost Schweinfurther** - jostsch (AT) gmail (DOT) com
+* **Tobias Kowatsch** - tobias (DOT) kowatsch (AT) unisg (DOT) ch
+* **Jost Schweinfurther** - jschweinfurther (AT) ethz (DOT) ch
 * **Prof. Dr. Elgar Fleisch** - efleisch (AT) ethz (DOT) ch
+
+## Behavioral intervention experts of the release version
+
+* **Dr. Severin Haug** - severin (DOT) haug (AT) isgf (DOT) uzh (DOT) ch
+* **Raquel Paz Castro** - raquel (DOT) paz (AT) isgf (DOT) uzh (DOT) ch
 
 ## License
 
