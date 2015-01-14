@@ -1,17 +1,17 @@
 <?xml version="1.0"?>
 <!DOCTYPE ivy-module [
-	<!ENTITY log4j.version "2.0">
+	<!ENTITY log4j.version "2.1">
 	<!ENTITY commons-lang.version "2.6">
 	<!ENTITY commons-collection.version "3.2.1">
 	<!ENTITY commons-io.version "2.4">
 	<!ENTITY geronimo-validation_1.0_spec.version "1.1">
 	<!ENTITY bval-bundle.version "0.5">
-	<!ENTITY vaadin.version "7.2.6">
+	<!ENTITY vaadin.version "7.3.8">
 	<!ENTITY jongo.version "1.1">
 	<!ENTITY mongodb-driver.version "2.12.3">
 	<!ENTITY jena.version "2.11.0">
 	<!ENTITY javaluator.version "2.0.0">
-	<!ENTITY lombok.version "1.12.6">
+	<!ENTITY lombok.version "1.14.8">
 	<!ENTITY mustache.java.version "0.8.14">
 	<!ENTITY java.mail.version "1.4.7">
 	<!ENTITY jcsv.version "1.4.0">
