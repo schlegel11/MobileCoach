@@ -450,6 +450,7 @@ public class ScreeningSurveyExecutionManagerService {
 			nextSlide = formerSlide;
 		} else {
 			// If there was a former slide, store result if provided
+			log.debug("Checking for result values to store...");
 			if (formerSlideId != null && resultValues != null) {
 				for (int i = 0; i < resultValues.size(); i++) {
 					// If question results should to be saved
@@ -459,7 +460,7 @@ public class ScreeningSurveyExecutionManagerService {
 					if (questions.size() > i
 							&& (question = questions.get(i))
 									.getStoreValueToVariableWithName() != null
-							&& question.getStoreValueToVariableWithName()
+							&& !question.getStoreValueToVariableWithName()
 									.equals("")) {
 
 						val resultValue = resultValues.get(i);
