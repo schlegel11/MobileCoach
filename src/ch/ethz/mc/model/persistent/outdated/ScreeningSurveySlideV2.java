@@ -1,4 +1,4 @@
-package ch.ethz.mc.model.persistent;
+package ch.ethz.mc.model.persistent.outdated;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
@@ -25,20 +25,20 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
-import lombok.val;
 
 import org.bson.types.ObjectId;
+import org.jongo.marshall.jackson.oid.Id;
 
-import ch.ethz.mc.MC;
-import ch.ethz.mc.conf.AdminMessageStrings;
-import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.ModelObject;
-import ch.ethz.mc.model.Queries;
+import ch.ethz.mc.model.persistent.MediaObject;
+import ch.ethz.mc.model.persistent.ScreeningSurvey;
+import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
+import ch.ethz.mc.model.persistent.ScreeningSurveySlideRule;
 import ch.ethz.mc.model.persistent.types.ScreeningSurveySlideQuestionTypes;
-import ch.ethz.mc.model.ui.UIModelObject;
-import ch.ethz.mc.model.ui.UIScreeningSurveySlide;
 
 /**
+ * CAUTION: Will only be used for conversion from data model 1 to 2
+ * 
  * {@link ModelObject} to represent an {@link ScreeningSurveySlide}
  * 
  * A {@link ScreeningSurvey} consists of several {@link ScreeningSurveySlide}s,
@@ -49,7 +49,15 @@ import ch.ethz.mc.model.ui.UIScreeningSurveySlide;
  */
 @NoArgsConstructor
 @AllArgsConstructor
-public class ScreeningSurveySlide extends ModelObject {
+public class ScreeningSurveySlideV2 extends ModelObject {
+	/**
+	 * The id of the {@link ModelObject}
+	 */
+	@Id
+	@Getter
+	@Setter
+	private ObjectId	id;
+
 	/**
 	 * Consists of all attributes related to a {@link Question} within a
 	 * {@link ScreeningSurveySlide}
@@ -212,107 +220,4 @@ public class ScreeningSurveySlide extends ModelObject {
 	@Setter
 	@NonNull
 	private String								validationErrorMessage;
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.ethz.mc.model.ModelObject#toUIModelObject()
-	 */
-	@Override
-	public UIModelObject toUIModelObject() {
-		// Number of slide rules
-		int slideRules = 0;
-		val screeningSurveySlideRules = MC.getInstance()
-				.getScreeningSurveyAdministrationManagerService()
-				.getAllScreeningSurveySlideRulesOfScreeningSurveySlide(getId());
-
-		if (screeningSurveySlideRules != null) {
-			val screeningSurveySlideRulesIterator = screeningSurveySlideRules
-					.iterator();
-
-			while (screeningSurveySlideRulesIterator.hasNext()) {
-				screeningSurveySlideRulesIterator.next();
-				slideRules++;
-			}
-		}
-
-		// Variable names from multi-item questions
-		final StringBuffer storeValueToVariableWithNames = new StringBuffer();
-		for (val question : questions) {
-			if (question.getStoreValueToVariableWithName() != null) {
-				if (storeValueToVariableWithNames.length() > 0) {
-					storeValueToVariableWithNames.append(", ");
-				}
-
-				storeValueToVariableWithNames.append(question
-						.getStoreValueToVariableWithName());
-			}
-		}
-
-		val screeningSurveySlide = new UIScreeningSurveySlide(
-				order,
-				titleWithPlaceholders.equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: titleWithPlaceholders,
-				questionType.toString(),
-				storeValueToVariableWithNames.length() > 0 ? storeValueToVariableWithNames
-						.toString() : Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET),
-				slideRules);
-
-		screeningSurveySlide.setRelatedModelObject(this);
-
-		return screeningSurveySlide;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * ch.ethz.mc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
-	 * (java.util.List)
-	 */
-	@Override
-	public void collectThisAndRelatedModelObjectsForExport(
-			final List<ModelObject> exportList) {
-		exportList.add(this);
-
-		// Linked media object
-		if (linkedMediaObject != null) {
-			exportList.add(ModelObject
-					.get(MediaObject.class, linkedMediaObject));
-		}
-
-		// Add screening survey slide rule
-		for (val screeningSurveySlideRule : ModelObject.find(
-				ScreeningSurveySlideRule.class,
-				Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE,
-				getId())) {
-			screeningSurveySlideRule
-					.collectThisAndRelatedModelObjectsForExport(exportList);
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.ethz.mc.model.ModelObject#performOnDelete()
-	 */
-	@Override
-	public void performOnDelete() {
-		if (linkedMediaObject != null) {
-			val mediaObjectToDelete = ModelObject.get(MediaObject.class,
-					linkedMediaObject);
-
-			if (mediaObjectToDelete != null) {
-				ModelObject.delete(mediaObjectToDelete);
-			}
-		}
-
-		// Delete sub rules
-		val rulesToDelete = ModelObject.find(ScreeningSurveySlideRule.class,
-				Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE,
-				getId());
-		ModelObject.delete(rulesToDelete);
-	}
 }

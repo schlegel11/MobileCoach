@@ -39,9 +39,9 @@ import ch.ethz.mc.model.ui.UIModelObject;
 import ch.ethz.mc.model.ui.UIScreeningSurveySlide;
 
 /**
- * {@link ModelObject} to represent an {@link ScreeningSurveySlide}
+ * {@link ModelObject} to represent an {@link NewScreeningSurveySlide}
  * 
- * A {@link ScreeningSurvey} consists of several {@link ScreeningSurveySlide}s,
+ * A {@link ScreeningSurvey} consists of several {@link NewScreeningSurveySlide}s,
  * which are presented to a {@link Participant} in a dynamic order. The order
  * can be defined by using the rules or by defining a default next slide.
  * 
@@ -49,16 +49,16 @@ import ch.ethz.mc.model.ui.UIScreeningSurveySlide;
  */
 @NoArgsConstructor
 @AllArgsConstructor
-public class ScreeningSurveySlide extends ModelObject {
+public class NewScreeningSurveySlide extends ModelObject {
 	/**
 	 * Consists of all attributes related to a {@link Question} within a
-	 * {@link ScreeningSurveySlide}
+	 * {@link NewScreeningSurveySlide}
 	 * 
 	 * @author Andreas Filler
 	 */
 	@NoArgsConstructor
 	@AllArgsConstructor
-	public static class Question {
+	public class Question {
 		/**
 		 * The question presented to the {@link Participant} containing
 		 * placeholders
@@ -90,7 +90,7 @@ public class ScreeningSurveySlide extends ModelObject {
 
 		/**
 		 * <strong>OPTIONAL:</strong> The answer that is preselected when the
-		 * {@link Participant} comes to the {@link ScreeningSurveySlide}
+		 * {@link Participant} comes to the {@link NewScreeningSurveySlide}
 		 */
 		@Getter
 		@Setter
@@ -128,7 +128,7 @@ public class ScreeningSurveySlide extends ModelObject {
 	private String								globalUniqueId;
 
 	/**
-	 * The {@link ScreeningSurvey} the {@link ScreeningSurveySlide} belongs to
+	 * The {@link ScreeningSurvey} the {@link NewScreeningSurveySlide} belongs to
 	 */
 	@Getter
 	@Setter
@@ -136,10 +136,10 @@ public class ScreeningSurveySlide extends ModelObject {
 	private ObjectId							screeningSurvey;
 
 	/**
-	 * The position of the {@link ScreeningSurveySlide} compared to all other
-	 * {@link ScreeningSurveySlide}s; the first slide will be presented to the
+	 * The position of the {@link NewScreeningSurveySlide} compared to all other
+	 * {@link NewScreeningSurveySlide}s; the first slide will be presented to the
 	 * {@link Participant}; if no {@link ScreeningSurveySlideRule} leads to
-	 * another {@link ScreeningSurveySlide} the next in this order will be
+	 * another {@link NewScreeningSurveySlide} the next in this order will be
 	 * presented
 	 */
 	@Getter
@@ -147,7 +147,7 @@ public class ScreeningSurveySlide extends ModelObject {
 	private int									order;
 
 	/**
-	 * The title of the {@link ScreeningSurveySlide} presented to the
+	 * The title of the {@link NewScreeningSurveySlide} presented to the
 	 * {@link Participant} containing placeholders
 	 * for variables
 	 */
@@ -183,7 +183,7 @@ public class ScreeningSurveySlide extends ModelObject {
 
 	/**
 	 * <strong>OPTIONAL:</strong> A {@link MediaObject} can be linked to be
-	 * presented on the {@link ScreeningSurveySlide}
+	 * presented on the {@link NewScreeningSurveySlide}
 	 */
 	@Getter
 	@Setter

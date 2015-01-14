@@ -470,10 +470,12 @@ public class VariablesManagerService {
 							screeningSurveyModelObject.getId());
 
 			for (val screeningSurveySlideModelObject : screeningSurveySlideModelObjects) {
-				if (screeningSurveySlideModelObject
-						.getStoreValueToVariableWithName() != null) {
-					variables.add(screeningSurveySlideModelObject
-							.getStoreValueToVariableWithName());
+				for (val question : screeningSurveySlideModelObject
+						.getQuestions()) {
+					if (question.getStoreValueToVariableWithName() != null) {
+						variables.add(question
+								.getStoreValueToVariableWithName());
+					}
 				}
 
 				val screeningSurveySlideRuleModelObjects = databaseManagerService
@@ -506,10 +508,10 @@ public class VariablesManagerService {
 						screeningSurveyId);
 
 		for (val screeningSurveySlideModelObject : screeningSurveySlideModelObjects) {
-			if (screeningSurveySlideModelObject
-					.getStoreValueToVariableWithName() != null) {
-				variables.add(screeningSurveySlideModelObject
-						.getStoreValueToVariableWithName());
+			for (val question : screeningSurveySlideModelObject.getQuestions()) {
+				if (question.getStoreValueToVariableWithName() != null) {
+					variables.add(question.getStoreValueToVariableWithName());
+				}
 			}
 
 			val screeningSurveySlideRuleModelObjects = databaseManagerService

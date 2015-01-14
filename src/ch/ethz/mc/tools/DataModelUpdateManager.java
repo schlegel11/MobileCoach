@@ -17,18 +17,21 @@ package ch.ethz.mc.tools;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import java.util.ArrayList;
+
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.collections.IteratorUtils;
 import org.jongo.Jongo;
 
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.DialogStatus;
-import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
-import ch.ethz.mc.model.persistent.ScreeningSurveySlideRule;
 import ch.ethz.mc.model.persistent.consistency.DataModelConfiguration;
+import ch.ethz.mc.model.persistent.outdated.ScreeningSurveySlideV1;
+import ch.ethz.mc.model.persistent.outdated.ScreeningSurveySlideV2;
 
 /**
  * Manages the modification of the Data Model on the startup of the system
@@ -58,6 +61,9 @@ public class DataModelUpdateManager {
 				case 1:
 					updateToVersion1();
 					break;
+				case 2:
+					updateToVersion2();
+					break;
 			}
 
 			log.info("Update to version {} done", updateToVersionInThisStep);
@@ -65,8 +71,8 @@ public class DataModelUpdateManager {
 			// set new version
 			val configurationCollection = jongo
 					.getCollection(Constants.DATA_MODEL_CONFIGURATION);
-			val configuration = configurationCollection.findOne().as(
-					DataModelConfiguration.class);
+			val configuration = configurationCollection.findOne(
+					Queries.EVERYTHING).as(DataModelConfiguration.class);
 			configuration.setVersion(updateToVersionInThisStep);
 			configurationCollection.save(configuration);
 		}
@@ -88,8 +94,7 @@ public class DataModelUpdateManager {
 	 * Changes for version 1:
 	 */
 	private static void updateToVersion1() {
-		val interventionCollection = jongo.getCollection(Intervention.class
-				.getSimpleName());
+		val interventionCollection = jongo.getCollection("Intervention");
 		interventionCollection.update(Queries.EVERYTHING).multi()
 				.with(Queries.UPDATE_VERSION_1__INTERVENTION__CHANGE_1);
 
@@ -107,7 +112,7 @@ public class DataModelUpdateManager {
 				.with(Queries.UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_5);
 
 		val screeningSurveySlideCollection = jongo
-				.getCollection(ScreeningSurveySlide.class.getSimpleName());
+				.getCollection("ScreeningSurveySlide");
 		screeningSurveySlideCollection
 				.update(Queries.EVERYTHING)
 				.multi()
@@ -130,10 +135,62 @@ public class DataModelUpdateManager {
 		}
 
 		val screeningSurveySlideRuleCollection = jongo
-				.getCollection(ScreeningSurveySlideRule.class.getSimpleName());
+				.getCollection("ScreeningSurveySlideRule");
 		screeningSurveySlideRuleCollection
 				.update(Queries.EVERYTHING)
 				.multi()
 				.with(Queries.UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE_RULE__CHANGE_1);
+	}
+
+	/**
+	 * Changes for version 2:
+	 */
+	private static void updateToVersion2() {
+		val screeningSurveySlideCollection = jongo
+				.getCollection("ScreeningSurveySlide");
+		val oldScreeningSurveySlidesIterator = screeningSurveySlideCollection
+				.find(Queries.EVERYTHING)
+				.as(ch.ethz.mc.model.persistent.outdated.ScreeningSurveySlideV1.class)
+				.iterator();
+
+		final ScreeningSurveySlideV1[] oldScreeningSurveySlides = (ScreeningSurveySlideV1[]) IteratorUtils
+				.toArray(oldScreeningSurveySlidesIterator,
+						ScreeningSurveySlideV1.class);
+
+		for (val oldScreeningSurveySlide : oldScreeningSurveySlides) {
+			log.debug("Old ScreeningSurveySlide: {}",
+					oldScreeningSurveySlide.toJSONString());
+			val questions = new ArrayList<ScreeningSurveySlideV2.Question>();
+
+			val newScreeningSurveySlide = new ScreeningSurveySlideV2(
+					oldScreeningSurveySlide.getId(),
+					oldScreeningSurveySlide.getGlobalUniqueId(),
+					oldScreeningSurveySlide.getScreeningSurvey(),
+					oldScreeningSurveySlide.getOrder(),
+					oldScreeningSurveySlide.getTitleWithPlaceholders(),
+					oldScreeningSurveySlide.getQuestionType(),
+					oldScreeningSurveySlide
+							.getOptionalLayoutAttributeWithPlaceholders(),
+					questions, oldScreeningSurveySlide.getLinkedMediaObject(),
+					oldScreeningSurveySlide.isLastSlide(),
+					oldScreeningSurveySlide.getHandsOverToFeedback(),
+					oldScreeningSurveySlide.getValidationErrorMessage());
+
+			val question = new ScreeningSurveySlideV2.Question(
+					oldScreeningSurveySlide.getQuestionWithPlaceholders(),
+					oldScreeningSurveySlide.getAnswersWithPlaceholders(),
+					oldScreeningSurveySlide.getAnswerValues(),
+					oldScreeningSurveySlide.getPreSelectedAnswer(),
+					oldScreeningSurveySlide.getStoreValueToVariableWithName(),
+					oldScreeningSurveySlide.getDefaultValue());
+
+			questions.add(question);
+			log.debug("New ScreeningSurveySlide: {}",
+					newScreeningSurveySlide.toJSONString());
+
+			screeningSurveySlideCollection.remove(oldScreeningSurveySlide
+					.getId());
+			screeningSurveySlideCollection.save(newScreeningSurveySlide);
+		}
 	}
 }

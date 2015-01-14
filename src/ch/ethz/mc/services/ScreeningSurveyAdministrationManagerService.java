@@ -256,11 +256,18 @@ public class ScreeningSurveyAdministrationManagerService {
 	@Synchronized
 	public ScreeningSurveySlide screeningSurveySlideCreate(
 			final ObjectId screeningSurveyId) {
+		val questions = new ArrayList<ScreeningSurveySlide.Question>();
+
 		val screeningSurveySlide = new ScreeningSurveySlide(
 				GlobalUniqueIdGenerator.createGlobalUniqueId(),
-				screeningSurveyId, 0, "", "", null, "",
-				ScreeningSurveySlideQuestionTypes.TEXT_ONLY, false, null,
-				new String[0], new String[0], -1, null, "", "");
+				screeningSurveyId, 0, "",
+				ScreeningSurveySlideQuestionTypes.TEXT_ONLY, "", questions,
+				null, false, null, "");
+
+		val question = new ScreeningSurveySlide.Question("", new String[0],
+				new String[0], -1, null, "");
+
+		questions.add(question);
 
 		val highestOrderSlide = databaseManagerService
 				.findOneSortedModelObject(ScreeningSurveySlide.class,
@@ -275,6 +282,36 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurveySlide);
 
 		return screeningSurveySlide;
+	}
+
+	@Synchronized
+	public ScreeningSurveySlide.Question screeningSurveySlideAddQuestion(
+			final ScreeningSurveySlide screeningSurveySlide) {
+		val newQuestion = new ScreeningSurveySlide.Question("", new String[0],
+				new String[0], -1, null, "");
+
+		screeningSurveySlide.getQuestions().add(newQuestion);
+
+		databaseManagerService.saveModelObject(screeningSurveySlide);
+
+		return newQuestion;
+	}
+
+	@Synchronized
+	public void screeningSurveySlideRemoveQuestion(
+			final ScreeningSurveySlide screeningSurveySlide,
+			final int questionToRemove) throws NotificationMessageException {
+
+		val questions = screeningSurveySlide.getQuestions();
+
+		if (questions.size() > 1) {
+			questions.remove(questionToRemove);
+		} else {
+			throw new NotificationMessageException(
+					AdminMessageStrings.NOTIFICATION__CANT_DELETE_LAST_QUESTION);
+		}
+
+		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
 
 	@Synchronized
@@ -354,28 +391,6 @@ public class ScreeningSurveyAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void screeningSurveySlideChangeQuestion(
-			final ScreeningSurveySlide screeningSurveySlide,
-			final String textWithPlaceholders,
-			final List<String> allPossibleMessageVariables)
-			throws NotificationMessageException {
-		if (textWithPlaceholders == null) {
-			screeningSurveySlide.setQuestionWithPlaceholders("");
-		} else {
-			if (!StringValidator.isValidVariableText(textWithPlaceholders,
-					allPossibleMessageVariables)) {
-				throw new NotificationMessageException(
-						AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
-			}
-
-			screeningSurveySlide
-					.setQuestionWithPlaceholders(textWithPlaceholders);
-		}
-
-		databaseManagerService.saveModelObject(screeningSurveySlide);
-	}
-
-	@Synchronized
 	public void screeningSurveySlideChangeQuestionType(
 			final ScreeningSurveySlide screeningSurveySlide,
 			final ScreeningSurveySlideQuestionTypes screeningSurveySlideQuestionType) {
@@ -394,23 +409,98 @@ public class ScreeningSurveyAdministrationManagerService {
 		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
 
+	@Synchronized
+	public void screeningSurveySlideChangeQuestion(
+			final ScreeningSurveySlide screeningSurveySlide,
+			final int questionPosition, final String textWithPlaceholders,
+			final List<String> allPossibleMessageVariables)
+			throws NotificationMessageException {
+		val question = screeningSurveySlide.getQuestions()
+				.get(questionPosition);
+
+		if (textWithPlaceholders == null) {
+			question.setQuestionWithPlaceholders("");
+		} else {
+			if (!StringValidator.isValidVariableText(textWithPlaceholders,
+					allPossibleMessageVariables)) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
+			}
+
+			question.setQuestionWithPlaceholders(textWithPlaceholders);
+		}
+
+		databaseManagerService.saveModelObject(screeningSurveySlide);
+	}
+
 	public void screeningSurveySlideChangePreselectedAnswer(
 			final ScreeningSurveySlide screeningSurveySlide,
-			final int preselectedAnswer) {
-		screeningSurveySlide.setPreSelectedAnswer(preselectedAnswer);
+			final int questionPosition, final int preselectedAnswer) {
+		val question = screeningSurveySlide.getQuestions()
+				.get(questionPosition);
+
+		question.setPreSelectedAnswer(preselectedAnswer);
 
 		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
 
 	@Synchronized
 	public void screeningSurveySlideChangeDefaultVariableValue(
-			final ScreeningSurveySlide screeningSurveySlide, final String text)
+			final ScreeningSurveySlide screeningSurveySlide,
+			final int questionPosition, final String text)
 			throws NotificationMessageException {
+		val question = screeningSurveySlide.getQuestions()
+				.get(questionPosition);
+
 		if (text == null) {
-			screeningSurveySlide.setDefaultValue("");
+			question.setDefaultValue("");
 		} else {
-			screeningSurveySlide.setDefaultValue(text);
+			question.setDefaultValue(text);
 		}
+
+		databaseManagerService.saveModelObject(screeningSurveySlide);
+	}
+
+	@Synchronized
+	public void screeningSurveySlideChangeStoreResultToVariable(
+			final ScreeningSurveySlide screeningSurveySlide,
+			final int questionPosition, final String variableName)
+			throws NotificationMessageException {
+		val question = screeningSurveySlide.getQuestions()
+				.get(questionPosition);
+
+		if (variableName == null || variableName.equals("")) {
+			question.setStoreValueToVariableWithName(null);
+
+			databaseManagerService.saveModelObject(screeningSurveySlide);
+		} else {
+			if (!StringValidator.isValidVariableName(variableName)) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_NOT_VALID);
+			}
+
+			if (variablesManagerService
+					.isWriteProtectedVariableName(variableName)) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
+			}
+
+			question.setStoreValueToVariableWithName(variableName);
+
+			databaseManagerService.saveModelObject(screeningSurveySlide);
+		}
+	}
+
+	@Synchronized
+	public void screeningSurveySlideSetAnswersWithPlaceholdersAndValues(
+			final ScreeningSurveySlide screeningSurveySlide,
+			final int questionPosition, final String[] answers,
+			final String[] values) {
+		val question = screeningSurveySlide.getQuestions()
+				.get(questionPosition);
+
+		question.setAnswersWithPlaceholders(answers);
+		question.setAnswerValues(values);
 
 		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
@@ -438,32 +528,6 @@ public class ScreeningSurveyAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void screeningSurveySlideChangeStoreResultToVariable(
-			final ScreeningSurveySlide screeningSurveySlide,
-			final String variableName) throws NotificationMessageException {
-		if (variableName == null || variableName.equals("")) {
-			screeningSurveySlide.setStoreValueToVariableWithName(null);
-
-			databaseManagerService.saveModelObject(screeningSurveySlide);
-		} else {
-			if (!StringValidator.isValidVariableName(variableName)) {
-				throw new NotificationMessageException(
-						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_NOT_VALID);
-			}
-
-			if (variablesManagerService
-					.isWriteProtectedVariableName(variableName)) {
-				throw new NotificationMessageException(
-						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
-			}
-
-			screeningSurveySlide.setStoreValueToVariableWithName(variableName);
-
-			databaseManagerService.saveModelObject(screeningSurveySlide);
-		}
-	}
-
-	@Synchronized
 	public void screeningSurveySlideChangeHandsOverToFeedback(
 			final ScreeningSurveySlide screeningSurveySlide,
 			final ObjectId feedbackId) {
@@ -477,16 +541,6 @@ public class ScreeningSurveyAdministrationManagerService {
 			final ScreeningSurveySlide screeningSurveySlide,
 			final boolean newValue) {
 		screeningSurveySlide.setLastSlide(newValue);
-
-		databaseManagerService.saveModelObject(screeningSurveySlide);
-	}
-
-	@Synchronized
-	public void screeningSurveySlideSetAnswersWithPlaceholdersAndValues(
-			final ScreeningSurveySlide screeningSurveySlide,
-			final String[] answers, final String[] values) {
-		screeningSurveySlide.setAnswersWithPlaceholders(answers);
-		screeningSurveySlide.setAnswerValues(values);
 
 		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
