@@ -25,6 +25,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
@@ -400,14 +401,23 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				accessGranted = false;
 			}
 
-			// Get question result if available
-			String resultValue;
-			try {
+			// Get question result(s) if available
+			List<String> resultValues = null;
+			int i = 0;
+			String resultValue = null;
+			do {
 				resultValue = request
-						.getParameter(ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLE);
-			} catch (final Exception e) {
-				resultValue = null;
-			}
+						.getParameter(ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLES
+								+ i);
+
+				if (resultValue != null) {
+					if (resultValues == null) {
+						resultValues = new ArrayList<String>();
+					}
+					resultValues.add(resultValue);
+				}
+				i++;
+			} while (resultValue != null);
 
 			// Get consistency check value if available
 			String checkValue;
@@ -426,13 +436,13 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			log.debug(
 					"Retrieved information from screening survey slide request: participant: {}, access granted: {}, screening survey: {}, result value: {}, check value: {}",
 					participantId, accessGranted, screeningSurveyId,
-					resultValue, checkValue);
+					resultValues, checkValue);
 
 			// Decide which slide should be send to the participant
 			try {
 				templateVariables = screeningSurveyExecutionManagerService
 						.getAppropriateScreeningSurveySlide(participantId,
-								accessGranted, screeningSurveyId, resultValue,
+								accessGranted, screeningSurveyId, resultValues,
 								checkValue, session);
 
 				if (templateVariables == null
@@ -522,10 +532,6 @@ public class ScreeningSurveyServlet extends HttpServlet {
 
 		templateVariables.put(
 				GeneralSlideTemplateFieldTypes.BASE_URL.toVariable(), baseURL);
-		templateVariables
-				.put(ScreeningSurveySlideTemplateFieldTypes.RESULT_VARIABLE
-						.toVariable(),
-						ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLE);
 
 		// Slide type
 		if (screeningSurveyId != null) {

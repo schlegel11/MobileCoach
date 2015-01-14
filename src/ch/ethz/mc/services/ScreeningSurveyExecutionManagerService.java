@@ -332,14 +332,14 @@ public class ScreeningSurveyExecutionManagerService {
 	 * @param accessGranted
 	 * @param screeningSurveyId
 	 *            The {@link ObjectId} of the requested {@link ScreeningSurvey}
-	 * @param resultValue
+	 * @param resultValues
 	 * @param session
 	 * @return
 	 */
 	@Synchronized
 	public HashMap<String, Object> getAppropriateScreeningSurveySlide(
 			ObjectId participantId, final boolean accessGranted,
-			final ObjectId screeningSurveyId, final String resultValue,
+			final ObjectId screeningSurveyId, final List<String> resultValues,
 			final String checkValue, final HttpSession session) {
 
 		val templateVariables = new HashMap<String, Object>();
@@ -375,8 +375,8 @@ public class ScreeningSurveyExecutionManagerService {
 		if (screeningSurvey.getPassword() != null
 				&& !screeningSurvey.getPassword().equals("") && !accessGranted) {
 			// Login is required, check login information, if provided
-			if (resultValue != null
-					&& resultValue.equals(screeningSurvey.getPassword())) {
+			if (resultValues != null
+					&& resultValues.equals(screeningSurvey.getPassword())) {
 				// Remember that user authenticated
 				session.setAttribute(
 						ScreeningSurveySessionAttributeTypes.PARTICIPANT_ACCESS_GRANTED
@@ -450,29 +450,39 @@ public class ScreeningSurveyExecutionManagerService {
 			nextSlide = formerSlide;
 		} else {
 			// If there was a former slide, store result if provided
-			if (formerSlideId != null) {
-				if (resultValue != null
-						&& formerSlide.getStoreValueToVariableWithName() != null
-						&& !formerSlide.getStoreValueToVariableWithName()
-								.equals("")) {
-					val variableName = formerSlide
-							.getStoreValueToVariableWithName();
+			if (formerSlideId != null && resultValues != null) {
+				for (int i = 0; i < resultValues.size(); i++) {
+					// If question results should to be saved
+					val questions = formerSlide.getQuestions();
+					ScreeningSurveySlide.Question question = null;
 
-					// Store result to variable
-					log.debug(
-							"Storing result of screening survey slide {} to variable {} as value {}",
-							formerSlideId, variableName, resultValue);
-					try {
-						variablesManagerService
-								.writeVariableValueOfParticipant(
-										participant.getId(), variableName,
-										resultValue);
-						participant = databaseManagerService
-								.getModelObjectById(Participant.class,
-										participant.getId());
-					} catch (final Exception e) {
-						log.warn("The variable {} could not be written: {}",
-								variableName, e.getMessage());
+					if (questions.size() > i
+							&& (question = questions.get(i))
+									.getStoreValueToVariableWithName() != null
+							&& question.getStoreValueToVariableWithName()
+									.equals("")) {
+
+						val resultValue = resultValues.get(i);
+						val variableName = question
+								.getStoreValueToVariableWithName();
+
+						// Store result to variable
+						log.debug(
+								"Storing result of screening survey slide {} to variable {} as value {}",
+								formerSlideId, variableName, resultValue);
+						try {
+							variablesManagerService
+									.writeVariableValueOfParticipant(
+											participant.getId(), variableName,
+											resultValue);
+							participant = databaseManagerService
+									.getModelObjectById(Participant.class,
+											participant.getId());
+						} catch (final Exception e) {
+							log.warn(
+									"The variable {} could not be written: {}",
+									variableName, e.getMessage());
+						}
 					}
 				}
 			}
@@ -644,68 +654,97 @@ public class ScreeningSurveyExecutionManagerService {
 				}
 			}
 
-			// Question
-			val question = VariableStringReplacer
-					.findVariablesAndReplaceWithTextValues(
-							nextSlide.getQuestionWithPlaceholders(),
-							variablesWithValues.values(), "");
-			templateVariables.put(
-					ScreeningSurveySlideTemplateFieldTypes.QUESTION
-							.toVariable(), question);
+			// Questions and answers
+			final List<HashMap<String, Object>> questionObjects = new ArrayList<HashMap<String, Object>>();
 
-			// Answers (text, value, preselected)
-			val answersWithPlaceholders = nextSlide
-					.getAnswersWithPlaceholders();
-			val answerValues = nextSlide.getAnswerValues();
+			val questions = nextSlide.getQuestions();
+			for (int i = 0; i < questions.size(); i++) {
+				val question = questions.get(i);
+				val questionObject = new HashMap<String, Object>();
 
-			templateVariables.put(
-					ScreeningSurveySlideTemplateFieldTypes.ANSWERS_COUNT
-							.toVariable(), answerValues.length);
-
-			final List<HashMap<String, Object>> answersObjects = new ArrayList<HashMap<String, Object>>();
-			for (int i = 0; i < answersWithPlaceholders.length; i++) {
-				val answerObjects = new HashMap<String, Object>();
-
-				val answerWithPlaceholder = answersWithPlaceholders[i];
-				val finalAnswer = VariableStringReplacer
+				// Question
+				val questionText = VariableStringReplacer
 						.findVariablesAndReplaceWithTextValues(
-								answerWithPlaceholder,
+								question.getQuestionWithPlaceholders(),
 								variablesWithValues.values(), "");
-
-				val answerValue = answerValues[i];
-
-				answerObjects.put(
-						ScreeningSurveySlideTemplateFieldTypes.ANSWER_POSITION
+				questionObject.put(
+						ScreeningSurveySlideTemplateFieldTypes.QUESTION_TEXT
+								.toVariable(), questionText);
+				questionObject
+						.put(ScreeningSurveySlideTemplateFieldTypes.QUESTION_POSITION
 								.toVariable(), i + 1);
-				answerObjects.put(
-						ScreeningSurveySlideTemplateFieldTypes.ANSWER_TEXT
-								.toVariable(), finalAnswer);
-				answerObjects.put(
-						ScreeningSurveySlideTemplateFieldTypes.ANSWER_VALUE
-								.toVariable(), answerValue);
-				if (i == 0) {
+
+				// Result variable
+				questionObject
+						.put(ScreeningSurveySlideTemplateFieldTypes.RESULT_VARIABLE
+								.toVariable(),
+								ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLES
+										+ i);
+
+				// Answers (text, value, preselected)
+				val answersWithPlaceholders = question
+						.getAnswersWithPlaceholders();
+				val answerValues = question.getAnswerValues();
+
+				final List<HashMap<String, Object>> answersObjects = new ArrayList<HashMap<String, Object>>();
+				for (int j = 0; j < answersWithPlaceholders.length; j++) {
+					val answerObjects = new HashMap<String, Object>();
+
+					val answerWithPlaceholder = answersWithPlaceholders[j];
+					val finalAnswerText = VariableStringReplacer
+							.findVariablesAndReplaceWithTextValues(
+									answerWithPlaceholder,
+									variablesWithValues.values(), "");
+
+					val answerValue = answerValues[j];
+
 					answerObjects
-							.put(ScreeningSurveySlideTemplateFieldTypes.IS_FIRST_ANSWER
-									.toVariable(), true);
-				}
-				if (i == answersWithPlaceholders.length - 1) {
-					answerObjects
-							.put(ScreeningSurveySlideTemplateFieldTypes.IS_LAST_ANSWER
-									.toVariable(), true);
-				}
-				if (nextSlide.getPreSelectedAnswer() == i) {
-					answerObjects
-							.put(ScreeningSurveySlideTemplateFieldTypes.PRESELECTED_ANSWER
-									.toVariable(), true);
+							.put(ScreeningSurveySlideTemplateFieldTypes.ANSWER_POSITION
+									.toVariable(), j + 1);
+					answerObjects.put(
+							ScreeningSurveySlideTemplateFieldTypes.ANSWER_TEXT
+									.toVariable(), finalAnswerText);
+					answerObjects.put(
+							ScreeningSurveySlideTemplateFieldTypes.ANSWER_VALUE
+									.toVariable(), answerValue);
+					if (j == 0) {
+						answerObjects
+								.put(ScreeningSurveySlideTemplateFieldTypes.IS_FIRST_ANSWER
+										.toVariable(), true);
+					}
+					if (j == answersWithPlaceholders.length - 1) {
+						answerObjects
+								.put(ScreeningSurveySlideTemplateFieldTypes.IS_LAST_ANSWER
+										.toVariable(), true);
+					}
+					if (question.getPreSelectedAnswer() == j) {
+						answerObjects
+								.put(ScreeningSurveySlideTemplateFieldTypes.PRESELECTED_ANSWER
+										.toVariable(), true);
+					}
+
+					answersObjects.add(answerObjects);
 				}
 
-				answersObjects.add(answerObjects);
+				questionObject.put(
+						ScreeningSurveySlideTemplateFieldTypes.ANSWERS_COUNT
+								.toVariable(), answerValues.length);
+
+				if (answersObjects.size() > 0) {
+					templateVariables.put(
+							ScreeningSurveySlideTemplateFieldTypes.ANSWERS
+									.toVariable(), answersObjects);
+				}
+
+				questionObjects.add(questionObject);
 			}
-			if (answersObjects.size() > 0) {
-				templateVariables.put(
-						ScreeningSurveySlideTemplateFieldTypes.ANSWERS
-								.toVariable(), answersObjects);
-			}
+
+			templateVariables.put(
+					ScreeningSurveySlideTemplateFieldTypes.QUESTIONS
+							.toVariable(), questionObjects);
+			templateVariables.put(
+					ScreeningSurveySlideTemplateFieldTypes.QUESTIONS_COUNT
+							.toVariable(), questions.size());
 
 			// Is last slide
 			if (nextSlide.isLastSlide()) {
@@ -827,30 +866,36 @@ public class ScreeningSurveyExecutionManagerService {
 
 			// If there was a former slide, store default value if provided
 			if (formerSlideId != null) {
-				if (formerSlide.getDefaultValue() != null
-						&& !formerSlide.getDefaultValue().equals("")
-						&& formerSlide.getStoreValueToVariableWithName() != null
-						&& !formerSlide.getStoreValueToVariableWithName()
-								.equals("")) {
-					val variableName = formerSlide
-							.getStoreValueToVariableWithName();
+				for (int j = 0; j < formerSlide.getQuestions().size(); j++) {
+					val questions = formerSlide.getQuestions();
+					val question = questions.get(j);
 
-					// Store result to variable
-					log.debug(
-							"Storing result of screening survey slide {} to variable {} as value {}",
-							formerSlideId, variableName,
-							formerSlide.getDefaultValue());
-					try {
-						variablesManagerService
-								.writeVariableValueOfParticipant(
-										participant.getId(), variableName,
-										formerSlide.getDefaultValue());
-						participant = databaseManagerService
-								.getModelObjectById(Participant.class,
-										participant.getId());
-					} catch (final Exception e) {
-						log.warn("The variable {} could not be written: {}",
-								variableName, e.getMessage());
+					if (question.getDefaultValue() != null
+							&& !question.getDefaultValue().equals("")
+							&& question.getStoreValueToVariableWithName() != null
+							&& !question.getStoreValueToVariableWithName()
+									.equals("")) {
+						val variableName = question
+								.getStoreValueToVariableWithName();
+
+						// Store result to variable
+						log.debug(
+								"Storing result of screening survey slide {} to variable {} as value {}",
+								formerSlideId, variableName,
+								question.getDefaultValue());
+						try {
+							variablesManagerService
+									.writeVariableValueOfParticipant(
+											participant.getId(), variableName,
+											question.getDefaultValue());
+							participant = databaseManagerService
+									.getModelObjectById(Participant.class,
+											participant.getId());
+						} catch (final Exception e) {
+							log.warn(
+									"The variable {} could not be written: {}",
+									variableName, e.getMessage());
+						}
 					}
 				}
 			}

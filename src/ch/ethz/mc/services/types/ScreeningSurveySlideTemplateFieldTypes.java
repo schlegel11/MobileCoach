@@ -45,15 +45,39 @@ public enum ScreeningSurveySlideTemplateFieldTypes {
 	 */
 	LAYOUT,
 	/**
-	 * Contains the question text
+	 * Contains the number of available questions
 	 */
-	QUESTION,
+	QUESTIONS_COUNT,
 	/**
-	 * Contains the number of available answers
+	 * Contains a list of questions:
+	 * 
+	 * <code>{{#questions}}...use the fields {{question_text}}, {{#answers}}...{{/answers}} etc. here...{{/questions}}</code>
+	 */
+	QUESTIONS,
+	/**
+	 * Contains the position (1...n) of one question and can be used inside
+	 * <code>{{#questions}}...{{/questions}}</code>
+	 */
+	QUESTION_POSITION,
+	/**
+	 * Contains the question text and can be used inside
+	 * <code>{{#questions}}...{{/questions}}</code>
+	 */
+	QUESTION_TEXT,
+	/**
+	 * Contains the name of the result variable which should contain the answer
+	 * value when pressing the button for the next slide and can be used inside
+	 * <code>{{#questions}}...{{/questions}}</code>
+	 */
+	RESULT_VARIABLE,
+	/**
+	 * Can be used inside <code>{{#questions}}...{{/questions}}</code> and
+	 * contains the number of available answers
 	 */
 	ANSWERS_COUNT,
 	/**
-	 * Contains a list of answers:
+	 * Can be used inside <code>{{#questions}}...{{/questions}}</code> and
+	 * contains a list of answers:
 	 * 
 	 * <code>{{#answers}}...use the fields {{answer_text}}, {{answer_value}}, {{preselected_answer}} etc. here...{{/answers}}</code>
 	 */
@@ -90,11 +114,6 @@ public enum ScreeningSurveySlideTemplateFieldTypes {
 	 * inside <code>{{#answers}}...{{/answers}}</code>
 	 */
 	PRESELECTED_ANSWER,
-	/**
-	 * Contains the name of the result variable which should contain the slides
-	 * selection when pressing the button for the next slide
-	 */
-	RESULT_VARIABLE,
 	/**
 	 * <strong>OPTIONAL:</strong> Can contain the error message of the
 	 * validation

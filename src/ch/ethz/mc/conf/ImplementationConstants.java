@@ -68,7 +68,7 @@ public class ImplementationConstants {
 	public static final String	FILE_STREAMING_SERVLET_PATH											= "files";
 	public static final String	SHORT_ID_FILE_STREAMING_SERVLET_PATH								= "files-short";
 
-	public static final String	SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLE						= "MC_ResultValue";
+	public static final String	SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLES					= "MC_ResultValue_";
 	public static final String	SCREENING_SURVEY_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE			= "MC_ConsistencyCheckValue";
 	public static final int		SCREENING_SURVEY_SLIDE_AUTOMATIC_EXECUTION_LOOP_DETECTION_THRESHOLD	= 1000;
 
