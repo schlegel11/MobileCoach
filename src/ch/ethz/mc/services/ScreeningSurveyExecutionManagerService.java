@@ -732,7 +732,7 @@ public class ScreeningSurveyExecutionManagerService {
 								.toVariable(), answerValues.length);
 
 				if (answersObjects.size() > 0) {
-					templateVariables.put(
+					questionObject.put(
 							ScreeningSurveySlideTemplateFieldTypes.ANSWERS
 									.toVariable(), answersObjects);
 				}

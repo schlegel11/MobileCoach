@@ -587,7 +587,43 @@ public class ScreeningSurveyAdministrationManagerService {
 
 	@Synchronized
 	public void screeningSurveySlideDelete(
-			final ScreeningSurveySlide screeningSurveySlide) {
+			final ScreeningSurveySlide screeningSurveySlide)
+			throws NotificationMessageException {
+		val otherScreeningSurveySlides = databaseManagerService
+				.findModelObjects(ScreeningSurveySlide.class,
+						Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY,
+						screeningSurveySlide.getScreeningSurvey());
+
+		for (val otherScreeningSurveySlide : otherScreeningSurveySlides) {
+			if (otherScreeningSurveySlide.getId().equals(
+					screeningSurveySlide.getId())) {
+				continue;
+			}
+
+			val screeningSurveySlidesWhenTrue = databaseManagerService
+					.findModelObjects(
+							ScreeningSurveySlideRule.class,
+							Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE_AND_NEXT_SCREENING_SURVEY_SLIDE_WHEN_TRUE,
+							otherScreeningSurveySlide.getId(),
+							screeningSurveySlide.getId());
+
+			if (screeningSurveySlidesWhenTrue.iterator().hasNext()) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_SLIDE_HAS_BACKLINKS);
+			}
+			val screeningSurveySlidesWhenFalse = databaseManagerService
+					.findModelObjects(
+							ScreeningSurveySlideRule.class,
+							Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE_AND_NEXT_SCREENING_SURVEY_SLIDE_WHEN_FALSE,
+							otherScreeningSurveySlide.getId(),
+							screeningSurveySlide.getId());
+
+			if (screeningSurveySlidesWhenFalse.iterator().hasNext()) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_SLIDE_HAS_BACKLINKS);
+			}
+		}
+
 		databaseManagerService.deleteModelObject(screeningSurveySlide);
 	}
 
