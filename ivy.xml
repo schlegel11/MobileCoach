@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!DOCTYPE ivy-module [
-	<!ENTITY log4j.version "2.1">
+	<!ENTITY log4j.version "2.2">
 	<!ENTITY commons-lang.version "2.6">
 	<!ENTITY commons-collection.version "3.2.1">
 	<!ENTITY commons-io.version "2.4">
