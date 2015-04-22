@@ -494,6 +494,8 @@ public class ScreeningSurveyExecutionManagerService {
 			} else {
 				nextSlide = getNextScreeningSurveySlide(participant,
 						screeningSurvey, formerSlide);
+				participant = databaseManagerService.getModelObjectById(
+						Participant.class, participant.getId());
 			}
 		}
 

@@ -121,5 +121,5 @@ When the debug parameter **IS_LIVE_SYSTEM** in the file **Constants.java** is se
 
 An extended backend user guide will be published in the following months.
 
-### Version 1.1.0 (Build 20150130)
+### Version 1.1.2 (Build 20150422)
 
