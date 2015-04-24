@@ -203,7 +203,7 @@ public class Constants {
 
 	/**
 	 * Injects a specific configuration file (if provided as system parameter
-	 * "mc.configuration")
+	 * "[CONTEXT PATH to lower case].configuration")
 	 * 
 	 * @param configurationsFile
 	 */

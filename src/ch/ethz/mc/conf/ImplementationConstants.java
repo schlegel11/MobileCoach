@@ -23,7 +23,7 @@ package ch.ethz.mc.conf;
  * @author Andreas Filler
  */
 public class ImplementationConstants {
-	public static final String	SYSTEM_CONFIGURATION_PROPERTY										= "mc.configuration";
+	public static final String	SYSTEM_CONFIGURATION_PROPERTY_POSTFIX								= ".configuration";
 	public static final String	LOGGING_APPLICATION_NAME											= "MC";
 
 	public static final String	DEFAULT_OBJECT_NAME													= "---";

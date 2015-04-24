@@ -42,8 +42,14 @@ import ch.ethz.mc.conf.ImplementationConstants;
 public class FirstInitializations implements ServletContextListener {
 	@Override
 	public void contextInitialized(final ServletContextEvent event) {
-		val loggingFolder = getLoggingFolder();
-		val loggingConsoleLevel = getLoggingConsoleLevel();
+		val contextPath = event.getServletContext().getContextPath()
+				.toLowerCase().replaceFirst("^/", "");
+		val configurationsFileString = System
+				.getProperty(contextPath
+						+ ImplementationConstants.SYSTEM_CONFIGURATION_PROPERTY_POSTFIX);
+
+		val loggingFolder = getLoggingFolder(configurationsFileString);
+		val loggingConsoleLevel = getLoggingConsoleLevel(configurationsFileString);
 
 		System.setProperty("mc_logging_folder", loggingFolder);
 		System.setProperty("mc_logging_console_level", loggingConsoleLevel);
@@ -53,21 +59,18 @@ public class FirstInitializations implements ServletContextListener {
 		val thread = Thread.currentThread();
 		thread.setName(ImplementationConstants.LOGGING_APPLICATION_NAME);
 
-		Constants
-				.injectConfiguration(System
-						.getProperty(ImplementationConstants.SYSTEM_CONFIGURATION_PROPERTY));
+		Constants.injectConfiguration(configurationsFileString);
 	}
 
 	/**
 	 * Reads the logging folder from configuration file before the configuration
 	 * file is officially parsed for the system
 	 * 
+	 * @param configurationsFileString
+	 *            String containing the complete path to the configuration file
 	 * @return
 	 */
-	private String getLoggingFolder() {
-		val configurationsFileString = System
-				.getProperty(ImplementationConstants.SYSTEM_CONFIGURATION_PROPERTY);
-
+	private String getLoggingFolder(final String configurationsFileString) {
 		if (configurationsFileString == null) {
 			return Constants.getLoggingFolder();
 		}
@@ -101,12 +104,11 @@ public class FirstInitializations implements ServletContextListener {
 	 * configuration
 	 * file is officially parsed for the system
 	 * 
+	 * @param configurationsFileString
+	 *            String containing the complete path to the configuration file
 	 * @return
 	 */
-	private String getLoggingConsoleLevel() {
-		val configurationsFileString = System
-				.getProperty(ImplementationConstants.SYSTEM_CONFIGURATION_PROPERTY);
-
+	private String getLoggingConsoleLevel(final String configurationsFileString) {
 		if (configurationsFileString == null) {
 			return Constants.getLoggingConsoleLevel();
 		}

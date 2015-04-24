@@ -68,9 +68,9 @@ The *FileServletWrapper* is an optional component for the MobileCoach system. To
 
 The whole **MobileCoach** can be configured using one configuration file **configuration.properties** which is included in the repository containing example values. All folders mentioned in this file should be created before the first startup of the **MobileCoach** system.
 
-Your adjusted copy of the **configuration.properties** can be placed anywhere on your system, but the file need to be referenced as system property with the name **mc.configuration**. Otherwise the default configuration from the **Constants.java** will be used - and you won't like it.
+Your adjusted copy of the **configuration.properties** can be placed anywhere on your system, but the file need to be referenced as system property with the name **[YOUR CONTEXT PATH in lower case].configuration**. Otherwise the default configuration from the **Constants.java** will be used - and you won't like it.
 
-To define the system property you can start your java runtime with the following parameter:
+E.g., to define the system property for a **MobileCoach** instance running at your server in the path "/MC" (deployed using a MC.war) you can start your java runtime with the following parameter:
 	
 	-Dmc.configuration="/PATH_TO_YOUR_FILE/configuration.properties"
 
@@ -90,20 +90,32 @@ You lost the password of the user **admin**? Shutdown the system, rename the use
 
 After deploying a (newly created) web archive (**.war**) to your server you can access the **MobileCoach** on your server at
 	
-	https://YOURDOMAIN.WHATEVER/MC/admin
+	https://YOURDOMAIN.WHATEVER/YOUR_CONTEXT_PATH/admin
 
 **Suggestion:**   
 Use the WAR building functionalities provided by **Eclipse WTP** in the **"Export->WAR file"** context menu when clicking on a web project.
+
+E.g.:
+
+	MC.war
 
 ## Important URLs
 
 The *MobileCoach* administration:
 
-	https://YOURDOMAIN.WHATEVER/MC/admin
+	https://YOURDOMAIN.WHATEVER/YOUR_CONTEXT_PATH/admin
 
+E.g.:
+	
+	https://mydomain.com/MC/admin
+	
 A listing of your existing screening surveys (if activated):
 
-	https://YOURDOMAIN.WHATEVER/MC/
+	https://YOURDOMAIN.WHATEVER/YOUR_CONTEXT_PATH/
+	
+E.g.:
+
+	https://mydomain.com/MC/
 
 ## Screening survey and feedback templates
 
@@ -121,5 +133,5 @@ When the debug parameter **IS_LIVE_SYSTEM** in the file **Constants.java** is se
 
 An extended backend user guide will be published in the following months.
 
-### Version 1.1.2 (Build 20150422)
+### Version 1.2.0 (Build 20150424)
 
