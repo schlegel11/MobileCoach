@@ -76,6 +76,10 @@ E.g., to define the system property for a **MobileCoach** instance running at yo
 
 Extend your tomcat configuration files or startup scripts with this setting.
 
+You should also add the following parameters to avoid problems with the Log4J logging system:
+
+	-Dmc_logging_folder=/tmp -Dmc_logging_console_level=INFO
+
 **Suggestion:**   
 Ensure that your Tomcat installation is allowed to read and write to all folders configured in the **configuration.properties**
 
@@ -133,5 +137,5 @@ When the debug parameter **IS_LIVE_SYSTEM** in the file **Constants.java** is se
 
 An extended backend user guide will be published in the following months.
 
-### Version 1.2.0 (Build 20150424)
+### Version 1.2.1 (Build 20150426)
 

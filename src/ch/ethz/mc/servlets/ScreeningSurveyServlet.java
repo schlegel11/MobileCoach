@@ -339,7 +339,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 
 		@Cleanup
 		val templateInputStream = getServletContext().getResourceAsStream(
-				"ActiveScreeningSurveysList.template.html");
+				"/ActiveScreeningSurveysList.template.html");
 		@Cleanup
 		val templateInputStreamReader = new InputStreamReader(
 				templateInputStream, "UTF-8");
