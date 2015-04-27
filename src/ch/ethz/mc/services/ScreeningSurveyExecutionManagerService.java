@@ -1245,16 +1245,18 @@ public class ScreeningSurveyExecutionManagerService {
 							.toString(), newCheckValue);
 
 			// Check if slide is first or last slide
-			if (databaseManagerService.findOneModelObject(FeedbackSlide.class,
-					Queries.FEEDBACK_SLIDE__BY_FEEDBACK_AND_ORDER_LOWER,
-					nextSlide.getFeedback(), nextSlide.getOrder()) == null) {
+			val priorAppropriateSlide = getNextFeedbackSlide(nextSlide,
+					participant.getAssignedFeedback(), variablesWithValues,
+					false);
+			if (priorAppropriateSlide == null) {
 				templateVariables.put(
 						FeedbackSlideTemplateFieldTypes.IS_FIRST_SLIDE
 								.toVariable(), true);
 			}
-			if (databaseManagerService.findOneModelObject(FeedbackSlide.class,
-					Queries.FEEDBACK_SLIDE__BY_FEEDBACK_AND_ORDER_HIGHER,
-					nextSlide.getFeedback(), nextSlide.getOrder()) == null) {
+			val nextAppropriateSlide = getNextFeedbackSlide(nextSlide,
+					participant.getAssignedFeedback(), variablesWithValues,
+					true);
+			if (nextAppropriateSlide == null) {
 				templateVariables.put(
 						FeedbackSlideTemplateFieldTypes.IS_LAST_SLIDE
 								.toVariable(), true);
