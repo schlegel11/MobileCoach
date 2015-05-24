@@ -55,6 +55,7 @@ public class IncomingMessageWorker extends Thread {
 		}
 
 		while (!isInterrupted()) {
+			final long startingTime = System.currentTimeMillis();
 			log.info("Executing new run of incoming message worker...started");
 
 			try {
@@ -76,7 +77,9 @@ public class IncomingMessageWorker extends Thread {
 						e.getMessage());
 			}
 
-			log.info("Executing new run of incoming message worker...done");
+			log.info(
+					"Executing new run of incoming message worker...done ({} seconds)",
+					(System.currentTimeMillis() - startingTime) / 1000.0);
 			try {
 				TimeUnit.SECONDS
 						.sleep(ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS);

@@ -958,28 +958,24 @@ public class InterventionExecutionManagerService {
 				Intervention.class,
 				Queries.INTERVENTION__ACTIVE_TRUE_MONITORING_ACTIVE_TRUE)) {
 			if (intervention.getAssignedSenderIdentification() != null) {
-				for (val participant : databaseManagerService
-						.findModelObjects(
+				for (val participantId : databaseManagerService
+						.findModelObjectIds(
 								Participant.class,
 								Queries.PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE,
 								intervention.getId())) {
-					if (participant != null) {
+					if (participantId != null) {
 						for (val dialogStatus : databaseManagerService
-								.findModelObjects(DialogStatus.class,
-										Queries.DIALOG_STATUS__BY_PARTICIPANT,
-										participant.getId())) {
-							if (dialogStatus != null
-									&& dialogStatus
-											.isDataForMonitoringParticipationAvailable()
-									&& dialogStatus
-											.isScreeningSurveyPerformed()
-									&& !dialogStatus.isMonitoringPerformed()) {
+								.findModelObjects(
+										DialogStatus.class,
+										Queries.DIALOG_STATUS__BY_PARTICIPANT_AND_DATA_FOR_MONITORING_PARTICIPATION_AVAILABLE_TRUE_AND_SCREENING_SURVEY_PERFORMED_TRUE_AND_MONITORING_PERFORMED_FALSE,
+										participantId)) {
+							if (dialogStatus != null) {
 
 								val dialogMessagesWaitingToBeSendOfParticipant = databaseManagerService
 										.findModelObjects(
 												DialogMessage.class,
 												Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_SHOULD_BE_SENT_TIMESTAMP_LOWER,
-												participant.getId(),
+												participantId,
 												DialogMessageStatusTypes.PREPARED_FOR_SENDING,
 												InternalDateTime
 														.currentTimeMillis());
@@ -1140,15 +1136,11 @@ public class InterventionExecutionManagerService {
 								intervention.getId())) {
 					if (participant != null) {
 						for (val dialogStatus : databaseManagerService
-								.findModelObjects(DialogStatus.class,
-										Queries.DIALOG_STATUS__BY_PARTICIPANT,
+								.findModelObjects(
+										DialogStatus.class,
+										Queries.DIALOG_STATUS__BY_PARTICIPANT_AND_DATA_FOR_MONITORING_PARTICIPATION_AVAILABLE_TRUE_AND_SCREENING_SURVEY_PERFORMED_TRUE_AND_MONITORING_PERFORMED_FALSE,
 										participant.getId())) {
-							if (dialogStatus != null
-									&& dialogStatus
-											.isDataForMonitoringParticipationAvailable()
-									&& dialogStatus
-											.isScreeningSurveyPerformed()
-									&& !dialogStatus.isMonitoringPerformed()) {
+							if (dialogStatus != null) {
 								relevantParticipants.add(participant);
 							}
 						}

@@ -435,6 +435,50 @@ public abstract class ModelObject {
 	}
 
 	/**
+	 * Find and load {@link ObjectId}s from database
+	 * 
+	 * @param clazz
+	 *            The {@link ModelObject} subclass to retrieve
+	 * @param query
+	 *            The query to find the appropriate {@link ModelObject}s
+	 * @param parameters
+	 *            The parameters to fill the query
+	 * @return The retrieved {@link ModelObject} subclass objects as
+	 *         {@link Iterable} (which contains no items if none has been found)
+	 */
+	@JsonIgnore
+	@Synchronized
+	protected static final Iterable<ObjectId> findIds(
+			final Class<? extends ModelObject> clazz, final String query,
+			final Object... parameters) {
+		synchronized (db) {
+			final MongoCollection collection = db.getCollection(clazz
+					.getSimpleName());
+
+			Iterable<ObjectId> iteratable = null;
+			try {
+				if (parameters != null && parameters.length > 0) {
+					iteratable = collection.distinct("_id")
+							.query(query, parameters).as(ObjectId.class);
+				} else {
+					iteratable = collection.distinct("_id").query(query)
+							.as(ObjectId.class);
+				}
+				log.debug(
+						"Retrieved id listing of {} with find query {} and parameters {}",
+						clazz.getSimpleName(), query, parameters);
+			} catch (final Exception e) {
+				log.warn(
+						"Could not retrieve id listing of {} with find query {} and parameters {}: {}",
+						clazz.getSimpleName(), query, parameters,
+						e.getMessage());
+			}
+
+			return iteratable;
+		}
+	}
+
+	/**
 	 * Find, loads and sort {@link ModelObject}s from database
 	 * 
 	 * @param clazz

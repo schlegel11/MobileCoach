@@ -772,25 +772,21 @@ public class ScreeningSurveyExecutionManagerService {
 	 */
 	@Synchronized
 	public void finishUnfinishedScreeningSurveys() {
-		for (val intervention : databaseManagerService.findModelObjects(
+		for (val interventionId : databaseManagerService.findModelObjectIds(
 				Intervention.class, Queries.INTERVENTION__ACTIVE_TRUE)) {
 			for (val participant : databaseManagerService.findModelObjects(
 					Participant.class, Queries.PARTICIPANT__BY_INTERVENTION,
-					intervention.getId())) {
+					interventionId)) {
 				if (participant != null) {
 					for (val dialogStatus : databaseManagerService
 							.findModelObjects(
 									DialogStatus.class,
-									Queries.DIALOG_STATUS__BY_PARTICIPANT_AND_LAST_VISITED_SCREENING_SURVEY_SLIDE_TIMESTAMP_LOWER,
+									Queries.DIALOG_STATUS__BY_PARTICIPANT_AND_LAST_VISITED_SCREENING_SURVEY_SLIDE_TIMESTAMP_LOWER_AND_DATA_FOR_MONITORING_PARTICIPATION_AVAILABLE_TRUE_AND_SCREENING_SURVEY_PERFORMED_FALSE_AND_MONITORING_PERFORMED_FALSE,
 									participant.getId(),
 									InternalDateTime.currentTimeMillis()
 											- ImplementationConstants.HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR
 											* 2)) {
-						if (dialogStatus != null
-								&& dialogStatus
-										.isDataForMonitoringParticipationAvailable()
-								&& !dialogStatus.isScreeningSurveyPerformed()
-								&& !dialogStatus.isMonitoringPerformed()) {
+						if (dialogStatus != null) {
 
 							log.debug("Trying to finish the screening survey for a participant who did not finish the screening survey");
 

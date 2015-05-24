@@ -32,6 +32,10 @@
 		<delete file="release/stats.sh" />
 		<delete file="release/WebContent/WEB-INF/lib/FileServletWrapper.jar" />
 
+		<!-- Version info -->
+		<loadfile property="version" srcFile="version.txt" />
+		<replace file="release/README.md" token="@@VERSION@@" value="${version}" />
+
 		<!-- Cleanup -->
 		<mkdir dir="release/.git" />
 

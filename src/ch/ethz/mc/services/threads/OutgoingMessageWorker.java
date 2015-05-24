@@ -50,6 +50,7 @@ public class OutgoingMessageWorker extends Thread {
 		}
 
 		while (!isInterrupted()) {
+			final long startingTime = System.currentTimeMillis();
 			log.info("Executing new run of outgoing message worker...started");
 
 			try {
@@ -59,7 +60,9 @@ public class OutgoingMessageWorker extends Thread {
 						e.getMessage());
 			}
 
-			log.info("Executing new run of outgoing message worker...done");
+			log.info(
+					"Executing new run of outgoing message worker...done ({} seconds)",
+					(System.currentTimeMillis() - startingTime) / 1000.0);
 
 			try {
 				TimeUnit.SECONDS

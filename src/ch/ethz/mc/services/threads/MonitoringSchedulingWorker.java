@@ -69,6 +69,7 @@ public class MonitoringSchedulingWorker extends Thread {
 		}
 
 		while (!isInterrupted()) {
+			final long startingTime = System.currentTimeMillis();
 			log.info("Executing new run of monitoring sheduling worker...started");
 
 			try {
@@ -125,7 +126,9 @@ public class MonitoringSchedulingWorker extends Thread {
 						e.getMessage());
 			}
 
-			log.info("Executing new run of monitoring sheduling worker...done");
+			log.info(
+					"Executing new run of monitoring sheduling worker...done ({} seconds)",
+					(System.currentTimeMillis() - startingTime) / 1000.0);
 
 			try {
 				TimeUnit.SECONDS

@@ -88,6 +88,15 @@ public abstract class AbstractModelObjectAccessService {
 	}
 
 	/**
+	 * @see ModelObject#findIds(Class, String, Object...)
+	 */
+	public Iterable<ObjectId> findModelObjectIds(
+			final Class<? extends ModelObject> clazz, final String query,
+			final Object... parameters) {
+		return ModelObject.findIds(clazz, query, parameters);
+	}
+
+	/**
 	 * @see ModelObject#findSorted(Class, String, String, Object...)
 	 */
 	public <ModelObjectSubclass extends ModelObject> Iterable<ModelObjectSubclass> findSortedModelObjects(
