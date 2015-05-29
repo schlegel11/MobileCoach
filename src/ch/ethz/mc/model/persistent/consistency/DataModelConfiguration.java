@@ -22,7 +22,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import org.bson.types.ObjectId;
-import org.jongo.marshall.jackson.oid.Id;
+import org.jongo.marshall.jackson.oid.MongoId;
 
 import ch.ethz.mc.model.ModelObject;
 
@@ -36,7 +36,7 @@ public class DataModelConfiguration {
 	/**
 	 * The id of the {@link ModelObject}
 	 */
-	@Id
+	@MongoId
 	@Getter
 	private ObjectId	id;
 

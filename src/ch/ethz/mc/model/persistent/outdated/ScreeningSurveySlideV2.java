@@ -27,7 +27,7 @@ import lombok.NonNull;
 import lombok.Setter;
 
 import org.bson.types.ObjectId;
-import org.jongo.marshall.jackson.oid.Id;
+import org.jongo.marshall.jackson.oid.MongoId;
 
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.persistent.MediaObject;
@@ -53,7 +53,7 @@ public class ScreeningSurveySlideV2 extends ModelObject {
 	/**
 	 * The id of the {@link ModelObject}
 	 */
-	@Id
+	@MongoId
 	@Getter
 	@Setter
 	private ObjectId	id;

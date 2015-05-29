@@ -32,7 +32,7 @@ import org.apache.commons.lang.NotImplementedException;
 import org.bson.types.ObjectId;
 import org.jongo.Jongo;
 import org.jongo.MongoCollection;
-import org.jongo.marshall.jackson.oid.Id;
+import org.jongo.marshall.jackson.oid.MongoId;
 
 import ch.ethz.mc.model.ui.UIModelObject;
 import ch.ethz.mc.services.internal.FileStorageManagerService;
@@ -52,7 +52,7 @@ public abstract class ModelObject {
 	/**
 	 * The id of the {@link ModelObject}
 	 */
-	@Id
+	@MongoId
 	@Getter
 	private ObjectId							id;
 
