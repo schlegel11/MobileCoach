@@ -540,7 +540,7 @@ public class ScreeningSurveyExecutionManagerService {
 							.toString(), newCheckValue);
 
 			// Fill next screening survey slide
-			log.debug("Filling next slide {} with contents",
+			log.debug("Filling next slide '{}' with contents",
 					nextSlide.getTitleWithPlaceholders());
 
 			// Layout

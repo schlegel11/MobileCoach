@@ -39,6 +39,7 @@ import ch.ethz.mc.services.internal.FileStorageManagerService;
 import ch.ethz.mc.tools.CustomObjectMapper;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -53,6 +54,7 @@ public abstract class ModelObject {
 	 * The id of the {@link ModelObject}
 	 */
 	@MongoId
+	@JsonProperty("_id")
 	@Getter
 	private ObjectId							id;
 
