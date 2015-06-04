@@ -17,15 +17,20 @@ package ch.ethz.mc.conf;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 
+import javax.servlet.ServletContext;
+
 import lombok.Cleanup;
 import lombok.Getter;
+import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 import ch.ethz.mc.tools.StringHelpers;
@@ -189,6 +194,11 @@ public class Constants {
 	private static String	smsUserPassword			= "xyz";
 	private static String	smsPhoneNumberFrom		= "+4567890";
 
+	/**
+	 * Get all configured recipient SMS phone numbers
+	 * 
+	 * @return List of SMS phone numbers
+	 */
 	public static List<String> getSmsPhoneNumberFrom() {
 		final List<String> smsPhoneNumbers = new ArrayList<String>();
 
@@ -201,16 +211,54 @@ public class Constants {
 		return smsPhoneNumbers;
 	}
 
+	// Current version information
+	private static String			version			= null;
+	private static ServletContext	servletContext	= null;
+
+	/**
+	 * Enables the application to retrieve the current version information
+	 * 
+	 * @return Current version
+	 */
+	@Synchronized
+	public static String getVersion() {
+		try {
+
+			if (version == null) {
+				@Cleanup
+				val inputStream = servletContext
+						.getResourceAsStream("/WEB-INF/version.txt");
+				@Cleanup
+				val inputStreamReader = new InputStreamReader(inputStream);
+				@Cleanup
+				val bufferedInputStreamReader = new BufferedReader(
+						inputStreamReader);
+
+				version = bufferedInputStreamReader.readLine();
+			}
+		} catch (final Exception e) {
+			log.error("Error at parsing version file: {}", e.getMessage());
+			return "---";
+		}
+		return version;
+	}
+
 	/**
 	 * Injects a specific configuration file (if provided as system parameter
 	 * "[CONTEXT PATH to lower case].configuration")
 	 * 
+	 * @param servletContext
+	 * 
 	 * @param configurationsFile
 	 */
-	public static void injectConfiguration(final String configurationsFileString) {
+	public static void injectConfiguration(
+			final String configurationsFileString,
+			final ServletContext servletContext) {
 		// Ensure that this method can only be called once
 		if (!injectionPerformed) {
 			injectionPerformed = true;
+
+			Constants.servletContext = servletContext;
 
 			if (configurationsFileString == null) {
 				return;

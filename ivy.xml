@@ -6,7 +6,8 @@
 	<!ENTITY commons-io.version "2.4">
 	<!ENTITY geronimo-validation_1.0_spec.version "1.1">
 	<!ENTITY bval-bundle.version "0.5">
-	<!ENTITY vaadin.version "7.3.9">
+	<!ENTITY vaadin.version "7.4.7">
+	<!ENTITY validation.version "1.1.0.Final">
 	<!ENTITY jongo.version "1.2">
 	<!ENTITY mongodb-driver.version "2.13.2">
 	<!ENTITY jena.version "2.11.0">
@@ -72,6 +73,10 @@
 		<!-- Compiler for custom widget sets. Should not be deployed -->
 		<dependency org="com.vaadin" name="vaadin-client-compiler"
 			rev="&vaadin.version;" conf="widgetset-compile->default" />
+		
+		<!-- Java validation, needed for widget set compilation -->
+		<dependency org="javax.validation" name="validation-api" rev="&validation.version;"
+			 conf="widgetset-compile->default" />
 		
 		<!-- Jongo with MongoDB driver -->	
 		<dependency org="org.jongo" name="jongo" rev="&jongo.version;"/>

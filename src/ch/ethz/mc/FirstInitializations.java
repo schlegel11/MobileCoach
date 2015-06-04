@@ -59,7 +59,8 @@ public class FirstInitializations implements ServletContextListener {
 		val thread = Thread.currentThread();
 		thread.setName(ImplementationConstants.LOGGING_APPLICATION_NAME);
 
-		Constants.injectConfiguration(configurationsFileString);
+		Constants.injectConfiguration(configurationsFileString,
+				event.getServletContext());
 	}
 
 	/**

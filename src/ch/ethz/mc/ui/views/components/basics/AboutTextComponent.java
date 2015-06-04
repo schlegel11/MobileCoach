@@ -20,6 +20,7 @@ package ch.ethz.mc.ui.views.components.basics;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.ui.views.components.AbstractCustomComponent;
 
@@ -57,11 +58,10 @@ public class AboutTextComponent extends AbstractCustomComponent {
 		setCompositionRoot(mainLayout);
 
 		// manually added
-		aboutText
-				.setValue("<div class=\"about-text\">"
-						+ Messages
-								.getAdminString(AdminMessageStrings.ABOUT_WINDOW__HTML_TEXT)
-						+ "</div>");
+		aboutText.setValue("<div class=\"about-text\">"
+				+ Messages.getAdminString(
+						AdminMessageStrings.ABOUT_WINDOW__HTML_TEXT)
+						.replaceAll("###", Constants.getVersion()) + "</div>");
 		aboutText.setReadOnly(true);
 	}
 
