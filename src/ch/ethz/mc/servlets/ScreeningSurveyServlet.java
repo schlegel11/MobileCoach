@@ -240,7 +240,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				+ requestedFile.getName() + "\"");
 
 		// Allow caching
-		if (Constants.IS_LIVE_SYSTEM) {
+		if (Constants.isCachingActive()) {
 			response.setHeader("Pragma", "cache");
 			response.setHeader(
 					"Cache-Control",
@@ -599,7 +599,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		}
 
 		// Create new Mustache template factory on non-production system
-		if (!Constants.IS_LIVE_SYSTEM) {
+		if (!Constants.isCachingActive()) {
 			log.debug("Initializing NEW mustache template engine");
 			synchronized (mustacheFactory) {
 				mustacheFactory = createMustacheFactory();

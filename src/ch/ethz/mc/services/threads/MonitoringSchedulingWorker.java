@@ -60,9 +60,11 @@ public class MonitoringSchedulingWorker extends Thread {
 
 	@Override
 	public void run() {
+		val simulatorActive = Constants.isSimulatedDateAndTime();
 		try {
 			TimeUnit.SECONDS
-					.sleep(ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
+					.sleep(simulatorActive ? ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITH_SIMULATOR
+							: ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITHOUT_SIMULATOR);
 		} catch (final InterruptedException e) {
 			interrupt();
 			log.debug("Monitoring sheduling worker received signal to stop (before first run)");
@@ -132,7 +134,8 @@ public class MonitoringSchedulingWorker extends Thread {
 
 			try {
 				TimeUnit.SECONDS
-						.sleep(ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
+						.sleep(simulatorActive ? ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITH_SIMULATOR
+								: ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITHOUT_SIMULATOR);
 			} catch (final InterruptedException e) {
 				interrupt();
 				log.debug("Monitoring sheduling worker received signal to stop");

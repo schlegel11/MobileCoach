@@ -49,7 +49,7 @@ import com.vaadin.server.VaadinServlet;
 		@WebInitParam(name = "pushmode", value = "automatic"),
 		@WebInitParam(name = "closeIdleSessions", value = "true"),
 		@WebInitParam(name = "heartbeatInterval", value = "300") }, asyncSupported = true, loadOnStartup = 1)
-@VaadinServletConfiguration(productionMode = Constants.IS_LIVE_SYSTEM, ui = AdminNavigatorUI.class)
+@VaadinServletConfiguration(productionMode = Constants.VAADIN_PRODUCTION_MODE, ui = AdminNavigatorUI.class)
 @Log4j2
 public class AdminServlet extends VaadinServlet implements SessionInitListener,
 		SessionDestroyListener {

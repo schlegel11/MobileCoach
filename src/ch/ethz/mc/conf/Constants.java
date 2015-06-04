@@ -46,12 +46,12 @@ public class Constants {
 	private static boolean		injectionPerformed					= false;
 
 	/**
-	 * Debugging is only activated when IS_LIVE_SYSTEM is false, but it should
-	 * never be false on a live system!
+	 * Vaadin production mode configuration for debugging purposes. Should NEVER
+	 * be false on live systems.
 	 * 
 	 * CAUTION: Can NOT be defined in configuration file
 	 */
-	public static final boolean	IS_LIVE_SYSTEM						= true;
+	public static final boolean	VAADIN_PRODUCTION_MODE				= true;
 
 	/**
 	 * Basic debugging configuration
@@ -76,6 +76,13 @@ public class Constants {
 	/**
 	 * Basic configuration
 	 */
+	/**
+	 * CAUTION: Caching can help during development but should NEVER be false on
+	 * public servers! It's only for development.
+	 */
+	@Getter
+	public static boolean		cachingActive						= true;
+
 	@Getter
 	private static boolean		listOpenScreenSurveysOnBaseURL		= false;
 
@@ -137,8 +144,8 @@ public class Constants {
 	/**
 	 * CAUTION: Simulated date and time should only be used on SEPARATE
 	 * installations, with an OWN database to test ALREADY FINALIZED
-	 * interventions! Simulated interventions should never be transfered back to
-	 * another system.
+	 * interventions! They also create intensively higher system load. Simulated
+	 * interventions should never be transfered back to another system.
 	 */
 	@Getter
 	private static boolean	simulatedDateAndTime				= false;
