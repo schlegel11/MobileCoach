@@ -68,6 +68,8 @@ public class ImplementationConstants {
 
 	public static final int		SCREENING_SURVEY_FILE_CACHE_IN_MINUTES												= 3600;
 
+	public static final int		UI_SESSION_TIMEOUT_IN_SECONDS														= 900;
+
 	public static final String	FILE_STREAMING_SERVLET_PATH															= "files";
 	public static final String	SHORT_ID_FILE_STREAMING_SERVLET_PATH												= "files-short";
 

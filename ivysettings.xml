@@ -4,8 +4,8 @@
 	<resolvers>
 		<chain name="default">
 			<!-- Public Maven repository -->
-			<ibiblio name="public" m2compatible="true" />
-
+			<ibiblio name="public" m2compatible="true" checksums=""/>
+			
 			<!-- Vaadin Add-on repository -->
 			<ibiblio name="vaadin-addons" usepoms="true" m2compatible="true"
 				root="http://maven.vaadin.com/vaadin-addons" />

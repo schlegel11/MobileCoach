@@ -2,15 +2,15 @@ package ch.ethz.mc.ui;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,6 +24,7 @@ import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.Messages;
+import ch.ethz.mc.services.internal.LockingService;
 import ch.ethz.mc.ui.views.ErrorView;
 import ch.ethz.mc.ui.views.LoginView;
 import ch.ethz.mc.ui.views.MainView;
@@ -36,22 +37,32 @@ import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 
 /**
  * Navigates between views and cares for session management (login/logout)
- * 
+ *
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
 @Theme("mc")
 @Log4j2
 public class AdminNavigatorUI extends UI implements ViewChangeListener,
-		DetachListener {
+DetachListener {
+
+	private UISession	uiSession;
+
+	public AdminNavigatorUI() {
+		val sessionId = VaadinSession.getCurrent().getSession().getId();
+		log.debug("Creating new UI session based on session {}", sessionId);
+		uiSession = new UISession(sessionId);
+	}
+
 	/**
 	 * Contains all available admin views
-	 * 
+	 *
 	 * @author Andreas Filler
 	 */
 	public static enum VIEWS {
@@ -72,8 +83,8 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener,
 		// Set basic settings
 		setLocale(Constants.getAdminLocale());
 		getPage()
-				.setTitle(
-						Messages.getAdminString(AdminMessageStrings.APPLICATION__NAME_LONG));
+		.setTitle(
+				Messages.getAdminString(AdminMessageStrings.APPLICATION__NAME_LONG));
 
 		// Configure the error handler for the UI
 		setErrorHandler(new DefaultErrorHandler() {
@@ -83,7 +94,7 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener,
 						event.getThrowable());
 
 				// Create new session
-				AdminNavigatorUI.this.clearSession();
+				AdminNavigatorUI.this.resetSession();
 
 				// Reload page
 				AdminNavigatorUI.this.getPage().reload();
@@ -108,15 +119,12 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener,
 							final BrowserWindowResizeEvent event) {
 						if ((event.getWidth() < 1100 || event.getHeight() < 650)
 								&& System.currentTimeMillis()
-										- lastNotification > 5000) {
+								- lastNotification > 5000) {
 							lastNotification = System.currentTimeMillis();
 							showWarningNotification(AdminMessageStrings.GENERAL__RESIZE_ERROR_MESSAGE);
 						}
 					}
 				});
-
-		// Always create new session
-		clearSession();
 
 		// Redirect to appropriate view
 		getNavigator().addViewChangeListener(this);
@@ -125,8 +133,17 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener,
 		addDetachListener(this);
 	}
 
-	protected void clearSession() {
-		getSession().setAttribute(UISession.class, new UISession());
+	@Synchronized
+	protected void resetSession() {
+		log.debug("Resetting UI session");
+
+		if (uiSession != null) {
+			getLockingService().releaseLockOfUISession(uiSession);
+		}
+
+		val sessionId = VaadinSession.getCurrent().getSession().getId();
+		log.debug("Creating new UI session based on session {}", sessionId);
+		uiSession = new UISession(sessionId);
 	}
 
 	public void showInformationNotification(final AdminMessageStrings message,
@@ -149,7 +166,7 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener,
 
 	/**
 	 * Login currentAuthorId if provided login information is correct
-	 * 
+	 *
 	 * @param currentAuthorUsername
 	 * @param password
 	 */
@@ -177,9 +194,27 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener,
 	 */
 	@Synchronized
 	public void logout() {
-		clearSession();
+		resetSession();
 
 		getNavigator().navigateTo(VIEWS.LOGIN.getLowerCase());
+	}
+
+	/**
+	 * Returns the {@link UISession} of the current currentAuthorId
+	 *
+	 * @return
+	 */
+	public UISession getUISession() {
+		return uiSession;
+	}
+
+	/**
+	 * Returns the {@link LockingService}
+	 *
+	 * @return
+	 */
+	public LockingService getLockingService() {
+		return MC.getInstance().getLockingService();
 	}
 
 	@Override
@@ -209,17 +244,10 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener,
 		// do nothing
 	}
 
-	/**
-	 * Returns the {@link UISession} of the current currentAuthorId
-	 * 
-	 * @return
-	 */
-	private UISession getUISession() {
-		return getSession().getAttribute(UISession.class);
-	}
-
 	@Override
 	public void detach(final DetachEvent event) {
 		log.debug("View detached");
+
+		getLockingService().releaseLockOfUISession(getUISession());
 	}
 }

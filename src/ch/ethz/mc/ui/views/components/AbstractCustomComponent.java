@@ -72,7 +72,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	}
 
 	protected UISession getUISession() {
-		return UI.getCurrent().getSession().getAttribute(UISession.class);
+		return getAdminUI().getUISession();
 	}
 
 	protected AdminNavigatorUI getAdminUI() {

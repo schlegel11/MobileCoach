@@ -22,10 +22,12 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
 
+import lombok.val;
 import lombok.extern.log4j.Log4j2;
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
+import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.ui.AdminNavigatorUI;
 
@@ -126,11 +128,21 @@ public class AdminServlet extends VaadinServlet implements SessionInitListener,
 	@Override
 	public void sessionInit(final SessionInitEvent event)
 			throws ServiceException {
-		log.debug("Session opened");
+		log.debug("Setting new session timeout");
+
+		event.getSession()
+				.getSession()
+				.setMaxInactiveInterval(
+						ImplementationConstants.UI_SESSION_TIMEOUT_IN_SECONDS);
 	}
 
 	@Override
 	public void sessionDestroy(final SessionDestroyEvent event) {
-		log.debug("Session closed");
+		val sessionId = event.getSession().getSession().getId();
+
+		log.debug("Session {} destroyed", sessionId);
+
+		MC.getInstance().getLockingService()
+				.releaseAllLocksOfSession(sessionId);
 	}
 }

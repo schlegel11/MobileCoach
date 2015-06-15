@@ -19,24 +19,23 @@ package ch.ethz.mc.model.persistent.consistency;
  */
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 import org.bson.types.ObjectId;
 import org.jongo.marshall.jackson.oid.MongoId;
 
-import ch.ethz.mc.model.ModelObject;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Stores the current version of the data model
  * 
  * @author Andreas Filler
  */
-@ToString
 public class DataModelConfiguration {
 	/**
-	 * The id of the {@link ModelObject}
+	 * The id of the {@link DataModelConfiguration}
 	 */
 	@MongoId
+	@JsonProperty("_id")
 	@Getter
 	private ObjectId	id;
 

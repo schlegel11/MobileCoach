@@ -48,21 +48,22 @@ The *FileServletWrapper* is an optional component for the MobileCoach system. To
 
 ### Development environment
 
-* Java (7+) SDK 
-* Web application server (e.g. Apache Tomcat 7)
+* Java (8 or newer) SDK 
+* Web application server (Apache Tomcat 8 or newer/compatible)
 * Web application server configured to listen on port 80 (HTTP) and 443 (HTTPS) with a valid or self-signed certificate
-* MongoDB installation with enabled user authentication, a created database and configured user
+* MongoDB (2.6.x or newer, but lower than 3.x.x) installation with enabled user authentication, a created database and configured user
 * [Eclipse IDE for Java EE Developers](https://eclipse.org/downloads/packages/eclipse-ide-java-ee-developers/keplersr2) (Project files included in repository)
-* [Project Lombok](http://projectlombok.org) (Can be installed using a double-click on the **.jar** file)
-* [Vaadin Eclipse Plugins](http://vaadin.com/eclipse) (required to compile the widget and themes)
 * [Apache Ivy Eclipse Integration](http://ant.apache.org/ivy/ivyde/) (already included in some distributions)
+* [Project Lombok Eclipse Integration](http://projectlombok.org) (Can be installed using a double-click on the **.jar** file)
+* [Vaadin Eclipse Plug-ins](http://vaadin.com/eclipse) (required to compile the widget and themes)
+* [ResourceBundle Editor Eclipse Plug-in](http://essiembre.github.io/eclipse-rbe/) (optional, but recommended for properties file editing)
 
 ### Server environment
 
-* Java (7+) SDK 
-* Web application server (e.g. Apache Tomcat 7)
+* Java (8 or newer) SDK 
+* Web application server (Apache Tomcat 8 or newer/compatible)
 * Web application server configured to listen on port 80 (HTTP) and 443 (HTTPS) with a valid certificate
-* MongoDB installation with enabled user authentication, a created database and configured user
+* MongoDB (2.6.* or newer, but lower than 3.*) installation with enabled user authentication, a created database and configured user
 
 ## Basic configuration
 

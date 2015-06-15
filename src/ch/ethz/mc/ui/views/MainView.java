@@ -145,6 +145,8 @@ public class MainView extends AbstractView implements View, LayoutClickListener 
 	 */
 	@Synchronized
 	private void switchToWelcomeView() {
+		getAdminUI().getLockingService().releaseLockOfUISession(getUISession());
+
 		removeAllTabs();
 
 		addTab(mainViewComponent.getContentAccordion(),
@@ -165,6 +167,8 @@ public class MainView extends AbstractView implements View, LayoutClickListener 
 
 	@Synchronized
 	private void switchToAccessControlView() {
+		getAdminUI().getLockingService().releaseLockOfUISession(getUISession());
+
 		removeAllTabs();
 
 		addTab(mainViewComponent.getContentAccordion(),
@@ -175,6 +179,8 @@ public class MainView extends AbstractView implements View, LayoutClickListener 
 
 	@Synchronized
 	private void switchToAccountView() {
+		getAdminUI().getLockingService().releaseLockOfUISession(getUISession());
+
 		removeAllTabs();
 
 		addTab(mainViewComponent.getContentAccordion(),

@@ -98,7 +98,6 @@ public class LoginView extends AbstractView implements View {
 			aboutWindow.setContent(new AboutTextComponent());
 
 			getAdminUI().addWindow(aboutWindow);
-
 		}
 	}
 }

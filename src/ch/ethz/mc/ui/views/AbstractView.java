@@ -43,7 +43,7 @@ public abstract class AbstractView extends VerticalLayout implements View {
 	 * @return
 	 */
 	protected UISession getUISession() {
-		return getUI().getSession().getAttribute(UISession.class);
+		return getAdminUI().getUISession();
 	}
 
 	/**

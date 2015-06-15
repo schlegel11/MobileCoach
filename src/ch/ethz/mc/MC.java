@@ -31,6 +31,7 @@ import ch.ethz.mc.services.ScreeningSurveyExecutionManagerService;
 import ch.ethz.mc.services.internal.CommunicationManagerService;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService;
+import ch.ethz.mc.services.internal.LockingService;
 import ch.ethz.mc.services.internal.ModelObjectExchangeService;
 import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.tools.InternalDateTime;
@@ -54,6 +55,9 @@ public class MC implements ServletContextListener {
 
 	CommunicationManagerService					communicationManagerService;
 	ModelObjectExchangeService					modelObjectExchangeService;
+
+	@Getter
+	LockingService								lockingService;
 
 	// Controller services
 	@Getter
@@ -91,6 +95,7 @@ public class MC implements ServletContextListener {
 			communicationManagerService = CommunicationManagerService.start();
 			modelObjectExchangeService = ModelObjectExchangeService.start(
 					databaseManagerService, fileStorageManagerService);
+			lockingService = LockingService.start();
 
 			// Controller services
 			screeningSurveyAdministrationManagerService = ScreeningSurveyAdministrationManagerService
@@ -130,6 +135,7 @@ public class MC implements ServletContextListener {
 		InternalDateTime.setFastForwardMode(false);
 
 		try {
+			lockingService.stop();
 			screeningSurveyExecutionManagerService.stop();
 			interventionExecutionManagerService.stop();
 			screeningSurveyAdministrationManagerService.stop();

@@ -19,19 +19,40 @@ package ch.ethz.mc.ui;
  */
 import java.io.Serializable;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import org.bson.types.ObjectId;
 
-@Data
+/**
+ * Contains information about the user currently using the
+ * {@link AdminNavigatorUI}
+ * 
+ * @author Andreas Filler
+ */
 public class UISession implements Serializable {
 	private static final long	serialVersionUID		= 1L;
 
-	boolean						isLoggedIn				= false;
+	@Getter
+	@Setter
+	private boolean				isLoggedIn				= false;
 
-	boolean						isAdmin					= false;
+	@Getter
+	@Setter
+	private boolean				isAdmin					= false;
 
-	ObjectId					currentAuthorId			= null;
+	@Getter
+	@Setter
+	private ObjectId			currentAuthorId			= null;
 
-	String						currentAuthorUsername	= null;
+	@Getter
+	@Setter
+	private String				currentAuthorUsername	= null;
+
+	@Getter
+	private String				sessionId				= null;
+
+	public UISession(final String sessionId) {
+		this.sessionId = sessionId;
+	}
 }

@@ -31,7 +31,8 @@ import com.vaadin.data.fieldgroup.PropertyId;
 @EqualsAndHashCode(callSuper = false)
 public class UIParticipant extends UIModelObject {
 	// NOTE: The String values have to fit the name of the variables
-	public static final String	NAME							= "name";
+	public static final String	PARTICIPANT_ID					= "participantId";
+	public static final String	PARTICIPANT_NAME				= "participantName";
 	public static final String	ORGANIZATION					= "organization";
 	public static final String	UNIT							= "unit";
 	public static final String	CREATED							= "created";
@@ -41,8 +42,11 @@ public class UIParticipant extends UIModelObject {
 	public static final String	INTERVENTION_STATUS				= "interventionStatus";
 	public static final String	MONITORING_STATUS				= "monitoringStatus";
 
-	@PropertyId(NAME)
-	private String				name;
+	@PropertyId(PARTICIPANT_ID)
+	private String				participantId;
+
+	@PropertyId(PARTICIPANT_NAME)
+	private String				participantName;
 
 	@PropertyId(ORGANIZATION)
 	private String				organization;
@@ -77,14 +81,15 @@ public class UIParticipant extends UIModelObject {
 	private boolean				booleanMonitoringStatus;
 
 	public static Object[] getVisibleColumns() {
-		return new Object[] { NAME, ORGANIZATION, UNIT, CREATED,
-				SCREENING_SURVEY_NAME, SCREENING_SURVEY_STATUS,
+		return new Object[] { PARTICIPANT_ID, PARTICIPANT_NAME, ORGANIZATION,
+				UNIT, CREATED, SCREENING_SURVEY_NAME, SCREENING_SURVEY_STATUS,
 				DATA_FOR_MONITORING_AVAILABLE, INTERVENTION_STATUS,
 				MONITORING_STATUS };
 	}
 
 	public static String[] getColumnHeaders() {
 		return new String[] {
+				localize(AdminMessageStrings.UI_COLUMNS__PARTICIPANT_ID),
 				localize(AdminMessageStrings.UI_COLUMNS__PARTICIPANT_NAME),
 				localize(AdminMessageStrings.UI_COLUMNS__ORGANIZATION),
 				localize(AdminMessageStrings.UI_COLUMNS__ORGANIZATION_UNIT),

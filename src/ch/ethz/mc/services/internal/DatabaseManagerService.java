@@ -17,15 +17,12 @@ package ch.ethz.mc.services.internal;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.List;
 
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.jongo.Jongo;
-import org.jongo.MongoCollection;
 
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.AbstractModelObjectAccessService;
@@ -52,7 +49,7 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 		log.info("Starting service...");
 		try {
 			// Creating MongoDB driver object
-			final List<MongoCredential> mongoCredentials = new ArrayList<MongoCredential>();
+			val mongoCredentials = new ArrayList<MongoCredential>();
 			mongoCredentials.add(MongoCredential.createMongoCRCredential(
 					Constants.getDatabaseUser(), Constants.getDatabaseName(),
 					Constants.getDatabasePassword().toCharArray()));
@@ -63,8 +60,8 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 			// Checking connection
 			log.debug("Existing collections in database {}: ",
 					Constants.getDatabaseName());
-			for (val collection : mongoClient
-					.getDB(Constants.getDatabaseName()).getCollectionNames()) {
+			for (val collection : mongoClient.getDatabase(
+					Constants.getDatabaseName()).listCollectionNames()) {
 				log.debug(" {}", collection);
 			}
 
@@ -85,7 +82,7 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 					collection.ensureIndex(index);
 				}
 			}
-		} catch (final UnknownHostException e) {
+		} catch (final Exception e) {
 			log.error("Error at creating MongoDB connection: {}",
 					e.getMessage());
 			throw new Exception("Error at creating MongoDB connection: "
@@ -122,7 +119,7 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 
 	/**
 	 * Update data to appropriate version
-	 * 
+	 *
 	 * @param versionToBeReached
 	 */
 	private void updateDataToVersionIfNecessary(final int versionToBeReached) {
@@ -132,20 +129,30 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 		int currentVersion = -1;
 
 		// get current version if available in DB
-		final MongoCollection configurationCollection = jongo
-				.getCollection(Constants.DATA_MODEL_CONFIGURATION);
-		final DataModelConfiguration configuration = configurationCollection
-				.findOne().as(DataModelConfiguration.class);
+		DataModelConfiguration configuration = null;
+		try {
+			val configurationCollection = jongo
+					.getCollection(Constants.DATA_MODEL_CONFIGURATION);
+			configuration = configurationCollection.findOne().as(
+					DataModelConfiguration.class);
+		} catch (final Exception e) {
+			log.error("Error at retrieving data model configuration: {}",
+					e.getMessage());
+			throw e;
+		}
 
 		if (configuration != null) {
 			currentVersion = configuration.getVersion();
+			log.info("Database is on data model version {}", currentVersion);
+		} else {
+			log.info("Database is new - no data model version");
 		}
 
 		// perform update
 		DataModelUpdateManager.updateDataFromVersionToVersion(currentVersion,
 				versionToBeReached, jongo);
 
-		log.info("Database is on data model version {}", versionToBeReached);
+		log.info("Database is now on data model version {}", versionToBeReached);
 	}
 
 	public static DatabaseManagerService start(final int expectedVersion)

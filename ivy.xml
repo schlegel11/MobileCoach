@@ -9,7 +9,7 @@
 	<!ENTITY vaadin.version "7.4.7">
 	<!ENTITY validation.version "1.1.0.Final">
 	<!ENTITY jongo.version "1.2">
-	<!ENTITY mongodb-driver.version "2.13.2">
+	<!ENTITY mongodb-driver.version "3.0.2">
 	<!ENTITY jena.version "2.11.0">
 	<!ENTITY javaluator.version "2.0.0">
 	<!ENTITY lombok.version "1.14.8">
@@ -27,29 +27,35 @@
 		<!-- A configuration only needed when compiling the widget set. Should 
 			not be deployed to the server -->
 		<conf name="widgetset-compile" />
-		<!-- A configuration used in compilation of server side classes only.
-			Should be deployed to the server -->
+		<!-- A configuration used in compilation of server side classes only. Should 
+			be deployed to the server -->
 		<conf name="nodeploy" />
 	</configurations>
 	<dependencies defaultconf="default" defaultconfmapping="default->default">
-		<!-- Log4j with all extension to route other logging frameworks -->	
-		<dependency org="org.apache.logging.log4j" name="log4j-api" rev="&log4j.version;"/>
-		<dependency org="org.apache.logging.log4j" name="log4j-core" rev="&log4j.version;"/>
-		<dependency org="org.apache.logging.log4j" name="log4j-1.2-api" rev="&log4j.version;"/>
-		<dependency org="org.apache.logging.log4j" name="log4j-jcl" rev="&log4j.version;"/>
-		<dependency org="org.apache.logging.log4j" name="log4j-slf4j-impl" rev="&log4j.version;"/>
+		<!-- Log4j with all extension to route other logging frameworks -->
+		<dependency org="org.apache.logging.log4j" name="log4j-api"
+			rev="&log4j.version;" />
+		<dependency org="org.apache.logging.log4j" name="log4j-core"
+			rev="&log4j.version;" />
+		<dependency org="org.apache.logging.log4j" name="log4j-1.2-api"
+			rev="&log4j.version;" />
+		<dependency org="org.apache.logging.log4j" name="log4j-jcl"
+			rev="&log4j.version;" />
+		<dependency org="org.apache.logging.log4j" name="log4j-slf4j-impl"
+			rev="&log4j.version;" />
 
 		<!-- Apache Commons -->
-		<dependency org="commons-lang" name="commons-lang" rev="&commons-lang.version;"/>
-		<dependency org="commons-collections" name="commons-collections" rev="&commons-collection.version;"/>
-		<dependency org="commons-io" name="commons-io" rev="&commons-io.version;"/>
-	
+		<dependency org="commons-lang" name="commons-lang"
+			rev="&commons-lang.version;" />
+		<dependency org="commons-collections" name="commons-collections"
+			rev="&commons-collection.version;" />
+		<dependency org="commons-io" name="commons-io" rev="&commons-io.version;" />
+
 		<!-- Apache Bean validation -->
-		<!-- currently not required 
-		<dependency org="org.apache.geronimo.specs" name="geronimo-validation_1.0_spec" rev="&geronimo-validation_1.0_spec.version;"/>
-		<dependency org="org.apache.bval" name="org.apache.bval.bundle" rev="&bval-bundle.version;"/>
-		-->
-	
+		<!-- currently not required <dependency org="org.apache.geronimo.specs" 
+			name="geronimo-validation_1.0_spec" rev="&geronimo-validation_1.0_spec.version;"/> 
+			<dependency org="org.apache.bval" name="org.apache.bval.bundle" rev="&bval-bundle.version;"/> -->
+
 		<!-- The core server part of Vaadin -->
 		<dependency org="com.vaadin" name="vaadin-server" rev="&vaadin.version;" />
 
@@ -60,46 +66,47 @@
 		<dependency org="com.vaadin" name="vaadin-push" rev="&vaadin.version;" />
 
 		<!-- Servlet 3.0 API -->
-		<dependency org="javax.servlet" name="javax.servlet-api" rev="3.0.1" conf="nodeploy->default" />
-
+		<dependency org="javax.servlet" name="javax.servlet-api"
+			rev="3.0.1" conf="nodeploy->default" />
 		<!-- Precompiled DefaultWidgetSet -->
 		<dependency org="com.vaadin" name="vaadin-client-compiled"
 			rev="&vaadin.version;" />
 
 		<!-- Vaadin client side, needed for widget set compilation -->
 		<dependency org="com.vaadin" name="vaadin-client" rev="&vaadin.version;"
-			 conf="widgetset-compile->default" />
+			conf="widgetset-compile->default" />
 
 		<!-- Compiler for custom widget sets. Should not be deployed -->
 		<dependency org="com.vaadin" name="vaadin-client-compiler"
 			rev="&vaadin.version;" conf="widgetset-compile->default" />
-		
-		<!-- Java validation, needed for widget set compilation -->
-		<dependency org="javax.validation" name="validation-api" rev="&validation.version;"
-			 conf="widgetset-compile->default" />
-		
-		<!-- Jongo with MongoDB driver -->	
-		<dependency org="org.jongo" name="jongo" rev="&jongo.version;"/>
-		<dependency org="org.mongodb" name="mongo-java-driver" rev="&mongodb-driver.version;"/>
 
-		<!-- JENA -->	
-		<!-- currently not required 
-			<dependency org="org.apache.jena" name="apache-jena-libs" rev="&jena.version;"/>
-		-->
-		
-		<!-- Javaluator -->	
-		<dependency org="com.fathzer" name="javaluator" rev="&javaluator.version;"/>
-		
+		<!-- Java validation, needed for widget set compilation -->
+		<dependency org="javax.validation" name="validation-api"
+			rev="&validation.version;" conf="widgetset-compile->default" />
+
+		<!-- Jongo with MongoDB driver -->
+		<dependency org="org.jongo" name="jongo" rev="&jongo.version;" />
+		<dependency org="org.mongodb" name="mongodb-driver"
+			rev="&mongodb-driver.version;" />
+
+		<!-- JENA -->
+		<!-- currently not required <dependency org="org.apache.jena" name="apache-jena-libs" 
+			rev="&jena.version;"/> -->
+
+		<!-- Javaluator -->
+		<dependency org="com.fathzer" name="javaluator" rev="&javaluator.version;" />
+
 		<!-- Lombok -->
-		<dependency org="org.projectlombok" name="lombok" rev="&lombok.version;"/>
+		<dependency org="org.projectlombok" name="lombok" rev="&lombok.version;" />
 
 		<!-- Mustache.java -->
-		<dependency org="com.github.spullara.mustache.java" name="compiler" rev="&mustache.java.version;"/>
-		
+		<dependency org="com.github.spullara.mustache.java" name="compiler"
+			rev="&mustache.java.version;" />
+
 		<!-- JavaMail -->
-		<dependency org="javax.mail" name="mail" rev="&java.mail.version;"/>
-		
+		<dependency org="javax.mail" name="mail" rev="&java.mail.version;" />
+
 		<!-- jcsv -->
-		<dependency org="com.googlecode.jcsv" name="jcsv" rev="&jcsv.version;"/>
+		<dependency org="com.googlecode.jcsv" name="jcsv" rev="&jcsv.version;" />
 	</dependencies>
 </ivy-module>

@@ -176,6 +176,7 @@ public class Participant extends ModelObject {
 		}
 
 		val participant = new UIParticipant(
+				getId().toString(),
 				nickname.equals("") ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 						: nickname,

@@ -105,10 +105,14 @@ public class AllInterventionsTabComponentWithController extends
 
 			@Override
 			public void valueChange(final ValueChangeEvent event) {
-				val objectId = allInterventionsTable.getValue();
+				final ObjectId objectId = (ObjectId) allInterventionsTable
+						.getValue();
 				if (objectId == null) {
 					selectedUIIntervention = null;
 					selectedUIInterventionBeanItem = null;
+
+					getAdminUI().getLockingService().releaseLockOfUISession(
+							getUISession());
 				} else {
 					selectedUIIntervention = getUIModelObjectFromTableByObjectId(
 							allInterventionsTable, UIIntervention.class,
@@ -116,6 +120,19 @@ public class AllInterventionsTabComponentWithController extends
 					selectedUIInterventionBeanItem = getBeanItemFromTableByObjectId(
 							allInterventionsTable, UIIntervention.class,
 							objectId);
+
+					if (!getAdminUI().getLockingService()
+							.checkAndSetLockForUISession(getUISession(),
+									objectId)) {
+
+						allInterventionsTable.select(null);
+						selectedUIIntervention = null;
+						selectedUIInterventionBeanItem = null;
+
+						getAdminUI()
+								.showWarningNotification(
+										AdminMessageStrings.NOTIFICATION__INTERVENTION_LOCKED);
+					}
 				}
 
 				allInterventionsEditComponent.adjust(
@@ -467,6 +484,8 @@ public class AllInterventionsTabComponentWithController extends
 
 	public void returnToInterventionList() {
 		log.debug("Step back to intervention overview");
+
+		getAdminUI().getLockingService().releaseLockOfUISession(getUISession());
 
 		mainView.switchToInterventionsView();
 	}

@@ -12,21 +12,25 @@
 	<!-- Generate javadocs for current project -->
 	<target name="javadoc">
 		<!-- Use Ivy in ANT -->
-		<taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="javadoc-lib" />
+		<taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant"
+			classpathref="javadoc-lib" />
 
 		<ivy:resolve />
 		<ivy:cachepath pathid="ivy-lib" />
 
 		<!-- Use Delombok in ANT -->
-		<taskdef classname="lombok.delombok.ant.DelombokTask" name="delombok" classpathref="ivy-lib" />
+		<taskdef classname="lombok.delombok.ant.DelombokTask" name="delombok"
+			classpathref="ivy-lib" />
 
 		<mkdir dir="src-delomboked" />
-		<delombok verbose="true" encoding="UTF-8" to="src-delomboked" from="src" classpathref="ivy-lib" />
+		<delombok verbose="true" encoding="UTF-8" to="src-delomboked"
+			from="src" classpathref="ivy-lib" />
 
 		<!-- Create JavaDoc -->
 		<delete dir="javadoc" />
 		<mkdir dir="javadoc" />
-		<javadoc sourcepath="src-delomboked" defaultexcludes="yes" destdir="javadoc" classpathref="ivy-lib" />
+		<javadoc sourcepath="src-delomboked" defaultexcludes="yes"
+			destdir="javadoc" classpathref="ivy-lib" />
 		<delete dir="src-delomboked" />
 	</target>
 </project>
