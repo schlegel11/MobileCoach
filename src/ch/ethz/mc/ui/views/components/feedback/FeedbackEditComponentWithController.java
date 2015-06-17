@@ -208,7 +208,7 @@ public class FeedbackEditComponentWithController extends FeedbackEditComponent {
 
 		try {
 			final FeedbackSlide importedFeedbackSlide = getScreeningSurveyAdministrationManagerService()
-					.feedbackSlideImport(temporaryBackupFile);
+					.feedbackSlideImport(temporaryBackupFile, true);
 
 			if (importedFeedbackSlide == null) {
 				throw new NullArgumentException(

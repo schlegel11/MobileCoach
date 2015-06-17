@@ -51,7 +51,7 @@ import com.vaadin.ui.Button.ClickEvent;
 
 /**
  * Extends the all interventions tab component with a controller
- * 
+ *
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
@@ -317,17 +317,12 @@ public class AllInterventionsTabComponentWithController extends
 
 				try {
 					final Intervention importedIntervention = getInterventionAdministrationManagerService()
-							.interventionImport(temporaryBackupFile);
+							.interventionImport(temporaryBackupFile, true);
 
 					if (importedIntervention == null) {
 						throw new NullArgumentException(
 								"Imported intervention not found in import");
 					}
-
-					// Recreate global unique IDs for subelements
-					getInterventionAdministrationManagerService()
-							.interventionRecreateGlobalUniqueIdsForSubelements(
-									importedIntervention);
 
 					// Adapt UI
 					interventionsBeanContainer.addItem(importedIntervention
@@ -370,7 +365,7 @@ public class AllInterventionsTabComponentWithController extends
 
 				try {
 					final Intervention importedIntervention = getInterventionAdministrationManagerService()
-							.interventionImport(file);
+							.interventionImport(file, false);
 
 					if (importedIntervention == null) {
 						throw new NullArgumentException(

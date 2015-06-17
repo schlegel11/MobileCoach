@@ -365,17 +365,12 @@ public class ScreeningSurveyEditComponentWithController extends
 
 		try {
 			final ScreeningSurveySlide importedScreeningSurveySlide = getScreeningSurveyAdministrationManagerService()
-					.screeningSurveySlideImport(temporaryBackupFile);
+					.screeningSurveySlideImport(temporaryBackupFile, true);
 
 			if (importedScreeningSurveySlide == null) {
 				throw new NullArgumentException(
 						"Imported slide not found in import");
 			}
-
-			// Recreate global unique ID
-			getScreeningSurveyAdministrationManagerService()
-					.screeningSurveySlideRecreateGlobalUniqueId(
-							importedScreeningSurveySlide);
 
 			// Adapt UI
 			slidesBeanContainer.addItem(importedScreeningSurveySlide.getId(),

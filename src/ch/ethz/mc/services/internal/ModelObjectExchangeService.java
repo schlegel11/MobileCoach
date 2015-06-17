@@ -91,7 +91,7 @@ public class ModelObjectExchangeService {
 
 	/**
 	 * Exports the given {@link ModelObject}s to a zip-file
-	 * 
+	 *
 	 * @param modelObjects
 	 *            The {@link ModelObject}s to export
 	 * @param exchangeFormat
@@ -175,7 +175,7 @@ public class ModelObjectExchangeService {
 	/**
 	 * Imports the {@link ModelObject}s in the given zip-file into the system
 	 * with new and unique {@link ObjectId}s
-	 * 
+	 *
 	 * @param zipFile
 	 *            The zip-file to import
 	 * @param expectedExchangeFormat
@@ -300,7 +300,7 @@ public class ModelObjectExchangeService {
 	/**
 	 * Creates a {@link File} in zip-format containing the given
 	 * {@link ExchangeModelObject}s
-	 * 
+	 *
 	 * @param exchangeModelObjects
 	 *            The {@link ExchangeModelObject}s to save in the zip-file
 	 * @param exchangeFormat
@@ -329,7 +329,8 @@ public class ModelObjectExchangeService {
 		val fileOutputStream = new FileOutputStream(zipFile);
 		@Cleanup
 		val zipOutputStream = new ZipOutputStream(fileOutputStream);
-		zipOutputStream.setComment(exchangeFormat.toString());
+		zipOutputStream.setComment(exchangeFormat.toString() + ","
+				+ Constants.DATA_MODEL_VERSION);
 
 		for (val exchangeModelObject : exchangeModelObjects) {
 			// Care for linked files
@@ -372,7 +373,7 @@ public class ModelObjectExchangeService {
 
 	/**
 	 * Reads {@link ExchangeModelObject}s from {@link ZipFile}
-	 * 
+	 *
 	 * @param zipFile
 	 *            The file to read from
 	 * @param expectedExchangeFormat
@@ -386,13 +387,40 @@ public class ModelObjectExchangeService {
 			throws IOException {
 		val exchangeModelObjects = new ArrayList<ExchangeModelObject>();
 
-		if (!zipFile.getComment().equals(expectedExchangeFormat.toString())) {
-			log.warn("Wrong exchange format provided: "
-					+ expectedExchangeFormat + " expected, "
-					+ zipFile.getComment() + " received");
+		// Ensure correct exchange format and version
+		final String exchangeFormat;
+		final int dataModelVersion;
+		val comment = zipFile.getComment();
+		if (comment.contains(",")) {
+			val exchangeFormatAndVersion = comment.split(",");
+			exchangeFormat = exchangeFormatAndVersion[0];
+			dataModelVersion = Integer.valueOf(exchangeFormatAndVersion[1]);
+		} else {
+			// Backward compatibility to older formats containing no version
+			// information
+			exchangeFormat = comment;
+			dataModelVersion = -1;
+		}
+
+		log.debug("File is {} in version {}", exchangeFormat, dataModelVersion);
+
+		if (!exchangeFormat.equals(expectedExchangeFormat.toString())) {
+			log.warn(
+					"Wrong exchange format provided: {} expected, {} received",
+					expectedExchangeFormat, exchangeFormat);
 			throw new IOException("Wrong exchange format provided: "
-					+ expectedExchangeFormat + " expected, "
-					+ zipFile.getComment() + " received");
+					+ expectedExchangeFormat + " expected, " + exchangeFormat
+					+ " received");
+		}
+
+		if (dataModelVersion != -1
+				&& dataModelVersion != Constants.DATA_MODEL_VERSION) {
+			log.warn(
+					"Wrong data model version provided: {} expected, {} received",
+					Constants.DATA_MODEL_VERSION, dataModelVersion);
+			throw new IOException("Wrong data model version provided: "
+					+ Constants.DATA_MODEL_VERSION + " expected, "
+					+ dataModelVersion + " received");
 		}
 
 		log.debug("Loading exchange model objects from zip file {}",

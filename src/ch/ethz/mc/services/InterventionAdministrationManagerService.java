@@ -2,15 +2,15 @@ package ch.ethz.mc.services;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -82,7 +82,7 @@ import ch.ethz.mc.ui.NotificationMessageException;
 /**
  * Cares for the creation of the {@link Author}s, {@link Participant}s and
  * {@link Intervention}s as well as all related {@link ModelObject}s
- * 
+ *
  * @author Andreas Filler
  */
 @Log4j2
@@ -106,7 +106,7 @@ public class InterventionAdministrationManagerService {
 			final VariablesManagerService variablesManagerService,
 			final ModelObjectExchangeService modelObjectExchangeService,
 			final ScreeningSurveyAdministrationManagerService screeningSurveyAdministrationManagerService)
-			throws Exception {
+					throws Exception {
 		$lock = MC.getInstance();
 
 		log.info("Starting service...");
@@ -133,7 +133,7 @@ public class InterventionAdministrationManagerService {
 			final VariablesManagerService variablesManagerService,
 			final ModelObjectExchangeService modelObjectExchangeService,
 			final ScreeningSurveyAdministrationManagerService screeningSurveyAdministrationManagerService)
-			throws Exception {
+					throws Exception {
 		if (instance == null) {
 			instance = new InterventionAdministrationManagerService(
 					databaseManagerService, fileStorageManagerService,
@@ -267,7 +267,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void interventionRecreateGlobalUniqueIdsForSubelements(
+	private void interventionRecreateGlobalUniqueIdsForSubelements(
 			final Intervention intervention) {
 		val screeningSurveysOfIntervention = databaseManagerService
 				.findModelObjects(ScreeningSurvey.class,
@@ -278,7 +278,7 @@ public class InterventionAdministrationManagerService {
 
 		for (val screeningSurvey : screeningSurveysOfIntervention) {
 			screeningSurveyAdministrationManagerService
-					.screeningSurveyRecreateGlobalUniqueId(screeningSurvey);
+			.screeningSurveyRecreateGlobalUniqueId(screeningSurvey);
 		}
 	}
 
@@ -304,31 +304,38 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public Intervention interventionImport(final File file)
-			throws FileNotFoundException, IOException {
+	public Intervention interventionImport(final File file,
+			final boolean duplicate) throws FileNotFoundException, IOException {
 		val importedModelObjects = modelObjectExchangeService
 				.importModelObjects(file,
 						ModelObjectExchangeFormatTypes.INTERVENTION);
 
+		Intervention importedIntervention = null;
+
 		for (val modelObject : importedModelObjects) {
 			if (modelObject instanceof Intervention) {
 				val intervention = (Intervention) modelObject;
+				importedIntervention = intervention;
 
+				// Adjust name
 				val dateFormat = DateFormat.getDateTimeInstance(
 						DateFormat.MEDIUM, DateFormat.MEDIUM,
 						Constants.getAdminLocale());
 				val date = dateFormat.format(new Date(InternalDateTime
 						.currentTimeMillis()));
 				intervention
-						.setName(intervention.getName() + " (" + date + ")");
+				.setName(intervention.getName() + " (" + date + ")");
 
 				databaseManagerService.saveModelObject(intervention);
-
-				return intervention;
 			}
 		}
 
-		return null;
+		// Recreate global unique IDs for subelements
+		if (duplicate && importedIntervention != null) {
+			interventionRecreateGlobalUniqueIdsForSubelements(importedIntervention);
+		}
+
+		return importedIntervention;
 	}
 
 	@Synchronized
@@ -337,7 +344,7 @@ public class InterventionAdministrationManagerService {
 
 		log.debug("Recursively collect all model objects related to the intervention");
 		intervention
-				.collectThisAndRelatedModelObjectsForExport(modelObjectsToExport);
+		.collectThisAndRelatedModelObjectsForExport(modelObjectsToExport);
 
 		log.debug("Export intervention");
 		return modelObjectExchangeService.exportModelObjects(
@@ -381,7 +388,7 @@ public class InterventionAdministrationManagerService {
 	@Synchronized
 	public InterventionVariableWithValue interventionVariableWithValueCreate(
 			final String variableName, final ObjectId interventionId)
-			throws NotificationMessageException {
+					throws NotificationMessageException {
 
 		if (!StringValidator.isValidVariableName(variableName)) {
 			throw new NotificationMessageException(
@@ -426,7 +433,7 @@ public class InterventionAdministrationManagerService {
 			final InterventionVariableWithValue interventionVariableWithValue = new InterventionVariableWithValue(
 					interventionId, variableName, variableValue);
 			databaseManagerService
-					.saveModelObject(interventionVariableWithValue);
+			.saveModelObject(interventionVariableWithValue);
 		} else {
 			interventionVariable.setValue(variableValue);
 			databaseManagerService.saveModelObject(interventionVariable);
@@ -490,7 +497,7 @@ public class InterventionAdministrationManagerService {
 
 		if (monitoringMessageGroup.getName().equals("")) {
 			monitoringMessageGroup
-					.setName(ImplementationConstants.DEFAULT_OBJECT_NAME);
+			.setName(ImplementationConstants.DEFAULT_OBJECT_NAME);
 		}
 
 		val highestOrderMessageGroup = databaseManagerService
@@ -501,7 +508,7 @@ public class InterventionAdministrationManagerService {
 
 		if (highestOrderMessageGroup != null) {
 			monitoringMessageGroup
-					.setOrder(highestOrderMessageGroup.getOrder() + 1);
+			.setOrder(highestOrderMessageGroup.getOrder() + 1);
 		}
 
 		databaseManagerService.saveModelObject(monitoringMessageGroup);
@@ -546,10 +553,10 @@ public class InterventionAdministrationManagerService {
 						MonitoringMessageGroup.class,
 						moveLeft ? Queries.MONITORING_MESSAGE_GROUP__BY_INTERVENTION_AND_ORDER_LOWER
 								: Queries.MONITORING_MESSAGE_GROUP__BY_INTERVENTION_AND_ORDER_HIGHER,
-						moveLeft ? Queries.MONITORING_MESSAGE_GROUP__SORT_BY_ORDER_DESC
-								: Queries.MONITORING_MESSAGE_GROUP__SORT_BY_ORDER_ASC,
-						monitoringMessageGroup.getIntervention(),
-						monitoringMessageGroup.getOrder());
+								moveLeft ? Queries.MONITORING_MESSAGE_GROUP__SORT_BY_ORDER_DESC
+										: Queries.MONITORING_MESSAGE_GROUP__SORT_BY_ORDER_ASC,
+										monitoringMessageGroup.getIntervention(),
+										monitoringMessageGroup.getOrder());
 
 		if (monitoringMessageGroupToSwapWith == null) {
 			return null;
@@ -563,7 +570,7 @@ public class InterventionAdministrationManagerService {
 
 		databaseManagerService.saveModelObject(monitoringMessageGroup);
 		databaseManagerService
-				.saveModelObject(monitoringMessageGroupToSwapWith);
+		.saveModelObject(monitoringMessageGroupToSwapWith);
 
 		return monitoringMessageGroupToSwapWith;
 	}
@@ -574,7 +581,7 @@ public class InterventionAdministrationManagerService {
 			final String newName) {
 		if (newName.equals("")) {
 			monitoringMessageGroup
-					.setName(ImplementationConstants.DEFAULT_OBJECT_NAME);
+			.setName(ImplementationConstants.DEFAULT_OBJECT_NAME);
 		} else {
 			monitoringMessageGroup.setName(newName);
 		}
@@ -600,7 +607,7 @@ public class InterventionAdministrationManagerService {
 			final MonitoringMessageGroup monitoringMessageGroupToDelete) {
 
 		databaseManagerService
-				.deleteModelObject(monitoringMessageGroupToDelete);
+		.deleteModelObject(monitoringMessageGroupToDelete);
 	}
 
 	// Monitoring Message
@@ -635,10 +642,10 @@ public class InterventionAdministrationManagerService {
 						MonitoringMessage.class,
 						moveUp ? Queries.MONITORING_MESSAGE__BY_MONITORING_MESSAGE_GROUP_AND_ORDER_LOWER
 								: Queries.MONITORING_MESSAGE__BY_MONITORING_MESSAGE_GROUP_AND_ORDER_HIGHER,
-						moveUp ? Queries.MONITORING_MESSAGE__SORT_BY_ORDER_DESC
-								: Queries.MONITORING_MESSAGE__SORT_BY_ORDER_ASC,
-						monitoringMessage.getMonitoringMessageGroup(),
-						monitoringMessage.getOrder());
+								moveUp ? Queries.MONITORING_MESSAGE__SORT_BY_ORDER_DESC
+										: Queries.MONITORING_MESSAGE__SORT_BY_ORDER_ASC,
+										monitoringMessage.getMonitoringMessageGroup(),
+										monitoringMessage.getOrder());
 
 		if (monitoringMessageToSwapWith == null) {
 			return null;
@@ -669,7 +676,7 @@ public class InterventionAdministrationManagerService {
 			final MonitoringMessage monitoringMessage,
 			final String textWithPlaceholders,
 			final List<String> allPossibleMessageVariables)
-			throws NotificationMessageException {
+					throws NotificationMessageException {
 		if (textWithPlaceholders == null) {
 			monitoringMessage.setTextWithPlaceholders("");
 		} else {
@@ -688,7 +695,7 @@ public class InterventionAdministrationManagerService {
 	@Synchronized
 	public void monitoringMessageSetStoreResultToVariable(
 			final MonitoringMessage monitoringMessage, final String variableName)
-			throws NotificationMessageException {
+					throws NotificationMessageException {
 		if (variableName == null || variableName.equals("")) {
 			monitoringMessage.setStoreValueToVariableWithName(null);
 
@@ -734,7 +741,7 @@ public class InterventionAdministrationManagerService {
 
 		if (highestOrderSlideRule != null) {
 			monitoringMessageRule
-					.setOrder(highestOrderSlideRule.getOrder() + 1);
+			.setOrder(highestOrderSlideRule.getOrder() + 1);
 		}
 
 		databaseManagerService.saveModelObject(monitoringMessageRule);
@@ -752,10 +759,10 @@ public class InterventionAdministrationManagerService {
 						MonitoringMessageRule.class,
 						moveUp ? Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE_AND_ORDER_LOWER
 								: Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE_AND_ORDER_HIGHER,
-						moveUp ? Queries.MONITORING_MESSAGE_RULE__SORT_BY_ORDER_DESC
-								: Queries.MONITORING_MESSAGE_RULE__SORT_BY_ORDER_ASC,
-						monitoringMessageRule.getBelongingMonitoringMessage(),
-						monitoringMessageRule.getOrder());
+								moveUp ? Queries.MONITORING_MESSAGE_RULE__SORT_BY_ORDER_DESC
+										: Queries.MONITORING_MESSAGE_RULE__SORT_BY_ORDER_ASC,
+										monitoringMessageRule.getBelongingMonitoringMessage(),
+										monitoringMessageRule.getOrder());
 
 		if (monitoringMessageRuleToSwapWith == null) {
 			return null;
@@ -854,7 +861,7 @@ public class InterventionAdministrationManagerService {
 				otherMonitoringRuleToMove.setOrder(otherMonitoringRuleToMove
 						.getOrder() + 1);
 				databaseManagerService
-						.saveModelObject(otherMonitoringRuleToMove);
+				.saveModelObject(otherMonitoringRuleToMove);
 			}
 
 			// Set target as new parent
@@ -862,7 +869,7 @@ public class InterventionAdministrationManagerService {
 					.getModelObjectById(MonitoringRule.class,
 							monitoringRuleIdToMove);
 			monitoringRuleToMove
-					.setIsSubRuleOfMonitoringRule(referenceTargetId);
+			.setIsSubRuleOfMonitoringRule(referenceTargetId);
 
 			// Set at beginning of list
 			monitoringRuleToMove.setOrder(0);
@@ -887,7 +894,7 @@ public class InterventionAdministrationManagerService {
 				otherMonitoringRuleToMove.setOrder(otherMonitoringRuleToMove
 						.getOrder() + 1);
 				databaseManagerService
-						.saveModelObject(otherMonitoringRuleToMove);
+				.saveModelObject(otherMonitoringRuleToMove);
 			}
 
 			// Set parent of target to rule
@@ -935,7 +942,7 @@ public class InterventionAdministrationManagerService {
 			final MonitoringRule monitoringRule,
 			final ObjectId newMonitoringMessageGroupId) {
 		monitoringRule
-				.setRelatedMonitoringMessageGroup(newMonitoringMessageGroupId);
+		.setRelatedMonitoringMessageGroup(newMonitoringMessageGroupId);
 
 		databaseManagerService.saveModelObject(monitoringRule);
 	}
@@ -943,7 +950,7 @@ public class InterventionAdministrationManagerService {
 	@Synchronized
 	public void monitoringRuleSetStoreResultToVariable(
 			final MonitoringRule monitoringRule, final String variableName)
-			throws NotificationMessageException {
+					throws NotificationMessageException {
 		if (variableName == null || variableName.equals("")) {
 			monitoringRule.setStoreValueToVariableWithName(null);
 
@@ -998,15 +1005,15 @@ public class InterventionAdministrationManagerService {
 				RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "",
 				parentMonitoringReplyRuleId, 0, null, false, null,
 				isGotAnswerRule ? monitoringRuleId : null,
-				isGotAnswerRule ? null : monitoringRuleId);
+						isGotAnswerRule ? null : monitoringRuleId);
 
 		val highestOrderRule = databaseManagerService
 				.findOneSortedModelObject(
 						MonitoringReplyRule.class,
 						isGotAnswerRule ? Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_ANSWER
 								: Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_NO_ANSWER,
-						Queries.MONITORING_REPLY_RULE__SORT_BY_ORDER_DESC,
-						monitoringRuleId, parentMonitoringReplyRuleId);
+								Queries.MONITORING_REPLY_RULE__SORT_BY_ORDER_DESC,
+								monitoringRuleId, parentMonitoringReplyRuleId);
 
 		if (highestOrderRule != null) {
 			monitoringReplyRule.setOrder(highestOrderRule.getOrder() + 1);
@@ -1031,12 +1038,12 @@ public class InterventionAdministrationManagerService {
 							MonitoringReplyRule.class,
 							isGotAnswerRule ? Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_ANSWER
 									: Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_NO_ANSWER,
-							monitoringRuleId, referenceTargetId);
+									monitoringRuleId, referenceTargetId);
 			for (val otherMonitoringRuleToMove : otherMonitoringRulesToMove) {
 				otherMonitoringRuleToMove.setOrder(otherMonitoringRuleToMove
 						.getOrder() + 1);
 				databaseManagerService
-						.saveModelObject(otherMonitoringRuleToMove);
+				.saveModelObject(otherMonitoringRuleToMove);
 			}
 
 			// Set target as new parent
@@ -1044,7 +1051,7 @@ public class InterventionAdministrationManagerService {
 					.getModelObjectById(MonitoringReplyRule.class,
 							monitoringReplyRuleIdToMove);
 			monitoringRuleToMove
-					.setIsSubRuleOfMonitoringRule(referenceTargetId);
+			.setIsSubRuleOfMonitoringRule(referenceTargetId);
 
 			// Set at beginning of list
 			monitoringRuleToMove.setOrder(0);
@@ -1063,14 +1070,14 @@ public class InterventionAdministrationManagerService {
 							MonitoringReplyRule.class,
 							isGotAnswerRule ? Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_AND_ORDER_HIGHER_ONLY_GOT_ANSWER
 									: Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_AND_ORDER_HIGHER_ONLY_GOT_NO_ANSWER,
-							monitoringRuleId, referenceTarget
+									monitoringRuleId, referenceTarget
 									.getIsSubRuleOfMonitoringRule(),
-							referenceTarget.getOrder());
+									referenceTarget.getOrder());
 			for (val otherMonitoringRuleToMove : otherMonitoringRulesToMove) {
 				otherMonitoringRuleToMove.setOrder(otherMonitoringRuleToMove
 						.getOrder() + 1);
 				databaseManagerService
-						.saveModelObject(otherMonitoringRuleToMove);
+				.saveModelObject(otherMonitoringRuleToMove);
 			}
 
 			// Set parent of target to rule
@@ -1112,7 +1119,7 @@ public class InterventionAdministrationManagerService {
 			final MonitoringReplyRule monitoringReplyRule,
 			final ObjectId newMonitoringMessageGroupId) {
 		monitoringReplyRule
-				.setRelatedMonitoringMessageGroup(newMonitoringMessageGroupId);
+		.setRelatedMonitoringMessageGroup(newMonitoringMessageGroupId);
 
 		databaseManagerService.saveModelObject(monitoringReplyRule);
 	}
@@ -1155,7 +1162,7 @@ public class InterventionAdministrationManagerService {
 	public void abstractRuleChangeRuleWithPlaceholders(
 			final AbstractRule abstractRule, final String textWithPlaceholders,
 			final List<String> allPossibleVariables)
-			throws NotificationMessageException {
+					throws NotificationMessageException {
 		if (textWithPlaceholders == null) {
 			abstractRule.setRuleWithPlaceholders("");
 		} else {
@@ -1175,7 +1182,7 @@ public class InterventionAdministrationManagerService {
 	public void abstractRuleChangeRuleComparisonTermWithPlaceholders(
 			final AbstractRule abstractRule, final String textWithPlaceholders,
 			final List<String> allPossibleVariables)
-			throws NotificationMessageException {
+					throws NotificationMessageException {
 		if (textWithPlaceholders == null) {
 			abstractRule.setRuleComparisonTermWithPlaceholders("");
 		} else {
@@ -1186,7 +1193,7 @@ public class InterventionAdministrationManagerService {
 			}
 
 			abstractRule
-					.setRuleComparisonTermWithPlaceholders(textWithPlaceholders);
+			.setRuleComparisonTermWithPlaceholders(textWithPlaceholders);
 		}
 
 		databaseManagerService.saveModelObject(abstractRule);
@@ -1218,12 +1225,26 @@ public class InterventionAdministrationManagerService {
 
 				if (dialogStatus
 						.getLastVisitedScreeningSurveySlideGlobalUniqueId() != null) {
-					val screeningSurveySlide = databaseManagerService
-							.findOneModelObject(
-									ScreeningSurveySlide.class,
-									Queries.SCREENING_SURVEY_SLIDE__BY_GLOBAL_UNIQUE_ID,
-									dialogStatus
-											.getLastVisitedScreeningSurveySlideGlobalUniqueId());
+					val screeningSurveys = databaseManagerService
+							.findModelObjects(ScreeningSurvey.class,
+									Queries.SCREENING_SURVEY__BY_INTERVENTION,
+									interventionId);
+
+					ScreeningSurveySlide screeningSurveySlide = null;
+					for (val screeningSurvey : screeningSurveys) {
+						val foundScreeningSurveySlide = databaseManagerService
+								.findOneModelObject(
+										ScreeningSurveySlide.class,
+										Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY_AND_GLOBAL_UNIQUE_ID,
+										screeningSurvey.getId(),
+										dialogStatus
+												.getLastVisitedScreeningSurveySlideGlobalUniqueId());
+
+						if (foundScreeningSurveySlide != null) {
+							screeningSurveySlide = foundScreeningSurveySlide;
+						}
+					}
+
 					if (screeningSurveySlide != null) {
 						dialogStatus
 								.setLastVisitedScreeningSurveySlide(screeningSurveySlide
@@ -1233,6 +1254,7 @@ public class InterventionAdministrationManagerService {
 						dialogStatus
 								.setLastVisitedScreeningSurveySlideGlobalUniqueId(null);
 					}
+
 					databaseManagerService.saveModelObject(dialogStatus);
 				}
 			}
@@ -1296,7 +1318,7 @@ public class InterventionAdministrationManagerService {
 		log.debug("Recursively collect all model objects related to the participants");
 		for (val participant : participants) {
 			participant
-					.collectThisAndRelatedModelObjectsForExport(modelObjectsToExport);
+			.collectThisAndRelatedModelObjectsForExport(modelObjectsToExport);
 		}
 
 		log.debug("Export participants");
@@ -1501,7 +1523,7 @@ public class InterventionAdministrationManagerService {
 						MonitoringReplyRule.class,
 						isGotAnswerRule ? Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_ONLY_GOT_ANSWER
 								: Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_ONLY_GOT_NO_ANSWER,
-						monitoringRuleId);
+								monitoringRuleId);
 	}
 
 	@Synchronized
@@ -1514,8 +1536,8 @@ public class InterventionAdministrationManagerService {
 						MonitoringReplyRule.class,
 						isGotAnswerRule ? Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_ANSWER
 								: Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_NO_ANSWER,
-						Queries.MONITORING_RULE__SORT_BY_ORDER_ASC,
-						monitoringRuleId, parentMonitoringReplyRuleId);
+								Queries.MONITORING_RULE__SORT_BY_ORDER_ASC,
+								monitoringRuleId, parentMonitoringReplyRuleId);
 	}
 
 	@Synchronized
@@ -1553,14 +1575,14 @@ public class InterventionAdministrationManagerService {
 		variables.addAll(variablesManagerService
 				.getAllInterventionVariableNamesOfIntervention(interventionId));
 		variables
-				.addAll(variablesManagerService
-						.getAllScreeningSurveyVariableNamesOfIntervention(interventionId));
+		.addAll(variablesManagerService
+				.getAllScreeningSurveyVariableNamesOfIntervention(interventionId));
 		variables
-				.addAll(variablesManagerService
-						.getAllMonitoringMessageVariableNamesOfIntervention(interventionId));
+		.addAll(variablesManagerService
+				.getAllMonitoringMessageVariableNamesOfIntervention(interventionId));
 		variables
-				.addAll(variablesManagerService
-						.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(interventionId));
+		.addAll(variablesManagerService
+				.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(interventionId));
 
 		Collections.sort(variables);
 
@@ -1577,14 +1599,14 @@ public class InterventionAdministrationManagerService {
 		variables.addAll(variablesManagerService
 				.getAllInterventionVariableNamesOfIntervention(interventionId));
 		variables
-				.addAll(variablesManagerService
-						.getAllScreeningSurveyVariableNamesOfIntervention(interventionId));
+		.addAll(variablesManagerService
+				.getAllScreeningSurveyVariableNamesOfIntervention(interventionId));
 		variables
-				.addAll(variablesManagerService
-						.getAllMonitoringMessageVariableNamesOfIntervention(interventionId));
+		.addAll(variablesManagerService
+				.getAllMonitoringMessageVariableNamesOfIntervention(interventionId));
 		variables
-				.addAll(variablesManagerService
-						.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(interventionId));
+		.addAll(variablesManagerService
+				.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(interventionId));
 
 		Collections.sort(variables);
 
@@ -1602,14 +1624,14 @@ public class InterventionAdministrationManagerService {
 		variables.addAll(variablesManagerService
 				.getAllInterventionVariableNamesOfIntervention(interventionId));
 		variables
-				.addAll(variablesManagerService
-						.getAllScreeningSurveyVariableNamesOfIntervention(interventionId));
+		.addAll(variablesManagerService
+				.getAllScreeningSurveyVariableNamesOfIntervention(interventionId));
 		variables
-				.addAll(variablesManagerService
-						.getAllMonitoringMessageVariableNamesOfIntervention(interventionId));
+		.addAll(variablesManagerService
+				.getAllMonitoringMessageVariableNamesOfIntervention(interventionId));
 		variables
-				.addAll(variablesManagerService
-						.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(interventionId));
+		.addAll(variablesManagerService
+				.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(interventionId));
 
 		Collections.sort(variables);
 
@@ -1627,14 +1649,14 @@ public class InterventionAdministrationManagerService {
 		variables.addAll(variablesManagerService
 				.getAllInterventionVariableNamesOfIntervention(interventionId));
 		variables
-				.addAll(variablesManagerService
-						.getAllScreeningSurveyVariableNamesOfIntervention(interventionId));
+		.addAll(variablesManagerService
+				.getAllScreeningSurveyVariableNamesOfIntervention(interventionId));
 		variables
-				.addAll(variablesManagerService
-						.getAllMonitoringMessageVariableNamesOfIntervention(interventionId));
+		.addAll(variablesManagerService
+				.getAllMonitoringMessageVariableNamesOfIntervention(interventionId));
 		variables
-				.addAll(variablesManagerService
-						.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(interventionId));
+		.addAll(variablesManagerService
+				.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(interventionId));
 
 		Collections.sort(variables);
 
@@ -1687,8 +1709,8 @@ public class InterventionAdministrationManagerService {
 						participantId,
 						variableName,
 						InternalDateTime.currentTimeMillis()
-								- ImplementationConstants.DAYS_TO_TIME_IN_MILLIS_MULTIPLICATOR
-								* 28);
+						- ImplementationConstants.DAYS_TO_TIME_IN_MILLIS_MULTIPLICATOR
+						* 28);
 	}
 
 	@Synchronized
