@@ -2,15 +2,15 @@ package ch.ethz.mc.tools;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 
 import lombok.val;
 import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.persistent.concepts.AbstractRule;
@@ -30,18 +31,18 @@ import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 
 /**
  * Small helpers for {@link String}s
- * 
+ *
  * @author Andreas Filler
  */
 public class StringHelpers {
 	private static SimpleDateFormat	simpleDateFormat	= new SimpleDateFormat(
-																"yyyy-MM-dd");
+			"yyyy-MM-dd");
 	private static SimpleDateFormat	longDateFormat		= new SimpleDateFormat(
-																"yyyy-MM-dd HH:mm:ss");
+			"yyyy-MM-dd HH:mm:ss");
 
 	/**
 	 * Creates a readable name representation of a rule's name
-	 * 
+	 *
 	 * @param abstractRule
 	 * @return
 	 */
@@ -97,8 +98,9 @@ public class StringHelpers {
 	}
 
 	/**
-	 * Creates a clean phone number of the given {@link String}
-	 * 
+	 * Creates a clean phone number of the given {@link String} to result in the
+	 * format "00CCNNNNNNN..." (CC: country code, NN...: number)
+	 *
 	 * @param phoneNumber
 	 * @return
 	 */
@@ -109,10 +111,10 @@ public class StringHelpers {
 						ImplementationConstants.REGULAR_EXPRESSION_TO_CLEAN_PHONE_NUMBERS,
 						"").replaceAll("^0+", "");
 
-		// FIXME Need to be more international using the configuration (at best:
-		// per intervention project)
-		if (!numberWithoutZeros.startsWith("4")) {
-			numberWithoutZeros = "41" + numberWithoutZeros;
+		if (!numberWithoutZeros.startsWith(Constants
+				.getSmsPhoneNumberCountryCorrection())) {
+			numberWithoutZeros = Constants.getSmsPhoneNumberCountryCorrection()
+					+ numberWithoutZeros;
 		}
 
 		return "00" + numberWithoutZeros;
@@ -120,7 +122,7 @@ public class StringHelpers {
 
 	/**
 	 * Creates a clean email address of the given {@link String}
-	 * 
+	 *
 	 * @param emailAddress
 	 * @return
 	 */
@@ -131,7 +133,7 @@ public class StringHelpers {
 
 	/**
 	 * Creates a clean message of the given string {@link String}
-	 * 
+	 *
 	 * @param messageString
 	 * @return
 	 */
@@ -147,7 +149,7 @@ public class StringHelpers {
 
 	/**
 	 * Creates a clean {@link String} of the given double value
-	 * 
+	 *
 	 * @param doubleValue
 	 * @return
 	 */
@@ -162,7 +164,7 @@ public class StringHelpers {
 
 	/**
 	 * Replaces the simple commands within the text with HTML commands
-	 * 
+	 *
 	 * @param text
 	 * @return
 	 */

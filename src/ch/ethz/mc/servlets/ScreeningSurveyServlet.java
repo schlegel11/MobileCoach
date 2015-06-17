@@ -308,10 +308,9 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			val activeScreeningSurveys = screeningSurveyExecutionManagerService
 					.getActiveScreeningSurveys();
 
-			// FIXME Should be done more generic
 			if (activeScreeningSurveys != null) {
 				templateVariables.put("title",
-						"Hier geht es zur Eingangsbefragung...");
+						Constants.getSurveyListingTitle());
 
 				val surveysData = new ArrayList<HashMap<String, String>>();
 
@@ -331,10 +330,10 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				templateVariables.put("surveys", surveysData);
 			} else {
 				templateVariables
-						.put("title", "Keine Eingansgbefragung aktiv.");
+						.put("title", Constants.getSurveyListingNoneActive());
 			}
 		} else {
-			templateVariables.put("title", "Auflistung nicht aktiv.");
+			templateVariables.put("title", Constants.getSurveyListingNotActive());
 		}
 
 		@Cleanup
