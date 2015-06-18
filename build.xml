@@ -1,48 +1,59 @@
 <?xml version="1.0"?>
-<project name="MobileCoach Release" basedir="." default="release">
+<!-- 
+
+IMPORTANT: 
+
+This script needs to run in the same JRE as eclipse is currently running.
+This can be set in the "JRE" tab when configuring an ANT task in the eclipse GUI.
+
+-->
+
+<project name="MobileCoach WAR-file creation" basedir="." default="war" xmlns:ivy="antlib:org.apache.ivy.ant">
 	<description>
-		MobileCoach release version creation
+		MobileCoach WAR creation
 	</description>
 
-	<import file="javadoc.xml" />
+	<path id="ivy-libs">
+		<fileset dir="ivy-libs" includes="*.jar" />
+	</path>
+	<path id="ivy-lib" />
 
-	<target name="release" depends="javadoc">
-		<!-- Preparation -->
-		<delete dir="git-temp" />
-		<mkdir dir="git-temp/.git" />
-		<copy todir="git-temp/.git" preservelastmodified="true" force="true">
-			<fileset dir="release/.git" />
-		</copy>
+	<!-- Generate .war file for for current project -->
+	<target name="war">
+		<!-- Cleaning -->
+		<delete dir="lib" />
+		<delete dir="out" />
+		<mkdir dir="out" />
 
-		<delete dir="release" />
+		<!-- Use Ivy in ANT -->
+		<taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy-libs" />
 
-		<!-- Copy -->
-		<copy todir="release" preservelastmodified="true" force="true">
-			<fileset dir=".">
-				<exclude name="build.xml" />
-				<exclude name=".gitignore" />
-				<exclude name=".git/**" />
-				<exclude name="out/**" />
-				<exclude name="build/**" />
-				<exclude name="git-temp/**" />
+		<ivy:configure file="ivysettings.xml" />
+		<ivy:cachepath pathid="ivy-lib" />
+		<ivy:resolve file="ivy.xml" conf="default" />
+		<ivy:retrieve pattern="lib/[artifact]-[revision].[ext]" conf="default" />
+
+		<!-- Retrieve FileWrapperServlet -->
+		<get src="https://bitbucket.org/mobilecoach/mobilecoach-fileservletwrapper/src/0840154f5b634d41e801be723f76bd52deeda758/out/FileServletWrapper.jar?at=master" dest="WebContent/WEB-INF/lib" verbose="true" usetimestamp="true" />
+
+		<!-- Compiling using eclipse -->
+		<eclipse.refreshLocal resource="" depth="infinite" />
+		<eclipse.incrementalBuild project="." kind="full" />
+
+		<!-- Create .war file -->
+		<war destfile="out/MC.war" webxml="WebContent/WEB-INF/web.xml" update="true">
+			<classes dir="build/classes" />
+			<lib dir="lib" />
+			<fileset dir="WebContent">
+				<exclude name="WEB-INF/web.xml" />
 			</fileset>
-		</copy>
+		</war>
 
-		<!-- Adjustments -->
-		<delete file="release/stats.sh" />
-		<delete file="release/WebContent/WEB-INF/lib/FileServletWrapper.jar" />
+		<!-- Cleaning -->
+		<delete dir="lib" />
 
-		<!-- Version info -->
-		<loadfile property="version" srcFile="WebContent/WEB-INF/version.txt" />
-		<replace file="release/README.md" token="@@VERSION@@" value="${version}" />
-
-		<!-- Cleanup -->
-		<mkdir dir="release/.git" />
-
-		<copy todir="release/.git" preservelastmodified="true" force="true">
-			<fileset dir="git-temp/.git" />
-		</copy>
-		<delete dir="git-temp" />
+		<!-- Refresh -->
+		<eclipse.refreshLocal resource="" depth="infinite" />
 	</target>
 
 </project>

@@ -97,8 +97,7 @@ After deploying a (newly created) web archive (**.war**) to your server you can 
 	
 	https://YOURDOMAIN.WHATEVER/YOUR_CONTEXT_PATH/admin
 
-**Suggestion:**   
-Use the WAR building functionalities provided by **Eclipse WTP** in the **"Export->WAR file"** context menu when clicking on a web project.
+**Suggestion:** Use the provided **build.xml** within **Eclipse** to create the **.war** file.
 
 E.g.:
 
