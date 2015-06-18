@@ -34,11 +34,8 @@ This can be set in the "JRE" tab when configuring an ANT task in the eclipse GUI
 		<ivy:retrieve pattern="lib/[artifact]-[revision].[ext]" conf="default" />
 
 		<!-- Retrieve FileWrapperServlet -->
-		<get src="https://bitbucket.org/mobilecoach/mobilecoach-fileservletwrapper/src/0840154f5b634d41e801be723f76bd52deeda758/out/FileServletWrapper.jar?at=master" dest="WebContent/WEB-INF/lib" verbose="true" usetimestamp="true" />
-
-		<!-- Compiling using eclipse -->
-		<eclipse.refreshLocal resource="" depth="infinite" />
-		<eclipse.incrementalBuild project="." kind="full" />
+		<mkdir dir="WebContent/WEB-INF/lib" />
+		<get src="https://bitbucket.org/mobilecoach/mobilecoach-fileservletwrapper/src/0840154f5b634d41e801be723f76bd52deeda758/out/FileServletWrapper.jar?at=master" dest="WebContent/WEB-INF/lib/" verbose="true" usetimestamp="true" />
 
 		<!-- Create .war file -->
 		<war destfile="out/MC.war" webxml="WebContent/WEB-INF/web.xml" update="true">
@@ -51,6 +48,10 @@ This can be set in the "JRE" tab when configuring an ANT task in the eclipse GUI
 
 		<!-- Cleaning -->
 		<delete dir="lib" />
+
+		<!-- Compiling using eclipse -->
+		<eclipse.refreshLocal resource="" depth="infinite" />
+		<eclipse.incrementalBuild project="." kind="full" />
 
 		<!-- Refresh -->
 		<eclipse.refreshLocal resource="" depth="infinite" />
