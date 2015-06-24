@@ -2,15 +2,15 @@ package ch.ethz.mc.tools;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,9 +36,9 @@ import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
  */
 public class StringHelpers {
 	private static SimpleDateFormat	simpleDateFormat	= new SimpleDateFormat(
-			"yyyy-MM-dd");
+																"yyyy-MM-dd");
 	private static SimpleDateFormat	longDateFormat		= new SimpleDateFormat(
-			"yyyy-MM-dd HH:mm:ss");
+																"yyyy-MM-dd HH:mm:ss");
 
 	/**
 	 * Creates a readable name representation of a rule's name
@@ -111,8 +111,16 @@ public class StringHelpers {
 						ImplementationConstants.REGULAR_EXPRESSION_TO_CLEAN_PHONE_NUMBERS,
 						"").replaceAll("^0+", "");
 
-		if (!numberWithoutZeros.startsWith(Constants
-				.getSmsPhoneNumberCountryCorrection())) {
+		boolean needsCorrection = true;
+
+		for (val countryCode : Constants
+				.getSmsPhoneNumberAcceptedCountryCodes()) {
+			if (numberWithoutZeros.startsWith(countryCode)) {
+				needsCorrection = false;
+			}
+		}
+
+		if (needsCorrection) {
 			numberWithoutZeros = Constants.getSmsPhoneNumberCountryCorrection()
 					+ numberWithoutZeros;
 		}
