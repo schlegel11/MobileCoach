@@ -35,7 +35,7 @@ This can be set in the "JRE" tab when configuring an ANT task in the eclipse GUI
 
 		<!-- Retrieve FileWrapperServlet -->
 		<mkdir dir="WebContent/WEB-INF/lib" />
-		<get src="https://bitbucket.org/mobilecoach/mobilecoach-fileservletwrapper/src/0840154f5b634d41e801be723f76bd52deeda758/out/FileServletWrapper.jar?at=master" dest="WebContent/WEB-INF/lib/" verbose="true" usetimestamp="true" />
+		<get src="https://bitbucket.org/mobilecoach/mobilecoach-fileservletwrapper/raw/0840154f5b634d41e801be723f76bd52deeda758/out/FileServletWrapper.jar" dest="WebContent/WEB-INF/lib/" verbose="true" usetimestamp="true" />
 
 		<!-- Create .war file -->
 		<war destfile="out/MC.war" webxml="WebContent/WEB-INF/web.xml" update="true">
