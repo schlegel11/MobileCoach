@@ -70,8 +70,22 @@ a:active {
    Author's styles
    ---------------------------------------------------------*/
 
-body {}
-
+body {
+    padding: 20px 20px 20px 20px;
+}
+body.colorful {
+    background-color: lightblue;
+    color: darkblue;
+}
+body.colorful h3 {
+    color: darkred;
+}
 .with-linebreaks {
     white-space: pre-line;
+}
+.error {
+    color: red;
+}
+footer {
+    padding-top: 30px;
 }

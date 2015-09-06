@@ -65,10 +65,10 @@ import ch.ethz.mc.tools.VariableStringReplacer;
 /**
  * Cares for the orchestration of {@link ScreeningSurveySlides} as
  * part of a {@link ScreeningSurvey}
- * 
+ *
  * The templates are based on the Mustache standard. Details can be found in the
  * {@link ScreeningSurveySlideTemplateFieldTypes} class
- * 
+ *
  * @author Andreas Filler
  */
 @Log4j2
@@ -231,7 +231,7 @@ public class ScreeningSurveyExecutionManagerService {
 	/**
 	 * Checks variables of participant if all relevant information for
 	 * monitoring is available
-	 * 
+	 *
 	 * @param participantId
 	 * @return
 	 */
@@ -254,7 +254,7 @@ public class ScreeningSurveyExecutionManagerService {
 	 * Returns if the requested {@link ScreeningSurvey} is currently accessible
 	 * (means the the {@link Intervention} and {@link ScreeningSurvey} are both
 	 * active)
-	 * 
+	 *
 	 * @param screeningSurveyId
 	 * @return
 	 */
@@ -281,7 +281,7 @@ public class ScreeningSurveyExecutionManagerService {
 	 * Returns if the requested {@link Feedback} is currently accessible
 	 * (means the the {@link Intervention} is active) by checking the
 	 * {@link Participant} first
-	 * 
+	 *
 	 * @param screeningSurveyId
 	 * @return
 	 */
@@ -325,7 +325,7 @@ public class ScreeningSurveyExecutionManagerService {
 	/**
 	 * Returns the appropriate {@link HashMap} to fill the template or
 	 * <code>null</code> if an unexpected error occurs
-	 * 
+	 *
 	 * @param participantId
 	 *            The {@link ObjectId} of the current participant or
 	 *            <code>null</code> if not created
@@ -374,18 +374,29 @@ public class ScreeningSurveyExecutionManagerService {
 		log.debug("Check if participant has access to screening survey");
 		if (screeningSurvey.getPassword() != null
 				&& !screeningSurvey.getPassword().equals("") && !accessGranted) {
+
 			// Login is required, check login information, if provided
 			if (resultValues != null
-					&& resultValues.equals(screeningSurvey.getPassword())) {
+					&& resultValues.size() > 0
+					&& resultValues.get(0)
+					.equals(screeningSurvey.getPassword())) {
+				log.debug("Access granted");
 				// Remember that user authenticated
 				session.setAttribute(
 						ScreeningSurveySessionAttributeTypes.PARTICIPANT_ACCESS_GRANTED
 								.toString(), true);
 			} else {
 				// Redirect to password page
+				log.debug("Access not granted - show password page (again)");
 				templateVariables.put(
 						ScreeningSurveySlideTemplateLayoutTypes.PASSWORD_INPUT
 								.toVariable(), true);
+
+				templateVariables
+						.put(ScreeningSurveySlideTemplateFieldTypes.RESULT_VARIABLE
+								.toVariable(),
+								ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLES + 0);
+
 				return templateVariables;
 			}
 		}
@@ -763,12 +774,12 @@ public class ScreeningSurveyExecutionManagerService {
 	/**
 	 * Tries to finish all unfinished {@link ScreeningSurvey}s of
 	 * {@link Participant} with the following state:
-	 * 
+	 *
 	 * - the belonging intervention is active
 	 * - the participant has all data for monitoring available
 	 * - the participant has not finished the screening survey
 	 * - the participant has not finished the monitoring
-	 * 
+	 *
 	 */
 	@Synchronized
 	public void finishUnfinishedScreeningSurveys() {
@@ -810,7 +821,7 @@ public class ScreeningSurveyExecutionManagerService {
 	/**
 	 * Finishes a {@link ScreeningSurvey} for an already existing
 	 * {@link Participant}
-	 * 
+	 *
 	 * @param participantId
 	 *            The {@link ObjectId} of the participant
 	 * @return
@@ -947,7 +958,7 @@ public class ScreeningSurveyExecutionManagerService {
 	/**
 	 * Determines which {@link ScreeningSurveySlide} is the next slide to
 	 * present to the user
-	 * 
+	 *
 	 * @param participant
 	 * @param screeningSurvey
 	 * @param formerSlide
@@ -1141,7 +1152,7 @@ public class ScreeningSurveyExecutionManagerService {
 	/**
 	 * Returns the appropriate {@link HashMap} to fill the template or
 	 * <code>null</code> if an unexpected error occurs
-	 * 
+	 *
 	 * @param feedbackParticipantId
 	 *            The {@link ObjectId} of the participant of which the feedback
 	 *            should be shown
@@ -1362,7 +1373,7 @@ public class ScreeningSurveyExecutionManagerService {
 	/**
 	 * Determines which {@link FeedbackSlide} is the next slide to present to
 	 * the user
-	 * 
+	 *
 	 * @param formerSlide
 	 * @param feedbackId
 	 * @param variablesWithValues
@@ -1435,7 +1446,7 @@ public class ScreeningSurveyExecutionManagerService {
 	 */
 	/**
 	 * Get a specific {@link ScreeningSurvey} by {@link ObjectId}
-	 * 
+	 *
 	 * @param screeningSurveyId
 	 * @return
 	 */
@@ -1449,7 +1460,7 @@ public class ScreeningSurveyExecutionManagerService {
 	/**
 	 * Get a specific {@link Feedback} by the {@link ObjectId} of a
 	 * {@link Participant}
-	 * 
+	 *
 	 * @param feedbackParticipantId
 	 * @return
 	 */
@@ -1478,7 +1489,7 @@ public class ScreeningSurveyExecutionManagerService {
 	 * Returns all active {@link ScreeningSurvey}s or <code>null</code> if non
 	 * has been
 	 * found
-	 * 
+	 *
 	 * @return
 	 */
 	@Synchronized
@@ -1504,7 +1515,7 @@ public class ScreeningSurveyExecutionManagerService {
 
 	/**
 	 * Returns the path containing the templates
-	 * 
+	 *
 	 * @return
 	 */
 	@Synchronized
