@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.basics;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -59,13 +59,13 @@ import com.vaadin.ui.Tree.TreeTargetDetails;
 
 /**
  * Extends the abstract monitoring rules edit component with a controller
- * 
+ *
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
 @Log4j2
 public abstract class AbstractMonitoringRulesEditComponentWithController extends
-		AbstractMonitoringRulesEditComponent {
+AbstractMonitoringRulesEditComponent {
 
 	private Intervention			intervention;
 
@@ -83,11 +83,11 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 	public static final String		ICON						= "icon";
 
 	private final ThemeResource		RULE_ICON					= new ThemeResource(
-																		ThemeImageStrings.RULE_ICON_SMALL);
+			ThemeImageStrings.RULE_ICON_SMALL);
 	private final ThemeResource		MESSAGE_RULE_ICON			= new ThemeResource(
-																		ThemeImageStrings.MESSAGE_ICON_SMALL);
+			ThemeImageStrings.MESSAGE_ICON_SMALL);
 	private final ThemeResource		STOP_RULE_ICON				= new ThemeResource(
-																		ThemeImageStrings.STOP_ICON_SMALL);
+			ThemeImageStrings.STOP_ICON_SMALL);
 
 	private HierarchicalContainer	container;
 
@@ -97,7 +97,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 
 	/**
 	 * Initialization for {@link MonitoringRule}s
-	 * 
+	 *
 	 * @param intervention
 	 */
 	public void init(final Intervention intervention) {
@@ -106,7 +106,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 
 	/**
 	 * Initialization for {@link MonitoringReplyRule}s
-	 * 
+	 *
 	 * @param intervention
 	 * @param relatedMonitoringRuleId
 	 * @param isGotAnswerRule
@@ -120,7 +120,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 	/**
 	 * Internal initialization for {@link MonitoringRule}s and
 	 * {@link MonitoringReplyRule}s
-	 * 
+	 *
 	 * @param intervention
 	 * @param relatedMonitoringRuleId
 	 * @param isGotAnswerRule
@@ -182,12 +182,12 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 						abstractMonitoringRule.getId());
 				if (isMonitoringRule) {
 					getInterventionAdministrationManagerService()
-							.monitoringRuleDelete(
-									abstractMonitoringRule.getId());
+					.monitoringRuleDelete(
+							abstractMonitoringRule.getId());
 				} else {
 					getInterventionAdministrationManagerService()
-							.monitoringReplyRuleDelete(
-									abstractMonitoringRule.getId());
+					.monitoringReplyRuleDelete(
+							abstractMonitoringRule.getId());
 				}
 			}
 		}
@@ -283,7 +283,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 			String resultVariable;
 			if (selectedMonitoringRule.getStoreValueToVariableWithName() == null
 					|| selectedMonitoringRule.getStoreValueToVariableWithName()
-							.equals("")) {
+					.equals("")) {
 				resultVariable = ImplementationConstants.DEFAULT_OBJECT_NAME;
 			} else {
 				resultVariable = selectedMonitoringRule
@@ -299,7 +299,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 					final MonitoringMessageGroup monitoringMessageGroup = getInterventionAdministrationManagerService()
 							.getMonitoringMessageGroup(
 									selectedMonitoringRule
-											.getRelatedMonitoringMessageGroup());
+									.getRelatedMonitoringMessageGroup());
 					if (monitoringMessageGroup == null) {
 						sendMessage = Messages
 								.getAdminString(AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_MESSAGE_FROM_ALREADY_DELETED_GROUP);
@@ -375,8 +375,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 						rulesTree.select(newAbstractMonitoringRule.getId());
 
 						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__MONITORING_RULE_CREATED);
+						.showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__MONITORING_RULE_CREATED);
 
 						adjust();
 
@@ -423,7 +423,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 							icon = MESSAGE_RULE_ICON;
 						} else if (isMonitoringRule
 								&& ((MonitoringRule) selectedAbstractMonitoringRule)
-										.isStopInterventionWhenTrue()) {
+								.isStopInterventionWhenTrue()) {
 							icon = STOP_RULE_ICON;
 						} else {
 							icon = RULE_ICON;
@@ -434,8 +434,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 						item.getItemProperty(ICON).setValue(icon);
 
 						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__MONITORING_RULE_UPDATED);
+						.showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__MONITORING_RULE_UPDATED);
 
 						adjust();
 
@@ -465,7 +465,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 			icon = MESSAGE_RULE_ICON;
 		} else if (isMonitoringRule
 				&& ((MonitoringRule) abstractMonitoringRule)
-						.isStopInterventionWhenTrue()) {
+				.isStopInterventionWhenTrue()) {
 			icon = STOP_RULE_ICON;
 		} else {
 			icon = RULE_ICON;
@@ -490,17 +490,19 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 	}
 
 	public void moveItem(final TreeSortDropHandler.MOVE movement,
-			final ObjectId sourceItemId, final ObjectId targetItemId) {
-		log.debug("Moving {} {} {}", sourceItemId, movement, targetItemId);
+			final ObjectId sourceItemId, final ObjectId parentItemId,
+			final ObjectId sameLevelTargetItemId) {
+		log.debug("Moving {} {} (parent: {} / same level target: {} )",
+				sourceItemId, movement, parentItemId, sameLevelTargetItemId);
 		if (isMonitoringRule) {
 			getInterventionAdministrationManagerService().monitoringRuleMove(
-					movement.ordinal(), sourceItemId, targetItemId,
-					intervention.getId());
+					movement.ordinal(), sourceItemId, parentItemId,
+					sameLevelTargetItemId, intervention.getId());
 		} else {
 			getInterventionAdministrationManagerService()
 					.monitoringReplyRuleMove(movement.ordinal(), sourceItemId,
-							targetItemId, relatedMonitoringRuleId,
-							isGotAnswerRule);
+							parentItemId, sameLevelTargetItemId,
+							relatedMonitoringRuleId, isGotAnswerRule);
 		}
 	}
 
@@ -515,11 +517,11 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 					// Delete rule
 					if (isMonitoringRule) {
 						getInterventionAdministrationManagerService()
-								.monitoringRuleDelete(selectedMonitoringRuleId);
+						.monitoringRuleDelete(selectedMonitoringRuleId);
 					} else {
 						getInterventionAdministrationManagerService()
-								.monitoringReplyRuleDelete(
-										selectedMonitoringRuleId);
+						.monitoringReplyRuleDelete(
+								selectedMonitoringRuleId);
 					}
 				} catch (final Exception e) {
 					closeWindow();
@@ -531,8 +533,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 				container.removeItemRecursively(selectedMonitoringRuleId);
 
 				getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__MONITORING_RULE_DELETED);
+				.showInformationNotification(
+						AdminMessageStrings.NOTIFICATION__MONITORING_RULE_DELETED);
 
 				rulesTree.select(null);
 
@@ -552,7 +554,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 
 		/**
 		 * Manages the drag & drop events on the rules tree
-		 * 
+		 *
 		 * @param tree
 		 * @param container
 		 */
@@ -586,30 +588,43 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 					.getTargetDetails();
 
 			final Object sourceItemId = ((DataBoundTransferable) t).getItemId();
-			final Object targetItemId = dropData.getItemIdOver();
+
+			final Object parentTargetItemId = dropData.getItemIdInto();
+
+			final Object sameLevelTargetItemId = dropData.getItemIdOver();
 
 			// Location describes on which part of the node the drop took
 			// place
 			final VerticalDropLocation location = dropData.getDropLocation();
 
-			moveNode(sourceItemId, targetItemId, location);
+			moveNode(sourceItemId, parentTargetItemId, sameLevelTargetItemId,
+					location);
 
 		}
 
 		/**
 		 * Move a node within a tree onto, above or below another node depending
 		 * on the drop location.
-		 * 
+		 *
 		 * @param sourceItemId
 		 *            id of the item to move
-		 * @param targetItemId
+		 * @param parentTargetItemId
 		 *            id of the item onto which the source node should be moved
+		 *            (relevant for MIDDLE)
+		 * @param sameLevelTargetItemId
+		 *            id of the item over which the source node should be moved
+		 *            (relevant for BOTTOM)
+		 * @param afterItemId
+		 *            id of the item after which the source node should be moved
+		 *            (relevant for TOP)
 		 * @param location
 		 *            VerticalDropLocation indicating where the source node was
 		 *            dropped relative to the target node
 		 */
 		private void moveNode(final Object sourceItemId,
-				final Object targetItemId, final VerticalDropLocation location) {
+				final Object parentTargetItemId,
+				final Object sameLevelTargetItemId,
+				final VerticalDropLocation location) {
 			final HierarchicalContainer container = (HierarchicalContainer) tree
 					.getContainerDataSource();
 
@@ -620,32 +635,40 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 			// - If dropped on the BOTTOM part of a node, we move/add it
 			// after the node
 			if (location == VerticalDropLocation.MIDDLE) {
-				if (container.setParent(sourceItemId, targetItemId)
-						&& container.hasChildren(targetItemId)) {
+				if (container.setParent(sourceItemId, parentTargetItemId)
+						&& container.hasChildren(parentTargetItemId)) {
 					// move first in the container
 					container.moveAfterSibling(sourceItemId, null);
-					// Adjust monitoring rule
 				}
+				// Adjust monitoring rule
 				component.moveItem(TreeSortDropHandler.MOVE.AS_CHILD,
-						(ObjectId) sourceItemId, (ObjectId) targetItemId);
+						(ObjectId) sourceItemId, (ObjectId) parentTargetItemId,
+						(ObjectId) sameLevelTargetItemId);
 			} else if (location == VerticalDropLocation.TOP) {
-				final Object parentId = container.getParent(targetItemId);
-				if (container.setParent(sourceItemId, parentId)) {
-					// reorder only the two items, moving source above target
-					container.moveAfterSibling(sourceItemId, targetItemId);
-					container.moveAfterSibling(targetItemId, sourceItemId);
-					// Adjust monitoring rule
+				final Object parentItemId = container
+						.getParent(sameLevelTargetItemId);
+				if (container.setParent(sourceItemId, parentItemId)) {
+					// Reorder only the two items, moving source above target
+					container.moveAfterSibling(sourceItemId,
+							sameLevelTargetItemId);
+					container.moveAfterSibling(sameLevelTargetItemId,
+							sourceItemId);
 				}
+				// Adjust monitoring rule
 				component.moveItem(TreeSortDropHandler.MOVE.ABOVE,
-						(ObjectId) sourceItemId, (ObjectId) targetItemId);
+						(ObjectId) sourceItemId, (ObjectId) parentItemId,
+						(ObjectId) sameLevelTargetItemId);
 			} else if (location == VerticalDropLocation.BOTTOM) {
-				final Object parentId = container.getParent(targetItemId);
-				if (container.setParent(sourceItemId, parentId)) {
-					container.moveAfterSibling(sourceItemId, targetItemId);
-					// Adjust monitoring rule
+				final Object parentItemId = container
+						.getParent(sameLevelTargetItemId);
+				if (container.setParent(sourceItemId, parentItemId)) {
+					container.moveAfterSibling(sourceItemId,
+							sameLevelTargetItemId);
 				}
+				// Adjust monitoring rule
 				component.moveItem(TreeSortDropHandler.MOVE.BELOW,
-						(ObjectId) sourceItemId, (ObjectId) targetItemId);
+						(ObjectId) sourceItemId, (ObjectId) parentItemId,
+						(ObjectId) sameLevelTargetItemId);
 			}
 		}
 	}

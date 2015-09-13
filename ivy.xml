@@ -6,7 +6,7 @@
 	<!ENTITY commons-io.version "2.4">
 	<!ENTITY geronimo-validation_1.0_spec.version "1.1">
 	<!ENTITY bval-bundle.version "0.5">
-	<!ENTITY vaadin.version "7.4.7">
+	<!ENTITY vaadin.version "7.5.5">
 	<!ENTITY validation.version "1.1.0.Final">
 	<!ENTITY jongo.version "1.2">
 	<!ENTITY mongodb-driver.version "3.0.2">

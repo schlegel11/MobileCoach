@@ -139,3 +139,14 @@ An extended backend user guide will be published in the following months.
 
 ### Version @@VERSION@@
 
+## Release notes
+
+### 1.3.0
+
+**Enhancements**
+
+* New Vaadin version for better browser compatibility
+
+**Bugfixes**
+
+* Fixing table sort parent problem for monitoring (reply) rules
