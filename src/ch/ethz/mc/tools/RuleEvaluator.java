@@ -42,7 +42,7 @@ import com.fathzer.soft.javaluator.Function;
 
 /**
  * Evaluates calculated and text based rules
- * 
+ *
  * @author Andreas Filler
  */
 @Log4j2
@@ -50,7 +50,7 @@ public class RuleEvaluator {
 	/**
 	 * Evaluates an {@link AbstractRule} including the given
 	 * {@link AbstractVariableWithValue}s
-	 * 
+	 *
 	 * @param rule
 	 *            The {@link AbstractRule} to evaluate
 	 * @param variablesWithValues
@@ -229,7 +229,7 @@ public class RuleEvaluator {
 								Integer.parseInt(dateParts[0]));
 					} else if (dateParts.length > 2
 							&& dateParts[2].length() == 2) {
-						calendarDiff.set(Integer.parseInt(dateParts[2] + 2000),
+						calendarDiff.set(Integer.parseInt(dateParts[2]) + 2000,
 								Integer.parseInt(dateParts[1]) - 1,
 								Integer.parseInt(dateParts[0]));
 					} else {
@@ -271,7 +271,7 @@ public class RuleEvaluator {
 					} else if (dateParts1.length > 2
 							&& dateParts1[2].length() == 2) {
 						calendarDiff1.set(
-								Integer.parseInt(dateParts1[2] + 2000),
+								Integer.parseInt(dateParts1[2]) + 2000,
 								Integer.parseInt(dateParts1[1]) - 1,
 								Integer.parseInt(dateParts1[0]));
 					} else {
@@ -286,7 +286,7 @@ public class RuleEvaluator {
 					} else if (dateParts2.length > 2
 							&& dateParts2[2].length() == 2) {
 						calendarDiff2.set(
-								Integer.parseInt(dateParts2[2] + 2000),
+								Integer.parseInt(dateParts2[2]) + 2000,
 								Integer.parseInt(dateParts2[1]) - 1,
 								Integer.parseInt(dateParts2[0]));
 					} else {
@@ -334,7 +334,7 @@ public class RuleEvaluator {
 
 	/**
 	 * Evaluates a calculatable rule {@link String}
-	 * 
+	 *
 	 * @param ruleWithPlaceholders
 	 *            String to evaluate
 	 * @param variablesWithValues
@@ -421,7 +421,7 @@ public class RuleEvaluator {
 			/**
 			 * Determines the position of the 1st, 2nd, 3rd highest value in the
 			 * list; The result is randomized if all/several values would fit
-			 * 
+			 *
 			 * @param i
 			 * @param arguments
 			 * @return
@@ -443,7 +443,7 @@ public class RuleEvaluator {
 
 			/**
 			 * Returns the object at the given position in the array
-			 * 
+			 *
 			 * @param arguments
 			 * @return
 			 */
@@ -463,7 +463,7 @@ public class RuleEvaluator {
 
 	/**
 	 * Evaluates a text rule {@link String}
-	 * 
+	 *
 	 * @param ruleWithPlaceholders
 	 *            String to evaluate
 	 * @param variablesWithValues

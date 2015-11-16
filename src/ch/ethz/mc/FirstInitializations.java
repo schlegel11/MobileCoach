@@ -2,15 +2,15 @@ package ch.ethz.mc;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,7 +36,7 @@ import ch.ethz.mc.conf.ImplementationConstants;
 /**
  * Sets logging folder as folder for Log4j2 log files and adjusts configuration
  * based on configuration file
- * 
+ *
  * @author Andreas Filler
  */
 public class FirstInitializations implements ServletContextListener {
@@ -50,9 +50,12 @@ public class FirstInitializations implements ServletContextListener {
 
 		val loggingFolder = getLoggingFolder(configurationsFileString);
 		val loggingConsoleLevel = getLoggingConsoleLevel(configurationsFileString);
+		val loggingRollingFileLevel = getLoggingRollingFileLevel(configurationsFileString);
 
 		System.setProperty("mc_logging_folder", loggingFolder);
 		System.setProperty("mc_logging_console_level", loggingConsoleLevel);
+		System.setProperty("mc_logging_rolling_file_level",
+				loggingRollingFileLevel);
 		val loggerContext = (LoggerContext) LogManager.getContext(false);
 		loggerContext.reconfigure();
 
@@ -66,7 +69,7 @@ public class FirstInitializations implements ServletContextListener {
 	/**
 	 * Reads the logging folder from configuration file before the configuration
 	 * file is officially parsed for the system
-	 * 
+	 *
 	 * @param configurationsFileString
 	 *            String containing the complete path to the configuration file
 	 * @return
@@ -102,9 +105,8 @@ public class FirstInitializations implements ServletContextListener {
 
 	/**
 	 * Reads the logging level of the console from configuration file before the
-	 * configuration
-	 * file is officially parsed for the system
-	 * 
+	 * configuration file is officially parsed for the system
+	 *
 	 * @param configurationsFileString
 	 *            String containing the complete path to the configuration file
 	 * @return
@@ -136,6 +138,47 @@ public class FirstInitializations implements ServletContextListener {
 		}
 
 		return Constants.getLoggingConsoleLevel();
+	}
+
+	/**
+	 * Reads the logging level of the rolling file from configuration file
+	 * before the
+	 * configuration file is officially parsed for the system
+	 *
+	 * @param configurationsFileString
+	 *            String containing the complete path to the configuration file
+	 * @return
+	 */
+
+	private String getLoggingRollingFileLevel(
+			final String configurationsFileString) {
+		if (configurationsFileString == null) {
+			return Constants.getLoggingRollingFileLevel();
+		}
+
+		val configurationFile = new File(configurationsFileString);
+
+		if (!configurationFile.exists()) {
+			return Constants.getLoggingConsoleLevel();
+		}
+
+		// Configuration file provided and exists
+		val properties = new Properties();
+		try {
+			@Cleanup
+			val fileInputStream = new FileInputStream(configurationFile);
+			properties.load(fileInputStream);
+		} catch (final Exception e) {
+			return Constants.getLoggingConsoleLevel();
+		}
+
+		if (properties.getProperty("loggingRollingFileLevel") != null
+				&& !properties.getProperty("loggingRollingFileLevel")
+						.equals("")) {
+			return properties.getProperty("loggingRollingFileLevel");
+		}
+
+		return Constants.getLoggingRollingFileLevel();
 	}
 
 	@Override

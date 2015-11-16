@@ -79,7 +79,7 @@ Extend your tomcat configuration files or startup scripts with this setting.
 
 You should also add the following parameters to avoid problems with the Log4J logging system:
 
-	-Dmc_logging_folder=/tmp -Dmc_logging_console_level=INFO
+	-Dmc_logging_folder=/tmp -Dmc_logging_console_level=INFO -Dmc_logging_rolling_file_level=INFO
 
 **Suggestion:**   
 Ensure that your Tomcat installation is allowed to read and write to all folders configured in the **configuration.properties**

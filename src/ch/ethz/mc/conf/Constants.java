@@ -125,6 +125,8 @@ public class Constants {
 
 	@Getter
 	private static String	loggingConsoleLevel					= "DEBUG";
+	@Getter
+	private static String	loggingRollingFileLevel				= "DEBUG";
 
 	@Getter
 	private static String	fileExtension						= ".mc";
