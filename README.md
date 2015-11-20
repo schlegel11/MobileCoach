@@ -141,6 +141,16 @@ An extended backend user guide will be published in the following months.
 
 ## Release notes
 
+### 1.3.1
+
+**Enhancements**
+
+* New JVM argument **-Dmc_logging_rolling_file_level=INFO** and configuration paramter **loggingRollingFileLevel** to define logging level of rolling file appender (should be added to installations < 1.3.1) 
+
+**Bugfixes**
+
+* Fixing date calculations for 2-digit years entered by participants
+
 ### 1.3.0
 
 **Enhancements**
@@ -150,3 +160,4 @@ An extended backend user guide will be published in the following months.
 **Bugfixes**
 
 * Fixing table sort parent problem for monitoring (reply) rules
+
