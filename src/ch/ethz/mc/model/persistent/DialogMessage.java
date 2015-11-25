@@ -26,6 +26,7 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.val;
 
+import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
@@ -34,12 +35,13 @@ import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.ui.UIDialogMessageProblemViewWithParticipant;
+import ch.ethz.mc.model.ui.UIDialogMessageWithParticipant;
 import ch.ethz.mc.model.ui.results.UIDialogMessageWithParticipantForResults;
 import ch.ethz.mc.tools.StringHelpers;
 
 /**
  * {@link ModelObject} to represent an {@link DialogMessage}
- * 
+ *
  * @author Andreas Filler
  */
 @NoArgsConstructor
@@ -173,12 +175,12 @@ public class DialogMessage extends ModelObject {
 	/**
 	 * Create a {@link UIDialogMessageWithParticipantForResults} with the
 	 * belonging {@link Participant}
-	 * 
+	 *
 	 * @param participantId
 	 * @param participantName
 	 * @return
 	 */
-	public UIDialogMessageWithParticipantForResults toUIDialogMessageWithParticipant(
+	public UIDialogMessageWithParticipantForResults toUIDialogMessageWithParticipantForResults(
 			final String participantId, final String participantName,
 			final String organization, final String organizationUnit) {
 		final val dialogMessage = new UIDialogMessageWithParticipantForResults(
@@ -186,7 +188,7 @@ public class DialogMessage extends ModelObject {
 				participantName,
 				organization,
 				organizationUnit,
-				String.valueOf(order + 1),
+				StringUtils.right("0000" + String.valueOf(order + 1), 5),
 				status.toString(),
 				message == null || message.equals("") ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
@@ -215,9 +217,55 @@ public class DialogMessage extends ModelObject {
 	}
 
 	/**
+	 * Create a {@link UIDialogMessageWithParticipant} with the
+	 * belonging {@link Participant}
+	 *
+	 * @param participantId
+	 * @param participantName
+	 * @return
+	 */
+	public UIDialogMessageWithParticipant toUIDialogMessageWithParticipant(
+			final String participantId, final String participantName,
+			final String organization, final String organizationUnit) {
+		final val dialogMessage = new UIDialogMessageWithParticipant(
+				participantId,
+				participantName,
+				organization,
+				organizationUnit,
+				order + 1,
+				status.toString(),
+				message == null || message.equals("") ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+						: message,
+				shouldBeSentTimestamp <= 0 ? null : new Date(
+						shouldBeSentTimestamp),
+				sentTimestamp <= 0 ? null : new Date(sentTimestamp),
+										answerReceived == null || answerReceived.equals("") ? Messages
+												.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+												: answerReceived,
+												answerReceivedRaw == null || answerReceivedRaw.equals("") ? Messages
+														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+														: answerReceivedRaw,
+														answerReceivedTimestamp <= 0 ? null : new Date(
+																answerReceivedTimestamp),
+																manuallySent ? Messages
+																		.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+																		: Messages
+																		.getAdminString(AdminMessageStrings.UI_MODEL__NO),
+																		mediaContentViewed ? Messages
+																				.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+																				: Messages
+																				.getAdminString(AdminMessageStrings.UI_MODEL__NO));
+
+		dialogMessage.setRelatedModelObject(this);
+
+		return dialogMessage;
+	}
+
+	/**
 	 * Create a {@link UIDialogMessageProblemViewWithParticipant} with the
 	 * belonging {@link Participant}
-	 * 
+	 *
 	 * @param participantId
 	 * @param participantName
 	 * @return

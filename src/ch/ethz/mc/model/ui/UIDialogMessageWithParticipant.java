@@ -1,34 +1,35 @@
-package ch.ethz.mc.model.ui.results;
+package ch.ethz.mc.model.ui;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import java.util.Date;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import ch.ethz.mc.conf.AdminMessageStrings;
-import ch.ethz.mc.model.ui.UIModelObject;
 
 import com.vaadin.data.fieldgroup.PropertyId;
 
 @AllArgsConstructor
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class UIDialogMessageWithParticipantForResults extends UIModelObject {
+public class UIDialogMessageWithParticipant extends UIModelObject {
 	// NOTE: The String values have to fit the name of the variables
 	public static final String	PARTICIPANT_ID				= "participantId";
 	public static final String	PARTICIPANT_NAME			= "participantName";
@@ -61,7 +62,7 @@ public class UIDialogMessageWithParticipantForResults extends UIModelObject {
 	private String				organizationUnit;
 
 	@PropertyId(ORDER)
-	private String				order;
+	private int					order;
 
 	@PropertyId(STATUS)
 	private String				status;
@@ -70,10 +71,10 @@ public class UIDialogMessageWithParticipantForResults extends UIModelObject {
 	private String				message;
 
 	@PropertyId(SHOULD_BE_SENT_TIMESTAMP)
-	private String				shouldBeSentTimestamp;
+	private Date				shouldBeSentTimestamp;
 
 	@PropertyId(SENT_TIMESTAMP)
-	private String				sentTimestamp;
+	private Date				sentTimestamp;
 
 	@PropertyId(ANSWER)
 	private String				answer;
@@ -82,7 +83,7 @@ public class UIDialogMessageWithParticipantForResults extends UIModelObject {
 	private String				rawAnswer;
 
 	@PropertyId(ANSWER_RECEIVED_TIMESTAMP)
-	private String				answerReceivedTimestamp;
+	private Date				answerReceivedTimestamp;
 
 	@PropertyId(MANUALLY_SENT)
 	private String				manuallySent;
@@ -115,6 +116,6 @@ public class UIDialogMessageWithParticipantForResults extends UIModelObject {
 	}
 
 	public static String getSortColumn() {
-		return PARTICIPANT_ID;
+		return SHOULD_BE_SENT_TIMESTAMP;
 	}
 }
