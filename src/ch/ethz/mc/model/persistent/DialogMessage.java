@@ -184,6 +184,7 @@ public class DialogMessage extends ModelObject {
 			final String participantId, final String participantName,
 			final String organization, final String organizationUnit,
 			final boolean containsMediaContent) {
+
 		final val dialogMessage = new UIDialogMessageWithParticipantForResults(
 				participantId,
 				participantName,
@@ -231,7 +232,8 @@ public class DialogMessage extends ModelObject {
 	 */
 	public UIDialogMessageWithParticipant toUIDialogMessageWithParticipant(
 			final String participantId, final String participantName,
-			final String organization, final String organizationUnit) {
+			final String organization, final String organizationUnit,
+			final boolean containsMediaContent) {
 		final val dialogMessage = new UIDialogMessageWithParticipant(
 				participantId,
 				participantName,
@@ -257,10 +259,14 @@ public class DialogMessage extends ModelObject {
 																		.getAdminString(AdminMessageStrings.UI_MODEL__YES)
 																		: Messages
 																		.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-																		mediaContentViewed ? Messages
+																		containsMediaContent ? Messages
 																				.getAdminString(AdminMessageStrings.UI_MODEL__YES)
 																				: Messages
-																				.getAdminString(AdminMessageStrings.UI_MODEL__NO));
+																				.getAdminString(AdminMessageStrings.UI_MODEL__NO),
+																				mediaContentViewed ? Messages
+																						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+																						: Messages
+																						.getAdminString(AdminMessageStrings.UI_MODEL__NO));
 
 		dialogMessage.setRelatedModelObject(this);
 

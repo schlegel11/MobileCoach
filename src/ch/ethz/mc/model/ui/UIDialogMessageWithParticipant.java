@@ -47,6 +47,7 @@ public class UIDialogMessageWithParticipant extends UIModelObject {
 	public static final String	ANSWER_RECEIVED_TIMESTAMP	= "answerReceivedTimestamp";
 
 	public static final String	MANUALLY_SENT				= "manuallySent";
+	public static final String	CONTAINS_MEDIA_CONTENT		= "containsMediaContent";
 	public static final String	MEDIA_CONTENT_VIEWED		= "mediaContentViewed";
 
 	@PropertyId(PARTICIPANT_ID)
@@ -87,6 +88,8 @@ public class UIDialogMessageWithParticipant extends UIModelObject {
 
 	@PropertyId(MANUALLY_SENT)
 	private String				manuallySent;
+	@PropertyId(CONTAINS_MEDIA_CONTENT)
+	private String				containsMediaContent;
 	@PropertyId(MEDIA_CONTENT_VIEWED)
 	private String				mediaContentViewed;
 
@@ -94,7 +97,8 @@ public class UIDialogMessageWithParticipant extends UIModelObject {
 		return new Object[] { PARTICIPANT_ID, PARTICIPANT_NAME, ORGANIZATION,
 				ORGANIZATION_UNIT, ORDER, STATUS, MESSAGE,
 				SHOULD_BE_SENT_TIMESTAMP, SENT_TIMESTAMP, ANSWER, RAW_ANSWER,
-				ANSWER_RECEIVED_TIMESTAMP, MANUALLY_SENT, MEDIA_CONTENT_VIEWED };
+				ANSWER_RECEIVED_TIMESTAMP, MANUALLY_SENT,
+				CONTAINS_MEDIA_CONTENT, MEDIA_CONTENT_VIEWED };
 	}
 
 	public static String[] getColumnHeaders() {
@@ -112,6 +116,7 @@ public class UIDialogMessageWithParticipant extends UIModelObject {
 				localize(AdminMessageStrings.UI_COLUMNS__RAW_ANSWER),
 				localize(AdminMessageStrings.UI_COLUMNS__ANSWER_RECEIVED_TIMESTAMP),
 				localize(AdminMessageStrings.UI_COLUMNS__MANUALLY_SENT),
+				localize(AdminMessageStrings.UI_COLUMNS__CONTAINS_MEDIA_CONTENT),
 				localize(AdminMessageStrings.UI_COLUMNS__MEDIA_CONTENT_VIEWED) };
 	}
 
