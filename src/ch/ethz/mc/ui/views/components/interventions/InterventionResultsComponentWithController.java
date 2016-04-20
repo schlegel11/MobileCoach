@@ -383,6 +383,27 @@ InterventionResultsComponent {
 					.getAllDialogMessagesOfParticipant(participantId);
 
 			for (val dialogMessageOfParticipant : dialogMessagesOfParticipant) {
+				boolean containsMediaContentInMessage = false;
+				val relatedMonitoringMessageId = dialogMessageOfParticipant
+						.getRelatedMonitoringMessage();
+
+				if (relatedMonitoringMessageId != null) {
+					val relatedMonitoringMessage = getInterventionAdministrationManagerService()
+							.getMonitoringMessage(relatedMonitoringMessageId);
+
+					if (relatedMonitoringMessage != null
+							&& relatedMonitoringMessage.getLinkedMediaObject() != null) {
+						val linkedMediaObject = getInterventionAdministrationManagerService()
+								.getMediaObject(
+										relatedMonitoringMessage
+										.getLinkedMediaObject());
+
+						if (linkedMediaObject != null) {
+							containsMediaContentInMessage = true;
+						}
+					}
+				}
+
 				messageDialogBeanContainer
 				.addItem(
 						i++,
@@ -404,7 +425,8 @@ InterventionResultsComponent {
 												.equals("") ? Messages
 														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 														: participant
-														.getOrganizationUnit()));
+														.getOrganizationUnit(),
+												containsMediaContentInMessage));
 			}
 		}
 
