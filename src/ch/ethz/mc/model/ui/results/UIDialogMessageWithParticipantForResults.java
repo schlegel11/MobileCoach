@@ -2,15 +2,15 @@ package ch.ethz.mc.model.ui.results;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -46,6 +46,7 @@ public class UIDialogMessageWithParticipantForResults extends UIModelObject {
 	public static final String	ANSWER_RECEIVED_TIMESTAMP	= "answerReceivedTimestamp";
 
 	public static final String	MANUALLY_SENT				= "manuallySent";
+	public static final String	CONTAINS_MEDIA_CONTENT		= "containsMediaContent";
 	public static final String	MEDIA_CONTENT_VIEWED		= "mediaContentViewed";
 
 	@PropertyId(PARTICIPANT_ID)
@@ -86,6 +87,8 @@ public class UIDialogMessageWithParticipantForResults extends UIModelObject {
 
 	@PropertyId(MANUALLY_SENT)
 	private String				manuallySent;
+	@PropertyId(CONTAINS_MEDIA_CONTENT)
+	private String				containsMediaContent;
 	@PropertyId(MEDIA_CONTENT_VIEWED)
 	private String				mediaContentViewed;
 
@@ -93,7 +96,8 @@ public class UIDialogMessageWithParticipantForResults extends UIModelObject {
 		return new Object[] { PARTICIPANT_ID, PARTICIPANT_NAME, ORGANIZATION,
 				ORGANIZATION_UNIT, ORDER, STATUS, MESSAGE,
 				SHOULD_BE_SENT_TIMESTAMP, SENT_TIMESTAMP, ANSWER, RAW_ANSWER,
-				ANSWER_RECEIVED_TIMESTAMP, MANUALLY_SENT, MEDIA_CONTENT_VIEWED };
+				ANSWER_RECEIVED_TIMESTAMP, MANUALLY_SENT,
+				CONTAINS_MEDIA_CONTENT, MEDIA_CONTENT_VIEWED };
 	}
 
 	public static String[] getColumnHeaders() {
@@ -111,6 +115,7 @@ public class UIDialogMessageWithParticipantForResults extends UIModelObject {
 				localize(AdminMessageStrings.UI_COLUMNS__RAW_ANSWER),
 				localize(AdminMessageStrings.UI_COLUMNS__ANSWER_RECEIVED_TIMESTAMP),
 				localize(AdminMessageStrings.UI_COLUMNS__MANUALLY_SENT),
+				localize(AdminMessageStrings.UI_COLUMNS__CONTAINS_MEDIA_CONTENT),
 				localize(AdminMessageStrings.UI_COLUMNS__MEDIA_CONTENT_VIEWED) };
 	}
 

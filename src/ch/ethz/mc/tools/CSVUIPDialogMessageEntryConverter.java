@@ -43,6 +43,7 @@ public class CSVUIPDialogMessageEntryConverter implements
 				clean(uiDialogMessage.getRawAnswer()),
 				uiDialogMessage.getAnswerReceivedTimestamp(),
 				uiDialogMessage.getManuallySent(),
+				uiDialogMessage.getContainsMediaContent(),
 				uiDialogMessage.getMediaContentViewed() };
 	}
 
@@ -58,6 +59,6 @@ public class CSVUIPDialogMessageEntryConverter implements
 				columnHeaders[4], columnHeaders[5], columnHeaders[6],
 				columnHeaders[7], columnHeaders[8], columnHeaders[9],
 				columnHeaders[10], columnHeaders[11], columnHeaders[12],
-				columnHeaders[13]);
+				columnHeaders[13], columnHeaders[14]);
 	}
 }
