@@ -37,6 +37,7 @@ import ch.ethz.mc.ui.AdminNavigatorUI;
 import ch.ethz.mc.ui.NotificationMessageException;
 import ch.ethz.mc.ui.UISession;
 import ch.ethz.mc.ui.views.components.basics.ConfirmationComponent;
+import ch.ethz.mc.ui.views.helper.CaseInsensitiveItemSorter;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -55,7 +56,7 @@ import com.vaadin.ui.Window;
 
 /**
  * Provides methods for all {@link CustomComponent}s
- * 
+ *
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
@@ -82,7 +83,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	/**
 	 * Provides a {@link ClickListener} which can also close the belonging
 	 * window
-	 * 
+	 *
 	 * @author Andreas Filler
 	 */
 	public abstract class ExtendableButtonClickListener implements
@@ -95,7 +96,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 
 		/**
 		 * Returns string value of belonging {@link AbstractCustomComponent}
-		 * 
+		 *
 		 * @return
 		 */
 		protected String getStringValue() {
@@ -117,7 +118,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 
 	/**
 	 * Shows a model window to edit {@link String}s
-	 * 
+	 *
 	 * @param title
 	 *            The title of the window
 	 * @param valueToEdit
@@ -192,7 +193,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 
 	/**
 	 * Shows a model and closable edit window
-	 * 
+	 *
 	 * @param title
 	 *            The title of the window
 	 * @param modelObjectToEdit
@@ -220,7 +221,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 
 	/**
 	 * Shows a model and closable edit window
-	 * 
+	 *
 	 * @param title
 	 *            The title of the window
 	 * @param modelObjectToEdit
@@ -318,7 +319,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	/**
 	 * Creates an appropriate {@link BeanContainer} for a specific
 	 * {@link Iterable} containing {@link ModelObject}s
-	 * 
+	 *
 	 * @param uiModelObjectSubclass
 	 * @param iterableModelObjects
 	 * @return
@@ -329,6 +330,8 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 
 		final BeanContainer<ObjectId, UIObjectSubclass> beanContainer = new BeanContainer<ObjectId, UIObjectSubclass>(
 				uiModelObjectSubclass);
+
+		beanContainer.setItemSorter(new CaseInsensitiveItemSorter());
 
 		if (iterableModelObjects != null) {
 			for (final ModelObject modelObject : iterableModelObjects) {
@@ -344,7 +347,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	/**
 	 * Updates a {@link BeanContainer} with the provided {@link Iterable}
 	 * containing {@link ModelObject}s
-	 * 
+	 *
 	 * @param beanContainer
 	 * @param uiModelObjectSubclass
 	 * @param iterableModelObjects
@@ -366,7 +369,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	 * Creates an appropriate {@link BeanContainer} for a specific
 	 * {@link Iterable} containing {@link ModelObject}s represented by only ONE
 	 * property
-	 * 
+	 *
 	 * @param uiObjectSubclass
 	 * @param iterableModelObjects
 	 * @return
@@ -377,6 +380,8 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 
 		final BeanContainer<UIObjectSubclass, UIObjectSubclass> beanContainer = new BeanContainer<UIObjectSubclass, UIObjectSubclass>(
 				uiObjectSubclass);
+
+		beanContainer.setItemSorter(new CaseInsensitiveItemSorter());
 
 		for (final ModelObject modelObject : iterableModelObjects) {
 			val uiModelObject = modelObject.toUIModelObject();
@@ -390,7 +395,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	/**
 	 * Returns the {@link UIObject} fitting to the item selected in a
 	 * {@link Table}
-	 * 
+	 *
 	 * @param table
 	 * @param uiObjectSubclass
 	 * @param objectId
@@ -410,7 +415,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	/**
 	 * Returns the {@link Property} as String fitting to the given
 	 * {@link UIObject} subclass
-	 * 
+	 *
 	 * @param beanItem
 	 * @param type
 	 * @return
@@ -427,7 +432,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	/**
 	 * Returns the {@link BeanItem} fitting to the item selected in a
 	 * {@link Table}
-	 * 
+	 *
 	 * @param table
 	 * @param uiObjectSubclass
 	 * @param objectId
@@ -443,7 +448,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	/**
 	 * Adds a tab to the given {@link Accordion} and allows to add an optional
 	 * {@link ThemeResource} icon
-	 * 
+	 *
 	 * @param accordion
 	 * @param tabComponent
 	 * @param accordionCaption
@@ -471,7 +476,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	/**
 	 * Localizes a specific {@link CustomComponent} with the given localization
 	 * {@link AdminMessageStrings}
-	 * 
+	 *
 	 * @param component
 	 * @param adminMessageString
 	 * @param values
@@ -491,7 +496,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 
 	/**
 	 * Handles {@link Exception}s in a UI compatible way
-	 * 
+	 *
 	 * @param exception
 	 */
 	protected void handleException(final Exception exception) {
@@ -511,7 +516,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	/**
 	 * Removes and adds a {@link ModelObject} from a {@link BeanContainer} to
 	 * update the content
-	 * 
+	 *
 	 * @param answersBeanContainer
 	 * @param slide
 	 */

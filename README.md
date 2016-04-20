@@ -2,7 +2,7 @@
 
 *MobileCoach* is the Open Source Behavioral Intervention Platform designed by **ETH Zurich**, the **University of St. Gallen** and the **Swiss Research Institute for Public Health and Addiction**.
 
-© 2013-2015 [Health-IS Lab](http://www.health-is.ch) a joint initiative of the [Institute of Technology Management](http://www.item.unisg.ch) at [University of St. Gallen](http://www.unisg.ch) and the [Department of Management, Technology and Economics](http://mtec.ethz.ch) at [ETH Zurich](http://www.ethz.ch).   
+© 2013-2016 [Health-IS Lab](http://www.health-is.ch) a joint initiative of the [Institute of Technology Management](http://www.item.unisg.ch) at [University of St. Gallen](http://www.unisg.ch) and the [Department of Management, Technology and Economics](http://mtec.ethz.ch) at [ETH Zurich](http://www.ethz.ch).   
 
 For further information visit the *MobileCoach* Website at [https://www.mobile-coach.eu](https://www.mobile-coach.eu)!
 
@@ -141,6 +141,16 @@ An extended backend user guide will be published in the following months.
 
 ## Release notes
 
+### 1.3.1
+
+**Enhancements**
+
+* New JVM argument **-Dmc_logging_rolling_file_level=INFO** and configuration paramter **loggingRollingFileLevel** to define logging level of rolling file appender (should be added to installations < 1.3.1) 
+
+**Bugfixes**
+
+* Fixing date calculations for 2-digit years entered by participants
+
 ### 1.3.0
 
 **Enhancements**
@@ -150,3 +160,4 @@ An extended backend user guide will be published in the following months.
 **Bugfixes**
 
 * Fixing table sort parent problem for monitoring (reply) rules
+

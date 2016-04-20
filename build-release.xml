@@ -45,6 +45,9 @@ STEPS:
 		<!-- Adjustments -->
 		<delete file="release/stats.sh" />
 		<delete file="release/WebContent/WEB-INF/lib/FileServletWrapper.jar" />
+		<echo file="release/.gitignore" append="false">
+			build/classes
+		</echo>
 
 		<!-- Version info -->
 		<loadfile property="version" srcFile="WebContent/WEB-INF/version.txt" />
@@ -57,7 +60,7 @@ STEPS:
 			<fileset dir="git-temp/.git" />
 		</copy>
 		<delete dir="git-temp" />
-		
+
 		<!-- Refresh -->
 		<eclipse.refreshLocal resource="" depth="infinite" />
 	</target>

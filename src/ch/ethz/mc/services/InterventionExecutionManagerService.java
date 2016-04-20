@@ -287,7 +287,7 @@ public class InterventionExecutionManagerService {
 
 	@Synchronized
 	public void dialogMessageSetProblemSolved(final ObjectId dialogMessageId,
-			final String newCleanedResult) throws NotificationMessageException {
+			final String newUncleanedButCorrectedResult) throws NotificationMessageException {
 		log.debug("Marking dialog message {} as problem solved");
 
 		val dialogMessage = databaseManagerService.getModelObjectById(
@@ -297,7 +297,7 @@ public class InterventionExecutionManagerService {
 			dialogMessageStatusChangesAfterSending(dialogMessageId,
 					DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
 					dialogMessage.getAnswerReceivedTimestamp(),
-					StringHelpers.cleanReceivedMessageString(newCleanedResult),
+					StringHelpers.cleanReceivedMessageString(newUncleanedButCorrectedResult),
 					dialogMessage.getAnswerReceivedRaw());
 		} else if (dialogMessage.getStatus() == DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY) {
 			dialogMessage.setAnswerNotAutomaticallyProcessable(false);
