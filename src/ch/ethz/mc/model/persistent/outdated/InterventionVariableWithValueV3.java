@@ -1,4 +1,4 @@
-package ch.ethz.mc.model.persistent;
+package ch.ethz.mc.model.persistent.outdated;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
@@ -17,45 +17,51 @@ package ch.ethz.mc.model.persistent;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import java.util.List;
-
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 
 import org.bson.types.ObjectId;
+import org.jongo.marshall.jackson.oid.MongoId;
 
 import ch.ethz.mc.model.ModelObject;
-import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
+import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValueAccessTypes;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValuePrivacyTypes;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 /**
- * {@link ModelObject} to represent an {@link InterventionVariableWithValue}
- *
- * Intervention variables belong to the referenced {@link Intervention} and
- * consist of a type, name and default value.
+ * CAUTION: Will only be used for conversion from data model 2 to 3
  *
  * @author Andreas Filler
  */
 @NoArgsConstructor
-public class InterventionVariableWithValue extends AbstractVariableWithValue {
+@AllArgsConstructor
+public class InterventionVariableWithValueV3 extends ModelObject {
 	/**
-	 * Default constructor
+	 * The id of the {@link ModelObject}
 	 */
-	public InterventionVariableWithValue(final ObjectId intervention,
-			final String name, final String value,
-			final InterventionVariableWithValuePrivacyTypes privacyType,
-			final InterventionVariableWithValueAccessTypes accessType) {
-		super(name, value);
+	@MongoId
+	@Getter
+	@Setter
+	private ObjectId									id;
 
-		this.intervention = intervention;
-		this.privacyType = privacyType;
-		this.accessType = accessType;
-	}
+	/**
+	 * Name of the variable
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private String										name;
+
+	/**
+	 * Value of the variable
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private String										value;
 
 	/**
 	 * {@link Intervention} to which this variable and its value belong to
@@ -80,18 +86,4 @@ public class InterventionVariableWithValue extends AbstractVariableWithValue {
 	@Setter
 	@NonNull
 	private InterventionVariableWithValueAccessTypes	accessType;
-
-	/**
-	 * Will recursively collect all related {@link ModelObject} for export
-	 *
-	 * @param exportList
-	 *            The {@link ModelObject} itself and all related
-	 *            {@link ModelObject}s
-	 */
-	@Override
-	@JsonIgnore
-	protected void collectThisAndRelatedModelObjectsForExport(
-			final List<ModelObject> exportList) {
-		exportList.add(this);
-	}
 }

@@ -2,15 +2,15 @@ package ch.ethz.mc.services;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -74,7 +74,7 @@ import ch.ethz.mc.ui.NotificationMessageException;
 /**
  * Cares for the orchestration of the {@link Intervention}s as well as all
  * related {@link ModelObject}s
- * 
+ *
  * @author Andreas Filler
  */
 @Log4j2
@@ -84,7 +84,7 @@ public class InterventionExecutionManagerService {
 	private static InterventionExecutionManagerService	instance			= null;
 
 	private static SimpleDateFormat						dayInWeekFormatter	= new SimpleDateFormat(
-																					"u");
+			"u");
 	private final String[]								acceptedStopWords;
 
 	private final DatabaseManagerService				databaseManagerService;
@@ -100,7 +100,7 @@ public class InterventionExecutionManagerService {
 			final VariablesManagerService variablesManagerService,
 			final CommunicationManagerService communicationManagerService,
 			final ScreeningSurveyExecutionManagerService screeningSurveyExecutionManagerService)
-			throws Exception {
+					throws Exception {
 		$lock = MC.getInstance();
 
 		log.info("Starting service...");
@@ -132,7 +132,7 @@ public class InterventionExecutionManagerService {
 			final VariablesManagerService variablesManagerService,
 			final CommunicationManagerService communicationManagerService,
 			final ScreeningSurveyExecutionManagerService screeningSurveyExecutionManagerService)
-			throws Exception {
+					throws Exception {
 		if (instance == null) {
 			instance = new InterventionExecutionManagerService(
 					databaseManagerService, variablesManagerService,
@@ -200,7 +200,7 @@ public class InterventionExecutionManagerService {
 
 				if (dialogStatus != null
 						&& dialogStatus
-								.isDataForMonitoringParticipationAvailable()) {
+						.isDataForMonitoringParticipationAvailable()) {
 					participant.setMonitoringActive(true);
 				}
 			}
@@ -223,8 +223,8 @@ public class InterventionExecutionManagerService {
 				timestampToSendMessage, -1, answerExpected, -1, -1, null, null,
 				false, relatedMonitoringRule == null ? null
 						: relatedMonitoringRule.getId(),
-				relatedMonitoringMessage == null ? null
-						: relatedMonitoringMessage.getId(), false, manuallySent);
+						relatedMonitoringMessage == null ? null
+								: relatedMonitoringMessage.getId(), false, manuallySent);
 
 		// Check linked media object
 		MediaObject linkedMediaObject = null;
@@ -268,7 +268,7 @@ public class InterventionExecutionManagerService {
 			dialogMessage.setMessage(message + " "
 					+ mediaObjectParticipantShortURLString);
 			dialogMessage
-					.setStatus(DialogMessageStatusTypes.PREPARED_FOR_SENDING);
+			.setStatus(DialogMessageStatusTypes.PREPARED_FOR_SENDING);
 		}
 
 		databaseManagerService.saveModelObject(dialogMessage);
@@ -287,17 +287,20 @@ public class InterventionExecutionManagerService {
 
 	@Synchronized
 	public void dialogMessageSetProblemSolved(final ObjectId dialogMessageId,
-			final String newUncleanedButCorrectedResult) throws NotificationMessageException {
+			final String newUncleanedButCorrectedResult)
+			throws NotificationMessageException {
 		log.debug("Marking dialog message {} as problem solved");
 
 		val dialogMessage = databaseManagerService.getModelObjectById(
 				DialogMessage.class, dialogMessageId);
 
 		if (dialogMessage.getStatus() == DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER) {
-			dialogMessageStatusChangesAfterSending(dialogMessageId,
+			dialogMessageStatusChangesAfterSending(
+					dialogMessageId,
 					DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
 					dialogMessage.getAnswerReceivedTimestamp(),
-					StringHelpers.cleanReceivedMessageString(newUncleanedButCorrectedResult),
+					StringHelpers
+							.cleanReceivedMessageString(newUncleanedButCorrectedResult),
 					dialogMessage.getAnswerReceivedRaw());
 		} else if (dialogMessage.getStatus() == DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY) {
 			dialogMessage.setAnswerNotAutomaticallyProcessable(false);
@@ -311,7 +314,7 @@ public class InterventionExecutionManagerService {
 	/**
 	 * Handles states form "PREPARED_FOR_SENDING" to
 	 * "SENT_AND_WAITING_FOR_ANSWER" or "SENT_AND_WAITING_FOR_ANSWER"
-	 * 
+	 *
 	 * @param dialogMessageId
 	 * @param newStatus
 	 * @param timeStampOfEvent
@@ -336,11 +339,11 @@ public class InterventionExecutionManagerService {
 				if (monitoringRule != null) {
 					final long isUnansweredAfterTimestamp = timeStampOfEvent
 							+ monitoringRule
-									.getHoursUntilMessageIsHandledAsUnanswered()
+							.getHoursUntilMessageIsHandledAsUnanswered()
 							* ImplementationConstants.HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR;
 
 					dialogMessage
-							.setIsUnansweredAfterTimestamp(isUnansweredAfterTimestamp);
+					.setIsUnansweredAfterTimestamp(isUnansweredAfterTimestamp);
 				}
 			}
 			dialogMessage.setSentTimestamp(timeStampOfEvent);
@@ -410,7 +413,7 @@ public class InterventionExecutionManagerService {
 
 		for (val pendingDialogMessage : pendingDialogMessages) {
 			pendingDialogMessage
-					.setStatus(DialogMessageStatusTypes.PREPARED_FOR_SENDING);
+			.setStatus(DialogMessageStatusTypes.PREPARED_FOR_SENDING);
 
 			databaseManagerService.saveModelObject(pendingDialogMessage);
 		}
@@ -418,7 +421,7 @@ public class InterventionExecutionManagerService {
 
 	/**
 	 * Handles states form "SENT_AND_ANSWERED_BY_PARTICIPANT" till end
-	 * 
+	 *
 	 * @param dialogMessageId
 	 * @param newStatus
 	 * @param timeStampOfEvent
@@ -495,7 +498,7 @@ public class InterventionExecutionManagerService {
 
 	/*
 	 * MAIN methods -
-	 * 
+	 *
 	 * (the following two methods contain the elemental parts of
 	 * the monitoring process)
 	 */
@@ -535,7 +538,7 @@ public class InterventionExecutionManagerService {
 
 					// Store value to variable (which is only relevant if a
 					// reply is expected = related monitoring message is
-					// available
+					// available)
 					if (relatedMonitoringMessage != null) {
 						val cleanedMessageValue = dialogMessage
 								.getAnswerReceived();
@@ -544,33 +547,33 @@ public class InterventionExecutionManagerService {
 								"Store value '{}' (cleaned: '{}') of message to '{}' for participant {}",
 								dialogMessage.getAnswerReceived(),
 								cleanedMessageValue, relatedMonitoringMessage
-										.getStoreValueToVariableWithName(),
+								.getStoreValueToVariableWithName(),
 								participant.getId());
 						try {
 							if (relatedMonitoringMessage
 									.getStoreValueToVariableWithName() != null
 									&& !relatedMonitoringMessage
-											.getStoreValueToVariableWithName()
-											.equals("")) {
+									.getStoreValueToVariableWithName()
+									.equals("")) {
 								variablesManagerService
-										.writeVariableValueOfParticipant(
-												participant.getId(),
-												relatedMonitoringMessage
-														.getStoreValueToVariableWithName(),
-												cleanedMessageValue);
+								.writeVariableValueOfParticipant(
+										participant.getId(),
+										relatedMonitoringMessage
+										.getStoreValueToVariableWithName(),
+										cleanedMessageValue);
 							}
 							variablesManagerService
-									.writeVariableValueOfParticipant(
-											participant.getId(),
-											SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantMessageReply
-													.toVariableName(),
-											cleanedMessageValue, true);
+							.writeVariableValueOfParticipant(
+									participant.getId(),
+									SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantMessageReply
+									.toVariableName(),
+									cleanedMessageValue, true);
 						} catch (final Exception e) {
 							log.error(
 									"Could not store value '{}' of message to '{}' for participant {}: {}",
 									dialogMessage.getAnswerReceived(),
 									relatedMonitoringMessage
-											.getStoreValueToVariableWithName(),
+									.getStoreValueToVariableWithName(),
 									participant.getId(), e.getMessage());
 						}
 					}
@@ -604,7 +607,7 @@ public class InterventionExecutionManagerService {
 								false,
 								dialogMessage.getRelatedMonitoringMessage(),
 								dialogMessage
-										.getRelatedMonitoringRuleForReplyRules(),
+								.getRelatedMonitoringRuleForReplyRules(),
 								reactOnAnsweredMessages);
 
 						recursiveRuleResolver.resolve();
@@ -663,8 +666,8 @@ public class InterventionExecutionManagerService {
 
 			if (dialogStatus != null
 					&& !dialogStatus
-							.getDateIndexOfLastDailyMonitoringProcessing()
-							.equals(dateIndex)) {
+					.getDateIndexOfLastDailyMonitoringProcessing()
+					.equals(dateIndex)) {
 				log.debug(
 						"Participant {} has not been scheduled today! Start sheduling...",
 						participant.getId());
@@ -757,10 +760,10 @@ public class InterventionExecutionManagerService {
 				// FIXME Special solution for MC tobacco
 				try {
 					variablesManagerService
-							.writeVariableValueOfParticipant(
-									dialogOption.getParticipant(),
-									ImplementationConstants.VARIABLE_DEFINING_PARTICIPATION_IN_MOBILE_COACH_EXTRA,
-									"0");
+					.writeVariableValueOfParticipant(
+							dialogOption.getParticipant(),
+							ImplementationConstants.VARIABLE_DEFINING_PARTICIPATION_IN_MOBILE_COACH_EXTRA,
+							"0");
 				} catch (final Exception e) {
 					log.warn(
 							"Caution: Error when performing MobileCoach+ fix: {}",
@@ -769,7 +772,7 @@ public class InterventionExecutionManagerService {
 				/*
 				 * dialogMessageCreateAsUnexpectedReceived(
 				 * dialogOption.getParticipant(), receivedMessage);
-				 * 
+				 *
 				 * dialogStatusSetMonitoringFinished(dialogOption.getParticipant(
 				 * ));
 				 */
@@ -804,11 +807,11 @@ public class InterventionExecutionManagerService {
 			val relatedMonitoringMessageGroup = databaseManagerService
 					.getModelObjectById(MonitoringMessageGroup.class,
 							relatedMonitoringMessage
-									.getMonitoringMessageGroup());
+							.getMonitoringMessageGroup());
 			if (relatedMonitoringMessageGroup.getValidationExpression() != null
 					&& !cleanedMessageValue
-							.matches(relatedMonitoringMessageGroup
-									.getValidationExpression())) {
+					.matches(relatedMonitoringMessageGroup
+							.getValidationExpression())) {
 
 				dialogMessageStatusChangesAfterSending(dialogMessage.getId(),
 						DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
@@ -842,7 +845,7 @@ public class InterventionExecutionManagerService {
 				val dialogOption = getDialogOptionByParticipantAndType(
 						dialogMessageToSend.getParticipant(),
 						communicationManagerService
-								.getSupportedDialogOptionType());
+						.getSupportedDialogOptionType());
 
 				if (dialogOption != null) {
 					log.debug("Sending prepared message to {}",
@@ -850,7 +853,7 @@ public class InterventionExecutionManagerService {
 					communicationManagerService.sendMessage(dialogOption,
 							dialogMessageToSend.getId(),
 							dialogMessageWithPhoneNumberToSend
-									.getMessageSenderIdentification(),
+							.getMessageSenderIdentification(),
 							dialogMessageToSend.getMessage(),
 							dialogMessageToSend.isMessageExpectsAnswer());
 					sentMessages++;
@@ -879,7 +882,7 @@ public class InterventionExecutionManagerService {
 	/**
 	 * Cleanup method for the case of problems when trying to send to a
 	 * participant
-	 * 
+	 *
 	 * @param participantId
 	 */
 	@Synchronized
@@ -913,7 +916,7 @@ public class InterventionExecutionManagerService {
 
 	/**
 	 * Sends a manual message
-	 * 
+	 *
 	 * @param participant
 	 * @param messageWithPlaceholders
 	 */
@@ -937,7 +940,7 @@ public class InterventionExecutionManagerService {
 	/**
 	 * Returns a list of {@link DialogMessage}s that should be sent; Parameters
 	 * therefore are:
-	 * 
+	 *
 	 * - the belonging intervention is active
 	 * - the belonging intervention has sender identification
 	 * - the belonging intervention monitoring is active
@@ -947,7 +950,7 @@ public class InterventionExecutionManagerService {
 	 * - the participant not finished the monitoring
 	 * - the message should have the status PREPARED_FOR_SENDING
 	 * - the should be sent timestamp should be lower than the current time
-	 * 
+	 *
 	 * @return
 	 */
 	@Synchronized
@@ -978,14 +981,14 @@ public class InterventionExecutionManagerService {
 												participantId,
 												DialogMessageStatusTypes.PREPARED_FOR_SENDING,
 												InternalDateTime
-														.currentTimeMillis());
+												.currentTimeMillis());
 
 								for (val dialogMessageWaitingToBeSendOfParticipant : dialogMessagesWaitingToBeSendOfParticipant) {
 									dialogMessagesWaitingToBeSend
-											.add(new DialogMessageWithSenderIdentification(
-													dialogMessageWaitingToBeSendOfParticipant,
-													intervention
-															.getAssignedSenderIdentification()));
+									.add(new DialogMessageWithSenderIdentification(
+											dialogMessageWaitingToBeSendOfParticipant,
+											intervention
+											.getAssignedSenderIdentification()));
 								}
 							}
 						}
@@ -1110,7 +1113,7 @@ public class InterventionExecutionManagerService {
 	/**
 	 * Returns a list of {@link Participant}s that are relevant for monitoring;
 	 * Parameters therefore are:
-	 * 
+	 *
 	 * - the belonging intervention is active
 	 * - the belonging intervention has a sender identification
 	 * - the belonging intervention monitoring is active
@@ -1118,7 +1121,7 @@ public class InterventionExecutionManagerService {
 	 * - the participant has all data for monitoring available
 	 * - the participant has finished the screening survey
 	 * - the participant not finished the monitoring
-	 * 
+	 *
 	 * @return
 	 */
 	@Synchronized
@@ -1278,14 +1281,14 @@ public class InterventionExecutionManagerService {
 		val fileWriter = new FileWriter(statisticsFile);
 		statistics.store(fileWriter,
 				ImplementationConstants.LOGGING_APPLICATION_NAME
-						+ " Statistics File");
+				+ " Statistics File");
 		fileWriter.flush();
 
 		@Cleanup
 		val stringWriter = new StringWriter();
 		statistics.store(stringWriter,
 				ImplementationConstants.LOGGING_APPLICATION_NAME
-						+ " Statistics File");
+				+ " Statistics File");
 		stringWriter.flush();
 		log.debug(stringWriter.toString());
 	}

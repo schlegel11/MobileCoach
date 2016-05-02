@@ -62,6 +62,8 @@ import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.persistent.concepts.AbstractRule;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
+import ch.ethz.mc.model.persistent.types.InterventionVariableWithValueAccessTypes;
+import ch.ethz.mc.model.persistent.types.InterventionVariableWithValuePrivacyTypes;
 import ch.ethz.mc.model.persistent.types.MediaObjectTypes;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import ch.ethz.mc.modules.AbstractModule;
@@ -395,7 +397,8 @@ public class InterventionAdministrationManagerService {
 					AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_NOT_VALID);
 		}
 
-		if (variablesManagerService.isWriteProtectedVariableName(variableName)) {
+		if (variablesManagerService
+				.isWriteProtectedReservedVariableName(variableName)) {
 			throw new NotificationMessageException(
 					AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
 		}
@@ -411,7 +414,9 @@ public class InterventionAdministrationManagerService {
 		}
 
 		val interventionVariableWithValue = new InterventionVariableWithValue(
-				interventionId, variableName, "0");
+				interventionId, variableName, "0",
+				InterventionVariableWithValuePrivacyTypes.PRIVATE,
+				InterventionVariableWithValueAccessTypes.INTERNAL);
 
 		databaseManagerService.saveModelObject(interventionVariableWithValue);
 
@@ -431,7 +436,9 @@ public class InterventionAdministrationManagerService {
 
 		if (interventionVariable == null) {
 			final InterventionVariableWithValue interventionVariableWithValue = new InterventionVariableWithValue(
-					interventionId, variableName, variableValue);
+					interventionId, variableName, variableValue,
+					InterventionVariableWithValuePrivacyTypes.PRIVATE,
+					InterventionVariableWithValueAccessTypes.INTERNAL);
 			databaseManagerService
 			.saveModelObject(interventionVariableWithValue);
 		} else {
@@ -450,7 +457,8 @@ public class InterventionAdministrationManagerService {
 					AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_NOT_VALID);
 		}
 
-		if (variablesManagerService.isWriteProtectedVariableName(newName)) {
+		if (variablesManagerService
+				.isWriteProtectedReservedVariableName(newName)) {
 			throw new NotificationMessageException(
 					AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
 		}
@@ -708,7 +716,7 @@ public class InterventionAdministrationManagerService {
 			}
 
 			if (variablesManagerService
-					.isWriteProtectedVariableName(variableName)) {
+					.isWriteProtectedReservedVariableName(variableName)) {
 				throw new NotificationMessageException(
 						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
 			}
@@ -979,7 +987,7 @@ public class InterventionAdministrationManagerService {
 			}
 
 			if (variablesManagerService
-					.isWriteProtectedVariableName(variableName)) {
+					.isWriteProtectedReservedVariableName(variableName)) {
 				throw new NotificationMessageException(
 						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
 			}
@@ -1157,7 +1165,7 @@ public class InterventionAdministrationManagerService {
 			}
 
 			if (variablesManagerService
-					.isWriteProtectedVariableName(variableName)) {
+					.isWriteProtectedReservedVariableName(variableName)) {
 				throw new NotificationMessageException(
 						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
 			}
@@ -1587,7 +1595,8 @@ public class InterventionAdministrationManagerService {
 			final ObjectId interventionId) {
 		val variables = new ArrayList<String>();
 
-		variables.addAll(variablesManagerService.getAllSystemVariableNames());
+		variables.addAll(variablesManagerService
+				.getAllSystemReservedVariableNames());
 
 		variables.addAll(variablesManagerService
 				.getAllInterventionVariableNamesOfIntervention(interventionId));
@@ -1611,7 +1620,8 @@ public class InterventionAdministrationManagerService {
 			final ObjectId interventionId) {
 		val variables = new ArrayList<String>();
 
-		variables.addAll(variablesManagerService.getAllSystemVariableNames());
+		variables.addAll(variablesManagerService
+				.getAllSystemReservedVariableNames());
 
 		variables.addAll(variablesManagerService
 				.getAllInterventionVariableNamesOfIntervention(interventionId));
@@ -1636,7 +1646,7 @@ public class InterventionAdministrationManagerService {
 		val variables = new ArrayList<String>();
 
 		variables.addAll(variablesManagerService
-				.getAllWritableSystemVariableNames());
+				.getAllWritableSystemReservedVariableNames());
 
 		variables.addAll(variablesManagerService
 				.getAllInterventionVariableNamesOfIntervention(interventionId));
@@ -1661,7 +1671,7 @@ public class InterventionAdministrationManagerService {
 		val variables = new ArrayList<String>();
 
 		variables.addAll(variablesManagerService
-				.getAllWritableSystemVariableNames());
+				.getAllWritableSystemReservedVariableNames());
 
 		variables.addAll(variablesManagerService
 				.getAllInterventionVariableNamesOfIntervention(interventionId));

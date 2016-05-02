@@ -30,12 +30,18 @@ import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.DialogStatus;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.persistent.consistency.DataModelConfiguration;
+import ch.ethz.mc.model.persistent.outdated.InterventionVariableWithValueV2;
+import ch.ethz.mc.model.persistent.outdated.InterventionVariableWithValueV3;
+import ch.ethz.mc.model.persistent.outdated.ParticipantVariableWithValueV2;
+import ch.ethz.mc.model.persistent.outdated.ParticipantVariableWithValueV3;
 import ch.ethz.mc.model.persistent.outdated.ScreeningSurveySlideV1;
 import ch.ethz.mc.model.persistent.outdated.ScreeningSurveySlideV2;
+import ch.ethz.mc.model.persistent.types.InterventionVariableWithValueAccessTypes;
+import ch.ethz.mc.model.persistent.types.InterventionVariableWithValuePrivacyTypes;
 
 /**
  * Manages the modification of the Data Model on the startup of the system
- * 
+ *
  * @author Andreas Filler
  */
 @Log4j2
@@ -63,6 +69,9 @@ public class DataModelUpdateManager {
 					break;
 				case 2:
 					updateToVersion2();
+					break;
+				case 3:
+					updateToVersion3();
 					break;
 			}
 
@@ -191,6 +200,74 @@ public class DataModelUpdateManager {
 			screeningSurveySlideCollection.remove(oldScreeningSurveySlide
 					.getId());
 			screeningSurveySlideCollection.save(newScreeningSurveySlide);
+		}
+	}
+
+	/**
+	 * Changes for version 3:
+	 */
+	private static void updateToVersion3() {
+		val interventionVariableWithValueCollection = jongo
+				.getCollection("InterventionVariableWithValue");
+
+		val oldInterventionVariableWithValueIterator = interventionVariableWithValueCollection
+				.find(Queries.EVERYTHING)
+				.as(ch.ethz.mc.model.persistent.outdated.InterventionVariableWithValueV2.class)
+				.iterator();
+
+		final InterventionVariableWithValueV2[] oldInterventionVariableWithValues = (InterventionVariableWithValueV2[]) IteratorUtils
+				.toArray(oldInterventionVariableWithValueIterator,
+						InterventionVariableWithValueV2.class);
+
+		for (val oldInterventionVariableWithValue : oldInterventionVariableWithValues) {
+			log.debug("Old InterventionVariableWithValue: {}",
+					oldInterventionVariableWithValue.toJSONString());
+			val newInterventionVariableWithValue = new InterventionVariableWithValueV3(
+					oldInterventionVariableWithValue.getId(),
+					oldInterventionVariableWithValue.getName(),
+					oldInterventionVariableWithValue.getValue(),
+					oldInterventionVariableWithValue.getIntervention(),
+					InterventionVariableWithValuePrivacyTypes.PRIVATE,
+					InterventionVariableWithValueAccessTypes.INTERNAL);
+
+			log.debug("New InterventionVariableWithValue: {}",
+					newInterventionVariableWithValue.toJSONString());
+
+			interventionVariableWithValueCollection
+					.remove(oldInterventionVariableWithValue.getId());
+			interventionVariableWithValueCollection
+					.save(newInterventionVariableWithValue);
+		}
+
+		val participantVariableWithValueCollection = jongo
+				.getCollection("ParticipantVariableWithValue");
+
+		val oldParticipantVariableWithValueIterator = participantVariableWithValueCollection
+				.find(Queries.EVERYTHING)
+				.as(ch.ethz.mc.model.persistent.outdated.ParticipantVariableWithValueV2.class)
+				.iterator();
+
+		final ParticipantVariableWithValueV2[] oldParticipantVariableWithValues = (ParticipantVariableWithValueV2[]) IteratorUtils
+				.toArray(oldParticipantVariableWithValueIterator,
+						ParticipantVariableWithValueV2.class);
+
+		for (val oldParticipantVariableWithValue : oldParticipantVariableWithValues) {
+			log.debug("Old ParticipantVariableWithValue: {}",
+					oldParticipantVariableWithValue.toJSONString());
+			val newParticipantVariableWithValue = new ParticipantVariableWithValueV3(
+					oldParticipantVariableWithValue.getId(),
+					oldParticipantVariableWithValue.getName(),
+					oldParticipantVariableWithValue.getValue(),
+					oldParticipantVariableWithValue.getParticipant(),
+					oldParticipantVariableWithValue.getLastUpdated());
+
+			log.debug("New ParticipantVariableWithValue: {}",
+					newParticipantVariableWithValue.toJSONString());
+
+			participantVariableWithValueCollection
+					.remove(oldParticipantVariableWithValue.getId());
+			participantVariableWithValueCollection
+					.save(newParticipantVariableWithValue);
 		}
 	}
 }

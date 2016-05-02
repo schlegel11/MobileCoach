@@ -33,11 +33,13 @@ import ch.ethz.mc.model.ui.UIVariableWithParticipant;
 
 /**
  * {@link ModelObject} to represent an {@link ParticipantVariableWithValue}
- * 
- * SystemVariables belong to the referenced {@link Participant} and consist of a
- * name
- * and a value.
- * 
+ *
+ * Participant variables belong to the referenced {@link Participant} and
+ * consist of a
+ * name, order, timestamp and value. Their type is implicitly retrieved from the
+ * appropriate
+ * intervention variable.
+ *
  * @author Andreas Filler
  */
 @NoArgsConstructor
@@ -46,11 +48,11 @@ public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 	 * Default constructor
 	 */
 	public ParticipantVariableWithValue(final ObjectId participant,
-			final long lastUpdated, final String name, final String value) {
+			final long timestamp, final String name, final String value) {
 		super(name, value);
 
 		this.participant = participant;
-		this.lastUpdated = lastUpdated;
+		this.timestamp = timestamp;
 	}
 
 	/**
@@ -62,16 +64,16 @@ public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 	private ObjectId	participant;
 
 	/**
-	 * The moment in time when the variable was updated the last time
+	 * The moment in time when the variable was created
 	 */
 	@Getter
 	@Setter
-	private long		lastUpdated;
+	private long		timestamp;
 
 	/**
 	 * Creates a {@link UIVariableWithParticipant} with the belonging
 	 * {@link Participant}
-	 * 
+	 *
 	 * @param participantName
 	 * @return
 	 */
@@ -82,7 +84,7 @@ public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 
 		variable = new UIVariableWithParticipant(participantId,
 				participantName, organization, organizationUnit, getName(),
-				getValue(), new Date(getLastUpdated()));
+				getValue(), new Date(timestamp));
 
 		variable.setRelatedModelObject(this);
 

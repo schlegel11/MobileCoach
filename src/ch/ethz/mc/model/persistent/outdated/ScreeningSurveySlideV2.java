@@ -2,15 +2,15 @@ package ch.ethz.mc.model.persistent.outdated;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,7 +30,9 @@ import org.bson.types.ObjectId;
 import org.jongo.marshall.jackson.oid.MongoId;
 
 import ch.ethz.mc.model.ModelObject;
+import ch.ethz.mc.model.persistent.Feedback;
 import ch.ethz.mc.model.persistent.MediaObject;
+import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlideRule;
@@ -38,13 +40,7 @@ import ch.ethz.mc.model.persistent.types.ScreeningSurveySlideQuestionTypes;
 
 /**
  * CAUTION: Will only be used for conversion from data model 1 to 2
- * 
- * {@link ModelObject} to represent an {@link ScreeningSurveySlide}
- * 
- * A {@link ScreeningSurvey} consists of several {@link ScreeningSurveySlide}s,
- * which are presented to a {@link Participant} in a dynamic order. The order
- * can be defined by using the rules or by defining a default next slide.
- * 
+ *
  * @author Andreas Filler
  */
 @NoArgsConstructor
@@ -61,7 +57,7 @@ public class ScreeningSurveySlideV2 extends ModelObject {
 	/**
 	 * Consists of all attributes related to a {@link Question} within a
 	 * {@link ScreeningSurveySlide}
-	 * 
+	 *
 	 * @author Andreas Filler
 	 */
 	@NoArgsConstructor

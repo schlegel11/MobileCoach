@@ -44,9 +44,9 @@ import com.vaadin.ui.Button.ClickEvent;
 
 /**
  * Extends the MessageContestModule with a controller
- * 
+ *
  * @author Andreas Filler
- * 
+ *
  */
 @SuppressWarnings("serial")
 @Log4j2
@@ -60,15 +60,15 @@ public abstract class MessageContestModuleWithController extends
 	private Collection<ObjectId>								selectedVariableIds;
 
 	/**
-	 * Returns the name of the variable to store for the selected partipants
-	 * 
+	 * Returns the name of the variable to store for the selected participants
+	 *
 	 * @return
 	 */
 	protected abstract String getResultVariable();
 
 	/**
 	 * Returns the name of the variable where the values are stored in
-	 * 
+	 *
 	 * @return
 	 */
 	protected abstract String getRelevantVariable();
@@ -96,7 +96,7 @@ public abstract class MessageContestModuleWithController extends
 		relevantVariablesTable.setColumnHeaders(UIVariableWithParticipant
 				.getColumnHeaders());
 		relevantVariablesTable.setConverter(
-				UIVariableWithParticipant.LAST_UPDATED,
+				UIVariableWithParticipant.TIMESTAMP,
 				new StringToDateConverter() {
 					@Override
 					protected DateFormat getFormat(final Locale locale) {
