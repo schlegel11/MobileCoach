@@ -39,7 +39,7 @@ import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 import ch.ethz.mc.model.ui.UIParticipant;
-import ch.ethz.mc.model.ui.UIVariableWithParticipant;
+import ch.ethz.mc.model.ui.UIParticipantVariableWithParticipant;
 import ch.ethz.mc.model.ui.results.UIDialogMessageWithParticipantForResults;
 import ch.ethz.mc.model.ui.results.UIVariableWithParticipantForResults;
 import ch.ethz.mc.tools.CSVExporter;
@@ -506,7 +506,7 @@ InterventionResultsComponent {
 						if (changeSuceeded) {
 							getStringItemProperty(
 									selectedUIVariableWithParticipantBeanItem,
-									UIVariableWithParticipant.VALUE).setValue(
+									UIParticipantVariableWithParticipant.VALUE).setValue(
 											getStringValue());
 
 							selectedUIVariableWithParticipant

@@ -23,6 +23,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.val;
 
 import org.bson.types.ObjectId;
 
@@ -30,6 +31,8 @@ import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValueAccessTypes;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValuePrivacyTypes;
+import ch.ethz.mc.model.ui.UIInterventionVariable;
+import ch.ethz.mc.model.ui.UIModelObject;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -80,6 +83,21 @@ public class InterventionVariableWithValue extends AbstractVariableWithValue {
 	@Setter
 	@NonNull
 	private InterventionVariableWithValueAccessTypes	accessType;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ch.ethz.mc.model.ModelObject#toUIModelObject()
+	 */
+	@Override
+	public UIModelObject toUIModelObject() {
+		final val variable = new UIInterventionVariable(getName(), getValue(),
+				privacyType.toString(), accessType.toString());
+
+		variable.setRelatedModelObject(this);
+
+		return variable;
+	}
 
 	/**
 	 * Will recursively collect all related {@link ModelObject} for export

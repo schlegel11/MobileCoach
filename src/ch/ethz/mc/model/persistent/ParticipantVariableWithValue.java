@@ -29,7 +29,7 @@ import org.bson.types.ObjectId;
 
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
-import ch.ethz.mc.model.ui.UIVariableWithParticipant;
+import ch.ethz.mc.model.ui.UIParticipantVariableWithParticipant;
 
 /**
  * {@link ModelObject} to represent an {@link ParticipantVariableWithValue}
@@ -71,18 +71,18 @@ public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 	private long		timestamp;
 
 	/**
-	 * Creates a {@link UIVariableWithParticipant} with the belonging
+	 * Creates a {@link UIParticipantVariableWithParticipant} with the belonging
 	 * {@link Participant}
 	 *
 	 * @param participantName
 	 * @return
 	 */
-	public UIVariableWithParticipant toUIVariableWithParticipant(
+	public UIParticipantVariableWithParticipant toUIVariableWithParticipant(
 			final String participantId, final String participantName,
 			final String organization, final String organizationUnit) {
-		final UIVariableWithParticipant variable;
+		final UIParticipantVariableWithParticipant variable;
 
-		variable = new UIVariableWithParticipant(participantId,
+		variable = new UIParticipantVariableWithParticipant(participantId,
 				participantName, organization, organizationUnit, getName(),
 				getValue(), new Date(timestamp));
 

@@ -18,7 +18,7 @@ package ch.ethz.mc.tools;
  * limitations under the License.
  */
 import lombok.val;
-import ch.ethz.mc.model.ui.UIVariableWithParticipant;
+import ch.ethz.mc.model.ui.UIParticipantVariableWithParticipant;
 import ch.ethz.mc.model.ui.results.UIVariableWithParticipantForResults;
 
 import com.googlecode.jcsv.writer.CSVEntryConverter;
@@ -45,7 +45,7 @@ public class CSVUIParticipantVariableEntryConverter implements
 	}
 
 	public static UIVariableWithParticipantForResults getHeaders() {
-		val columnHeaders = UIVariableWithParticipant.getColumnHeaders();
+		val columnHeaders = UIParticipantVariableWithParticipant.getColumnHeaders();
 		return new UIVariableWithParticipantForResults(columnHeaders[0],
 				columnHeaders[1], columnHeaders[2], columnHeaders[3]);
 	}

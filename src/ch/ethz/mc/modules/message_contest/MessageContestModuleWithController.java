@@ -31,7 +31,7 @@ import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.persistent.ParticipantVariableWithValue;
-import ch.ethz.mc.model.ui.UIVariableWithParticipant;
+import ch.ethz.mc.model.ui.UIParticipantVariableWithParticipant;
 import ch.ethz.mc.ui.views.components.basics.StringEditComponent;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -55,7 +55,7 @@ public abstract class MessageContestModuleWithController extends
 
 	private ObjectId											interventionId;
 
-	private BeanContainer<ObjectId, UIVariableWithParticipant>	beanContainer	= null;
+	private BeanContainer<ObjectId, UIParticipantVariableWithParticipant>	beanContainer	= null;
 
 	private Collection<ObjectId>								selectedVariableIds;
 
@@ -86,17 +86,17 @@ public abstract class MessageContestModuleWithController extends
 
 		// Init table
 		beanContainer = createBeanContainerForModelObjects(
-				UIVariableWithParticipant.class, null);
+				UIParticipantVariableWithParticipant.class, null);
 		relevantVariablesTable.setContainerDataSource(beanContainer);
 		relevantVariablesTable
-				.setSortContainerPropertyId(UIVariableWithParticipant
+				.setSortContainerPropertyId(UIParticipantVariableWithParticipant
 						.getSortColumn());
-		relevantVariablesTable.setVisibleColumns(UIVariableWithParticipant
+		relevantVariablesTable.setVisibleColumns(UIParticipantVariableWithParticipant
 				.getVisibleColumns());
-		relevantVariablesTable.setColumnHeaders(UIVariableWithParticipant
+		relevantVariablesTable.setColumnHeaders(UIParticipantVariableWithParticipant
 				.getColumnHeaders());
 		relevantVariablesTable.setConverter(
-				UIVariableWithParticipant.TIMESTAMP,
+				UIParticipantVariableWithParticipant.TIMESTAMP,
 				new StringToDateConverter() {
 					@Override
 					protected DateFormat getFormat(final Locale locale) {
