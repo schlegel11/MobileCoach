@@ -141,6 +141,10 @@ An extended backend user guide will be published in the following months.
 
 ## Release notes
 
+### 1.3.X
+
+--> fill from Bitbucket log
+
 ### 1.3.1
 
 **Enhancements**

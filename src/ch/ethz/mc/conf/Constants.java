@@ -85,6 +85,8 @@ public class Constants {
 
 	@Getter
 	private static boolean		listOpenScreenSurveysOnBaseURL		= false;
+	@Getter
+	private static int			accessTokenTimeoutInMinutes			= 5;
 
 	@Getter
 	private static String		mediaObjectLinkingBaseURL			= "https://f.mobile-coach.eu/";

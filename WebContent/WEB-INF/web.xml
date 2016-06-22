@@ -3,17 +3,24 @@
 	xmlns="http://java.sun.com/xml/ns/javaee"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 	id="WebApp_ID" version="3.0">
+
 	<display-name>MC</display-name>
 	<description>MobileCoach</description>
+
 	<session-config>
 		<session-timeout>30</session-timeout>
 	</session-config>
+
 	<listener>
 		<listener-class>ch.ethz.mc.FirstInitializations</listener-class>
 	</listener>
 	<listener>
 		<listener-class>ch.ethz.mc.MC</listener-class>
 	</listener>
+	<listener>
+		<listener-class>org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap</listener-class>
+	</listener>
+
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
 		<welcome-file>index.htm</welcome-file>
@@ -22,6 +29,7 @@
 		<welcome-file>default.htm</welcome-file>
 		<welcome-file>default.jsp</welcome-file>
 	</welcome-file-list>
+
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>MC everything</web-resource-name>
@@ -31,6 +39,36 @@
 			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
 		</user-data-constraint>
 	</security-constraint>
+
+	<context-param>
+		<param-name>resteasy.servlet.mapping.prefix</param-name>
+		<param-value>/services</param-value>
+	</context-param>
+
+	<context-param>
+		<param-name>resteasy.scan</param-name>
+		<param-value>true</param-value>
+	</context-param>
+
+	<context-param>
+		<param-name>resteasy.providers</param-name>
+		<param-value>ch.ethz.mc.JacksonConfiguration</param-value>
+	</context-param>
+
+	<servlet>
+		<servlet-name>RESTeasy</servlet-name>
+		<servlet-class>org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher</servlet-class>
+		<init-param>
+			<param-name>javax.ws.rs.Application</param-name>
+			<param-value>ch.ethz.mc.RESTServiceApplication</param-value>
+		</init-param>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>RESTeasy</servlet-name>
+		<url-pattern>/rest/*</url-pattern>
+	</servlet-mapping>
+
 	<mime-mapping>
 		<extension>md</extension>
 		<mime-type>text/plain</mime-type>
