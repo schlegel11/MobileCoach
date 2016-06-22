@@ -141,11 +141,22 @@ An extended backend user guide will be published in the following months.
 
 ## Release notes
 
+### 1.3.2
+
+**Enhancements**
+
+**Changes**
+
+* The configuration parameter **feedbackLinkingBaseURL** has been replaced by a generic **surveyLinkingBaseURL** - You should adjust your configuration files accordingly
+
+**Bugfixes**
+
+
 ### 1.3.1
 
 **Enhancements**
 
-* New JVM argument **-Dmc_logging_rolling_file_level=INFO** and configuration paramter **loggingRollingFileLevel** to define logging level of rolling file appender (should be added to installations < 1.3.1) 
+* New JVM argument **-Dmc_logging_rolling_file_level=INFO** and configuration paramter **loggingRollingFileLevel** to define logging level of rolling file appender - you should adjust your installation accordingly 
 
 **Bugfixes**
 

@@ -2,15 +2,15 @@ package ch.ethz.mc.tools;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,7 +35,7 @@ import ch.ethz.mc.model.persistent.outdated.ScreeningSurveySlideV2;
 
 /**
  * Manages the modification of the Data Model on the startup of the system
- * 
+ *
  * @author Andreas Filler
  */
 @Log4j2
@@ -63,6 +63,9 @@ public class DataModelUpdateManager {
 					break;
 				case 2:
 					updateToVersion2();
+					break;
+				case 3:
+					updateToVersion3();
 					break;
 			}
 
@@ -96,35 +99,35 @@ public class DataModelUpdateManager {
 	private static void updateToVersion1() {
 		val interventionCollection = jongo.getCollection("Intervention");
 		interventionCollection.update(Queries.EVERYTHING).multi()
-				.with(Queries.UPDATE_VERSION_1__INTERVENTION__CHANGE_1);
+		.with(Queries.UPDATE_VERSION_1__INTERVENTION__CHANGE_1);
 
 		val dialogStatusCollection = jongo.getCollection(DialogStatus.class
 				.getSimpleName());
 		dialogStatusCollection.update(Queries.EVERYTHING).multi()
-				.with(Queries.UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_1);
+		.with(Queries.UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_1);
 		dialogStatusCollection.update(Queries.EVERYTHING).multi()
-				.with(Queries.UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_2);
+		.with(Queries.UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_2);
 		dialogStatusCollection.update(Queries.EVERYTHING).multi()
-				.with(Queries.UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_3);
+		.with(Queries.UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_3);
 		dialogStatusCollection.update(Queries.EVERYTHING).multi()
-				.with(Queries.UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_4);
+		.with(Queries.UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_4);
 		dialogStatusCollection.update(Queries.EVERYTHING).multi()
-				.with(Queries.UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_5);
+		.with(Queries.UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_5);
 
 		val screeningSurveySlideCollection = jongo
 				.getCollection("ScreeningSurveySlide");
 		screeningSurveySlideCollection
-				.update(Queries.EVERYTHING)
-				.multi()
-				.with(Queries.UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE__CHANGE_1);
+		.update(Queries.EVERYTHING)
+		.multi()
+		.with(Queries.UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE__CHANGE_1);
 		screeningSurveySlideCollection
-				.update(Queries.EVERYTHING)
-				.multi()
-				.with(Queries.UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE__CHANGE_2);
+		.update(Queries.EVERYTHING)
+		.multi()
+		.with(Queries.UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE__CHANGE_2);
 		screeningSurveySlideCollection
-				.update(Queries.EVERYTHING)
-				.multi()
-				.with(Queries.UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE__CHANGE_3);
+		.update(Queries.EVERYTHING)
+		.multi()
+		.with(Queries.UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE__CHANGE_3);
 
 		val screeningSurveySlides = screeningSurveySlideCollection.find(
 				Queries.EVERYTHING).as(ScreeningSurveySlide.class);
@@ -137,9 +140,9 @@ public class DataModelUpdateManager {
 		val screeningSurveySlideRuleCollection = jongo
 				.getCollection("ScreeningSurveySlideRule");
 		screeningSurveySlideRuleCollection
-				.update(Queries.EVERYTHING)
-				.multi()
-				.with(Queries.UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE_RULE__CHANGE_1);
+		.update(Queries.EVERYTHING)
+		.multi()
+		.with(Queries.UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE_RULE__CHANGE_1);
 	}
 
 	/**
@@ -170,7 +173,7 @@ public class DataModelUpdateManager {
 					oldScreeningSurveySlide.getTitleWithPlaceholders(),
 					oldScreeningSurveySlide.getQuestionType(),
 					oldScreeningSurveySlide
-							.getOptionalLayoutAttributeWithPlaceholders(),
+					.getOptionalLayoutAttributeWithPlaceholders(),
 					questions, oldScreeningSurveySlide.getLinkedMediaObject(),
 					oldScreeningSurveySlide.isLastSlide(),
 					oldScreeningSurveySlide.getHandsOverToFeedback(),
@@ -192,5 +195,14 @@ public class DataModelUpdateManager {
 					.getId());
 			screeningSurveySlideCollection.save(newScreeningSurveySlide);
 		}
+	}
+
+	/**
+	 * Changes for version 3:
+	 */
+	private static void updateToVersion3() {
+		val screeningSurveyCollection = jongo.getCollection("ScreeningSurvey");
+		screeningSurveyCollection.update(Queries.EVERYTHING).multi()
+		.with(Queries.UPDATE_VERSION_3__SCREENING_SURVEY__CHANGE_1);
 	}
 }

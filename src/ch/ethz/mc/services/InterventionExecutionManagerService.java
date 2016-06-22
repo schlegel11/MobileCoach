@@ -56,6 +56,7 @@ import ch.ethz.mc.model.persistent.MonitoringMessage;
 import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
 import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.Participant;
+import ch.ethz.mc.model.persistent.ScreeningSurveyAndFeedbackParticipantShortURL;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.services.internal.CommunicationManagerService;
@@ -74,7 +75,7 @@ import ch.ethz.mc.ui.NotificationMessageException;
 /**
  * Cares for the orchestration of the {@link Intervention}s as well as all
  * related {@link ModelObject}s
- * 
+ *
  * @author Andreas Filler
  */
 @Log4j2
@@ -287,17 +288,20 @@ public class InterventionExecutionManagerService {
 
 	@Synchronized
 	public void dialogMessageSetProblemSolved(final ObjectId dialogMessageId,
-			final String newUncleanedButCorrectedResult) throws NotificationMessageException {
+			final String newUncleanedButCorrectedResult)
+					throws NotificationMessageException {
 		log.debug("Marking dialog message {} as problem solved");
 
 		val dialogMessage = databaseManagerService.getModelObjectById(
 				DialogMessage.class, dialogMessageId);
 
 		if (dialogMessage.getStatus() == DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER) {
-			dialogMessageStatusChangesAfterSending(dialogMessageId,
+			dialogMessageStatusChangesAfterSending(
+					dialogMessageId,
 					DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
 					dialogMessage.getAnswerReceivedTimestamp(),
-					StringHelpers.cleanReceivedMessageString(newUncleanedButCorrectedResult),
+					StringHelpers
+					.cleanReceivedMessageString(newUncleanedButCorrectedResult),
 					dialogMessage.getAnswerReceivedRaw());
 		} else if (dialogMessage.getStatus() == DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY) {
 			dialogMessage.setAnswerNotAutomaticallyProcessable(false);
@@ -311,7 +315,7 @@ public class InterventionExecutionManagerService {
 	/**
 	 * Handles states form "PREPARED_FOR_SENDING" to
 	 * "SENT_AND_WAITING_FOR_ANSWER" or "SENT_AND_WAITING_FOR_ANSWER"
-	 * 
+	 *
 	 * @param dialogMessageId
 	 * @param newStatus
 	 * @param timeStampOfEvent
@@ -354,27 +358,57 @@ public class InterventionExecutionManagerService {
 	/*
 	 * PRIVATE Modification methods
 	 */
-	// System Unique Id
+	// Media Object Participant Short URL
 	@Synchronized
 	private MediaObjectParticipantShortURL mediaObjectParticipantShortURLCreate(
 			final DialogMessage relatedDialogMessage,
 			final MediaObject relatedMediaObject) {
 
-		val newestSystemUniqueId = databaseManagerService
+		val newestIdObject = databaseManagerService
 				.findOneSortedModelObject(
 						MediaObjectParticipantShortURL.class,
 						Queries.ALL,
 						Queries.MEDIA_OBJECT_PARTICIPANT_SHORT_URL__SORT_BY_SHORT_ID_DESC);
 
-		final long nextShortId = newestSystemUniqueId == null ? 1
-				: newestSystemUniqueId.getShortId() + 1;
+		final long nextShortId = newestIdObject == null ? 1 : newestIdObject
+				.getShortId() + 1;
 
-		val newSystemUniqueId = new MediaObjectParticipantShortURL(nextShortId,
+		val newShortIdObject = new MediaObjectParticipantShortURL(nextShortId,
 				relatedDialogMessage.getId(), relatedMediaObject.getId());
 
-		databaseManagerService.saveModelObject(newSystemUniqueId);
+		databaseManagerService.saveModelObject(newShortIdObject);
 
-		return newSystemUniqueId;
+		return newShortIdObject;
+	}
+
+	// Screening Survey Participant Short URL (also available in
+	// InterventionAdministrationManagerService)
+	@Synchronized
+	private void ensureScreeningSurveyParticipantShortURL(
+			final ObjectId participantId, final ObjectId screeningSurveyId) {
+
+		val existingShortIdObject = databaseManagerService
+				.findOneModelObject(
+						ScreeningSurveyAndFeedbackParticipantShortURL.class,
+						Queries.SCREENING_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_PARTICIPANT_AND_SCREENING_SURVEY,
+						participantId, screeningSurveyId);
+
+		if (existingShortIdObject == null) {
+			val newestShortIdObject = databaseManagerService
+					.findOneSortedModelObject(
+							ScreeningSurveyAndFeedbackParticipantShortURL.class,
+							Queries.ALL,
+							Queries.SCREENING_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__SORT_BY_SHORT_ID_DESC);
+
+			final long nextShortId = newestShortIdObject == null ? 1
+					: newestShortIdObject.getShortId() + 1;
+
+			val newShortIdObject = new ScreeningSurveyAndFeedbackParticipantShortURL(
+					nextShortId, StringHelpers.createRandomString(4),
+					participantId, screeningSurveyId, null);
+
+			databaseManagerService.saveModelObject(newShortIdObject);
+		}
 	}
 
 	// Dialog Message
@@ -418,7 +452,7 @@ public class InterventionExecutionManagerService {
 
 	/**
 	 * Handles states form "SENT_AND_ANSWERED_BY_PARTICIPANT" till end
-	 * 
+	 *
 	 * @param dialogMessageId
 	 * @param newStatus
 	 * @param timeStampOfEvent
@@ -639,7 +673,7 @@ public class InterventionExecutionManagerService {
 
 	@Synchronized
 	public void scheduleMessagesForSending() {
-		log.debug("Create a list of all relevant participants for sheduling of monitoring messages");
+		log.debug("Create a list of all relevant participants for scheduling of monitoring messages");
 		val participants = getAllParticipantsRelevantForAnsweredInTimeChecksAndMonitoringSheduling();
 
 		val dateIndex = StringHelpers.createDailyUniqueIndex();
@@ -656,7 +690,7 @@ public class InterventionExecutionManagerService {
 					&& dialogStatus.getMonitoringDaysParticipated() == 0
 					&& todayDayIndex != 1) {
 				log.debug(
-						"Participant {} has not been scheduled at all! Wait until next monday to start with sheduling...",
+						"Participant {} has not been scheduled at all! Wait until next monday to start with scheduling...",
 						participant.getId());
 				continue;
 			}
@@ -666,7 +700,7 @@ public class InterventionExecutionManagerService {
 							.getDateIndexOfLastDailyMonitoringProcessing()
 							.equals(dateIndex)) {
 				log.debug(
-						"Participant {} has not been scheduled today! Start sheduling...",
+						"Participant {} has not been scheduled today! Start scheduling...",
 						participant.getId());
 
 				// Resolve rules
@@ -879,7 +913,7 @@ public class InterventionExecutionManagerService {
 	/**
 	 * Cleanup method for the case of problems when trying to send to a
 	 * participant
-	 * 
+	 *
 	 * @param participantId
 	 */
 	@Synchronized
@@ -913,7 +947,7 @@ public class InterventionExecutionManagerService {
 
 	/**
 	 * Sends a manual message
-	 * 
+	 *
 	 * @param participant
 	 * @param messageWithPlaceholders
 	 */
@@ -937,7 +971,7 @@ public class InterventionExecutionManagerService {
 	/**
 	 * Returns a list of {@link DialogMessage}s that should be sent; Parameters
 	 * therefore are:
-	 * 
+	 *
 	 * - the belonging intervention is active
 	 * - the belonging intervention has sender identification
 	 * - the belonging intervention monitoring is active
@@ -947,7 +981,7 @@ public class InterventionExecutionManagerService {
 	 * - the participant not finished the monitoring
 	 * - the message should have the status PREPARED_FOR_SENDING
 	 * - the should be sent timestamp should be lower than the current time
-	 * 
+	 *
 	 * @return
 	 */
 	@Synchronized
@@ -1110,7 +1144,7 @@ public class InterventionExecutionManagerService {
 	/**
 	 * Returns a list of {@link Participant}s that are relevant for monitoring;
 	 * Parameters therefore are:
-	 * 
+	 *
 	 * - the belonging intervention is active
 	 * - the belonging intervention has a sender identification
 	 * - the belonging intervention monitoring is active
@@ -1118,7 +1152,7 @@ public class InterventionExecutionManagerService {
 	 * - the participant has all data for monitoring available
 	 * - the participant has finished the screening survey
 	 * - the participant not finished the monitoring
-	 * 
+	 *
 	 * @return
 	 */
 	@Synchronized

@@ -58,14 +58,15 @@ public class Constants {
 	 * 
 	 * CAUTION: Can NOT be defined in configuration file
 	 */
-	public static final boolean	RUN_TESTS_AT_STARTUP				= false;
+	// TODO Switch off before release
+	public static final boolean	RUN_TESTS_AT_STARTUP				= true;
 
 	/**
 	 * Data model version
 	 * 
 	 * CAUTION: Can NOT be defined in configuration file
 	 */
-	public static final int		DATA_MODEL_VERSION					= 2;
+	public static final int		DATA_MODEL_VERSION					= 3;
 	/**
 	 * Data model configuration collection
 	 * 
@@ -89,7 +90,7 @@ public class Constants {
 	@Getter
 	private static String		mediaObjectLinkingBaseURL			= "https://f.mobile-coach.eu/";
 	@Getter
-	private static String		feedbackLinkingBaseURL				= "https://fb.mobile-coach.eu/";
+	private static String		surveyLinkingBaseURL				= "https://web.mobile-coach.eu/";
 
 	private static String		acceptedStopWordsSeparatedByComma	= "stop,stopp";
 

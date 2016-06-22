@@ -29,7 +29,6 @@ import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 
-import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.memory.MemoryVariable;
 import ch.ethz.mc.model.persistent.DialogOption;
@@ -42,6 +41,7 @@ import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.ParticipantVariableWithValue;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
+import ch.ethz.mc.model.persistent.ScreeningSurveyAndFeedbackParticipantShortURL;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlideRule;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
@@ -53,7 +53,7 @@ import ch.ethz.mc.tools.StringValidator;
 
 /**
  * Manages all variables for the system and a specific participant
- * 
+ *
  * @author Andreas Filler
  */
 @Log4j2
@@ -248,8 +248,16 @@ public class VariablesManagerService {
 			participationInWeeks = (int) Math.floor(participationInDays / 7);
 		}
 		if (participant.getAssignedFeedback() != null) {
-			participantFeedbackURL = Constants.getFeedbackLinkingBaseURL()
-					+ participant.getId();
+			val surveyShortURL = databaseManagerService
+					.findOneModelObject(
+							ScreeningSurveyAndFeedbackParticipantShortURL.class,
+							Queries.SCREENING_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_PARTICIPANT_AND_FEEDBACK,
+							participant.getId(),
+							participant.getAssignedFeedback());
+
+			if (surveyShortURL != null) {
+				participantFeedbackURL = surveyShortURL.calculateURL();
+			}
 		}
 		for (val variable : SystemVariables.READ_ONLY_PARTICIPANT_VARIABLES
 				.values()) {
@@ -291,7 +299,7 @@ public class VariablesManagerService {
 	/**
 	 * Adds the variable with value as {@link AbstractVariableWithValue} to the
 	 * hashtable
-	 * 
+	 *
 	 * @param hashtable
 	 * @param variable
 	 * @param value

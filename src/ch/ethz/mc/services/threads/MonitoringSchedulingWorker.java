@@ -31,7 +31,7 @@ import ch.ethz.mc.tools.StringHelpers;
 /**
  * Manages the scheduling of monitoring messages, i.e. intervention, monitoring
  * messages, rules, participants and all other relevant parts in this system
- * 
+ *
  * @author Andreas Filler
  */
 @Log4j2
@@ -67,12 +67,12 @@ public class MonitoringSchedulingWorker extends Thread {
 							: ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITHOUT_SIMULATOR);
 		} catch (final InterruptedException e) {
 			interrupt();
-			log.debug("Monitoring sheduling worker received signal to stop (before first run)");
+			log.debug("Monitoring scheduling worker received signal to stop (before first run)");
 		}
 
 		while (!isInterrupted()) {
 			final long startingTime = System.currentTimeMillis();
-			log.info("Executing new run of monitoring sheduling worker...started");
+			log.info("Executing new run of monitoring scheduling worker...started");
 
 			try {
 				if (statisticsEnabled) {
@@ -90,6 +90,11 @@ public class MonitoringSchedulingWorker extends Thread {
 								e.getMessage());
 					}
 				}
+
+				/*
+				 * The following four steps should always be performed in this
+				 * order to retain data consistency
+				 */
 				try {
 					log.debug("Finishing unfinished screening surveys");
 					screeningSurveyExecutionManagerService
@@ -116,20 +121,21 @@ public class MonitoringSchedulingWorker extends Thread {
 							e.getMessage());
 				}
 				try {
-					log.debug("Sheduling new messages");
+					log.debug("Scheduling new messages");
 					interventionExecutionManagerService
 							.scheduleMessagesForSending();
 				} catch (final Exception e) {
-					log.error("Could not shedule new monitoring messages: {}",
+					log.error("Could not schedule new monitoring messages: {}",
 							e.getMessage());
 				}
+
 			} catch (final Exception e) {
-				log.error("Could not run whole sheduling process: {}",
+				log.error("Could not run whole scheduling process: {}",
 						e.getMessage());
 			}
 
 			log.info(
-					"Executing new run of monitoring sheduling worker...done ({} seconds)",
+					"Executing new run of monitoring scheduling worker...done ({} seconds)",
 					(System.currentTimeMillis() - startingTime) / 1000.0);
 
 			try {
@@ -138,7 +144,7 @@ public class MonitoringSchedulingWorker extends Thread {
 								: ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITHOUT_SIMULATOR);
 			} catch (final InterruptedException e) {
 				interrupt();
-				log.debug("Monitoring sheduling worker received signal to stop");
+				log.debug("Monitoring scheduling worker received signal to stop");
 			}
 		}
 	}

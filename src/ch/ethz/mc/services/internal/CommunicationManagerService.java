@@ -2,15 +2,15 @@ package ch.ethz.mc.services.internal;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -64,6 +64,11 @@ import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mc.tools.Simulator;
 import ch.ethz.mc.tools.StringHelpers;
 
+/**
+ * Handles communication with SMS gateway
+ *
+ * @author Andreas Filler
+ */
 @Log4j2
 public class CommunicationManagerService {
 	private static CommunicationManagerService	instance	= null;
@@ -169,7 +174,7 @@ public class CommunicationManagerService {
 
 	/**
 	 * Sends a mail message (asynchronous)
-	 * 
+	 *
 	 * @param dialogOption
 	 * @param dialogMessageId
 	 * @param message
@@ -187,9 +192,9 @@ public class CommunicationManagerService {
 				messageSender, message, messageExpectsAnswer);
 
 		interventionExecutionManagerService
-				.dialogMessageStatusChangesForSending(dialogMessageId,
-						DialogMessageStatusTypes.SENDING,
-						InternalDateTime.currentTimeMillis());
+		.dialogMessageStatusChangesForSending(dialogMessageId,
+				DialogMessageStatusTypes.SENDING,
+				InternalDateTime.currentTimeMillis());
 
 		synchronized (runningMailingThreads) {
 			runningMailingThreads.add(mailingThread);
@@ -200,7 +205,7 @@ public class CommunicationManagerService {
 
 	/**
 	 * Receives mail messages
-	 * 
+	 *
 	 * @return
 	 */
 	public List<ReceivedMessage> receiveMessages() {
@@ -259,7 +264,7 @@ public class CommunicationManagerService {
 								.evaluate("/aspsms/DateReceived",
 										document.getDocumentElement(),
 										XPathConstants.NODESET)).item(0)
-								.getTextContent();
+										.getTextContent();
 
 						val receivedTimestamp = receiverDateFormat.parse(
 								receivedTimestampString).getTime();
@@ -267,11 +272,11 @@ public class CommunicationManagerService {
 						// Abjust for simulated date and time
 						if (Constants.isSimulatedDateAndTime()) {
 							receivedMessage
-									.setReceivedTimestamp(InternalDateTime
-											.currentTimeMillis());
+							.setReceivedTimestamp(InternalDateTime
+									.currentTimeMillis());
 						} else {
 							receivedMessage
-									.setReceivedTimestamp(receivedTimestamp);
+							.setReceivedTimestamp(receivedTimestamp);
 						}
 
 						val messageStringEncoded = ((NodeList) xPath.evaluate(
@@ -318,7 +323,7 @@ public class CommunicationManagerService {
 
 	/**
 	 * Password authenticator for mail accounts with authentication
-	 * 
+	 *
 	 * @author Andreas Filler
 	 */
 	private class PasswordAuthenticator extends Authenticator {
@@ -339,7 +344,7 @@ public class CommunicationManagerService {
 
 	/**
 	 * Enables threaded sending of messages, with retries
-	 * 
+	 *
 	 * @author Andreas Filler
 	 */
 	private class MailingThread extends Thread {
@@ -369,16 +374,16 @@ public class CommunicationManagerService {
 
 				if (messageExpectsAnswer) {
 					interventionExecutionManagerService
-							.dialogMessageStatusChangesForSending(
-									dialogMessageId,
-									DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
-									InternalDateTime.currentTimeMillis());
+					.dialogMessageStatusChangesForSending(
+							dialogMessageId,
+							DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
+							InternalDateTime.currentTimeMillis());
 				} else {
 					interventionExecutionManagerService
-							.dialogMessageStatusChangesForSending(
-									dialogMessageId,
-									DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
-									InternalDateTime.currentTimeMillis());
+					.dialogMessageStatusChangesForSending(
+							dialogMessageId,
+							DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
+							InternalDateTime.currentTimeMillis());
 				}
 
 				removeFromList();
@@ -395,16 +400,16 @@ public class CommunicationManagerService {
 			for (int i = 0; i < ImplementationConstants.MAILING_SEND_RETRIES; i++) {
 				try {
 					TimeUnit.SECONDS
-							.sleep(simulatorActive ? ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR
-									: ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR);
+					.sleep(simulatorActive ? ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR
+							: ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR);
 				} catch (final InterruptedException e) {
 					log.warn("Interrupted messaging sending approach {}", i);
 
 					interventionExecutionManagerService
-							.dialogMessageStatusChangesForSending(
-									dialogMessageId,
-									DialogMessageStatusTypes.PREPARED_FOR_SENDING,
-									InternalDateTime.currentTimeMillis());
+					.dialogMessageStatusChangesForSending(
+							dialogMessageId,
+							DialogMessageStatusTypes.PREPARED_FOR_SENDING,
+							InternalDateTime.currentTimeMillis());
 
 					return;
 				}
@@ -414,16 +419,16 @@ public class CommunicationManagerService {
 
 					if (messageExpectsAnswer) {
 						interventionExecutionManagerService
-								.dialogMessageStatusChangesForSending(
-										dialogMessageId,
-										DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
-										InternalDateTime.currentTimeMillis());
+						.dialogMessageStatusChangesForSending(
+								dialogMessageId,
+								DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
+								InternalDateTime.currentTimeMillis());
 					} else {
 						interventionExecutionManagerService
-								.dialogMessageStatusChangesForSending(
-										dialogMessageId,
-										DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
-										InternalDateTime.currentTimeMillis());
+						.dialogMessageStatusChangesForSending(
+								dialogMessageId,
+								DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
+								InternalDateTime.currentTimeMillis());
 					}
 
 					removeFromList();
@@ -439,9 +444,9 @@ public class CommunicationManagerService {
 					dialogOption.getData());
 
 			interventionExecutionManagerService
-					.dialogMessageStatusChangesForSending(dialogMessageId,
-							DialogMessageStatusTypes.PREPARED_FOR_SENDING,
-							InternalDateTime.currentTimeMillis());
+			.dialogMessageStatusChangesForSending(dialogMessageId,
+					DialogMessageStatusTypes.PREPARED_FOR_SENDING,
+					InternalDateTime.currentTimeMillis());
 
 			removeFromList();
 		}
@@ -454,7 +459,7 @@ public class CommunicationManagerService {
 
 		/**
 		 * Sends message using SMTP protocol
-		 * 
+		 *
 		 * @param dialogOption
 		 * @param messageSender
 		 * @param message
@@ -463,7 +468,7 @@ public class CommunicationManagerService {
 		 */
 		private void sendMessage(final DialogOption dialogOption,
 				final String messageSender, final String message)
-				throws AddressException, MessagingException {
+						throws AddressException, MessagingException {
 			log.debug("Sending mail for outgoing SMS to {} with text {}",
 					dialogOption.getData(), message);
 

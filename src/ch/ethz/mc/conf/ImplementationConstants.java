@@ -19,7 +19,7 @@ package ch.ethz.mc.conf;
  */
 /**
  * Contains some implementation specific constants
- * 
+ *
  * @author Andreas Filler
  */
 public class ImplementationConstants {
@@ -72,6 +72,7 @@ public class ImplementationConstants {
 
 	public static final String	FILE_STREAMING_SERVLET_PATH															= "files";
 	public static final String	SHORT_ID_FILE_STREAMING_SERVLET_PATH												= "files-short";
+	public static final String	SHORT_ID_SCREEN_SURVEY_AND_FEEDBACK_SERVLET_PATH									= "surveys-short";
 
 	public static final String	SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLES									= "MC_ResultValue_";
 	public static final String	SCREENING_SURVEY_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE							= "MC_ConsistencyCheckValue";

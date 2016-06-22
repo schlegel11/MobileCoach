@@ -2,15 +2,15 @@ package ch.ethz.mc.services;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -80,7 +80,7 @@ public class ScreeningSurveyAdministrationManagerService {
 			final FileStorageManagerService fileStorageManagerService,
 			final VariablesManagerService variablesManagerService,
 			final ModelObjectExchangeService modelObjectExchangeService)
-					throws Exception {
+			throws Exception {
 		$lock = MC.getInstance();
 
 		log.info("Starting service...");
@@ -98,7 +98,7 @@ public class ScreeningSurveyAdministrationManagerService {
 			final FileStorageManagerService fileStorageManagerService,
 			final VariablesManagerService variablesManagerService,
 			final ModelObjectExchangeService modelObjectExchangeService)
-					throws Exception {
+			throws Exception {
 		if (instance == null) {
 			instance = new ScreeningSurveyAdministrationManagerService(
 					databaseManagerService, fileStorageManagerService,
@@ -122,7 +122,7 @@ public class ScreeningSurveyAdministrationManagerService {
 			final ObjectId interventionId) {
 		val screeningSurvey = new ScreeningSurvey(
 				GlobalUniqueIdGenerator.createGlobalUniqueId(), interventionId,
-				name, "", null, false);
+				name, "", null, false, false);
 
 		if (name.equals("")) {
 			screeningSurvey.setName(DEFAULT_OBJECT_NAME);
@@ -196,7 +196,7 @@ public class ScreeningSurveyAdministrationManagerService {
 	@Synchronized
 	public ScreeningSurvey screeningSurveyImport(final File file,
 			final ObjectId interventionId, final boolean duplicate)
-			throws FileNotFoundException, IOException {
+					throws FileNotFoundException, IOException {
 		val importedModelObjects = modelObjectExchangeService
 				.importModelObjects(file,
 						ModelObjectExchangeFormatTypes.SCREENING_SURVEY);
@@ -237,7 +237,7 @@ public class ScreeningSurveyAdministrationManagerService {
 
 		log.debug("Recursively collect all model objects related to the screening survey");
 		screeningSurvey
-		.collectThisAndRelatedModelObjectsForExport(modelObjectsToExport);
+				.collectThisAndRelatedModelObjectsForExport(modelObjectsToExport);
 
 		log.debug("Export screening survey");
 		return modelObjectExchangeService.exportModelObjects(
@@ -256,7 +256,7 @@ public class ScreeningSurveyAdministrationManagerService {
 	@Synchronized
 	public void screeningSurveyDelete(
 			final ScreeningSurvey screeningSurveyToDelete)
-					throws NotificationMessageException {
+			throws NotificationMessageException {
 
 		databaseManagerService.deleteModelObject(screeningSurveyToDelete);
 	}
@@ -390,7 +390,7 @@ public class ScreeningSurveyAdministrationManagerService {
 			final ScreeningSurveySlide screeningSurveySlide,
 			final String textWithPlaceholders,
 			final List<String> allPossibleMessageVariables)
-					throws NotificationMessageException {
+			throws NotificationMessageException {
 		if (textWithPlaceholders == null) {
 			screeningSurveySlide.setTitleWithPlaceholders("");
 		} else {
@@ -420,7 +420,7 @@ public class ScreeningSurveyAdministrationManagerService {
 			final ScreeningSurveySlide screeningSurveySlide,
 			final String optionalLayoutAttributeWithPlaceholders) {
 		screeningSurveySlide
-		.setOptionalLayoutAttributeWithPlaceholders(optionalLayoutAttributeWithPlaceholders);
+				.setOptionalLayoutAttributeWithPlaceholders(optionalLayoutAttributeWithPlaceholders);
 
 		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
@@ -430,7 +430,7 @@ public class ScreeningSurveyAdministrationManagerService {
 			final ScreeningSurveySlide screeningSurveySlide,
 			final int questionPosition, final String textWithPlaceholders,
 			final List<String> allPossibleMessageVariables)
-					throws NotificationMessageException {
+			throws NotificationMessageException {
 		val question = screeningSurveySlide.getQuestions()
 				.get(questionPosition);
 
@@ -464,7 +464,7 @@ public class ScreeningSurveyAdministrationManagerService {
 	public void screeningSurveySlideChangeDefaultVariableValue(
 			final ScreeningSurveySlide screeningSurveySlide,
 			final int questionPosition, final String text)
-					throws NotificationMessageException {
+			throws NotificationMessageException {
 		val question = screeningSurveySlide.getQuestions()
 				.get(questionPosition);
 
@@ -481,7 +481,7 @@ public class ScreeningSurveyAdministrationManagerService {
 	public void screeningSurveySlideChangeStoreResultToVariable(
 			final ScreeningSurveySlide screeningSurveySlide,
 			final int questionPosition, final String variableName)
-					throws NotificationMessageException {
+			throws NotificationMessageException {
 		val question = screeningSurveySlide.getQuestions()
 				.get(questionPosition);
 
@@ -526,7 +526,7 @@ public class ScreeningSurveyAdministrationManagerService {
 			final ScreeningSurveySlide screeningSurveySlide,
 			final String textWithPlaceholders,
 			final List<String> allPossibleMessageVariables)
-					throws NotificationMessageException {
+			throws NotificationMessageException {
 		if (textWithPlaceholders == null) {
 			screeningSurveySlide.setValidationErrorMessage("");
 		} else {
@@ -537,7 +537,7 @@ public class ScreeningSurveyAdministrationManagerService {
 			}
 
 			screeningSurveySlide
-			.setValidationErrorMessage(textWithPlaceholders);
+					.setValidationErrorMessage(textWithPlaceholders);
 		}
 
 		databaseManagerService.saveModelObject(screeningSurveySlide);
@@ -571,10 +571,10 @@ public class ScreeningSurveyAdministrationManagerService {
 						ScreeningSurveySlide.class,
 						moveUp ? Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY_AND_ORDER_LOWER
 								: Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY_AND_ORDER_HIGHER,
-								moveUp ? Queries.SCREENING_SURVEY_SLIDE__SORT_BY_ORDER_DESC
-										: Queries.SCREENING_SURVEY_SLIDE__SORT_BY_ORDER_ASC,
-										screeningSurveySlide.getScreeningSurvey(),
-										screeningSurveySlide.getOrder());
+						moveUp ? Queries.SCREENING_SURVEY_SLIDE__SORT_BY_ORDER_DESC
+								: Queries.SCREENING_SURVEY_SLIDE__SORT_BY_ORDER_ASC,
+						screeningSurveySlide.getScreeningSurvey(),
+						screeningSurveySlide.getOrder());
 
 		if (screeningSurveySlideToSwapWith == null) {
 			return null;
@@ -583,7 +583,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		// Swap order
 		final int order = screeningSurveySlide.getOrder();
 		screeningSurveySlide
-		.setOrder(screeningSurveySlideToSwapWith.getOrder());
+				.setOrder(screeningSurveySlideToSwapWith.getOrder());
 		screeningSurveySlideToSwapWith.setOrder(order);
 
 		databaseManagerService.saveModelObject(screeningSurveySlide);
@@ -604,7 +604,7 @@ public class ScreeningSurveyAdministrationManagerService {
 	@Synchronized
 	public void screeningSurveySlideDelete(
 			final ScreeningSurveySlide screeningSurveySlide)
-					throws NotificationMessageException {
+			throws NotificationMessageException {
 		val otherScreeningSurveySlides = databaseManagerService
 				.findModelObjects(ScreeningSurveySlide.class,
 						Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY,
@@ -660,7 +660,7 @@ public class ScreeningSurveyAdministrationManagerService {
 
 		if (highestOrderSlideRule != null) {
 			screeningSurveySlideRule
-			.setOrder(highestOrderSlideRule.getOrder() + 1);
+					.setOrder(highestOrderSlideRule.getOrder() + 1);
 		}
 
 		databaseManagerService.saveModelObject(screeningSurveySlideRule);
@@ -719,7 +719,7 @@ public class ScreeningSurveyAdministrationManagerService {
 			}
 
 			screeningSurveySlideRule
-			.setStoreValueToVariableWithName(variableName);
+					.setStoreValueToVariableWithName(variableName);
 
 			databaseManagerService.saveModelObject(screeningSurveySlideRule);
 		}
@@ -730,7 +730,7 @@ public class ScreeningSurveyAdministrationManagerService {
 			final ScreeningSurveySlideRule screeningSurveySlideRule,
 			final boolean newValue) {
 		screeningSurveySlideRule
-		.setShowSameSlideBecauseValueNotValidWhenTrue(newValue);
+				.setShowSameSlideBecauseValueNotValidWhenTrue(newValue);
 
 		if (newValue) {
 			screeningSurveySlideRule.setNextScreeningSurveySlideWhenTrue(null);
@@ -750,11 +750,11 @@ public class ScreeningSurveyAdministrationManagerService {
 						ScreeningSurveySlideRule.class,
 						moveUp ? Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE_AND_ORDER_LOWER
 								: Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE_AND_ORDER_HIGHER,
-								moveUp ? Queries.SCREENING_SURVEY_SLIDE_RULE__SORT_BY_ORDER_DESC
-										: Queries.SCREENING_SURVEY_SLIDE_RULE__SORT_BY_ORDER_ASC,
-										screeningSurveySlideRule
-										.getBelongingScreeningSurveySlide(),
-										screeningSurveySlideRule.getOrder());
+						moveUp ? Queries.SCREENING_SURVEY_SLIDE_RULE__SORT_BY_ORDER_DESC
+								: Queries.SCREENING_SURVEY_SLIDE_RULE__SORT_BY_ORDER_ASC,
+						screeningSurveySlideRule
+								.getBelongingScreeningSurveySlide(),
+						screeningSurveySlideRule.getOrder());
 
 		if (screeningSurveySlideRuleToSwapWith == null) {
 			return null;
@@ -768,7 +768,7 @@ public class ScreeningSurveyAdministrationManagerService {
 
 		databaseManagerService.saveModelObject(screeningSurveySlideRule);
 		databaseManagerService
-		.saveModelObject(screeningSurveySlideRuleToSwapWith);
+				.saveModelObject(screeningSurveySlideRuleToSwapWith);
 
 		return screeningSurveySlideRuleToSwapWith;
 	}
@@ -780,10 +780,10 @@ public class ScreeningSurveyAdministrationManagerService {
 			final ObjectId selectedScreeningSurveySlideId) {
 		if (isTrueCase) {
 			screeningSurveySlideRule
-			.setNextScreeningSurveySlideWhenTrue(selectedScreeningSurveySlideId);
+					.setNextScreeningSurveySlideWhenTrue(selectedScreeningSurveySlideId);
 		} else {
 			screeningSurveySlideRule
-			.setNextScreeningSurveySlideWhenFalse(selectedScreeningSurveySlideId);
+					.setNextScreeningSurveySlideWhenFalse(selectedScreeningSurveySlideId);
 		}
 
 		databaseManagerService.saveModelObject(screeningSurveySlideRule);
@@ -817,7 +817,7 @@ public class ScreeningSurveyAdministrationManagerService {
 	public void feedbackSlideChangeTitle(final FeedbackSlide feedbackSlide,
 			final String textWithPlaceholders,
 			final List<String> allPossibleFeedbackVariables)
-					throws NotificationMessageException {
+			throws NotificationMessageException {
 		if (textWithPlaceholders == null) {
 			feedbackSlide.setTitleWithPlaceholders("");
 		} else {
@@ -838,7 +838,7 @@ public class ScreeningSurveyAdministrationManagerService {
 			final FeedbackSlide feedbackSlide,
 			final String textWithPlaceholders,
 			final List<String> allPossibleFeedbackVariables)
-					throws NotificationMessageException {
+			throws NotificationMessageException {
 		if (textWithPlaceholders == null) {
 			feedbackSlide.setTitleWithPlaceholders("");
 		} else {
@@ -859,7 +859,7 @@ public class ScreeningSurveyAdministrationManagerService {
 			final FeedbackSlide feedbackSlide,
 			final String optionalLayoutAttributeWithPlaceholders) {
 		feedbackSlide
-		.setOptionalLayoutAttributeWithPlaceholders(optionalLayoutAttributeWithPlaceholders);
+				.setOptionalLayoutAttributeWithPlaceholders(optionalLayoutAttributeWithPlaceholders);
 
 		databaseManagerService.saveModelObject(feedbackSlide);
 	}
@@ -873,9 +873,9 @@ public class ScreeningSurveyAdministrationManagerService {
 						FeedbackSlide.class,
 						moveUp ? Queries.FEEDBACK_SLIDE__BY_FEEDBACK_AND_ORDER_LOWER
 								: Queries.FEEDBACK_SLIDE__BY_FEEDBACK_AND_ORDER_HIGHER,
-								moveUp ? Queries.FEEDBACK_SLIDE__SORT_BY_ORDER_DESC
-										: Queries.FEEDBACK_SLIDE__SORT_BY_ORDER_ASC,
-										feedbackSlide.getFeedback(), feedbackSlide.getOrder());
+						moveUp ? Queries.FEEDBACK_SLIDE__SORT_BY_ORDER_DESC
+								: Queries.FEEDBACK_SLIDE__SORT_BY_ORDER_ASC,
+						feedbackSlide.getFeedback(), feedbackSlide.getOrder());
 
 		if (feedbackSlideToSwapWith == null) {
 			return null;
@@ -937,10 +937,10 @@ public class ScreeningSurveyAdministrationManagerService {
 						FeedbackSlideRule.class,
 						moveUp ? Queries.FEEDBACK_SLIDE_RULE__BY_FEEDBACK_SLIDE_AND_ORDER_LOWER
 								: Queries.FEEDBACK_SLIDE_RULE__BY_FEEDBACK_SLIDE_AND_ORDER_HIGHER,
-								moveUp ? Queries.FEEDBACK_SLIDE_RULE__SORT_BY_ORDER_DESC
-										: Queries.FEEDBACK_SLIDE_RULE__SORT_BY_ORDER_ASC,
-										feedbackSlideRule.getBelongingFeedbackSlide(),
-										feedbackSlideRule.getOrder());
+						moveUp ? Queries.FEEDBACK_SLIDE_RULE__SORT_BY_ORDER_DESC
+								: Queries.FEEDBACK_SLIDE_RULE__SORT_BY_ORDER_ASC,
+						feedbackSlideRule.getBelongingFeedbackSlide(),
+						feedbackSlideRule.getOrder());
 
 		if (feedbackSlideRuleToSwapWith == null) {
 			return null;
@@ -1163,8 +1163,8 @@ public class ScreeningSurveyAdministrationManagerService {
 				.getAllInterventionVariableNamesOfIntervention(screeningSurvey
 						.getIntervention()));
 		variables
-		.addAll(variablesManagerService
-				.getAllScreeningSurveyVariableNamesOfScreeningSurvey(screeningSurveyId));
+				.addAll(variablesManagerService
+						.getAllScreeningSurveyVariableNamesOfScreeningSurvey(screeningSurveyId));
 
 		Collections.sort(variables);
 
@@ -1186,8 +1186,8 @@ public class ScreeningSurveyAdministrationManagerService {
 				.getAllInterventionVariableNamesOfIntervention(screeningSurvey
 						.getIntervention()));
 		variables
-		.addAll(variablesManagerService
-				.getAllScreeningSurveyVariableNamesOfScreeningSurvey(screeningSurveyId));
+				.addAll(variablesManagerService
+						.getAllScreeningSurveyVariableNamesOfScreeningSurvey(screeningSurveyId));
 
 		Collections.sort(variables);
 

@@ -65,9 +65,11 @@ import com.github.mustachejava.MustacheFactory;
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
-@WebServlet(displayName = "Screening Surveys", value = "/*", asyncSupported = true, loadOnStartup = 1)
+@WebServlet(displayName = "Short URL Screening Surveys and Feedback", value = "/"
+		+ ImplementationConstants.SHORT_ID_SCREEN_SURVEY_AND_FEEDBACK_SERVLET_PATH
+		+ "/*", asyncSupported = true, loadOnStartup = 1)
 @Log4j2
-public class ScreeningSurveyServlet extends HttpServlet {
+public class ShortURLScreeningSurveyAndFeedbackServlet extends HttpServlet {
 	private MustacheFactory							mustacheFactory;
 
 	private ScreeningSurveyExecutionManagerService	screeningSurveyExecutionManagerService;
@@ -122,14 +124,20 @@ public class ScreeningSurveyServlet extends HttpServlet {
 						return;
 					}
 
-					// Only object ids of active non intermediate screening
-					// surveys are accepted
+					// Only object id
 					if (ObjectId.isValid(pathParts[0])) {
 						if (screeningSurveyExecutionManagerService
-								.screeningSurveyCheckIfActiveAndNonIntermediate(new ObjectId(
+								.screeningSurveyCheckIfActive(new ObjectId(
 										pathParts[0]))) {
 							handleTemplateRequest(request, response,
 									new ObjectId(pathParts[0]), null);
+							return;
+						}
+						if (screeningSurveyExecutionManagerService
+								.feedbackCheckIfActiveByBelongingParticipant(new ObjectId(
+										pathParts[0]))) {
+							handleTemplateRequest(request, response, null,
+									new ObjectId(pathParts[0]));
 							return;
 						}
 						throw new Exception("Invalid id");

@@ -37,7 +37,7 @@ import ch.ethz.mc.model.ui.UIScreeningSurvey;
 
 /**
  * {@link ModelObject} to represent an {@link ScreeningSurvey}
- * 
+ *
  * Before a {@link Participant} can participate in an {@link Intervention}
  * she/he has to perform one of the {@link ScreeningSurvey}s belonging to an
  * Intervention. In this {@link ScreeningSurvey}, which consist of several
@@ -45,7 +45,7 @@ import ch.ethz.mc.model.ui.UIScreeningSurvey;
  * s
  * are collected as well as used to calculate the next
  * {@link ScreeningSurveySlide}s.
- * 
+ *
  * @author Andreas Filler
  */
 @NoArgsConstructor
@@ -92,6 +92,13 @@ public class ScreeningSurvey extends ModelObject {
 	@Getter
 	@Setter
 	private String		password;
+
+	/**
+	 * Defines if the {@link ScreeningSurvey} is an intermediate survey
+	 */
+	@Getter
+	@Setter
+	private boolean		intermediateSurvey;
 
 	/**
 	 * Defines if the {@link ScreeningSurvey} is open for new

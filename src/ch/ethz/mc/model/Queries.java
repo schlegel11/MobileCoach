@@ -31,6 +31,7 @@ public class Queries {
 
 	public static final String	SCREENING_SURVEY__ACTIVE_TRUE																																													= "{'active':true}";
 	public static final String	SCREENING_SURVEY__BY_INTERVENTION_AND_ACTIVE_TRUE																																								= "{'intervention':#,'active':true}";
+	public static final String	SCREENING_SURVEY__BY_INTERVENTION_AND_ACTIVE_TRUE_AND_INTERMEDIATE_SURVEY_FALSE																																	= "{'intervention':#,'active':true,'intermediateSurvey':false}";
 	public static final String	SCREENING_SURVEY__BY_INTERVENTION_AND_GLOBAL_UNIQUE_ID																																							= "{'intervention':#,'globalUniqueId':#}";
 
 	public static final String	AUTHOR__BY_USERNAME																																																= "{'username':#}";
@@ -78,6 +79,11 @@ public class Queries {
 	public static final String	SCREENING_SURVEY_SLIDE_RULE__SORT_BY_ORDER_DESC																																									= "{'order':-1}";
 	public static final String	SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE_AND_NEXT_SCREENING_SURVEY_SLIDE_WHEN_TRUE																												= "{'belongingScreeningSurveySlide':#,'nextScreeningSurveySlideWhenTrue':#}";
 	public static final String	SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE_AND_NEXT_SCREENING_SURVEY_SLIDE_WHEN_FALSE																												= "{'belongingScreeningSurveySlide':#,'nextScreeningSurveySlideWhenFalse':#}";
+
+	public static final String	SCREENING_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_PARTICIPANT_AND_SCREENING_SURVEY																														= "{'participant':#,'screeningSurvey':#}";
+	public static final String	SCREENING_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_PARTICIPANT_AND_FEEDBACK																																= "{'participant':#,'feedback':#}";
+	public static final String	SCREENING_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_SHORT_ID																																				= "{'shortId':#}";
+	public static final String	SCREENING_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__SORT_BY_SHORT_ID_DESC																																		= "{'shortId':-1}";
 
 	public static final String	FEEDBACK__BY_SCREENING_SURVEY																																													= "{'screeningSurvey':#}";
 	public static final String	FEEDBACK__BY_SCREENING_SURVEY_AND_ORDER_LOWER																																									= "{'screeningSurvey':#,'order':{$lt:#}}";
@@ -161,4 +167,5 @@ public class Queries {
 	public static final String	UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE__CHANGE_2																																								= "{ $set: { 'validationErrorMessage' : '' } }";
 	public static final String	UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE__CHANGE_3																																								= "{ $set: { 'defaultValue' : '' } }";
 	public static final String	UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE_RULE__CHANGE_1																																							= "{ $set: { 'showSameSlideBecauseValueNotValidWhenTrue' : false } }";
+	public static final String	UPDATE_VERSION_3__SCREENING_SURVEY__CHANGE_1																																									= "{ $set: { 'intermediateSurvey' : false } }";
 }

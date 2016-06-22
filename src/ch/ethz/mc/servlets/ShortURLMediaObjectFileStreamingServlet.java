@@ -103,7 +103,7 @@ public class ShortURLMediaObjectFileStreamingServlet extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return null;
 		}
-		log.debug("Requested system unique id {}",
+		log.debug("Requested media object short id {}",
 				mediaObjectParticipantShortURL);
 
 		// Check if system unique id exists
@@ -131,7 +131,7 @@ public class ShortURLMediaObjectFileStreamingServlet extends HttpServlet {
 				.getFileByReference(mediaObject.getFileReference());
 		log.debug("Serving file {}", file.getAbsoluteFile());
 
-		// Check if file actually exists in filesystem.
+		// Check if file actually exists in filesystem
 		if (!file.exists()) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return null;
