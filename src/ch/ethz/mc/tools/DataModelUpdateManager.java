@@ -70,8 +70,8 @@ public class DataModelUpdateManager {
 				case 2:
 					updateToVersion2();
 					break;
-				case 3:
-					updateToVersion3();
+				case 4:
+					updateToVersion4();
 					break;
 			}
 
@@ -204,9 +204,9 @@ public class DataModelUpdateManager {
 	}
 
 	/**
-	 * Changes for version 3:
+	 * Changes for version 4:
 	 */
-	private static void updateToVersion3() {
+	private static void updateToVersion4() {
 		val interventionVariableWithValueCollection = jongo
 				.getCollection("InterventionVariableWithValue");
 
