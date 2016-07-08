@@ -2,15 +2,15 @@ package ch.ethz.mc.conf;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,14 +52,6 @@ public class ImplementationConstants {
 	// FIXME Special solution for MC tobacco
 	public static String		VARIABLE_DEFINING_PARTICIPATION_IN_MOBILE_COACH_EXTRA								= "$participation_extra";
 
-	// FIXME Special solution for first MC interventions
-	public static final String	MESSAGE_CONTEST_QUIT_RESULT_VARIABLE												= "$contest_quit_message_result";
-	public static final String	MESSAGE_CONTEST_QUIT_RELEVANT_VARIABLE												= "$contest_quit_message";
-	public static final String	MESSAGE_CONTEST_MOTIVATIONAL_RESULT_VARIABLE										= "$contest_motivational_message_result";
-	public static final String	MESSAGE_CONTEST_MOTIVATIONAL_RELEVANT_VARIABLE										= "$contest_motivational_message";
-	public static final String	MESSAGE_CONTEST_DRINKING_RESULT_VARIABLE											= "$contest_drinking_message_result";
-	public static final String	MESSAGE_CONTEST_DRINKING_RELEVANT_VARIABLE											= "$contest_drinking_message";
-
 	public static final long	MAILING_SEND_RETRIES																= 2;
 	public static final long	MAILING_SEND_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS								= 5 * 60;
 	public static final int		MAILING_MAXIMUM_THREAD_COUNT														= 25;
@@ -89,8 +81,8 @@ public class ImplementationConstants {
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_VARIABLES_IN_STRING										= "\\$[a-zA-Z0-9_]+";
 	public static final String	VARIABLE_MATCH_MODIFIER																= "#";
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_MODIFIED_VARIABLES_IN_STRING							= VARIABLE_MATCH_MODIFIER
-																															+ "[a-zA-Z0-9_]+"
-																															+ VARIABLE_MATCH_MODIFIER;
+			+ "[a-zA-Z0-9_]+"
+			+ VARIABLE_MATCH_MODIFIER;
 	public static final String	VARIABLE_VALUE_MODIFIER_START														= "{";
 	public static final String	VARIABLE_VALUE_MODIFIER_END															= "}";
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_VALUE_MODIFIER											= "\\{[^\\}]+\\}";

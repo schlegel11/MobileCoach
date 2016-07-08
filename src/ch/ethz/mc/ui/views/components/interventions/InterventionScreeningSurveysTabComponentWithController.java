@@ -31,6 +31,7 @@ import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
+import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.ui.UIScreeningSurvey;
@@ -119,6 +120,8 @@ InterventionScreeningSurveysTabComponent {
 				buttonClickListener);
 		screeningSurveysEditComponent.getImportButton().addClickListener(
 				buttonClickListener);
+		screeningSurveysEditComponent.getSwitchTypeButton().addClickListener(
+				buttonClickListener);
 		screeningSurveysEditComponent.getRenameButton().addClickListener(
 				buttonClickListener);
 		screeningSurveysEditComponent.getEditButton().addClickListener(
@@ -149,7 +152,7 @@ InterventionScreeningSurveysTabComponent {
 						return "Intervention_"
 								+ intervention.getName().replaceAll(
 										"[^A-Za-z0-9_. ]+", "_")
-										+ "_Screening_Survey_"
+										+ "_Survey_"
 										+ selectedUIScreeningSurvey
 										.getScreeningSurveyName().replaceAll(
 												"[^A-Za-z0-9_. ]+", "_")
@@ -172,6 +175,9 @@ InterventionScreeningSurveysTabComponent {
 			} else if (event.getButton() == interventionScreeningSurveyEditComponent
 					.getImportButton()) {
 				importScreeningSurvey();
+			} else if (event.getButton() == interventionScreeningSurveyEditComponent
+					.getSwitchTypeButton()) {
+				switchTypeOfScreeningSurvey();
 			} else if (event.getButton() == interventionScreeningSurveyEditComponent
 					.getRenameButton()) {
 				renameScreeningSurvey();
@@ -330,6 +336,36 @@ InterventionScreeningSurveysTabComponent {
 		showModalClosableEditWindow(
 				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__IMPORT_SCREENING_SURVEY,
 				fileUploadComponentWithController, null);
+	}
+
+	public void switchTypeOfScreeningSurvey() {
+		log.debug("Switch type of screening survey");
+
+		try {
+			val selectedScreeningSurvey = selectedUIScreeningSurvey
+					.getRelatedModelObject(ScreeningSurvey.class);
+
+			// Change type
+			getScreeningSurveyAdministrationManagerService()
+			.screeningSurveySwitchType(selectedScreeningSurvey);
+		} catch (final Exception e) {
+			handleException(e);
+			return;
+		}
+
+		// Adapt UI
+		getStringItemProperty(selectedUIScreeningSurveyBeanItem,
+				UIScreeningSurvey.SCREENING_SURVEY_TYPE)
+				.setValue(
+						selectedUIScreeningSurvey.getRelatedModelObject(
+								ScreeningSurvey.class).isIntermediateSurvey() ? Messages
+										.getAdminString(AdminMessageStrings.UI_MODEL__SURVEY__INTERMEDIATE)
+										: Messages
+										.getAdminString(AdminMessageStrings.UI_MODEL__SURVEY__SCREENING));
+
+		getAdminUI()
+		.showInformationNotification(
+				AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_TYPE_CHANGED);
 	}
 
 	public void renameScreeningSurvey() {

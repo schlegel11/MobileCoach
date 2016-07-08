@@ -256,7 +256,6 @@ public class Constants {
 	@Synchronized
 	public static String getVersion() {
 		try {
-
 			if (version == null) {
 				@Cleanup
 				val inputStream = servletContext
@@ -267,7 +266,7 @@ public class Constants {
 				val bufferedInputStreamReader = new BufferedReader(
 						inputStreamReader);
 
-				version = bufferedInputStreamReader.readLine();
+				version = bufferedInputStreamReader.readLine() + " - DM: "+ DATA_MODEL_VERSION;
 			}
 		} catch (final Exception e) {
 			log.error("Error at parsing version file: {}", e.getMessage());

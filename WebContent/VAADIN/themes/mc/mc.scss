@@ -228,7 +228,6 @@ input.gwt-FileUpload {
         }
         .title-label {
             @extend .bold;
-            @extend .right;
             @extend .biggest;
         }
     }
@@ -250,6 +249,10 @@ input.gwt-FileUpload {
         }
         .menu-panel {
             background-color: rgb(247, 247, 247);
+        }
+        .menu-panel  .v-caption {
+        	margin-top: 10px;
+        	@extend .center;
         }
         .v-accordion-item-caption {
             padding-bottom: 15px;

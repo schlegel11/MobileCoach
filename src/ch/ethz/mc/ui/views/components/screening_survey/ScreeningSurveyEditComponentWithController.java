@@ -104,6 +104,13 @@ public class ScreeningSurveyEditComponentWithController extends
 		feedbacksTable.setSortAscending(true);
 		feedbacksTable.setSortEnabled(false);
 
+		// handle survey type adjusments (hide feedback area for intermediate surveys)
+		if (screeningSurvey.isIntermediateSurvey()) {
+			getFeedbacksLabel().setVisible(false);
+			getFedbacksButtonLayout().setVisible(false);
+			feedbacksTable.setVisible(false);
+		}
+		
 		// handle table selection change
 		slidesTable.addValueChangeListener(new ValueChangeListener() {
 
