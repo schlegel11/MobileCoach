@@ -43,6 +43,8 @@ also available under the Apache License:
      http://projectlombok.org
    * Mustache.java
      https://github.com/spullara/mustache.java
+   * Resteasy
+     https://github.com/resteasy/Resteasy
    * jcsv
      https://code.google.com/p/jcsv/
    
