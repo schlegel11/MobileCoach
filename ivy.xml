@@ -15,7 +15,7 @@
 	<!ENTITY lombok.version "1.14.8">
 	<!ENTITY mustache.java.version "0.8.14">
 	<!ENTITY java.mail.version "1.4.7">
-	<!ENTITY resteasy.version "3.0.12.Final">
+	<!ENTITY resteasy.version "3.0.17.Final">
 	<!ENTITY jcsv.version "1.4.0">
 ]>
 <ivy-module version="2.0"
