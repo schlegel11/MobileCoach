@@ -2,15 +2,15 @@ package ch.ethz.mc.model;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,6 +32,7 @@ public class Queries {
 	public static final String	SCREENING_SURVEY__ACTIVE_TRUE																																													= "{'active':true}";
 	public static final String	SCREENING_SURVEY__BY_INTERVENTION_AND_ACTIVE_TRUE																																								= "{'intervention':#,'active':true}";
 	public static final String	SCREENING_SURVEY__BY_INTERVENTION_AND_ACTIVE_TRUE_AND_INTERMEDIATE_SURVEY_FALSE																																	= "{'intervention':#,'active':true,'intermediateSurvey':false}";
+	public static final String	SCREENING_SURVEY__BY_INTERVENTION_AND_INTERMEDIATE_SURVEY_TRUE																																					= "{'intervention':#,'intermediateSurvey':true}";
 	public static final String	SCREENING_SURVEY__BY_INTERVENTION_AND_GLOBAL_UNIQUE_ID																																							= "{'intervention':#,'globalUniqueId':#}";
 
 	public static final String	AUTHOR__BY_USERNAME																																																= "{'username':#}";
@@ -54,6 +55,7 @@ public class Queries {
 	public static final String	MONITORING_MESSAGE__BY_MONITORING_MESSAGE_GROUP																																									= "{'monitoringMessageGroup':#}";
 	public static final String	MONITORING_MESSAGE__BY_MONITORING_MESSAGE_GROUP_AND_ORDER_LOWER																																					= "{'monitoringMessageGroup':#,'order':{$lt:#}}";
 	public static final String	MONITORING_MESSAGE__BY_MONITORING_MESSAGE_GROUP_AND_ORDER_HIGHER																																				= "{'monitoringMessageGroup':#,'order':{$gt:#}}";
+	public static final String	MONITORING_MESSAGE__BY_LINKED_INTERMEDIATE_SURVEY																																								= "{'linkedIntermediateSurvey':#}";
 	public static final String	MONITORING_MESSAGE__SORT_BY_ORDER_ASC																																											= "{'order':1}";
 	public static final String	MONITORING_MESSAGE__SORT_BY_ORDER_DESC																																											= "{'order':-1}";
 
@@ -168,4 +170,5 @@ public class Queries {
 	public static final String	UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE__CHANGE_3																																								= "{ $set: { 'defaultValue' : '' } }";
 	public static final String	UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE_RULE__CHANGE_1																																							= "{ $set: { 'showSameSlideBecauseValueNotValidWhenTrue' : false } }";
 	public static final String	UPDATE_VERSION_3__SCREENING_SURVEY__CHANGE_1																																									= "{ $set: { 'intermediateSurvey' : false } }";
+	public static final String	UPDATE_VERSION_3__MONITORING_MESSAGE__CHANGE_1																																									= "{ $set: { 'linkedIntermediateSurvey' : null } }";
 }

@@ -41,6 +41,7 @@ import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.Feedback;
 import ch.ethz.mc.model.persistent.FeedbackSlide;
 import ch.ethz.mc.model.persistent.FeedbackSlideRule;
+import ch.ethz.mc.model.persistent.MonitoringMessage;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlideRule;
@@ -180,15 +181,30 @@ public class ScreeningSurveyAdministrationManagerService {
 	@Synchronized
 	public void screeningSurveySwitchType(final ScreeningSurvey screeningSurvey)
 			throws NotificationMessageException {
-		if (!screeningSurvey.isIntermediateSurvey()
-				&& getAllFeedbacksOfScreeningSurvey(screeningSurvey.getId())
-				.iterator().hasNext()) {
-			throw new NotificationMessageException(
-					AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_CANT_CHANGE_TYPE);
+
+		if (screeningSurvey.isIntermediateSurvey()) {
+			val monitoringMessagesLinkingIntermediateSurvey = databaseManagerService
+					.findModelObjects(
+							MonitoringMessage.class,
+							Queries.MONITORING_MESSAGE__BY_LINKED_INTERMEDIATE_SURVEY,
+							screeningSurvey.getId());
+			if (monitoringMessagesLinkingIntermediateSurvey.iterator()
+					.hasNext()) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_CANT_CHANGE_TYPE_1);
+			}
 		} else {
-			screeningSurvey.setIntermediateSurvey(!screeningSurvey
-					.isIntermediateSurvey());
+			val feedbacksOfSurvey = databaseManagerService.findModelObjects(
+					Feedback.class, Queries.FEEDBACK__BY_SCREENING_SURVEY,
+					screeningSurvey.getId());
+			if (feedbacksOfSurvey.iterator().hasNext()) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_CANT_CHANGE_TYPE_2);
+			}
 		}
+
+		screeningSurvey.setIntermediateSurvey(!screeningSurvey
+				.isIntermediateSurvey());
 
 		databaseManagerService.saveModelObject(screeningSurvey);
 	}
@@ -212,7 +228,7 @@ public class ScreeningSurveyAdministrationManagerService {
 	@Synchronized
 	public ScreeningSurvey screeningSurveyImport(final File file,
 			final ObjectId interventionId, final boolean duplicate)
-			throws FileNotFoundException, IOException {
+					throws FileNotFoundException, IOException {
 		val importedModelObjects = modelObjectExchangeService
 				.importModelObjects(file, ModelObjectExchangeFormatTypes.SURVEY);
 
@@ -270,7 +286,19 @@ public class ScreeningSurveyAdministrationManagerService {
 	@Synchronized
 	public void screeningSurveyDelete(
 			final ScreeningSurvey screeningSurveyToDelete)
-					throws NotificationMessageException {
+			throws NotificationMessageException {
+		if (screeningSurveyToDelete.isIntermediateSurvey()) {
+			val monitoringMessagesLinkingIntermediateSurvey = databaseManagerService
+					.findModelObjects(
+							MonitoringMessage.class,
+							Queries.MONITORING_MESSAGE__BY_LINKED_INTERMEDIATE_SURVEY,
+							screeningSurveyToDelete.getId());
+			if (monitoringMessagesLinkingIntermediateSurvey.iterator()
+					.hasNext()) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_CANT_DELETE);
+			}
+		}
 
 		databaseManagerService.deleteModelObject(screeningSurveyToDelete);
 	}
@@ -1136,6 +1164,16 @@ public class ScreeningSurveyAdministrationManagerService {
 						Queries.FEEDBACK_SLIDE_RULE__BY_FEEDBACK_SLIDE,
 						Queries.FEEDBACK_SLIDE_RULE__SORT_BY_ORDER_ASC,
 						feedbackSlideId);
+	}
+
+	@Synchronized
+	public Iterable<ScreeningSurvey> getAllIntermediateSurveysOfIntervention(
+			final Object interventionId) {
+		return databaseManagerService
+				.findModelObjects(
+						ScreeningSurvey.class,
+						Queries.SCREENING_SURVEY__BY_INTERVENTION_AND_INTERMEDIATE_SURVEY_TRUE,
+						interventionId);
 	}
 
 	@Synchronized

@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.interventions.monitoring_messages;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,7 +25,9 @@ import org.bson.types.ObjectId;
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.model.persistent.MonitoringMessage;
 import ch.ethz.mc.model.persistent.MonitoringMessageRule;
+import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.ui.UIMonitoringMessageRule;
+import ch.ethz.mc.model.ui.UIScreeningSurvey;
 import ch.ethz.mc.ui.views.components.basics.MediaObjectIntegrationComponentWithController.MediaObjectCreationOrDeleteionListener;
 import ch.ethz.mc.ui.views.components.basics.PlaceholderStringEditComponent;
 import ch.ethz.mc.ui.views.components.basics.ShortPlaceholderStringEditComponent;
@@ -39,14 +41,14 @@ import com.vaadin.ui.Table;
 
 /**
  * Extends the monitoring message edit component with a controller
- * 
+ *
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
 @Log4j2
 public class MonitoringMessageEditComponentWithController extends
-		MonitoringMessageEditComponent implements
-		MediaObjectCreationOrDeleteionListener {
+MonitoringMessageEditComponent implements
+MediaObjectCreationOrDeleteionListener {
 
 	private final MonitoringMessage									monitoringMessage;
 
@@ -112,7 +114,7 @@ public class MonitoringMessageEditComponentWithController extends
 		getDeleteRuleButton().addClickListener(buttonClickListener);
 
 		getTextWithPlaceholdersTextFieldComponent().getButton()
-				.addClickListener(buttonClickListener);
+		.addClickListener(buttonClickListener);
 		getStoreVariableTextFieldComponent().getButton().addClickListener(
 				buttonClickListener);
 
@@ -129,6 +131,42 @@ public class MonitoringMessageEditComponentWithController extends
 		// Adjust UI
 		adjust();
 
+		// Handle combo boxes
+		val intermediateSurveys = getScreeningSurveyAdministrationManagerService()
+				.getAllIntermediateSurveysOfIntervention(interventionId);
+
+		val intermediateSurveyComboBox = getIntermediateSurveyComboBox();
+		for (val intermediateSurvey : intermediateSurveys) {
+			val uiIntermediateSurvey = intermediateSurvey.toUIModelObject();
+			intermediateSurveyComboBox.addItem(uiIntermediateSurvey);
+			if (monitoringMessage.getLinkedIntermediateSurvey() != null
+					&& monitoringMessage.getLinkedIntermediateSurvey().equals(
+							intermediateSurvey.getId())) {
+				intermediateSurveyComboBox.select(uiIntermediateSurvey);
+			}
+		}
+		intermediateSurveyComboBox
+		.addValueChangeListener(new ValueChangeListener() {
+
+			@Override
+			public void valueChange(final ValueChangeEvent event) {
+				val selectedUIScreeningSurvey = (UIScreeningSurvey) event
+						.getProperty().getValue();
+
+				ObjectId intermediateSurveyToSet = null;
+				if (selectedUIScreeningSurvey != null) {
+					intermediateSurveyToSet = selectedUIScreeningSurvey
+							.getRelatedModelObject(
+									ScreeningSurvey.class).getId();
+				}
+				log.debug("Adjust intermediate survey to {}",
+						intermediateSurveyToSet);
+				getInterventionAdministrationManagerService()
+				.monitoringMessageSetLinkedIntermediateSurvey(
+						monitoringMessage,
+						intermediateSurveyToSet);
+			}
+		});
 	}
 
 	private void adjust() {
@@ -177,10 +215,10 @@ public class MonitoringMessageEditComponentWithController extends
 						try {
 							// Change text with placeholders
 							getInterventionAdministrationManagerService()
-									.monitoringMessageSetTextWithPlaceholders(
-											monitoringMessage,
-											getStringValue(),
-											allPossibleMessageVariables);
+							.monitoringMessageSetTextWithPlaceholders(
+									monitoringMessage,
+									getStringValue(),
+									allPossibleMessageVariables);
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -209,8 +247,8 @@ public class MonitoringMessageEditComponentWithController extends
 						try {
 							// Change store result to variable
 							getInterventionAdministrationManagerService()
-									.monitoringMessageSetStoreResultToVariable(
-											monitoringMessage, getStringValue());
+							.monitoringMessageSetStoreResultToVariable(
+									monitoringMessage, getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -232,7 +270,7 @@ public class MonitoringMessageEditComponentWithController extends
 				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__CREATE_MONITORING_MESSAGE_RULE,
 				new MonitoringMessageRuleEditComponentWithController(
 						newMonitoringMessageRule, interventionId),
-				new ExtendableButtonClickListener() {
+						new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
@@ -242,8 +280,8 @@ public class MonitoringMessageEditComponentWithController extends
 										.toUIModelObject()));
 						rulesTable.select(newMonitoringMessageRule.getId());
 						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_RULE_CREATED);
+						.showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_RULE_CREATED);
 
 						closeWindow();
 					}
@@ -259,7 +297,7 @@ public class MonitoringMessageEditComponentWithController extends
 				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_MONITORING_MESSAGE_RULE,
 				new MonitoringMessageRuleEditComponentWithController(
 						selectedMonitoringMessageRule, interventionId),
-				new ExtendableButtonClickListener() {
+						new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
@@ -269,8 +307,8 @@ public class MonitoringMessageEditComponentWithController extends
 						rulesTable.sort();
 						rulesTable.select(selectedMonitoringMessageRule.getId());
 						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_RULE_UPDATED);
+						.showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_RULE_UPDATED);
 
 						closeWindow();
 					}
@@ -309,8 +347,8 @@ public class MonitoringMessageEditComponentWithController extends
 
 					// Delete rule
 					getInterventionAdministrationManagerService()
-							.monitoringMessageRuleDelete(
-									selectedMonitoringMessageRule);
+					.monitoringMessageRuleDelete(
+							selectedMonitoringMessageRule);
 				} catch (final Exception e) {
 					closeWindow();
 					handleException(e);
@@ -322,8 +360,8 @@ public class MonitoringMessageEditComponentWithController extends
 						.getRelatedModelObject(MonitoringMessageRule.class)
 						.getId());
 				getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_RULE_DELETED);
+				.showInformationNotification(
+						AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_RULE_DELETED);
 
 				closeWindow();
 			}
@@ -333,7 +371,7 @@ public class MonitoringMessageEditComponentWithController extends
 	@Override
 	public void updateLinkedMediaObjectId(final ObjectId mediaObjectId) {
 		getInterventionAdministrationManagerService()
-				.monitoringMessageSetLinkedMediaObject(monitoringMessage,
-						mediaObjectId);
+		.monitoringMessageSetLinkedMediaObject(monitoringMessage,
+				mediaObjectId);
 	}
 }

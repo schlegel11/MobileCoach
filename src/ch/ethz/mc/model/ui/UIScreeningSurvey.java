@@ -64,4 +64,9 @@ public class UIScreeningSurvey extends UIModelObject {
 	public static String getSortColumn() {
 		return SCREENING_SURVEY_NAME;
 	}
+
+	@Override
+	public String toString() {
+		return screeningSurveyName;
+	}
 }

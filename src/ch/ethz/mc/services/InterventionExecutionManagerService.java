@@ -56,6 +56,7 @@ import ch.ethz.mc.model.persistent.MonitoringMessage;
 import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
 import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.Participant;
+import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.ScreeningSurveyAndFeedbackParticipantShortURL;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
@@ -242,6 +243,21 @@ public class InterventionExecutionManagerService {
 			}
 		}
 
+		// Check linked intermediate survey
+		ScreeningSurvey linkedIntermediateSurvey = null;
+		if (relatedMonitoringMessage != null) {
+			val monitoringMessage = databaseManagerService.getModelObjectById(
+					MonitoringMessage.class,
+					dialogMessage.getRelatedMonitoringMessage());
+
+			if (monitoringMessage != null
+					&& monitoringMessage.getLinkedIntermediateSurvey() != null) {
+				linkedIntermediateSurvey = databaseManagerService
+						.getModelObjectById(ScreeningSurvey.class,
+								monitoringMessage.getLinkedIntermediateSurvey());
+			}
+		}
+
 		// Determine order
 		val highestOrderMessage = databaseManagerService
 				.findOneSortedModelObject(DialogMessage.class,
@@ -253,21 +269,39 @@ public class InterventionExecutionManagerService {
 			dialogMessage.setOrder(highestOrderMessage.getOrder() + 1);
 		}
 
-		// Special saving case for linked media object
-		if (linkedMediaObject != null) {
+		// Special saving case for linked media object or intermediate survey
+		if (linkedMediaObject != null || linkedIntermediateSurvey != null) {
 			dialogMessage.setStatus(DialogMessageStatusTypes.IN_CREATION);
 			databaseManagerService.saveModelObject(dialogMessage);
 
-			val mediaObjectParticipantShortURL = mediaObjectParticipantShortURLCreate(
-					dialogMessage, linkedMediaObject);
+			String URLsToAdd = "";
 
-			val mediaObjectParticipantShortURLString = mediaObjectParticipantShortURL
-					.calculateURL();
+			// Integrate media object URL
+			if (linkedMediaObject != null) {
+				val mediaObjectParticipantShortURL = mediaObjectParticipantShortURLCreate(
+						dialogMessage, linkedMediaObject);
 
-			log.debug("Integrating media object into message with URL {}",
-					mediaObjectParticipantShortURLString);
-			dialogMessage.setMessage(message + " "
-					+ mediaObjectParticipantShortURLString);
+				val mediaObjectParticipantShortURLString = mediaObjectParticipantShortURL
+						.calculateURL();
+				log.debug("Integrating media object into message with URL {}",
+						mediaObjectParticipantShortURLString);
+				URLsToAdd += " " + mediaObjectParticipantShortURLString;
+			}
+
+			// Integrate intermediate survey URL
+			if (linkedIntermediateSurvey != null) {
+				val intermediateSurveyShortURL = ensureScreeningSurveyParticipantShortURL(
+						participant.getId(), linkedIntermediateSurvey.getId());
+
+				val intermediateSurveyShortURLString = intermediateSurveyShortURL
+						.calculateURL();
+				log.debug(
+						"Integrating intermediate survey into message with URL {}",
+						intermediateSurveyShortURLString);
+				URLsToAdd += " " + intermediateSurveyShortURLString;
+			}
+
+			dialogMessage.setMessage(message + URLsToAdd);
 			dialogMessage
 					.setStatus(DialogMessageStatusTypes.PREPARED_FOR_SENDING);
 		}
@@ -289,7 +323,7 @@ public class InterventionExecutionManagerService {
 	@Synchronized
 	public void dialogMessageSetProblemSolved(final ObjectId dialogMessageId,
 			final String newUncleanedButCorrectedResult)
-					throws NotificationMessageException {
+			throws NotificationMessageException {
 		log.debug("Marking dialog message {} as problem solved");
 
 		val dialogMessage = databaseManagerService.getModelObjectById(
@@ -301,7 +335,7 @@ public class InterventionExecutionManagerService {
 					DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
 					dialogMessage.getAnswerReceivedTimestamp(),
 					StringHelpers
-					.cleanReceivedMessageString(newUncleanedButCorrectedResult),
+							.cleanReceivedMessageString(newUncleanedButCorrectedResult),
 					dialogMessage.getAnswerReceivedRaw());
 		} else if (dialogMessage.getStatus() == DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY) {
 			dialogMessage.setAnswerNotAutomaticallyProcessable(false);
@@ -384,7 +418,7 @@ public class InterventionExecutionManagerService {
 	// Screening Survey Participant Short URL (also available in
 	// InterventionAdministrationManagerService)
 	@Synchronized
-	private void ensureScreeningSurveyParticipantShortURL(
+	private ScreeningSurveyAndFeedbackParticipantShortURL ensureScreeningSurveyParticipantShortURL(
 			final ObjectId participantId, final ObjectId screeningSurveyId) {
 
 		val existingShortIdObject = databaseManagerService
@@ -393,7 +427,9 @@ public class InterventionExecutionManagerService {
 						Queries.SCREENING_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_PARTICIPANT_AND_SCREENING_SURVEY,
 						participantId, screeningSurveyId);
 
-		if (existingShortIdObject == null) {
+		if (existingShortIdObject != null) {
+			return existingShortIdObject;
+		} else {
 			val newestShortIdObject = databaseManagerService
 					.findOneSortedModelObject(
 							ScreeningSurveyAndFeedbackParticipantShortURL.class,
@@ -408,6 +444,8 @@ public class InterventionExecutionManagerService {
 					participantId, screeningSurveyId, null);
 
 			databaseManagerService.saveModelObject(newShortIdObject);
+
+			return newestShortIdObject;
 		}
 	}
 

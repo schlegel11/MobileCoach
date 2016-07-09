@@ -29,11 +29,12 @@ import com.vaadin.data.fieldgroup.PropertyId;
 @EqualsAndHashCode(callSuper = false)
 public class UIMonitoringMessage extends UIModelObject {
 	// NOTE: The String values have to fit the name of the variables
-	public static final String	ORDER					= "order";
-	public static final String	TEXT_WITH_PLACEHOLDERS	= "textWithPlaceholders";
-	public static final String	CONTAINS_MEDIA_CONTENT	= "containsMediaContent";
-	public static final String	RESULT_VARIABLE			= "resultVariable";
-	public static final String	CONTAINS_RULES			= "containsRules";
+	public static final String	ORDER									= "order";
+	public static final String	TEXT_WITH_PLACEHOLDERS					= "textWithPlaceholders";
+	public static final String	CONTAINS_MEDIA_CONTENT					= "containsMediaContent";
+	public static final String	CONTAINS_LINK_TO_INTERMEDIATE_SURVEY	= "containsLinkToIntermediateSurvey";
+	public static final String	RESULT_VARIABLE							= "resultVariable";
+	public static final String	CONTAINS_RULES							= "containsRules";
 
 	@PropertyId(ORDER)
 	private int					order;
@@ -41,10 +42,11 @@ public class UIMonitoringMessage extends UIModelObject {
 	@PropertyId(TEXT_WITH_PLACEHOLDERS)
 	private String				textWithPlaceholders;
 
-	private boolean				booleanHasLinkedMediaObject;
-
 	@PropertyId(CONTAINS_MEDIA_CONTENT)
 	private String				containsMediaContent;
+
+	@PropertyId(CONTAINS_LINK_TO_INTERMEDIATE_SURVEY)
+	private String				containsLinkToIntermediateSurvey;
 
 	@PropertyId(RESULT_VARIABLE)
 	private String				resultVariable;
@@ -54,13 +56,15 @@ public class UIMonitoringMessage extends UIModelObject {
 
 	public static Object[] getVisibleColumns() {
 		return new Object[] { TEXT_WITH_PLACEHOLDERS, CONTAINS_MEDIA_CONTENT,
-				RESULT_VARIABLE, CONTAINS_RULES };
+				CONTAINS_LINK_TO_INTERMEDIATE_SURVEY, RESULT_VARIABLE,
+				CONTAINS_RULES };
 	}
 
 	public static String[] getColumnHeaders() {
 		return new String[] {
 				localize(AdminMessageStrings.UI_COLUMNS__MESSAGE_TEXT),
 				localize(AdminMessageStrings.UI_COLUMNS__CONTAINS_MEDIA_CONTENT),
+				localize(AdminMessageStrings.UI_COLUMNS__CONTAINS_LINK_TO_INTERMEDIATE_SURVEY),
 				localize(AdminMessageStrings.UI_COLUMNS__RESULT_VARIABLE),
 				localize(AdminMessageStrings.UI_COLUMNS__CONTAINS_RULES) };
 	}

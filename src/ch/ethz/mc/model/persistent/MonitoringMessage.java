@@ -38,11 +38,11 @@ import ch.ethz.mc.model.ui.UIMonitoringMessage;
 
 /**
  * {@link ModelObject} to represent an {@link MonitoringMessage}
- * 
+ *
  * {@link MonitoringMessage}s will be sent to the {@link Participant} during
  * an {@link Intervention}. {@link MonitoringMessage}s are grouped in
  * {@link MonitoringMessageGroup}s.
- * 
+ *
  * @author Andreas Filler
  */
 @NoArgsConstructor
@@ -82,6 +82,14 @@ public class MonitoringMessage extends ModelObject {
 	private ObjectId	linkedMediaObject;
 
 	/**
+	 * <strong>OPTIONAL:</strong> The intermediate {@link ScreeningSurvey}
+	 * used/presented in this {@link MonitoringMessage}
+	 */
+	@Getter
+	@Setter
+	private ObjectId	linkedIntermediateSurvey;
+
+	/**
 	 * <strong>OPTIONAL:</strong> If the result of the {@link MonitoringMessage}
 	 * should be
 	 * stored, the name of the appropriate variable can be set here.
@@ -115,8 +123,11 @@ public class MonitoringMessage extends ModelObject {
 				order,
 				textWithPlaceholders.length() > 160 ? textWithPlaceholders
 						.substring(0, 160) + "..." : textWithPlaceholders,
-				linkedMediaObject != null,
 				linkedMediaObject != null ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
+				linkedIntermediateSurvey != null ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
 						: Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
