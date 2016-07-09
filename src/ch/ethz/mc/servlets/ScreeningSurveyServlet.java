@@ -102,7 +102,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 	protected void doGet(final HttpServletRequest request,
 			final HttpServletResponse response) throws ServletException,
 			IOException {
-		log.debug("Survey servlet call");
+		log.debug("Screening survey servlet call");
 
 		request.setCharacterEncoding("UTF-8");
 		try {
@@ -125,7 +125,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 					// intermediate) surveys are accepted
 					if (ObjectId.isValid(pathParts[0])) {
 						if (screeningSurveyExecutionManagerService
-								.screeningSurveyCheckIfActiveAndOGivenType(new ObjectId(
+								.screeningSurveyCheckIfActiveAndOfGivenType(new ObjectId(
 										pathParts[0]), false)) {
 							handleTemplateRequest(request, response,
 									new ObjectId(pathParts[0]));
@@ -397,7 +397,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			checkValue = null;
 		}
 
-		// Remember that user participated in screening survey
+		// Remember that user participated in screening survey (to have this information when we directly go to the feedback afterwards)
 		session.setAttribute(
 				ScreeningSurveySessionAttributeTypes.FROM_SCREENING_SURVEY
 						.toString(), true);

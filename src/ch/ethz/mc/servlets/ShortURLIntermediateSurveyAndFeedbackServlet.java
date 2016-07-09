@@ -45,6 +45,7 @@ import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.persistent.Feedback;
+import ch.ethz.mc.model.persistent.IntermediateSurveyAndFeedbackParticipantShortURL;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.services.ScreeningSurveyExecutionManagerService;
@@ -104,55 +105,68 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 	protected void doGet(final HttpServletRequest request,
 			final HttpServletResponse response) throws ServletException,
 			IOException {
-		log.debug("Survey servlet call");
+		log.debug("Intermediate survey or feedback servlet call");
 
 		request.setCharacterEncoding("UTF-8");
 		try {
 			// Determine request path
-			final String path = request.getRequestURI()
-					.substring(request.getContextPath().length())
-					.replaceAll("^/", "").replaceAll("/$", "");
+			String path = request
+					.getRequestURI()
+					.substring(
+							request.getContextPath().length()
+									+ ImplementationConstants.SHORT_ID_SCREEN_SURVEY_AND_FEEDBACK_SERVLET_PATH
+											.length() + 1).replaceAll("^/", "")
+					.replaceAll("/$", "");
 
 			// Determine request type
 			val pathParts = path.split("/");
+
+			if (pathParts[0].equals("")) {
+				// Empty request
+				throw new Exception("Cannot be called this way");
+			}
+
+			// Get appropriate short id object
+			val shortIdLong = IntermediateSurveyAndFeedbackParticipantShortURL
+					.validateURLIdPartAndReturnShortId(pathParts[0]);
+			val shortId = screeningSurveyExecutionManagerService
+					.getIntermediateSurveyAndFeedbackParticipantShortURL(shortIdLong);
+			if (shortId == null
+					|| !shortId.validateSecretInGivenIdPart(pathParts[0])) {
+				throw new Exception("Invalid id");
+			}
+
+			log.debug("Request for short id {}", shortId);
+
 			switch (pathParts.length) {
 				case 1:
-					if (pathParts[0].equals("")) {
-						// Empty request
-						throw new Exception("Cannot be called this way");
-					}
-
 					// Only object ids of active intermediate surveys or
 					// feedbacks surveys are accepted
-					if (ObjectId.isValid(pathParts[0])) {
-						if (screeningSurveyExecutionManagerService
-								.screeningSurveyCheckIfActiveAndOGivenType(
-										new ObjectId(pathParts[0]), true)) {
-							handleTemplateRequest(request, response,
-									new ObjectId(pathParts[0]), null);
-							return;
-						}
-						if (screeningSurveyExecutionManagerService
-								.feedbackCheckIfActiveByBelongingParticipant(new ObjectId(
-										pathParts[0]))) {
-							handleTemplateRequest(request, response, null,
-									new ObjectId(pathParts[0]));
-							return;
-						}
-						throw new Exception("Invalid id");
-					} else {
-						throw new Exception("Invalid id");
+					if (shortId.getSurvey() != null
+							&& screeningSurveyExecutionManagerService
+									.screeningSurveyCheckIfActiveAndOfGivenType(
+											shortId.getSurvey(), true)) {
+						handleTemplateRequest(request, response,
+								shortId.getParticipant(), shortId.getSurvey(),
+								null);
+						return;
+					} else if (shortId.getFeedback() != null
+							&& screeningSurveyExecutionManagerService
+									.feedbackCheckIfActiveByBelongingParticipant(
+											shortId.getParticipant(),
+											shortId.getFeedback())) {
+						handleTemplateRequest(request, response,
+								shortId.getParticipant(), null,
+								shortId.getFeedback());
+						return;
 					}
+					throw new Exception("Invalid id");
 				default:
 					// Object id and file request
-					if (ObjectId.isValid(pathParts[0])) {
-						handleFileRequest(request, response, new ObjectId(
-								pathParts[0]),
-								path.substring(path.indexOf("/") + 1));
-						return;
-					} else {
-						throw new Exception("Invalid request");
-					}
+					handleFileRequest(request, response, shortId.getSurvey(),
+							shortId.getFeedback(),
+							path.substring(path.indexOf("/") + 1));
+					return;
 			}
 		} catch (final Exception e) {
 			log.warn("Request {} could not be fulfilled: {}",
@@ -179,32 +193,41 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 	 * 
 	 * @param request
 	 * @param response
-	 * @param screeningSurveyOrFeedbackParticipantId
+	 * @param surveyId
+	 * @param feedbackId
 	 * @param fileRequest
 	 */
 	private void handleFileRequest(final HttpServletRequest request,
-			final HttpServletResponse response,
-			final ObjectId screeningSurveyOrFeedbackParticipantId,
-			final String fileRequest) throws ServletException, IOException {
-		val screeningSurvey = screeningSurveyExecutionManagerService
-				.getScreeningSurveyById(screeningSurveyOrFeedbackParticipantId);
-		val feedback = screeningSurveyExecutionManagerService
-				.getFeedbackByBelongingParticipant(screeningSurveyOrFeedbackParticipantId);
+			final HttpServletResponse response, final ObjectId surveyId,
+			final ObjectId feedbackId, final String fileRequest)
+			throws ServletException, IOException {
+		ScreeningSurvey survey = null;
+		Feedback feedback = null;
 
-		if (screeningSurvey == null && feedback == null) {
+		boolean isSurveyRequest;
+		if (surveyId != null) {
+			survey = screeningSurveyExecutionManagerService
+					.getScreeningSurveyById(surveyId);
+			isSurveyRequest = true;
+		} else {
+			feedback = screeningSurveyExecutionManagerService
+					.getFeedbackById(feedbackId);
+			isSurveyRequest = false;
+		}
+
+		if (survey == null && feedback == null) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
-		val isScreeningSurveyRequest = screeningSurvey != null;
 
 		log.debug("Handling file request '{}' for {} {}", fileRequest,
-				isScreeningSurveyRequest ? "screening survey"
-						: "feedback of participant",
-				screeningSurveyOrFeedbackParticipantId);
+				isSurveyRequest ? "survey"
+						: "feedback",
+						isSurveyRequest ? surveyId:feedbackId);
 
 		final File basicTemplateFolder = new File(
 				screeningSurveyExecutionManagerService.getTemplatePath(),
-				isScreeningSurveyRequest ? screeningSurvey.getTemplatePath()
+				isSurveyRequest ? survey.getTemplatePath()
 						: feedback.getTemplatePath());
 		final File requestedFile = new File(basicTemplateFolder, fileRequest);
 
@@ -269,40 +292,34 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 	 * 
 	 * @param request
 	 * @param response
+	 * @param participantId
+	 * @param surveyId
+	 * @param feedbackId
 	 * @throws ServletException
 	 * @throws IOException
 	 */
 	private void handleTemplateRequest(final HttpServletRequest request,
-			final HttpServletResponse response,
-			final ObjectId screeningSurveyId,
-			final ObjectId feedbackParticipantId) throws ServletException,
-			IOException {
-		if (screeningSurveyId == null) {
-			log.debug("Handling template request for feedback participant {}",
-					feedbackParticipantId);
+			final HttpServletResponse response, final ObjectId participantId,
+			final ObjectId surveyId, final ObjectId feedbackId)
+			throws ServletException, IOException {
+		if (surveyId != null) {
+			log.debug("Handling template request for survey {} of participant {}",
+					surveyId, participantId);
 		} else {
-			log.debug("Handling template request for screening survey {}",
-					screeningSurveyId);
+			log.debug("Handling template request for feedback {} of participant {}",
+					feedbackId, participantId);
 		}
 
 		HashMap<String, Object> templateVariables;
 		val session = request.getSession(true);
 
-		// Handle screening survey or feedback request
-		if (screeningSurveyId != null) {
+		// Handle survey or feedback request
+		if (surveyId != null) {
 			/*
 			 * Handle screening survey specific things
 			 */
 
 			// Get information from session
-			ObjectId participantId;
-			try {
-				participantId = (ObjectId) session
-						.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_ID
-								.toString());
-			} catch (final Exception e) {
-				participantId = null;
-			}
 			boolean accessGranted;
 			try {
 				accessGranted = (boolean) session
@@ -339,21 +356,16 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 				checkValue = null;
 			}
 
-			// Remember that user participated in screening survey
-			session.setAttribute(
-					ScreeningSurveySessionAttributeTypes.FROM_SCREENING_SURVEY
-							.toString(), true);
-
 			log.debug(
-					"Retrieved information from screening survey slide request: participant: {}, access granted: {}, screening survey: {}, result value: {}, check value: {}",
-					participantId, accessGranted, screeningSurveyId,
+					"Retrieved information from intermediate survey slide request: participant: {}, access granted: {}, screening survey: {}, result value: {}, check value: {}",
+					participantId, accessGranted, surveyId,
 					resultValues, checkValue);
 
 			// Decide which slide should be send to the participant
 			try {
 				templateVariables = screeningSurveyExecutionManagerService
 						.getAppropriateScreeningSurveySlide(participantId,
-								accessGranted, screeningSurveyId, resultValues,
+								accessGranted, surveyId, resultValues,
 								checkValue, session);
 
 				if (templateVariables == null
@@ -395,12 +407,12 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 
 			log.debug(
 					"Retrieved information from feedback slide request: feedback participant: {}, navigation value: {}, check value: {}",
-					feedbackParticipantId, navigationValue, checkValue);
+					feedbackId, navigationValue, checkValue);
 
 			// Decide which slide should be send to the participant
 			try {
 				templateVariables = screeningSurveyExecutionManagerService
-						.getAppropriateFeedbackSlide(feedbackParticipantId,
+						.getAppropriateFeedbackSlide(participantId, feedbackId,
 								navigationValue, checkValue, session);
 
 				if (templateVariables == null
@@ -445,7 +457,7 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 				GeneralSlideTemplateFieldTypes.BASE_URL.toVariable(), baseURL);
 
 		// Slide type
-		if (screeningSurveyId != null) {
+		if (surveyId != null) {
 			templateVariables.put(
 					ScreeningSurveySlideTemplateFieldTypes.IS_SCREENING_SURVEY
 							.toVariable(), true);
@@ -470,7 +482,7 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 		}
 
 		// Adjust feedback URL (only for screening survey slides)
-		if (screeningSurveyId != null
+		if (surveyId != null
 				&& session
 						.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
 								.toString()) != null) {
@@ -484,7 +496,7 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 		}
 
 		// Set layout (only for screening survey slides)
-		if (screeningSurveyId != null) {
+		if (surveyId != null) {
 			for (val layout : ScreeningSurveySlideTemplateLayoutTypes.values()) {
 				if (templateVariables.get(layout.toVariable()) != null) {
 					templateVariables.put(

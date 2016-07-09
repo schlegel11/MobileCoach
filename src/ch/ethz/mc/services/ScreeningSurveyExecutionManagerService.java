@@ -301,7 +301,7 @@ public class ScreeningSurveyExecutionManagerService {
 	 * @return
 	 */
 	@Synchronized
-	public boolean screeningSurveyCheckIfActiveAndOGivenType(
+	public boolean screeningSurveyCheckIfActiveAndOfGivenType(
 			final ObjectId screeningSurveyId, final boolean isIntermediateSurvey) {
 		final val screeningSurvey = databaseManagerService.getModelObjectById(
 				ScreeningSurvey.class, screeningSurveyId);
@@ -332,7 +332,7 @@ public class ScreeningSurveyExecutionManagerService {
 	 */
 	@Synchronized
 	public boolean feedbackCheckIfActiveByBelongingParticipant(
-			final ObjectId participantId) {
+			final ObjectId participantId, final ObjectId feedbackId) {
 		final val participant = databaseManagerService.getModelObjectById(
 				Participant.class, participantId);
 
@@ -344,6 +344,10 @@ public class ScreeningSurveyExecutionManagerService {
 				Feedback.class, participant.getAssignedFeedback());
 
 		if (feedback == null) {
+			return false;
+		}
+
+		if (!feedback.getId().equals(feedbackId)) {
 			return false;
 		}
 
@@ -1204,9 +1208,11 @@ public class ScreeningSurveyExecutionManagerService {
 	 * Returns the appropriate {@link HashMap} to fill the template or
 	 * <code>null</code> if an unexpected error occurs
 	 *
-	 * @param feedbackParticipantId
+	 * @param participantId
 	 *            The {@link ObjectId} of the participant of which the feedback
 	 *            should be shown
+	 * @param feedbackId
+	 *            The {@link ObjectId} of the feedback that should be shown
 	 * @param navigationValue
 	 * @param checkValue
 	 * @param session
@@ -1214,22 +1220,24 @@ public class ScreeningSurveyExecutionManagerService {
 	 */
 	@Synchronized
 	public HashMap<String, Object> getAppropriateFeedbackSlide(
-			final ObjectId feedbackParticipantId, final String navigationValue,
-			final String checkValue, final HttpSession session) {
+			final ObjectId participantId, final ObjectId feedbackId,
+			final String navigationValue, final String checkValue,
+			final HttpSession session) {
 
 		final val templateVariables = new HashMap<String, Object>();
 
 		// Check if participant exists and has a feedback
 		final val participant = databaseManagerService.getModelObjectById(
-				Participant.class, feedbackParticipantId);
+				Participant.class, participantId);
 		if (participant == null || participant.getAssignedFeedback() == null) {
 			return null;
 		}
 
 		// Check if feedback exists
 		final val feedback = databaseManagerService.getModelObjectById(
-				Feedback.class, participant.getAssignedFeedback());
-		if (feedback == null) {
+				Feedback.class, feedbackId);
+		if (feedback == null
+				|| !participant.getAssignedFeedback().equals(feedbackId)) {
 			return null;
 		}
 
@@ -1511,31 +1519,32 @@ public class ScreeningSurveyExecutionManagerService {
 	}
 
 	/**
-	 * Get a specific {@link Feedback} by the {@link ObjectId} of a
-	 * {@link Participant}
+	 * Get a specific {@link Feedback} by {@link ObjectId}
 	 *
-	 * @param feedbackParticipantId
+	 * @param feedbackId
 	 * @return
 	 */
 	@Synchronized
-	public Feedback getFeedbackByBelongingParticipant(
-			final ObjectId feedbackParticipantId) {
+	public Feedback getFeedbackById(final ObjectId feedbackId) {
+		return databaseManagerService.getModelObjectById(Feedback.class,
+				feedbackId);
+	}
 
-		// Check if participant exists and has a feedback
-		final val participant = databaseManagerService.getModelObjectById(
-				Participant.class, feedbackParticipantId);
-		if (participant == null || participant.getAssignedFeedback() == null) {
-			return null;
-		}
-
-		// Check if feedback exists
-		final val feedback = databaseManagerService.getModelObjectById(
-				Feedback.class, participant.getAssignedFeedback());
-		if (feedback == null) {
-			return null;
-		}
-
-		return feedback;
+	/**
+	 * Get a specific {@link IntermediateSurveyAndFeedbackParticipantShortURL}
+	 * by the long id
+	 *
+	 * @param longId
+	 * @return
+	 */
+	@Synchronized
+	public IntermediateSurveyAndFeedbackParticipantShortURL getIntermediateSurveyAndFeedbackParticipantShortURL(
+			final long shortId) {
+		return databaseManagerService
+				.findOneModelObject(
+						IntermediateSurveyAndFeedbackParticipantShortURL.class,
+						Queries.INTERMEDIATE_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_SHORT_ID,
+						shortId);
 	}
 
 	/**
