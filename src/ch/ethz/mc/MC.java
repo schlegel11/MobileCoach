@@ -108,10 +108,12 @@ public class MC implements ServletContextListener {
 							screeningSurveyAdministrationManagerService);
 			screeningSurveyExecutionManagerService = ScreeningSurveyExecutionManagerService
 					.start(databaseManagerService, fileStorageManagerService,
-							variablesManagerService);
+							variablesManagerService,
+							interventionAdministrationManagerService);
 			interventionExecutionManagerService = InterventionExecutionManagerService
 					.start(databaseManagerService, variablesManagerService,
 							communicationManagerService,
+							interventionAdministrationManagerService,
 							screeningSurveyExecutionManagerService);
 		} catch (final Exception e) {
 			noErrorsOccurred = false;

@@ -45,7 +45,6 @@ import org.bson.types.ObjectId;
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
-import ch.ethz.mc.model.persistent.Feedback;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.services.ScreeningSurveyExecutionManagerService;
@@ -60,7 +59,7 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
 /**
- * Servlet to stream the survey slides of surveys and feedbacks
+ * Servlet to stream the survey slides of screening surveys with id-based URLs
  * 
  * @author Andreas Filler
  */
@@ -122,14 +121,14 @@ public class ScreeningSurveyServlet extends HttpServlet {
 						return;
 					}
 
-					// Only object ids of active non intermediate screening
-					// surveys are accepted
+					// Only object ids of active screening surveys (non
+					// intermediate) surveys are accepted
 					if (ObjectId.isValid(pathParts[0])) {
 						if (screeningSurveyExecutionManagerService
-								.screeningSurveyCheckIfActiveAndNonIntermediate(new ObjectId(
-										pathParts[0]))) {
+								.screeningSurveyCheckIfActiveAndOGivenType(new ObjectId(
+										pathParts[0]), false)) {
 							handleTemplateRequest(request, response,
-									new ObjectId(pathParts[0]), null);
+									new ObjectId(pathParts[0]));
 							return;
 						}
 						throw new Exception("Invalid id");
@@ -144,13 +143,13 @@ public class ScreeningSurveyServlet extends HttpServlet {
 								path.substring(path.indexOf("/") + 1));
 						return;
 					} else {
-						throw new Exception("Invalid id");
+						throw new Exception("Invalid request");
 					}
 			}
 		} catch (final Exception e) {
 			log.warn("Request {} could not be fulfilled: {}",
 					request.getRequestURI(), e.getMessage());
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		}
 	}
 
@@ -167,38 +166,31 @@ public class ScreeningSurveyServlet extends HttpServlet {
 	}
 
 	/**
-	 * Return appropriate file fitting to {@link ScreeningSurvey} or
-	 * {@link Feedback}
+	 * Return appropriate file fitting to {@link ScreeningSurvey}
 	 * 
 	 * @param request
 	 * @param response
-	 * @param screeningSurveyOrFeedbackParticipantId
+	 * @param screeningSurveyId
 	 * @param fileRequest
 	 */
 	private void handleFileRequest(final HttpServletRequest request,
 			final HttpServletResponse response,
-			final ObjectId screeningSurveyOrFeedbackParticipantId,
-			final String fileRequest) throws ServletException, IOException {
+			final ObjectId screeningSurveyId, final String fileRequest)
+			throws ServletException, IOException {
 		val screeningSurvey = screeningSurveyExecutionManagerService
-				.getScreeningSurveyById(screeningSurveyOrFeedbackParticipantId);
-		val feedback = screeningSurveyExecutionManagerService
-				.getFeedbackByBelongingParticipant(screeningSurveyOrFeedbackParticipantId);
+				.getScreeningSurveyById(screeningSurveyId);
 
-		if (screeningSurvey == null && feedback == null) {
+		if (screeningSurvey == null) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
-		val isScreeningSurveyRequest = screeningSurvey != null;
 
-		log.debug("Handling file request '{}' for {} {}", fileRequest,
-				isScreeningSurveyRequest ? "scrrening survey"
-						: "feedback of participant",
-				screeningSurveyOrFeedbackParticipantId);
+		log.debug("Handling file request '{}' for screening survey {}",
+				fileRequest, screeningSurveyId);
 
 		final File basicTemplateFolder = new File(
 				screeningSurveyExecutionManagerService.getTemplatePath(),
-				isScreeningSurveyRequest ? screeningSurvey.getTemplatePath()
-						: feedback.getTemplatePath());
+				screeningSurvey.getTemplatePath());
 		final File requestedFile = new File(basicTemplateFolder, fileRequest);
 
 		if (!requestedFile.getAbsolutePath().startsWith(
@@ -236,15 +228,11 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		// Allow caching
 		if (Constants.isCachingActive()) {
 			response.setHeader("Pragma", "cache");
-			response.setHeader(
-					"Cache-Control",
-					"max-age="
-							+ ImplementationConstants.SCREENING_SURVEY_FILE_CACHE_IN_MINUTES);
-			response.setDateHeader(
-					"Expires",
-					System.currentTimeMillis()
-							+ ImplementationConstants.SCREENING_SURVEY_FILE_CACHE_IN_MINUTES
-							* 1000);
+			response.setHeader("Cache-Control", "max-age="
+					+ ImplementationConstants.SURVEY_FILE_CACHE_IN_MINUTES);
+			response.setDateHeader("Expires", System.currentTimeMillis()
+					+ ImplementationConstants.SURVEY_FILE_CACHE_IN_MINUTES
+					* 1000);
 		} else {
 			response.setHeader("Pragma", "No-cache");
 			response.setHeader("Cache-Control", "no-cache,no-store,max-age=0");
@@ -356,150 +344,88 @@ public class ScreeningSurveyServlet extends HttpServlet {
 	 * @throws IOException
 	 */
 	private void handleTemplateRequest(final HttpServletRequest request,
-			final HttpServletResponse response,
-			final ObjectId screeningSurveyId,
-			final ObjectId feedbackParticipantId) throws ServletException,
-			IOException {
-		if (screeningSurveyId == null) {
-			log.debug("Handling template request for feedback participant {}",
-					feedbackParticipantId);
-		} else {
-			log.debug("Handling template request for screening survey {}",
-					screeningSurveyId);
-		}
+			final HttpServletResponse response, final ObjectId screeningSurveyId)
+			throws ServletException, IOException {
+		log.debug("Handling template request for screening survey {}",
+				screeningSurveyId);
 
 		HashMap<String, Object> templateVariables;
 		val session = request.getSession(true);
 
-		// Handle screening survey or feedback request
-		if (screeningSurveyId != null) {
-			/*
-			 * Handle screening survey specific things
-			 */
+		// Get information from session
+		ObjectId participantId;
+		try {
+			participantId = (ObjectId) session
+					.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_ID
+							.toString());
+		} catch (final Exception e) {
+			participantId = null;
+		}
+		boolean accessGranted;
+		try {
+			accessGranted = (boolean) session
+					.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_ACCESS_GRANTED
+							.toString());
+		} catch (final Exception e) {
+			accessGranted = false;
+		}
 
-			// Get information from session
-			ObjectId participantId;
-			try {
-				participantId = (ObjectId) session
-						.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_ID
-								.toString());
-			} catch (final Exception e) {
-				participantId = null;
-			}
-			boolean accessGranted;
-			try {
-				accessGranted = (boolean) session
-						.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_ACCESS_GRANTED
-								.toString());
-			} catch (final Exception e) {
-				accessGranted = false;
-			}
+		// Get question result(s) if available
+		List<String> resultValues = null;
+		int i = 0;
+		String resultValue = null;
+		do {
+			resultValue = request
+					.getParameter(ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLES
+							+ i);
 
-			// Get question result(s) if available
-			List<String> resultValues = null;
-			int i = 0;
-			String resultValue = null;
-			do {
-				resultValue = request
-						.getParameter(ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLES
-								+ i);
-
-				if (resultValue != null) {
-					if (resultValues == null) {
-						resultValues = new ArrayList<String>();
-					}
-					resultValues.add(resultValue);
+			if (resultValue != null) {
+				if (resultValues == null) {
+					resultValues = new ArrayList<String>();
 				}
-				i++;
-			} while (resultValue != null);
-
-			// Get consistency check value if available
-			String checkValue;
-			try {
-				checkValue = request
-						.getParameter(ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE);
-			} catch (final Exception e) {
-				checkValue = null;
+				resultValues.add(resultValue);
 			}
+			i++;
+		} while (resultValue != null);
 
-			// Remember that user participated in screening survey
-			session.setAttribute(
-					ScreeningSurveySessionAttributeTypes.FROM_SCREENING_SURVEY
-							.toString(), true);
+		// Get consistency check value if available
+		String checkValue;
+		try {
+			checkValue = request
+					.getParameter(ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE);
+		} catch (final Exception e) {
+			checkValue = null;
+		}
 
-			log.debug(
-					"Retrieved information from screening survey slide request: participant: {}, access granted: {}, screening survey: {}, result value: {}, check value: {}",
-					participantId, accessGranted, screeningSurveyId,
-					resultValues, checkValue);
+		// Remember that user participated in screening survey
+		session.setAttribute(
+				ScreeningSurveySessionAttributeTypes.FROM_SCREENING_SURVEY
+						.toString(), true);
 
-			// Decide which slide should be send to the participant
-			try {
-				templateVariables = screeningSurveyExecutionManagerService
-						.getAppropriateScreeningSurveySlide(participantId,
-								accessGranted, screeningSurveyId, resultValues,
-								checkValue, session);
+		log.debug(
+				"Retrieved information from screening survey slide request: participant: {}, access granted: {}, screening survey: {}, result value: {}, check value: {}",
+				participantId, accessGranted, screeningSurveyId, resultValues,
+				checkValue);
 
-				if (templateVariables == null
-						|| !templateVariables
-								.containsKey(GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER
-										.toVariable())) {
-					throw new NullPointerException();
-				}
-			} catch (final Exception e) {
-				log.warn(
-						"An error occurred while getting appropriate slide: {}",
-						e.getMessage());
+		// Decide which slide should be send to the participant
+		try {
+			templateVariables = screeningSurveyExecutionManagerService
+					.getAppropriateScreeningSurveySlide(participantId,
+							accessGranted, screeningSurveyId, resultValues,
+							checkValue, session);
 
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-				return;
+			if (templateVariables == null
+					|| !templateVariables
+							.containsKey(GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER
+									.toVariable())) {
+				throw new NullPointerException();
 			}
-		} else {
-			/*
-			 * Handle feedback specific things
-			 */
+		} catch (final Exception e) {
+			log.warn("An error occurred while getting appropriate slide: {}",
+					e.getMessage());
 
-			// Get navigation value if available
-			String navigationValue;
-			try {
-				navigationValue = request
-						.getParameter(ImplementationConstants.FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE);
-			} catch (final Exception e) {
-				navigationValue = null;
-			}
-
-			// Get consistency check value if available
-			String checkValue;
-			try {
-				checkValue = request
-						.getParameter(ImplementationConstants.FEEDBACK_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE);
-			} catch (final Exception e) {
-				checkValue = null;
-			}
-
-			log.debug(
-					"Retrieved information from feedback slide request: feedback participant: {}, navigation value: {}, check value: {}",
-					feedbackParticipantId, navigationValue, checkValue);
-
-			// Decide which slide should be send to the participant
-			try {
-				templateVariables = screeningSurveyExecutionManagerService
-						.getAppropriateFeedbackSlide(feedbackParticipantId,
-								navigationValue, checkValue, session);
-
-				if (templateVariables == null
-						|| !templateVariables
-								.containsKey(GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER
-										.toVariable())) {
-					throw new NullPointerException();
-				}
-			} catch (final Exception e) {
-				log.warn(
-						"An error occurred while getting appropriate slide: {}",
-						e.getMessage());
-
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-				return;
-			}
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			return;
 		}
 
 		log.debug("Setting no-cache headers");
@@ -552,28 +478,23 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			}
 		}
 
-		// Adjust feedback URL (only for screening survey slides)
-		if (screeningSurveyId != null
-				&& session
-						.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
-								.toString()) != null) {
+		// Adjust feedback URL
+		if (session
+				.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
+						.toString()) != null) {
 			templateVariables
 					.put(GeneralSlideTemplateFieldTypes.FEEDBACK_URL
 							.toVariable(),
-							normalizedBaseURL
-									+ session
-											.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
-													.toString()));
+							session.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
+									.toString()));
 		}
 
-		// Set layout (only for screening survey slides)
-		if (screeningSurveyId != null) {
-			for (val layout : ScreeningSurveySlideTemplateLayoutTypes.values()) {
-				if (templateVariables.get(layout.toVariable()) != null) {
-					templateVariables.put(
-							ScreeningSurveySlideTemplateFieldTypes.LAYOUT
-									.toVariable(), layout.toVariable());
-				}
+		// Set layout
+		for (val layout : ScreeningSurveySlideTemplateLayoutTypes.values()) {
+			if (templateVariables.get(layout.toVariable()) != null) {
+				templateVariables.put(
+						ScreeningSurveySlideTemplateFieldTypes.LAYOUT
+								.toVariable(), layout.toVariable());
 			}
 		}
 

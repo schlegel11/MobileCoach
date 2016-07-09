@@ -2,15 +2,15 @@ package ch.ethz.mc.model.persistent;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,9 +33,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * {@link ModelObject} to represent an
- * {@link ScreeningSurveyAndFeedbackParticipantShortURL}
+ * {@link IntermediateSurveyAndFeedbackParticipantShortURL}
  *
- * A {@link ScreeningSurveyAndFeedbackParticipantShortURL} is used to create and
+ * A {@link IntermediateSurveyAndFeedbackParticipantShortURL} is used to create
+ * and
  * verify unique Ids for specific {@link ScreeningSurvey}s or {@link Feedback}
  * of {@link Participant}s to create URLs
  *
@@ -43,10 +44,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 @NoArgsConstructor
 @AllArgsConstructor
-public class ScreeningSurveyAndFeedbackParticipantShortURL extends ModelObject {
+public class IntermediateSurveyAndFeedbackParticipantShortURL extends
+		ModelObject {
 	/**
 	 * The short id defining this
-	 * {@link ScreeningSurveyAndFeedbackParticipantShortURL}
+	 * {@link IntermediateSurveyAndFeedbackParticipantShortURL}
 	 */
 	@Getter
 	@Setter
@@ -63,7 +65,7 @@ public class ScreeningSurveyAndFeedbackParticipantShortURL extends ModelObject {
 
 	@Getter
 	@Setter
-	private ObjectId	screeningSurvey;
+	private ObjectId	survey;
 
 	@Getter
 	@Setter
@@ -85,8 +87,8 @@ public class ScreeningSurveyAndFeedbackParticipantShortURL extends ModelObject {
 			// Will never happen
 		}
 
-		return Constants.getSurveyLinkingBaseURL() + checksum + shortIdString
-				+ secret;
+		return Constants.getSurveyLinkingBaseURL() + checksum
+				+ Long.toString(shortId, 36) + secret;
 	}
 
 	/**
@@ -96,14 +98,13 @@ public class ScreeningSurveyAndFeedbackParticipantShortURL extends ModelObject {
 	 * @return
 	 */
 	@JsonIgnore
-	public boolean checkSecretInGivenIdPart(final String idPart) {
+	public boolean validateSecretInGivenIdPart(final String idPart) {
 		if (idPart.length() < 6) {
 			return false;
 		}
 
 		val extractedSecret = idPart.substring(idPart.length() - 4,
 				idPart.length());
-		System.out.println("-- " + extractedSecret);
 
 		if (secret.equals(extractedSecret)) {
 			return true;
@@ -126,7 +127,8 @@ public class ScreeningSurveyAndFeedbackParticipantShortURL extends ModelObject {
 			throw new Exception("The following id part is not valid: " + idPart);
 		}
 
-		val shortId = idPart.substring(1, idPart.length() - 4);
+		val shortId = String.valueOf(Long.parseLong(
+				idPart.substring(1, idPart.length() - 4), 36));
 		final String checksum = calculateChecksum(shortId);
 
 		if (checksum.equals(idPart.substring(0, 1))) {

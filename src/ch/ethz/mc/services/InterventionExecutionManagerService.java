@@ -49,6 +49,7 @@ import ch.ethz.mc.model.memory.ReceivedMessage;
 import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.DialogStatus;
+import ch.ethz.mc.model.persistent.IntermediateSurveyAndFeedbackParticipantShortURL;
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.MediaObject;
 import ch.ethz.mc.model.persistent.MediaObjectParticipantShortURL;
@@ -57,7 +58,6 @@ import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
 import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
-import ch.ethz.mc.model.persistent.ScreeningSurveyAndFeedbackParticipantShortURL;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.services.internal.CommunicationManagerService;
@@ -93,6 +93,8 @@ public class InterventionExecutionManagerService {
 	private final VariablesManagerService				variablesManagerService;
 	final CommunicationManagerService					communicationManagerService;
 
+	final InterventionAdministrationManagerService		interventionAdministrationManagerService;
+
 	private final IncomingMessageWorker					incomingMessageWorker;
 	private final OutgoingMessageWorker					outgoingMessageWorker;
 	private final MonitoringSchedulingWorker			monitoringSchedulingWorker;
@@ -101,6 +103,7 @@ public class InterventionExecutionManagerService {
 			final DatabaseManagerService databaseManagerService,
 			final VariablesManagerService variablesManagerService,
 			final CommunicationManagerService communicationManagerService,
+			final InterventionAdministrationManagerService interventionAdministrationManagerService,
 			final ScreeningSurveyExecutionManagerService screeningSurveyExecutionManagerService)
 			throws Exception {
 		$lock = MC.getInstance();
@@ -110,6 +113,7 @@ public class InterventionExecutionManagerService {
 		this.databaseManagerService = databaseManagerService;
 		this.variablesManagerService = variablesManagerService;
 		this.communicationManagerService = communicationManagerService;
+		this.interventionAdministrationManagerService = interventionAdministrationManagerService;
 
 		// Remember stop words
 		acceptedStopWords = Constants.getAcceptedStopWords();
@@ -133,12 +137,14 @@ public class InterventionExecutionManagerService {
 			final DatabaseManagerService databaseManagerService,
 			final VariablesManagerService variablesManagerService,
 			final CommunicationManagerService communicationManagerService,
+			final InterventionAdministrationManagerService interventionAdministrationManagerService,
 			final ScreeningSurveyExecutionManagerService screeningSurveyExecutionManagerService)
 			throws Exception {
 		if (instance == null) {
 			instance = new InterventionExecutionManagerService(
 					databaseManagerService, variablesManagerService,
 					communicationManagerService,
+					interventionAdministrationManagerService,
 					screeningSurveyExecutionManagerService);
 		}
 		return instance;
@@ -290,7 +296,7 @@ public class InterventionExecutionManagerService {
 
 			// Integrate intermediate survey URL
 			if (linkedIntermediateSurvey != null) {
-				val intermediateSurveyShortURL = ensureScreeningSurveyParticipantShortURL(
+				val intermediateSurveyShortURL = screeningSurveyParticipantShortURLEnsure(
 						participant.getId(), linkedIntermediateSurvey.getId());
 
 				val intermediateSurveyShortURLString = intermediateSurveyShortURL
@@ -415,16 +421,15 @@ public class InterventionExecutionManagerService {
 		return newShortIdObject;
 	}
 
-	// Screening Survey Participant Short URL (also available in
-	// InterventionAdministrationManagerService)
+	// Intermediate Survey and Feedback Participant Short URL
 	@Synchronized
-	private ScreeningSurveyAndFeedbackParticipantShortURL ensureScreeningSurveyParticipantShortURL(
+	private IntermediateSurveyAndFeedbackParticipantShortURL screeningSurveyParticipantShortURLEnsure(
 			final ObjectId participantId, final ObjectId screeningSurveyId) {
 
 		val existingShortIdObject = databaseManagerService
 				.findOneModelObject(
-						ScreeningSurveyAndFeedbackParticipantShortURL.class,
-						Queries.SCREENING_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_PARTICIPANT_AND_SCREENING_SURVEY,
+						IntermediateSurveyAndFeedbackParticipantShortURL.class,
+						Queries.INTERMEDIATE_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_PARTICIPANT_AND_SURVEY,
 						participantId, screeningSurveyId);
 
 		if (existingShortIdObject != null) {
@@ -432,20 +437,20 @@ public class InterventionExecutionManagerService {
 		} else {
 			val newestShortIdObject = databaseManagerService
 					.findOneSortedModelObject(
-							ScreeningSurveyAndFeedbackParticipantShortURL.class,
+							IntermediateSurveyAndFeedbackParticipantShortURL.class,
 							Queries.ALL,
-							Queries.SCREENING_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__SORT_BY_SHORT_ID_DESC);
+							Queries.INTERMEDIATE_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__SORT_BY_SHORT_ID_DESC);
 
 			final long nextShortId = newestShortIdObject == null ? 1
 					: newestShortIdObject.getShortId() + 1;
 
-			val newShortIdObject = new ScreeningSurveyAndFeedbackParticipantShortURL(
+			val newShortIdObject = new IntermediateSurveyAndFeedbackParticipantShortURL(
 					nextShortId, StringHelpers.createRandomString(4),
 					participantId, screeningSurveyId, null);
 
 			databaseManagerService.saveModelObject(newShortIdObject);
 
-			return newestShortIdObject;
+			return newShortIdObject;
 		}
 	}
 

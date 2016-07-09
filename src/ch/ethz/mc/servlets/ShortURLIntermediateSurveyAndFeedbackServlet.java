@@ -20,7 +20,6 @@ package ch.ethz.mc.servlets;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -60,7 +59,7 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
 /**
- * Servlet to stream the survey slides of surveys and feedbacks
+ * Servlet to stream the survey slides of intermediate surveys and feedbacks
  * 
  * @author Andreas Filler
  */
@@ -69,7 +68,7 @@ import com.github.mustachejava.MustacheFactory;
 		+ ImplementationConstants.SHORT_ID_SCREEN_SURVEY_AND_FEEDBACK_SERVLET_PATH
 		+ "/*", asyncSupported = true, loadOnStartup = 1)
 @Log4j2
-public class ShortURLScreeningSurveyAndFeedbackServlet extends HttpServlet {
+public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 	private MustacheFactory							mustacheFactory;
 
 	private ScreeningSurveyExecutionManagerService	screeningSurveyExecutionManagerService;
@@ -120,15 +119,15 @@ public class ShortURLScreeningSurveyAndFeedbackServlet extends HttpServlet {
 				case 1:
 					if (pathParts[0].equals("")) {
 						// Empty request
-						listActiveScreeningSurveys(request, response);
-						return;
+						throw new Exception("Cannot be called this way");
 					}
 
-					// Only object id
+					// Only object ids of active intermediate surveys or
+					// feedbacks surveys are accepted
 					if (ObjectId.isValid(pathParts[0])) {
 						if (screeningSurveyExecutionManagerService
-								.screeningSurveyCheckIfActive(new ObjectId(
-										pathParts[0]))) {
+								.screeningSurveyCheckIfActiveAndOGivenType(
+										new ObjectId(pathParts[0]), true)) {
 							handleTemplateRequest(request, response,
 									new ObjectId(pathParts[0]), null);
 							return;
@@ -152,13 +151,13 @@ public class ShortURLScreeningSurveyAndFeedbackServlet extends HttpServlet {
 								path.substring(path.indexOf("/") + 1));
 						return;
 					} else {
-						throw new Exception("Invalid id");
+						throw new Exception("Invalid request");
 					}
 			}
 		} catch (final Exception e) {
 			log.warn("Request {} could not be fulfilled: {}",
 					request.getRequestURI(), e.getMessage());
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		}
 	}
 
@@ -199,7 +198,7 @@ public class ShortURLScreeningSurveyAndFeedbackServlet extends HttpServlet {
 		val isScreeningSurveyRequest = screeningSurvey != null;
 
 		log.debug("Handling file request '{}' for {} {}", fileRequest,
-				isScreeningSurveyRequest ? "scrrening survey"
+				isScreeningSurveyRequest ? "screening survey"
 						: "feedback of participant",
 				screeningSurveyOrFeedbackParticipantId);
 
@@ -244,15 +243,11 @@ public class ShortURLScreeningSurveyAndFeedbackServlet extends HttpServlet {
 		// Allow caching
 		if (Constants.isCachingActive()) {
 			response.setHeader("Pragma", "cache");
-			response.setHeader(
-					"Cache-Control",
-					"max-age="
-							+ ImplementationConstants.SCREENING_SURVEY_FILE_CACHE_IN_MINUTES);
-			response.setDateHeader(
-					"Expires",
-					System.currentTimeMillis()
-							+ ImplementationConstants.SCREENING_SURVEY_FILE_CACHE_IN_MINUTES
-							* 1000);
+			response.setHeader("Cache-Control", "max-age="
+					+ ImplementationConstants.SURVEY_FILE_CACHE_IN_MINUTES);
+			response.setDateHeader("Expires", System.currentTimeMillis()
+					+ ImplementationConstants.SURVEY_FILE_CACHE_IN_MINUTES
+					* 1000);
 		} else {
 			response.setHeader("Pragma", "No-cache");
 			response.setHeader("Cache-Control", "no-cache,no-store,max-age=0");
@@ -267,92 +262,6 @@ public class ShortURLScreeningSurveyAndFeedbackServlet extends HttpServlet {
 
 		// Copy the contents of the file to the output stream
 		IOUtils.copy(in, out);
-	}
-
-	/**
-	 * Return list of all currently active {@link ScreeningSurvey}s
-	 * 
-	 * @param request
-	 * @param response
-	 * @throws ServletException
-	 * @throws IOException
-	 */
-	private void listActiveScreeningSurveys(final HttpServletRequest request,
-			final HttpServletResponse response) throws ServletException,
-			IOException {
-		log.debug("Handling request for all open screening surveys");
-
-		log.debug("Clearing session");
-		val session = request.getSession(true);
-		for (val attribute : ScreeningSurveySessionAttributeTypes.values()) {
-			val sessionObject = session.getAttribute(attribute.toString());
-			if (sessionObject != null) {
-				session.removeAttribute(attribute.toString());
-			}
-		}
-
-		val sessionAttributeNames = session.getAttributeNames();
-		while (sessionAttributeNames.hasMoreElements()) {
-			log.debug("> " + sessionAttributeNames.nextElement());
-		}
-
-		log.debug("Setting no-cache headers");
-		// Set header information (e.g. for no caching)
-		response.setHeader("Pragma", "No-cache");
-		response.setHeader("Cache-Control", "no-cache,no-store,max-age=0");
-		response.setDateHeader("Expires", 1);
-		response.setContentType("text/html");
-
-		val templateVariables = new HashMap<String, Object>();
-
-		if (Constants.isListOpenScreenSurveysOnBaseURL()) {
-			// Get all active non intermediate screening surveys
-			val activeScreeningSurveys = screeningSurveyExecutionManagerService
-					.getActiveNonItermediateScreeningSurveys();
-
-			if (activeScreeningSurveys != null) {
-				templateVariables.put("title",
-						Constants.getSurveyListingTitle());
-
-				val surveysData = new ArrayList<HashMap<String, String>>();
-
-				String baseURL = request.getRequestURL().toString();
-				if (!baseURL.endsWith("/")) {
-					baseURL += "/";
-				}
-
-				for (val screeningSurvey : activeScreeningSurveys) {
-					val screeningSurveyData = new HashMap<String, String>();
-					screeningSurveyData.put("name", screeningSurvey.getName());
-					screeningSurveyData.put("url",
-							baseURL + screeningSurvey.getId() + "/");
-					surveysData.add(screeningSurveyData);
-				}
-
-				templateVariables.put("surveys", surveysData);
-			} else {
-				templateVariables.put("title",
-						Constants.getSurveyListingNoneActive());
-			}
-		} else {
-			templateVariables.put("title",
-					Constants.getSurveyListingNotActive());
-		}
-
-		@Cleanup
-		val templateInputStream = getServletContext().getResourceAsStream(
-				"/ActiveScreeningSurveysList.template.html");
-		@Cleanup
-		val templateInputStreamReader = new InputStreamReader(
-				templateInputStream, "UTF-8");
-		val mustache = mustacheFactory.compile(templateInputStreamReader,
-				"mustache.template");
-
-		@Cleanup
-		val responseOutputStreamWriter = new OutputStreamWriter(
-				response.getOutputStream());
-
-		mustache.execute(responseOutputStreamWriter, templateVariables);
 	}
 
 	/**

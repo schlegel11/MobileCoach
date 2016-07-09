@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import lombok.Synchronized;
+import lombok.val;
 import lombok.extern.log4j.Log4j2;
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.Constants;
@@ -36,7 +37,7 @@ import ch.ethz.mc.conf.Constants;
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
-@WebServlet(displayName = "Testing Interface", value = "/self-test", asyncSupported = true, loadOnStartup = 2)
+@WebServlet(displayName = "Testing Interface", value = "/internal-test", asyncSupported = true, loadOnStartup = 2)
 @Log4j2
 public class TestServlet extends HttpServlet {
 	private ServletOutputStream	servletOutputStream	= null;
@@ -98,6 +99,8 @@ public class TestServlet extends HttpServlet {
 	}
 
 	private void runTestcases() {
+		val mc = MC.getInstance();
+
 		// val service = MC.getInstance()
 		// .getScreeningSurveyAdministrationManagerService();
 		// final String[] slides = { "53f38855cee8b9fcaee967f2",

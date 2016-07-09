@@ -58,7 +58,7 @@ public class ImplementationConstants {
 
 	public static final long	SIMULATOR_TIME_UPDATE_INTERVAL_IN_SECONDS											= 10;
 
-	public static final int		SCREENING_SURVEY_FILE_CACHE_IN_MINUTES												= 3600;
+	public static final int		SURVEY_FILE_CACHE_IN_MINUTES														= 3600;
 
 	public static final int		UI_SESSION_TIMEOUT_IN_SECONDS														= 900;
 

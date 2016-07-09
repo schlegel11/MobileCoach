@@ -1,5 +1,22 @@
 package ch.ethz.mc.services;
 
+/*
+ * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
+ *
+ * For details see README.md file in the root folder of this project.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,11 +40,11 @@ import ch.ethz.mc.model.persistent.DialogStatus;
 import ch.ethz.mc.model.persistent.Feedback;
 import ch.ethz.mc.model.persistent.FeedbackSlide;
 import ch.ethz.mc.model.persistent.FeedbackSlideRule;
+import ch.ethz.mc.model.persistent.IntermediateSurveyAndFeedbackParticipantShortURL;
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.MediaObject;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
-import ch.ethz.mc.model.persistent.ScreeningSurveyAndFeedbackParticipantShortURL;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlideRule;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
@@ -46,71 +63,7 @@ import ch.ethz.mc.tools.RuleEvaluator;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.tools.VariableStringReplacer;
 
-/*
- * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
- * For details see README.md file in the root folder of this project.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * import java.io.File;
- * import java.util.ArrayList;
- * import java.util.HashMap;
- * import java.util.Hashtable;
- * import java.util.List;
- *
- * import javax.servlet.http.HttpSession;
- *
- * import lombok.Synchronized;
- * import lombok.val;
- * import lombok.extern.log4j.Log4j2;
- *
- * import org.apache.commons.collections.CollectionUtils;
- * import org.bson.types.ObjectId;
- *
- * import ch.ethz.mc.MC;
- * import ch.ethz.mc.conf.ImplementationConstants;
- * import ch.ethz.mc.model.Queries;
- * import ch.ethz.mc.model.persistent.DialogOption;
- * import ch.ethz.mc.model.persistent.DialogStatus;
- * import ch.ethz.mc.model.persistent.Feedback;
- * import ch.ethz.mc.model.persistent.FeedbackSlide;
- * import ch.ethz.mc.model.persistent.FeedbackSlideRule;
- * import ch.ethz.mc.model.persistent.Intervention;
- * import ch.ethz.mc.model.persistent.MediaObject;
- * import ch.ethz.mc.model.persistent.Participant;
- * import ch.ethz.mc.model.persistent.ScreeningSurvey;
- * import
- * ch.ethz.mc.model.persistent.ScreeningSurveyAndFeedbackParticipantShortURL;
- * import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
- * import ch.ethz.mc.model.persistent.ScreeningSurveySlideRule;
- * import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
- * import ch.ethz.mc.services.internal.DatabaseManagerService;
- * import ch.ethz.mc.services.internal.FileStorageManagerService;
- * import ch.ethz.mc.services.internal.VariablesManagerService;
- * import ch.ethz.mc.services.types.FeedbackSessionAttributeTypes;
- * import ch.ethz.mc.services.types.FeedbackSlideTemplateFieldTypes;
- * import ch.ethz.mc.services.types.GeneralSlideTemplateFieldTypes;
- * import ch.ethz.mc.services.types.ScreeningSurveySessionAttributeTypes;
- * import ch.ethz.mc.services.types.ScreeningSurveySlideTemplateFieldTypes;
- * import ch.ethz.mc.services.types.ScreeningSurveySlideTemplateLayoutTypes;
- * import ch.ethz.mc.tools.GlobalUniqueIdGenerator;
- * import ch.ethz.mc.tools.InternalDateTime;
- * import ch.ethz.mc.tools.RuleEvaluator;
- * import ch.ethz.mc.tools.StringHelpers;
- * import ch.ethz.mc.tools.VariableStringReplacer;
- * er;
- *
- * /**
+/**
  * Cares for the orchestration of {@link ScreeningSurveySlides} as
  * part of a {@link ScreeningSurvey}
  *
@@ -129,10 +82,13 @@ public class ScreeningSurveyExecutionManagerService {
 	private final FileStorageManagerService					fileStorageManagerService;
 	private final VariablesManagerService					variablesManagerService;
 
+	private final InterventionAdministrationManagerService	interventionAdministrationManagerService;
+
 	private ScreeningSurveyExecutionManagerService(
 			final DatabaseManagerService databaseManagerService,
 			final FileStorageManagerService fileStorageManagerService,
-			final VariablesManagerService variablesManagerService)
+			final VariablesManagerService variablesManagerService,
+			final InterventionAdministrationManagerService interventionAdministrationManagerService)
 					throws Exception {
 		$lock = MC.getInstance();
 
@@ -142,18 +98,22 @@ public class ScreeningSurveyExecutionManagerService {
 		this.fileStorageManagerService = fileStorageManagerService;
 		this.variablesManagerService = variablesManagerService;
 
+		this.interventionAdministrationManagerService = interventionAdministrationManagerService;
+
 		log.info("Started.");
 	}
 
 	public static ScreeningSurveyExecutionManagerService start(
 			final DatabaseManagerService databaseManagerService,
 			final FileStorageManagerService fileStorageManagerService,
-			final VariablesManagerService variablesManagerService)
+			final VariablesManagerService variablesManagerService,
+			final InterventionAdministrationManagerService interventionAdministrationManagerService)
 					throws Exception {
 		if (instance == null) {
 			instance = new ScreeningSurveyExecutionManagerService(
 					databaseManagerService, fileStorageManagerService,
-					variablesManagerService);
+					variablesManagerService,
+					interventionAdministrationManagerService);
 		}
 		return instance;
 	}
@@ -184,8 +144,8 @@ public class ScreeningSurveyExecutionManagerService {
 	}
 
 	@Synchronized
-	private void participantSetFeedback(final Participant participant,
-			final ObjectId feedbackId) {
+	private IntermediateSurveyAndFeedbackParticipantShortURL participantSetFeedback(
+			final Participant participant, final ObjectId feedbackId) {
 		val feedback = databaseManagerService.getModelObjectById(
 				Feedback.class, feedbackId);
 
@@ -193,39 +153,13 @@ public class ScreeningSurveyExecutionManagerService {
 		participant.setAssignedFeedbackGlobalUniqueId(feedback
 				.getGlobalUniqueId());
 
-		ensureFeedbackParticipantShortURL(participant.getId(), feedbackId);
+		val feedbackParticipantShortURL = interventionAdministrationManagerService
+				.feedbackParticipantShortURLEnsure(participant.getId(),
+						feedbackId);
 
 		databaseManagerService.saveModelObject(participant);
-	}
 
-	// Feedback Participant Short URL (also available in
-	// InterventionAdministrationManagerService)
-	@Synchronized
-	private void ensureFeedbackParticipantShortURL(
-			final ObjectId participantId, final ObjectId feedbackId) {
-
-		val existingShortIdObject = databaseManagerService
-				.findOneModelObject(
-						ScreeningSurveyAndFeedbackParticipantShortURL.class,
-						Queries.SCREENING_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_PARTICIPANT_AND_FEEDBACK,
-						participantId, feedbackId);
-
-		if (existingShortIdObject == null) {
-			val newestShortIdObject = databaseManagerService
-					.findOneSortedModelObject(
-							ScreeningSurveyAndFeedbackParticipantShortURL.class,
-							Queries.ALL,
-							Queries.SCREENING_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__SORT_BY_SHORT_ID_DESC);
-
-			final long nextShortId = newestShortIdObject == null ? 1
-					: newestShortIdObject.getShortId() + 1;
-
-			val newShortIdObject = new ScreeningSurveyAndFeedbackParticipantShortURL(
-					nextShortId, StringHelpers.createRandomString(4),
-					participantId, null, feedbackId);
-
-			databaseManagerService.saveModelObject(newShortIdObject);
-		}
+		return feedbackParticipantShortURL;
 	}
 
 	// Dialog status
@@ -361,19 +295,20 @@ public class ScreeningSurveyExecutionManagerService {
 	/**
 	 * Returns if the requested {@link ScreeningSurvey} is currently accessible
 	 * (means the the {@link Intervention} and {@link ScreeningSurvey} are both
-	 * active) and it's not an intermediate survey
+	 * active) and if its the right type
 	 *
 	 * @param screeningSurveyId
 	 * @return
 	 */
 	@Synchronized
-	public boolean screeningSurveyCheckIfActiveAndNonIntermediate(
-			final ObjectId screeningSurveyId) {
+	public boolean screeningSurveyCheckIfActiveAndOGivenType(
+			final ObjectId screeningSurveyId, final boolean isIntermediateSurvey) {
 		final val screeningSurvey = databaseManagerService.getModelObjectById(
 				ScreeningSurvey.class, screeningSurveyId);
 
-		if (screeningSurvey == null || !screeningSurvey.isActive()
-				|| screeningSurvey.isIntermediateSurvey()) {
+		if (screeningSurvey == null
+				|| !screeningSurvey.isActive()
+				|| screeningSurvey.isIntermediateSurvey() != isIntermediateSurvey) {
 			return false;
 		}
 
@@ -639,11 +574,12 @@ public class ScreeningSurveyExecutionManagerService {
 					log.debug("Setting feedback {} for participant {}",
 							nextSlide.getHandsOverToFeedback(),
 							participant.getId());
-					participantSetFeedback(participant,
+					val feedbackShortURL = participantSetFeedback(participant,
 							nextSlide.getHandsOverToFeedback());
 					session.setAttribute(
 							ScreeningSurveySessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
-							.toString(), participantId);
+							.toString(), feedbackShortURL
+							.calculateURL());
 				}
 
 				dialogStatusSetScreeningSurveyFinished(participantId);

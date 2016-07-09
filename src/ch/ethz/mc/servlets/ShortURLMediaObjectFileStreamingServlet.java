@@ -100,7 +100,7 @@ public class ShortURLMediaObjectFileStreamingServlet extends HttpServlet {
 			mediaObjectParticipantShortURL = interventionExecutionManagerService
 					.getMediaObjectParticipantShortURLByShortId(shortId);
 		} catch (final Exception e) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 			return null;
 		}
 		log.debug("Requested media object short id {}",

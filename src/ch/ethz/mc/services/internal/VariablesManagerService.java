@@ -41,7 +41,7 @@ import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.ParticipantVariableWithValue;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
-import ch.ethz.mc.model.persistent.ScreeningSurveyAndFeedbackParticipantShortURL;
+import ch.ethz.mc.model.persistent.IntermediateSurveyAndFeedbackParticipantShortURL;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlideRule;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
@@ -250,8 +250,8 @@ public class VariablesManagerService {
 		if (participant.getAssignedFeedback() != null) {
 			val surveyShortURL = databaseManagerService
 					.findOneModelObject(
-							ScreeningSurveyAndFeedbackParticipantShortURL.class,
-							Queries.SCREENING_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_PARTICIPANT_AND_FEEDBACK,
+							IntermediateSurveyAndFeedbackParticipantShortURL.class,
+							Queries.INTERMEDIATE_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_PARTICIPANT_AND_FEEDBACK,
 							participant.getId(),
 							participant.getAssignedFeedback());
 

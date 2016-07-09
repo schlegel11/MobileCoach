@@ -2,15 +2,15 @@ package ch.ethz.mc.model.persistent;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,11 +33,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * {@link ModelObject} to represent an {@link MediaObjectParticipantShortURL}
- * 
+ *
  * A {@link MediaObjectParticipantShortURL} is used to create and verify unique
  * Ids for
  * specific {@link MediaObject}s and {@link Participant}s to create URLs
- * 
+ *
  * @author Andreas Filler
  */
 @NoArgsConstructor
@@ -62,7 +62,7 @@ public class MediaObjectParticipantShortURL extends ModelObject {
 
 	/**
 	 * Calculates a URL that can be checked for validity
-	 * 
+	 *
 	 * @return
 	 */
 	@JsonIgnore
@@ -77,12 +77,12 @@ public class MediaObjectParticipantShortURL extends ModelObject {
 		}
 
 		return Constants.getMediaObjectLinkingBaseURL() + checksum
-				+ shortIdString;
+				+ Long.toString(shortId, 36);
 	}
 
 	/**
 	 * Validates the given id part and returns the appropriate shortId
-	 * 
+	 *
 	 * @param idPart
 	 * @return
 	 */
@@ -90,10 +90,11 @@ public class MediaObjectParticipantShortURL extends ModelObject {
 	public static long validateURLIdPartAndReturnShortId(final String idPart)
 			throws Exception {
 
-		final String checksum = calculateChecksum(idPart.substring(1));
+		final String checksum = calculateChecksum(String.valueOf(Long.valueOf(
+				idPart.substring(1), 36)));
 
 		if (checksum.equals(idPart.substring(0, 1))) {
-			return Long.valueOf(idPart.substring(1));
+			return Long.valueOf(idPart.substring(1), 36);
 		} else {
 			throw new Exception("The following id part is not valid: " + idPart);
 		}
@@ -101,7 +102,7 @@ public class MediaObjectParticipantShortURL extends ModelObject {
 
 	/**
 	 * Calculates a checksum for the given short id string
-	 * 
+	 *
 	 * @param shortIdString
 	 * @return
 	 * @throws Exception
