@@ -334,6 +334,10 @@ input.gwt-FileUpload {
     .media-content {
         @extend .center;
     }
+    .v-link-media-link {
+	    padding-top: 10px;
+    	@extend .center;
+    }
     /* read-only textfield */
     .v-textfield.read-only {
         padding: 5px;

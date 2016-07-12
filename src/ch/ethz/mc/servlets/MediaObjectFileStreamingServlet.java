@@ -100,8 +100,8 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 		final val mediaObject = interventionAdministrationManagerService
 				.getMediaObject(mediaObjectId);
 
-		// Check if media object exists
-		if (mediaObject == null) {
+		// Check if media object exists and contains a file
+		if (mediaObject == null || mediaObject.getFileReference() == null) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return null;
 		}

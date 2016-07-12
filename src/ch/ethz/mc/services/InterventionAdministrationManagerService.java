@@ -20,6 +20,8 @@ package ch.ethz.mc.services;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -828,7 +830,7 @@ public class InterventionAdministrationManagerService {
 
 	// Media Object
 	@Synchronized
-	public MediaObject mediaObjectCreate(final File temporaryFile,
+	public MediaObject mediaObjectCreateWithFile(final File temporaryFile,
 			final String originalFileName,
 			final MediaObjectTypes originalFileType) {
 
@@ -840,6 +842,29 @@ public class InterventionAdministrationManagerService {
 			log.error("Can't create media object: {}", e.getMessage());
 			return null;
 		}
+
+		databaseManagerService.saveModelObject(mediaObject);
+
+		return mediaObject;
+	}
+
+	@Synchronized
+	public MediaObject mediaObjectCreateWithURL(final String url,
+			final MediaObjectTypes mediaObjectType) {
+
+		if (url == null) {
+			log.error("Can't create media object with empty URL");
+			return null;
+		}
+
+		try {
+			new URL(url);
+		} catch (final MalformedURLException e) {
+			log.error("Cant' create media object with URL: {}", e.getMessage());
+			return null;
+		}
+
+		val mediaObject = new MediaObject(MediaObjectTypes.URL, url, null, url);
 
 		databaseManagerService.saveModelObject(mediaObject);
 

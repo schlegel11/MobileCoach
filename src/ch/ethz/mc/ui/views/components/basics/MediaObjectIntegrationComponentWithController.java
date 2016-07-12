@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.basics;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,6 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URL;
 
 import lombok.SneakyThrows;
 import lombok.val;
@@ -35,6 +36,7 @@ import ch.ethz.mc.conf.ThemeImageStrings;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.persistent.MediaObject;
 import ch.ethz.mc.model.persistent.types.MediaObjectTypes;
+import ch.ethz.mc.ui.NotificationMessageException;
 
 import com.vaadin.server.ErrorHandler;
 import com.vaadin.server.ExternalResource;
@@ -51,13 +53,13 @@ import com.vaadin.ui.Upload.SucceededListener;
 
 /**
  * Extends the media object integration component with a controller
- * 
+ *
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
 @Log4j2
 public class MediaObjectIntegrationComponentWithController extends
-		MediaObjectIntegrationComponent {
+MediaObjectIntegrationComponent {
 
 	private MediaObject								mediaObject	= null;
 	private MediaObjectCreationOrDeleteionListener	listener;
@@ -66,6 +68,7 @@ public class MediaObjectIntegrationComponentWithController extends
 		super();
 
 		val buttonClickListener = new ButtonClickListener();
+		getSetURLButton().addClickListener(buttonClickListener);
 		getDeleteButton().addClickListener(buttonClickListener);
 
 		val uploader = new Uploader();
@@ -81,6 +84,8 @@ public class MediaObjectIntegrationComponentWithController extends
 		public void buttonClick(final ClickEvent event) {
 			if (event.getButton() == getDeleteButton()) {
 				destroyMediaObject();
+			} else if (event.getButton() == getSetURLButton()) {
+				setURL();
 			}
 		}
 	}
@@ -94,25 +99,75 @@ public class MediaObjectIntegrationComponentWithController extends
 					ThemeImageStrings.BLANK_MEDIA_OBJECT));
 
 			getUploadComponent().setEnabled(true);
+			getSetURLButton().setEnabled(true);
 			getDeleteButton().setEnabled(false);
 		} else {
-			val externalReference = ImplementationConstants.FILE_STREAMING_SERVLET_PATH
-					+ "/" + mediaObject.getId() + "/" + mediaObject.getName();
-			log.debug("Streaming file {} with file servlet", externalReference);
+			String externalReference;
+			if (mediaObject.getFileReference() != null) {
+				externalReference = ImplementationConstants.FILE_STREAMING_SERVLET_PATH
+						+ "/"
+						+ mediaObject.getId()
+						+ "/"
+						+ mediaObject.getName();
+				log.debug("Streaming file {} with file servlet",
+						externalReference);
+			} else {
+				externalReference = mediaObject.getUrlReference();
+			}
+
 			adjustEmbeddedMediaObject(mediaObject.getType(),
 					mediaObject.getName(), new ExternalResource(
 							externalReference));
 
 			getUploadComponent().setEnabled(false);
+			getSetURLButton().setEnabled(false);
 			getDeleteButton().setEnabled(true);
 		}
 	}
 
-	public void createMediaObject(final File temporaryFile,
+	/**
+	 * Requests and sets a new URL for a URL media object
+	 */
+	private void setURL() {
+		log.debug("Set url for media object");
+
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_EXTERNAL_URL,
+				mediaObject == null ? "" : mediaObject.getUrlReference(), null,
+						new ShortStringEditComponent(),
+						new ExtendableButtonClickListener() {
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Change URL
+							val url = new URL(getStringValue());
+							createOrUpdateMediaObjectForURL(url
+									.toExternalForm());
+						} catch (final Exception e) {
+							log.debug("Given URL cannot be set: {}",
+									e.getMessage());
+							handleException(new NotificationMessageException(
+									AdminMessageStrings.NOTIFICATION__GIVEN_URL_NOT_VALID));
+							return;
+						}
+
+						// Change was successful
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__URL_SET);
+						closeWindow();
+					}
+				}, null);
+	}
+
+	/*
+	 * Media object creation/deletion for specific types
+	 */
+
+	private void createMediaObjectForFile(final File temporaryFile,
 			final String originalFileName,
 			final MediaObjectTypes originalFileType) {
 		val newMediaObject = getInterventionAdministrationManagerService()
-				.mediaObjectCreate(temporaryFile, originalFileName,
+				.mediaObjectCreateWithFile(temporaryFile, originalFileName,
 						originalFileType);
 
 		if (newMediaObject != null) {
@@ -123,7 +178,31 @@ public class MediaObjectIntegrationComponentWithController extends
 		adjust();
 	}
 
-	public void destroyMediaObject() {
+	private void createOrUpdateMediaObjectForURL(final String url) {
+		if (mediaObject != null) {
+			val mediaObjectToDelete = mediaObject;
+			mediaObject = null;
+
+			listener.updateLinkedMediaObjectId(null);
+
+			adjust();
+
+			getInterventionAdministrationManagerService().mediaObjectDelete(
+					mediaObjectToDelete);
+		}
+
+		val newMediaObject = getInterventionAdministrationManagerService()
+				.mediaObjectCreateWithURL(url, MediaObjectTypes.URL);
+
+		if (newMediaObject != null) {
+			mediaObject = newMediaObject;
+			listener.updateLinkedMediaObjectId(mediaObject.getId());
+		}
+
+		adjust();
+	}
+
+	private void destroyMediaObject() {
 		showConfirmationWindow(new ExtendableButtonClickListener() {
 			@Override
 			public void buttonClick(final ClickEvent event) {
@@ -136,7 +215,7 @@ public class MediaObjectIntegrationComponentWithController extends
 				adjust();
 
 				getInterventionAdministrationManagerService()
-						.mediaObjectDelete(mediaObjectToDelete);
+				.mediaObjectDelete(mediaObjectToDelete);
 
 				closeWindow();
 			}
@@ -147,7 +226,7 @@ public class MediaObjectIntegrationComponentWithController extends
 	 * Set the media object to edit in this component or null if non exists,
 	 * yet; A listener is necessary as well, to inform about creation and
 	 * deletion of media objects
-	 * 
+	 *
 	 * @param mediaObject
 	 */
 	public void setMediaObject(final MediaObject mediaObject,
@@ -160,11 +239,11 @@ public class MediaObjectIntegrationComponentWithController extends
 
 	/**
 	 * Handles the file upload
-	 * 
+	 *
 	 * @author Andreas Filler
 	 */
 	private class Uploader implements Receiver, StartedListener,
-			SucceededListener, FailedListener, ErrorHandler {
+	SucceededListener, FailedListener, ErrorHandler {
 		public File					temporaryFile;
 		public String				originalFileName;
 		private MediaObjectTypes	originalFileType;
@@ -217,15 +296,16 @@ public class MediaObjectIntegrationComponentWithController extends
 			reset();
 
 			getAdminUI()
-					.showErrorNotification(
-							AdminMessageStrings.NOTIFICATION__UPLOAD_FAILED_OR_UNSUPPORTED_FILE_TYPE);
+			.showErrorNotification(
+					AdminMessageStrings.NOTIFICATION__UPLOAD_FAILED_OR_UNSUPPORTED_FILE_TYPE);
 		}
 
 		@Override
 		public void uploadSucceeded(final SucceededEvent event) {
 			log.debug("Upload succeeded");
 
-			createMediaObject(temporaryFile, originalFileName, originalFileType);
+			createMediaObjectForFile(temporaryFile, originalFileName,
+					originalFileType);
 
 			reset();
 
@@ -267,14 +347,14 @@ public class MediaObjectIntegrationComponentWithController extends
 	/**
 	 * Informs the parent {@link ModelObject} about the creation or deletion of
 	 * media objects
-	 * 
+	 *
 	 * @author Andreas Filler
 	 */
 	public interface MediaObjectCreationOrDeleteionListener {
 		/**
 		 * Informs the parent {@link ModelObject} about the creation or deletion
 		 * of media objects
-		 * 
+		 *
 		 * @param mediaObjectId
 		 */
 		public void updateLinkedMediaObjectId(final ObjectId mediaObjectId);

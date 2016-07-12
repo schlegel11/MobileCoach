@@ -33,11 +33,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * {@link ModelObject} to represent an {@link MediaObject}
- * 
+ *
  * {@link MediaObject}s represent media files (e.g. images or videos) that are
  * integrated in messages. They consist of a type description and a file
  * reference.
- * 
+ *
  * @author Andreas Filler
  */
 @NoArgsConstructor
@@ -65,13 +65,19 @@ public class MediaObject extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	@NonNull
 	private String				fileReference;
+
+	/**
+	 * The reference to the URL
+	 */
+	@Getter
+	@Setter
+	private String				urlReference;
 
 	/**
 	 * Alternative constructor to combine the creation of the file reference and
 	 * the creation of the {@link MediaObject}
-	 * 
+	 *
 	 * @param type
 	 *            The type of the {@link MediaObject}
 	 * @param name
@@ -105,13 +111,15 @@ public class MediaObject extends ModelObject {
 	@Override
 	@JsonIgnore
 	protected void performOnDelete() {
-		log.debug("Deleting file with reference {}", fileReference);
-		try {
-			getFileStorageManagerService().deleteFile(fileReference);
-		} catch (final Exception e) {
-			log.warn(
-					"File belonging to file reference {} could not be deleted: {}",
-					fileReference, e.getMessage());
+		if (fileReference != null) {
+			log.debug("Deleting file with reference {}", fileReference);
+			try {
+				getFileStorageManagerService().deleteFile(fileReference);
+			} catch (final Exception e) {
+				log.warn(
+						"File belonging to file reference {} could not be deleted: {}",
+						fileReference, e.getMessage());
+			}
 		}
 
 		super.performOnDelete();
