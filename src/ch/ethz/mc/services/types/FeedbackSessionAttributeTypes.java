@@ -1,5 +1,7 @@
 package ch.ethz.mc.services.types;
 
+import ch.ethz.mc.conf.ImplementationConstants;
+
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
  * 
@@ -21,5 +23,16 @@ package ch.ethz.mc.services.types;
  * @author Andreas Filler
  */
 public enum FeedbackSessionAttributeTypes {
-	PARTICIPANT_FORMER_FEEDBACK_SLIDE_ID, FEEDBACK_CONSISTENCY_CHECK_VALUE
+	FEEDBACK_FORMER_SLIDE_ID, FEEDBACK_CONSISTENCY_CHECK_VALUE;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Enum#toString()
+	 */
+	@Override
+	public String toString() {
+		return ImplementationConstants.SURVEY_SESSION_PREFIX
+				+ super.toString().toLowerCase();
+	}
 }

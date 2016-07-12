@@ -2,15 +2,15 @@ package ch.ethz.mc.ui;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -50,14 +50,15 @@ import com.vaadin.ui.UI;
 @Theme("mc")
 @Log4j2
 public class AdminNavigatorUI extends UI implements ViewChangeListener,
-DetachListener {
+		DetachListener {
 
 	private UISession	uiSession;
 
 	public AdminNavigatorUI() {
-		val sessionId = VaadinSession.getCurrent().getSession().getId();
-		log.debug("Creating new UI session based on session {}", sessionId);
-		uiSession = new UISession(sessionId);
+		val session = VaadinSession.getCurrent().getSession();
+		log.debug("Creating new UI session based on session {}",
+				session.getId());
+		uiSession = new UISession(session);
 	}
 
 	/**
@@ -83,8 +84,8 @@ DetachListener {
 		// Set basic settings
 		setLocale(Constants.getAdminLocale());
 		getPage()
-		.setTitle(
-				Messages.getAdminString(AdminMessageStrings.APPLICATION__NAME_LONG));
+				.setTitle(
+						Messages.getAdminString(AdminMessageStrings.APPLICATION__NAME_LONG));
 
 		// Configure the error handler for the UI
 		setErrorHandler(new DefaultErrorHandler() {
@@ -119,7 +120,7 @@ DetachListener {
 							final BrowserWindowResizeEvent event) {
 						if ((event.getWidth() < 1100 || event.getHeight() < 650)
 								&& System.currentTimeMillis()
-								- lastNotification > 5000) {
+										- lastNotification > 5000) {
 							lastNotification = System.currentTimeMillis();
 							showWarningNotification(AdminMessageStrings.GENERAL__RESIZE_ERROR_MESSAGE);
 						}
@@ -139,11 +140,13 @@ DetachListener {
 
 		if (uiSession != null) {
 			getLockingService().releaseLockOfUISession(uiSession);
+			uiSession.clearWrappedSession();
 		}
 
-		val sessionId = VaadinSession.getCurrent().getSession().getId();
-		log.debug("Creating new UI session based on session {}", sessionId);
-		uiSession = new UISession(sessionId);
+		val session = VaadinSession.getCurrent().getSession();
+		log.debug("Creating new UI session based on session {}",
+				session.getId());
+		uiSession = new UISession(session);
 	}
 
 	public void showInformationNotification(final AdminMessageStrings message,
@@ -179,10 +182,10 @@ DetachListener {
 			showErrorNotification(AdminMessageStrings.NOTIFICATION__WRONG_LOGIN);
 		} else {
 			final UISession uiSession = getUISession();
-			uiSession.setLoggedIn(true);
 			uiSession.setAdmin(author.isAdmin());
 			uiSession.setCurrentAuthorId(author.getId());
 			uiSession.setCurrentAuthorUsername(author.getUsername());
+			uiSession.setLoggedIn(true);
 
 			getUI().getNavigator().navigateTo(
 					AdminNavigatorUI.VIEWS.MAIN.getLowerCase());

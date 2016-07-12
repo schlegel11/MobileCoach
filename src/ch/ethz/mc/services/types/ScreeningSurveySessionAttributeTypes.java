@@ -1,5 +1,7 @@
 package ch.ethz.mc.services.types;
 
+import ch.ethz.mc.conf.ImplementationConstants;
+
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
  * 
@@ -21,5 +23,16 @@ package ch.ethz.mc.services.types;
  * @author Andreas Filler
  */
 public enum ScreeningSurveySessionAttributeTypes {
-	PARTICIPANT_ID, PARTICIPANT_ACCESS_GRANTED, PARTICIPANT_FORMER_SCREENING_SURVEY_SLIDE_ID, PARTICIPANT_FEEDBACK_URL, SCREENING_SURVEY_CONSISTENCY_CHECK_VALUE, FROM_SCREENING_SURVEY
+	SCREENING_SURVEY_PARTICIPANT_ACCESS_GRANTED, SCREENING_SURVEY_FORMER_SLIDE_ID, SCREENING_SURVEY_PARTICIPANT_FEEDBACK_URL, SCREENING_SURVEY_CONSISTENCY_CHECK_VALUE, SCREENING_SURVEY_FROM_URL;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Enum#toString()
+	 */
+	@Override
+	public String toString() {
+		return ImplementationConstants.SURVEY_SESSION_PREFIX
+				+ super.toString().toLowerCase();
+	}
 }

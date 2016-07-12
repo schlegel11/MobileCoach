@@ -92,6 +92,25 @@ ModelObject {
 	}
 
 	/**
+	 * Calculates the last relevant part of the URL
+	 *
+	 * @return
+	 */
+	@JsonIgnore
+	public String calculateIdPartOfURL() {
+		val shortIdString = String.valueOf(shortId);
+
+		String checksum = null;
+		try {
+			checksum = calculateChecksum(shortIdString);
+		} catch (final Exception e) {
+			// Will never happen
+		}
+
+		return checksum + Long.toString(shortId, 36) + secret;
+	}
+
+	/**
 	 * Checks secret in given idPart
 	 *
 	 * @param idPart

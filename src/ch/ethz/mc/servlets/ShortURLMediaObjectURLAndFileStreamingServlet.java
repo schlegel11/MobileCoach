@@ -37,7 +37,7 @@ import ch.ethz.mc.services.InterventionAdministrationManagerService;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
 
 /**
- * The {@link ShortURLMediaObjectFileStreamingServlet} serves files contained in
+ * The {@link ShortURLMediaObjectURLAndFileStreamingServlet} serves files contained in
  * {@link MediaObject}s, which are referenced by
  * {@link MediaObjectParticipantShortURL}s
  * 
@@ -56,7 +56,7 @@ import ch.ethz.mc.services.InterventionExecutionManagerService;
 @WebServlet(displayName = "Short URL based Media Object File Streaming", value = "/"
 		+ ImplementationConstants.SHORT_ID_FILE_STREAMING_SERVLET_PATH + "/*", asyncSupported = true, loadOnStartup = 1)
 @Log4j2
-public class ShortURLMediaObjectFileStreamingServlet extends HttpServlet {
+public class ShortURLMediaObjectURLAndFileStreamingServlet extends HttpServlet {
 	private InterventionAdministrationManagerService	interventionAdministrationManagerService;
 	private InterventionExecutionManagerService			interventionExecutionManagerService;
 
@@ -79,16 +79,18 @@ public class ShortURLMediaObjectFileStreamingServlet extends HttpServlet {
 	}
 
 	/**
-	 * Create a request that links to a existing file of an existing
-	 * {@link MediaObject}
+	 * Handles the request and creates a request that links to a existing file
+	 * of an existing {@link MediaObject} or redirects to its URL
 	 * 
 	 * @param request
-	 * @return
+	 * @param response
+	 * @param headerOnly
+	 * @throws ServletException
 	 * @throws IOException
 	 */
-	private HttpServletRequest createWrappedReqest(
-			final HttpServletRequest request, final HttpServletResponse response)
-			throws IOException {
+	private void handleRequest(final HttpServletRequest request,
+			final HttpServletResponse response, boolean headerOnly)
+			throws ServletException, IOException {
 		// Determine requested system unique id
 		MediaObjectParticipantShortURL mediaObjectParticipantShortURL = null;
 		try {
@@ -101,7 +103,7 @@ public class ShortURLMediaObjectFileStreamingServlet extends HttpServlet {
 					.getMediaObjectParticipantShortURLByShortId(shortId);
 		} catch (final Exception e) {
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-			return null;
+			return;
 		}
 		log.debug("Requested media object short id {}",
 				mediaObjectParticipantShortURL);
@@ -109,16 +111,16 @@ public class ShortURLMediaObjectFileStreamingServlet extends HttpServlet {
 		// Check if system unique id exists
 		if (mediaObjectParticipantShortURL == null) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
-			return null;
+			return;
 		}
 
 		final val mediaObject = interventionAdministrationManagerService
 				.getMediaObject(mediaObjectParticipantShortURL.getMediaObject());
 
-		// Check if media object exists and contains a file
-		if (mediaObject == null || mediaObject.getFileReference() == null) {
+		// Check if media object exists
+		if (mediaObject == null) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
-			return null;
+			return;
 		}
 
 		// Mark media object as seen
@@ -126,27 +128,40 @@ public class ShortURLMediaObjectFileStreamingServlet extends HttpServlet {
 				.dialogMessageSetMediaContentViewed(mediaObjectParticipantShortURL
 						.getDialogMessage());
 
-		// Retrieve file from media object
-		final val file = interventionAdministrationManagerService
-				.getFileByReference(mediaObject.getFileReference());
-		log.debug("Serving file {}", file.getAbsoluteFile());
+		// Handle file or URL based media objects
+		if (mediaObject.getFileReference() != null) {
+			// Retrieve file from media object
+			final val file = interventionAdministrationManagerService
+					.getFileByReference(mediaObject.getFileReference());
+			log.debug("Serving file {}", file.getAbsoluteFile());
 
-		// Check if file actually exists in filesystem
-		if (!file.exists()) {
-			response.sendError(HttpServletResponse.SC_NOT_FOUND);
-			return null;
-		}
-
-		// Wrapping request
-		final HttpServletRequest wrapped = new HttpServletRequestWrapper(
-				request) {
-			@Override
-			public String getPathInfo() {
-				return file.getAbsolutePath();
+			// Check if file actually exists in filesystem
+			if (!file.exists()) {
+				response.sendError(HttpServletResponse.SC_NOT_FOUND);
+				return;
 			}
-		};
 
-		return wrapped;
+			// Wrapping request
+			val wrapped = new HttpServletRequestWrapper(request) {
+				@Override
+				public String getPathInfo() {
+					return file.getAbsolutePath();
+				}
+			};
+
+			if (headerOnly) {
+				fileServletWrapper.doGet(wrapped, response);
+			} else {
+				fileServletWrapper.doGet(wrapped, response);
+			}
+		} else if (mediaObject.getUrlReference() != null) {
+			// Send redirect for URL
+			response.sendRedirect(mediaObject.getUrlReference());
+		} else {
+			// Send error (should never occur)
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
 	}
 
 	/**
@@ -161,13 +176,7 @@ public class ShortURLMediaObjectFileStreamingServlet extends HttpServlet {
 			IOException {
 		log.debug("Serving short id dynamic {}", request.getPathInfo());
 
-		val wrapped = createWrappedReqest(request, response);
-
-		if (wrapped == null) {
-			return;
-		}
-
-		fileServletWrapper.doHead(wrapped, response);
+		handleRequest(request, response, true);
 	}
 
 	/**
@@ -181,13 +190,7 @@ public class ShortURLMediaObjectFileStreamingServlet extends HttpServlet {
 			IOException {
 		log.debug("Serving short id dynamic {}", request.getPathInfo());
 
-		val wrapped = createWrappedReqest(request, response);
-
-		if (wrapped == null) {
-			return;
-		}
-
-		fileServletWrapper.doGet(wrapped, response);
+		handleRequest(request, response, false);
 	}
 
 }

@@ -26,8 +26,10 @@ import org.apache.commons.lang.NullArgumentException;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.conf.ThemeImageStrings;
 import ch.ethz.mc.model.persistent.Feedback;
+import ch.ethz.mc.model.persistent.IntermediateSurveyAndFeedbackParticipantShortURL;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.ui.UIFeedback;
@@ -104,13 +106,14 @@ public class ScreeningSurveyEditComponentWithController extends
 		feedbacksTable.setSortAscending(true);
 		feedbacksTable.setSortEnabled(false);
 
-		// handle survey type adjusments (hide feedback area for intermediate surveys)
+		// handle survey type adjusments (hide feedback area for intermediate
+		// surveys)
 		if (screeningSurvey.isIntermediateSurvey()) {
 			getFeedbacksLabel().setVisible(false);
 			getFedbacksButtonLayout().setVisible(false);
 			feedbacksTable.setVisible(false);
 		}
-		
+
 		// handle table selection change
 		slidesTable.addValueChangeListener(new ValueChangeListener() {
 
@@ -184,6 +187,7 @@ public class ScreeningSurveyEditComponentWithController extends
 		getNewFeedbackButton().addClickListener(buttonClickListener);
 		getEditFeedbackButton().addClickListener(buttonClickListener);
 		getRenameFeedbackButton().addClickListener(buttonClickListener);
+		getShowFeedbackButton().addClickListener(buttonClickListener);
 		getDeleteFeedbackButton().addClickListener(buttonClickListener);
 
 		getSwitchScreeningSurveyButton().addClickListener(buttonClickListener);
@@ -247,6 +251,8 @@ public class ScreeningSurveyEditComponentWithController extends
 				renameFeedback();
 			} else if (event.getButton() == getEditFeedbackButton()) {
 				editFeedback();
+			} else if (event.getButton() == getShowFeedbackButton()) {
+				showFeedback();
 			} else if (event.getButton() == getDeleteFeedbackButton()) {
 				deleteFeedback();
 			} else if (event.getButton() == getSwitchScreeningSurveyButton()) {
@@ -554,6 +560,59 @@ public class ScreeningSurveyEditComponentWithController extends
 						closeWindow();
 					}
 				}, selectedFeedback.getName(), screeningSurvey.getName());
+	}
+
+	public void showFeedback() {
+		log.debug("Show feedback");
+
+		val selectedFeedback = selectedUIFeedback
+				.getRelatedModelObject(Feedback.class);
+
+		val participantId = getAdminUI().getUISession()
+				.getCurrentAuthorParticipantId();
+
+		if (participantId == null) {
+			getAdminUI()
+					.showWarningNotification(
+							AdminMessageStrings.NOTIFICATION__SURVEY_PARTICIPATION_REQUIRED);
+			return;
+		}
+
+		val participant = getInterventionAdministrationManagerService()
+				.getParticipant(participantId);
+
+		if (participant == null) {
+			getAdminUI()
+					.showWarningNotification(
+							AdminMessageStrings.NOTIFICATION__SURVEY_PARTICIPATION_REQUIRED);
+			return;
+		}
+
+		IntermediateSurveyAndFeedbackParticipantShortURL shortURL = null;
+		if (!participant.getAssignedFeedback().equals(selectedFeedback.getId())) {
+			shortURL = getScreeningSurveyExecutionManagerService()
+					.participantSetFeedback(participant,
+							selectedFeedback.getId());
+		}
+
+		if (shortURL == null) {
+			shortURL = getInterventionAdministrationManagerService()
+					.feedbackParticipantShortURLEnsure(participantId,
+							selectedFeedback.getId());
+		}
+
+		final String url = getAdminUI()
+				.getPage()
+				.getLocation()
+				.toString()
+				.substring(
+						0,
+						getAdminUI().getPage().getLocation().toString()
+								.lastIndexOf("/") + 1)
+				+ ImplementationConstants.SHORT_ID_SCREEN_SURVEY_AND_FEEDBACK_SERVLET_PATH
+				+ "/" + shortURL.calculateIdPartOfURL();
+
+		getAdminUI().getPage().open(url, "_blank");
 	}
 
 	public void deleteFeedback() {

@@ -66,6 +66,15 @@ public class ImplementationConstants {
 	public static final String	SHORT_ID_FILE_STREAMING_SERVLET_PATH												= "files-short";
 	public static final String	SHORT_ID_SCREEN_SURVEY_AND_FEEDBACK_SERVLET_PATH									= "surveys-short";
 
+	public static final String	PARTICIPANT_SESSION_ATTRIBUTE_EXPECTED												= "mc.vaadin.assigned-participant.expected";
+	public static final String	PARTICIPANT_SESSION_ATTRIBUTE_DESCRIPTION											= "mc.vaadin.assigned-participant.description";
+	public static final String	PARTICIPANT_SESSION_ATTRIBUTE														= "mc.vaadin.assigned-participant";
+	public static final String	SURVEY_SESSION_PREFIX																= "mc.surveys.";
+	public static final String	SURVEYS_CURRENT_SURVEY_CHECK_SESSION_ATTRIBUTE										= SURVEY_SESSION_PREFIX
+			+ "current_session";
+	public static final String	SURVEYS_CURRENT_PARTICIPANT_CHECK_SESSION_ATTRIBUTE									= SURVEY_SESSION_PREFIX
+			+ "current_participant";
+
 	public static final String	SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLES									= "MC_ResultValue_";
 	public static final String	SCREENING_SURVEY_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE							= "MC_ConsistencyCheckValue";
 	public static final int		SCREENING_SURVEY_SLIDE_AUTOMATIC_EXECUTION_LOOP_DETECTION_THRESHOLD					= 1000;

@@ -45,6 +45,7 @@ import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.persistent.Feedback;
+import ch.ethz.mc.model.persistent.FeedbackSlide;
 import ch.ethz.mc.model.persistent.IntermediateSurveyAndFeedbackParticipantShortURL;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
@@ -221,9 +222,8 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 		}
 
 		log.debug("Handling file request '{}' for {} {}", fileRequest,
-				isSurveyRequest ? "survey"
-						: "feedback",
-						isSurveyRequest ? surveyId:feedbackId);
+				isSurveyRequest ? "survey" : "feedback",
+				isSurveyRequest ? surveyId : feedbackId);
 
 		final File basicTemplateFolder = new File(
 				screeningSurveyExecutionManagerService.getTemplatePath(),
@@ -288,7 +288,8 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 	}
 
 	/**
-	 * Return appropriate {@link ScreeningSurveySlide} as filled template
+	 * Return appropriate {@link ScreeningSurveySlide} or {@link FeedbackSlide}
+	 * as filled template
 	 * 
 	 * @param request
 	 * @param response
@@ -303,15 +304,79 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 			final ObjectId surveyId, final ObjectId feedbackId)
 			throws ServletException, IOException {
 		if (surveyId != null) {
-			log.debug("Handling template request for survey {} of participant {}",
+			log.debug(
+					"Handling template request for intermediate survey {} of participant {}",
 					surveyId, participantId);
 		} else {
-			log.debug("Handling template request for feedback {} of participant {}",
+			log.debug(
+					"Handling template request for feedback {} of participant {}",
 					feedbackId, participantId);
 		}
 
 		HashMap<String, Object> templateVariables;
 		val session = request.getSession(true);
+
+		// Reset session if there already is a running session but for a
+		// different survey
+		if (session
+				.getAttribute(ImplementationConstants.SURVEYS_CURRENT_SURVEY_CHECK_SESSION_ATTRIBUTE) != null) {
+			val currentSurveyRegardingSession = (ObjectId) session
+					.getAttribute(ImplementationConstants.SURVEYS_CURRENT_SURVEY_CHECK_SESSION_ATTRIBUTE);
+			if ((surveyId != null && !surveyId
+					.equals(currentSurveyRegardingSession))
+					|| (feedbackId != null && !feedbackId
+							.equals(currentSurveyRegardingSession))) {
+
+				// Session needs to be reset
+				log.debug("Session needs to be reset due to different survey");
+				val sessionAttributeNames = session.getAttributeNames();
+				while (sessionAttributeNames.hasMoreElements()) {
+					val attribute = (String) sessionAttributeNames
+							.nextElement();
+					if (attribute
+							.startsWith(ImplementationConstants.SURVEY_SESSION_PREFIX)
+							&& !attribute
+									.equals(ScreeningSurveySessionAttributeTypes.SCREENING_SURVEY_FROM_URL
+											.toString()))
+						session.removeAttribute(attribute);
+				}
+			}
+		}
+
+		if (surveyId != null) {
+			session.setAttribute(
+					ImplementationConstants.SURVEYS_CURRENT_SURVEY_CHECK_SESSION_ATTRIBUTE,
+					surveyId);
+
+		} else if (feedbackId != null) {
+			session.setAttribute(
+					ImplementationConstants.SURVEYS_CURRENT_SURVEY_CHECK_SESSION_ATTRIBUTE,
+					feedbackId);
+		}
+
+		// Reset session if there already is a running session but for a
+		// different participant
+		if (session
+				.getAttribute(ImplementationConstants.SURVEYS_CURRENT_PARTICIPANT_CHECK_SESSION_ATTRIBUTE) != null
+				&& !((ObjectId) session
+						.getAttribute(ImplementationConstants.SURVEYS_CURRENT_PARTICIPANT_CHECK_SESSION_ATTRIBUTE))
+						.equals(participantId)) {
+
+			// Session needs to be reset
+			log.debug("Session needs to be reset due to different participant");
+			val sessionAttributeNames = session.getAttributeNames();
+			while (sessionAttributeNames.hasMoreElements()) {
+				val attribute = (String) sessionAttributeNames.nextElement();
+				if (attribute
+						.startsWith(ImplementationConstants.SURVEY_SESSION_PREFIX)) {
+					session.removeAttribute(attribute);
+				}
+			}
+		}
+
+		session.setAttribute(
+				ImplementationConstants.SURVEYS_CURRENT_PARTICIPANT_CHECK_SESSION_ATTRIBUTE,
+				participantId);
 
 		// Handle survey or feedback request
 		if (surveyId != null) {
@@ -323,7 +388,7 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 			boolean accessGranted;
 			try {
 				accessGranted = (boolean) session
-						.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_ACCESS_GRANTED
+						.getAttribute(ScreeningSurveySessionAttributeTypes.SCREENING_SURVEY_PARTICIPANT_ACCESS_GRANTED
 								.toString());
 			} catch (final Exception e) {
 				accessGranted = false;
@@ -358,14 +423,14 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 
 			log.debug(
 					"Retrieved information from intermediate survey slide request: participant: {}, access granted: {}, screening survey: {}, result value: {}, check value: {}",
-					participantId, accessGranted, surveyId,
-					resultValues, checkValue);
+					participantId, accessGranted, surveyId, resultValues,
+					checkValue);
 
 			// Decide which slide should be send to the participant
 			try {
 				templateVariables = screeningSurveyExecutionManagerService
 						.getAppropriateScreeningSurveySlide(participantId,
-								accessGranted, surveyId, resultValues,
+								accessGranted, false, surveyId, resultValues,
 								checkValue, session);
 
 				if (templateVariables == null
@@ -467,12 +532,12 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 					true);
 
 			if (session
-					.getAttribute(ScreeningSurveySessionAttributeTypes.FROM_SCREENING_SURVEY
+					.getAttribute(ScreeningSurveySessionAttributeTypes.SCREENING_SURVEY_FROM_URL
 							.toString()) != null) {
 				templateVariables
 						.put(FeedbackSlideTemplateFieldTypes.FROM_SCREENING_SURVEY
 								.toVariable(),
-								session.getAttribute(ScreeningSurveySessionAttributeTypes.FROM_SCREENING_SURVEY
+								session.getAttribute(ScreeningSurveySessionAttributeTypes.SCREENING_SURVEY_FROM_URL
 										.toString()));
 			} else {
 				templateVariables.put(
@@ -481,21 +546,21 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 			}
 		}
 
-		// Adjust feedback URL (only for screening survey slides)
+		// Adjust feedback URL (only for intermediate survey slides)
 		if (surveyId != null
 				&& session
-						.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
+						.getAttribute(ScreeningSurveySessionAttributeTypes.SCREENING_SURVEY_PARTICIPANT_FEEDBACK_URL
 								.toString()) != null) {
 			templateVariables
 					.put(GeneralSlideTemplateFieldTypes.FEEDBACK_URL
 							.toVariable(),
 							normalizedBaseURL
 									+ session
-											.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
+											.getAttribute(ScreeningSurveySessionAttributeTypes.SCREENING_SURVEY_PARTICIPANT_FEEDBACK_URL
 													.toString()));
 		}
 
-		// Set layout (only for screening survey slides)
+		// Set layout (only for intermediate survey slides)
 		if (surveyId != null) {
 			for (val layout : ScreeningSurveySlideTemplateLayoutTypes.values()) {
 				if (templateVariables.get(layout.toVariable()) != null) {

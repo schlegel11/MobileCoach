@@ -48,7 +48,6 @@ import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.services.ScreeningSurveyExecutionManagerService;
-import ch.ethz.mc.services.types.FeedbackSlideTemplateFieldTypes;
 import ch.ethz.mc.services.types.GeneralSlideTemplateFieldTypes;
 import ch.ethz.mc.services.types.ScreeningSurveySessionAttributeTypes;
 import ch.ethz.mc.services.types.ScreeningSurveySlideTemplateFieldTypes;
@@ -125,8 +124,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 					// intermediate) surveys are accepted
 					if (ObjectId.isValid(pathParts[0])) {
 						if (screeningSurveyExecutionManagerService
-								.screeningSurveyCheckIfActiveAndOfGivenType(new ObjectId(
-										pathParts[0]), false)) {
+								.screeningSurveyCheckIfActiveAndOfGivenType(
+										new ObjectId(pathParts[0]), false)) {
 							handleTemplateRequest(request, response,
 									new ObjectId(pathParts[0]));
 							return;
@@ -264,16 +263,13 @@ public class ScreeningSurveyServlet extends HttpServlet {
 
 		log.debug("Clearing session");
 		val session = request.getSession(true);
-		for (val attribute : ScreeningSurveySessionAttributeTypes.values()) {
-			val sessionObject = session.getAttribute(attribute.toString());
-			if (sessionObject != null) {
-				session.removeAttribute(attribute.toString());
-			}
-		}
-
 		val sessionAttributeNames = session.getAttributeNames();
 		while (sessionAttributeNames.hasMoreElements()) {
-			log.debug("> " + sessionAttributeNames.nextElement());
+			val attribute = (String) sessionAttributeNames.nextElement();
+			if (attribute
+					.startsWith(ImplementationConstants.SURVEY_SESSION_PREFIX)) {
+				session.removeAttribute(attribute);
+			}
 		}
 
 		log.debug("Setting no-cache headers");
@@ -352,19 +348,71 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		HashMap<String, Object> templateVariables;
 		val session = request.getSession(true);
 
-		// Get information from session
+		// Reset session if there already is a running session but for a
+		// different survey
+		if (session
+				.getAttribute(ImplementationConstants.SURVEYS_CURRENT_SURVEY_CHECK_SESSION_ATTRIBUTE) != null) {
+			val currentSurveyRegardingSession = (ObjectId) session
+					.getAttribute(ImplementationConstants.SURVEYS_CURRENT_SURVEY_CHECK_SESSION_ATTRIBUTE);
+			if (screeningSurveyId != null
+					&& !screeningSurveyId.equals(currentSurveyRegardingSession)) {
+
+				// Session needs to be reset
+				log.debug("Session needs to be reset due to different survey");
+				val sessionAttributeNames = session.getAttributeNames();
+				while (sessionAttributeNames.hasMoreElements()) {
+					val attribute = (String) sessionAttributeNames
+							.nextElement();
+					if (attribute
+							.startsWith(ImplementationConstants.SURVEY_SESSION_PREFIX)
+							&& !attribute
+									.equals(ScreeningSurveySessionAttributeTypes.SCREENING_SURVEY_FROM_URL
+											.toString()))
+						session.removeAttribute(attribute);
+				}
+			}
+		}
+		
+		session.setAttribute(
+				ImplementationConstants.SURVEYS_CURRENT_SURVEY_CHECK_SESSION_ATTRIBUTE,
+				screeningSurveyId);
+		
+
+		// Reset session if there already is a running session but for a
+		// different participant
 		ObjectId participantId;
 		try {
 			participantId = (ObjectId) session
-					.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_ID
-							.toString());
+					.getAttribute(ImplementationConstants.SURVEYS_CURRENT_PARTICIPANT_CHECK_SESSION_ATTRIBUTE);
 		} catch (final Exception e) {
 			participantId = null;
 		}
+
+		if ((participantId != null
+				&& session
+						.getAttribute(ImplementationConstants.SURVEYS_CURRENT_PARTICIPANT_CHECK_SESSION_ATTRIBUTE) != null
+				&& !((ObjectId) session
+						.getAttribute(ImplementationConstants.SURVEYS_CURRENT_PARTICIPANT_CHECK_SESSION_ATTRIBUTE))
+						.equals(participantId)) || (participantId == null && session
+						.getAttribute(ImplementationConstants.SURVEYS_CURRENT_PARTICIPANT_CHECK_SESSION_ATTRIBUTE) != null)) {
+
+			// Session needs to be reset
+			log.debug("Session needs to be reset due to different participant");
+			val sessionAttributeNames = session.getAttributeNames();
+			while (sessionAttributeNames.hasMoreElements()) {
+				val attribute = (String) sessionAttributeNames.nextElement();
+				if (attribute
+						.startsWith(ImplementationConstants.SURVEY_SESSION_PREFIX)) {
+					session.removeAttribute(attribute);
+				}
+			}
+		}
+
+		// Get information from session
 		boolean accessGranted;
 		try {
 			accessGranted = (boolean) session
-					.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_ACCESS_GRANTED
+					.getAttribute(ScreeningSurveySessionAttributeTypes.SCREENING_SURVEY_PARTICIPANT_ACCESS_GRANTED
 							.toString());
 		} catch (final Exception e) {
 			accessGranted = false;
@@ -397,9 +445,10 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			checkValue = null;
 		}
 
-		// Remember that user participated in screening survey (to have this information when we directly go to the feedback afterwards)
+		// Remember that user participated in screening survey (to have this
+		// information when we directly go to the feedback afterwards)
 		session.setAttribute(
-				ScreeningSurveySessionAttributeTypes.FROM_SCREENING_SURVEY
+				ScreeningSurveySessionAttributeTypes.SCREENING_SURVEY_FROM_URL
 						.toString(), true);
 
 		log.debug(
@@ -411,8 +460,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		try {
 			templateVariables = screeningSurveyExecutionManagerService
 					.getAppropriateScreeningSurveySlide(participantId,
-							accessGranted, screeningSurveyId, resultValues,
-							checkValue, session);
+							accessGranted, true, screeningSurveyId,
+							resultValues, checkValue, session);
 
 			if (templateVariables == null
 					|| !templateVariables
@@ -454,38 +503,18 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				GeneralSlideTemplateFieldTypes.BASE_URL.toVariable(), baseURL);
 
 		// Slide type
-		if (screeningSurveyId != null) {
-			templateVariables.put(
-					ScreeningSurveySlideTemplateFieldTypes.IS_SCREENING_SURVEY
-							.toVariable(), true);
-		} else {
-			templateVariables.put(
-					FeedbackSlideTemplateFieldTypes.IS_FEEDBACK.toVariable(),
-					true);
-
-			if (session
-					.getAttribute(ScreeningSurveySessionAttributeTypes.FROM_SCREENING_SURVEY
-							.toString()) != null) {
-				templateVariables
-						.put(FeedbackSlideTemplateFieldTypes.FROM_SCREENING_SURVEY
-								.toVariable(),
-								session.getAttribute(ScreeningSurveySessionAttributeTypes.FROM_SCREENING_SURVEY
-										.toString()));
-			} else {
-				templateVariables.put(
-						FeedbackSlideTemplateFieldTypes.FROM_SCREENING_SURVEY
-								.toVariable(), false);
-			}
-		}
+		templateVariables.put(
+				ScreeningSurveySlideTemplateFieldTypes.IS_SCREENING_SURVEY
+						.toVariable(), true);
 
 		// Adjust feedback URL
 		if (session
-				.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
+				.getAttribute(ScreeningSurveySessionAttributeTypes.SCREENING_SURVEY_PARTICIPANT_FEEDBACK_URL
 						.toString()) != null) {
 			templateVariables
 					.put(GeneralSlideTemplateFieldTypes.FEEDBACK_URL
 							.toVariable(),
-							session.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
+							session.getAttribute(ScreeningSurveySessionAttributeTypes.SCREENING_SURVEY_PARTICIPANT_FEEDBACK_URL
 									.toString()));
 		}
 

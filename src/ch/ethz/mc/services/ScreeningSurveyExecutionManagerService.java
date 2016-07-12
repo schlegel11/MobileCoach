@@ -18,7 +18,9 @@ package ch.ethz.mc.services;
  * limitations under the License.
  */
 import java.io.File;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -33,7 +35,10 @@ import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.MC;
+import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.DialogStatus;
@@ -144,7 +149,17 @@ public class ScreeningSurveyExecutionManagerService {
 	}
 
 	@Synchronized
-	private IntermediateSurveyAndFeedbackParticipantShortURL participantSetFeedback(
+	private void participantSetOrganizationAndUnit(
+			final Participant participant, final String organization,
+			final String organizationUnit) {
+		participant.setOrganization(organization);
+		participant.setOrganizationUnit(organizationUnit);
+
+		databaseManagerService.saveModelObject(participant);
+	}
+
+	@Synchronized
+	public IntermediateSurveyAndFeedbackParticipantShortURL participantSetFeedback(
 			final Participant participant, final ObjectId feedbackId) {
 		val feedback = databaseManagerService.getModelObjectById(
 				Feedback.class, feedbackId);
@@ -379,6 +394,8 @@ public class ScreeningSurveyExecutionManagerService {
 	 *            The {@link ObjectId} of the current participant or
 	 *            <code>null</code> if not created
 	 * @param accessGranted
+	 * @param isScreening
+	 *            Only for screening surveys, not for intermediate surveys
 	 * @param screeningSurveyId
 	 *            The {@link ObjectId} of the requested {@link ScreeningSurvey}
 	 * @param resultValues
@@ -388,8 +405,9 @@ public class ScreeningSurveyExecutionManagerService {
 	@Synchronized
 	public HashMap<String, Object> getAppropriateScreeningSurveySlide(
 			ObjectId participantId, final boolean accessGranted,
-			final ObjectId screeningSurveyId, final List<String> resultValues,
-			final String checkValue, final HttpSession session) {
+			final boolean isScreening, final ObjectId screeningSurveyId,
+			final List<String> resultValues, final String checkValue,
+			final HttpSession session) {
 
 		final val templateVariables = new HashMap<String, Object>();
 
@@ -432,7 +450,7 @@ public class ScreeningSurveyExecutionManagerService {
 				log.debug("Access granted");
 				// Remember that user authenticated
 				session.setAttribute(
-						ScreeningSurveySessionAttributeTypes.PARTICIPANT_ACCESS_GRANTED
+						ScreeningSurveySessionAttributeTypes.SCREENING_SURVEY_PARTICIPANT_ACCESS_GRANTED
 								.toString(), true);
 			} else {
 				// Redirect to password page
@@ -450,7 +468,8 @@ public class ScreeningSurveyExecutionManagerService {
 			}
 		}
 
-		// Create participant if she does not exist
+		// Create participant if she does not exist (will only happen for
+		// screening survey calls)
 		Participant participant = null;
 		if (participantId == null) {
 			log.debug("Create participant");
@@ -458,37 +477,73 @@ public class ScreeningSurveyExecutionManagerService {
 			participantId = participant.getId();
 
 			session.setAttribute(
-					ScreeningSurveySessionAttributeTypes.PARTICIPANT_ID
-							.toString(), participantId);
-			session.removeAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
-					.toString());
-			session.removeAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_FORMER_SCREENING_SURVEY_SLIDE_ID
-					.toString());
+					ImplementationConstants.SURVEYS_CURRENT_PARTICIPANT_CHECK_SESSION_ATTRIBUTE,
+					participantId);
+
+			// Create participant for currently logged in debug user
+			if (session
+					.getAttribute(ImplementationConstants.PARTICIPANT_SESSION_ATTRIBUTE_EXPECTED) != null
+					&& (boolean) session
+							.getAttribute(ImplementationConstants.PARTICIPANT_SESSION_ATTRIBUTE_EXPECTED)) {
+				session.setAttribute(
+						ImplementationConstants.PARTICIPANT_SESSION_ATTRIBUTE_EXPECTED,
+						false);
+				session.setAttribute(
+						ImplementationConstants.PARTICIPANT_SESSION_ATTRIBUTE,
+						participantId);
+
+				if (session
+						.getAttribute(ImplementationConstants.PARTICIPANT_SESSION_ATTRIBUTE_DESCRIPTION) != null) {
+					val dateFormat = DateFormat.getDateTimeInstance(
+							DateFormat.MEDIUM, DateFormat.MEDIUM,
+							Constants.getAdminLocale());
+					val date = dateFormat.format(new Date(InternalDateTime
+							.currentTimeMillis()));
+
+					participantSetOrganizationAndUnit(
+							participant,
+							Messages.getAdminString(
+									AdminMessageStrings.DEBUG__PARTICIPANT_ORGANIZATION,
+									(String) session
+											.getAttribute(ImplementationConstants.PARTICIPANT_SESSION_ATTRIBUTE_DESCRIPTION)),
+							Messages.getAdminString(
+									AdminMessageStrings.DEBUG__PARTICIPANT_ORGANIZATION_UNIT,
+									date));
+				}
+			}
 		} else {
 			log.debug("Participant exists");
 			participant = databaseManagerService.getModelObjectById(
 					Participant.class, participantId);
 
-			final val dialogStatus = databaseManagerService.findOneModelObject(
-					DialogStatus.class, Queries.DIALOG_STATUS__BY_PARTICIPANT,
+			session.setAttribute(
+					ImplementationConstants.SURVEYS_CURRENT_PARTICIPANT_CHECK_SESSION_ATTRIBUTE,
 					participantId);
 
-			// Redirect to done slide if user already completely performed the
-			// screening survey
-			if (dialogStatus != null
-					&& dialogStatus.isScreeningSurveyPerformed()) {
-				log.debug("User already participated");
+			if (isScreening) {
+				final val dialogStatus = databaseManagerService
+						.findOneModelObject(DialogStatus.class,
+								Queries.DIALOG_STATUS__BY_PARTICIPANT,
+								participantId);
 
-				templateVariables.put(
-						ScreeningSurveySlideTemplateLayoutTypes.DONE
-								.toVariable(), true);
-				return templateVariables;
+				// Redirect to done slide if user already completely performed
+				// the
+				// screening survey
+				if (dialogStatus != null
+						&& dialogStatus.isScreeningSurveyPerformed()) {
+					log.debug("User already participated");
+
+					templateVariables.put(
+							ScreeningSurveySlideTemplateLayoutTypes.DONE
+									.toVariable(), true);
+					return templateVariables;
+				}
 			}
 		}
 
 		// Get last visited slide
 		final val formerSlideId = session
-				.getAttribute(ScreeningSurveySessionAttributeTypes.PARTICIPANT_FORMER_SCREENING_SURVEY_SLIDE_ID
+				.getAttribute(ScreeningSurveySessionAttributeTypes.SCREENING_SURVEY_FORMER_SLIDE_ID
 						.toString());
 
 		ScreeningSurveySlide formerSlide = null;
@@ -560,38 +615,44 @@ public class ScreeningSurveyExecutionManagerService {
 		}
 
 		// Adjust dialog status
-		dialogStatusUpdateAfterDeterminingNextSlide(participantId, formerSlide,
-				true);
+		if (isScreening) {
+			dialogStatusUpdateAfterDeterminingNextSlide(participantId,
+					formerSlide, true);
+		}
 
 		if (nextSlide == null) {
 			// Screening survey done
 			log.debug("No next slide found");
 
-			dialogStatusSetScreeningSurveyFinished(participantId);
+			if (isScreening) {
+				dialogStatusSetScreeningSurveyFinished(participantId);
+			}
 
 			return null;
 		} else {
 			// Check if it's the last slide
 			if (nextSlide.isLastSlide()) {
 				// Set feedback URL to participant and session if required
-				if (nextSlide.getHandsOverToFeedback() != null) {
+				if (isScreening && nextSlide.getHandsOverToFeedback() != null) {
 					log.debug("Setting feedback {} for participant {}",
 							nextSlide.getHandsOverToFeedback(),
 							participant.getId());
 					val feedbackShortURL = participantSetFeedback(participant,
 							nextSlide.getHandsOverToFeedback());
 					session.setAttribute(
-							ScreeningSurveySessionAttributeTypes.PARTICIPANT_FEEDBACK_URL
+							ScreeningSurveySessionAttributeTypes.SCREENING_SURVEY_PARTICIPANT_FEEDBACK_URL
 									.toString(), feedbackShortURL
 									.calculateURL());
 				}
 
-				dialogStatusSetScreeningSurveyFinished(participantId);
+				if (isScreening) {
+					dialogStatusSetScreeningSurveyFinished(participantId);
+				}
 			}
 
 			// Remember next slide as former slide
 			session.setAttribute(
-					ScreeningSurveySessionAttributeTypes.PARTICIPANT_FORMER_SCREENING_SURVEY_SLIDE_ID
+					ScreeningSurveySessionAttributeTypes.SCREENING_SURVEY_FORMER_SLIDE_ID
 							.toString(), nextSlide.getId());
 
 			// Remember check variable
@@ -700,7 +761,7 @@ public class ScreeningSurveyExecutionManagerService {
 					templateVariables.put(
 							GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL
 									.toVariable(), mediaObject
-							.getUrlReference());
+									.getUrlReference());
 				}
 
 				switch (mediaObject.getType()) {
@@ -1243,6 +1304,10 @@ public class ScreeningSurveyExecutionManagerService {
 				Participant.class, participantId);
 		if (participant == null || participant.getAssignedFeedback() == null) {
 			return null;
+		} else {
+			session.setAttribute(
+					ImplementationConstants.SURVEYS_CURRENT_PARTICIPANT_CHECK_SESSION_ATTRIBUTE,
+					participantId);
 		}
 
 		// Check if feedback exists
@@ -1257,7 +1322,7 @@ public class ScreeningSurveyExecutionManagerService {
 		// again
 		FeedbackSlide formerSlide;
 		final val formerSlideValue = session
-				.getAttribute(FeedbackSessionAttributeTypes.PARTICIPANT_FORMER_FEEDBACK_SLIDE_ID
+				.getAttribute(FeedbackSessionAttributeTypes.FEEDBACK_FORMER_SLIDE_ID
 						.toString());
 		final val consistencyCheck = session
 				.getAttribute(FeedbackSessionAttributeTypes.FEEDBACK_CONSISTENCY_CHECK_VALUE
@@ -1313,7 +1378,7 @@ public class ScreeningSurveyExecutionManagerService {
 		} else {
 			// Remember next slide as former slide
 			session.setAttribute(
-					FeedbackSessionAttributeTypes.PARTICIPANT_FORMER_FEEDBACK_SLIDE_ID
+					FeedbackSessionAttributeTypes.FEEDBACK_FORMER_SLIDE_ID
 							.toString(), nextSlide.getId());
 
 			// Remember check variable
@@ -1405,12 +1470,12 @@ public class ScreeningSurveyExecutionManagerService {
 				if (mediaObject.getFileReference() != null) {
 					templateVariables.put(
 							GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL
-							.toVariable(), mediaObject.getId() + "/"
+									.toVariable(), mediaObject.getId() + "/"
 									+ mediaObject.getName());
 				} else if (mediaObject.getUrlReference() != null) {
 					templateVariables.put(
 							GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL
-							.toVariable(), mediaObject
+									.toVariable(), mediaObject
 									.getUrlReference());
 				}
 
