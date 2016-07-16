@@ -27,7 +27,7 @@ import ch.ethz.mc.tools.UTF8Control;
 
 /**
  * Enables localization of the whole application
- * 
+ *
  * @author Andreas Filler
  */
 @Log4j2
@@ -46,19 +46,24 @@ public class Messages {
 			ADMIN_RESOURCE_BUNDLE = ResourceBundle.getBundle(ADMIN_BUNDLE_NAME,
 					adminLocale, new UTF8Control());
 			log.debug("Set admin locale to {}", adminLocale);
+			Locale.setDefault(adminLocale);
 		} catch (final Exception e) {
 			ADMIN_RESOURCE_BUNDLE = ResourceBundle.getBundle(ADMIN_BUNDLE_NAME,
 					new UTF8Control());
-			log.debug("Set admin locale to {}", Locale.ENGLISH);
+			val fallbackLocale = new Locale("en", "GB");
+			log.warn(
+					"Given admin locale {} cannot be set. Set admin locale to {}",
+					adminLocale, fallbackLocale);
+			Locale.setDefault(fallbackLocale);
 		}
 	}
 
 	/**
 	 * Checks if all {@link AdminMessageStrings} are available
-	 * 
+	 *
 	 * @throws Exception
 	 */
-	public static void checkForMissingLocales() {
+	public static void checkForMissingLocalizedStrings() {
 		log.info("Checking for missing/obsolete localization strings in the selected language...");
 		for (val field : AdminMessageStrings.values()) {
 			try {
@@ -84,7 +89,7 @@ public class Messages {
 	/**
 	 * Return {@link String} in currently set admin locale, filled with given
 	 * placeholders (if provided)
-	 * 
+	 *
 	 * @param key
 	 * @param values
 	 * @return

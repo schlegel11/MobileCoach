@@ -28,6 +28,8 @@ import java.util.Properties;
 
 import javax.servlet.ServletContext;
 
+import org.apache.commons.lang.ArrayUtils;
+
 import lombok.Cleanup;
 import lombok.Getter;
 import lombok.Synchronized;
@@ -115,7 +117,13 @@ public class Constants {
 	private static boolean	automaticallyLoginAsDefaultAdmin	= false;
 
 	@Getter
-	private static Locale	adminLocale							= Locale.ENGLISH;
+	private static Locale	adminLocale							= new Locale(
+																		"en",
+																		"GB");
+
+	@Getter
+	private static Locale[]	interventionLocales					= new Locale[] {
+			new Locale("de", "CH"), new Locale("fr", "CH")		};
 
 	@Getter
 	private static String	loggingFolder						= "/mc_data/logs";
@@ -266,7 +274,8 @@ public class Constants {
 				val bufferedInputStreamReader = new BufferedReader(
 						inputStreamReader);
 
-				version = bufferedInputStreamReader.readLine() + " - DM: "+ DATA_MODEL_VERSION;
+				version = bufferedInputStreamReader.readLine() + " - DM: "
+						+ DATA_MODEL_VERSION;
 			}
 		} catch (final Exception e) {
 			log.error("Error at parsing version file: {}", e.getMessage());
@@ -341,10 +350,51 @@ public class Constants {
 								field.set(null, Integer.parseInt(properties
 										.getProperty(fieldName)));
 							} else if (fieldType == Locale.class) {
-								field.set(
-										null,
-										new Locale(properties
-												.getProperty(fieldName)));
+								val localeProperty = properties.getProperty(
+										fieldName).replace(" ", "");
+								if (localeProperty.contains("-")) {
+									val localePropertyParts = localeProperty
+											.split("-");
+									field.set(null, new Locale(
+											localePropertyParts[0],
+											localePropertyParts[1]));
+								} else if (localeProperty.contains("_")) {
+									val localePropertyParts = localeProperty
+											.split("_");
+									field.set(null, new Locale(
+											localePropertyParts[0],
+											localePropertyParts[1]));
+								} else {
+									field.set(null, new Locale(localeProperty));
+								}
+							} else if (fieldType.isArray()
+									&& fieldType.getComponentType() == Locale.class) {
+								val localeList = new ArrayList<Locale>();
+								val localeProperties = properties
+										.getProperty(fieldName);
+								val localePropertiesParts = localeProperties
+										.split(",");
+								for (String localeProperty : localePropertiesParts) {
+									if (localeProperty.contains("-")) {
+										val localePropertyParts = localeProperty
+												.split("-");
+										localeList.add(new Locale(
+												localePropertyParts[0],
+												localePropertyParts[1]));
+									} else if (localeProperty.contains("_")) {
+										val localePropertyParts = localeProperty
+												.split("_");
+
+										localeList.add(new Locale(
+												localePropertyParts[0],
+												localePropertyParts[1]));
+									} else {
+										localeList.add(new Locale(
+												localeProperty));
+									}
+								}
+								field.set(null,
+										localeList.toArray(new Locale[] {}));
 							} else {
 								log.error(
 										"Field '{}' seems to be of an unsupported type {}!",

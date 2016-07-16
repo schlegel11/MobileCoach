@@ -18,6 +18,9 @@ package ch.ethz.mc.servlets;
  * limitations under the License.
  */
 import java.io.IOException;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Locale;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -32,6 +35,14 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.Constants;
+import ch.ethz.mc.model.persistent.InterventionVariableWithValue;
+import ch.ethz.mc.model.persistent.MonitoringMessageRule;
+import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
+import ch.ethz.mc.model.persistent.subelements.LString;
+import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
+import ch.ethz.mc.tools.RuleEvaluator;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Andreas Filler
@@ -42,6 +53,8 @@ import ch.ethz.mc.conf.Constants;
 public class TestServlet extends HttpServlet {
 	private ServletOutputStream	servletOutputStream	= null;
 
+	private MC					mc;
+
 	@Override
 	public void init(final ServletConfig servletConfig) throws ServletException {
 		// Only start servlet if context is ready
@@ -50,6 +63,8 @@ public class TestServlet extends HttpServlet {
 					this.getClass());
 			throw new ServletException("Context is not ready!");
 		}
+
+		mc = MC.getInstance();
 
 		log.info("Initializing servlet...");
 
@@ -98,102 +113,6 @@ public class TestServlet extends HttpServlet {
 		logToWeb("TEST DONE.");
 	}
 
-	private void runTestcases() {
-		val mc = MC.getInstance();
-
-		// val service = MC.getInstance()
-		// .getScreeningSurveyAdministrationManagerService();
-		// final String[] slides = { "53f38855cee8b9fcaee967f2",
-		// "53ef46c4cee8dca1eb0fc0c6", "53ef46c4cee8dca1eb0fbfdc",
-		// "53ef46c4cee8dca1eb0fc04c", "53f3871fcee8c4285c923867",
-		// "53f38724cee8c4285c92387a", "53f38727cee8c4285c92388d",
-		// "53f38728cee8c4285c9238a0" };
-		// final val slide1 = "53ef46c4cee8dca1eb0fc071";
-		//
-		// for (val slide : slides) {
-		// val delRules = service
-		// .getAllScreeningSurveySlideRulesOfScreeningSurveySlide(new ObjectId(
-		// slide));
-		// for (val delRule : delRules) {
-		// service.screeningSurveySlideRuleDelete(delRule);
-		// }
-		//
-		// val coolRules = service
-		// .getAllScreeningSurveySlideRulesOfScreeningSurveySlide(new ObjectId(
-		// slide1));
-		//
-		// for (val coolRule : coolRules) {
-		// val newRule = service
-		// .screeningSurveySlideRuleCreate(new ObjectId(slide));
-		// newRule.setLevel(coolRule.getLevel());
-		// newRule.setNextScreeningSurveySlideWhenTrue(coolRule
-		// .getNextScreeningSurveySlideWhenTrue());
-		// newRule.setNextScreeningSurveySlideWhenFalse(coolRule
-		// .getNextScreeningSurveySlideWhenFalse());
-		// newRule.setOrder(coolRule.getOrder());
-		// newRule.setRuleComparisonTermWithPlaceholders(coolRule
-		// .getRuleComparisonTermWithPlaceholders());
-		// newRule.setRuleEquationSign(coolRule.getRuleEquationSign());
-		// newRule.setRuleWithPlaceholders(coolRule
-		// .getRuleWithPlaceholders());
-		// newRule.setShowSameSlideBecauseValueNotValidWhenTrue(coolRule
-		// .isShowSameSlideBecauseValueNotValidWhenTrue());
-		// newRule.setStoreValueToVariableWithName(coolRule
-		// .getStoreValueToVariableWithName());
-		// newRule.setValueToStoreToVariable(coolRule
-		// .getValueToStoreToVariable());
-		// service.saveRule(newRule);
-		// }
-		// }
-		// System.out.println("DDOOOOOONNNEEEE");
-		// TODO OPTIONAL: Testcases could be defined here
-		// final MonitoringMessageRule m1 = new MonitoringMessageRule(
-		// null,
-		// 0,
-		// "26.10.2015",
-		// RuleEquationSignTypes.CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_TRUE_IF_ZERO,
-		// "01.01.16");
-		// final val x1 = RuleEvaluator.evaluateRule(m1,
-		// new ArrayList<AbstractVariableWithValue>());
-		// log.debug(">>" + x1.getCalculatedRuleValue());
-		//
-		// final MonitoringMessageRule m2 = new MonitoringMessageRule(
-		// null,
-		// 0,
-		// "26.10.2015",
-		// RuleEquationSignTypes.CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_TRUE_IF_ZERO,
-		// "01.01.2016");
-		// final val x2 = RuleEvaluator.evaluateRule(m2,
-		// new ArrayList<AbstractVariableWithValue>());
-		// log.debug(">>" + x2.getCalculatedRuleValue());
-		//
-		// final MonitoringMessageRule m3 = new MonitoringMessageRule(null, 0,
-		// "16.11.", RuleEquationSignTypes.DATE_DIFFERENCE_VALUE_EQUALS,
-		// "0");
-		// final val x3 = RuleEvaluator.evaluateRule(m3,
-		// new ArrayList<AbstractVariableWithValue>());
-		// log.debug(">>" + x3.isRuleMatchesEquationSign());
-		//
-		// final MonitoringMessageRule m4 = new MonitoringMessageRule(null, 0,
-		// "16.11.2015",
-		// RuleEquationSignTypes.DATE_DIFFERENCE_VALUE_EQUALS, "0");
-		// final val x4 = RuleEvaluator.evaluateRule(m4,
-		// new ArrayList<AbstractVariableWithValue>());
-		// log.debug(">>" + x4.isRuleMatchesEquationSign());
-
-		// val variables = new ArrayList<AbstractVariableWithValue>();
-		// variables.add(new InterventionVariableWithValue(null,
-		// "$fieldWithValues", "5,42,3"));
-		// final MonitoringMessageRule m = new MonitoringMessageRule(
-		// null,
-		// 0,
-		// "position(1,$fieldWithValues)",
-		// RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
-		// "");
-		// final val x = RuleEvaluator.evaluateRule(m, variables);
-		// log.debug(">>" + x.getCalculatedRuleValue());
-	}
-
 	private void logToWeb(final String logMessage) {
 		if (servletOutputStream != null) {
 			try {
@@ -204,5 +123,86 @@ public class TestServlet extends HttpServlet {
 			}
 		}
 		log.debug(logMessage);
+	}
+
+	/*
+	 * TESTCASES START HERE
+	 */
+	private void runTestcases() {
+		// TODO OPTIONAL: Testcases could be defined here
+
+		// dateCalculationTests();
+		languageStringSerializationTest();
+	}
+
+	@SuppressWarnings("unused")
+	private void dateCalculationTests() {
+		final MonitoringMessageRule m1 = new MonitoringMessageRule(
+				null,
+				0,
+				"26.10.2015",
+				RuleEquationSignTypes.CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_TRUE_IF_ZERO,
+				"01.01.16");
+		final val x1 = RuleEvaluator.evaluateRule(m1,
+				new ArrayList<AbstractVariableWithValue>());
+		log.debug(">> " + x1.getCalculatedRuleValue());
+
+		final MonitoringMessageRule m2 = new MonitoringMessageRule(
+				null,
+				0,
+				"26.10.2015",
+				RuleEquationSignTypes.CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_TRUE_IF_ZERO,
+				"01.01.2016");
+		final val x2 = RuleEvaluator.evaluateRule(m2,
+				new ArrayList<AbstractVariableWithValue>());
+		log.debug(">> " + x2.getCalculatedRuleValue());
+
+		final MonitoringMessageRule m3 = new MonitoringMessageRule(null, 0,
+				"16.11.", RuleEquationSignTypes.DATE_DIFFERENCE_VALUE_EQUALS,
+				"0");
+		final val x3 = RuleEvaluator.evaluateRule(m3,
+				new ArrayList<AbstractVariableWithValue>());
+		log.debug(">> " + x3.isRuleMatchesEquationSign());
+
+		final MonitoringMessageRule m4 = new MonitoringMessageRule(null, 0,
+				"16.11.2015",
+				RuleEquationSignTypes.DATE_DIFFERENCE_VALUE_EQUALS, "0");
+		final val x4 = RuleEvaluator.evaluateRule(m4,
+				new ArrayList<AbstractVariableWithValue>());
+		log.debug(">> " + x4.isRuleMatchesEquationSign());
+
+		val variables = new ArrayList<AbstractVariableWithValue>();
+		variables.add(new InterventionVariableWithValue(null,
+				"$fieldWithValues", "5,42,3"));
+		final MonitoringMessageRule m = new MonitoringMessageRule(
+				null,
+				0,
+				"position(1,$fieldWithValues)",
+				RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
+				"");
+		final val x = RuleEvaluator.evaluateRule(m, variables);
+		log.debug(">> " + x.getCalculatedRuleValue());
+	}
+
+	private void languageStringSerializationTest() {
+		val l = new LString();
+		l.set(Constants.getInterventionLocales()[1], "DEF");
+		l.set(Constants.getInterventionLocales()[0], "ABC");
+		l.set(Locale.JAPAN, "GHI");
+
+		try {
+			val objectMapper = new ObjectMapper();
+			val stringWriter = new StringWriter();
+			objectMapper.writeValue(stringWriter, l);
+			log.debug(">> " + stringWriter.toString());
+
+			val v = objectMapper.readValue(stringWriter.toString(),
+					LString.class);
+			log.debug(">> " + v.toString());
+			log.debug(">> " + v.get(Constants.getInterventionLocales()[0]));
+			log.debug(">> " + v.get(new Locale("de", "CH")));
+		} catch (final Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

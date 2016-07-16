@@ -213,5 +213,12 @@ public class DataModelUpdateManager {
 		val mediaObjectCollection = jongo.getCollection("MediaObject");
 		mediaObjectCollection.update(Queries.EVERYTHING).multi()
 				.with(Queries.UPDATE_VERSION_3__MEDIA_OBJECT__CHANGE_1);
+
+		val participantCollection = jongo.getCollection("Participant");
+		participantCollection
+		.update(Queries.EVERYTHING)
+		.multi()
+		.with(Queries.UPDATE_VERSION_3__PARTICIPANT__CHANGE_1,
+				Constants.getInterventionLocales()[0]);
 	}
 }

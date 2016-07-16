@@ -2,15 +2,15 @@ package ch.ethz.mc.model.persistent;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +19,7 @@ package ch.ethz.mc.model.persistent;
  */
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -40,12 +41,12 @@ import ch.ethz.mc.model.ui.UIParticipant;
 
 /**
  * {@link ModelObject} to represent an {@link Participant}
- * 
+ *
  * A {@link Participant} is the person who participates in {@link Intervention}
  * s. To communicate with the {@link Participant} the system needs to know its
  * name. It furthermore stores if the {@link Participant} already performed the
  * screening survey and if the messaging is active for her/him.
- * 
+ *
  * @author Andreas Filler
  */
 @NoArgsConstructor
@@ -73,6 +74,14 @@ public class Participant extends ModelObject {
 	@Setter
 	@NonNull
 	private String		nickname;
+
+	/**
+	 * The language of the {@link Participant}
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private Locale		language;
 
 	/**
 	 * The {@link ScreeningSurvey} the {@link Participant} participates in
@@ -138,7 +147,7 @@ public class Participant extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ch.ethz.mc.model.ModelObject#toUIModelObject()
 	 */
 	@Override
@@ -180,30 +189,30 @@ public class Participant extends ModelObject {
 				nickname.equals("") ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 						: nickname,
-				organization,
-				organizationUnit,
-				new Date(createdTimestamp),
-				screeningSurveyName,
-				screeningSurveyStatus ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__FINISHED)
-						: Messages
+						organization,
+						organizationUnit,
+						new Date(createdTimestamp),
+						screeningSurveyName,
+						screeningSurveyStatus ? Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__FINISHED)
+								: Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_FINISHED),
-				screeningSurveyStatus,
-				dataForMonitoringAvailable ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-				dataForMonitoringAvailable,
-				monitoringStatus ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__FINISHED)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_FINISHED),
-				monitoringStatus,
-				monitoringActive ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE),
-				monitoringActive);
+								screeningSurveyStatus,
+								dataForMonitoringAvailable ? Messages
+										.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+										: Messages
+										.getAdminString(AdminMessageStrings.UI_MODEL__NO),
+										dataForMonitoringAvailable,
+										monitoringStatus ? Messages
+												.getAdminString(AdminMessageStrings.UI_MODEL__FINISHED)
+												: Messages
+												.getAdminString(AdminMessageStrings.UI_MODEL__NOT_FINISHED),
+												monitoringStatus,
+												monitoringActive ? Messages
+														.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
+														: Messages
+														.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE),
+														monitoringActive);
 
 		participant.setRelatedModelObject(this);
 
@@ -212,7 +221,7 @@ public class Participant extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * ch.ethz.mc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
 	 * (java.util.List)
@@ -228,7 +237,7 @@ public class Participant extends ModelObject {
 				Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT,
 				getId())) {
 			participantVariableWithValue
-					.collectThisAndRelatedModelObjectsForExport(exportList);
+			.collectThisAndRelatedModelObjectsForExport(exportList);
 		}
 
 		// Add dialog option
@@ -251,7 +260,7 @@ public class Participant extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ch.ethz.mc.model.ModelObject#performOnDelete()
 	 */
 	@Override
