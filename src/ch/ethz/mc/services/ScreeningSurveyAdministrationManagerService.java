@@ -45,6 +45,7 @@ import ch.ethz.mc.model.persistent.MonitoringMessage;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlideRule;
+import ch.ethz.mc.model.persistent.subelements.LString;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import ch.ethz.mc.model.persistent.types.ScreeningSurveySlideQuestionTypes;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
@@ -839,7 +840,8 @@ public class ScreeningSurveyAdministrationManagerService {
 	// Feedback Slide
 	@Synchronized
 	public FeedbackSlide feedbackSlideCreate(final ObjectId feedbackId) {
-		val feedbackSlide = new FeedbackSlide(feedbackId, 0, "", "", null, "");
+		val feedbackSlide = new FeedbackSlide(feedbackId, 0, new LString(), "",
+				null, new LString());
 
 		val highestOrderSlide = databaseManagerService
 				.findOneSortedModelObject(FeedbackSlide.class,
@@ -857,11 +859,11 @@ public class ScreeningSurveyAdministrationManagerService {
 
 	@Synchronized
 	public void feedbackSlideChangeTitle(final FeedbackSlide feedbackSlide,
-			final String textWithPlaceholders,
+			final LString textWithPlaceholders,
 			final List<String> allPossibleFeedbackVariables)
 					throws NotificationMessageException {
 		if (textWithPlaceholders == null) {
-			feedbackSlide.setTitleWithPlaceholders("");
+			feedbackSlide.setTitleWithPlaceholders(new LString());
 		} else {
 			if (!StringValidator.isValidVariableText(textWithPlaceholders,
 					allPossibleFeedbackVariables)) {
@@ -878,11 +880,11 @@ public class ScreeningSurveyAdministrationManagerService {
 	@Synchronized
 	public void feedbackSlideChangeTextWithPlaceholders(
 			final FeedbackSlide feedbackSlide,
-			final String textWithPlaceholders,
+			final LString textWithPlaceholders,
 			final List<String> allPossibleFeedbackVariables)
 					throws NotificationMessageException {
 		if (textWithPlaceholders == null) {
-			feedbackSlide.setTitleWithPlaceholders("");
+			feedbackSlide.setTitleWithPlaceholders(new LString());
 		} else {
 			if (!StringValidator.isValidVariableText(textWithPlaceholders,
 					allPossibleFeedbackVariables)) {

@@ -18,20 +18,27 @@ package ch.ethz.mc.tools;
  * limitations under the License.
  */
 import java.util.ArrayList;
+import java.util.Locale;
 
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.collections.IteratorUtils;
 import org.jongo.Jongo;
+import org.jongo.MongoCollection;
+import org.jongo.MongoCursor;
+import org.jongo.ResultHandler;
 
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.DialogStatus;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.persistent.consistency.DataModelConfiguration;
+import ch.ethz.mc.model.persistent.outdated.MinimalObject;
 import ch.ethz.mc.model.persistent.outdated.ScreeningSurveySlideV1;
 import ch.ethz.mc.model.persistent.outdated.ScreeningSurveySlideV2;
+
+import com.mongodb.DBObject;
 
 /**
  * Manages the modification of the Data Model on the startup of the system
@@ -212,13 +219,52 @@ public class DataModelUpdateManager {
 
 		val mediaObjectCollection = jongo.getCollection("MediaObject");
 		mediaObjectCollection.update(Queries.EVERYTHING).multi()
-				.with(Queries.UPDATE_VERSION_3__MEDIA_OBJECT__CHANGE_1);
+		.with(Queries.UPDATE_VERSION_3__MEDIA_OBJECT__CHANGE_1);
+
+		val localeToSet = Constants.getInterventionLocales()[0];
 
 		val participantCollection = jongo.getCollection("Participant");
 		participantCollection
 		.update(Queries.EVERYTHING)
 		.multi()
 		.with(Queries.UPDATE_VERSION_3__PARTICIPANT__CHANGE_1,
-				Constants.getInterventionLocales()[0]);
+				localeToSet);
+
+		updateLStrings(jongo.getCollection("FeedbackSlide"), new String[] {
+			"titleWithPlaceholders", "textWithPlaceholders" }, localeToSet);
+	}
+
+	private static void updateLStrings(final MongoCollection collection,
+			final String[] fields, final Locale localeToSet) {
+		for (val minimalObject : collection.find(Queries.EVERYTHING)
+				.projection(Queries.OBJECT_ID, 1).as(MinimalObject.class)) {
+			for (val field : fields) {
+				final MongoCursor<String> fieldValues = collection.find(
+						Queries.OBJECT_ID, minimalObject.getId()).map(
+								new ResultHandler<String>() {
+									@Override
+									public String map(final DBObject result) {
+										return (String) result.get(field);
+									}
+								});
+				while (fieldValues.hasNext()) {
+					val fieldValue = fieldValues.next();
+					if (fieldValue == null || fieldValue.equals("")) {
+						collection
+						.update(Queries.OBJECT_ID,
+								minimalObject.getId())
+								.with(Queries.UPDATE_VERSION_3__GENERAL_UPDATE_FOR_EMPTY_LSTRING,
+										field);
+					} else {
+						collection
+						.update(Queries.OBJECT_ID,
+								minimalObject.getId())
+								.with(Queries.UPDATE_VERSION_3__GENERAL_UPDATE_FOR_FILLED_LSTRING,
+										field, localeToSet.toString(),
+										fieldValue);
+					}
+				}
+			}
+		}
 	}
 }

@@ -32,16 +32,17 @@ import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
+import ch.ethz.mc.model.persistent.subelements.LString;
 import ch.ethz.mc.model.ui.UIFeedbackSlide;
 import ch.ethz.mc.model.ui.UIModelObject;
 
 /**
  * {@link ModelObject} to represent an {@link FeedbackSlide}
- * 
+ *
  * A {@link Feedback} consists of several {@link FeedbackSlide}s,
  * which are presented to a {@link Participant} in a fixed order, but only when
  * the defined {@link FeedbackSlideRule}s are all true.
- * 
+ *
  * @author Andreas Filler
  */
 @NoArgsConstructor
@@ -74,7 +75,7 @@ public class FeedbackSlide extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String		titleWithPlaceholders;
+	private LString		titleWithPlaceholders;
 
 	/**
 	 * Enables to add an optional layout attribute for the template generation
@@ -101,7 +102,7 @@ public class FeedbackSlide extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String		textWithPlaceholders;
+	private LString		textWithPlaceholders;
 
 	/*
 	 * (non-Javadoc)
@@ -111,9 +112,9 @@ public class FeedbackSlide extends ModelObject {
 	@Override
 	public UIModelObject toUIModelObject() {
 		val feedbackSlide = new UIFeedbackSlide(order,
-				titleWithPlaceholders.equals("") ? Messages
+				titleWithPlaceholders.isEmpty() ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: titleWithPlaceholders);
+						: titleWithPlaceholders.toString());
 
 		feedbackSlide.setRelatedModelObject(this);
 

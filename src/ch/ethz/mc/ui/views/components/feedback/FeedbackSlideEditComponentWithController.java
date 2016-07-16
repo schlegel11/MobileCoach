@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.feedback;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,6 +26,7 @@ import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.model.persistent.FeedbackSlide;
 import ch.ethz.mc.model.persistent.FeedbackSlideRule;
 import ch.ethz.mc.model.ui.UIFeedbackSlideRule;
+import ch.ethz.mc.ui.views.components.basics.LocalizedPlaceholderStringEditComponent;
 import ch.ethz.mc.ui.views.components.basics.MediaObjectIntegrationComponentWithController.MediaObjectCreationOrDeleteionListener;
 import ch.ethz.mc.ui.views.components.basics.PlaceholderStringEditComponent;
 
@@ -38,14 +39,14 @@ import com.vaadin.ui.Table;
 
 /**
  * Provides the feedback slide rule edit component with a controller
- * 
+ *
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
 @Log4j2
 public class FeedbackSlideEditComponentWithController extends
-		FeedbackSlideEditComponent implements
-		MediaObjectCreationOrDeleteionListener {
+FeedbackSlideEditComponent implements
+MediaObjectCreationOrDeleteionListener {
 
 	private final FeedbackSlide									feedbackSlide;
 	private final ObjectId										relatedScreeningSurveyId;
@@ -108,11 +109,11 @@ public class FeedbackSlideEditComponentWithController extends
 		getDeleteRuleButton().addClickListener(buttonClickListener);
 
 		getTitleWithPlaceholdersTextFieldComponent().getButton()
-				.addClickListener(buttonClickListener);
+		.addClickListener(buttonClickListener);
 		getOptionalLayoutAttributeTextFieldComponent().getButton()
-				.addClickListener(buttonClickListener);
+		.addClickListener(buttonClickListener);
 		getFeedbackTextWithPlaceholdersTextField().getButton()
-				.addClickListener(buttonClickListener);
+		.addClickListener(buttonClickListener);
 
 		// Handle media object to component
 		if (feedbackSlide.getLinkedMediaObject() == null) {
@@ -130,11 +131,11 @@ public class FeedbackSlideEditComponentWithController extends
 	private void adjust() {
 		// Adjust variable text fields
 		getTitleWithPlaceholdersTextFieldComponent().setValue(
-				feedbackSlide.getTitleWithPlaceholders());
+				feedbackSlide.getTitleWithPlaceholders().toString());
 		getOptionalLayoutAttributeTextFieldComponent().setValue(
 				feedbackSlide.getOptionalLayoutAttributeWithPlaceholders());
 		getFeedbackTextWithPlaceholdersTextField().setValue(
-				feedbackSlide.getTextWithPlaceholders());
+				feedbackSlide.getTextWithPlaceholders().toString());
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
@@ -168,10 +169,10 @@ public class FeedbackSlideEditComponentWithController extends
 		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
 				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 						relatedScreeningSurveyId);
-		showModalStringValueEditWindow(
+		showModalLStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_TITLE_WITH_PLACEHOLDERS,
 				feedbackSlide.getTitleWithPlaceholders(), allPossibleVariables,
-				new PlaceholderStringEditComponent(),
+				new LocalizedPlaceholderStringEditComponent(),
 				new ExtendableButtonClickListener() {
 
 					@Override
@@ -179,9 +180,9 @@ public class FeedbackSlideEditComponentWithController extends
 						try {
 							// Change title with placeholders
 							getScreeningSurveyAdministrationManagerService()
-									.feedbackSlideChangeTitle(feedbackSlide,
-											getStringValue(),
-											allPossibleVariables);
+							.feedbackSlideChangeTitle(feedbackSlide,
+									getLStringValue(),
+									allPossibleVariables);
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -192,6 +193,30 @@ public class FeedbackSlideEditComponentWithController extends
 						closeWindow();
 					}
 				}, null);
+		// showModalLStringValueEditWindow(
+		// AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_TITLE_WITH_PLACEHOLDERS,
+		// feedbackSlide.getTitleWithPlaceholders(), allPossibleVariables,
+		// new LocalizedPlaceholderStringEditComponent(),
+		// new ExtendableButtonClickListener() {
+		//
+		// @Override
+		// public void buttonClick(final ClickEvent event) {
+		// try {
+		// // Change title with placeholders
+		// getScreeningSurveyAdministrationManagerService()
+		// .feedbackSlideChangeTitle(feedbackSlide,
+		// getLStringValue(),
+		// allPossibleVariables);
+		// } catch (final Exception e) {
+		// handleException(e);
+		// return;
+		// }
+		//
+		// adjust();
+		//
+		// closeWindow();
+		// }
+		// }, null);
 	}
 
 	public void changeOptionalLayoutAttributeWithPlaceholders() {
@@ -210,8 +235,8 @@ public class FeedbackSlideEditComponentWithController extends
 						try {
 							// Change optional layout attribute
 							getScreeningSurveyAdministrationManagerService()
-									.feedbackSlideChangeOptionalLayoutAttributeWithPlaceholders(
-											feedbackSlide, getStringValue());
+							.feedbackSlideChangeOptionalLayoutAttributeWithPlaceholders(
+									feedbackSlide, getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -229,10 +254,10 @@ public class FeedbackSlideEditComponentWithController extends
 		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
 				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 						relatedScreeningSurveyId);
-		showModalStringValueEditWindow(
+		showModalLStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_FEEDBACK_TEXT_WITH_PLACEHOLDERS,
 				feedbackSlide.getTextWithPlaceholders(), allPossibleVariables,
-				new PlaceholderStringEditComponent(),
+				new LocalizedPlaceholderStringEditComponent(),
 				new ExtendableButtonClickListener() {
 
 					@Override
@@ -240,9 +265,9 @@ public class FeedbackSlideEditComponentWithController extends
 						try {
 							// Change feedback text with placeholders
 							getScreeningSurveyAdministrationManagerService()
-									.feedbackSlideChangeTextWithPlaceholders(
-											feedbackSlide, getStringValue(),
-											allPossibleVariables);
+							.feedbackSlideChangeTextWithPlaceholders(
+									feedbackSlide, getLStringValue(),
+									allPossibleVariables);
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -264,19 +289,19 @@ public class FeedbackSlideEditComponentWithController extends
 				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__CREATE_FEEDBACK_SLIDE_RULE,
 				new FeedbackSlideRuleEditComponentWithController(
 						newFeedbackSlideRule, relatedScreeningSurveyId),
-				new ExtendableButtonClickListener() {
+						new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
 						rulesBeanContainer.addItem(
 								newFeedbackSlideRule.getId(),
 								UIFeedbackSlideRule.class
-										.cast(newFeedbackSlideRule
-												.toUIModelObject()));
+								.cast(newFeedbackSlideRule
+										.toUIModelObject()));
 						rulesTable.select(newFeedbackSlideRule.getId());
 						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__FEEDBACK_SLIDE_RULE_CREATED);
+						.showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__FEEDBACK_SLIDE_RULE_CREATED);
 
 						closeWindow();
 					}
@@ -292,7 +317,7 @@ public class FeedbackSlideEditComponentWithController extends
 				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_FEEDBACK_SLIDE_RULE,
 				new FeedbackSlideRuleEditComponentWithController(
 						selectedFeedbackSlideRule, relatedScreeningSurveyId),
-				new ExtendableButtonClickListener() {
+						new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
@@ -301,8 +326,8 @@ public class FeedbackSlideEditComponentWithController extends
 						rulesTable.sort();
 						rulesTable.select(selectedFeedbackSlideRule.getId());
 						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__FEEDBACK_SLIDE_RULE_UPDATED);
+						.showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__FEEDBACK_SLIDE_RULE_UPDATED);
 
 						closeWindow();
 					}
@@ -340,7 +365,7 @@ public class FeedbackSlideEditComponentWithController extends
 
 					// Delete rule
 					getScreeningSurveyAdministrationManagerService()
-							.feedbackSlideRuleDelete(selectedFeedbackSlideRule);
+					.feedbackSlideRuleDelete(selectedFeedbackSlideRule);
 				} catch (final Exception e) {
 					closeWindow();
 					handleException(e);
@@ -349,12 +374,12 @@ public class FeedbackSlideEditComponentWithController extends
 
 				// Adapt UI
 				rulesTable
-						.removeItem(selectedUIFeedbackSlideRule
-								.getRelatedModelObject(FeedbackSlideRule.class)
-								.getId());
+				.removeItem(selectedUIFeedbackSlideRule
+						.getRelatedModelObject(FeedbackSlideRule.class)
+						.getId());
 				getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__FEEDBACK_SLIDE_RULE_DELETED);
+				.showInformationNotification(
+						AdminMessageStrings.NOTIFICATION__FEEDBACK_SLIDE_RULE_DELETED);
 
 				closeWindow();
 			}
@@ -364,7 +389,7 @@ public class FeedbackSlideEditComponentWithController extends
 	@Override
 	public void updateLinkedMediaObjectId(final ObjectId linkedMediaObjectId) {
 		getScreeningSurveyAdministrationManagerService()
-				.feedbackSlideSetLinkedMediaObject(feedbackSlide,
-						linkedMediaObjectId);
+		.feedbackSlideSetLinkedMediaObject(feedbackSlide,
+				linkedMediaObjectId);
 	}
 }

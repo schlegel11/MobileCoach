@@ -338,6 +338,10 @@ input.gwt-FileUpload {
 	    padding-top: 10px;
     	@extend .center;
     }
+    /* languuage buttons */
+    .v-button.selected {
+    	background-color: #ebebeb;
+    }
     /* read-only textfield */
     .v-textfield.read-only {
         padding: 5px;

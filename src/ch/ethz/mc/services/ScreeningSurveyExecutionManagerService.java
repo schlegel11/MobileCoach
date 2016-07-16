@@ -1455,8 +1455,8 @@ public class ScreeningSurveyExecutionManagerService {
 
 			// Title
 			final val title = VariableStringReplacer
-					.findVariablesAndReplaceWithTextValues(
-							nextSlide.getTitleWithPlaceholders(),
+					.findVariablesAndReplaceWithTextValues(nextSlide
+							.getTitleWithPlaceholders().get(participant),
 							variablesWithValues.values(), "");
 			templateVariables.put(
 					GeneralSlideTemplateFieldTypes.TITLE.toVariable(), title);
@@ -1510,8 +1510,8 @@ public class ScreeningSurveyExecutionManagerService {
 
 			// Text
 			final val text = VariableStringReplacer
-					.findVariablesAndReplaceWithTextValues(
-							nextSlide.getTextWithPlaceholders(),
+					.findVariablesAndReplaceWithTextValues(nextSlide
+							.getTextWithPlaceholders().get(participant),
 							variablesWithValues.values(), "");
 			templateVariables.put(
 					FeedbackSlideTemplateFieldTypes.TEXT.toVariable(), text);

@@ -55,6 +55,16 @@ public class LString {
 		}
 	}
 
+	@JsonIgnore
+	public boolean isEmpty() {
+		for (val locale : Constants.getInterventionLocales()) {
+			if (values.containsKey(locale)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	@Override
 	@JsonIgnore
 	public String toString() {
@@ -73,5 +83,17 @@ public class LString {
 			}
 			return stringBuffer.toString();
 		}
+	}
+
+	@Override
+	@JsonIgnore
+	public LString clone() {
+		val newLString = new LString();
+
+		for (val key : values.keySet()) {
+			newLString.set(key, values.get(key));
+		}
+
+		return newLString;
 	}
 }

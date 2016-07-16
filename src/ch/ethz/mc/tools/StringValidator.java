@@ -2,15 +2,15 @@ package ch.ethz.mc.tools;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,18 +22,20 @@ import java.util.regex.Pattern;
 
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
+import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.model.persistent.subelements.LString;
 
 /**
  * Validates strings for several purposes
- * 
+ *
  * @author Andreas Filler
  */
 @Log4j2
 public class StringValidator {
 	/**
 	 * Check if a {@link String} is a valid rule
-	 * 
+	 *
 	 * @param rule
 	 * @return
 	 */
@@ -59,7 +61,7 @@ public class StringValidator {
 
 	/**
 	 * Check if a {@link String} is a valid variable name
-	 * 
+	 *
 	 * @param name
 	 *            The name to test
 	 * @return
@@ -86,7 +88,7 @@ public class StringValidator {
 
 	/**
 	 * Check if the text contains unknown variables
-	 * 
+	 *
 	 * @param textWithPlaceholders
 	 * @param allPossibleMessageVariables
 	 * @return
@@ -105,5 +107,35 @@ public class StringValidator {
 		} else {
 			return true;
 		}
+	}
+
+	/**
+	 * Check if the text contains unknown variables
+	 *
+	 * @param textWithPlaceholders
+	 * @param allPossibleMessageVariables
+	 * @return
+	 */
+	public static boolean isValidVariableText(
+			final LString localizedTextWithPlaceholders,
+			final List<String> allPossibleMessageVariables) {
+		log.debug("Testing if '{}' only contains valid variable texts",
+				localizedTextWithPlaceholders);
+
+		for (val locale : Constants.getInterventionLocales()) {
+			String textWithPlaceholders = localizedTextWithPlaceholders
+					.get(locale);
+
+			for (final val variable : allPossibleMessageVariables) {
+				textWithPlaceholders = textWithPlaceholders.replace(variable,
+						"");
+			}
+
+			if (textWithPlaceholders.contains("$")) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 }

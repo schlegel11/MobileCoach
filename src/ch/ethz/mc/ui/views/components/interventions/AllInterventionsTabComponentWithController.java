@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.interventions;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -58,7 +58,7 @@ import com.vaadin.ui.Button.ClickEvent;
 @SuppressWarnings("serial")
 @Log4j2
 public class AllInterventionsTabComponentWithController extends
-AllInterventionsTabComponent {
+		AllInterventionsTabComponent {
 
 	private final MainView													mainView;
 
@@ -87,150 +87,150 @@ AllInterventionsTabComponent {
 		val allRelevantIntervention = getUISession().isAdmin() ? getInterventionAdministrationManagerService()
 				.getAllInterventions()
 				: getInterventionAdministrationManagerService()
-				.getAllInterventionsForAuthor(
-						getUISession().getCurrentAuthorId());
-				interventionsBeanContainer = createBeanContainerForModelObjects(
-						UIIntervention.class, allRelevantIntervention);
+						.getAllInterventionsForAuthor(
+								getUISession().getCurrentAuthorId());
+		interventionsBeanContainer = createBeanContainerForModelObjects(
+				UIIntervention.class, allRelevantIntervention);
 
-				allInterventionsTable
+		allInterventionsTable
 				.setContainerDataSource(interventionsBeanContainer);
-				allInterventionsTable.setSortContainerPropertyId(UIIntervention
-						.getSortColumn());
-				allInterventionsTable.setVisibleColumns(UIIntervention
-						.getVisibleColumns());
-				allInterventionsTable.setColumnHeaders(UIIntervention
-						.getColumnHeaders());
+		allInterventionsTable.setSortContainerPropertyId(UIIntervention
+				.getSortColumn());
+		allInterventionsTable.setVisibleColumns(UIIntervention
+				.getVisibleColumns());
+		allInterventionsTable.setColumnHeaders(UIIntervention
+				.getColumnHeaders());
 
-				// handle selection change
-				allInterventionsTable.addValueChangeListener(new ValueChangeListener() {
+		// handle selection change
+		allInterventionsTable.addValueChangeListener(new ValueChangeListener() {
 
-					@Override
-					public void valueChange(final ValueChangeEvent event) {
-						final ObjectId objectId = (ObjectId) allInterventionsTable
-								.getValue();
-						if (objectId == null) {
-							selectedUIIntervention = null;
-							selectedUIInterventionBeanItem = null;
+			@Override
+			public void valueChange(final ValueChangeEvent event) {
+				final ObjectId objectId = (ObjectId) allInterventionsTable
+						.getValue();
+				if (objectId == null) {
+					selectedUIIntervention = null;
+					selectedUIInterventionBeanItem = null;
 
-							getAdminUI().getLockingService().releaseLockOfUISession(
-									getUISession());
-						} else {
-							selectedUIIntervention = getUIModelObjectFromTableByObjectId(
-									allInterventionsTable, UIIntervention.class,
-									objectId);
-							selectedUIInterventionBeanItem = getBeanItemFromTableByObjectId(
-									allInterventionsTable, UIIntervention.class,
-									objectId);
+					getAdminUI().getLockingService().releaseLockOfUISession(
+							getUISession());
+				} else {
+					selectedUIIntervention = getUIModelObjectFromTableByObjectId(
+							allInterventionsTable, UIIntervention.class,
+							objectId);
+					selectedUIInterventionBeanItem = getBeanItemFromTableByObjectId(
+							allInterventionsTable, UIIntervention.class,
+							objectId);
 
-							if (!getAdminUI().getLockingService()
-									.checkAndSetLockForUISession(getUISession(),
-											objectId)) {
+					if (!getAdminUI().getLockingService()
+							.checkAndSetLockForUISession(getUISession(),
+									objectId)) {
 
-								allInterventionsTable.select(null);
-								selectedUIIntervention = null;
-								selectedUIInterventionBeanItem = null;
+						allInterventionsTable.select(null);
+						selectedUIIntervention = null;
+						selectedUIInterventionBeanItem = null;
 
-								getAdminUI()
+						getAdminUI()
 								.showWarningNotification(
 										AdminMessageStrings.NOTIFICATION__INTERVENTION_LOCKED);
-							}
-						}
-
-						allInterventionsEditComponent.adjust(
-								selectedUIIntervention != null, selectedModule != null);
-					}
-				});
-
-				// Handle modules table
-				modulesBeanContainer = new BeanContainer<Class<? extends AbstractModule>, UIModule>(
-						UIModule.class);
-				modulesBeanContainer.setItemSorter(new CaseInsensitiveItemSorter());
-
-				val modules = getInterventionAdministrationManagerService()
-						.getRegisteredModules();
-				val modulesTable = allInterventionsEditComponent.getModulesTable();
-				modulesTable.setImmediate(true);
-				modulesTable.setSelectable(true);
-				modulesTable.setContainerDataSource(modulesBeanContainer);
-				modulesTable.setSortContainerPropertyId(UIModule.getSortColumn());
-				modulesTable.setVisibleColumns(UIModule.getVisibleColumns());
-				modulesTable.setColumnHeaders(UIModule.getColumnHeaders());
-
-				for (val moduleClass : modules) {
-					AbstractModule module;
-					try {
-						module = moduleClass.newInstance();
-						modulesBeanContainer.addItem(moduleClass, module.toUIModule());
-					} catch (final Exception e) {
-						log.error("Error when creating new module instance: {}",
-								e.getMessage());
 					}
 				}
 
-				// Handle table selection change
-				modulesTable.addValueChangeListener(new ValueChangeListener() {
+				allInterventionsEditComponent.adjust(
+						selectedUIIntervention != null, selectedModule != null);
+			}
+		});
 
-					@SuppressWarnings("unchecked")
+		// Handle modules table
+		modulesBeanContainer = new BeanContainer<Class<? extends AbstractModule>, UIModule>(
+				UIModule.class);
+		modulesBeanContainer.setItemSorter(new CaseInsensitiveItemSorter());
+
+		val modules = getInterventionAdministrationManagerService()
+				.getRegisteredModules();
+		val modulesTable = allInterventionsEditComponent.getModulesTable();
+		modulesTable.setImmediate(true);
+		modulesTable.setSelectable(true);
+		modulesTable.setContainerDataSource(modulesBeanContainer);
+		modulesTable.setSortContainerPropertyId(UIModule.getSortColumn());
+		modulesTable.setVisibleColumns(UIModule.getVisibleColumns());
+		modulesTable.setColumnHeaders(UIModule.getColumnHeaders());
+
+		for (val moduleClass : modules) {
+			AbstractModule module;
+			try {
+				module = moduleClass.newInstance();
+				modulesBeanContainer.addItem(moduleClass, module.toUIModule());
+			} catch (final Exception e) {
+				log.error("Error when creating new module instance: {}",
+						e.getMessage());
+			}
+		}
+
+		// Handle table selection change
+		modulesTable.addValueChangeListener(new ValueChangeListener() {
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public void valueChange(final ValueChangeEvent event) {
+				val objectId = modulesTable.getValue();
+				if (objectId == null) {
+					selectedModule = null;
+				} else {
+					selectedModule = (Class<? extends AbstractModule>) modulesTable
+							.getValue();
+				}
+
+				allInterventionsEditComponent.adjust(
+						selectedUIIntervention != null, selectedModule != null);
+			}
+		});
+
+		// handle buttons
+		val buttonClickListener = new ButtonClickListener();
+		allInterventionsEditComponent.getNewButton().addClickListener(
+				buttonClickListener);
+		allInterventionsEditComponent.getImportButton().addClickListener(
+				buttonClickListener);
+		allInterventionsEditComponent.getRenameButton().addClickListener(
+				buttonClickListener);
+		allInterventionsEditComponent.getResultsButton().addClickListener(
+				buttonClickListener);
+		allInterventionsEditComponent.getProblemsButton().addClickListener(
+				buttonClickListener);
+		allInterventionsEditComponent.getEditButton().addClickListener(
+				buttonClickListener);
+		allInterventionsEditComponent.getDuplicateButton().addClickListener(
+				buttonClickListener);
+		allInterventionsEditComponent.getDeleteButton().addClickListener(
+				buttonClickListener);
+		allInterventionsEditComponent.getOpenModuleButton().addClickListener(
+				buttonClickListener);
+
+		// Special handle for export button
+		val onDemandFileDownloader = new OnDemandFileDownloader(
+				new OnDemandStreamResource() {
+
 					@Override
-					public void valueChange(final ValueChangeEvent event) {
-						val objectId = modulesTable.getValue();
-						if (objectId == null) {
-							selectedModule = null;
-						} else {
-							selectedModule = (Class<? extends AbstractModule>) modulesTable
-									.getValue();
-						}
-
-						allInterventionsEditComponent.adjust(
-								selectedUIIntervention != null, selectedModule != null);
-					}
-				});
-
-				// handle buttons
-				val buttonClickListener = new ButtonClickListener();
-				allInterventionsEditComponent.getNewButton().addClickListener(
-						buttonClickListener);
-				allInterventionsEditComponent.getImportButton().addClickListener(
-						buttonClickListener);
-				allInterventionsEditComponent.getRenameButton().addClickListener(
-						buttonClickListener);
-				allInterventionsEditComponent.getResultsButton().addClickListener(
-						buttonClickListener);
-				allInterventionsEditComponent.getProblemsButton().addClickListener(
-						buttonClickListener);
-				allInterventionsEditComponent.getEditButton().addClickListener(
-						buttonClickListener);
-				allInterventionsEditComponent.getDuplicateButton().addClickListener(
-						buttonClickListener);
-				allInterventionsEditComponent.getDeleteButton().addClickListener(
-						buttonClickListener);
-				allInterventionsEditComponent.getOpenModuleButton().addClickListener(
-						buttonClickListener);
-
-				// Special handle for export button
-				val onDemandFileDownloader = new OnDemandFileDownloader(
-						new OnDemandStreamResource() {
-
-							@Override
-							@SneakyThrows(FileNotFoundException.class)
-							public InputStream getStream() {
-								return new FileInputStream(
-										getInterventionAdministrationManagerService()
+					@SneakyThrows(FileNotFoundException.class)
+					public InputStream getStream() {
+						return new FileInputStream(
+								getInterventionAdministrationManagerService()
 										.interventionExport(
 												selectedUIIntervention
-												.getRelatedModelObject(Intervention.class)));
-							}
+														.getRelatedModelObject(Intervention.class)));
+					}
 
-							@Override
-							public String getFilename() {
-								return "Intervention_"
-										+ selectedUIIntervention.getInterventionName()
+					@Override
+					public String getFilename() {
+						return "Intervention_"
+								+ selectedUIIntervention.getInterventionName()
 										.replaceAll("[^A-Za-z0-9_. ]+", "_")
-										+ Constants.getFileExtension();
-							}
-						});
-				onDemandFileDownloader.extend(allInterventionsEditComponent
-						.getExportButton());
+								+ Constants.getFileExtension();
+					}
+				});
+		onDemandFileDownloader.extend(allInterventionsEditComponent
+				.getExportButton());
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
@@ -295,11 +295,11 @@ AllInterventionsTabComponent {
 								.getId(), UIIntervention.class
 								.cast(newIntervention.toUIModelObject()));
 						getAllInterventionsEditComponent()
-						.getAllInterventionsTable().select(
-								newIntervention.getId());
+								.getAllInterventionsTable().select(
+										newIntervention.getId());
 						getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__INTERVENTION_CREATED);
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__INTERVENTION_CREATED);
 
 						closeWindow();
 					}
@@ -315,7 +315,7 @@ AllInterventionsTabComponent {
 				final File temporaryBackupFile = getInterventionAdministrationManagerService()
 						.interventionExport(
 								selectedUIIntervention
-								.getRelatedModelObject(Intervention.class));
+										.getRelatedModelObject(Intervention.class));
 
 				try {
 					final Intervention importedIntervention = getInterventionAdministrationManagerService()
@@ -331,18 +331,18 @@ AllInterventionsTabComponent {
 							.getId(), UIIntervention.class
 							.cast(importedIntervention.toUIModelObject()));
 					getAllInterventionsEditComponent()
-					.getAllInterventionsTable().select(
-							importedIntervention.getId());
+							.getAllInterventionsTable().select(
+									importedIntervention.getId());
 					getAllInterventionsEditComponent()
-					.getAllInterventionsTable().sort();
+							.getAllInterventionsTable().sort();
 
 					getAdminUI()
-					.showInformationNotification(
-							AdminMessageStrings.NOTIFICATION__INTERVENTION_DUPLICATED);
+							.showInformationNotification(
+									AdminMessageStrings.NOTIFICATION__INTERVENTION_DUPLICATED);
 				} catch (final Exception e) {
 					getAdminUI()
-					.showWarningNotification(
-							AdminMessageStrings.NOTIFICATION__INTERVENTION_DUPLICATION_FAILED);
+							.showWarningNotification(
+									AdminMessageStrings.NOTIFICATION__INTERVENTION_DUPLICATION_FAILED);
 				}
 
 				try {
@@ -379,18 +379,18 @@ AllInterventionsTabComponent {
 							.getId(), UIIntervention.class
 							.cast(importedIntervention.toUIModelObject()));
 					getAllInterventionsEditComponent()
-					.getAllInterventionsTable().select(
-							importedIntervention.getId());
+							.getAllInterventionsTable().select(
+									importedIntervention.getId());
 					getAllInterventionsEditComponent()
-					.getAllInterventionsTable().sort();
+							.getAllInterventionsTable().sort();
 
 					getAdminUI()
-					.showInformationNotification(
-							AdminMessageStrings.NOTIFICATION__INTERVENTION_IMPORTED);
+							.showInformationNotification(
+									AdminMessageStrings.NOTIFICATION__INTERVENTION_IMPORTED);
 				} catch (final Exception e) {
 					getAdminUI()
-					.showWarningNotification(
-							AdminMessageStrings.NOTIFICATION__INTERVENTION_IMPORT_FAILED);
+							.showWarningNotification(
+									AdminMessageStrings.NOTIFICATION__INTERVENTION_IMPORT_FAILED);
 				} finally {
 					try {
 						file.delete();
@@ -411,7 +411,7 @@ AllInterventionsTabComponent {
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_NAME_FOR_INTERVENTION,
 				selectedUIIntervention
-				.getRelatedModelObject(Intervention.class).getName(),
+						.getRelatedModelObject(Intervention.class).getName(),
 				null, new ShortStringEditComponent(),
 				new ExtendableButtonClickListener() {
 					@Override
@@ -422,9 +422,9 @@ AllInterventionsTabComponent {
 
 							// Change name
 							getInterventionAdministrationManagerService()
-							.interventionChangeName(
-									selectedIntervention,
-									getStringValue());
+									.interventionChangeName(
+											selectedIntervention,
+											getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -433,12 +433,12 @@ AllInterventionsTabComponent {
 						// Adapt UI
 						getStringItemProperty(selectedUIInterventionBeanItem,
 								UIIntervention.INTERVENTION_NAME).setValue(
-										selectedUIIntervention.getRelatedModelObject(
-												Intervention.class).getName());
+								selectedUIIntervention.getRelatedModelObject(
+										Intervention.class).getName());
 
 						getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__INTERVENTION_RENAMED);
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__INTERVENTION_RENAMED);
 						closeWindow();
 					}
 				}, null);
@@ -498,7 +498,7 @@ AllInterventionsTabComponent {
 
 					// Delete intervention
 					getInterventionAdministrationManagerService()
-					.interventionDelete(selectedIntervention);
+							.interventionDelete(selectedIntervention);
 				} catch (final Exception e) {
 					closeWindow();
 					handleException(e);
@@ -507,9 +507,9 @@ AllInterventionsTabComponent {
 
 				// Adapt UI
 				getAllInterventionsEditComponent().getAllInterventionsTable()
-				.removeItem(
-						selectedUIIntervention.getRelatedModelObject(
-								Intervention.class).getId());
+						.removeItem(
+								selectedUIIntervention.getRelatedModelObject(
+										Intervention.class).getId());
 				getAdminUI().showInformationNotification(
 						AdminMessageStrings.NOTIFICATION__INTERVENTION_DELETED);
 

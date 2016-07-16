@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,6 +29,7 @@ import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.ModelObject;
+import ch.ethz.mc.model.persistent.subelements.LString;
 import ch.ethz.mc.model.ui.UIModelObject;
 import ch.ethz.mc.model.ui.UIObject;
 import ch.ethz.mc.services.InterventionAdministrationManagerService;
@@ -97,7 +98,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	 * @author Andreas Filler
 	 */
 	public abstract class ExtendableButtonClickListener implements
-	Button.ClickListener {
+			Button.ClickListener {
 		@Setter
 		private Window							belongingWindow;
 
@@ -113,6 +114,21 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 			if (belongingComponent instanceof AbstractStringValueEditComponent) {
 				return ((AbstractStringValueEditComponent) belongingComponent)
 						.getStringValue();
+			} else {
+				return null;
+			}
+		}
+
+		/**
+		 * Returns localized string value of belonging
+		 * {@link AbstractCustomComponent}
+		 *
+		 * @return
+		 */
+		protected LString getLStringValue() {
+			if (belongingComponent instanceof AbstractLStringValueEditComponent) {
+				return ((AbstractLStringValueEditComponent) belongingComponent)
+						.getLStringValue();
 			} else {
 				return null;
 			}
@@ -174,7 +190,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 			okButtonClickListener.setBelongingWindow(modalWindow);
 			okButtonClickListener.setBelongingComponent(stringValueComponent);
 			stringValueComponent
-			.registerOkButtonListener(okButtonClickListener);
+					.registerOkButtonListener(okButtonClickListener);
 		}
 
 		// Register cancel button listener if provided or a simple window closer
@@ -182,17 +198,92 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 		if (cancelButtonClickListener != null) {
 			cancelButtonClickListener.setBelongingWindow(modalWindow);
 			cancelButtonClickListener
-			.setBelongingComponent(stringValueComponent);
+					.setBelongingComponent(stringValueComponent);
 			stringValueComponent
-			.registerCancelButtonListener(cancelButtonClickListener);
+					.registerCancelButtonListener(cancelButtonClickListener);
 		} else {
 			stringValueComponent
-			.registerCancelButtonListener(new Button.ClickListener() {
-				@Override
-				public void buttonClick(final ClickEvent event) {
-					modalWindow.close();
-				}
-			});
+					.registerCancelButtonListener(new Button.ClickListener() {
+						@Override
+						public void buttonClick(final ClickEvent event) {
+							modalWindow.close();
+						}
+					});
+		}
+
+		// show window
+		getAdminUI().addWindow(modalWindow);
+
+		return modalWindow;
+	}
+
+	/**
+	 * Shows a model window to edit {@link LString}s
+	 *
+	 * @param title
+	 *            The title of the window
+	 * @param valueToEdit
+	 *            The value to edit or <code>null</code> if not set yet
+	 * @param variablesToSelect
+	 *            The list of variables that should be available for selection
+	 *            or <code>null</code> if not required
+	 * @param stringValueComponent
+	 *            The appropriate {@link AbstractStringValueEditComponent} to
+	 *            create
+	 * @param okButtonClickListener
+	 *            The listener for the OK button
+	 * @param cancelButtonClickListener
+	 *            The listener for the Cancel button
+	 * @return The shown window
+	 */
+	protected Window showModalLStringValueEditWindow(
+			final AdminMessageStrings title, final LString valueToEdit,
+			final List<String> variablesToSelect,
+			final AbstractLStringValueEditComponent stringValueComponent,
+			final ExtendableButtonClickListener okButtonClickListener,
+			final ExtendableButtonClickListener cancelButtonClickListener) {
+		val modalWindow = new Window(Messages.getAdminString(title));
+		modalWindow.setModal(true);
+		modalWindow.setResizable(false);
+		modalWindow.setClosable(false);
+		modalWindow.setContent(stringValueComponent);
+
+		// Set value to edit
+		if (valueToEdit == null) {
+			stringValueComponent.setLStringValue(new LString());
+		} else {
+			stringValueComponent.setLStringValue(valueToEdit);
+		}
+
+		// Set variables if not null
+		if (variablesToSelect != null) {
+			stringValueComponent.addVariables(variablesToSelect);
+		}
+
+		// Register ok button listener
+		if (okButtonClickListener != null) {
+			okButtonClickListener.setBelongingWindow(modalWindow);
+			okButtonClickListener.setBelongingComponent(stringValueComponent);
+			stringValueComponent
+					.registerOkButtonListener(okButtonClickListener);
+		}
+
+		// Register cancel button listener if provided or a simple window closer
+		// if not
+		if (cancelButtonClickListener != null) {
+			cancelButtonClickListener.setBelongingWindow(modalWindow);
+			cancelButtonClickListener
+					.setBelongingComponent(stringValueComponent);
+			stringValueComponent
+					.registerCancelButtonListener(cancelButtonClickListener);
+		} else {
+			stringValueComponent
+					.registerCancelButtonListener(new Button.ClickListener() {
+						@Override
+						public void buttonClick(final ClickEvent event) {
+							modalWindow.close();
+						}
+					});
 		}
 
 		// show window
@@ -262,17 +353,17 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 		if (closeButtonClickListener != null) {
 			closeButtonClickListener.setBelongingWindow(modalWindow);
 			closeButtonClickListener
-			.setBelongingComponent(closableEditComponent);
+					.setBelongingComponent(closableEditComponent);
 			closableEditComponent
-			.registerOkButtonListener(closeButtonClickListener);
+					.registerOkButtonListener(closeButtonClickListener);
 		} else {
 			closableEditComponent
-			.registerOkButtonListener(new Button.ClickListener() {
-				@Override
-				public void buttonClick(final ClickEvent event) {
-					modalWindow.close();
-				}
-			});
+					.registerOkButtonListener(new Button.ClickListener() {
+						@Override
+						public void buttonClick(final ClickEvent event) {
+							modalWindow.close();
+						}
+					});
 		}
 
 		// show window
@@ -299,7 +390,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 			okButtonClickListener.setBelongingWindow(modalWindow);
 			okButtonClickListener.setBelongingComponent(confirmationComponent);
 			confirmationComponent
-			.registerOkButtonListener(okButtonClickListener);
+					.registerOkButtonListener(okButtonClickListener);
 		}
 
 		// Register cancel button listener if provided or a simple window closer
@@ -307,17 +398,17 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 		if (cancelButtonClickListener != null) {
 			cancelButtonClickListener.setBelongingWindow(modalWindow);
 			cancelButtonClickListener
-			.setBelongingComponent(confirmationComponent);
+					.setBelongingComponent(confirmationComponent);
 			confirmationComponent
-			.registerCancelButtonListener(cancelButtonClickListener);
+					.registerCancelButtonListener(cancelButtonClickListener);
 		} else {
 			confirmationComponent
-			.registerCancelButtonListener(new Button.ClickListener() {
-				@Override
-				public void buttonClick(final ClickEvent event) {
-					modalWindow.close();
-				}
-			});
+					.registerCancelButtonListener(new Button.ClickListener() {
+						@Override
+						public void buttonClick(final ClickEvent event) {
+							modalWindow.close();
+						}
+					});
 		}
 
 		// show window
@@ -513,7 +604,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 		if (exception instanceof NotificationMessageException) {
 			getAdminUI().showWarningNotification(
 					((NotificationMessageException) exception)
-					.getNotificationMessage());
+							.getNotificationMessage());
 			log.debug("Expected error occurred: {}", exception.getMessage());
 		} else {
 			getAdminUI().showErrorNotification(
@@ -533,7 +624,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	@SuppressWarnings("unchecked")
 	protected <SubClassOfUIModelObject extends UIModelObject> void removeAndAddModelObjectToBeanContainer(
 
-			final BeanContainer<ObjectId, SubClassOfUIModelObject> beanContainer,
+	final BeanContainer<ObjectId, SubClassOfUIModelObject> beanContainer,
 			final ModelObject modelObject) {
 		beanContainer.removeItem(modelObject.getId());
 		beanContainer.addItem(modelObject.getId(),
