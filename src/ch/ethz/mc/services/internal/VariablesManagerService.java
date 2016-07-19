@@ -2,15 +2,15 @@ package ch.ethz.mc.services.internal;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -63,58 +63,60 @@ public class VariablesManagerService {
 
 	private final DatabaseManagerService	databaseManagerService;
 
-	private final HashSet<String>			allSystemVariableNames;
-	private final HashSet<String>			allSystemVariableNamesRelevantForSlides;
-	private final HashSet<String>			writableVariableNames;
-	private final HashSet<String>			writeProtectedVariableNames;
+	private final HashSet<String>			allSystemReservedVariableNames;
+	private final HashSet<String>			allSystemReservedVariableNamesRelevantForSlides;
+	private final HashSet<String>			writableReservedVariableNames;
+	private final HashSet<String>			writeProtectedReservedVariableNames;
 
 	private static SimpleDateFormat			dayInWeekFormatter	= new SimpleDateFormat(
-																		"u");
+			"u");
 	private static SimpleDateFormat			dayOfMonthFormatter	= new SimpleDateFormat(
-																		"d");
+			"d");
 	private static SimpleDateFormat			monthFormatter		= new SimpleDateFormat(
-																		"M");
+			"M");
 	private static SimpleDateFormat			yearFormatter		= new SimpleDateFormat(
-																		"yyyy");
+			"yyyy");
 
 	private VariablesManagerService(
 			final DatabaseManagerService databaseManagerService)
-			throws Exception {
+					throws Exception {
 		log.info("Starting service...");
 
 		this.databaseManagerService = databaseManagerService;
 
-		writeProtectedVariableNames = new HashSet<String>();
+		writeProtectedReservedVariableNames = new HashSet<String>();
 		for (val variable : SystemVariables.READ_ONLY_SYSTEM_VARIABLES.values()) {
-			writeProtectedVariableNames.add(variable.toVariableName());
+			writeProtectedReservedVariableNames.add(variable.toVariableName());
 		}
 		for (val variable : SystemVariables.READ_ONLY_PARTICIPANT_VARIABLES
 				.values()) {
-			writeProtectedVariableNames.add(variable.toVariableName());
+			writeProtectedReservedVariableNames.add(variable.toVariableName());
 		}
 		for (val variable : SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES
 				.values()) {
-			writeProtectedVariableNames.add(variable.toVariableName());
+			writeProtectedReservedVariableNames.add(variable.toVariableName());
 		}
 
-		writableVariableNames = new HashSet<String>();
+		writableReservedVariableNames = new HashSet<String>();
 		for (val variable : SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES
 				.values()) {
-			writableVariableNames.add(variable.toVariableName());
+			writableReservedVariableNames.add(variable.toVariableName());
 		}
 
-		allSystemVariableNames = new HashSet<String>();
-		allSystemVariableNames.addAll(writeProtectedVariableNames);
+		allSystemReservedVariableNames = new HashSet<String>();
+		allSystemReservedVariableNames
+		.addAll(writeProtectedReservedVariableNames);
 		for (val variable : SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES
 				.values()) {
-			allSystemVariableNames.add(variable.toVariableName());
+			allSystemReservedVariableNames.add(variable.toVariableName());
 		}
 
-		allSystemVariableNamesRelevantForSlides = new HashSet<String>();
-		allSystemVariableNamesRelevantForSlides.addAll(allSystemVariableNames);
+		allSystemReservedVariableNamesRelevantForSlides = new HashSet<String>();
+		allSystemReservedVariableNamesRelevantForSlides
+		.addAll(allSystemReservedVariableNames);
 		for (val variable : SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES
 				.values()) {
-			allSystemVariableNamesRelevantForSlides.remove(variable
+			allSystemReservedVariableNamesRelevantForSlides.remove(variable
 					.toVariableName());
 		}
 
@@ -123,7 +125,7 @@ public class VariablesManagerService {
 
 	public static VariablesManagerService start(
 			final DatabaseManagerService databaseManagerService)
-			throws Exception {
+					throws Exception {
 		if (instance == null) {
 			instance = new VariablesManagerService(databaseManagerService);
 		}
@@ -150,11 +152,11 @@ public class VariablesManagerService {
 			switch (variable) {
 				case participantDialogOptionEmailData:
 					val dialogOptionEmail = databaseManagerService
-							.findOneModelObject(
-									DialogOption.class,
-									Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
-									participant.getId(),
-									DialogOptionTypes.EMAIL);
+					.findOneModelObject(
+							DialogOption.class,
+							Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
+							participant.getId(),
+							DialogOptionTypes.EMAIL);
 					if (dialogOptionEmail != null) {
 						addToHashtable(variablesWithValues,
 								variable.toVariableName(),
@@ -163,10 +165,10 @@ public class VariablesManagerService {
 					break;
 				case participantDialogOptionSMSData:
 					val dialogOptionSMS = databaseManagerService
-							.findOneModelObject(
-									DialogOption.class,
-									Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
-									participant.getId(), DialogOptionTypes.SMS);
+					.findOneModelObject(
+							DialogOption.class,
+							Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
+							participant.getId(), DialogOptionTypes.SMS);
 					if (dialogOptionSMS != null) {
 						addToHashtable(variablesWithValues,
 								variable.toVariableName(),
@@ -188,9 +190,10 @@ public class VariablesManagerService {
 
 		// Retrieve all stored variables
 		val participantVariablesWithValues = databaseManagerService
-				.findModelObjects(
+				.findSortedModelObjects(
 						ParticipantVariableWithValue.class,
 						Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT,
+						Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
 						participant.getId());
 		val interventionVariablesWithValues = databaseManagerService
 				.findModelObjects(
@@ -200,8 +203,11 @@ public class VariablesManagerService {
 
 		// Add all variables of participant
 		for (val participantVariableWithValue : participantVariablesWithValues) {
-			variablesWithValues.put(participantVariableWithValue.getName(),
-					participantVariableWithValue);
+			if (!variablesWithValues.containsKey(participantVariableWithValue
+					.getName())) {
+				variablesWithValues.put(participantVariableWithValue.getName(),
+						participantVariableWithValue);
+			}
 		}
 
 		// Add also variables of intervention, but only if not overwritten for
@@ -323,8 +329,8 @@ public class VariablesManagerService {
 	@Synchronized
 	public void writeVariableValueOfParticipant(final ObjectId participantId,
 			final String variableName, final String variableValue)
-			throws WriteProtectedVariableException,
-			InvalidVariableNameException {
+					throws WriteProtectedVariableException,
+					InvalidVariableNameException {
 		writeVariableValueOfParticipant(participantId, variableName,
 				variableValue, false);
 	}
@@ -333,8 +339,8 @@ public class VariablesManagerService {
 	public void writeVariableValueOfParticipant(final ObjectId participantId,
 			final String variableName, final String variableValue,
 			final boolean overwriteAllowed)
-			throws WriteProtectedVariableException,
-			InvalidVariableNameException {
+					throws WriteProtectedVariableException,
+					InvalidVariableNameException {
 		log.debug("Storing variable {} with value {} for participant {}",
 				variableName, variableValue, participantId);
 
@@ -342,13 +348,14 @@ public class VariablesManagerService {
 			throw new InvalidVariableNameException();
 		}
 
-		if (!overwriteAllowed && isWriteProtectedVariableName(variableName)) {
+		if (!overwriteAllowed
+				&& isWriteProtectedReservedVariableName(variableName)) {
 			log.warn("{} is a write protected variable name", variableName);
 			throw new WriteProtectedVariableException();
 		}
 
 		// Care for read write participants variable
-		if (isWritableVariableName(variableName)) {
+		if (isWritableReservedVariableName(variableName)) {
 			val readWriteVariableName = SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES
 					.valueOf(variableName.substring(1));
 
@@ -375,31 +382,13 @@ public class VariablesManagerService {
 					break;
 			}
 		} else {
-			val participantVariableWithValue = databaseManagerService
-					.findOneModelObject(
-							ParticipantVariableWithValue.class,
-							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_VARIABLE_NAME,
-							participantId, variableName);
+			log.debug("Creating new variable");
+			val newParticipantVariableWithValue = new ParticipantVariableWithValue(
+					participantId, InternalDateTime.currentTimeMillis(),
+					variableName, variableValue == null ? "" : variableValue);
 
-			if (participantVariableWithValue == null) {
-				log.debug("Creating new variable");
-				val newParticipantVariableWithValue = new ParticipantVariableWithValue(
-						participantId, InternalDateTime.currentTimeMillis(),
-						variableName, variableValue == null ? ""
-								: variableValue);
-
-				databaseManagerService
-						.saveModelObject(newParticipantVariableWithValue);
-			} else {
-				log.debug("Changing existing variable");
-				participantVariableWithValue
-						.setValue(variableValue == null ? "" : variableValue);
-				participantVariableWithValue.setLastUpdated(InternalDateTime
-						.currentTimeMillis());
-
-				databaseManagerService
-						.saveModelObject(participantVariableWithValue);
-			}
+			databaseManagerService
+					.saveModelObject(newParticipantVariableWithValue);
 		}
 	}
 
@@ -453,24 +442,24 @@ public class VariablesManagerService {
 	/*
 	 * Methods for administration
 	 */
-	public boolean isWriteProtectedVariableName(final String variable) {
-		return writeProtectedVariableNames.contains(variable);
+	public boolean isWriteProtectedReservedVariableName(final String variable) {
+		return writeProtectedReservedVariableNames.contains(variable);
 	}
 
-	public boolean isWritableVariableName(final String variable) {
-		return writableVariableNames.contains(variable);
+	public boolean isWritableReservedVariableName(final String variable) {
+		return writableReservedVariableNames.contains(variable);
 	}
 
-	public Set<String> getAllSystemVariableNames() {
-		return allSystemVariableNames;
+	public Set<String> getAllSystemReservedVariableNames() {
+		return allSystemReservedVariableNames;
 	}
 
-	public Set<String> getAllSystemVariableNamesRelevantForSlides() {
-		return allSystemVariableNamesRelevantForSlides;
+	public Set<String> getAllSystemReservedVariableNamesRelevantForSlides() {
+		return allSystemReservedVariableNamesRelevantForSlides;
 	}
 
-	public Set<String> getAllWritableSystemVariableNames() {
-		return writableVariableNames;
+	public Set<String> getAllWritableSystemReservedVariableNames() {
+		return writableReservedVariableNames;
 	}
 
 	public Set<String> getAllInterventionVariableNamesOfIntervention(

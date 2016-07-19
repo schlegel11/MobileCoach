@@ -1,4 +1,4 @@
-package ch.ethz.mc.model.persistent.types;
+package ch.ethz.mc.model.persistent.outdated.helpers;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
@@ -17,16 +17,21 @@ package ch.ethz.mc.model.persistent.types;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import lombok.Getter;
+
+import org.bson.types.ObjectId;
+import org.jongo.marshall.jackson.oid.MongoId;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
- * Supported dialog message status types
+ * Used for several data update steps
  *
  * @author Andreas Filler
  */
-public enum DialogMessageStatusTypes {
-	IN_CREATION, PREPARED_FOR_SENDING, SENDING, SENT_AND_WAITING_FOR_ANSWER, SENT_BUT_NOT_WAITING_FOR_ANSWER, SENT_AND_ANSWERED_BY_PARTICIPANT, SENT_AND_ANSWERED_AND_PROCESSED, SENT_AND_NOT_ANSWERED_AND_PROCESSED, RECEIVED_UNEXPECTEDLY;
-
-	@Override
-	public String toString() {
-		return name().toLowerCase().replace("_", " ");
-	}
+public class MinimalObject {
+	@MongoId
+	@JsonProperty("_id")
+	@Getter
+	private ObjectId	id;
 }

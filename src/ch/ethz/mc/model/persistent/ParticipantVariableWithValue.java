@@ -29,15 +29,17 @@ import org.bson.types.ObjectId;
 
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
-import ch.ethz.mc.model.ui.UIVariableWithParticipant;
+import ch.ethz.mc.model.ui.UIParticipantVariableWithParticipant;
 
 /**
  * {@link ModelObject} to represent an {@link ParticipantVariableWithValue}
- * 
- * SystemVariables belong to the referenced {@link Participant} and consist of a
- * name
- * and a value.
- * 
+ *
+ * Participant variables belong to the referenced {@link Participant} and
+ * consist of a
+ * name, order, timestamp and value. Their type is implicitly retrieved from the
+ * appropriate
+ * intervention variable.
+ *
  * @author Andreas Filler
  */
 @NoArgsConstructor
@@ -46,11 +48,11 @@ public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 	 * Default constructor
 	 */
 	public ParticipantVariableWithValue(final ObjectId participant,
-			final long lastUpdated, final String name, final String value) {
+			final long timestamp, final String name, final String value) {
 		super(name, value);
 
 		this.participant = participant;
-		this.lastUpdated = lastUpdated;
+		this.timestamp = timestamp;
 	}
 
 	/**
@@ -62,27 +64,27 @@ public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 	private ObjectId	participant;
 
 	/**
-	 * The moment in time when the variable was updated the last time
+	 * The moment in time when the variable was created
 	 */
 	@Getter
 	@Setter
-	private long		lastUpdated;
+	private long		timestamp;
 
 	/**
-	 * Creates a {@link UIVariableWithParticipant} with the belonging
+	 * Creates a {@link UIParticipantVariableWithParticipant} with the belonging
 	 * {@link Participant}
-	 * 
+	 *
 	 * @param participantName
 	 * @return
 	 */
-	public UIVariableWithParticipant toUIVariableWithParticipant(
+	public UIParticipantVariableWithParticipant toUIVariableWithParticipant(
 			final String participantId, final String participantName,
 			final String organization, final String organizationUnit) {
-		final UIVariableWithParticipant variable;
+		final UIParticipantVariableWithParticipant variable;
 
-		variable = new UIVariableWithParticipant(participantId,
+		variable = new UIParticipantVariableWithParticipant(participantId,
 				participantName, organization, organizationUnit, getName(),
-				getValue(), new Date(getLastUpdated()));
+				getValue(), new Date(timestamp));
 
 		variable.setRelatedModelObject(this);
 

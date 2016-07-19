@@ -612,7 +612,7 @@ public class InterventionExecutionManagerService {
 
 					// Store value to variable (which is only relevant if a
 					// reply is expected = related monitoring message is
-					// available
+					// available)
 					if (relatedMonitoringMessage != null) {
 						val cleanedMessageValue = dialogMessage
 								.getAnswerReceived();

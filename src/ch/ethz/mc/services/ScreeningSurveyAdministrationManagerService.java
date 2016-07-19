@@ -539,7 +539,7 @@ public class ScreeningSurveyAdministrationManagerService {
 			}
 
 			if (variablesManagerService
-					.isWriteProtectedVariableName(variableName)) {
+					.isWriteProtectedReservedVariableName(variableName)) {
 				throw new NotificationMessageException(
 						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
 			}
@@ -756,7 +756,7 @@ public class ScreeningSurveyAdministrationManagerService {
 			}
 
 			if (variablesManagerService
-					.isWriteProtectedVariableName(variableName)) {
+					.isWriteProtectedReservedVariableName(variableName)) {
 				throw new NotificationMessageException(
 						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
 			}
@@ -1209,7 +1209,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		val variables = new ArrayList<String>();
 
 		variables.addAll(variablesManagerService
-				.getAllSystemVariableNamesRelevantForSlides());
+				.getAllSystemReservedVariableNamesRelevantForSlides());
 
 		val screeningSurvey = databaseManagerService.getModelObjectById(
 				ScreeningSurvey.class, screeningSurveyId);
@@ -1232,7 +1232,7 @@ public class ScreeningSurveyAdministrationManagerService {
 		val variables = new ArrayList<String>();
 
 		variables.addAll(variablesManagerService
-				.getAllWritableSystemVariableNames());
+				.getAllWritableSystemReservedVariableNames());
 
 		val screeningSurvey = databaseManagerService.getModelObjectById(
 				ScreeningSurvey.class, screeningSurveyId);
