@@ -34,6 +34,7 @@ import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.ui.UIFeedback;
 import ch.ethz.mc.model.ui.UIScreeningSurveySlide;
+import ch.ethz.mc.ui.views.components.basics.LocalizedShortStringEditComponent;
 import ch.ethz.mc.ui.views.components.basics.ShortStringEditComponent;
 import ch.ethz.mc.ui.views.components.feedback.FeedbackEditComponentWithController;
 
@@ -460,15 +461,15 @@ public class ScreeningSurveyEditComponentWithController extends
 
 	public void createFeedback() {
 		log.debug("Create feedback");
-		showModalStringValueEditWindow(
+		showModalLStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NAME_FOR_FEEDBACK,
-				null, null, new ShortStringEditComponent(),
+				null, null, new LocalizedShortStringEditComponent(),
 				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						final Feedback newFeedback;
 						try {
-							val newFeedbackName = getStringValue();
+							val newFeedbackName = getLStringValue();
 
 							// Create feedback
 							newFeedback = getScreeningSurveyAdministrationManagerService()
@@ -497,10 +498,10 @@ public class ScreeningSurveyEditComponentWithController extends
 	public void renameFeedback() {
 		log.debug("Rename feedback");
 
-		showModalStringValueEditWindow(
+		showModalLStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_NAME_FOR_FEEDBACK,
 				selectedUIFeedback.getRelatedModelObject(Feedback.class)
-						.getName(), null, new ShortStringEditComponent(),
+						.getName(), null, new LocalizedShortStringEditComponent(),
 				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
@@ -516,7 +517,7 @@ public class ScreeningSurveyEditComponentWithController extends
 							// Change name
 							getScreeningSurveyAdministrationManagerService()
 									.feedbackChangeName(selectedFeedback,
-											getStringValue());
+											getLStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -526,7 +527,7 @@ public class ScreeningSurveyEditComponentWithController extends
 						getStringItemProperty(beanItem,
 								UIFeedback.FEEDBACK_NAME).setValue(
 								selectedUIFeedback.getRelatedModelObject(
-										Feedback.class).getName());
+										Feedback.class).getName().toString());
 						feedbacksTable.sort();
 
 						getAdminUI()

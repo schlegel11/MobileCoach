@@ -428,8 +428,25 @@ public class ScreeningSurveyExecutionManagerService {
 		final val screeningSurvey = getScreeningSurveyById(screeningSurveyId);
 
 		// Set name
-		templateVariables.put(GeneralSlideTemplateFieldTypes.NAME.toVariable(),
-				screeningSurvey.getName());
+		Participant participant = null;
+		if (participantId != null) {
+			participant = databaseManagerService.getModelObjectById(
+					Participant.class, participantId);
+
+			if (participant == null) {
+				// Participant id sent, but participant does not exist
+				return null;
+			} else {
+				templateVariables.put(
+						GeneralSlideTemplateFieldTypes.NAME.toVariable(),
+						screeningSurvey.getName().get(participant));
+			}
+		} else {
+			templateVariables.put(
+					GeneralSlideTemplateFieldTypes.NAME.toVariable(),
+					screeningSurvey.getName().get(
+							Constants.getInterventionLocales()[0]));
+		}
 
 		// Check if screening survey template is set
 		log.debug("Check if template is set");
@@ -475,7 +492,6 @@ public class ScreeningSurveyExecutionManagerService {
 
 		// Create participant if she does not exist (will only happen for
 		// screening survey calls)
-		Participant participant = null;
 		if (participantId == null) {
 			log.debug("Create participant");
 			participant = participantCreate(screeningSurvey);
@@ -739,8 +755,8 @@ public class ScreeningSurveyExecutionManagerService {
 
 			// Title
 			final val title = VariableStringReplacer
-					.findVariablesAndReplaceWithTextValues(
-							nextSlide.getTitleWithPlaceholders(),
+					.findVariablesAndReplaceWithTextValues(nextSlide
+							.getTitleWithPlaceholders().get(participant),
 							variablesWithValues.values(), "");
 			templateVariables.put(
 					GeneralSlideTemplateFieldTypes.TITLE.toVariable(), title);
@@ -749,8 +765,8 @@ public class ScreeningSurveyExecutionManagerService {
 			if (formerSlide != null && nextSlide != null
 					&& formerSlide.getId().equals(nextSlide.getId())) {
 				final val validationErrorMessage = VariableStringReplacer
-						.findVariablesAndReplaceWithTextValues(
-								nextSlide.getValidationErrorMessage(),
+						.findVariablesAndReplaceWithTextValues(nextSlide
+								.getValidationErrorMessage().get(participant),
 								variablesWithValues.values(), "");
 				templateVariables
 				.put(ScreeningSurveySlideTemplateFieldTypes.VALIDATION_ERROR_MESSAGE
@@ -815,8 +831,9 @@ public class ScreeningSurveyExecutionManagerService {
 				// Question
 				final val questionText = VariableStringReplacer
 						.findVariablesAndReplaceWithTextValues(
-								question.getQuestionWithPlaceholders(),
-								variablesWithValues.values(), "");
+								question.getQuestionWithPlaceholders().get(
+										participant),
+										variablesWithValues.values(), "");
 				questionObject.put(
 						ScreeningSurveySlideTemplateFieldTypes.QUESTION_TEXT
 						.toVariable(), questionText);
@@ -843,7 +860,7 @@ public class ScreeningSurveyExecutionManagerService {
 					final val answerWithPlaceholder = answersWithPlaceholders[j];
 					final val finalAnswerText = VariableStringReplacer
 							.findVariablesAndReplaceWithTextValues(
-									answerWithPlaceholder,
+									answerWithPlaceholder.get(participant),
 									variablesWithValues.values(), "");
 
 					final val answerValue = answerValues[j];
@@ -1348,7 +1365,7 @@ public class ScreeningSurveyExecutionManagerService {
 
 		// Set name
 		templateVariables.put(GeneralSlideTemplateFieldTypes.NAME.toVariable(),
-				feedback.getName());
+				feedback.getName().get(participant));
 
 		// Check if feedback template is set
 		log.debug("Check if template is set");

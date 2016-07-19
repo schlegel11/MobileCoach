@@ -28,8 +28,8 @@ import ch.ethz.mc.model.persistent.MonitoringMessageRule;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.ui.UIMonitoringMessageRule;
 import ch.ethz.mc.model.ui.UIScreeningSurvey;
+import ch.ethz.mc.ui.views.components.basics.LocalizedPlaceholderStringEditComponent;
 import ch.ethz.mc.ui.views.components.basics.MediaObjectIntegrationComponentWithController.MediaObjectCreationOrDeleteionListener;
-import ch.ethz.mc.ui.views.components.basics.PlaceholderStringEditComponent;
 import ch.ethz.mc.ui.views.components.basics.ShortPlaceholderStringEditComponent;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -171,7 +171,7 @@ MediaObjectCreationOrDeleteionListener {
 
 	private void adjust() {
 		getTextWithPlaceholdersTextFieldComponent().setValue(
-				monitoringMessage.getTextWithPlaceholders());
+				monitoringMessage.getTextWithPlaceholders().toString());
 		getStoreVariableTextFieldComponent().setValue(
 				monitoringMessage.getStoreValueToVariableWithName());
 	}
@@ -203,11 +203,11 @@ MediaObjectCreationOrDeleteionListener {
 		log.debug("Edit text with placeholder");
 		val allPossibleMessageVariables = getInterventionAdministrationManagerService()
 				.getAllPossibleMessageVariablesOfIntervention(interventionId);
-		showModalStringValueEditWindow(
+		showModalLStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_TEXT_WITH_PLACEHOLDERS,
 				monitoringMessage.getTextWithPlaceholders(),
 				allPossibleMessageVariables,
-				new PlaceholderStringEditComponent(),
+				new LocalizedPlaceholderStringEditComponent(),
 				new ExtendableButtonClickListener() {
 
 					@Override
@@ -217,7 +217,7 @@ MediaObjectCreationOrDeleteionListener {
 							getInterventionAdministrationManagerService()
 							.monitoringMessageSetTextWithPlaceholders(
 									monitoringMessage,
-									getStringValue(),
+									getLStringValue(),
 									allPossibleMessageVariables);
 						} catch (final Exception e) {
 							handleException(e);

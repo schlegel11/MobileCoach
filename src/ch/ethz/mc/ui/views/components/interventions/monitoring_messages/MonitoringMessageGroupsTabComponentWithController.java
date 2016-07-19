@@ -38,7 +38,7 @@ import com.vaadin.ui.TabSheet.Tab;
 
 /**
  * Extends the monitoring message groups tab with a controller
- * 
+ *
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
@@ -90,6 +90,8 @@ public class MonitoringMessageGroupsTabComponentWithController extends
 					@Override
 					public void selectedTabChange(
 							final SelectedTabChangeEvent event) {
+						log.debug("New group selected");
+
 						val selectedTab = event.getTabSheet().getSelectedTab();
 						if (selectedTab == null) {
 							setNothingSelected();
@@ -99,9 +101,14 @@ public class MonitoringMessageGroupsTabComponentWithController extends
 									selectedTab);
 							val monitoringMessageGroupObjectId = tabsWithObjectIdsOfMessageGroup
 									.get(selectedTabObject);
-							selectedMonitoringMessageGroup = getInterventionAdministrationManagerService()
-									.getMonitoringMessageGroup(
-											monitoringMessageGroupObjectId);
+
+							// New tabs cannot be found in list, so the selected
+							// tab will be set programmatically after creation
+							if (monitoringMessageGroupObjectId != null) {
+								selectedMonitoringMessageGroup = getInterventionAdministrationManagerService()
+										.getMonitoringMessageGroup(
+												monitoringMessageGroupObjectId);
+							}
 
 							setSomethingSelected();
 						}
@@ -155,13 +162,13 @@ public class MonitoringMessageGroupsTabComponentWithController extends
 						}
 
 						// Adapt UI
-						selectedMonitoringMessageGroup = newMonitoringMessageGroup;
-
 						val newTab = addTabComponent(newMonitoringMessageGroup,
 								intervention.getId());
 
 						tabsWithObjectIdsOfMessageGroup.put(newTab,
 								newMonitoringMessageGroup.getId());
+
+						selectedMonitoringMessageGroup = newMonitoringMessageGroup;
 
 						getMonitoringMessageGroupsTabSheet().setSelectedTab(
 								newTab);

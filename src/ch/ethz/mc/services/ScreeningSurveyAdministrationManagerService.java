@@ -120,14 +120,14 @@ public class ScreeningSurveyAdministrationManagerService {
 	 */
 	// ScreeningSurvey
 	@Synchronized
-	public ScreeningSurvey screeningSurveyCreate(final String name,
+	public ScreeningSurvey screeningSurveyCreate(final LString name,
 			final ObjectId interventionId) {
 		val screeningSurvey = new ScreeningSurvey(
 				GlobalUniqueIdGenerator.createGlobalUniqueId(), interventionId,
 				name, "", null, false, false);
 
-		if (name.equals("")) {
-			screeningSurvey.setName(DEFAULT_OBJECT_NAME);
+		if (name.isEmpty()) {
+			screeningSurvey.setName(new LString(DEFAULT_OBJECT_NAME));
 		}
 
 		databaseManagerService.saveModelObject(screeningSurvey);
@@ -169,9 +169,9 @@ public class ScreeningSurveyAdministrationManagerService {
 
 	@Synchronized
 	public void screeningSurveyChangeName(
-			final ScreeningSurvey screeningSurvey, final String newName) {
-		if (newName.equals("")) {
-			screeningSurvey.setName(DEFAULT_OBJECT_NAME);
+			final ScreeningSurvey screeningSurvey, final LString newName) {
+		if (newName.isEmpty()) {
+			screeningSurvey.setName(new LString(DEFAULT_OBJECT_NAME));
 		} else {
 			screeningSurvey.setName(newName);
 		}
@@ -249,8 +249,8 @@ public class ScreeningSurveyAdministrationManagerService {
 						Constants.getAdminLocale());
 				val date = dateFormat.format(new Date(InternalDateTime
 						.currentTimeMillis()));
-				screeningSurvey.setName(screeningSurvey.getName() + " (" + date
-						+ ")");
+				screeningSurvey.setName(screeningSurvey.getName().appendToAll(
+						"(" + date + ")"));
 
 				databaseManagerService.saveModelObject(screeningSurvey);
 			}
@@ -312,12 +312,12 @@ public class ScreeningSurveyAdministrationManagerService {
 
 		val screeningSurveySlide = new ScreeningSurveySlide(
 				GlobalUniqueIdGenerator.createGlobalUniqueId(),
-				screeningSurveyId, 0, "",
+				screeningSurveyId, 0, new LString(),
 				ScreeningSurveySlideQuestionTypes.TEXT_ONLY, "", questions,
-				null, false, null, "");
+				null, false, null, new LString());
 
-		val question = new ScreeningSurveySlide.Question("", new String[0],
-				new String[0], -1, null, "");
+		val question = new ScreeningSurveySlide.Question(new LString(),
+				new LString[0], new String[0], -1, null, "");
 
 		questions.add(question);
 
@@ -339,8 +339,8 @@ public class ScreeningSurveyAdministrationManagerService {
 	@Synchronized
 	public ScreeningSurveySlide.Question screeningSurveySlideAddQuestion(
 			final ScreeningSurveySlide screeningSurveySlide) {
-		val newQuestion = new ScreeningSurveySlide.Question("", new String[0],
-				new String[0], -1, null, "");
+		val newQuestion = new ScreeningSurveySlide.Question(new LString(),
+				new LString[0], new String[0], -1, null, "");
 
 		screeningSurveySlide.getQuestions().add(newQuestion);
 
@@ -431,11 +431,11 @@ public class ScreeningSurveyAdministrationManagerService {
 	@Synchronized
 	public void screeningSurveySlideChangeTitle(
 			final ScreeningSurveySlide screeningSurveySlide,
-			final String textWithPlaceholders,
+			final LString textWithPlaceholders,
 			final List<String> allPossibleMessageVariables)
 					throws NotificationMessageException {
 		if (textWithPlaceholders == null) {
-			screeningSurveySlide.setTitleWithPlaceholders("");
+			screeningSurveySlide.setTitleWithPlaceholders(new LString());
 		} else {
 			if (!StringValidator.isValidVariableText(textWithPlaceholders,
 					allPossibleMessageVariables)) {
@@ -471,14 +471,14 @@ public class ScreeningSurveyAdministrationManagerService {
 	@Synchronized
 	public void screeningSurveySlideChangeQuestion(
 			final ScreeningSurveySlide screeningSurveySlide,
-			final int questionPosition, final String textWithPlaceholders,
+			final int questionPosition, final LString textWithPlaceholders,
 			final List<String> allPossibleMessageVariables)
 					throws NotificationMessageException {
 		val question = screeningSurveySlide.getQuestions()
 				.get(questionPosition);
 
 		if (textWithPlaceholders == null) {
-			question.setQuestionWithPlaceholders("");
+			question.setQuestionWithPlaceholders(new LString());
 		} else {
 			if (!StringValidator.isValidVariableText(textWithPlaceholders,
 					allPossibleMessageVariables)) {
@@ -553,7 +553,7 @@ public class ScreeningSurveyAdministrationManagerService {
 	@Synchronized
 	public void screeningSurveySlideSetAnswersWithPlaceholdersAndValues(
 			final ScreeningSurveySlide screeningSurveySlide,
-			final int questionPosition, final String[] answers,
+			final int questionPosition, final LString[] answers,
 			final String[] values) {
 		val question = screeningSurveySlide.getQuestions()
 				.get(questionPosition);
@@ -567,11 +567,11 @@ public class ScreeningSurveyAdministrationManagerService {
 	@Synchronized
 	public void screeningSurveySlideChangeValidationErrorMessage(
 			final ScreeningSurveySlide screeningSurveySlide,
-			final String textWithPlaceholders,
+			final LString textWithPlaceholders,
 			final List<String> allPossibleMessageVariables)
 					throws NotificationMessageException {
 		if (textWithPlaceholders == null) {
-			screeningSurveySlide.setValidationErrorMessage("");
+			screeningSurveySlide.setValidationErrorMessage(new LString());
 		} else {
 			if (!StringValidator.isValidVariableText(textWithPlaceholders,
 					allPossibleMessageVariables)) {
@@ -1009,14 +1009,14 @@ public class ScreeningSurveyAdministrationManagerService {
 
 	// Feedback
 	@Synchronized
-	public Feedback feedbackCreate(final String name,
+	public Feedback feedbackCreate(final LString name,
 			final ObjectId screeningSurveyId) {
 		val feedback = new Feedback(
 				GlobalUniqueIdGenerator.createGlobalUniqueId(),
 				screeningSurveyId, name, "");
 
-		if (name.equals("")) {
-			feedback.setName(DEFAULT_OBJECT_NAME);
+		if (name.isEmpty()) {
+			feedback.setName(new LString(DEFAULT_OBJECT_NAME));
 		}
 
 		databaseManagerService.saveModelObject(feedback);
@@ -1070,9 +1070,10 @@ public class ScreeningSurveyAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void feedbackChangeName(final Feedback feedback, final String newName) {
-		if (newName.equals("")) {
-			feedback.setName(DEFAULT_OBJECT_NAME);
+	public void feedbackChangeName(final Feedback feedback,
+			final LString newName) {
+		if (newName.isEmpty()) {
+			feedback.setName(new LString(DEFAULT_OBJECT_NAME));
 		} else {
 			feedback.setName(newName);
 		}

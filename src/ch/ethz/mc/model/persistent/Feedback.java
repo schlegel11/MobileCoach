@@ -2,15 +2,15 @@ package ch.ethz.mc.model.persistent;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,16 +30,17 @@ import org.bson.types.ObjectId;
 
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
+import ch.ethz.mc.model.persistent.subelements.LString;
 import ch.ethz.mc.model.ui.UIFeedback;
 import ch.ethz.mc.model.ui.UIModelObject;
 
 /**
  * {@link ModelObject} to represent an {@link Feedback}
- * 
+ *
  * After a {@link Participant} participated in an {@link ScreeningSurvey},
  * she/he can be redirected to a {@link Feedback} A {@link Feedback} consist of
  * several {@link FeedbackSlide}s
- * 
+ *
  * @author Andreas Filler
  */
 @NoArgsConstructor
@@ -69,7 +70,7 @@ public class Feedback extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String		name;
+	private LString		name;
 
 	/**
 	 * The path of the template for the {@link FeedbackSlide}s
@@ -81,12 +82,12 @@ public class Feedback extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ch.ethz.mc.model.ModelObject#toUIModelObject()
 	 */
 	@Override
 	public UIModelObject toUIModelObject() {
-		val feedback = new UIFeedback(name);
+		val feedback = new UIFeedback(name.toString());
 
 		feedback.setRelatedModelObject(this);
 
@@ -95,7 +96,7 @@ public class Feedback extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * ch.ethz.mc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
 	 * (java.util.List)
@@ -109,13 +110,13 @@ public class Feedback extends ModelObject {
 		for (val feedbackSlide : ModelObject.find(FeedbackSlide.class,
 				Queries.FEEDBACK_SLIDE__BY_FEEDBACK, getId())) {
 			feedbackSlide
-					.collectThisAndRelatedModelObjectsForExport(exportList);
+			.collectThisAndRelatedModelObjectsForExport(exportList);
 		}
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ch.ethz.mc.model.ModelObject#performOnDelete()
 	 */
 	@Override

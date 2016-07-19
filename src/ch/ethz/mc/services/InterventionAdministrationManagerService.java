@@ -64,6 +64,7 @@ import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.persistent.concepts.AbstractRule;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
+import ch.ethz.mc.model.persistent.subelements.LString;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.MediaObjectTypes;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
@@ -648,7 +649,7 @@ public class InterventionAdministrationManagerService {
 	public MonitoringMessage monitoringMessageCreate(
 			final ObjectId monitoringMessageGroupId) {
 		val monitoringMessage = new MonitoringMessage(monitoringMessageGroupId,
-				"", 0, null, null, null);
+				new LString(), 0, null, null, null);
 
 		val highestOrderMessage = databaseManagerService
 				.findOneSortedModelObject(
@@ -716,11 +717,11 @@ public class InterventionAdministrationManagerService {
 	@Synchronized
 	public void monitoringMessageSetTextWithPlaceholders(
 			final MonitoringMessage monitoringMessage,
-			final String textWithPlaceholders,
+			final LString textWithPlaceholders,
 			final List<String> allPossibleMessageVariables)
 			throws NotificationMessageException {
 		if (textWithPlaceholders == null) {
-			monitoringMessage.setTextWithPlaceholders("");
+			monitoringMessage.setTextWithPlaceholders(new LString());
 		} else {
 			if (!StringValidator.isValidVariableText(textWithPlaceholders,
 					allPossibleMessageVariables)) {

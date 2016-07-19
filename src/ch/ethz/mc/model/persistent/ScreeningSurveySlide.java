@@ -2,15 +2,15 @@ package ch.ethz.mc.model.persistent;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,17 +34,18 @@ import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
+import ch.ethz.mc.model.persistent.subelements.LString;
 import ch.ethz.mc.model.persistent.types.ScreeningSurveySlideQuestionTypes;
 import ch.ethz.mc.model.ui.UIModelObject;
 import ch.ethz.mc.model.ui.UIScreeningSurveySlide;
 
 /**
  * {@link ModelObject} to represent an {@link ScreeningSurveySlide}
- * 
+ *
  * A {@link ScreeningSurvey} consists of several {@link ScreeningSurveySlide}s,
  * which are presented to a {@link Participant} in a dynamic order. The order
  * can be defined by using the rules or by defining a default next slide.
- * 
+ *
  * @author Andreas Filler
  */
 @NoArgsConstructor
@@ -53,7 +54,7 @@ public class ScreeningSurveySlide extends ModelObject {
 	/**
 	 * Consists of all attributes related to a {@link Question} within a
 	 * {@link ScreeningSurveySlide}
-	 * 
+	 *
 	 * @author Andreas Filler
 	 */
 	@NoArgsConstructor
@@ -67,7 +68,7 @@ public class ScreeningSurveySlide extends ModelObject {
 		@Getter
 		@Setter
 		@NonNull
-		private String		questionWithPlaceholders;
+		private LString		questionWithPlaceholders;
 
 		/**
 		 * <strong>OPTIONAL:</strong> The answers presented to the
@@ -75,7 +76,7 @@ public class ScreeningSurveySlide extends ModelObject {
 		 */
 		@Getter
 		@Setter
-		private String[]	answersWithPlaceholders;
+		private LString[]	answersWithPlaceholders;
 
 		/**
 		 * <strong>OPTIONAL:</strong> The return values of the answers presented
@@ -154,7 +155,7 @@ public class ScreeningSurveySlide extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String								titleWithPlaceholders;
+	private LString								titleWithPlaceholders;
 
 	/**
 	 * The type of the question presented to the {@link Participant} of all
@@ -211,11 +212,11 @@ public class ScreeningSurveySlide extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String								validationErrorMessage;
+	private LString								validationErrorMessage;
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ch.ethz.mc.model.ModelObject#toUIModelObject()
 	 */
 	@Override
@@ -251,14 +252,14 @@ public class ScreeningSurveySlide extends ModelObject {
 
 		val screeningSurveySlide = new UIScreeningSurveySlide(
 				order,
-				titleWithPlaceholders.equals("") ? Messages
+				titleWithPlaceholders.toString().equals("") ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: titleWithPlaceholders,
-				questionType.toString(),
-				storeValueToVariableWithNames.length() > 0 ? storeValueToVariableWithNames
-						.toString() : Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET),
-				slideRules);
+						: titleWithPlaceholders.toString(),
+						questionType.toString(),
+						storeValueToVariableWithNames.length() > 0 ? storeValueToVariableWithNames
+								.toString() : Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET),
+								slideRules);
 
 		screeningSurveySlide.setRelatedModelObject(this);
 
@@ -267,7 +268,7 @@ public class ScreeningSurveySlide extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * ch.ethz.mc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
 	 * (java.util.List)
@@ -289,13 +290,13 @@ public class ScreeningSurveySlide extends ModelObject {
 				Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE,
 				getId())) {
 			screeningSurveySlideRule
-					.collectThisAndRelatedModelObjectsForExport(exportList);
+			.collectThisAndRelatedModelObjectsForExport(exportList);
 		}
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ch.ethz.mc.model.ModelObject#performOnDelete()
 	 */
 	@Override

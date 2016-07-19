@@ -21,6 +21,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.model.persistent.subelements.LString;
 
 import com.vaadin.data.fieldgroup.PropertyId;
 
@@ -37,7 +38,7 @@ public class UIAnswer extends UIObject {
 	private int					order;
 
 	@PropertyId(ANSWER)
-	private String				answer;
+	private LString				answer;
 
 	@PropertyId(VALUE)
 	private String				value;
@@ -58,6 +59,6 @@ public class UIAnswer extends UIObject {
 
 	@Override
 	public String toString() {
-		return answer;
+		return answer.toString();
 	}
 }

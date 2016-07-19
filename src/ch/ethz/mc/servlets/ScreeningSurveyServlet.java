@@ -299,7 +299,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 
 				for (val screeningSurvey : activeScreeningSurveys) {
 					val screeningSurveyData = new HashMap<String, String>();
-					screeningSurveyData.put("name", screeningSurvey.getName());
+					screeningSurveyData.put("name", screeningSurvey.getName().toString());
 					screeningSurveyData.put("url",
 							baseURL + screeningSurvey.getId() + "/");
 					surveysData.add(screeningSurveyData);

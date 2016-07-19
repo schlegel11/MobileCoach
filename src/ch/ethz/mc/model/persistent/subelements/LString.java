@@ -3,6 +3,7 @@ package ch.ethz.mc.model.persistent.subelements;
 import java.util.HashMap;
 import java.util.Locale;
 
+import lombok.NoArgsConstructor;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 import ch.ethz.mc.conf.Constants;
@@ -17,10 +18,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Andreas Filler
  */
 @Log4j2
+@NoArgsConstructor
 public class LString {
 	// Contains all values in different values in different languages
 	@JsonProperty
 	private final HashMap<Locale, String>	values	= new HashMap<Locale, String>();
+
+	@JsonIgnore
+	public LString(final String defaultValue) {
+		values.put(Constants.getInterventionLocales()[0], defaultValue);
+	}
 
 	@JsonIgnore
 	public void set(final Locale locale, final String value) {
@@ -53,6 +60,14 @@ public class LString {
 		} else {
 			return "";
 		}
+	}
+
+	public LString appendToAll(final String valueToAdd) {
+		for (val key : values.keySet()) {
+			values.put(key, values.get(key) + valueToAdd);
+		}
+
+		return this;
 	}
 
 	@JsonIgnore

@@ -39,6 +39,8 @@ import ch.ethz.mc.model.persistent.outdated.ScreeningSurveySlideV1;
 import ch.ethz.mc.model.persistent.outdated.ScreeningSurveySlideV2;
 
 import com.mongodb.DBObject;
+import com.mongodb.LazyDBList;
+import com.mongodb.LazyDBObject;
 
 /**
  * Manages the modification of the Data Model on the startup of the system
@@ -230,8 +232,112 @@ public class DataModelUpdateManager {
 		.with(Queries.UPDATE_VERSION_3__PARTICIPANT__CHANGE_1,
 				localeToSet);
 
+		updateLStrings(jongo.getCollection("Feedback"),
+				new String[] { "name" }, localeToSet);
 		updateLStrings(jongo.getCollection("FeedbackSlide"), new String[] {
 			"titleWithPlaceholders", "textWithPlaceholders" }, localeToSet);
+		updateLStrings(jongo.getCollection("ScreeningSurvey"),
+				new String[] { "name" }, localeToSet);
+		updateLStrings(jongo.getCollection("ScreeningSurveySlide"),
+				new String[] { "titleWithPlaceholders",
+		"validationErrorMessage" }, localeToSet);
+		updateLStrings(jongo.getCollection("MonitoringMessage"),
+				new String[] { "textWithPlaceholders" }, localeToSet);
+
+		// Special case: questions -> questionWithPlaceholders in
+		// ScreeningSurveySlide
+		MongoCollection collection = jongo
+				.getCollection("ScreeningSurveySlide");
+		final String fieldQuestions = "questions";
+		String subField = "questionWithPlaceholders";
+
+		for (val minimalObject : collection.find(Queries.EVERYTHING)
+				.projection(Queries.OBJECT_ID, 1).as(MinimalObject.class)) {
+			final MongoCursor<LazyDBList> questionArray = collection.find(
+					Queries.OBJECT_ID, minimalObject.getId()).map(
+							new ResultHandler<LazyDBList>() {
+								@Override
+								public LazyDBList map(final DBObject result) {
+									return (LazyDBList) result.get(fieldQuestions);
+								}
+							});
+
+			int i = 0;
+			while (questionArray.hasNext()) {
+				val itemList = questionArray.next();
+
+				for (val rawItem : itemList) {
+					final LazyDBObject dbItem = (LazyDBObject) rawItem;
+					val fieldValue = (String) dbItem.get(subField);
+					if (fieldValue == null || fieldValue.equals("")) {
+						collection
+						.update(Queries.OBJECT_ID,
+								minimalObject.getId())
+								.with(Queries.UPDATE_VERSION_3__GENERAL_UPDATE_FOR_EMPTY_LSTRING,
+										fieldQuestions + "." + i + "."
+												+ subField);
+					} else {
+						collection
+						.update(Queries.OBJECT_ID,
+								minimalObject.getId())
+								.with(Queries.UPDATE_VERSION_3__GENERAL_UPDATE_FOR_FILLED_LSTRING,
+										fieldQuestions + "." + i + "."
+												+ subField,
+												localeToSet.toString(), fieldValue);
+					}
+					i++;
+				}
+			}
+		}
+
+		// Special case: questions -> answersWithPlaceholders[] in
+		// ScreeningSurveySlide
+		collection = jongo.getCollection("ScreeningSurveySlide");
+		subField = "answersWithPlaceholders";
+
+		for (val minimalObject : collection.find(Queries.EVERYTHING)
+				.projection(Queries.OBJECT_ID, 1).as(MinimalObject.class)) {
+			final MongoCursor<LazyDBList> questionArray = collection.find(
+					Queries.OBJECT_ID, minimalObject.getId()).map(
+							new ResultHandler<LazyDBList>() {
+								@Override
+								public LazyDBList map(final DBObject result) {
+									return (LazyDBList) result.get(fieldQuestions);
+								}
+							});
+
+			int i = 0;
+			while (questionArray.hasNext()) {
+				val itemList = questionArray.next();
+
+				for (val rawItem : itemList) {
+					final LazyDBObject dbItem = (LazyDBObject) rawItem;
+
+					int j = 0;
+					for (val rawSubItem : (LazyDBList) dbItem.get(subField)) {
+						val fieldValue = (String) rawSubItem;
+						if (fieldValue == null || fieldValue.equals("")) {
+							collection
+							.update(Queries.OBJECT_ID,
+									minimalObject.getId())
+									.with(Queries.UPDATE_VERSION_3__GENERAL_UPDATE_FOR_EMPTY_LSTRING,
+											fieldQuestions + "." + i + "."
+													+ subField + "." + j);
+						} else {
+							collection
+							.update(Queries.OBJECT_ID,
+									minimalObject.getId())
+									.with(Queries.UPDATE_VERSION_3__GENERAL_UPDATE_FOR_FILLED_LSTRING,
+											fieldQuestions + "." + i + "."
+													+ subField + "." + j,
+													localeToSet.toString(), fieldValue);
+						}
+						j++;
+					}
+					i++;
+				}
+			}
+		}
 	}
 
 	private static void updateLStrings(final MongoCollection collection,
@@ -244,11 +350,16 @@ public class DataModelUpdateManager {
 								new ResultHandler<String>() {
 									@Override
 									public String map(final DBObject result) {
-										return (String) result.get(field);
+										if (result.get(field) instanceof String) {
+											return (String) result.get(field);
+										} else {
+											return null;
+										}
 									}
 								});
 				while (fieldValues.hasNext()) {
 					val fieldValue = fieldValues.next();
+
 					if (fieldValue == null || fieldValue.equals("")) {
 						collection
 						.update(Queries.OBJECT_ID,

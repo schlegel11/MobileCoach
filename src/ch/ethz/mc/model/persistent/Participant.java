@@ -162,7 +162,7 @@ public class Participant extends ModelObject {
 		} else if (screeningSurvey.getName().equals("")) {
 			screeningSurveyName = ImplementationConstants.DEFAULT_OBJECT_NAME;
 		} else {
-			screeningSurveyName = screeningSurvey.getName();
+			screeningSurveyName = screeningSurvey.getName().toString();
 		}
 
 		boolean screeningSurveyStatus = false;
@@ -189,7 +189,8 @@ public class Participant extends ModelObject {
 				nickname.equals("") ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 						: nickname,
-				language.getDisplayLanguage(),
+				language.getDisplayLanguage() + " (" + language.toLanguageTag()
+						+ ")",
 				organization,
 				organizationUnit,
 				new Date(createdTimestamp),

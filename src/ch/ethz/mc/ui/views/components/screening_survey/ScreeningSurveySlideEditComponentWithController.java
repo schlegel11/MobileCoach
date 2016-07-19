@@ -28,6 +28,7 @@ import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.persistent.Feedback;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlideRule;
+import ch.ethz.mc.model.persistent.subelements.LString;
 import ch.ethz.mc.model.persistent.types.ScreeningSurveySlideQuestionTypes;
 import ch.ethz.mc.model.ui.UIAnswer;
 import ch.ethz.mc.model.ui.UIFeedback;
@@ -35,6 +36,7 @@ import ch.ethz.mc.model.ui.UIQuestion;
 import ch.ethz.mc.model.ui.UIScreeningSurveySlideRule;
 import ch.ethz.mc.tools.StringValidator;
 import ch.ethz.mc.ui.NotificationMessageException;
+import ch.ethz.mc.ui.views.components.basics.LocalizedPlaceholderStringEditComponent;
 import ch.ethz.mc.ui.views.components.basics.MediaObjectIntegrationComponentWithController.MediaObjectCreationOrDeleteionListener;
 import ch.ethz.mc.ui.views.components.basics.PlaceholderStringEditComponent;
 import ch.ethz.mc.ui.views.components.basics.ShortPlaceholderStringEditComponent;
@@ -99,9 +101,9 @@ MediaObjectCreationOrDeleteionListener {
 			val question = questions.get(i);
 			val uiQuestion = new UIQuestion(
 					i,
-					question.getQuestionWithPlaceholders().equals("") ? Messages
+					question.getQuestionWithPlaceholders().isEmpty() ? Messages
 							.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-							: question.getQuestionWithPlaceholders());
+							: question.getQuestionWithPlaceholders().toString());
 			questionsBeanContainer.addItem(i, uiQuestion);
 
 			if (i == 0) {
@@ -363,7 +365,7 @@ MediaObjectCreationOrDeleteionListener {
 
 	private void saveAnswersWithValues() {
 		val itemIds = answersBeanContainer.getItemIds();
-		val answers = new String[itemIds.size()];
+		val answers = new LString[itemIds.size()];
 		val values = new String[itemIds.size()];
 
 		for (int i = 0; i < itemIds.size(); i++) {
@@ -410,14 +412,14 @@ MediaObjectCreationOrDeleteionListener {
 				selectedQuestion);
 
 		getTitleWithPlaceholdersTextFieldComponent().setValue(
-				screeningSurveySlide.getTitleWithPlaceholders());
+				screeningSurveySlide.getTitleWithPlaceholders().toString());
 		getOptionalLayoutAttributeTextFieldComponent().setValue(
 				screeningSurveySlide
 				.getOptionalLayoutAttributeWithPlaceholders());
 		getQuestionTextWithPlaceholdersTextField().setValue(
-				currentQuestion.getQuestionWithPlaceholders());
+				currentQuestion.getQuestionWithPlaceholders().toString());
 		getValidationErrorMessageTextFieldComponent().setValue(
-				screeningSurveySlide.getValidationErrorMessage());
+				screeningSurveySlide.getValidationErrorMessage().toString());
 		getDefaultVariableValueTextFieldComponent().setValue(
 				currentQuestion.getDefaultValue());
 		getStoreVariableTextFieldComponent().setValue(
@@ -507,9 +509,9 @@ MediaObjectCreationOrDeleteionListener {
 		val question = getScreeningSurveyAdministrationManagerService()
 				.screeningSurveySlideAddQuestion(screeningSurveySlide);
 		val uiQuestion = new UIQuestion(newId,
-				question.getQuestionWithPlaceholders().equals("") ? Messages
+				question.getQuestionWithPlaceholders().isEmpty() ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: question.getQuestionWithPlaceholders());
+						: question.getQuestionWithPlaceholders().toString());
 
 		questionsBeanContainer.addItem(newId, uiQuestion);
 		questionsTable.select(newId);
@@ -542,8 +544,8 @@ MediaObjectCreationOrDeleteionListener {
 		}
 
 		log.debug("New answer has id {}", newId);
-		val uiAnswer = new UIAnswer(newId,
-				ImplementationConstants.DEFAULT_ANSWER_NAME,
+		val uiAnswer = new UIAnswer(newId, new LString(
+				ImplementationConstants.DEFAULT_ANSWER_NAME),
 				String.valueOf(answersBeanContainer.size() + 1));
 
 		answersBeanContainer.addItem(newId, uiAnswer);
@@ -575,10 +577,10 @@ MediaObjectCreationOrDeleteionListener {
 		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
 				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 						screeningSurveySlide.getScreeningSurvey());
-		showModalStringValueEditWindow(
+		showModalLStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_ANSWER_WITH_PLACEHOLDERS,
 				selectedUIAnswer.getAnswer(), allPossibleVariables,
-				new PlaceholderStringEditComponent(),
+				new LocalizedPlaceholderStringEditComponent(),
 				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
@@ -590,12 +592,12 @@ MediaObjectCreationOrDeleteionListener {
 
 							// Change answer
 							if (!StringValidator.isValidVariableText(
-									getStringValue(), allPossibleVariables)) {
+									getLStringValue(), allPossibleVariables)) {
 								throw new NotificationMessageException(
 										AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
 							}
 
-							selectedUIAnswer.setAnswer(getStringValue());
+							selectedUIAnswer.setAnswer(getLStringValue());
 
 							saveAnswersWithValues();
 							adjustPreselectedAnswer();
@@ -605,7 +607,7 @@ MediaObjectCreationOrDeleteionListener {
 						}
 
 						// Adapt UI
-						getStringItemProperty(beanItem, UIAnswer.ANSWER)
+						getLStringItemProperty(beanItem, UIAnswer.ANSWER)
 						.setValue(selectedUIAnswer.getAnswer());
 
 						closeWindow();
@@ -697,10 +699,11 @@ MediaObjectCreationOrDeleteionListener {
 		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
 				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 						screeningSurveySlide.getScreeningSurvey());
-		showModalStringValueEditWindow(
+		showModalLStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_TITLE_WITH_PLACEHOLDERS,
 				screeningSurveySlide.getTitleWithPlaceholders(),
-				allPossibleVariables, new PlaceholderStringEditComponent(),
+				allPossibleVariables,
+				new LocalizedPlaceholderStringEditComponent(),
 				new ExtendableButtonClickListener() {
 
 					@Override
@@ -710,7 +713,7 @@ MediaObjectCreationOrDeleteionListener {
 							getScreeningSurveyAdministrationManagerService()
 							.screeningSurveySlideChangeTitle(
 									screeningSurveySlide,
-									getStringValue(),
+									getLStringValue(),
 									allPossibleVariables);
 						} catch (final Exception e) {
 							handleException(e);
@@ -761,11 +764,11 @@ MediaObjectCreationOrDeleteionListener {
 		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
 				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 						screeningSurveySlide.getScreeningSurvey());
-		showModalStringValueEditWindow(
+		showModalLStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_QUESTION_TEXT_WITH_PLACEHOLDERS,
 				screeningSurveySlide.getQuestions().get(selectedQuestion)
 				.getQuestionWithPlaceholders(), allPossibleVariables,
-				new PlaceholderStringEditComponent(),
+				new LocalizedPlaceholderStringEditComponent(),
 				new ExtendableButtonClickListener() {
 
 					@Override
@@ -775,19 +778,21 @@ MediaObjectCreationOrDeleteionListener {
 							getScreeningSurveyAdministrationManagerService()
 							.screeningSurveySlideChangeQuestion(
 									screeningSurveySlide,
-									selectedQuestion, getStringValue(),
+									selectedQuestion,
+											getLStringValue(),
 									allPossibleVariables);
 						} catch (final Exception e) {
 							handleException(e);
 							return;
 						}
 
-						val newQuestion = getStringValue();
-						if (newQuestion.equals("")) {
+						val newQuestion = getLStringValue();
+						if (newQuestion.isEmpty()) {
 							selectedUIQuestion.setQuestion(Messages
 									.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET));
 						} else {
-							selectedUIQuestion.setQuestion(newQuestion);
+							selectedUIQuestion.setQuestion(newQuestion
+									.toString());
 						}
 
 						// Adapt UI
@@ -809,10 +814,11 @@ MediaObjectCreationOrDeleteionListener {
 		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
 				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 						screeningSurveySlide.getScreeningSurvey());
-		showModalStringValueEditWindow(
+		showModalLStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_VALIDATION_ERROR_MESSAGE,
 				screeningSurveySlide.getValidationErrorMessage(),
-				allPossibleVariables, new PlaceholderStringEditComponent(),
+				allPossibleVariables,
+				new LocalizedPlaceholderStringEditComponent(),
 				new ExtendableButtonClickListener() {
 
 					@Override
@@ -822,7 +828,7 @@ MediaObjectCreationOrDeleteionListener {
 							getScreeningSurveyAdministrationManagerService()
 							.screeningSurveySlideChangeValidationErrorMessage(
 									screeningSurveySlide,
-									getStringValue(),
+									getLStringValue(),
 									allPossibleVariables);
 						} catch (final Exception e) {
 							handleException(e);

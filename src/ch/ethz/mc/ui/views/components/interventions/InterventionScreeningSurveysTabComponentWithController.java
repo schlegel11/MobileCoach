@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.interventions;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -40,7 +40,7 @@ import ch.ethz.mc.tools.OnDemandFileDownloader;
 import ch.ethz.mc.tools.OnDemandFileDownloader.OnDemandStreamResource;
 import ch.ethz.mc.ui.views.components.basics.FileUploadComponentWithController;
 import ch.ethz.mc.ui.views.components.basics.FileUploadComponentWithController.UploadListener;
-import ch.ethz.mc.ui.views.components.basics.ShortStringEditComponent;
+import ch.ethz.mc.ui.views.components.basics.LocalizedShortStringEditComponent;
 import ch.ethz.mc.ui.views.components.screening_survey.ScreeningSurveyEditComponentWithController;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -58,7 +58,7 @@ import com.vaadin.ui.Button.ClickEvent;
 @SuppressWarnings("serial")
 @Log4j2
 public class InterventionScreeningSurveysTabComponentWithController extends
-		InterventionScreeningSurveysTabComponent {
+InterventionScreeningSurveysTabComponent {
 
 	private final Intervention									intervention;
 
@@ -82,8 +82,8 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 		beanContainer = createBeanContainerForModelObjects(
 				UIScreeningSurvey.class,
 				getScreeningSurveyAdministrationManagerService()
-						.getAllScreeningSurveysOfIntervention(
-								intervention.getId()));
+				.getAllScreeningSurveysOfIntervention(
+						intervention.getId()));
 
 		screeningSurveysTable.setContainerDataSource(beanContainer);
 		screeningSurveysTable.setSortContainerPropertyId(UIScreeningSurvey
@@ -143,9 +143,9 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 					public InputStream getStream() {
 						return new FileInputStream(
 								getScreeningSurveyAdministrationManagerService()
-										.screeningSurveyExport(
-												selectedUIScreeningSurvey
-														.getRelatedModelObject(ScreeningSurvey.class)));
+								.screeningSurveyExport(
+										selectedUIScreeningSurvey
+										.getRelatedModelObject(ScreeningSurvey.class)));
 					}
 
 					@Override
@@ -153,11 +153,11 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 						return "Intervention_"
 								+ intervention.getName().replaceAll(
 										"[^A-Za-z0-9_. ]+", "_")
-								+ "_Survey_"
-								+ selectedUIScreeningSurvey
+										+ "_Survey_"
+										+ selectedUIScreeningSurvey
 										.getScreeningSurveyName().replaceAll(
 												"[^A-Za-z0-9_. ]+", "_")
-								+ Constants.getFileExtension();
+												+ Constants.getFileExtension();
 					}
 				});
 		onDemandFileDownloader.extend(screeningSurveysEditComponent
@@ -200,15 +200,15 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 
 	public void createScreeningSurvey() {
 		log.debug("Create screening survey");
-		showModalStringValueEditWindow(
+		showModalLStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NAME_FOR_SCREENING_SURVEY,
-				null, null, new ShortStringEditComponent(),
+				null, null, new LocalizedShortStringEditComponent(),
 				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						final ScreeningSurvey newScreeningSurvey;
 						try {
-							val newScreeningSurveyName = getStringValue();
+							val newScreeningSurveyName = getLStringValue();
 
 							// Create intervention
 							newScreeningSurvey = getScreeningSurveyAdministrationManagerService()
@@ -225,11 +225,11 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 								UIScreeningSurvey.class.cast(newScreeningSurvey
 										.toUIModelObject()));
 						getInterventionScreeningSurveyEditComponent()
-								.getScreeningSurveysTable().select(
-										newScreeningSurvey.getId());
+						.getScreeningSurveysTable().select(
+								newScreeningSurvey.getId());
 						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_CREATED);
+						.showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_CREATED);
 
 						closeWindow();
 					}
@@ -245,7 +245,7 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 				final File temporaryBackupFile = getScreeningSurveyAdministrationManagerService()
 						.screeningSurveyExport(
 								selectedUIScreeningSurvey
-										.getRelatedModelObject(ScreeningSurvey.class));
+								.getRelatedModelObject(ScreeningSurvey.class));
 
 				try {
 					final ScreeningSurvey importedScreeningSurvey = getScreeningSurveyAdministrationManagerService()
@@ -260,21 +260,21 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 					// Adapt UI
 					beanContainer.addItem(importedScreeningSurvey.getId(),
 							UIScreeningSurvey.class
-									.cast(importedScreeningSurvey
-											.toUIModelObject()));
+							.cast(importedScreeningSurvey
+									.toUIModelObject()));
 					getInterventionScreeningSurveyEditComponent()
-							.getScreeningSurveysTable().select(
-									importedScreeningSurvey.getId());
+					.getScreeningSurveysTable().select(
+							importedScreeningSurvey.getId());
 					getInterventionScreeningSurveyEditComponent()
-							.getScreeningSurveysTable().sort();
+					.getScreeningSurveysTable().sort();
 
 					getAdminUI()
-							.showInformationNotification(
-									AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_DUPLICATED);
+					.showInformationNotification(
+							AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_DUPLICATED);
 				} catch (final Exception e) {
 					getAdminUI()
-							.showWarningNotification(
-									AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_DUPLICATION_FAILED);
+					.showWarningNotification(
+							AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_DUPLICATION_FAILED);
 				}
 
 				try {
@@ -310,21 +310,21 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 					// Adapt UI
 					beanContainer.addItem(importedScreeningSurvey.getId(),
 							UIScreeningSurvey.class
-									.cast(importedScreeningSurvey
-											.toUIModelObject()));
+							.cast(importedScreeningSurvey
+									.toUIModelObject()));
 					getInterventionScreeningSurveyEditComponent()
-							.getScreeningSurveysTable().select(
-									importedScreeningSurvey.getId());
+					.getScreeningSurveysTable().select(
+							importedScreeningSurvey.getId());
 					getInterventionScreeningSurveyEditComponent()
-							.getScreeningSurveysTable().sort();
+					.getScreeningSurveysTable().sort();
 
 					getAdminUI()
-							.showInformationNotification(
-									AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_IMPORTED);
+					.showInformationNotification(
+							AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_IMPORTED);
 				} catch (final Exception e) {
 					getAdminUI()
-							.showWarningNotification(
-									AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_IMPORT_FAILED);
+					.showWarningNotification(
+							AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_IMPORT_FAILED);
 				} finally {
 					try {
 						file.delete();
@@ -348,7 +348,7 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 
 			// Change type
 			getScreeningSurveyAdministrationManagerService()
-					.screeningSurveySwitchType(selectedScreeningSurvey);
+			.screeningSurveySwitchType(selectedScreeningSurvey);
 		} catch (final Exception e) {
 			handleException(e);
 			return;
@@ -360,24 +360,24 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 				.setValue(
 						selectedUIScreeningSurvey.getRelatedModelObject(
 								ScreeningSurvey.class).isIntermediateSurvey() ? Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__SURVEY__INTERMEDIATE)
-								: Messages
+										.getAdminString(AdminMessageStrings.UI_MODEL__SURVEY__INTERMEDIATE)
+										: Messages
 										.getAdminString(AdminMessageStrings.UI_MODEL__SURVEY__SCREENING));
 
 		getAdminUI()
-				.showInformationNotification(
-						AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_TYPE_CHANGED);
+		.showInformationNotification(
+				AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_TYPE_CHANGED);
 	}
 
 	public void renameScreeningSurvey() {
 		log.debug("Rename screening survey");
 
-		showModalStringValueEditWindow(
+		showModalLStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_NAME_FOR_SCREENING_SURVEY,
 				selectedUIScreeningSurvey.getRelatedModelObject(
 						ScreeningSurvey.class).getName(), null,
-				new ShortStringEditComponent(),
-				new ExtendableButtonClickListener() {
+						new LocalizedShortStringEditComponent(),
+						new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						try {
@@ -386,9 +386,9 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 
 							// Change name
 							getScreeningSurveyAdministrationManagerService()
-									.screeningSurveyChangeName(
-											selectedScreeningSurvey,
-											getStringValue());
+							.screeningSurveyChangeName(
+									selectedScreeningSurvey,
+									getLStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -400,13 +400,13 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 								UIScreeningSurvey.SCREENING_SURVEY_NAME)
 								.setValue(
 										selectedUIScreeningSurvey
-												.getRelatedModelObject(
-														ScreeningSurvey.class)
-												.getName());
+										.getRelatedModelObject(
+												ScreeningSurvey.class)
+												.getName().toString());
 
 						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_RENAMED);
+						.showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_RENAMED);
 						closeWindow();
 					}
 				}, null);
@@ -432,8 +432,8 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 						screeningSurveysTable.sort();
 						screeningSurveysTable.select(screeningSurvey.getId());
 						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_UPDATED);
+						.showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_UPDATED);
 
 						closeWindow();
 					}
@@ -451,7 +451,7 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 
 					// Delete intervention
 					getScreeningSurveyAdministrationManagerService()
-							.screeningSurveyDelete(selectedScreeningSurvey);
+					.screeningSurveyDelete(selectedScreeningSurvey);
 				} catch (final Exception e) {
 					closeWindow();
 					handleException(e);
@@ -460,13 +460,13 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 
 				// Adapt UI
 				getInterventionScreeningSurveyEditComponent()
-						.getScreeningSurveysTable().removeItem(
-								selectedUIScreeningSurvey
-										.getRelatedModelObject(
-												ScreeningSurvey.class).getId());
+				.getScreeningSurveysTable().removeItem(
+						selectedUIScreeningSurvey
+						.getRelatedModelObject(
+								ScreeningSurvey.class).getId());
 				getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_DELETED);
+				.showInformationNotification(
+						AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_DELETED);
 
 				closeWindow();
 			}
@@ -476,6 +476,12 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 	public void showScreeningSurvey() {
 		val survey = selectedUIScreeningSurvey
 				.getRelatedModelObject(ScreeningSurvey.class);
+
+		if (!intervention.isActive()) {
+			getAdminUI().showWarningNotification(
+					AdminMessageStrings.NOTIFICATION__INTERVENTION_NOT_ACTIVE);
+			return;
+		}
 
 		if (!survey.isActive()) {
 			getAdminUI().showWarningNotification(
@@ -491,8 +497,8 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 
 			if (participantId == null) {
 				getAdminUI()
-				.showWarningNotification(
-						AdminMessageStrings.NOTIFICATION__SURVEY_PARTICIPATION_REQUIRED);
+						.showWarningNotification(
+								AdminMessageStrings.NOTIFICATION__SURVEY_PARTICIPATION_REQUIRED);
 				return;
 			}
 
@@ -501,8 +507,8 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 
 			if (participant == null) {
 				getAdminUI()
-				.showWarningNotification(
-						AdminMessageStrings.NOTIFICATION__SURVEY_PARTICIPATION_REQUIRED);
+						.showWarningNotification(
+								AdminMessageStrings.NOTIFICATION__SURVEY_PARTICIPATION_REQUIRED);
 				return;
 			}
 
@@ -517,9 +523,9 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 					.substring(
 							0,
 							getAdminUI().getPage().getLocation().toString()
-							.lastIndexOf("/") + 1)
-							+ ImplementationConstants.SHORT_ID_SCREEN_SURVEY_AND_FEEDBACK_SERVLET_PATH
-							+ "/" + surveyShortURL.calculateIdPartOfURL();
+									.lastIndexOf("/") + 1)
+					+ ImplementationConstants.SHORT_ID_SCREEN_SURVEY_AND_FEEDBACK_SERVLET_PATH
+					+ "/" + surveyShortURL.calculateIdPartOfURL();
 
 			getAdminUI().getPage().open(url, "_blank");
 		} else {
@@ -534,8 +540,8 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 					.substring(
 							0,
 							getAdminUI().getPage().getLocation().toString()
-									.lastIndexOf("/") + 1)
-					+ survey.getId() + "/";
+							.lastIndexOf("/") + 1)
+							+ survey.getId() + "/";
 
 			getAdminUI().getPage().open(url, "_blank");
 		}
