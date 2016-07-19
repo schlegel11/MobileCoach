@@ -15,6 +15,7 @@
 	<!ENTITY lombok.version "1.16.8">
 	<!ENTITY mustache.java.version "0.8.14">
 	<!ENTITY java.mail.version "1.4.7">
+	<!ENTITY resteasy.version "3.0.17.Final">
 	<!ENTITY jcsv.version "1.4.0">
 ]>
 <ivy-module version="2.0"
@@ -105,6 +106,13 @@
 
 		<!-- JavaMail -->
 		<dependency org="javax.mail" name="mail" rev="&java.mail.version;" />
+
+		<!-- RESTeasy -->
+		<dependency org="org.jboss.resteasy" name="resteasy-jaxrs" rev="&resteasy.version;" />
+		<dependency org="org.jboss.resteasy" name="resteasy-servlet-initializer" rev="&resteasy.version;" />
+		<dependency org="org.jboss.resteasy" name="resteasy-jaxb-provider" rev="&resteasy.version;" />
+		<dependency org="org.jboss.resteasy" name="resteasy-jackson-provider" rev="&resteasy.version;" />
+		<dependency org="org.jboss.resteasy" name="resteasy-multipart-provider" rev="&resteasy.version;" />
 
 		<!-- jcsv -->
 		<dependency org="com.googlecode.jcsv" name="jcsv" rev="&jcsv.version;" />
