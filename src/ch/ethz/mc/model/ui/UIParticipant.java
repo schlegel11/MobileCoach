@@ -33,6 +33,7 @@ public class UIParticipant extends UIModelObject {
 	// NOTE: The String values have to fit the name of the variables
 	public static final String	PARTICIPANT_ID					= "participantId";
 	public static final String	PARTICIPANT_NAME				= "participantName";
+	public static final String	LANGUAGE						= "language";
 	public static final String	ORGANIZATION					= "organization";
 	public static final String	UNIT							= "unit";
 	public static final String	CREATED							= "created";
@@ -47,6 +48,9 @@ public class UIParticipant extends UIModelObject {
 
 	@PropertyId(PARTICIPANT_NAME)
 	private String				participantName;
+
+	@PropertyId(LANGUAGE)
+	private String				language;
 
 	@PropertyId(ORGANIZATION)
 	private String				organization;
@@ -81,16 +85,17 @@ public class UIParticipant extends UIModelObject {
 	private boolean				booleanMonitoringStatus;
 
 	public static Object[] getVisibleColumns() {
-		return new Object[] { PARTICIPANT_ID, PARTICIPANT_NAME, ORGANIZATION,
-				UNIT, CREATED, SCREENING_SURVEY_NAME, SCREENING_SURVEY_STATUS,
-				DATA_FOR_MONITORING_AVAILABLE, INTERVENTION_STATUS,
-				MONITORING_STATUS };
+		return new Object[] { PARTICIPANT_ID, PARTICIPANT_NAME, LANGUAGE,
+				ORGANIZATION, UNIT, CREATED, SCREENING_SURVEY_NAME,
+				SCREENING_SURVEY_STATUS, DATA_FOR_MONITORING_AVAILABLE,
+				INTERVENTION_STATUS, MONITORING_STATUS };
 	}
 
 	public static String[] getColumnHeaders() {
 		return new String[] {
 				localize(AdminMessageStrings.UI_COLUMNS__PARTICIPANT_ID),
 				localize(AdminMessageStrings.UI_COLUMNS__PARTICIPANT_NAME),
+				localize(AdminMessageStrings.UI_COLUMNS__LANGUAGE),
 				localize(AdminMessageStrings.UI_COLUMNS__ORGANIZATION),
 				localize(AdminMessageStrings.UI_COLUMNS__ORGANIZATION_UNIT),
 				localize(AdminMessageStrings.UI_COLUMNS__CREATED),

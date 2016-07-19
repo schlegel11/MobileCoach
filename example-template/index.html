@@ -17,6 +17,7 @@
 <body class="{{optional_layout_attribute}}">
     <header role="banner">
         <h1>{{#is_feedback}}FEEDBACK{{/is_feedback}}{{#is_screening_survey}}SCREENING SURVEY{{/is_screening_survey}}: {{title}} {{#is_last_slide}}(LAST SLIDE){{/is_last_slide}}</h1>
+        <h4>Language: {{language}}</h2>
         <h4>Layout: {{layout}}
         {{#optional_layout_attribute}} - Additional layout: {{optional_layout_attribute}}{{/optional_layout_attribute}}</h4>
         {{#feedback_url}}

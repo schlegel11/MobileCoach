@@ -2,15 +2,15 @@ package ch.ethz.mc.model.persistent;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -147,7 +147,7 @@ public class Participant extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see ch.ethz.mc.model.ModelObject#toUIModelObject()
 	 */
 	@Override
@@ -189,30 +189,31 @@ public class Participant extends ModelObject {
 				nickname.equals("") ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 						: nickname,
-						organization,
-						organizationUnit,
-						new Date(createdTimestamp),
-						screeningSurveyName,
-						screeningSurveyStatus ? Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__FINISHED)
-								: Messages
+				language.getDisplayLanguage(),
+				organization,
+				organizationUnit,
+				new Date(createdTimestamp),
+				screeningSurveyName,
+				screeningSurveyStatus ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__FINISHED)
+						: Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_FINISHED),
-								screeningSurveyStatus,
-								dataForMonitoringAvailable ? Messages
-										.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-										: Messages
-										.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-										dataForMonitoringAvailable,
-										monitoringStatus ? Messages
-												.getAdminString(AdminMessageStrings.UI_MODEL__FINISHED)
-												: Messages
-												.getAdminString(AdminMessageStrings.UI_MODEL__NOT_FINISHED),
-												monitoringStatus,
-												monitoringActive ? Messages
-														.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
-														: Messages
-														.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE),
-														monitoringActive);
+				screeningSurveyStatus,
+				dataForMonitoringAvailable ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
+				dataForMonitoringAvailable,
+				monitoringStatus ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__FINISHED)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_FINISHED),
+				monitoringStatus,
+				monitoringActive ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE),
+				monitoringActive);
 
 		participant.setRelatedModelObject(this);
 
@@ -221,7 +222,7 @@ public class Participant extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see
 	 * ch.ethz.mc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
 	 * (java.util.List)
@@ -237,7 +238,7 @@ public class Participant extends ModelObject {
 				Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT,
 				getId())) {
 			participantVariableWithValue
-			.collectThisAndRelatedModelObjectsForExport(exportList);
+					.collectThisAndRelatedModelObjectsForExport(exportList);
 		}
 
 		// Add dialog option
@@ -260,7 +261,7 @@ public class Participant extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see ch.ethz.mc.model.ModelObject#performOnDelete()
 	 */
 	@Override

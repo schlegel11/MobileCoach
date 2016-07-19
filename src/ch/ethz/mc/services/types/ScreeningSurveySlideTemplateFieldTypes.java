@@ -22,15 +22,15 @@ import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 /**
  * Contains all template fields that can be available in the HTML template of a
  * {@link ScreeningSurveySlide}
- * 
+ *
  * All fields can be used as <code>{{field}}</code> to get the content, as
  * <code>{{#field}}...{{/field}}</code> for loops and existence checks as well
  * as <code>{{^field}}...{{/field}}</code> for non-existence checks
- * 
+ *
  * Detailed information regarding the template system can be found in the
  * <a href="http://mustache.github.io/mustache.5.html">Mustache
  * documentation</a>
- * 
+ *
  * @author Andreas Filler
  */
 public enum ScreeningSurveySlideTemplateFieldTypes {
@@ -50,7 +50,7 @@ public enum ScreeningSurveySlideTemplateFieldTypes {
 	QUESTIONS_COUNT,
 	/**
 	 * Contains a list of questions:
-	 * 
+	 *
 	 * <code>{{#questions}}...use the fields {{question_text}}, {{#answers}}...{{/answers}} etc. here...{{/questions}}</code>
 	 */
 	QUESTIONS,
@@ -78,7 +78,7 @@ public enum ScreeningSurveySlideTemplateFieldTypes {
 	/**
 	 * Can be used inside <code>{{#questions}}...{{/questions}}</code> and
 	 * contains a list of answers:
-	 * 
+	 *
 	 * <code>{{#answers}}...use the fields {{answer_text}}, {{answer_value}}, {{preselected_answer}} etc. here...{{/answers}}</code>
 	 */
 	ANSWERS,
@@ -127,7 +127,7 @@ public enum ScreeningSurveySlideTemplateFieldTypes {
 	/**
 	 * Creates the appropriate variable name of the
 	 * {@link ScreeningSurveySlideTemplateFieldTypes}
-	 * 
+	 *
 	 * @return The appropriate variable name
 	 */
 	public String toVariable() {

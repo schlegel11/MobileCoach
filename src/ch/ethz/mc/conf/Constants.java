@@ -28,8 +28,6 @@ import java.util.Properties;
 
 import javax.servlet.ServletContext;
 
-import org.apache.commons.lang.ArrayUtils;
-
 import lombok.Cleanup;
 import lombok.Getter;
 import lombok.Synchronized;

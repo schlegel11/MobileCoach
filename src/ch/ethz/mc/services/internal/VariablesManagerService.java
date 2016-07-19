@@ -2,15 +2,15 @@ package ch.ethz.mc.services.internal;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Locale;
 import java.util.Set;
 
 import lombok.Synchronized;
@@ -33,6 +34,7 @@ import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.memory.MemoryVariable;
 import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.DialogStatus;
+import ch.ethz.mc.model.persistent.IntermediateSurveyAndFeedbackParticipantShortURL;
 import ch.ethz.mc.model.persistent.InterventionVariableWithValue;
 import ch.ethz.mc.model.persistent.MonitoringMessage;
 import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
@@ -41,7 +43,6 @@ import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.ParticipantVariableWithValue;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
-import ch.ethz.mc.model.persistent.IntermediateSurveyAndFeedbackParticipantShortURL;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlideRule;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
@@ -68,17 +69,17 @@ public class VariablesManagerService {
 	private final HashSet<String>			writeProtectedVariableNames;
 
 	private static SimpleDateFormat			dayInWeekFormatter	= new SimpleDateFormat(
-																		"u");
+			"u");
 	private static SimpleDateFormat			dayOfMonthFormatter	= new SimpleDateFormat(
-																		"d");
+			"d");
 	private static SimpleDateFormat			monthFormatter		= new SimpleDateFormat(
-																		"M");
+			"M");
 	private static SimpleDateFormat			yearFormatter		= new SimpleDateFormat(
-																		"yyyy");
+			"yyyy");
 
 	private VariablesManagerService(
 			final DatabaseManagerService databaseManagerService)
-			throws Exception {
+					throws Exception {
 		log.info("Starting service...");
 
 		this.databaseManagerService = databaseManagerService;
@@ -122,7 +123,7 @@ public class VariablesManagerService {
 
 	public static VariablesManagerService start(
 			final DatabaseManagerService databaseManagerService)
-			throws Exception {
+					throws Exception {
 		if (instance == null) {
 			instance = new VariablesManagerService(databaseManagerService);
 		}
@@ -149,11 +150,11 @@ public class VariablesManagerService {
 			switch (variable) {
 				case participantDialogOptionEmailData:
 					val dialogOptionEmail = databaseManagerService
-							.findOneModelObject(
-									DialogOption.class,
-									Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
-									participant.getId(),
-									DialogOptionTypes.EMAIL);
+					.findOneModelObject(
+							DialogOption.class,
+							Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
+							participant.getId(),
+							DialogOptionTypes.EMAIL);
 					if (dialogOptionEmail != null) {
 						addToHashtable(variablesWithValues,
 								variable.toVariableName(),
@@ -162,10 +163,10 @@ public class VariablesManagerService {
 					break;
 				case participantDialogOptionSMSData:
 					val dialogOptionSMS = databaseManagerService
-							.findOneModelObject(
-									DialogOption.class,
-									Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
-									participant.getId(), DialogOptionTypes.SMS);
+					.findOneModelObject(
+							DialogOption.class,
+							Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
+							participant.getId(), DialogOptionTypes.SMS);
 					if (dialogOptionSMS != null) {
 						addToHashtable(variablesWithValues,
 								variable.toVariableName(),
@@ -176,6 +177,10 @@ public class VariablesManagerService {
 					addToHashtable(variablesWithValues,
 							variable.toVariableName(),
 							participant.getNickname());
+				case participantLanguage:
+					addToHashtable(variablesWithValues,
+							variable.toVariableName(), participant
+									.getLanguage().toLanguageTag());
 					break;
 			}
 		}
@@ -317,8 +322,8 @@ public class VariablesManagerService {
 	@Synchronized
 	public void writeVariableValueOfParticipant(final ObjectId participantId,
 			final String variableName, final String variableValue)
-			throws WriteProtectedVariableException,
-			InvalidVariableNameException {
+					throws WriteProtectedVariableException,
+					InvalidVariableNameException {
 		writeVariableValueOfParticipant(participantId, variableName,
 				variableValue, false);
 	}
@@ -327,8 +332,8 @@ public class VariablesManagerService {
 	public void writeVariableValueOfParticipant(final ObjectId participantId,
 			final String variableName, final String variableValue,
 			final boolean overwriteAllowed)
-			throws WriteProtectedVariableException,
-			InvalidVariableNameException {
+					throws WriteProtectedVariableException,
+					InvalidVariableNameException {
 		log.debug("Storing variable {} with value {} for participant {}",
 				variableName, variableValue, participantId);
 
@@ -363,6 +368,10 @@ public class VariablesManagerService {
 					log.debug("Setting variable 'participantName'");
 					participantSetName(participantId, variableValue);
 					break;
+				case participantLanguage:
+					log.debug("Setting variable 'participantLanguage'");
+					participantSetLanguage(participantId, variableValue);
+					break;
 			}
 		} else {
 			val participantVariableWithValue = databaseManagerService
@@ -379,16 +388,16 @@ public class VariablesManagerService {
 								: variableValue);
 
 				databaseManagerService
-						.saveModelObject(newParticipantVariableWithValue);
+				.saveModelObject(newParticipantVariableWithValue);
 			} else {
 				log.debug("Changing existing variable");
 				participantVariableWithValue
-						.setValue(variableValue == null ? "" : variableValue);
+				.setValue(variableValue == null ? "" : variableValue);
 				participantVariableWithValue.setLastUpdated(InternalDateTime
 						.currentTimeMillis());
 
 				databaseManagerService
-						.saveModelObject(participantVariableWithValue);
+				.saveModelObject(participantVariableWithValue);
 			}
 		}
 	}
@@ -400,6 +409,23 @@ public class VariablesManagerService {
 				Participant.class, participantId);
 
 		participant.setNickname(participantName);
+
+		databaseManagerService.saveModelObject(participant);
+	}
+
+	@Synchronized
+	private void participantSetLanguage(final ObjectId participantId,
+			final String language) {
+		val participant = databaseManagerService.getModelObjectById(
+				Participant.class, participantId);
+
+		try {
+			participant.setLanguage(new Locale(language));
+		} catch (final Exception e) {
+			log.warn(
+					"The value {} could not be interpreted as language - so the participant language could not be set",
+					language);
+		}
 
 		databaseManagerService.saveModelObject(participant);
 	}

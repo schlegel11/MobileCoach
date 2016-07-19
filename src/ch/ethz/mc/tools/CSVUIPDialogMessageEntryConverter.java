@@ -35,7 +35,8 @@ public class CSVUIPDialogMessageEntryConverter implements
 			final UIDialogMessageWithParticipantForResults uiDialogMessage) {
 		return new String[] { uiDialogMessage.getParticipantId(),
 				uiDialogMessage.getParticipantName(),
-				uiDialogMessage.getOrder(), uiDialogMessage.getStatus(),
+				uiDialogMessage.getLanguage(), uiDialogMessage.getOrder(),
+				uiDialogMessage.getStatus(),
 				clean(uiDialogMessage.getMessage()),
 				uiDialogMessage.getShouldBeSentTimestamp(),
 				uiDialogMessage.getSentTimestamp(),
@@ -59,6 +60,6 @@ public class CSVUIPDialogMessageEntryConverter implements
 				columnHeaders[4], columnHeaders[5], columnHeaders[6],
 				columnHeaders[7], columnHeaders[8], columnHeaders[9],
 				columnHeaders[10], columnHeaders[11], columnHeaders[12],
-				columnHeaders[13], columnHeaders[14]);
+				columnHeaders[13], columnHeaders[14], columnHeaders[15]);
 	}
 }
