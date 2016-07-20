@@ -34,6 +34,7 @@ public class UIDialogMessageWithParticipant extends UIModelObject {
 	public static final String	PARTICIPANT_ID				= "participantId";
 	public static final String	PARTICIPANT_NAME			= "participantName";
 	public static final String	LANGUAGE					= "language";
+	public static final String	GROUP						= "group";
 	public static final String	ORGANIZATION				= "organization";
 	public static final String	ORGANIZATION_UNIT			= "organizationUnit";
 	public static final String	ORDER						= "order";
@@ -59,6 +60,9 @@ public class UIDialogMessageWithParticipant extends UIModelObject {
 
 	@PropertyId(LANGUAGE)
 	private String				language;
+
+	@PropertyId(LANGUAGE)
+	private String				group;
 
 	@PropertyId(ORGANIZATION)
 	private String				organization;
@@ -99,7 +103,7 @@ public class UIDialogMessageWithParticipant extends UIModelObject {
 
 	public static Object[] getVisibleColumns() {
 		return new Object[] { PARTICIPANT_ID, PARTICIPANT_NAME, LANGUAGE,
-				ORGANIZATION, ORGANIZATION_UNIT, ORDER, STATUS, MESSAGE,
+				GROUP, ORGANIZATION, ORGANIZATION_UNIT, ORDER, STATUS, MESSAGE,
 				SHOULD_BE_SENT_TIMESTAMP, SENT_TIMESTAMP, ANSWER, RAW_ANSWER,
 				ANSWER_RECEIVED_TIMESTAMP, MANUALLY_SENT,
 				CONTAINS_MEDIA_CONTENT, MEDIA_CONTENT_VIEWED };
@@ -110,6 +114,7 @@ public class UIDialogMessageWithParticipant extends UIModelObject {
 				localize(AdminMessageStrings.UI_COLUMNS__PARTICIPANT_ID),
 				localize(AdminMessageStrings.UI_COLUMNS__PARTICIPANT_NAME),
 				localize(AdminMessageStrings.UI_COLUMNS__LANGUAGE),
+				localize(AdminMessageStrings.UI_COLUMNS__GROUP),
 				localize(AdminMessageStrings.UI_COLUMNS__ORGANIZATION),
 				localize(AdminMessageStrings.UI_COLUMNS__ORGANIZATION_UNIT),
 				localize(AdminMessageStrings.UI_COLUMNS__ORDER),

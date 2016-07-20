@@ -33,6 +33,7 @@ public class UIParticipantVariableWithParticipant extends UIModelObject {
 	// NOTE: The String values have to fit the name of the variables
 	public static final String	PARTICIPANT_ID		= "participantId";
 	public static final String	PARTICIPANT_NAME	= "participantName";
+	public static final String	GROUP				= "group";
 	public static final String	ORGANIZATION		= "organization";
 	public static final String	ORGANIZATION_UNIT	= "organizationUnit";
 
@@ -45,6 +46,9 @@ public class UIParticipantVariableWithParticipant extends UIModelObject {
 
 	@PropertyId(PARTICIPANT_NAME)
 	private String				participantName;
+
+	@PropertyId(GROUP)
+	private String				group;
 
 	@PropertyId(ORGANIZATION)
 	private String				organization;
@@ -62,14 +66,15 @@ public class UIParticipantVariableWithParticipant extends UIModelObject {
 	private Date				timestamp;
 
 	public static Object[] getVisibleColumns() {
-		return new Object[] { PARTICIPANT_ID, PARTICIPANT_NAME, ORGANIZATION,
-				ORGANIZATION_UNIT, NAME, VALUE, TIMESTAMP };
+		return new Object[] { PARTICIPANT_ID, PARTICIPANT_NAME, GROUP,
+				ORGANIZATION, ORGANIZATION_UNIT, NAME, VALUE, TIMESTAMP };
 	}
 
 	public static String[] getColumnHeaders() {
 		return new String[] {
 				localize(AdminMessageStrings.UI_COLUMNS__PARTICIPANT_ID),
 				localize(AdminMessageStrings.UI_COLUMNS__PARTICIPANT_NAME),
+				localize(AdminMessageStrings.UI_COLUMNS__GROUP),
 				localize(AdminMessageStrings.UI_COLUMNS__ORGANIZATION),
 				localize(AdminMessageStrings.UI_COLUMNS__ORGANIZATION_UNIT),
 				localize(AdminMessageStrings.UI_COLUMNS__VARIABLE_NAME),

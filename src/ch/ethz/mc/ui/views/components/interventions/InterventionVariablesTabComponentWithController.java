@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.interventions;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -46,7 +46,7 @@ import com.vaadin.ui.Button.ClickEvent;
 @SuppressWarnings("serial")
 @Log4j2
 public class InterventionVariablesTabComponentWithController extends
-InterventionVariablesTabComponent {
+		InterventionVariablesTabComponent {
 
 	private final Intervention										intervention;
 
@@ -112,9 +112,9 @@ InterventionVariablesTabComponent {
 		interventionVariablesEditComponent.getEditButton().addClickListener(
 				buttonClickListener);
 		interventionVariablesEditComponent.getSwitchPrivacyButton()
-		.addClickListener(buttonClickListener);
+				.addClickListener(buttonClickListener);
 		interventionVariablesEditComponent.getSwitchAccessButton()
-		.addClickListener(buttonClickListener);
+				.addClickListener(buttonClickListener);
 		interventionVariablesEditComponent.getDeleteButton().addClickListener(
 				buttonClickListener);
 	}
@@ -170,11 +170,11 @@ InterventionVariablesTabComponent {
 								UIInterventionVariable.class.cast(newVariable
 										.toUIModelObject()));
 						getInterventionVariablesEditComponent()
-						.getVariablesTable()
-						.select(newVariable.getId());
+								.getVariablesTable()
+								.select(newVariable.getId());
 						getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__VARIABLE_CREATED);
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__VARIABLE_CREATED);
 
 						closeWindow();
 					}
@@ -188,8 +188,8 @@ InterventionVariablesTabComponent {
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_NAME_FOR_VARIABLE,
 				selectedUIVariable.getRelatedModelObject(
 						InterventionVariableWithValue.class).getName(), null,
-						new ShortStringEditComponent(),
-						new ExtendableButtonClickListener() {
+				new ShortStringEditComponent(),
+				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						try {
@@ -198,8 +198,8 @@ InterventionVariablesTabComponent {
 
 							// Change name
 							getInterventionAdministrationManagerService()
-							.interventionVariableWithValueChangeName(
-									selectedVariable, getStringValue());
+									.interventionVariableWithValueChangeName(
+											selectedVariable, getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -208,13 +208,13 @@ InterventionVariablesTabComponent {
 						// Adapt UI
 						getStringItemProperty(selectedUIVariableBeanItem,
 								UIInterventionVariable.NAME).setValue(
-										selectedUIVariable.getRelatedModelObject(
-												InterventionVariableWithValue.class)
-												.getName());
+								selectedUIVariable.getRelatedModelObject(
+										InterventionVariableWithValue.class)
+										.getName());
 
 						getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__VARIABLE_RENAMED);
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__VARIABLE_RENAMED);
 						closeWindow();
 					}
 				}, null);
@@ -229,28 +229,28 @@ InterventionVariablesTabComponent {
 		InterventionVariableWithValuePrivacyTypes newTypeValue = null;
 		switch (selectedVariable.getPrivacyType()) {
 			case PRIVATE:
-				newTypeValue = InterventionVariableWithValuePrivacyTypes.PUBLIC;
+				newTypeValue = InterventionVariableWithValuePrivacyTypes.SHARED_WITH_GROUP;
 				break;
-			case PUBLIC:
-				newTypeValue = InterventionVariableWithValuePrivacyTypes.SHARED;
+			case SHARED_WITH_GROUP:
+				newTypeValue = InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION;
 				break;
-			case SHARED:
+			case SHARED_WITH_INTERVENTION:
 				newTypeValue = InterventionVariableWithValuePrivacyTypes.PRIVATE;
 				break;
 		}
 
 		try {
 			getInterventionAdministrationManagerService()
-			.interventionVariableWithValueChangePrivacyType(
-					selectedVariable, newTypeValue);
+					.interventionVariableWithValueChangePrivacyType(
+							selectedVariable, newTypeValue);
 
 			// Adapt UI
 			getStringItemProperty(selectedUIVariableBeanItem,
 					UIInterventionVariable.PRIVACY_TYPE).setValue(
-							selectedUIVariable
+					selectedUIVariable
 							.getRelatedModelObject(
 									InterventionVariableWithValue.class)
-									.getPrivacyType().toString());
+							.getPrivacyType().toString());
 
 			getAdminUI().showInformationNotification(
 					AdminMessageStrings.NOTIFICATION__VARIABLE_SETTING_CHANGED);
@@ -280,16 +280,16 @@ InterventionVariablesTabComponent {
 
 		try {
 			getInterventionAdministrationManagerService()
-			.interventionVariableWithValueChangeAccessType(
-					selectedVariable, newTypeValue);
+					.interventionVariableWithValueChangeAccessType(
+							selectedVariable, newTypeValue);
 
 			// Adapt UI
 			getStringItemProperty(selectedUIVariableBeanItem,
 					UIInterventionVariable.ACCESS_TYPE).setValue(
-							selectedUIVariable
+					selectedUIVariable
 							.getRelatedModelObject(
 									InterventionVariableWithValue.class)
-							.getAccessType().toString());
+									.getAccessType().toString());
 
 			getAdminUI().showInformationNotification(
 					AdminMessageStrings.NOTIFICATION__VARIABLE_SETTING_CHANGED);
@@ -305,8 +305,8 @@ InterventionVariablesTabComponent {
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_VALUE_FOR_VARIABLE,
 				selectedUIVariable.getRelatedModelObject(
 						InterventionVariableWithValue.class).getValue(), null,
-						new ShortStringEditComponent(),
-						new ExtendableButtonClickListener() {
+				new ShortStringEditComponent(),
+				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						try {
@@ -315,8 +315,8 @@ InterventionVariablesTabComponent {
 
 							// Change name
 							getInterventionAdministrationManagerService()
-							.interventionVariableWithValueChangeValue(
-									selectedVariable, getStringValue());
+									.interventionVariableWithValueChangeValue(
+											selectedVariable, getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -325,13 +325,13 @@ InterventionVariablesTabComponent {
 						// Adapt UI
 						getStringItemProperty(selectedUIVariableBeanItem,
 								UIInterventionVariable.VALUE).setValue(
-										selectedUIVariable.getRelatedModelObject(
-												InterventionVariableWithValue.class)
-												.getValue());
+								selectedUIVariable.getRelatedModelObject(
+										InterventionVariableWithValue.class)
+										.getValue());
 
 						getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__VARIABLE_VALUE_CHANGED);
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__VARIABLE_VALUE_CHANGED);
 						closeWindow();
 					}
 				}, null);
@@ -348,8 +348,8 @@ InterventionVariablesTabComponent {
 
 					// Delete variable
 					getInterventionAdministrationManagerService()
-					.interventionVariableWithValueDelete(
-							selectedVariable);
+							.interventionVariableWithValueDelete(
+									selectedVariable);
 				} catch (final Exception e) {
 					closeWindow();
 					handleException(e);
@@ -358,10 +358,10 @@ InterventionVariablesTabComponent {
 
 				// Adapt UI
 				getInterventionVariablesEditComponent().getVariablesTable()
-				.removeItem(
-						selectedUIVariable.getRelatedModelObject(
-								InterventionVariableWithValue.class)
-								.getId());
+						.removeItem(
+								selectedUIVariable.getRelatedModelObject(
+										InterventionVariableWithValue.class)
+										.getId());
 				getAdminUI().showInformationNotification(
 						AdminMessageStrings.NOTIFICATION__VARIABLE_DELETED);
 

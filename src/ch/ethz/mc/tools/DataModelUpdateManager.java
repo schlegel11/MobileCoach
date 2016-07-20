@@ -238,6 +238,8 @@ public class DataModelUpdateManager {
 				.multi()
 				.with(Queries.UPDATE_VERSION_3__PARTICIPANT__CHANGE_1,
 						localeToSet);
+		participantCollection.update(Queries.EVERYTHING).multi()
+				.with(Queries.UPDATE_VERSION_3__PARTICIPANT__CHANGE_2);
 
 		updateLStrings(jongo.getCollection("Feedback"),
 				new String[] { "name" }, localeToSet);

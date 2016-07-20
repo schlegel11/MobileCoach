@@ -186,41 +186,45 @@ public class DialogMessage extends ModelObject {
 	 */
 	public UIDialogMessageWithParticipantForResults toUIDialogMessageWithParticipantForResults(
 			final String participantId, final String participantName,
-			final String participantLanguage, final String organization,
-			final String organizationUnit, final boolean containsMediaContent) {
+			final String group, final String language,
+			final String organization, final String organizationUnit,
+			final boolean containsMediaContent) {
 
 		final val dialogMessage = new UIDialogMessageWithParticipantForResults(
 				participantId,
 				participantName,
-				participantLanguage,
-				organization,
-				organizationUnit,
-				StringUtils.right("0000" + String.valueOf(order + 1), 5),
-				status.toString(),
-				message == null || message.equals("") ? Messages
+				language,
+				group == null ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: message,
-				StringHelpers.createStringTimeStamp(shouldBeSentTimestamp),
-				StringHelpers.createStringTimeStamp(sentTimestamp),
-				answerReceived == null || answerReceived.equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: answerReceived,
-				answerReceivedRaw == null || answerReceivedRaw.equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: answerReceivedRaw,
-				StringHelpers.createStringTimeStamp(answerReceivedTimestamp),
-				manuallySent ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-				containsMediaContent ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-				mediaContentViewed ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NO));
+						: group,
+						organization,
+						organizationUnit,
+						StringUtils.right("0000" + String.valueOf(order + 1), 5),
+						status.toString(),
+						message == null || message.equals("") ? Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+								: message,
+								StringHelpers.createStringTimeStamp(shouldBeSentTimestamp),
+								StringHelpers.createStringTimeStamp(sentTimestamp),
+								answerReceived == null || answerReceived.equals("") ? Messages
+										.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+										: answerReceived,
+										answerReceivedRaw == null || answerReceivedRaw.equals("") ? Messages
+												.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+												: answerReceivedRaw,
+												StringHelpers.createStringTimeStamp(answerReceivedTimestamp),
+												manuallySent ? Messages
+														.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+														: Messages
+														.getAdminString(AdminMessageStrings.UI_MODEL__NO),
+														containsMediaContent ? Messages
+																.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+																: Messages
+																.getAdminString(AdminMessageStrings.UI_MODEL__NO),
+																mediaContentViewed ? Messages
+																		.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+																		: Messages
+																		.getAdminString(AdminMessageStrings.UI_MODEL__NO));
 
 		dialogMessage.setRelatedModelObject(this);
 
@@ -233,7 +237,7 @@ public class DialogMessage extends ModelObject {
 	 *
 	 * @param participantId
 	 * @param participantName
-	 * @param participantLanguage
+	 * @param language
 	 * @param organization
 	 * @param organizationUnit
 	 * @param containsMediaContent
@@ -241,19 +245,23 @@ public class DialogMessage extends ModelObject {
 	 */
 	public UIDialogMessageWithParticipant toUIDialogMessageWithParticipant(
 			final String participantId, final String participantName,
-			final String participantLanguage, final String organization,
-			final String organizationUnit, final boolean containsMediaContent) {
+			final String language, final String group,
+			final String organization, final String organizationUnit,
+			final boolean containsMediaContent) {
 		final val dialogMessage = new UIDialogMessageWithParticipant(
 				participantId,
 				participantName,
-				participantLanguage,
-				organization,
-				organizationUnit,
-				order + 1,
-				status.toString(),
-				message == null || message.equals("") ? Messages
+				language,
+				group == null ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: message,
+						: group,
+						organization,
+						organizationUnit,
+						order + 1,
+						status.toString(),
+						message == null || message.equals("") ? Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+								: message,
 				shouldBeSentTimestamp <= 0 ? null : new Date(
 						shouldBeSentTimestamp),
 				sentTimestamp <= 0 ? null : new Date(sentTimestamp),
@@ -289,19 +297,23 @@ public class DialogMessage extends ModelObject {
 	 *
 	 * @param participantId
 	 * @param participantName
-	 * @param participantLanguage
+	 * @param language
+	 * @param group
 	 * @param organization
 	 * @param organizationUnit
 	 * @return
 	 */
 	public UIDialogMessageProblemViewWithParticipant toUIDialogMessageProblemViewWithParticipant(
 			final String participantId, final String participantName,
-			final String participantLanguage, final String organization,
-			final String organizationUnit) {
+			final String language, final String group,
+			final String organization, final String organizationUnit) {
 		final val dialogMessage = new UIDialogMessageProblemViewWithParticipant(
 				participantId,
 				participantName,
-				participantLanguage,
+				language,
+				group == null ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+						: group,
 				organization,
 				organizationUnit,
 				message,

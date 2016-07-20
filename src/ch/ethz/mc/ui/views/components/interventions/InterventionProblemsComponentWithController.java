@@ -179,6 +179,9 @@ public class InterventionProblemsComponentWithController extends
 									.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 									: participant.getNickname(),
 							participant.getLanguage().getDisplayLanguage(),
+							participant.getGroup() == null ? Messages
+									.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+											: participant.getGroup(),
 							participant.getOrganization().equals("") ? Messages
 									.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 									: participant.getOrganization(),
@@ -249,18 +252,22 @@ public class InterventionProblemsComponentWithController extends
 																.getNickname(),
 												participant.getLanguage()
 														.getDisplayLanguage(),
+												participant.getGroup() == null ? Messages
+														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+														: participant
+																.getGroup(),
 												participant.getOrganization()
 														.equals("") ? Messages
 														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 														: participant
 																.getOrganization(),
-												participant
+														participant
 														.getOrganizationUnit()
 														.equals("") ? Messages
-														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-														: participant
+																.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+																: participant
 																.getOrganizationUnit(),
-														containsMediaContentInMessage));
+																containsMediaContentInMessage));
 			}
 		}
 

@@ -2,15 +2,15 @@ package ch.ethz.mc.model.ui.results;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,6 +33,7 @@ public class UIDialogMessageWithParticipantForResults extends UIModelObject {
 	public static final String	PARTICIPANT_ID				= "participantId";
 	public static final String	PARTICIPANT_NAME			= "participantName";
 	public static final String	LANGUAGE					= "language";
+	public static final String	GROUP						= "group";
 	public static final String	ORGANIZATION				= "organization";
 	public static final String	ORGANIZATION_UNIT			= "organizationUnit";
 	public static final String	ORDER						= "order";
@@ -58,6 +59,9 @@ public class UIDialogMessageWithParticipantForResults extends UIModelObject {
 
 	@PropertyId(LANGUAGE)
 	private String				language;
+
+	@PropertyId(GROUP)
+	private String				group;
 
 	@PropertyId(ORGANIZATION)
 	private String				organization;
@@ -98,7 +102,7 @@ public class UIDialogMessageWithParticipantForResults extends UIModelObject {
 
 	public static Object[] getVisibleColumns() {
 		return new Object[] { PARTICIPANT_ID, PARTICIPANT_NAME, LANGUAGE,
-				ORGANIZATION, ORGANIZATION_UNIT, ORDER, STATUS, MESSAGE,
+				GROUP, ORGANIZATION, ORGANIZATION_UNIT, ORDER, STATUS, MESSAGE,
 				SHOULD_BE_SENT_TIMESTAMP, SENT_TIMESTAMP, ANSWER, RAW_ANSWER,
 				ANSWER_RECEIVED_TIMESTAMP, MANUALLY_SENT,
 				CONTAINS_MEDIA_CONTENT, MEDIA_CONTENT_VIEWED };
@@ -109,6 +113,7 @@ public class UIDialogMessageWithParticipantForResults extends UIModelObject {
 				localize(AdminMessageStrings.UI_COLUMNS__PARTICIPANT_ID),
 				localize(AdminMessageStrings.UI_COLUMNS__PARTICIPANT_NAME),
 				localize(AdminMessageStrings.UI_COLUMNS__LANGUAGE),
+				localize(AdminMessageStrings.UI_COLUMNS__GROUP),
 				localize(AdminMessageStrings.UI_COLUMNS__ORGANIZATION),
 				localize(AdminMessageStrings.UI_COLUMNS__ORGANIZATION_UNIT),
 				localize(AdminMessageStrings.UI_COLUMNS__ORDER),

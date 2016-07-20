@@ -2,15 +2,15 @@ package ch.ethz.mc.services.internal;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -69,17 +69,17 @@ public class VariablesManagerService {
 	private final HashSet<String>			writeProtectedReservedVariableNames;
 
 	private static SimpleDateFormat			dayInWeekFormatter	= new SimpleDateFormat(
-			"u");
+																		"u");
 	private static SimpleDateFormat			dayOfMonthFormatter	= new SimpleDateFormat(
-			"d");
+																		"d");
 	private static SimpleDateFormat			monthFormatter		= new SimpleDateFormat(
-			"M");
+																		"M");
 	private static SimpleDateFormat			yearFormatter		= new SimpleDateFormat(
-			"yyyy");
+																		"yyyy");
 
 	private VariablesManagerService(
 			final DatabaseManagerService databaseManagerService)
-					throws Exception {
+			throws Exception {
 		log.info("Starting service...");
 
 		this.databaseManagerService = databaseManagerService;
@@ -105,7 +105,7 @@ public class VariablesManagerService {
 
 		allSystemReservedVariableNames = new HashSet<String>();
 		allSystemReservedVariableNames
-		.addAll(writeProtectedReservedVariableNames);
+				.addAll(writeProtectedReservedVariableNames);
 		for (val variable : SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES
 				.values()) {
 			allSystemReservedVariableNames.add(variable.toVariableName());
@@ -113,7 +113,7 @@ public class VariablesManagerService {
 
 		allSystemReservedVariableNamesRelevantForSlides = new HashSet<String>();
 		allSystemReservedVariableNamesRelevantForSlides
-		.addAll(allSystemReservedVariableNames);
+				.addAll(allSystemReservedVariableNames);
 		for (val variable : SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES
 				.values()) {
 			allSystemReservedVariableNamesRelevantForSlides.remove(variable
@@ -125,7 +125,7 @@ public class VariablesManagerService {
 
 	public static VariablesManagerService start(
 			final DatabaseManagerService databaseManagerService)
-					throws Exception {
+			throws Exception {
 		if (instance == null) {
 			instance = new VariablesManagerService(databaseManagerService);
 		}
@@ -152,11 +152,11 @@ public class VariablesManagerService {
 			switch (variable) {
 				case participantDialogOptionEmailData:
 					val dialogOptionEmail = databaseManagerService
-					.findOneModelObject(
-							DialogOption.class,
-							Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
-							participant.getId(),
-							DialogOptionTypes.EMAIL);
+							.findOneModelObject(
+									DialogOption.class,
+									Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
+									participant.getId(),
+									DialogOptionTypes.EMAIL);
 					if (dialogOptionEmail != null) {
 						addToHashtable(variablesWithValues,
 								variable.toVariableName(),
@@ -165,10 +165,10 @@ public class VariablesManagerService {
 					break;
 				case participantDialogOptionSMSData:
 					val dialogOptionSMS = databaseManagerService
-					.findOneModelObject(
-							DialogOption.class,
-							Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
-							participant.getId(), DialogOptionTypes.SMS);
+							.findOneModelObject(
+									DialogOption.class,
+									Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
+									participant.getId(), DialogOptionTypes.SMS);
 					if (dialogOptionSMS != null) {
 						addToHashtable(variablesWithValues,
 								variable.toVariableName(),
@@ -183,7 +183,14 @@ public class VariablesManagerService {
 				case participantLanguage:
 					addToHashtable(variablesWithValues,
 							variable.toVariableName(), participant
-							.getLanguage().toLanguageTag());
+									.getLanguage().toLanguageTag());
+					break;
+				case participantGroup:
+					if (participant.getGroup() != null) {
+						addToHashtable(variablesWithValues,
+								variable.toVariableName(),
+								participant.getGroup());
+					}
 					break;
 			}
 		}
@@ -329,8 +336,8 @@ public class VariablesManagerService {
 	@Synchronized
 	public void writeVariableValueOfParticipant(final ObjectId participantId,
 			final String variableName, final String variableValue)
-					throws WriteProtectedVariableException,
-					InvalidVariableNameException {
+			throws WriteProtectedVariableException,
+			InvalidVariableNameException {
 		writeVariableValueOfParticipant(participantId, variableName,
 				variableValue, false);
 	}
@@ -339,8 +346,8 @@ public class VariablesManagerService {
 	public void writeVariableValueOfParticipant(final ObjectId participantId,
 			final String variableName, final String variableValue,
 			final boolean overwriteAllowed)
-					throws WriteProtectedVariableException,
-					InvalidVariableNameException {
+			throws WriteProtectedVariableException,
+			InvalidVariableNameException {
 		log.debug("Storing variable {} with value {} for participant {}",
 				variableName, variableValue, participantId);
 
@@ -380,6 +387,10 @@ public class VariablesManagerService {
 					log.debug("Setting variable 'participantLanguage'");
 					participantSetLanguage(participantId, variableValue);
 					break;
+				case participantGroup:
+					log.debug("Setting variable 'participantGroup'");
+					participantSetGroup(participantId, variableValue);
+					break;
 			}
 		} else {
 			log.debug("Creating new variable");
@@ -388,7 +399,7 @@ public class VariablesManagerService {
 					variableName, variableValue == null ? "" : variableValue);
 
 			databaseManagerService
-					.saveModelObject(newParticipantVariableWithValue);
+			.saveModelObject(newParticipantVariableWithValue);
 		}
 	}
 
@@ -415,6 +426,21 @@ public class VariablesManagerService {
 			log.warn(
 					"The value {} could not be interpreted as language - so the participant language could not be set",
 					language);
+		}
+
+		databaseManagerService.saveModelObject(participant);
+	}
+
+	@Synchronized
+	private void participantSetGroup(final ObjectId participantId,
+			final String group) {
+		val participant = databaseManagerService.getModelObjectById(
+				Participant.class, participantId);
+
+		if (group == null || group.equals("")) {
+			participant.setGroup(null);
+		} else {
+			participant.setGroup(group);
 		}
 
 		databaseManagerService.saveModelObject(participant);

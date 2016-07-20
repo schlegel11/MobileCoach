@@ -84,6 +84,13 @@ public class Participant extends ModelObject {
 	private Locale		language;
 
 	/**
+	 * The participation group of the {@link Participant}
+	 */
+	@Getter
+	@Setter
+	private String		group;
+
+	/**
 	 * The {@link ScreeningSurvey} the {@link Participant} participates in
 	 */
 	@Getter
@@ -191,6 +198,9 @@ public class Participant extends ModelObject {
 						: nickname,
 				language.getDisplayLanguage() + " (" + language.toLanguageTag()
 						+ ")",
+						group == null ? Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+						: group,
 				organization,
 				organizationUnit,
 				new Date(createdTimestamp),

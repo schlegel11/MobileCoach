@@ -113,6 +113,7 @@ public class DataTable {
 
 			entry.add(participant.getNickname());
 			entry.add(participant.getLanguage().getDisplayLanguage());
+			entry.add(participant.getGroup());
 			entry.add(participant.getOrganization());
 			entry.add(participant.getOrganizationUnit());
 
@@ -147,6 +148,8 @@ public class DataTable {
 				.getAdminString(AdminMessageStrings.UI_COLUMNS__PARTICIPANT_NAME));
 		dataEntry.add(Messages
 				.getAdminString(AdminMessageStrings.UI_COLUMNS__LANGUAGE));
+		dataEntry.add(Messages
+				.getAdminString(AdminMessageStrings.UI_COLUMNS__GROUP));
 		dataEntry.add(Messages
 				.getAdminString(AdminMessageStrings.UI_COLUMNS__ORGANIZATION));
 		dataEntry

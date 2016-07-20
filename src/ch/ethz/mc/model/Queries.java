@@ -131,6 +131,7 @@ public class Queries {
 	public static final String	MEDIA_OBJECT_PARTICIPANT_SHORT_URL__SORT_BY_SHORT_ID_DESC																																						= "{'shortId':-1}";
 
 	public static final String	PARTICIPANT__BY_INTERVENTION																																													= "{'intervention':#}";
+	public static final String	PARTICIPANT__BY_INTERVENTION_AND_GROUP																																											= "{'intervention':#,'group':#}";
 	public static final String	PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE																																							= "{'intervention':#,'monitoringActive':true}";
 
 	public static final String	DIALOG_OPTION__BY_PARTICIPANT																																													= "{'participant':#}";
@@ -173,6 +174,7 @@ public class Queries {
 	public static final String	UPDATE_VERSION_3__MONITORING_MESSAGE__CHANGE_1																																									= "{$set:{'linkedIntermediateSurvey':null}}";
 	public static final String	UPDATE_VERSION_3__MEDIA_OBJECT__CHANGE_1																																										= "{$set:{'urlReference':null}}";
 	public static final String	UPDATE_VERSION_3__PARTICIPANT__CHANGE_1																																											= "{$set:{'language':#}}";
+	public static final String	UPDATE_VERSION_3__PARTICIPANT__CHANGE_2																																											= "{$set:{'group':null}}";
 	public static final String	UPDATE_VERSION_3__GENERAL_UPDATE_FOR_FILLED_LSTRING																																								= "{$set:{'#':{'values':{#:#}}}}";
 	public static final String	UPDATE_VERSION_3__GENERAL_UPDATE_FOR_EMPTY_LSTRING																																								= "{$set:{'#':{'values':{}}}}";
 }

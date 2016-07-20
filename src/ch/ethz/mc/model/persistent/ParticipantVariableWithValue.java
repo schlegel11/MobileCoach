@@ -27,6 +27,8 @@ import lombok.Setter;
 
 import org.bson.types.ObjectId;
 
+import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 import ch.ethz.mc.model.ui.UIParticipantVariableWithParticipant;
@@ -79,12 +81,16 @@ public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 	 */
 	public UIParticipantVariableWithParticipant toUIVariableWithParticipant(
 			final String participantId, final String participantName,
-			final String organization, final String organizationUnit) {
+			final String group, final String organization,
+			final String organizationUnit) {
 		final UIParticipantVariableWithParticipant variable;
 
 		variable = new UIParticipantVariableWithParticipant(participantId,
-				participantName, organization, organizationUnit, getName(),
-				getValue(), new Date(timestamp));
+				participantName,
+				group == null ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+						: group, organization, organizationUnit, getName(),
+						getValue(), new Date(timestamp));
 
 		variable.setRelatedModelObject(this);
 

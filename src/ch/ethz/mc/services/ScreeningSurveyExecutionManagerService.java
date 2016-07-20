@@ -138,8 +138,9 @@ public class ScreeningSurveyExecutionManagerService {
 		final val participant = new Participant(
 				screeningSurvey.getIntervention(),
 				InternalDateTime.currentTimeMillis(), "",
-				Constants.getInterventionLocales()[0], screeningSurvey.getId(),
-				screeningSurvey.getGlobalUniqueId(), null, null, true, "", "");
+				Constants.getInterventionLocales()[0], null,
+				screeningSurvey.getId(), screeningSurvey.getGlobalUniqueId(),
+				null, null, true, "", "");
 
 		databaseManagerService.saveModelObject(participant);
 
@@ -752,6 +753,11 @@ public class ScreeningSurveyExecutionManagerService {
 			templateVariables.put(
 					GeneralSlideTemplateFieldTypes.LANGUAGE.toVariable(),
 					participant.getLanguage().toLanguageTag());
+
+			// Group
+			templateVariables.put(
+					GeneralSlideTemplateFieldTypes.GROUP.toVariable(),
+					participant.getGroup());
 
 			// Title
 			final val title = VariableStringReplacer
@@ -1485,6 +1491,11 @@ public class ScreeningSurveyExecutionManagerService {
 			templateVariables.put(
 					GeneralSlideTemplateFieldTypes.LANGUAGE.toVariable(),
 					participant.getLanguage().toLanguageTag());
+
+			// Group
+			templateVariables.put(
+					GeneralSlideTemplateFieldTypes.GROUP.toVariable(),
+					participant.getGroup());
 
 			// Title
 			final val title = VariableStringReplacer
