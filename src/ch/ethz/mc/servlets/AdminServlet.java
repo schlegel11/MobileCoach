@@ -2,15 +2,15 @@ package ch.ethz.mc.servlets;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -47,17 +47,17 @@ import com.vaadin.server.VaadinServlet;
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
-@WebServlet(displayName = "Admin UI", value = { "/admin/*", "/VAADIN/*" }, initParams = {
+@WebServlet(displayName = "Admin UI", urlPatterns = { "/admin/*", "/VAADIN/*" }, initParams = {
 		@WebInitParam(name = "pushmode", value = "automatic"),
 		@WebInitParam(name = "closeIdleSessions", value = "true"),
 		@WebInitParam(name = "heartbeatInterval", value = "300") }, asyncSupported = true, loadOnStartup = 1)
 @VaadinServletConfiguration(productionMode = Constants.VAADIN_PRODUCTION_MODE, ui = AdminNavigatorUI.class)
 @Log4j2
 public class AdminServlet extends VaadinServlet implements SessionInitListener,
-SessionDestroyListener {
+		SessionDestroyListener {
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.vaadin.server.VaadinServlet#init(javax.servlet.ServletConfig)
 	 */
 	@Override
@@ -75,7 +75,7 @@ SessionDestroyListener {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.vaadin.server.VaadinServlet#servletInitialized()
 	 */
 	@Override
@@ -126,9 +126,9 @@ SessionDestroyListener {
 		log.debug("Setting new session timeout");
 
 		event.getSession()
-		.getSession()
-		.setMaxInactiveInterval(
-				ImplementationConstants.UI_SESSION_TIMEOUT_IN_SECONDS);
+				.getSession()
+				.setMaxInactiveInterval(
+						ImplementationConstants.UI_SESSION_TIMEOUT_IN_SECONDS);
 	}
 
 	@Override
@@ -138,6 +138,6 @@ SessionDestroyListener {
 		log.debug("Session {} destroyed", sessionId);
 
 		MC.getInstance().getLockingService()
-		.releaseAllLocksOfSession(sessionId);
+				.releaseAllLocksOfSession(sessionId);
 	}
 }

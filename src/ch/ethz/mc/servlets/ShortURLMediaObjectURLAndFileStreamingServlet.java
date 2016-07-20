@@ -53,7 +53,7 @@ import ch.ethz.mc.services.InterventionExecutionManagerService;
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
-@WebServlet(displayName = "Short URL based Media Object File Streaming", value = "/"
+@WebServlet(displayName = "Short URL based Media Object File Streaming", urlPatterns = "/"
 		+ ImplementationConstants.SHORT_ID_FILE_STREAMING_SERVLET_PATH + "/*", asyncSupported = true, loadOnStartup = 1)
 @Log4j2
 public class ShortURLMediaObjectURLAndFileStreamingServlet extends HttpServlet {

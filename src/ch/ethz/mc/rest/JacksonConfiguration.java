@@ -2,15 +2,15 @@ package ch.ethz.mc.rest;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,6 +37,11 @@ import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.SerializerProvider;
 import org.codehaus.jackson.map.module.SimpleModule;
 
+/**
+ * JSON serialization/deserialization configuration for REST interface
+ *
+ * @author Andreas Filler
+ */
 @Provider
 public class JacksonConfiguration implements ContextResolver<ObjectMapper> {
 	private final ObjectMapper	objectMapper;
@@ -47,7 +52,7 @@ public class JacksonConfiguration implements ContextResolver<ObjectMapper> {
 		public void serialize(final Boolean value,
 				final JsonGenerator jsonGenerator,
 				final SerializerProvider serializerProvider)
-						throws IOException, JsonProcessingException {
+				throws IOException, JsonProcessingException {
 			jsonGenerator.writeString(value.toString());
 		}
 	}
@@ -57,7 +62,7 @@ public class JacksonConfiguration implements ContextResolver<ObjectMapper> {
 		@Override
 		public Boolean deserialize(final JsonParser jsonParser,
 				final DeserializationContext deserializationContext)
-						throws IOException, JsonProcessingException {
+				throws IOException, JsonProcessingException {
 			return Boolean.valueOf(jsonParser.getText());
 		}
 	}
@@ -68,7 +73,7 @@ public class JacksonConfiguration implements ContextResolver<ObjectMapper> {
 		public void serialize(final Integer value,
 				final JsonGenerator jsonGenerator,
 				final SerializerProvider serializerProvider)
-						throws IOException, JsonProcessingException {
+				throws IOException, JsonProcessingException {
 			jsonGenerator.writeString(value.toString());
 		}
 	}
@@ -78,7 +83,7 @@ public class JacksonConfiguration implements ContextResolver<ObjectMapper> {
 		@Override
 		public Integer deserialize(final JsonParser jsonParser,
 				final DeserializationContext deserializationContext)
-						throws IOException, JsonProcessingException {
+				throws IOException, JsonProcessingException {
 			return Integer.valueOf(jsonParser.getText());
 		}
 	}

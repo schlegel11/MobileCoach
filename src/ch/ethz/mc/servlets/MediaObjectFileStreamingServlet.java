@@ -53,7 +53,7 @@ import ch.ethz.mc.services.InterventionAdministrationManagerService;
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
-@WebServlet(displayName = "Media Object File Streaming", value = "/"
+@WebServlet(displayName = "Media Object File Streaming", urlPatterns = "/"
 		+ ImplementationConstants.FILE_STREAMING_SERVLET_PATH + "/*", asyncSupported = true, loadOnStartup = 1)
 @Log4j2
 public class MediaObjectFileStreamingServlet extends HttpServlet {

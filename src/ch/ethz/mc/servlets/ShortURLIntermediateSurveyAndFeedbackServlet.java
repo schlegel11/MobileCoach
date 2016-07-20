@@ -66,7 +66,7 @@ import com.github.mustachejava.MustacheFactory;
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
-@WebServlet(displayName = "Short URL Screening Surveys and Feedback", value = "/"
+@WebServlet(displayName = "Short URL Screening Surveys and Feedback", urlPatterns = "/"
 		+ ImplementationConstants.SHORT_ID_SCREEN_SURVEY_AND_FEEDBACK_SERVLET_PATH
 		+ "/*", asyncSupported = true, loadOnStartup = 1)
 @Log4j2

@@ -63,7 +63,7 @@ import com.github.mustachejava.MustacheFactory;
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
-@WebServlet(displayName = "Screening Surveys", value = "/*", asyncSupported = true, loadOnStartup = 1)
+@WebServlet(displayName = "Screening Surveys", urlPatterns = "/*", asyncSupported = true, loadOnStartup = 1)
 @Log4j2
 public class ScreeningSurveyServlet extends HttpServlet {
 	private MustacheFactory							mustacheFactory;
@@ -299,7 +299,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 
 				for (val screeningSurvey : activeScreeningSurveys) {
 					val screeningSurveyData = new HashMap<String, String>();
-					screeningSurveyData.put("name", screeningSurvey.getName().toString());
+					screeningSurveyData.put("name", screeningSurvey.getName()
+							.toString());
 					screeningSurveyData.put("url",
 							baseURL + screeningSurvey.getId() + "/");
 					surveysData.add(screeningSurveyData);
@@ -372,11 +373,10 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				}
 			}
 		}
-		
+
 		session.setAttribute(
 				ImplementationConstants.SURVEYS_CURRENT_SURVEY_CHECK_SESSION_ATTRIBUTE,
 				screeningSurveyId);
-		
 
 		// Reset session if there already is a running session but for a
 		// different participant
@@ -390,10 +390,10 @@ public class ScreeningSurveyServlet extends HttpServlet {
 
 		if ((participantId != null
 				&& session
-						.getAttribute(ImplementationConstants.SURVEYS_CURRENT_PARTICIPANT_CHECK_SESSION_ATTRIBUTE) != null
-				&& !((ObjectId) session
-						.getAttribute(ImplementationConstants.SURVEYS_CURRENT_PARTICIPANT_CHECK_SESSION_ATTRIBUTE))
-						.equals(participantId)) || (participantId == null && session
+						.getAttribute(ImplementationConstants.SURVEYS_CURRENT_PARTICIPANT_CHECK_SESSION_ATTRIBUTE) != null && !((ObjectId) session
+					.getAttribute(ImplementationConstants.SURVEYS_CURRENT_PARTICIPANT_CHECK_SESSION_ATTRIBUTE))
+				.equals(participantId))
+				|| (participantId == null && session
 						.getAttribute(ImplementationConstants.SURVEYS_CURRENT_PARTICIPANT_CHECK_SESSION_ATTRIBUTE) != null)) {
 
 			// Session needs to be reset
