@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,6 +26,7 @@ import ch.ethz.mc.ui.AdminNavigatorUI;
 import ch.ethz.mc.ui.views.components.basics.AboutTextComponent;
 import ch.ethz.mc.ui.views.components.views.LoginViewComponent;
 
+import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.ui.Button.ClickEvent;
@@ -34,7 +35,7 @@ import com.vaadin.ui.Window;
 
 /**
  * Provides login view and navigation in login view
- * 
+ *
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
@@ -55,6 +56,9 @@ public class LoginView extends AbstractView implements View {
 		loginViewComponent.getAboutButton().addClickListener(
 				new AboutButtonClickListener());
 
+		// Add enter as click shortcut for default button
+		loginViewComponent.getLoginButton().setClickShortcut(KeyCode.ENTER);
+
 		// Add view
 		this.addComponent(loginViewComponent);
 	}
@@ -69,14 +73,14 @@ public class LoginView extends AbstractView implements View {
 			} else {
 				if (!loginViewComponent.getUsernameField().isValid()) {
 					getAdminUI()
-							.showWarningNotification(
-									AdminMessageStrings.NOTIFICATION__NO_VALID_USERNAME);
+					.showWarningNotification(
+							AdminMessageStrings.NOTIFICATION__NO_VALID_USERNAME);
 					return;
 				}
 				if (!loginViewComponent.getPasswordField().isValid()) {
 					getAdminUI()
-							.showWarningNotification(
-									AdminMessageStrings.NOTIFICATION__NO_VALID_PASSWORD);
+					.showWarningNotification(
+							AdminMessageStrings.NOTIFICATION__NO_VALID_PASSWORD);
 					return;
 				}
 

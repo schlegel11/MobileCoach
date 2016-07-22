@@ -266,7 +266,9 @@ MediaObjectIntegrationComponent {
 			originalFileName = filename;
 
 			if (temporaryFileExtension.equals(".png")
-					|| temporaryFileExtension.equals(".jpg")) {
+					|| temporaryFileExtension.equals(".jpg")
+					|| temporaryFileExtension.equals(".jpeg")
+					|| temporaryFileExtension.equals(".gif")) {
 				originalFileType = MediaObjectTypes.IMAGE;
 			} else if (temporaryFileExtension.equals(".mp4")) {
 				originalFileType = MediaObjectTypes.VIDEO;

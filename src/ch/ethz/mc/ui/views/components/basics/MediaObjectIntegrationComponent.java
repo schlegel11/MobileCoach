@@ -159,7 +159,7 @@ AbstractCustomComponent {
 		uploadComponent.setWidth("100.0%");
 		uploadComponent.setHeight("-1px");
 		mainLayout.addComponent(uploadComponent,
-				"right:105.0px;bottom:0.0px;left:105.0px;");
+				"right:105.0px;bottom:0.0px;left:0.0px;");
 
 		// deleteButton
 		deleteButton = new Button();
@@ -173,15 +173,15 @@ AbstractCustomComponent {
 		contentObjectLabel = new Label();
 		contentObjectLabel.setImmediate(false);
 		contentObjectLabel.setWidth("100.0%");
-		contentObjectLabel.setHeight("25px");
+		contentObjectLabel.setHeight("30px");
 		contentObjectLabel.setValue("!!! (no file uploaded)");
 		mainLayout.addComponent(contentObjectLabel,
-				"top:0.0px;right:5.0px;left:0.0px;");
+				"top:0.0px;right:105.0px;left:0.0px;");
 
 		// contentObjectPanel
 		contentObjectPanel = buildContentObjectPanel();
 		mainLayout.addComponent(contentObjectPanel,
-				"top:20.0px;right:0.0px;bottom:30.0px;left:0.0px;");
+				"top:30.0px;right:0.0px;bottom:30.0px;left:0.0px;");
 
 		// setURLButton
 		setURLButton = new Button();
@@ -189,7 +189,7 @@ AbstractCustomComponent {
 		setURLButton.setImmediate(true);
 		setURLButton.setWidth("100px");
 		setURLButton.setHeight("-1px");
-		mainLayout.addComponent(setURLButton, "bottom:0.0px;left:0.0px;");
+		mainLayout.addComponent(setURLButton, "top:0.0px;right:0.0px;");
 
 		return mainLayout;
 	}
