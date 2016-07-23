@@ -27,8 +27,8 @@ import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.services.InterventionAdministrationManagerService;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
 import ch.ethz.mc.services.RESTManagerService;
-import ch.ethz.mc.services.ScreeningSurveyAdministrationManagerService;
-import ch.ethz.mc.services.ScreeningSurveyExecutionManagerService;
+import ch.ethz.mc.services.SurveyAdministrationManagerService;
+import ch.ethz.mc.services.SurveyExecutionManagerService;
 import ch.ethz.mc.services.internal.CommunicationManagerService;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService;
@@ -64,11 +64,11 @@ public class MC implements ServletContextListener {
 	@Getter
 	InterventionAdministrationManagerService	interventionAdministrationManagerService;
 	@Getter
-	ScreeningSurveyAdministrationManagerService	screeningSurveyAdministrationManagerService;
+	SurveyAdministrationManagerService	screeningSurveyAdministrationManagerService;
 	@Getter
 	InterventionExecutionManagerService			interventionExecutionManagerService;
 	@Getter
-	ScreeningSurveyExecutionManagerService		screeningSurveyExecutionManagerService;
+	SurveyExecutionManagerService		screeningSurveyExecutionManagerService;
 	@Getter
 	RESTManagerService							restManagerService;
 
@@ -101,7 +101,7 @@ public class MC implements ServletContextListener {
 			lockingService = LockingService.start();
 
 			// Controller services
-			screeningSurveyAdministrationManagerService = ScreeningSurveyAdministrationManagerService
+			screeningSurveyAdministrationManagerService = SurveyAdministrationManagerService
 					.start(databaseManagerService, fileStorageManagerService,
 							variablesManagerService, modelObjectExchangeService);
 			interventionAdministrationManagerService = InterventionAdministrationManagerService
@@ -109,7 +109,7 @@ public class MC implements ServletContextListener {
 							variablesManagerService,
 							modelObjectExchangeService,
 							screeningSurveyAdministrationManagerService);
-			screeningSurveyExecutionManagerService = ScreeningSurveyExecutionManagerService
+			screeningSurveyExecutionManagerService = SurveyExecutionManagerService
 					.start(databaseManagerService, fileStorageManagerService,
 							variablesManagerService,
 							interventionAdministrationManagerService);

@@ -42,7 +42,15 @@ public enum GeneralSlideTemplateFieldTypes {
 	 */
 	BASE_URL,
 	/**
-	 * Contains the URL of the screening survey feedback
+	 * Contains the token that enables REST access
+	 */
+	TOKEN,
+	/**
+	 * Contains the base URL of the REST interface
+	 */
+	REST_API_URL,
+	/**
+	 * Contains the URL of the feedback of the participant
 	 */
 	FEEDBACK_URL,
 	/**

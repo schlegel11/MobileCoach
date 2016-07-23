@@ -65,19 +65,19 @@ import ch.ethz.mc.ui.NotificationMessageException;
  *
  * @author Andreas Filler
  */
-public class ScreeningSurveyAdministrationManagerService {
+public class SurveyAdministrationManagerService {
 	private final Object										$lock;
 
 	private static final String									DEFAULT_OBJECT_NAME	= "---";
 
-	private static ScreeningSurveyAdministrationManagerService	instance			= null;
+	private static SurveyAdministrationManagerService	instance			= null;
 
 	private final DatabaseManagerService						databaseManagerService;
 	private final FileStorageManagerService						fileStorageManagerService;
 	private final VariablesManagerService						variablesManagerService;
 	private final ModelObjectExchangeService					modelObjectExchangeService;
 
-	private ScreeningSurveyAdministrationManagerService(
+	private SurveyAdministrationManagerService(
 			final DatabaseManagerService databaseManagerService,
 			final FileStorageManagerService fileStorageManagerService,
 			final VariablesManagerService variablesManagerService,
@@ -95,14 +95,14 @@ public class ScreeningSurveyAdministrationManagerService {
 		log.info("Started.");
 	}
 
-	public static ScreeningSurveyAdministrationManagerService start(
+	public static SurveyAdministrationManagerService start(
 			final DatabaseManagerService databaseManagerService,
 			final FileStorageManagerService fileStorageManagerService,
 			final VariablesManagerService variablesManagerService,
 			final ModelObjectExchangeService modelObjectExchangeService)
 					throws Exception {
 		if (instance == null) {
-			instance = new ScreeningSurveyAdministrationManagerService(
+			instance = new SurveyAdministrationManagerService(
 					databaseManagerService, fileStorageManagerService,
 					variablesManagerService, modelObjectExchangeService);
 		}

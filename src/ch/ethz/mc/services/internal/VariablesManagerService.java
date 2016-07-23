@@ -30,6 +30,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 
+import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.memory.MemoryVariable;
 import ch.ethz.mc.model.persistent.DialogOption;
@@ -47,7 +48,11 @@ import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlideRule;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
+import ch.ethz.mc.model.persistent.types.InterventionVariableWithValueAccessTypes;
 import ch.ethz.mc.services.types.SystemVariables;
+import ch.ethz.mc.services.types.SystemVariables.READ_ONLY_PARTICIPANT_VARIABLES;
+import ch.ethz.mc.services.types.SystemVariables.READ_ONLY_SYSTEM_VARIABLES;
+import ch.ethz.mc.services.types.SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES;
 import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.tools.StringValidator;
@@ -67,6 +72,9 @@ public class VariablesManagerService {
 	private final HashSet<String>			allSystemReservedVariableNamesRelevantForSlides;
 	private final HashSet<String>			writableReservedVariableNames;
 	private final HashSet<String>			writeProtectedReservedVariableNames;
+
+	private final HashSet<String>			externallyReadableSystemVariableNames;
+	private final HashSet<String>			externallyReadableParticipantVariableNames;
 
 	private static SimpleDateFormat			dayInWeekFormatter	= new SimpleDateFormat(
 																		"u");
@@ -120,6 +128,15 @@ public class VariablesManagerService {
 					.toVariableName());
 		}
 
+		externallyReadableSystemVariableNames = new HashSet<String>();
+		for (val variable : SystemVariables.EXTERNALLY_READABLE_SYSTEM_VARIABLE_NAMES) {
+			externallyReadableSystemVariableNames.add(variable);
+		}
+		externallyReadableParticipantVariableNames = new HashSet<String>();
+		for (val variable : SystemVariables.EXTERNALLY_READABLE_PARTICIPANT_VARIABLE_NAMES) {
+			externallyReadableParticipantVariableNames.add(variable);
+		}
+
 		log.info("Started.");
 	}
 
@@ -145,53 +162,15 @@ public class VariablesManagerService {
 			final Participant participant) {
 		val variablesWithValues = new Hashtable<String, AbstractVariableWithValue>();
 
-		// Add all read/write participant variables (to become overwritten, if
-		// required)
+		// Add all read/write participant variables
 		for (val variable : SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES
 				.values()) {
-			switch (variable) {
-				case participantDialogOptionEmailData:
-					val dialogOptionEmail = databaseManagerService
-							.findOneModelObject(
-									DialogOption.class,
-									Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
-									participant.getId(),
-									DialogOptionTypes.EMAIL);
-					if (dialogOptionEmail != null) {
-						addToHashtable(variablesWithValues,
-								variable.toVariableName(),
-								dialogOptionEmail.getData());
-					}
-					break;
-				case participantDialogOptionSMSData:
-					val dialogOptionSMS = databaseManagerService
-							.findOneModelObject(
-									DialogOption.class,
-									Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
-									participant.getId(), DialogOptionTypes.SMS);
-					if (dialogOptionSMS != null) {
-						addToHashtable(variablesWithValues,
-								variable.toVariableName(),
-								dialogOptionSMS.getData());
-					}
-					break;
-				case participantName:
-					addToHashtable(variablesWithValues,
-							variable.toVariableName(),
-							participant.getNickname());
-					break;
-				case participantLanguage:
-					addToHashtable(variablesWithValues,
-							variable.toVariableName(), participant
-									.getLanguage().toLanguageTag());
-					break;
-				case participantGroup:
-					if (participant.getGroup() != null) {
-						addToHashtable(variablesWithValues,
-								variable.toVariableName(),
-								participant.getGroup());
-					}
-					break;
+			val readWriteParticipantVariableValue = getReadWriteParticipantVariableValueForParticipant(
+					participant, variable);
+
+			if (readWriteParticipantVariableValue != null) {
+				addToHashtable(variablesWithValues, variable.toVariableName(),
+						readWriteParticipantVariableValue);
 			}
 		}
 
@@ -231,27 +210,12 @@ public class VariablesManagerService {
 		// Add all read only system variables
 		val date = new Date(InternalDateTime.currentTimeMillis());
 		for (val variable : SystemVariables.READ_ONLY_SYSTEM_VARIABLES.values()) {
-			switch (variable) {
-				case systemDayInWeek:
-					addToHashtable(variablesWithValues,
-							variable.toVariableName(),
-							dayInWeekFormatter.format(date));
-					break;
-				case systemDayOfMonth:
-					addToHashtable(variablesWithValues,
-							variable.toVariableName(),
-							dayOfMonthFormatter.format(date));
-					break;
-				case systemMonth:
-					addToHashtable(variablesWithValues,
-							variable.toVariableName(),
-							monthFormatter.format(date));
-					break;
-				case systemYear:
-					addToHashtable(variablesWithValues,
-							variable.toVariableName(),
-							yearFormatter.format(date));
-					break;
+			val readOnlySystemVariableValue = getReadOnlySystemVariableValue(
+					date, variable);
+
+			if (readOnlySystemVariableValue != null) {
+				addToHashtable(variablesWithValues, variable.toVariableName(),
+						readOnlySystemVariableValue);
 			}
 		}
 
@@ -259,42 +223,14 @@ public class VariablesManagerService {
 		val dialogStatus = databaseManagerService.findOneModelObject(
 				DialogStatus.class, Queries.DIALOG_STATUS__BY_PARTICIPANT,
 				participant.getId());
-		int participationInDays = 0;
-		int participationInWeeks = 0;
-		String participantFeedbackURL = "";
-		if (dialogStatus != null) {
-			participationInDays = dialogStatus.getMonitoringDaysParticipated();
-			participationInWeeks = (int) Math.floor(participationInDays / 7);
-		}
-		if (participant.getAssignedFeedback() != null) {
-			val surveyShortURL = databaseManagerService
-					.findOneModelObject(
-							IntermediateSurveyAndFeedbackParticipantShortURL.class,
-							Queries.INTERMEDIATE_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_PARTICIPANT_AND_FEEDBACK,
-							participant.getId(),
-							participant.getAssignedFeedback());
-
-			if (surveyShortURL != null) {
-				participantFeedbackURL = surveyShortURL.calculateURL();
-			}
-		}
 		for (val variable : SystemVariables.READ_ONLY_PARTICIPANT_VARIABLES
 				.values()) {
-			switch (variable) {
-				case participantParticipationInDays:
-					addToHashtable(variablesWithValues,
-							variable.toVariableName(),
-							String.valueOf(participationInDays));
-					break;
-				case participantParticipationInWeeks:
-					addToHashtable(variablesWithValues,
-							variable.toVariableName(),
-							String.valueOf(participationInWeeks));
-					break;
-				case participantFeedbackURL:
-					addToHashtable(variablesWithValues,
-							variable.toVariableName(), participantFeedbackURL);
-					break;
+			val readOnlyParticipantVariableValue = getReadOnlyParticipantVariableValue(
+					participant, dialogStatus, variable);
+
+			if (readOnlyParticipantVariableValue != null) {
+				addToHashtable(variablesWithValues, variable.toVariableName(),
+						readOnlyParticipantVariableValue);
 			}
 		}
 
@@ -313,6 +249,102 @@ public class VariablesManagerService {
 		}
 
 		return variablesWithValues;
+	}
+
+	/*
+	 * Helper methods to retrieve specific variable groups
+	 */
+	private String getReadWriteParticipantVariableValueForParticipant(
+			final Participant participant,
+			final READ_WRITE_PARTICIPANT_VARIABLES variable) {
+		switch (variable) {
+			case participantDialogOptionEmailData:
+				val dialogOptionEmail = databaseManagerService
+						.findOneModelObject(DialogOption.class,
+								Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
+								participant.getId(), DialogOptionTypes.EMAIL);
+				if (dialogOptionEmail != null) {
+					return dialogOptionEmail.getData();
+				}
+				break;
+			case participantDialogOptionSMSData:
+				val dialogOptionSMS = databaseManagerService
+						.findOneModelObject(DialogOption.class,
+								Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
+								participant.getId(), DialogOptionTypes.SMS);
+				if (dialogOptionSMS != null) {
+					return dialogOptionSMS.getData();
+				}
+				break;
+			case participantName:
+				return participant.getNickname();
+			case participantLanguage:
+				return participant.getLanguage().toLanguageTag();
+			case participantGroup:
+				if (participant.getGroup() != null) {
+					return participant.getGroup();
+				}
+				break;
+		}
+		return null;
+	}
+
+	private String getReadOnlySystemVariableValue(final Date date,
+			final READ_ONLY_SYSTEM_VARIABLES variable) {
+		switch (variable) {
+			case systemDayInWeek:
+				return dayInWeekFormatter.format(date);
+			case systemDayOfMonth:
+				return dayOfMonthFormatter.format(date);
+			case systemMonth:
+				return monthFormatter.format(date);
+			case systemYear:
+				return yearFormatter.format(date);
+		}
+		return null;
+	}
+
+	private String getReadOnlyParticipantVariableValue(
+			final Participant participant, final DialogStatus dialogStatus,
+			final READ_ONLY_PARTICIPANT_VARIABLES variable) {
+		switch (variable) {
+			case participantParticipationInDays:
+				int participationInDays = 0;
+				if (dialogStatus != null) {
+					participationInDays = dialogStatus
+							.getMonitoringDaysParticipated();
+				}
+				return String.valueOf(participationInDays);
+			case participantParticipationInWeeks:
+				participationInDays = 0;
+				int participationInWeeks = 0;
+				if (dialogStatus != null) {
+					participationInDays = dialogStatus
+							.getMonitoringDaysParticipated();
+				}
+				if (dialogStatus != null) {
+					participationInWeeks = (int) Math
+							.floor(participationInDays / 7);
+				}
+				return String.valueOf(participationInWeeks);
+			case participantFeedbackURL:
+				String participantFeedbackURL = "";
+
+				if (participant.getAssignedFeedback() != null) {
+					val surveyShortURL = databaseManagerService
+							.findOneModelObject(
+									IntermediateSurveyAndFeedbackParticipantShortURL.class,
+									Queries.INTERMEDIATE_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_PARTICIPANT_AND_FEEDBACK,
+									participant.getId(),
+									participant.getAssignedFeedback());
+
+					if (surveyShortURL != null) {
+						participantFeedbackURL = surveyShortURL.calculateURL();
+					}
+				}
+				return participantFeedbackURL;
+		}
+		return null;
 	}
 
 	/**
@@ -399,7 +431,7 @@ public class VariablesManagerService {
 					variableName, variableValue == null ? "" : variableValue);
 
 			databaseManagerService
-			.saveModelObject(newParticipantVariableWithValue);
+					.saveModelObject(newParticipantVariableWithValue);
 		}
 	}
 
@@ -642,13 +674,202 @@ public class VariablesManagerService {
 		return variables;
 	}
 
+	/**
+	 * Tries to read an variable of a specific participant from an external
+	 * interface
+	 *
+	 * @param participantId
+	 * @param variable
+	 * @return
+	 * @throws ExternallyReadProtectedVariableException
+	 */
+	public String getExternallyReadableVariableValueForParticipant(
+			final ObjectId participantId, final String variable)
+			throws ExternallyReadProtectedVariableException {
+
+		if (allSystemReservedVariableNames.contains(variable)) {
+			// It's a reserved variable
+			if (externallyReadableSystemVariableNames.contains(variable)) {
+				try {
+					return getReadOnlySystemVariableValue(
+							new Date(InternalDateTime.currentTimeMillis()),
+							READ_ONLY_SYSTEM_VARIABLES.valueOf(variable
+									.replace(
+											ImplementationConstants.VARIABLE_PREFIX,
+											"")));
+				} catch (final Exception e) {
+					return null;
+				}
+			} else if (externallyReadableParticipantVariableNames
+					.contains(variable)) {
+				val participant = databaseManagerService.getModelObjectById(
+						Participant.class, participantId);
+
+				if (participant == null) {
+					throw new ExternallyReadProtectedVariableException(
+							"The given participant does not exist anymore, so the variable cannot be read");
+				}
+
+				String value = null;
+				try {
+					value = getReadWriteParticipantVariableValueForParticipant(
+							participant,
+							READ_WRITE_PARTICIPANT_VARIABLES.valueOf(variable
+									.replace(
+											ImplementationConstants.VARIABLE_PREFIX,
+											"")));
+				} catch (final Exception e) {
+					// Not relevant to handle
+				}
+
+				if (value != null) {
+					return value;
+				}
+
+				try {
+					val dialogStatus = databaseManagerService
+							.findOneModelObject(DialogStatus.class,
+									Queries.DIALOG_STATUS__BY_PARTICIPANT,
+									participant.getId());
+
+					value = getReadOnlyParticipantVariableValue(
+							participant,
+							dialogStatus,
+							READ_ONLY_PARTICIPANT_VARIABLES.valueOf(variable
+									.replace(
+											ImplementationConstants.VARIABLE_PREFIX,
+											"")));
+				} catch (final Exception e) {
+					// Not relevant to handle
+				}
+
+				return value;
+			}
+
+			throw new ExternallyReadProtectedVariableException();
+		} else {
+			// It's a self-created variable
+			val participant = databaseManagerService.getModelObjectById(
+					Participant.class, participantId);
+
+			if (participant == null) {
+				throw new ExternallyReadProtectedVariableException(
+						"The given participant does not exist anymore, so the variable cannot be read");
+			}
+
+			// Check rights of intervention variable
+			val interventionVariable = databaseManagerService
+					.findOneModelObject(
+							InterventionVariableWithValue.class,
+							Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME,
+							participant.getIntervention(), variable);
+
+			if (interventionVariable == null) {
+				throw new ExternallyReadProtectedVariableException(
+						"This variable does not exist");
+			}
+			if (interventionVariable.getAccessType() == InterventionVariableWithValueAccessTypes.INTERNAL) {
+				throw new ExternallyReadProtectedVariableException();
+			}
+
+			// Find variable value for participant
+			val participantVariableWithValue = databaseManagerService
+					.findOneSortedModelObject(
+							ParticipantVariableWithValue.class,
+							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME,
+							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
+							participant.getId(), variable);
+
+			if (participantVariableWithValue != null) {
+				return participantVariableWithValue.getValue();
+			}
+
+			// Return default value if not set for participant
+			return interventionVariable.getValue();
+		}
+	}
+
+	/**
+	 * Tries to write a new variable value for a specific variable of a
+	 * participant from an external interface
+	 *
+	 * @param participantId
+	 * @param variable
+	 * @param value
+	 * @throws ExternallyWriteProtectedVariableException
+	 */
+	public void externallyWriteVariableForParticipant(
+			final ObjectId participantId, final String variable,
+			final String value)
+			throws ExternallyWriteProtectedVariableException {
+		if (allSystemReservedVariableNames.contains(variable)) {
+			// It's a reserved variable; these can't be written in general from
+			// external interfaces
+			throw new ExternallyWriteProtectedVariableException();
+		} else {
+			// It's a self-created variable
+			val participant = databaseManagerService.getModelObjectById(
+					Participant.class, participantId);
+
+			if (participant == null) {
+				throw new ExternallyWriteProtectedVariableException(
+						"The given participant does not exist anymore, so the variable cannot be written");
+			}
+
+			// Check rights of intervention variable
+			val interventionVariable = databaseManagerService
+					.findOneModelObject(
+							InterventionVariableWithValue.class,
+							Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME,
+							participant.getIntervention(), variable);
+
+			if (interventionVariable == null) {
+				throw new ExternallyWriteProtectedVariableException(
+						"This variable is not defined, so it cannot be written");
+			}
+			if (interventionVariable.getAccessType() != InterventionVariableWithValueAccessTypes.EXTERNALLY_READ_AND_WRITABLE) {
+				throw new ExternallyWriteProtectedVariableException();
+			}
+
+			// Write variable for participant
+			try {
+				writeVariableValueOfParticipant(participantId, variable, value);
+			} catch (final WriteProtectedVariableException
+					| InvalidVariableNameException e) {
+				throw new ExternallyWriteProtectedVariableException();
+			}
+		}
+	}
+
 	/*
 	 * Exceptions
 	 */
 	@SuppressWarnings("serial")
+	public class ExternallyReadProtectedVariableException extends Exception {
+		public ExternallyReadProtectedVariableException() {
+			super("This variable is read protected for external interfaces");
+		}
+
+		public ExternallyReadProtectedVariableException(final String message) {
+			super(message);
+		}
+	}
+
+	@SuppressWarnings("serial")
 	private class WriteProtectedVariableException extends Exception {
 		public WriteProtectedVariableException() {
-			super("This variable name is write protected");
+			super("This variable is write protected");
+		}
+	}
+
+	@SuppressWarnings("serial")
+	public class ExternallyWriteProtectedVariableException extends Exception {
+		public ExternallyWriteProtectedVariableException() {
+			super("This variable is write protected for external interfaces");
+		}
+
+		public ExternallyWriteProtectedVariableException(final String message) {
+			super(message);
 		}
 	}
 

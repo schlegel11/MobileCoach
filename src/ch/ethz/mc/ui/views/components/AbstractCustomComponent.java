@@ -34,8 +34,8 @@ import ch.ethz.mc.model.ui.UIModelObject;
 import ch.ethz.mc.model.ui.UIObject;
 import ch.ethz.mc.services.InterventionAdministrationManagerService;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
-import ch.ethz.mc.services.ScreeningSurveyAdministrationManagerService;
-import ch.ethz.mc.services.ScreeningSurveyExecutionManagerService;
+import ch.ethz.mc.services.SurveyAdministrationManagerService;
+import ch.ethz.mc.services.SurveyExecutionManagerService;
 import ch.ethz.mc.ui.AdminNavigatorUI;
 import ch.ethz.mc.ui.NotificationMessageException;
 import ch.ethz.mc.ui.UISession;
@@ -74,12 +74,12 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 		return MC.getInstance().getInterventionExecutionManagerService();
 	}
 
-	protected ScreeningSurveyAdministrationManagerService getScreeningSurveyAdministrationManagerService() {
+	protected SurveyAdministrationManagerService getScreeningSurveyAdministrationManagerService() {
 		return MC.getInstance()
 				.getScreeningSurveyAdministrationManagerService();
 	}
 
-	protected ScreeningSurveyExecutionManagerService getScreeningSurveyExecutionManagerService() {
+	protected SurveyExecutionManagerService getScreeningSurveyExecutionManagerService() {
 		return MC.getInstance().getScreeningSurveyExecutionManagerService();
 	}
 

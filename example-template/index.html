@@ -12,156 +12,130 @@
     <link href="css/normalize.css" rel="stylesheet" media="all">
     <link href="css/styles.css" rel="stylesheet" media="all">
     <!--[if lt IE 9]><script src="js/html5shiv-printshiv.js" media="all"></script><![endif]-->
+    <script lang="text/javascript">
+        // Configuration
+        var config = {
+            debug: true,
+            isFeedback: {{#is_feedback}}true{{/is_feedback}}{{#is_survey}}false{{/is_survey}},
+            layout: "{{layout}}",
+            token: "{{token}}",
+            rest: "{{rest_api_url}}/v01/",
+            attributes: "{{optional_layout_attribute}}",
+            questionsCount: 1 * "{{questions_count}}", 
+            isFirstSlide: {{#is_first_slide}}true{{/is_first_slide}}{{^is_first_slide}}false{{/is_first_slide}},
+            isLastSlide: {{#is_last_slide}}true{{/is_last_slide}}{{^is_last_slide}}false{{/is_last_slide}},
+            validationErrorMessage: "{{validation_error_message}}"
+        };
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="js/own-script.js"></script>
 </head>
 
 <body class="{{optional_layout_attribute}}">
     <header role="banner">
-        <h1>{{#is_feedback}}FEEDBACK{{/is_feedback}}{{#is_screening_survey}}SCREENING SURVEY{{/is_screening_survey}}: {{title}} {{#is_last_slide}}(LAST SLIDE){{/is_last_slide}}</h1>
-        <h4>Language: {{language}}</h2>
+        <h1>{{#is_feedback}}FEEDBACK{{/is_feedback}}{{#is_survey}}SURVEY{{/is_survey}}: {{title}} {{#is_last_slide}}(LAST SLIDE){{/is_last_slide}}</h1>
+        <h4>Language: {{language}}</h4>
+        <h4>Status of REST calls:</h4>
+        <p><span id="REST-status"></span></p>
         <h4>Layout: {{layout}}
-        {{#optional_layout_attribute}} - Additional layout: {{optional_layout_attribute}}{{/optional_layout_attribute}}</h4>
-        {{#feedback_url}}
+        {{#optional_layout_attribute}} - Additional layout: {{optional_layout_attribute}}{{/optional_layout_attribute}}</h4> {{#feedback_url}}
         <h2>
             <a href="{{feedback_url}}">Feeback available here</a>
-        </h2>
-        {{/feedback_url}}
+        </h2> {{/feedback_url}}
     </header>
 
     {{#done}}
-        <h3>DONE</h3>
-    {{/done}}
-    
-    {{#password_input}}
+    <h3>DONE</h3> {{/done}} {{#password_input}}
     <div class="wrap">
         <h3>Password:</h3>
         <form method="POST">
-            <input type="password" name="{{result_variable}}"/>
+            <input type="password" name="{{result_variable}}" />
             <br />
 
             <input type="submit" value="Next" />
         </form>
     </div>
-    {{/password_input}}
-    
-    {{^password_input}}{{^done}}
+    {{/password_input}} {{^password_input}}{{^done}}
     <div class="wrap">
-        {{#is_screening_survey}}{{^text_only}}{{^media_only}}
-        <h3>{{#questions_count}}{{questions_count}} Question(s){{/questions_count}}</h3>
-        {{/media_only}}{{/text_only}}{{/is_screening_survey}}
-        
-        {{#validation_error_message}}
-        <h3 class="error">Error: {{validation_error_message}}</h3>
-        {{/validation_error_message}}
-        
+        {{#is_survey}}{{^text_only}}{{^media_only}}
+        <h3>{{#questions_count}}{{questions_count}} Question(s){{/questions_count}}</h3> {{/media_only}}{{/text_only}}{{/is_survey}} {{#validation_error_message}}
+        <h3 class="error">Error: {{validation_error_message}}</h3> {{/validation_error_message}}
+
         <!-- Wrapper, no style, only relevant for nice HTML formatting -->
         <div>
-            {{#is_screening_survey}}
+            {{#is_survey}}
             <form method="POST">
-                <input type="hidden" name="{{hidden_check_variable}}" value="{{hidden_check_variable_value}}"/>
-            {{/is_screening_survey}}
-                        
-            {{#text_only}}
-            <h3>Text only.</h3>
-            <p class="with-linebreaks">{{#questions}}{{question_text}}{{/questions}}</p>
-            {{/text_only}} 
-            
-            {{#media_only}}
-            <h3>Media only.</h3>
-            <p class="with-linebreaks">{{#questions}}{{question_text}}{{/questions}}</p>
-            {{/media_only}}
-            
-            {{#select_one}}
-            <h3>Select one:</h3>
-            {{#questions}}
-                    <h3>{{question_position}}: {{question_text}}</h3>
-                    <p>Possible answers:</p>
-                        {{#answers}}
-                        {{answer_position}}: <input type="radio" name="{{result_variable}}" value="{{answer_value}}" {{#preselected_answer}}checked{{/preselected_answer}}/> {{answer_text}}
-                        <br />{{/answers}}
-                {{/questions}}
-            {{/select_one}}
-            
-            {{#select_many}}
-            <h3>Select many:</h3>
-                {{#questions}}
-                    <h3>{{question_position}}: {{question_text}}</h3>
-                    <p>Possible answers:</p>
-                        {{#answers}}
-                        {{answer_position}}: <input type="checkbox" name="{{result_variable}}" value="{{answer_value}}" {{#preselected_answer}}checked{{/preselected_answer}}/>{{answer_text}}
-                    <br />{{/answers}}
-                {{/questions}}
-            {{/select_many}}
-            
-            {{#number_input}}
-            <h3>Number input:</h3>
-                {{#questions}}
-                    <h3>{{question_position}}: {{question_text}}</h3>
-                    <input type="text" name="{{result_variable}}"/>
-                {{/questions}}
-            {{/number_input}}
-            
-            {{#text_input}}
-            <h3>Text input:</h3>
-                {{#questions}}
-                    <h3>{{question_position}}: {{question_text}}</h3>
-                    <input type="text" name="{{result_variable}}"/>
-                {{/questions}}
-            {{/text_input}}
-            
-            {{#multiline_text_input}}
-            <h3>Multiline text:</h3>
-                {{#questions}}
-                    <h3>{{question_position}}: {{question_text}}</h3>
-                    <textarea name="{{result_variable}}"></textarea>
-                {{/questions}}
-            {{/multiline_text_input}}
-            
-            <br />
-                
-            {{#is_feedback}}
-            <form method="POST">
-                <input type="hidden" name="{{hidden_check_variable}}" value="{{hidden_check_variable_value}}"/>
-                <input type="hidden" name="{{hidden_navigation_variable}}" value="{{hidden_navigation_variable_navigate_previous}}"/>
-                {{^is_first_slide}}
-                <input type="submit" value="Previous" />
-                {{/is_first_slide}}
+                <input type="hidden" name="{{hidden_check_variable}}" value="{{hidden_check_variable_value}}" /> {{/is_survey}} {{#text_only}}
+                <h3>Text only.</h3>
+                <p class="with-linebreaks">{{#questions}}{{question_text}}{{/questions}}</p>
+                {{/text_only}} {{#media_only}}
+                <h3>Media only.</h3>
+                <p class="with-linebreaks">{{#questions}}{{question_text}}{{/questions}}</p>
+                {{/media_only}} {{#select_one}}
+                <h3>Select one:</h3> {{#questions}}
+                <h3>{{question_position}}: {{question_text}}</h3>
+                <p>Possible answers:</p>
+                {{#answers}} {{answer_position}}:
+                <input type="radio" name="{{result_variable}}" value="{{answer_value}}" {{#preselected_answer}}checked{{/preselected_answer}}/> {{answer_text}}
+                <br />{{/answers}} {{/questions}} {{/select_one}} {{#select_many}}
+                <h3>Select many:</h3> {{#questions}}
+                <h3>{{question_position}}: {{question_text}}</h3>
+                <p>Possible answers:</p>
+                {{#answers}} {{answer_position}}:
+                <input type="checkbox" name="{{result_variable}}" value="{{answer_value}}" {{#preselected_answer}}checked{{/preselected_answer}}/>{{answer_text}}
+                <br />{{/answers}} {{/questions}} {{/select_many}} {{#number_input}}
+                <h3>Number input:</h3> {{#questions}}
+                <h3>{{question_position}}: {{question_text}}</h3>
+                <input type="text" name="{{result_variable}}" /> {{/questions}} {{/number_input}} {{#text_input}}
+                <h3>Text input:</h3> {{#questions}}
+                <h3>{{question_position}}: {{question_text}}</h3>
+                <input type="text" name="{{result_variable}}" /> {{/questions}} {{/text_input}} {{#multiline_text_input}}
+                <h3>Multiline text:</h3> {{#questions}}
+                <h3>{{question_position}}: {{question_text}}</h3>
+                <textarea name="{{result_variable}}"></textarea>
+                {{/questions}} {{/multiline_text_input}}
+
+                <br /> {{#is_feedback}}
+                <form method="POST">
+                    <input type="hidden" name="{{hidden_check_variable}}" value="{{hidden_check_variable_value}}" />
+                    <input type="hidden" name="{{hidden_navigation_variable}}" value="{{hidden_navigation_variable_navigate_previous}}" /> {{^is_first_slide}}
+                    <input type="submit" value="Previous" /> {{/is_first_slide}}
+                </form>
+                <form method="POST">
+                    <input type="hidden" name="{{hidden_check_variable}}" value="{{hidden_check_variable_value}}" />
+                    <input type="hidden" name="{{hidden_navigation_variable}}" value="{{hidden_navigation_variable_navigate_next}}" /> {{^is_last_slide}}
+                    <input type="submit" value="Next" /> {{/is_last_slide}}
+                </form>
+                {{/is_feedback}} {{#is_survey}} {{^is_last_slide}}
+                <input type="submit" value="Next" /> {{/is_last_slide}}
             </form>
-            <form method="POST">
-                <input type="hidden" name="{{hidden_check_variable}}" value="{{hidden_check_variable_value}}"/>
-                <input type="hidden" name="{{hidden_navigation_variable}}" value="{{hidden_navigation_variable_navigate_next}}"/>
-                {{^is_last_slide}}
-                <input type="submit" value="Next" />
-                {{/is_last_slide}}
-            </form>
-            {{/is_feedback}}
-            {{#is_screening_survey}}
-                {{^is_last_slide}}
-                <input type="submit" value="Next" />
-                {{/is_last_slide}}
-            </form>
-            {{/is_screening_survey}}
+            {{/is_survey}}
         </div>
 
         <!-- Wrapper, no style, only relevant for nice HTML formatting -->
         <div>
             {{#media_object_url}}
-                <h3>Media here:</h3>
-                {{> media-template}}
-            {{/media_object_url}}
+            <h3>Media here:</h3> {{> media-template}} {{/media_object_url}}
         </div>
     </div>
     {{/done}}{{/password_input}}
-    
+
     <footer role="contentinfo">
         <small>Copyright &copy;
-            <time datetime="2015">2015 your organization</time>
+            <time datetime="2016">2016 your organization</time>
         </small>
     </footer>
 
     <!-- Google Analytics - Optimized version by Mathias Bynens -->
     <!-- See: http://mathiasbynens.be/notes/async-analytics-snippet -->
     <script>
-        var _gaq=[['_setAccount','UA-XXXX-XX'],['_trackPageview']];(function(a,b){var c=a.createElement(b),d=a.getElementsByTagName(b)[0];c.src=("https:"==location.protocol?"//ssl":"//www")+".google-analytics.com/ga.js";d.parentNode.insertBefore(c,d)})(document,"script");
+        var _gaq = [['_setAccount', 'UA-XXXX-XX'], ['_trackPageview']];
+        (function (a, b) {
+            var c = a.createElement(b),
+                d = a.getElementsByTagName(b)[0];
+            c.src = ("https:" == location.protocol ? "//ssl" : "//www") + ".google-analytics.com/ga.js";
+            d.parentNode.insertBefore(c, d)
+        })(document, "script");
     </script>
 </body>
 

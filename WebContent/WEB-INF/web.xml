@@ -20,6 +20,9 @@
 	<listener>
 		<listener-class>org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap</listener-class>
 	</listener>
+	<listener>
+		<listener-class>ch.ethz.mc.ui.UISessionListener</listener-class>
+	</listener>
 
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>

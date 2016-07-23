@@ -590,7 +590,7 @@ public class ScreeningSurveyEditComponentWithController extends
 		}
 
 		IntermediateSurveyAndFeedbackParticipantShortURL shortURL = null;
-		if (!participant.getAssignedFeedback().equals(selectedFeedback.getId())) {
+		if (participant.getAssignedFeedback() == null || !participant.getAssignedFeedback().equals(selectedFeedback.getId())) {
 			shortURL = getScreeningSurveyExecutionManagerService()
 					.participantSetFeedback(participant,
 							selectedFeedback.getId());

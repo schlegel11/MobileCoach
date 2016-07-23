@@ -58,10 +58,11 @@ import ch.ethz.mc.services.internal.FileStorageManagerService;
 import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.services.types.FeedbackSessionAttributeTypes;
 import ch.ethz.mc.services.types.FeedbackSlideTemplateFieldTypes;
+import ch.ethz.mc.services.types.GeneralSessionAttributeTypes;
 import ch.ethz.mc.services.types.GeneralSlideTemplateFieldTypes;
-import ch.ethz.mc.services.types.ScreeningSurveySessionAttributeTypes;
-import ch.ethz.mc.services.types.ScreeningSurveySlideTemplateFieldTypes;
-import ch.ethz.mc.services.types.ScreeningSurveySlideTemplateLayoutTypes;
+import ch.ethz.mc.services.types.SurveySessionAttributeTypes;
+import ch.ethz.mc.services.types.SurveySlideTemplateFieldTypes;
+import ch.ethz.mc.services.types.SurveySlideTemplateLayoutTypes;
 import ch.ethz.mc.tools.GlobalUniqueIdGenerator;
 import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mc.tools.RuleEvaluator;
@@ -70,18 +71,18 @@ import ch.ethz.mc.tools.VariableStringReplacer;
 
 /**
  * Cares for the orchestration of {@link ScreeningSurveySlides} as
- * part of a {@link ScreeningSurvey}
+ * part of a {@link ScreeningSurvey} or a {@link Feedback}
  *
  * The templates are based on the Mustache standard. Details can be found in the
- * {@link ScreeningSurveySlideTemplateFieldTypes} class
+ * {@link SurveySlideTemplateFieldTypes} class
  *
  * @author Andreas Filler
  */
 @Log4j2
-public class ScreeningSurveyExecutionManagerService {
+public class SurveyExecutionManagerService {
 	private final Object									$lock;
 
-	private static ScreeningSurveyExecutionManagerService	instance	= null;
+	private static SurveyExecutionManagerService			instance	= null;
 
 	private final DatabaseManagerService					databaseManagerService;
 	private final FileStorageManagerService					fileStorageManagerService;
@@ -89,7 +90,7 @@ public class ScreeningSurveyExecutionManagerService {
 
 	private final InterventionAdministrationManagerService	interventionAdministrationManagerService;
 
-	private ScreeningSurveyExecutionManagerService(
+	private SurveyExecutionManagerService(
 			final DatabaseManagerService databaseManagerService,
 			final FileStorageManagerService fileStorageManagerService,
 			final VariablesManagerService variablesManagerService,
@@ -108,14 +109,14 @@ public class ScreeningSurveyExecutionManagerService {
 		log.info("Started.");
 	}
 
-	public static ScreeningSurveyExecutionManagerService start(
+	public static SurveyExecutionManagerService start(
 			final DatabaseManagerService databaseManagerService,
 			final FileStorageManagerService fileStorageManagerService,
 			final VariablesManagerService variablesManagerService,
 			final InterventionAdministrationManagerService interventionAdministrationManagerService)
 					throws Exception {
 		if (instance == null) {
-			instance = new ScreeningSurveyExecutionManagerService(
+			instance = new SurveyExecutionManagerService(
 					databaseManagerService, fileStorageManagerService,
 					variablesManagerService,
 					interventionAdministrationManagerService);
@@ -176,6 +177,23 @@ public class ScreeningSurveyExecutionManagerService {
 		databaseManagerService.saveModelObject(participant);
 
 		return feedbackParticipantShortURL;
+	}
+
+	@Synchronized
+	public IntermediateSurveyAndFeedbackParticipantShortURL participantGetFeedbackShortURL(
+			final Participant participant) {
+		if (participant.getAssignedFeedback() == null) {
+			val feedbackShortURL = databaseManagerService
+					.findOneModelObject(
+							IntermediateSurveyAndFeedbackParticipantShortURL.class,
+							Queries.INTERMEDIATE_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_PARTICIPANT_AND_FEEDBACK,
+							participant.getId(),
+							participant.getAssignedFeedback());
+
+			return feedbackShortURL;
+		} else {
+			return null;
+		}
 	}
 
 	// Dialog status
@@ -420,9 +438,8 @@ public class ScreeningSurveyExecutionManagerService {
 		// Check if screening survey is active
 		log.debug("Check if screening survey is active");
 		if (!screeningSurveyCheckIfActive(screeningSurveyId)) {
-			templateVariables
-			.put(ScreeningSurveySlideTemplateLayoutTypes.CLOSED
-					.toVariable(), true);
+			templateVariables.put(
+					SurveySlideTemplateLayoutTypes.CLOSED.toVariable(), true);
 			return templateVariables;
 		}
 
@@ -473,17 +490,17 @@ public class ScreeningSurveyExecutionManagerService {
 				log.debug("Access granted");
 				// Remember that user authenticated
 				session.setAttribute(
-						ScreeningSurveySessionAttributeTypes.SCREENING_SURVEY_PARTICIPANT_ACCESS_GRANTED
+						SurveySessionAttributeTypes.SURVEY_PARTICIPANT_ACCESS_GRANTED
 						.toString(), true);
 			} else {
 				// Redirect to password page
 				log.debug("Access not granted - show password page (again)");
 				templateVariables.put(
-						ScreeningSurveySlideTemplateLayoutTypes.PASSWORD_INPUT
+						SurveySlideTemplateLayoutTypes.PASSWORD_INPUT
 						.toVariable(), true);
 
 				templateVariables
-				.put(ScreeningSurveySlideTemplateFieldTypes.RESULT_VARIABLE
+				.put(SurveySlideTemplateFieldTypes.RESULT_VARIABLE
 						.toVariable(),
 						ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLES + 0);
 
@@ -499,7 +516,7 @@ public class ScreeningSurveyExecutionManagerService {
 			participantId = participant.getId();
 
 			session.setAttribute(
-					ImplementationConstants.SURVEYS_CURRENT_PARTICIPANT_CHECK_SESSION_ATTRIBUTE,
+					GeneralSessionAttributeTypes.CURRENT_PARTICIPANT.toString(),
 					participantId);
 
 			// Create participant for currently logged in debug user
@@ -539,7 +556,7 @@ public class ScreeningSurveyExecutionManagerService {
 					Participant.class, participantId);
 
 			session.setAttribute(
-					ImplementationConstants.SURVEYS_CURRENT_PARTICIPANT_CHECK_SESSION_ATTRIBUTE,
+					GeneralSessionAttributeTypes.CURRENT_PARTICIPANT.toString(),
 					participantId);
 
 			if (isScreening) {
@@ -556,8 +573,8 @@ public class ScreeningSurveyExecutionManagerService {
 					log.debug("User already participated");
 
 					templateVariables.put(
-							ScreeningSurveySlideTemplateLayoutTypes.DONE
-							.toVariable(), true);
+							SurveySlideTemplateLayoutTypes.DONE.toVariable(),
+							true);
 					return templateVariables;
 				}
 			}
@@ -565,7 +582,7 @@ public class ScreeningSurveyExecutionManagerService {
 
 		// Get last visited slide
 		final val formerSlideId = session
-				.getAttribute(ScreeningSurveySessionAttributeTypes.SCREENING_SURVEY_FORMER_SLIDE_ID
+				.getAttribute(SurveySessionAttributeTypes.SURVEY_FORMER_SLIDE_ID
 						.toString());
 
 		ScreeningSurveySlide formerSlide = null;
@@ -579,7 +596,7 @@ public class ScreeningSurveyExecutionManagerService {
 		if (formerSlideId != null
 				&& !session
 				.getAttribute(
-						ScreeningSurveySessionAttributeTypes.SCREENING_SURVEY_CONSISTENCY_CHECK_VALUE
+						SurveySessionAttributeTypes.SURVEY_CONSISTENCY_CHECK_VALUE
 						.toString()).equals(checkValue)) {
 			log.debug("Consistency check failed; show same page again");
 
@@ -653,35 +670,42 @@ public class ScreeningSurveyExecutionManagerService {
 			return null;
 		} else {
 			// Check if it's the last slide
-			if (nextSlide.isLastSlide()) {
+			if (nextSlide.isLastSlide() && isScreening) {
 				// Set feedback URL to participant and session if required
-				if (isScreening && nextSlide.getHandsOverToFeedback() != null) {
+				if (nextSlide.getHandsOverToFeedback() != null) {
 					log.debug("Setting feedback {} for participant {}",
 							nextSlide.getHandsOverToFeedback(),
 							participant.getId());
 					val feedbackShortURL = participantSetFeedback(participant,
 							nextSlide.getHandsOverToFeedback());
 					session.setAttribute(
-							ScreeningSurveySessionAttributeTypes.SCREENING_SURVEY_PARTICIPANT_FEEDBACK_URL
+							SurveySessionAttributeTypes.SURVEY_PARTICIPANT_FEEDBACK_URL
 							.toString(), feedbackShortURL
 							.calculateURL());
 				}
 
-				if (isScreening) {
-					dialogStatusSetScreeningSurveyFinished(participantId);
+				dialogStatusSetScreeningSurveyFinished(participantId);
+			} else if (!isScreening
+					&& participant.getAssignedFeedback() != null) {
+				// Set feedback URL if a feedback is already set for participant
+				val feedbackURL = participantGetFeedbackShortURL(participant);
+				if (feedbackURL != null) {
+					templateVariables.put(
+							GeneralSlideTemplateFieldTypes.FEEDBACK_URL
+							.toString(), feedbackURL.calculateURL());
 				}
 			}
 
 			// Remember next slide as former slide
 			session.setAttribute(
-					ScreeningSurveySessionAttributeTypes.SCREENING_SURVEY_FORMER_SLIDE_ID
+					SurveySessionAttributeTypes.SURVEY_FORMER_SLIDE_ID
 					.toString(), nextSlide.getId());
 
 			// Remember check variable
 			final val newCheckValue = GlobalUniqueIdGenerator
 					.createGlobalUniqueId();
 			session.setAttribute(
-					ScreeningSurveySessionAttributeTypes.SCREENING_SURVEY_CONSISTENCY_CHECK_VALUE
+					SurveySessionAttributeTypes.SURVEY_CONSISTENCY_CHECK_VALUE
 					.toString(), newCheckValue);
 
 			// Fill next screening survey slide
@@ -691,38 +715,38 @@ public class ScreeningSurveyExecutionManagerService {
 			// Layout
 			switch (nextSlide.getQuestionType()) {
 				case MULTILINE_TEXT_INPUT:
-					templateVariables
-					.put(ScreeningSurveySlideTemplateLayoutTypes.MULTILINE_TEXT_INPUT
+					templateVariables.put(
+							SurveySlideTemplateLayoutTypes.MULTILINE_TEXT_INPUT
 							.toVariable(), true);
 					break;
 				case NUMBER_INPUT:
-					templateVariables
-					.put(ScreeningSurveySlideTemplateLayoutTypes.NUMBER_INPUT
+					templateVariables.put(
+							SurveySlideTemplateLayoutTypes.NUMBER_INPUT
 							.toVariable(), true);
 					break;
 				case SELECT_MANY:
 					templateVariables.put(
-							ScreeningSurveySlideTemplateLayoutTypes.SELECT_MANY
+							SurveySlideTemplateLayoutTypes.SELECT_MANY
 							.toVariable(), true);
 					break;
 				case SELECT_ONE:
 					templateVariables.put(
-							ScreeningSurveySlideTemplateLayoutTypes.SELECT_ONE
+							SurveySlideTemplateLayoutTypes.SELECT_ONE
 							.toVariable(), true);
 					break;
 				case TEXT_INPUT:
 					templateVariables.put(
-							ScreeningSurveySlideTemplateLayoutTypes.TEXT_INPUT
+							SurveySlideTemplateLayoutTypes.TEXT_INPUT
 							.toVariable(), true);
 					break;
 				case TEXT_ONLY:
 					templateVariables.put(
-							ScreeningSurveySlideTemplateLayoutTypes.TEXT_ONLY
+							SurveySlideTemplateLayoutTypes.TEXT_ONLY
 							.toVariable(), true);
 					break;
 				case MEDIA_ONLY:
 					templateVariables.put(
-							ScreeningSurveySlideTemplateLayoutTypes.MEDIA_ONLY
+							SurveySlideTemplateLayoutTypes.MEDIA_ONLY
 							.toVariable(), true);
 					break;
 			}
@@ -774,8 +798,8 @@ public class ScreeningSurveyExecutionManagerService {
 						.findVariablesAndReplaceWithTextValues(nextSlide
 								.getValidationErrorMessage().get(participant),
 								variablesWithValues.values(), "");
-				templateVariables
-				.put(ScreeningSurveySlideTemplateFieldTypes.VALIDATION_ERROR_MESSAGE
+				templateVariables.put(
+						SurveySlideTemplateFieldTypes.VALIDATION_ERROR_MESSAGE
 						.toVariable(), validationErrorMessage);
 			}
 
@@ -840,16 +864,15 @@ public class ScreeningSurveyExecutionManagerService {
 								question.getQuestionWithPlaceholders().get(
 										participant),
 										variablesWithValues.values(), "");
-				questionObject.put(
-						ScreeningSurveySlideTemplateFieldTypes.QUESTION_TEXT
+				questionObject.put(SurveySlideTemplateFieldTypes.QUESTION_TEXT
 						.toVariable(), questionText);
-				questionObject
-				.put(ScreeningSurveySlideTemplateFieldTypes.QUESTION_POSITION
+				questionObject.put(
+						SurveySlideTemplateFieldTypes.QUESTION_POSITION
 						.toVariable(), i + 1);
 
 				// Result variable
 				questionObject
-				.put(ScreeningSurveySlideTemplateFieldTypes.RESULT_VARIABLE
+				.put(SurveySlideTemplateFieldTypes.RESULT_VARIABLE
 						.toVariable(),
 						ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLES
 						+ i);
@@ -871,58 +894,56 @@ public class ScreeningSurveyExecutionManagerService {
 
 					final val answerValue = answerValues[j];
 
-					answerObjects
-					.put(ScreeningSurveySlideTemplateFieldTypes.ANSWER_POSITION
-							.toVariable(), j + 1);
 					answerObjects.put(
-							ScreeningSurveySlideTemplateFieldTypes.ANSWER_TEXT
+							SurveySlideTemplateFieldTypes.ANSWER_POSITION
+							.toVariable(), j + 1);
+					answerObjects.put(SurveySlideTemplateFieldTypes.ANSWER_TEXT
 							.toVariable(), finalAnswerText);
 					answerObjects.put(
-							ScreeningSurveySlideTemplateFieldTypes.ANSWER_VALUE
+							SurveySlideTemplateFieldTypes.ANSWER_VALUE
 							.toVariable(), answerValue);
 					if (j == 0) {
-						answerObjects
-						.put(ScreeningSurveySlideTemplateFieldTypes.IS_FIRST_ANSWER
+						answerObjects.put(
+								SurveySlideTemplateFieldTypes.IS_FIRST_ANSWER
 								.toVariable(), true);
 					}
 					if (j == answersWithPlaceholders.length - 1) {
-						answerObjects
-						.put(ScreeningSurveySlideTemplateFieldTypes.IS_LAST_ANSWER
+						answerObjects.put(
+								SurveySlideTemplateFieldTypes.IS_LAST_ANSWER
 								.toVariable(), true);
 					}
 					if (question.getPreSelectedAnswer() == j) {
 						answerObjects
-						.put(ScreeningSurveySlideTemplateFieldTypes.PRESELECTED_ANSWER
+						.put(SurveySlideTemplateFieldTypes.PRESELECTED_ANSWER
 								.toVariable(), true);
 					}
 
 					answersObjects.add(answerObjects);
 				}
 
-				questionObject.put(
-						ScreeningSurveySlideTemplateFieldTypes.ANSWERS_COUNT
+				questionObject.put(SurveySlideTemplateFieldTypes.ANSWERS_COUNT
 						.toVariable(), answerValues.length);
 
 				if (answersObjects.size() > 0) {
 					questionObject.put(
-							ScreeningSurveySlideTemplateFieldTypes.ANSWERS
-							.toVariable(), answersObjects);
+							SurveySlideTemplateFieldTypes.ANSWERS.toVariable(),
+							answersObjects);
 				}
 
 				questionObjects.add(questionObject);
 			}
 
 			templateVariables.put(
-					ScreeningSurveySlideTemplateFieldTypes.QUESTIONS
-					.toVariable(), questionObjects);
+					SurveySlideTemplateFieldTypes.QUESTIONS.toVariable(),
+					questionObjects);
 			templateVariables.put(
-					ScreeningSurveySlideTemplateFieldTypes.QUESTIONS_COUNT
-					.toVariable(), questions.size());
+					SurveySlideTemplateFieldTypes.QUESTIONS_COUNT.toVariable(),
+					questions.size());
 
 			// Is last slide
 			if (nextSlide.isLastSlide()) {
 				templateVariables.put(
-						ScreeningSurveySlideTemplateFieldTypes.IS_LAST_SLIDE
+						SurveySlideTemplateFieldTypes.IS_LAST_SLIDE
 						.toVariable(), true);
 			}
 		}
@@ -1340,7 +1361,7 @@ public class ScreeningSurveyExecutionManagerService {
 			return null;
 		} else {
 			session.setAttribute(
-					ImplementationConstants.SURVEYS_CURRENT_PARTICIPANT_CHECK_SESSION_ATTRIBUTE,
+					GeneralSessionAttributeTypes.CURRENT_PARTICIPANT.toString(),
 					participantId);
 		}
 

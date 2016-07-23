@@ -22,8 +22,8 @@ import ch.ethz.mc.conf.ImplementationConstants;
 /**
  * @author Andreas Filler
  */
-public enum FeedbackSessionAttributeTypes {
-	FEEDBACK_FORMER_SLIDE_ID, FEEDBACK_CONSISTENCY_CHECK_VALUE;
+public enum SurveySessionAttributeTypes {
+	SURVEY_PARTICIPANT_ACCESS_GRANTED, SURVEY_FORMER_SLIDE_ID, SURVEY_PARTICIPANT_FEEDBACK_URL, SURVEY_CONSISTENCY_CHECK_VALUE, SURVEY_FROM_URL;
 
 	/*
 	 * (non-Javadoc)

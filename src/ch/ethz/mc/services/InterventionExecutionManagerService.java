@@ -104,7 +104,7 @@ public class InterventionExecutionManagerService {
 			final VariablesManagerService variablesManagerService,
 			final CommunicationManagerService communicationManagerService,
 			final InterventionAdministrationManagerService interventionAdministrationManagerService,
-			final ScreeningSurveyExecutionManagerService screeningSurveyExecutionManagerService)
+			final SurveyExecutionManagerService screeningSurveyExecutionManagerService)
 					throws Exception {
 		$lock = MC.getInstance();
 
@@ -138,7 +138,7 @@ public class InterventionExecutionManagerService {
 			final VariablesManagerService variablesManagerService,
 			final CommunicationManagerService communicationManagerService,
 			final InterventionAdministrationManagerService interventionAdministrationManagerService,
-			final ScreeningSurveyExecutionManagerService screeningSurveyExecutionManagerService)
+			final SurveyExecutionManagerService screeningSurveyExecutionManagerService)
 					throws Exception {
 		if (instance == null) {
 			instance = new InterventionExecutionManagerService(

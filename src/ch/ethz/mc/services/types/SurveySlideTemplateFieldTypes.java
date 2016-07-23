@@ -2,15 +2,15 @@ package ch.ethz.mc.services.types;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,11 +33,11 @@ import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
  *
  * @author Andreas Filler
  */
-public enum ScreeningSurveySlideTemplateFieldTypes {
+public enum SurveySlideTemplateFieldTypes {
 	/**
-	 * Exists if it's a screening survey slide
+	 * Exists if it's a survey slide
 	 */
-	IS_SCREENING_SURVEY,
+	IS_SURVEY,
 	/**
 	 * Contains the current layout of the slide; can be used instead or together
 	 * with the values defined in
@@ -126,7 +126,7 @@ public enum ScreeningSurveySlideTemplateFieldTypes {
 
 	/**
 	 * Creates the appropriate variable name of the
-	 * {@link ScreeningSurveySlideTemplateFieldTypes}
+	 * {@link SurveySlideTemplateFieldTypes}
 	 *
 	 * @return The appropriate variable name
 	 */
@@ -136,7 +136,7 @@ public enum ScreeningSurveySlideTemplateFieldTypes {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Enum#toString()
 	 */
 	@Override

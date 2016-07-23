@@ -61,19 +61,20 @@ public class ImplementationConstants {
 	public static final int		SURVEY_FILE_CACHE_IN_MINUTES														= 3600;
 
 	public static final int		UI_SESSION_TIMEOUT_IN_SECONDS														= 900;
+	public static final String	UI_SESSION_ATTRIBUTE_DETECTOR														= "mc.vaadin.is_vaadin_session";
 
+	// CAUTION: If this is changed it also needs to be adjusted in the web.xml
+	// configuration
+	public static final String	REST_API_PATH																		= "api";
 	public static final String	FILE_STREAMING_SERVLET_PATH															= "files";
 	public static final String	SHORT_ID_FILE_STREAMING_SERVLET_PATH												= "files-short";
 	public static final String	SHORT_ID_SCREEN_SURVEY_AND_FEEDBACK_SERVLET_PATH									= "surveys-short";
 
-	public static final String	PARTICIPANT_SESSION_ATTRIBUTE_EXPECTED												= "mc.vaadin.assigned-participant.expected";
-	public static final String	PARTICIPANT_SESSION_ATTRIBUTE_DESCRIPTION											= "mc.vaadin.assigned-participant.description";
-	public static final String	PARTICIPANT_SESSION_ATTRIBUTE														= "mc.vaadin.assigned-participant";
-	public static final String	SURVEY_SESSION_PREFIX																= "mc.surveys.";
-	public static final String	SURVEYS_CURRENT_SURVEY_CHECK_SESSION_ATTRIBUTE										= SURVEY_SESSION_PREFIX
-																															+ "current_session";
-	public static final String	SURVEYS_CURRENT_PARTICIPANT_CHECK_SESSION_ATTRIBUTE									= SURVEY_SESSION_PREFIX
-																															+ "current_participant";
+	public static final String	PARTICIPANT_SESSION_ATTRIBUTE_EXPECTED												= "mc.vaadin.assigned_participant.expected";
+	public static final String	PARTICIPANT_SESSION_ATTRIBUTE_DESCRIPTION											= "mc.vaadin.assigned_participant.description";
+	public static final String	PARTICIPANT_SESSION_ATTRIBUTE														= "mc.vaadin.assigned_participant";
+
+	public static final String	SURVEY_OR_FEEDBACK_SESSION_PREFIX													= "mc.survey_or_feedback.";
 
 	public static final String	SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLES									= "MC_ResultValue_";
 	public static final String	SCREENING_SURVEY_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE							= "MC_ConsistencyCheckValue";
@@ -83,6 +84,8 @@ public class ImplementationConstants {
 	public static final String	FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE_VALUE_PREVIOUS							= "previous";
 	public static final String	FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE_VALUE_NEXT								= "next";
 	public static final String	FEEDBACK_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE									= "MC_ConsistencyCheckValue";
+
+	public static final String	VARIABLE_PREFIX																		= "$";
 
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_ONE_OBJECT_ID											= "[A-Za-z0-9]+";
 	public static final String	REGULAR_EXPRESSION_TO_VALIDATE_CALCULATED_RULE										= "^[\\$a-zA-Z0-9_\\+\\-%*/^().,]*$";

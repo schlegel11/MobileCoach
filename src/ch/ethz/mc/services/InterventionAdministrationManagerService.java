@@ -98,7 +98,7 @@ public class InterventionAdministrationManagerService {
 	private final VariablesManagerService						variablesManagerService;
 	private final ModelObjectExchangeService					modelObjectExchangeService;
 
-	private final ScreeningSurveyAdministrationManagerService	screeningSurveyAdministrationManagerService;
+	private final SurveyAdministrationManagerService	screeningSurveyAdministrationManagerService;
 
 	private final List<Class<? extends AbstractModule>>			modules;
 
@@ -107,7 +107,7 @@ public class InterventionAdministrationManagerService {
 			final FileStorageManagerService fileStorageManagerService,
 			final VariablesManagerService variablesManagerService,
 			final ModelObjectExchangeService modelObjectExchangeService,
-			final ScreeningSurveyAdministrationManagerService screeningSurveyAdministrationManagerService)
+			final SurveyAdministrationManagerService screeningSurveyAdministrationManagerService)
 					throws Exception {
 		$lock = MC.getInstance();
 
@@ -134,7 +134,7 @@ public class InterventionAdministrationManagerService {
 			final FileStorageManagerService fileStorageManagerService,
 			final VariablesManagerService variablesManagerService,
 			final ModelObjectExchangeService modelObjectExchangeService,
-			final ScreeningSurveyAdministrationManagerService screeningSurveyAdministrationManagerService)
+			final SurveyAdministrationManagerService screeningSurveyAdministrationManagerService)
 					throws Exception {
 		if (instance == null) {
 			instance = new InterventionAdministrationManagerService(

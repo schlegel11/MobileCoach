@@ -25,7 +25,7 @@ import lombok.extern.log4j.Log4j2;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
-import ch.ethz.mc.services.ScreeningSurveyExecutionManagerService;
+import ch.ethz.mc.services.SurveyExecutionManagerService;
 import ch.ethz.mc.tools.StringHelpers;
 
 /**
@@ -36,7 +36,7 @@ import ch.ethz.mc.tools.StringHelpers;
  */
 @Log4j2
 public class MonitoringSchedulingWorker extends Thread {
-	private final ScreeningSurveyExecutionManagerService	screeningSurveyExecutionManagerService;
+	private final SurveyExecutionManagerService	screeningSurveyExecutionManagerService;
 	private final InterventionExecutionManagerService		interventionExecutionManagerService;
 
 	private final boolean									statisticsEnabled;
@@ -46,7 +46,7 @@ public class MonitoringSchedulingWorker extends Thread {
 
 	public MonitoringSchedulingWorker(
 			final InterventionExecutionManagerService interventionExecutionManagerService,
-			final ScreeningSurveyExecutionManagerService screeningSurveyExecutionManagerService) {
+			final SurveyExecutionManagerService screeningSurveyExecutionManagerService) {
 		setName("Monitoring Sheduling Worker");
 		setPriority(NORM_PRIORITY - 2);
 

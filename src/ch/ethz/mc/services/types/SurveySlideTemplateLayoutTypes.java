@@ -26,7 +26,7 @@ import ch.ethz.mc.model.persistent.types.ScreeningSurveySlideQuestionTypes;
  * 
  * @author Andreas Filler
  */
-public enum ScreeningSurveySlideTemplateLayoutTypes {
+public enum SurveySlideTemplateLayoutTypes {
 	/**
 	 * Can all be used as boolean checks if the current layout is active:
 	 * 
@@ -36,7 +36,7 @@ public enum ScreeningSurveySlideTemplateLayoutTypes {
 
 	/**
 	 * Creates the appropriate variable name of the
-	 * {@link ScreeningSurveySlideTemplateLayoutTypes}
+	 * {@link SurveySlideTemplateLayoutTypes}
 	 * 
 	 * @return The appropriate variable name
 	 */
