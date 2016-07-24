@@ -36,6 +36,8 @@ import lombok.extern.log4j.Log4j2;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.model.rest.ExtendedVariablesWithValues;
+import ch.ethz.mc.model.rest.VariableAverage;
 import ch.ethz.mc.model.rest.VariableWithValue;
 import ch.ethz.mc.model.rest.VariablesWithValues;
 import ch.ethz.mc.services.RESTManagerService;
@@ -60,7 +62,7 @@ public class VariableAccessService extends AbstractService {
 	@GET
 	@Path("/read/{variable}")
 	@Produces("application/json")
-	public VariableWithValue readVariable(
+	public VariableWithValue variableRead(
 			@HeaderParam("token") final String token,
 			@PathParam("variable") final String variable,
 			@Context final HttpServletRequest request) {
@@ -92,7 +94,7 @@ public class VariableAccessService extends AbstractService {
 	@GET
 	@Path("/readArray/{variables}")
 	@Produces("application/json")
-	public VariablesWithValues readVariableArray(
+	public VariablesWithValues variableReadArray(
 			@HeaderParam("token") final String token,
 			@PathParam("variables") final String variables,
 			@Context final HttpServletRequest request) {
@@ -123,11 +125,163 @@ public class VariableAccessService extends AbstractService {
 						participantId, variable.trim()));
 			}
 
+			variablesWithValues.setSize(variablesWithValuesList.size());
+
 			return variablesWithValues;
 		} catch (final Exception e) {
 			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
 					.entity("Could not retrieve variable: " + e.getMessage())
 					.build());
+		}
+	}
+
+	@GET
+	@Path("/readGroupArray/{variable}")
+	@Produces("application/json")
+	public ExtendedVariablesWithValues variableReadGroupArray(
+			@HeaderParam("token") final String token,
+			@PathParam("variable") final String variable,
+			@Context final HttpServletRequest request) {
+		log.debug(
+				"Token {}: Read variable array {} of participants from same group as participant",
+				token, variable);
+		ObjectId participantId;
+		try {
+			participantId = checkAccessAndReturnParticipant(token,
+					request.getSession());
+		} catch (final Exception e) {
+			throw e;
+		}
+
+		try {
+			if (!StringValidator
+					.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
+							+ variable.trim())) {
+				throw new Exception("The variable name is not valid");
+			}
+
+			val variablesWithValues = restManagerService
+					.readVariableArrayOfGroupOrIntervention(participantId,
+							variable.trim(), true);
+
+			return variablesWithValues;
+		} catch (final Exception e) {
+			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
+					.entity("Could not retrieve variable: " + e.getMessage())
+					.build());
+		}
+	}
+
+	@GET
+	@Path("/readInterventionArray/{variable}")
+	@Produces("application/json")
+	public ExtendedVariablesWithValues variableReadInterventionArray(
+			@HeaderParam("token") final String token,
+			@PathParam("variable") final String variable,
+			@Context final HttpServletRequest request) {
+		log.debug(
+				"Token {}: Read variable array {} of participants from same intervention as participant",
+				token, variable);
+		ObjectId participantId;
+		try {
+			participantId = checkAccessAndReturnParticipant(token,
+					request.getSession());
+		} catch (final Exception e) {
+			throw e;
+		}
+
+		try {
+			if (!StringValidator
+					.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
+							+ variable.trim())) {
+				throw new Exception("The variable name is not valid");
+			}
+
+			val variablesWithValues = restManagerService
+					.readVariableArrayOfGroupOrIntervention(participantId,
+							variable.trim(), false);
+
+			return variablesWithValues;
+		} catch (final Exception e) {
+			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
+					.entity("Could not retrieve variable: " + e.getMessage())
+					.build());
+		}
+	}
+
+	@GET
+	@Path("/calculateGroupAverage/{variable}")
+	@Produces("application/json")
+	public VariableAverage variableCalculateGroupAverage(
+			@HeaderParam("token") final String token,
+			@PathParam("variable") final String variable,
+			@Context final HttpServletRequest request) {
+		log.debug(
+				"Token {}: Calculate variable average of variable {} of participants from same group as participant",
+				token, variable);
+		ObjectId participantId;
+		try {
+			participantId = checkAccessAndReturnParticipant(token,
+					request.getSession());
+		} catch (final Exception e) {
+			throw e;
+		}
+
+		try {
+			if (!StringValidator
+					.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
+							+ variable.trim())) {
+				throw new Exception("The variable name is not valid");
+			}
+
+			val variableAverage = restManagerService
+					.calculateAverageOfVariableArrayOfGroupOrIntervention(
+							participantId, variable.trim(), true);
+
+			return variableAverage;
+		} catch (final Exception e) {
+			throw new WebApplicationException(Response
+					.status(Status.FORBIDDEN)
+					.entity("Could not calculate average of variable: "
+							+ e.getMessage()).build());
+		}
+	}
+
+	@GET
+	@Path("/calculateInterventionAverage/{variable}")
+	@Produces("application/json")
+	public VariableAverage variableCalculateInterventionAverage(
+			@HeaderParam("token") final String token,
+			@PathParam("variable") final String variable,
+			@Context final HttpServletRequest request) {
+		log.debug(
+				"Token {}: Calculate variable average of variable {} of participants from same intervention as participant",
+				token, variable);
+		ObjectId participantId;
+		try {
+			participantId = checkAccessAndReturnParticipant(token,
+					request.getSession());
+		} catch (final Exception e) {
+			throw e;
+		}
+
+		try {
+			if (!StringValidator
+					.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
+							+ variable.trim())) {
+				throw new Exception("The variable name is not valid");
+			}
+
+			val variableAverage = restManagerService
+					.calculateAverageOfVariableArrayOfGroupOrIntervention(
+							participantId, variable.trim(), false);
+
+			return variableAverage;
+		} catch (final Exception e) {
+			throw new WebApplicationException(Response
+					.status(Status.FORBIDDEN)
+					.entity("Could not calculate average of variable: "
+							+ e.getMessage()).build());
 		}
 	}
 
@@ -137,7 +291,7 @@ public class VariableAccessService extends AbstractService {
 	@POST
 	@Path("/write/{variable}")
 	@Consumes("text/plain")
-	public void writeVariable(@HeaderParam("token") final String token,
+	public void variableWrite(@HeaderParam("token") final String token,
 			@PathParam("variable") final String variable,
 			@Context final HttpServletRequest request, String content) {
 		log.debug("Token {}: Write variable {}", token, variable);

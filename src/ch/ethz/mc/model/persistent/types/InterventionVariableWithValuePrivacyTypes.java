@@ -1,5 +1,7 @@
 package ch.ethz.mc.model.persistent.types;
 
+import lombok.Getter;
+
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
  * 
@@ -23,7 +25,32 @@ package ch.ethz.mc.model.persistent.types;
  * @author Andreas Filler
  */
 public enum InterventionVariableWithValuePrivacyTypes {
-	PRIVATE, SHARED_WITH_GROUP, SHARED_WITH_INTERVENTION;
+	PRIVATE(0), SHARED_WITH_GROUP(1), SHARED_WITH_INTERVENTION(2);
+
+	@Getter
+	private int	intValue;
+
+	private InterventionVariableWithValuePrivacyTypes(final int intValue) {
+		this.intValue = intValue;
+	}
+
+	// public boolean isAllowedToAccessByRequest(
+	// final InterventionVariableWithValuePrivacyTypes requestType) {
+	// if (requestType.getIntValue() <= intValue) {
+	// return true;
+	// } else {
+	// return false;
+	// }
+	// }
+
+	public boolean isLessRestrictiveThan(
+			final InterventionVariableWithValuePrivacyTypes privacyTypeToCompareTo) {
+		if (intValue > privacyTypeToCompareTo.getIntValue()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	@Override
 	public String toString() {

@@ -17,18 +17,25 @@ package ch.ethz.mc.model.rest;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
- * Wrapper for a variable with a value for REST
+ * Wrapper for the average of variables with REST
  *
  * @author Andreas Filler
  */
-@AllArgsConstructor
-public class VariableWithValue {
+public class VariableAverage {
 	@Getter
-	private final String	variable;
+	@Setter
+	private String	variable;
 	@Getter
-	private final String	value;
+	@Setter
+	private double	average;
+	@Getter
+	@Setter
+	private int		size;
+	@Getter
+	@Setter
+	private double	valueOfParticipant;
 }

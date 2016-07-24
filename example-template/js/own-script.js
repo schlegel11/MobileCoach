@@ -5,10 +5,14 @@ $(function () {
     log("Ready");
 
     $("#REST-status").html("Requesting values...");
-    restTest("variable/read/Test");
-    restTest("variable/readArray/Test,participantName");
-    restTest("variable/write/systemDayOfMonth", "Hallo Welt! 👍");
-    restTest("variable/write/Tedddst", "Hallo Welt! 👍");
+    //restTest("variable/read/Test");
+    //restTest("variable/readArray/Test,participantName");
+    //restTest("variable/write/systemDayOfMonth", "Hallo Welt! 👍");
+    //restTest("variable/write/Tedddst", "Hallo Welt! 👍");
+    //restTest("variable/readGroupArray/Test");
+    //restTest("variable/readInterventionArray/Test");
+    restTest("variable/calculateGroupAverage/Test");
+    restTest("variable/calculateInterventionAverage/Test");
 });
 
 // Helpers
