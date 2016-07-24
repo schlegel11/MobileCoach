@@ -2,15 +2,15 @@ package ch.ethz.mc.model.persistent;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,6 +28,7 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.persistent.types.MediaObjectTypes;
+import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -92,7 +93,7 @@ public class MediaObject extends ModelObject {
 			final File temporaryFileToStoreAndReference) throws Exception {
 
 		val fileReference = getFileStorageManagerService().storeFile(
-				temporaryFileToStoreAndReference);
+				temporaryFileToStoreAndReference, FILE_STORES.STORAGE);
 
 		if (fileReference == null) {
 			throw new Exception("File cannot be stored");
@@ -105,7 +106,7 @@ public class MediaObject extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see ch.ethz.mc.model.ModelObject#performOnDelete()
 	 */
 	@Override
@@ -114,7 +115,8 @@ public class MediaObject extends ModelObject {
 		if (fileReference != null) {
 			log.debug("Deleting file with reference {}", fileReference);
 			try {
-				getFileStorageManagerService().deleteFile(fileReference);
+				getFileStorageManagerService().deleteFile(fileReference,
+						FILE_STORES.STORAGE);
 			} catch (final Exception e) {
 				log.warn(
 						"File belonging to file reference {} could not be deleted: {}",

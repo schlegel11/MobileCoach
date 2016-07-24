@@ -43,7 +43,7 @@
             <a href="{{feedback_url}}">Feeback available here</a>
         </h2> {{/feedback_url}}
     </header>
-
+    
     {{#done}}
     <h3>DONE</h3> {{/done}} {{#password_input}}
     <div class="wrap">
@@ -110,6 +110,13 @@
                 <input type="submit" value="Next" /> {{/is_last_slide}}
             </form>
             {{/is_survey}}
+            
+            <p>&nbsp;</p>
+            
+            <form id="image-upload" enctype="multipart/form-data">
+                <input name="file" type="file" />
+                <input id="image-upload-button" type="button" value="Upload" />
+            </form>
         </div>
 
         <!-- Wrapper, no style, only relevant for nice HTML formatting -->

@@ -376,7 +376,7 @@ public class VariableAccessService extends AbstractService {
 	@POST
 	@Path("/write/{variable}")
 	@Consumes("text/plain")
-	public void variableWrite(@HeaderParam("token") final String token,
+	public Response variableWrite(@HeaderParam("token") final String token,
 			@PathParam("variable") final String variable,
 			@Context final HttpServletRequest request, String content) {
 		log.debug("Token {}: Write variable {}", token, variable);
@@ -402,5 +402,7 @@ public class VariableAccessService extends AbstractService {
 					.entity("Could not write variable: " + e.getMessage())
 					.build());
 		}
+		
+		return Response.ok().build();
 	}
 }

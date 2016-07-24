@@ -35,6 +35,7 @@ import ch.ethz.mc.model.persistent.MediaObject;
 import ch.ethz.mc.model.persistent.MediaObjectParticipantShortURL;
 import ch.ethz.mc.services.InterventionAdministrationManagerService;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
+import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
 
 /**
  * The {@link ShortURLMediaObjectURLAndFileStreamingServlet} serves files contained in
@@ -132,7 +133,8 @@ public class ShortURLMediaObjectURLAndFileStreamingServlet extends HttpServlet {
 		if (mediaObject.getFileReference() != null) {
 			// Retrieve file from media object
 			final val file = interventionAdministrationManagerService
-					.getFileByReference(mediaObject.getFileReference());
+					.getFileByReference(mediaObject.getFileReference(),
+							FILE_STORES.STORAGE);
 			log.debug("Serving file {}", file.getAbsoluteFile());
 
 			// Check if file actually exists in filesystem

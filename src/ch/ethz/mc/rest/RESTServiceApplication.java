@@ -23,9 +23,11 @@ import java.util.Set;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
+import lombok.val;
 import lombok.extern.log4j.Log4j2;
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.rest.services.ImageUploadAndAccessService;
 import ch.ethz.mc.rest.services.VariableAccessService;
 
 /**
@@ -43,9 +45,11 @@ public class RESTServiceApplication extends Application {
 		log.info("Starting REST application...");
 		services = new HashSet<Object>();
 
+		final val restManagerService = MC.getInstance().getRestManagerService();
+
 		// Variable access service
-		services.add(new VariableAccessService(MC.getInstance()
-				.getRestManagerService()));
+		services.add(new VariableAccessService(restManagerService));
+		services.add(new ImageUploadAndAccessService(restManagerService));
 
 		log.info("Started.");
 	}

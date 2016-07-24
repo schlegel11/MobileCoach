@@ -128,6 +128,10 @@ public class Constants {
 	@Getter
 	private static String	storageFolder						= "/mc_data/FileStorage";
 	@Getter
+	private static String	mediaUploadFolder					= "/mc_data/MediaUpload";
+	@Getter
+	private static String	mediaCacheFolder					= "/mc_data/MediaCache";
+	@Getter
 	private static String	templatesFolder						= "/mc_data/templates";
 
 	@Getter

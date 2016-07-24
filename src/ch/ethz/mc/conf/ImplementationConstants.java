@@ -63,6 +63,8 @@ public class ImplementationConstants {
 	public static final int		UI_SESSION_TIMEOUT_IN_SECONDS														= 900;
 	public static final String	UI_SESSION_ATTRIBUTE_DETECTOR														= "mc.vaadin.is_vaadin_session";
 
+	public static final int		MAX_UPLOAD_SIZE_IN_BYTE																= 5000000;
+
 	// CAUTION: If this is changed it also needs to be adjusted in the web.xml
 	// configuration
 	public static final String	REST_API_PATH																		= "api";
@@ -86,6 +88,7 @@ public class ImplementationConstants {
 	public static final String	FEEDBACK_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE									= "MC_ConsistencyCheckValue";
 
 	public static final String	VARIABLE_PREFIX																		= "$";
+	public static final String	FILE_STORAGE_PREFIX																	= "MC_";
 
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_ONE_OBJECT_ID											= "[A-Za-z0-9]+";
 	public static final String	REGULAR_EXPRESSION_TO_VALIDATE_CALCULATED_RULE										= "^[\\$a-zA-Z0-9_\\+\\-%*/^().,]*$";

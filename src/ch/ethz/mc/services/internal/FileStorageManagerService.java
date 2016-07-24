@@ -2,15 +2,15 @@ package ch.ethz.mc.services.internal;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,6 +29,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.RandomStringUtils;
 
 import ch.ethz.mc.conf.Constants;
+import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.MediaObject;
@@ -37,22 +38,47 @@ import com.google.gwt.thirdparty.guava.common.io.Files;
 
 @Log4j2
 public class FileStorageManagerService {
+	public enum FILE_STORES {
+		STORAGE, MEDIA_UPLOAD;
+	}
+
 	private static FileStorageManagerService	instance	= null;
 
 	private final File							storageFolder;
+
+	@Getter
+	private final File							mediaUploadFolder;
+
+	@Getter
+	private final File							mediaCacheFolder;
 
 	@Getter
 	private final File							templatesFolder;
 
 	private FileStorageManagerService(
 			final DatabaseManagerService databaseManagerService)
-					throws Exception {
+			throws Exception {
 		log.info("Starting service...");
 
 		log.info("Using storage folder {}", Constants.getStorageFolder());
 		storageFolder = new File(Constants.getStorageFolder());
 		storageFolder.mkdirs();
 		if (!storageFolder.exists()) {
+			throw new FileNotFoundException();
+		}
+
+		log.info("Using media upload folder {}",
+				Constants.getMediaUploadFolder());
+		mediaUploadFolder = new File(Constants.getMediaUploadFolder());
+		mediaUploadFolder.mkdirs();
+		if (!mediaUploadFolder.exists()) {
+			throw new FileNotFoundException();
+		}
+
+		log.info("Using media cache folder {}", Constants.getMediaCacheFolder());
+		mediaCacheFolder = new File(Constants.getMediaCacheFolder());
+		mediaCacheFolder.mkdirs();
+		if (!mediaCacheFolder.exists()) {
 			throw new FileNotFoundException();
 		}
 
@@ -76,7 +102,7 @@ public class FileStorageManagerService {
 			if (mediaObject.getFileReference() != null) {
 				final String fileReference = mediaObject.getFileReference();
 				requiredFileRefernces.add(fileReference.split("/")[0]);
-				if (getFileByReference(fileReference) == null) {
+				if (getFileByReference(fileReference, FILE_STORES.STORAGE) == null) {
 					log.warn(
 							"Media object {} contains missing file reference {}",
 							mediaObject.getId(), mediaObject.getFileReference());
@@ -85,8 +111,10 @@ public class FileStorageManagerService {
 		}
 
 		for (val file : storageFolder.listFiles()) {
-			if (file.isDirectory() && file.getName().startsWith("MC_")
-					&& !requiredFileRefernces.contains(file.getName())) {
+			if (file.isDirectory()
+					&& file.getName().startsWith(
+							ImplementationConstants.FILE_STORAGE_PREFIX)
+							&& !requiredFileRefernces.contains(file.getName())) {
 				log.debug("Deleting unused resource {}", file.getAbsolutePath());
 				for (val nestedFile : file.listFiles()) {
 					nestedFile.delete();
@@ -97,6 +125,18 @@ public class FileStorageManagerService {
 
 		log.info("Check done.");
 
+		log.info("Clearing media upload cache...");
+		for (val file : mediaUploadFolder.listFiles()) {
+			if (file.isFile()
+					&& file.getName().startsWith(
+							ImplementationConstants.FILE_STORAGE_PREFIX)) {
+				log.debug("Deleting cache file {}", file.getAbsolutePath());
+				file.delete();
+			}
+		}
+
+		log.info("Clearing done.");
+
 		// Give this instance to model object
 		ModelObject.configure(this);
 
@@ -105,7 +145,7 @@ public class FileStorageManagerService {
 
 	public static FileStorageManagerService start(
 			final DatabaseManagerService databaseManagerService)
-					throws Exception {
+			throws Exception {
 		if (instance == null) {
 			instance = new FileStorageManagerService(databaseManagerService);
 		}
@@ -127,12 +167,38 @@ public class FileStorageManagerService {
 	 *
 	 * @param fileReference
 	 *            The reference of the file to retrieve
+	 * @param fileStore
+	 *            The file store for the file
 	 * @return The required file or <code>null</code> if an error occurred
 	 */
-	public File getFileByReference(final String fileReference) {
+	public File getFileByReference(final String fileReference,
+			final FILE_STORES fileStore) {
+
+		File responsibleFolder = null;
+		switch (fileStore) {
+			case MEDIA_UPLOAD:
+				responsibleFolder = mediaUploadFolder;
+				break;
+			case STORAGE:
+				responsibleFolder = storageFolder;
+				break;
+		}
+
 		log.debug("Returning file with reference {}", fileReference);
-		final String[] fileReferenceParts = fileReference.split("/");
-		final File folder = new File(storageFolder, fileReferenceParts[0]);
+
+		String[] fileReferenceParts;
+		if (fileReference.contains("/")) {
+			fileReferenceParts = fileReference.split("/");
+		} else {
+			fileReferenceParts = fileReference.split("-");
+		}
+
+		if (fileReferenceParts.length != 2) {
+			log.warn("Preventing security lack by not accepting different file names as regularly expected");
+			return null;
+		}
+
+		final File folder = new File(responsibleFolder, fileReferenceParts[0]);
 		final File file = new File(folder, fileReferenceParts[1]);
 
 		if (!file.exists()) {
@@ -151,10 +217,22 @@ public class FileStorageManagerService {
 	 *
 	 * @param file
 	 *            The file to store
+	 * @param fileStore
+	 *            The file store for the file
 	 * @return The file reference or <code>null</code> if an error occurred
 	 */
-	public String storeFile(final File file) {
+	public String storeFile(final File file, final FILE_STORES fileStore) {
 		log.debug("Storing file {}", file.getAbsoluteFile());
+
+		File responsibleFolder = null;
+		switch (fileStore) {
+			case MEDIA_UPLOAD:
+				responsibleFolder = mediaUploadFolder;
+				break;
+			case STORAGE:
+				responsibleFolder = storageFolder;
+				break;
+		}
 
 		String fileName;
 		if (file.getName().lastIndexOf(".") > -1) {
@@ -164,11 +242,13 @@ public class FileStorageManagerService {
 			fileName = "file.unknown";
 		}
 
-		String folderName = "MC_" + RandomStringUtils.randomAlphabetic(40);
-		File folder = new File(storageFolder, folderName);
+		String folderName = ImplementationConstants.FILE_STORAGE_PREFIX
+				+ RandomStringUtils.randomAlphabetic(40);
+		File folder = new File(responsibleFolder, folderName);
 		while (folder.exists()) {
-			folderName = "MC_" + RandomStringUtils.randomAlphabetic(40);
-			folder = new File(storageFolder, folderName);
+			folderName = ImplementationConstants.FILE_STORAGE_PREFIX
+					+ RandomStringUtils.randomAlphabetic(40);
+			folder = new File(responsibleFolder, folderName);
 		}
 		folder.mkdirs();
 
@@ -191,8 +271,17 @@ public class FileStorageManagerService {
 		return fileReference;
 	}
 
-	public void deleteFile(final String fileReference) {
-		final File fileToDelete = getFileByReference(fileReference);
+	/**
+	 * Deletes a file with the given file reference
+	 *
+	 * @param fileReference
+	 *            The file reference to delete
+	 * @param fileStore
+	 *            The file store for the file
+	 */
+	public void deleteFile(final String fileReference,
+			final FILE_STORES fileStore) {
+		final File fileToDelete = getFileByReference(fileReference, fileStore);
 
 		if (fileToDelete != null && fileToDelete.exists()) {
 			final File folderToDelete = fileToDelete.getParentFile();

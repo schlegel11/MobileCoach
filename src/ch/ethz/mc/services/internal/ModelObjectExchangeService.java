@@ -44,6 +44,7 @@ import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.memory.ExchangeModelObject;
 import ch.ethz.mc.model.persistent.MediaObject;
+import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
 import ch.ethz.mc.services.types.ModelObjectExchangeFormatTypes;
 
 /**
@@ -338,8 +339,9 @@ public class ModelObjectExchangeService {
 				final String uniqueFileZipName = "F "
 						+ exchangeModelObject.getFileReference();
 				final File referencedFile = fileStorageManagerService
-						.getFileByReference(exchangeModelObject
-								.getFileReference());
+						.getFileByReference(
+								exchangeModelObject.getFileReference(),
+								FILE_STORES.STORAGE);
 				log.debug("Adding referenced file {} as {} to zip file",
 						referencedFile, uniqueFileZipName);
 
@@ -452,7 +454,7 @@ public class ModelObjectExchangeService {
 				IOUtils.copy(zipEntryInputStream, fileOutputStream);
 
 				final String newFileReference = fileStorageManagerService
-						.storeFile(temporaryFile);
+						.storeFile(temporaryFile, FILE_STORES.STORAGE);
 
 				final String oldFileReference = zipEntry.getName().split(" ")[1];
 

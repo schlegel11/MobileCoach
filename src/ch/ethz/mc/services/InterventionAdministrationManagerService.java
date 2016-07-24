@@ -72,6 +72,7 @@ import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import ch.ethz.mc.modules.AbstractModule;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService;
+import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
 import ch.ethz.mc.services.internal.ModelObjectExchangeService;
 import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.services.types.ModelObjectExchangeFormatTypes;
@@ -89,18 +90,18 @@ import ch.ethz.mc.ui.NotificationMessageException;
  */
 @Log4j2
 public class InterventionAdministrationManagerService {
-	private final Object										$lock;
+	private final Object									$lock;
 
-	private static InterventionAdministrationManagerService		instance	= null;
+	private static InterventionAdministrationManagerService	instance	= null;
 
-	private final DatabaseManagerService						databaseManagerService;
-	private final FileStorageManagerService						fileStorageManagerService;
-	private final VariablesManagerService						variablesManagerService;
-	private final ModelObjectExchangeService					modelObjectExchangeService;
+	private final DatabaseManagerService					databaseManagerService;
+	private final FileStorageManagerService					fileStorageManagerService;
+	private final VariablesManagerService					variablesManagerService;
+	private final ModelObjectExchangeService				modelObjectExchangeService;
 
-	private final SurveyAdministrationManagerService	screeningSurveyAdministrationManagerService;
+	private final SurveyAdministrationManagerService		screeningSurveyAdministrationManagerService;
 
-	private final List<Class<? extends AbstractModule>>			modules;
+	private final List<Class<? extends AbstractModule>>		modules;
 
 	private InterventionAdministrationManagerService(
 			final DatabaseManagerService databaseManagerService,
@@ -1690,8 +1691,10 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public File getFileByReference(final String fileReference) {
-		return fileStorageManagerService.getFileByReference(fileReference);
+	public File getFileByReference(final String fileReference,
+			final FILE_STORES fileStorage) {
+		return fileStorageManagerService.getFileByReference(fileReference,
+				fileStorage);
 	}
 
 	@Synchronized
