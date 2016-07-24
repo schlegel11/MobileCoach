@@ -59,3 +59,5 @@ available under the following proprietary licenses:
 
    * JavaMail
      https://java.net/projects/javamail/pages/License
+   * Java Image Scaling
+     https://opensource.org/licenses/BSD-3-Clause
