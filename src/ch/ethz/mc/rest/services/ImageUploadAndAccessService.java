@@ -2,15 +2,15 @@ package ch.ethz.mc.rest.services;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,6 +38,7 @@ import org.bson.types.ObjectId;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
 import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.conf.ImplementationConstants.ACCEPTED_MEDIA_UPLOAD_TYPES;
 import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
 import ch.ethz.mc.services.internal.VariablesManagerService.ExternallyWriteProtectedVariableException;
@@ -75,8 +76,8 @@ public class ImageUploadAndAccessService extends AbstractFileUploadService {
 		if (request.getContentLength() > ImplementationConstants.MAX_UPLOAD_SIZE_IN_BYTE) {
 			throw new WebApplicationException(
 					Response.status(Status.BAD_REQUEST)
-							.entity("Could not upload image: The image file is too big")
-							.build());
+					.entity("Could not upload image: The image file is too big")
+					.build());
 		}
 
 		if (!StringValidator
@@ -84,8 +85,8 @@ public class ImageUploadAndAccessService extends AbstractFileUploadService {
 						+ variable.trim())) {
 			throw new WebApplicationException(
 					Response.serverError()
-							.entity("Could not upload image: The variable name is not valid")
-							.build());
+					.entity("Could not upload image: The variable name is not valid")
+					.build());
 		}
 
 		val uploadToVariableAllowed = restManagerService
@@ -98,12 +99,12 @@ public class ImageUploadAndAccessService extends AbstractFileUploadService {
 		}
 
 		// Do upload to temporary file
-		val fileType = FILE_TYPES.IMAGE;
+		val mediaType = ACCEPTED_MEDIA_UPLOAD_TYPES.IMAGE;
 		File temporaryFile = null;
 		try {
-			temporaryFile = handleUpload(input, fileType);
+			temporaryFile = handleUpload(input, mediaType);
 		} catch (final Exception e) {
-			log.warn("Error at handling {} file upload: {}", fileType,
+			log.warn("Error at handling {} file upload: {}", mediaType,
 					e.getMessage());
 
 			if (temporaryFile != null && temporaryFile.exists()) {

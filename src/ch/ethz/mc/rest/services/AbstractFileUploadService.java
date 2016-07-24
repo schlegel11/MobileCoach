@@ -2,15 +2,15 @@ package ch.ethz.mc.rest.services;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,8 +21,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +36,8 @@ import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
+import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.conf.ImplementationConstants.ACCEPTED_MEDIA_UPLOAD_TYPES;
 import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
@@ -49,19 +49,7 @@ import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
  */
 @Log4j2
 public abstract class AbstractFileUploadService extends AbstractService {
-	protected enum FILE_TYPES {
-		IMAGE;
-
-		@Override
-		public String toString() {
-			return name().toLowerCase();
-		}
-	}
-
 	private final FileStorageManagerService	fileStorageManagerService;
-
-	DateFormat								dateFormat	= new SimpleDateFormat(
-			"yyyy-MM-dd_HH-mm-ss-SSS");
 
 	public AbstractFileUploadService(final RESTManagerService restManagerService) {
 		super(restManagerService);
@@ -73,19 +61,19 @@ public abstract class AbstractFileUploadService extends AbstractService {
 	 * Handle upload of file to a temporary file
 	 *
 	 * @param input
-	 * @param fileType
+	 * @param mediaType
 	 * @return
 	 * @throws Exception
 	 */
 	protected File handleUpload(final MultipartFormDataInput input,
-			final FILE_TYPES fileType) throws Exception {
+			final ACCEPTED_MEDIA_UPLOAD_TYPES mediaType) throws Exception {
 
-		log.debug("Handling upload of {}...", fileType);
+		log.debug("Handling upload of {}...", mediaType);
 
 		// Handle upload
 		File file;
 		try {
-			file = formDataToFile(input, fileType);
+			file = formDataToFile(input, mediaType);
 		} catch (final Exception e) {
 			log.warn("Upload error: {}", e.getMessage());
 
@@ -109,7 +97,7 @@ public abstract class AbstractFileUploadService extends AbstractService {
 	}
 
 	private File formDataToFile(final MultipartFormDataInput input,
-			final FILE_TYPES fileType) throws Exception {
+			final ACCEPTED_MEDIA_UPLOAD_TYPES mediaType) throws Exception {
 		File file = null;
 
 		final Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
@@ -143,12 +131,10 @@ public abstract class AbstractFileUploadService extends AbstractService {
 					throw new Exception("File has no file extension");
 				}
 
-				switch (fileType) {
+				switch (mediaType) {
 					case IMAGE:
-						if (!temporaryFileExtension.equals(".png")
-								&& !temporaryFileExtension.equals(".jpg")
-								&& !temporaryFileExtension.equals(".jpeg")
-								&& !temporaryFileExtension.equals(".gif")) {
+						if (!ImplementationConstants.ACCEPTED_IMAGE_FORMATS
+								.contains(temporaryFileExtension)) {
 							throw new Exception("File type is not supported");
 						}
 						break;

@@ -6,7 +6,7 @@ $(function () {
 
     createListeners();
     $("#REST-status").html("Requesting values...");
-    //restTest("variable/read/Test");
+    restTest("variable/read/Test");
     //restTest("variable/readMany/Test,participantName");
     //restTest("variable/write/systemDayOfMonth", "Hallo Welt! 👍");
     //restTest("variable/write/TestString", "ABC123");

@@ -547,7 +547,24 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 										.indexOf(request.getRequestURI()))
 						+ request.getContextPath()
 						+ "/"
-						+ ImplementationConstants.REST_API_PATH);
+						+ ImplementationConstants.REST_API_PATH
+						+ "/"
+						+ ImplementationConstants.REST_API_VERSION + "/");
+
+		// Uploaded media content URL
+		templateVariables.put(
+				GeneralSlideTemplateFieldTypes.UPLOADED_MEDIA_CONTENT_URL
+						.toVariable(),
+				request.getRequestURL()
+						.toString()
+						.substring(
+								0,
+								request.getRequestURL().toString()
+										.indexOf(request.getRequestURI()))
+						+ request.getContextPath()
+						+ "/"
+						+ ImplementationConstants.FILE_STREAMING_SERVLET_PATH
+						+ "/");
 
 		// Slide type
 		if (surveyId != null) {

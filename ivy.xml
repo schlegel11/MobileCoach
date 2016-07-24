@@ -15,6 +15,7 @@
 	<!ENTITY lombok.version "1.16.8">
 	<!ENTITY mustache.java.version "0.8.14">
 	<!ENTITY java.mail.version "1.4.7">
+	<!ENTITY java-image-scaling.version "0.8.6">
 	<!ENTITY resteasy.version "3.0.17.Final">
 	<!ENTITY jcsv.version "1.4.0">
 ]>
@@ -106,6 +107,9 @@
 
 		<!-- JavaMail -->
 		<dependency org="javax.mail" name="mail" rev="&java.mail.version;" />
+
+		<!-- Java Image Scaling -->
+		<dependency org="com.mortennobel" name="java-image-scaling" rev="&java-image-scaling.version;"/>
 
 		<!-- RESTeasy -->
 		<dependency org="org.jboss.resteasy" name="resteasy-jaxrs" rev="&resteasy.version;" />

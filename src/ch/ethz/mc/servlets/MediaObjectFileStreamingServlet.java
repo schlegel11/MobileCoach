@@ -2,15 +2,15 @@ package ch.ethz.mc.servlets;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,10 +38,11 @@ import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.persistent.MediaObject;
 import ch.ethz.mc.services.InterventionAdministrationManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
+import ch.ethz.mc.services.internal.ImageCachingService;
 
 /**
  * The {@link MediaObjectFileStreamingServlet} serves files contained in
- * {@link MediaObject}s
+ * {@link MediaObject}s or uploaded media objects.
  *
  * The library used for serving the files is published under the LGPL license.
  * Therefore all modifications and extensions on these files are published as
@@ -61,6 +62,8 @@ import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
 public class MediaObjectFileStreamingServlet extends HttpServlet {
 	private InterventionAdministrationManagerService	interventionAdministrationManagerService;
 
+	private ImageCachingService							imageCachingService;
+
 	private FileServletWrapper							fileServletWrapper;
 
 	@Override
@@ -70,6 +73,8 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 
 		interventionAdministrationManagerService = MC.getInstance()
 				.getInterventionAdministrationManagerService();
+
+		imageCachingService = MC.getInstance().getImageCachingService();
 
 		fileServletWrapper = new FileServletWrapper();
 		fileServletWrapper.init(getServletContext());
@@ -87,14 +92,30 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 	 */
 	private HttpServletRequest createWrappedReqest(
 			final HttpServletRequest request, final HttpServletResponse response)
-					throws IOException {
+			throws IOException {
 
 		// Determine request type
 		String requestedElement;
+		int width = 0;
+		int height = 0;
+		boolean withWatermark = false;
+		boolean withCropping = false;
 		try {
 			val pathParts = request.getPathInfo().split("/");
 			requestedElement = pathParts[1];
+
+			if (pathParts.length >= 4) {
+				width = Integer.parseInt(pathParts[2]);
+				height = Integer.parseInt(pathParts[3]);
+			}
+			if (pathParts.length >= 5) {
+				withWatermark = Boolean.parseBoolean(pathParts[4]);
+			}
+			if (pathParts.length >= 6) {
+				withCropping = Boolean.parseBoolean(pathParts[5]);
+			}
 		} catch (final Exception e) {
+			log.debug("Error at parsing path parts: {}", e.getMessage());
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return null;
 		}
@@ -102,9 +123,34 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 		File file = null;
 		if (requestedElement
 				.startsWith(ImplementationConstants.FILE_STORAGE_PREFIX)) {
+			log.debug("Uploaded media object request");
+
 			// Retrieve media file
 			file = interventionAdministrationManagerService.getFileByReference(
 					requestedElement, FILE_STORES.MEDIA_UPLOAD);
+
+			// Retrieve cached/resized version of image if an image is requested
+			val fileExtension = file.getName()
+					.substring(file.getName().lastIndexOf(".")).toLowerCase();
+			if (ImplementationConstants.ACCEPTED_IMAGE_FORMATS
+					.contains(fileExtension) && width > 0 && height > 0) {
+				if (width > ImplementationConstants.IMAGE_MAX_WIDTH
+						|| height > ImplementationConstants.IMAGE_MAX_HEIGHT) {
+					log.debug("Image is requested in a bigger size than the allowed maximum size");
+					response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+					return null;
+				}
+
+				try {
+					file = imageCachingService.requestCacheImage(file, width,
+							height, withWatermark, withCropping);
+				} catch (final Exception e) {
+					log.warn("Error at requesting cached image: {}",
+							e.getMessage());
+					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+					return null;
+				}
+			}
 		} else {
 			// Determine requested media object
 			ObjectId mediaObjectId = null;

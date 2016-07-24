@@ -2,15 +2,15 @@ package ch.ethz.mc.services.internal;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -57,7 +57,7 @@ public class FileStorageManagerService {
 
 	private FileStorageManagerService(
 			final DatabaseManagerService databaseManagerService)
-			throws Exception {
+					throws Exception {
 		log.info("Starting service...");
 
 		log.info("Using storage folder {}", Constants.getStorageFolder());
@@ -114,7 +114,7 @@ public class FileStorageManagerService {
 			if (file.isDirectory()
 					&& file.getName().startsWith(
 							ImplementationConstants.FILE_STORAGE_PREFIX)
-							&& !requiredFileRefernces.contains(file.getName())) {
+					&& !requiredFileRefernces.contains(file.getName())) {
 				log.debug("Deleting unused resource {}", file.getAbsolutePath());
 				for (val nestedFile : file.listFiles()) {
 					nestedFile.delete();
@@ -125,8 +125,8 @@ public class FileStorageManagerService {
 
 		log.info("Check done.");
 
-		log.info("Clearing media upload cache...");
-		for (val file : mediaUploadFolder.listFiles()) {
+		log.info("Clearing media cache...");
+		for (val file : mediaCacheFolder.listFiles()) {
 			if (file.isFile()
 					&& file.getName().startsWith(
 							ImplementationConstants.FILE_STORAGE_PREFIX)) {
@@ -145,7 +145,7 @@ public class FileStorageManagerService {
 
 	public static FileStorageManagerService start(
 			final DatabaseManagerService databaseManagerService)
-			throws Exception {
+					throws Exception {
 		if (instance == null) {
 			instance = new FileStorageManagerService(databaseManagerService);
 		}
