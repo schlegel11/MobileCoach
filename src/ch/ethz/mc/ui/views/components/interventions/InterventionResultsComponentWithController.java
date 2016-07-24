@@ -39,7 +39,6 @@ import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 import ch.ethz.mc.model.ui.UIParticipant;
-import ch.ethz.mc.model.ui.UIParticipantVariableWithParticipant;
 import ch.ethz.mc.model.ui.results.UIDialogMessageWithParticipantForResults;
 import ch.ethz.mc.model.ui.results.UIVariableWithParticipantForResults;
 import ch.ethz.mc.tools.CSVExporter;
@@ -510,13 +509,7 @@ public class InterventionResultsComponentWithController extends
 										getStringValue());
 
 						if (changeSuceeded) {
-							getStringItemProperty(
-									selectedUIVariableWithParticipantBeanItem,
-									UIParticipantVariableWithParticipant.VALUE)
-									.setValue(getStringValue());
-
-							selectedUIVariableWithParticipant
-									.setValue(getStringValue());
+							updateTables();
 
 							getAdminUI()
 									.showInformationNotification(

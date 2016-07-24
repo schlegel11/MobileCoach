@@ -17,6 +17,8 @@ package ch.ethz.mc.services;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import java.util.List;
+
 import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -28,10 +30,12 @@ import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValuePrivacyTypes;
-import ch.ethz.mc.model.rest.ExtendedVariableWithValue;
-import ch.ethz.mc.model.rest.ExtendedVariablesWithValues;
+import ch.ethz.mc.model.rest.CollectionOfExtendedListVariables;
+import ch.ethz.mc.model.rest.CollectionOfExtendedVariables;
+import ch.ethz.mc.model.rest.ExtendedListVariable;
+import ch.ethz.mc.model.rest.ExtendedVariable;
+import ch.ethz.mc.model.rest.Variable;
 import ch.ethz.mc.model.rest.VariableAverage;
-import ch.ethz.mc.model.rest.VariableWithValue;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.services.internal.VariablesManagerService.ExternallyReadProtectedVariableException;
@@ -90,19 +94,19 @@ public class RESTManagerService {
 	 * @return
 	 * @throws ExternallyReadProtectedVariableException
 	 */
-	public VariableWithValue readVariable(final ObjectId participantId,
+	public Variable readVariable(final ObjectId participantId,
 			final String variable)
 			throws ExternallyReadProtectedVariableException {
 		log.debug("Try to read variable {} for participant {}", variable,
 				participantId);
 
 		try {
-			val variableWithValue = new VariableWithValue(variable,
-					getVariableValue(participantId, variable));
+			val resultVariable = new Variable(variable,
+					getVariableValueOfParticipant(participantId, variable));
 
 			log.debug("Returing variable with value {} for participant {}",
-					variableWithValue, participantId);
-			return variableWithValue;
+					resultVariable, participantId);
+			return resultVariable;
 		} catch (final Exception e) {
 			log.debug("Could not read variable {} for participant {}: {}",
 					variable, participantId, e.getMessage());
@@ -119,7 +123,7 @@ public class RESTManagerService {
 	 * @return
 	 * @throws ExternallyReadProtectedVariableException
 	 */
-	public ExtendedVariablesWithValues readVariableArrayOfGroupOrIntervention(
+	public CollectionOfExtendedVariables readVariableArrayOfGroupOrIntervention(
 			final ObjectId participantId, final String variable,
 			final boolean sameGroup)
 			throws ExternallyReadProtectedVariableException {
@@ -128,7 +132,7 @@ public class RESTManagerService {
 				variable, sameGroup ? "group" : "intervention", participantId);
 
 		try {
-			val variablesWithValues = getVariableValues(
+			val collecionOfExtendedVariables = getVariableValueOfParticipantsOfGroupOrIntervention(
 					participantId,
 					variable,
 					sameGroup ? InterventionVariableWithValuePrivacyTypes.SHARED_WITH_GROUP
@@ -136,14 +140,55 @@ public class RESTManagerService {
 
 			log.debug(
 					"Returing variables with values {} of participants from the same {} as participant {}",
-					variablesWithValues, sameGroup ? "group" : "intervention",
-					participantId);
-			return variablesWithValues;
+					collecionOfExtendedVariables, sameGroup ? "group"
+							: "intervention", participantId);
+
+			return collecionOfExtendedVariables;
 		} catch (final Exception e) {
 			log.debug(
 					"Could not read variable {} of participants from the same {} as participant {}: {}",
 					variable, sameGroup ? "group" : "intervention",
 					participantId, variable, participantId, e.getMessage());
+			throw e;
+		}
+	}
+
+	/**
+	 * Reads variable for all participants of the same group/intervention as the
+	 * given participant
+	 *
+	 * @param participantId
+	 * @param variables
+	 * @param sameGroup
+	 * @param many
+	 * @return
+	 * @throws ExternallyReadProtectedVariableException
+	 */
+	public CollectionOfExtendedListVariables readVariableListArrayOfGroupOrIntervention(
+			final ObjectId participantId, final List<String> variables,
+			final boolean sameGroup)
+			throws ExternallyReadProtectedVariableException {
+		log.debug(
+				"Try to read variable array {} of participants from the same {} as participant {}",
+				variables, sameGroup ? "group" : "intervention", participantId);
+
+		try {
+			val collectionOfExtendendListVariables = getVariableValueOfParticipantsOfGroupOrIntervention(
+					participantId,
+					variables,
+					sameGroup ? InterventionVariableWithValuePrivacyTypes.SHARED_WITH_GROUP
+							: InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION);
+
+			log.debug(
+					"Returing variables with values {} of participants from the same {} as participant {}",
+					collectionOfExtendendListVariables, sameGroup ? "group"
+							: "intervention", participantId);
+			return collectionOfExtendendListVariables;
+		} catch (final Exception e) {
+			log.debug(
+					"Could not read variable {} of participants from the same {} as participant {}: {}",
+					variables, sameGroup ? "group" : "intervention",
+					participantId, variables, participantId, e.getMessage());
 			throw e;
 		}
 	}
@@ -161,7 +206,7 @@ public class RESTManagerService {
 	public VariableAverage calculateAverageOfVariableArrayOfGroupOrIntervention(
 			final ObjectId participantId, final String variable,
 			final boolean sameGroup)
-					throws ExternallyReadProtectedVariableException {
+			throws ExternallyReadProtectedVariableException {
 		log.debug(
 				"Try to calculate average of variable array {} of participants from the same {} as participant {}",
 				variable, sameGroup ? "group" : "intervention", participantId);
@@ -170,24 +215,20 @@ public class RESTManagerService {
 			val variableAverage = new VariableAverage();
 			variableAverage.setVariable(variable);
 
-			val variablesWithValues = readVariableArrayOfGroupOrIntervention(
+			val resultVariables = readVariableArrayOfGroupOrIntervention(
 					participantId, variable, sameGroup);
 
 			try {
 				int i = 0;
 				double average = 0d;
-				for (val variableWithValue : variablesWithValues
-						.getVariablesWithValues()) {
+				for (val resultVariable : resultVariables.getVariables()) {
 					i++;
-					if (variableWithValue.isOwnValue()) {
-						variableAverage.setAverage(Double
-								.parseDouble(variableWithValue.getValue()));
+					if (resultVariable.isOwnValue()) {
+						variableAverage.setValueOfParticipant(Double
+								.parseDouble(resultVariable.getValue()));
 					}
 
-					log.debug(variableWithValue.getValue());
-					log.debug(Double.parseDouble(variableWithValue.getValue()));
-
-					average += Double.parseDouble(variableWithValue.getValue());
+					average += Double.parseDouble(resultVariable.getValue());
 				}
 				variableAverage.setAverage(average / i);
 				variableAverage.setSize(i);
@@ -202,7 +243,7 @@ public class RESTManagerService {
 			log.debug(
 					"Could not calculate averagte of variable {} of participants from the same {} as participant {}: {}",
 					variable, sameGroup ? "group" : "intervention",
-							participantId, variable, participantId, e.getMessage());
+					participantId, variable, participantId, e.getMessage());
 			throw e;
 		}
 	}
@@ -246,7 +287,7 @@ public class RESTManagerService {
 	 * @throws ExternallyReadProtectedVariableException
 	 */
 	@Synchronized
-	private String getVariableValue(final ObjectId participantId,
+	private String getVariableValueOfParticipant(final ObjectId participantId,
 			final String variable)
 			throws ExternallyReadProtectedVariableException {
 		return variablesManagerService
@@ -262,13 +303,13 @@ public class RESTManagerService {
 	 * participant
 	 *
 	 * @param participantId
-	 * @param variable
-	 * @param privacyType
+	 * @param variables
+	 * @param requestPrivacyType
 	 * @return
 	 * @throws ExternallyReadProtectedVariableException
 	 */
 	@Synchronized
-	private ExtendedVariablesWithValues getVariableValues(
+	private CollectionOfExtendedVariables getVariableValueOfParticipantsOfGroupOrIntervention(
 			final ObjectId participantId, final String variable,
 			final InterventionVariableWithValuePrivacyTypes requestPrivacyType)
 			throws ExternallyReadProtectedVariableException {
@@ -288,15 +329,15 @@ public class RESTManagerService {
 					"The given participant does not belong to a group, so the variable cannot be read");
 		}
 
-		val variablesWithValues = new ExtendedVariablesWithValues();
-		val variablesWithValuesList = variablesWithValues
-				.getVariablesWithValues();
+		val collectionOfExtendedResultVariables = new CollectionOfExtendedVariables();
+		val resultVariables = collectionOfExtendedResultVariables
+				.getVariables();
 
 		switch (requestPrivacyType) {
 			case PRIVATE:
-				variablesWithValuesList.add(new ExtendedVariableWithValue(
-						variable, getVariableValue(participantId, variable),
-						true));
+				resultVariables.add(new ExtendedVariable(variable,
+						getVariableValueOfParticipant(participantId, variable),
+						participant.getId().toHexString(), true));
 				break;
 			case SHARED_WITH_GROUP:
 				Iterable<Participant> relevantParticipants = databaseManagerService
@@ -305,7 +346,7 @@ public class RESTManagerService {
 								interventionId, group);
 
 				for (val relevantParticipant : relevantParticipants) {
-					final ExtendedVariableWithValue variableWithValue = new ExtendedVariableWithValue(
+					final ExtendedVariable variableWithValue = new ExtendedVariable(
 							variable,
 							variablesManagerService
 									.getExternallyReadableVariableValueForParticipant(
@@ -313,9 +354,10 @@ public class RESTManagerService {
 											ImplementationConstants.VARIABLE_PREFIX
 													+ variable,
 											InterventionVariableWithValuePrivacyTypes.SHARED_WITH_GROUP),
+							relevantParticipant.getId().toHexString(),
 							participantId.equals(relevantParticipant.getId()));
 
-					variablesWithValuesList.add(variableWithValue);
+					resultVariables.add(variableWithValue);
 				}
 				break;
 			case SHARED_WITH_INTERVENTION:
@@ -324,17 +366,18 @@ public class RESTManagerService {
 						Queries.PARTICIPANT__BY_INTERVENTION, interventionId);
 
 				for (val relevantParticipant : relevantParticipants) {
-					final ExtendedVariableWithValue variableWithValue = new ExtendedVariableWithValue(
+					final ExtendedVariable variableWithValue = new ExtendedVariable(
 							variable,
 							variablesManagerService
-							.getExternallyReadableVariableValueForParticipant(
-									relevantParticipant.getId(),
-									ImplementationConstants.VARIABLE_PREFIX
-									+ variable,
-									InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION),
-									participantId.equals(relevantParticipant.getId()));
+									.getExternallyReadableVariableValueForParticipant(
+											relevantParticipant.getId(),
+											ImplementationConstants.VARIABLE_PREFIX
+													+ variable,
+											InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION),
+							relevantParticipant.getId().toHexString(),
+							participantId.equals(relevantParticipant.getId()));
 
-					variablesWithValuesList.add(variableWithValue);
+					resultVariables.add(variableWithValue);
 				}
 				break;
 			default:
@@ -342,9 +385,122 @@ public class RESTManagerService {
 
 		}
 
-		variablesWithValues.setSize(variablesWithValuesList.size());
+		collectionOfExtendedResultVariables.setSize(resultVariables.size());
 
-		return variablesWithValues;
+		return collectionOfExtendedResultVariables;
+	}
+
+	/**
+	 * Reads variables for all participants of the same group/intervetion as the
+	 * given
+	 * participant
+	 *
+	 * @param participantId
+	 * @param variables
+	 * @param requestPrivacyType
+	 * @return
+	 * @throws ExternallyReadProtectedVariableException
+	 */
+	@Synchronized
+	private CollectionOfExtendedListVariables getVariableValueOfParticipantsOfGroupOrIntervention(
+			final ObjectId participantId, final List<String> variables,
+			final InterventionVariableWithValuePrivacyTypes requestPrivacyType)
+			throws ExternallyReadProtectedVariableException {
+		val participant = databaseManagerService.getModelObjectById(
+				Participant.class, participantId);
+
+		if (participant == null) {
+			throw variablesManagerService.new ExternallyReadProtectedVariableException(
+					"The given participant does not exist anymore, so the variables cannot be read");
+		}
+
+		val interventionId = participant.getIntervention();
+		val group = participant.getGroup();
+
+		if (group == null) {
+			throw variablesManagerService.new ExternallyReadProtectedVariableException(
+					"The given participant does not belong to a group, so the variable cannot be read");
+		}
+
+		val collectionOfExtendedListResultVariables = new CollectionOfExtendedListVariables();
+		val resultVariables = collectionOfExtendedListResultVariables
+				.getVariableListing();
+
+		switch (requestPrivacyType) {
+			case PRIVATE:
+				ExtendedListVariable extendedListVariable = new ExtendedListVariable(
+						participant.getId().toHexString(), true);
+
+				for (val variable : variables) {
+					extendedListVariable.getVariables().add(
+							new Variable(variable,
+									getVariableValueOfParticipant(
+											participantId, variable)));
+				}
+
+				resultVariables.add(extendedListVariable);
+				break;
+			case SHARED_WITH_GROUP:
+				Iterable<Participant> relevantParticipants = databaseManagerService
+						.findModelObjects(Participant.class,
+								Queries.PARTICIPANT__BY_INTERVENTION_AND_GROUP,
+								interventionId, group);
+
+				for (val relevantParticipant : relevantParticipants) {
+					extendedListVariable = new ExtendedListVariable(
+							relevantParticipant.getId().toHexString(),
+							participantId.equals(relevantParticipant.getId()));
+
+					for (val variable : variables) {
+						extendedListVariable
+								.getVariables()
+								.add(new Variable(
+										variable,
+										variablesManagerService
+												.getExternallyReadableVariableValueForParticipant(
+														relevantParticipant
+																.getId(),
+														ImplementationConstants.VARIABLE_PREFIX
+																+ variable,
+														InterventionVariableWithValuePrivacyTypes.SHARED_WITH_GROUP)));
+					}
+					resultVariables.add(extendedListVariable);
+				}
+				break;
+			case SHARED_WITH_INTERVENTION:
+				relevantParticipants = databaseManagerService.findModelObjects(
+						Participant.class,
+						Queries.PARTICIPANT__BY_INTERVENTION, interventionId);
+
+				for (val relevantParticipant : relevantParticipants) {
+					extendedListVariable = new ExtendedListVariable(
+							relevantParticipant.getId().toHexString(),
+							participantId.equals(relevantParticipant.getId()));
+
+					for (val variable : variables) {
+						extendedListVariable
+						.getVariables()
+						.add(new Variable(
+								variable,
+								variablesManagerService
+								.getExternallyReadableVariableValueForParticipant(
+										relevantParticipant
+										.getId(),
+										ImplementationConstants.VARIABLE_PREFIX
+										+ variable,
+										InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION)));
+					}
+					resultVariables.add(extendedListVariable);
+				}
+				break;
+			default:
+				break;
+
+		}
+
+		collectionOfExtendedListResultVariables.setSize(resultVariables.size());
+
+		return collectionOfExtendedListResultVariables;
 	}
 
 	/**

@@ -24,15 +24,15 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Wrapper for variables with values for REST
+ * Wrapper for variables with values for REST (extended to describe if the
+ * variable belongs to the participant)
  *
  * @author Andreas Filler
  */
-public class VariablesWithValues {
+public class CollectionOfExtendedListVariables {
 	@Getter
-	private final List<VariableWithValue>	variablesWithValues	= new ArrayList<VariableWithValue>();
-
+	private final List<ExtendedListVariable>	variableListing	= new ArrayList<ExtendedListVariable>();
 	@Getter
 	@Setter
-	private int								size;
+	private int									size;
 }

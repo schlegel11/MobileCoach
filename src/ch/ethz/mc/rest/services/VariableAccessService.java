@@ -17,6 +17,8 @@ package ch.ethz.mc.rest.services;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import java.util.ArrayList;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -36,10 +38,11 @@ import lombok.extern.log4j.Log4j2;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.ImplementationConstants;
-import ch.ethz.mc.model.rest.ExtendedVariablesWithValues;
+import ch.ethz.mc.model.rest.CollectionOfExtendedListVariables;
+import ch.ethz.mc.model.rest.CollectionOfExtendedVariables;
 import ch.ethz.mc.model.rest.VariableAverage;
-import ch.ethz.mc.model.rest.VariableWithValue;
-import ch.ethz.mc.model.rest.VariablesWithValues;
+import ch.ethz.mc.model.rest.Variable;
+import ch.ethz.mc.model.rest.CollectionOfVariables;
 import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mc.tools.StringValidator;
 
@@ -62,8 +65,7 @@ public class VariableAccessService extends AbstractService {
 	@GET
 	@Path("/read/{variable}")
 	@Produces("application/json")
-	public VariableWithValue variableRead(
-			@HeaderParam("token") final String token,
+	public Variable variableRead(@HeaderParam("token") final String token,
 			@PathParam("variable") final String variable,
 			@Context final HttpServletRequest request) {
 		log.debug("Token {}: Read variable {}", token, variable);
@@ -92,9 +94,9 @@ public class VariableAccessService extends AbstractService {
 	}
 
 	@GET
-	@Path("/readArray/{variables}")
+	@Path("/readMany/{variables}")
 	@Produces("application/json")
-	public VariablesWithValues variableReadArray(
+	public CollectionOfVariables variableReadMany(
 			@HeaderParam("token") final String token,
 			@PathParam("variables") final String variables,
 			@Context final HttpServletRequest request) {
@@ -110,9 +112,8 @@ public class VariableAccessService extends AbstractService {
 		try {
 			final val variableArray = variables.split(",");
 
-			val variablesWithValues = new VariablesWithValues();
-			val variablesWithValuesList = variablesWithValues
-					.getVariablesWithValues();
+			val collectionOfVariables = new CollectionOfVariables();
+			val resultVariables = collectionOfVariables.getVariables();
 
 			for (val variable : variableArray) {
 				if (!StringValidator
@@ -121,13 +122,13 @@ public class VariableAccessService extends AbstractService {
 					throw new Exception("The variable name is not valid");
 				}
 
-				variablesWithValuesList.add(restManagerService.readVariable(
+				resultVariables.add(restManagerService.readVariable(
 						participantId, variable.trim()));
 			}
 
-			variablesWithValues.setSize(variablesWithValuesList.size());
+			collectionOfVariables.setSize(resultVariables.size());
 
-			return variablesWithValues;
+			return collectionOfVariables;
 		} catch (final Exception e) {
 			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
 					.entity("Could not retrieve variable: " + e.getMessage())
@@ -138,7 +139,7 @@ public class VariableAccessService extends AbstractService {
 	@GET
 	@Path("/readGroupArray/{variable}")
 	@Produces("application/json")
-	public ExtendedVariablesWithValues variableReadGroupArray(
+	public CollectionOfExtendedVariables variableReadGroupArray(
 			@HeaderParam("token") final String token,
 			@PathParam("variable") final String variable,
 			@Context final HttpServletRequest request) {
@@ -160,11 +161,53 @@ public class VariableAccessService extends AbstractService {
 				throw new Exception("The variable name is not valid");
 			}
 
-			val variablesWithValues = restManagerService
+			val collectionOfExtendedVariables = restManagerService
 					.readVariableArrayOfGroupOrIntervention(participantId,
 							variable.trim(), true);
 
-			return variablesWithValues;
+			return collectionOfExtendedVariables;
+		} catch (final Exception e) {
+			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
+					.entity("Could not retrieve variable: " + e.getMessage())
+					.build());
+		}
+	}
+
+	@GET
+	@Path("/readGroupArrayMany/{variables}")
+	@Produces("application/json")
+	public CollectionOfExtendedListVariables variableReadGroupArrayMany(
+			@HeaderParam("token") final String token,
+			@PathParam("variables") final String variables,
+			@Context final HttpServletRequest request) {
+		log.debug(
+				"Token {}: Read variables array {} of participants from same group as participant",
+				token, variables);
+		ObjectId participantId;
+		try {
+			participantId = checkAccessAndReturnParticipant(token,
+					request.getSession());
+		} catch (final Exception e) {
+			throw e;
+		}
+
+		try {
+			val cleanedVariableList = new ArrayList<String>();
+
+			for (val variable : variables.split(",")) {
+				if (!StringValidator
+						.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
+								+ variable.trim())) {
+					throw new Exception("The variable name is not valid");
+				}
+				cleanedVariableList.add(variable.trim());
+			}
+
+			val collectionOfExtendedListVariables = restManagerService
+					.readVariableListArrayOfGroupOrIntervention(participantId,
+							cleanedVariableList, true);
+
+			return collectionOfExtendedListVariables;
 		} catch (final Exception e) {
 			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
 					.entity("Could not retrieve variable: " + e.getMessage())
@@ -175,7 +218,7 @@ public class VariableAccessService extends AbstractService {
 	@GET
 	@Path("/readInterventionArray/{variable}")
 	@Produces("application/json")
-	public ExtendedVariablesWithValues variableReadInterventionArray(
+	public CollectionOfExtendedVariables variableReadInterventionArray(
 			@HeaderParam("token") final String token,
 			@PathParam("variable") final String variable,
 			@Context final HttpServletRequest request) {
@@ -197,11 +240,53 @@ public class VariableAccessService extends AbstractService {
 				throw new Exception("The variable name is not valid");
 			}
 
-			val variablesWithValues = restManagerService
+			val collectionOfExtendedVariables = restManagerService
 					.readVariableArrayOfGroupOrIntervention(participantId,
 							variable.trim(), false);
 
-			return variablesWithValues;
+			return collectionOfExtendedVariables;
+		} catch (final Exception e) {
+			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
+					.entity("Could not retrieve variable: " + e.getMessage())
+					.build());
+		}
+	}
+
+	@GET
+	@Path("/readInterventionArrayMany/{variables}")
+	@Produces("application/json")
+	public CollectionOfExtendedListVariables variableReadInterventionArrayMany(
+			@HeaderParam("token") final String token,
+			@PathParam("variables") final String variables,
+			@Context final HttpServletRequest request) {
+		log.debug(
+				"Token {}: Read variables array {} of participants from same intervention as participant",
+				token, variables);
+		ObjectId participantId;
+		try {
+			participantId = checkAccessAndReturnParticipant(token,
+					request.getSession());
+		} catch (final Exception e) {
+			throw e;
+		}
+
+		try {
+			val cleanedVariableList = new ArrayList<String>();
+
+			for (val variable : variables.split(",")) {
+				if (!StringValidator
+						.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
+								+ variable.trim())) {
+					throw new Exception("The variable name is not valid");
+				}
+				cleanedVariableList.add(variable.trim());
+			}
+
+			val collectionOfExtendedListVariables = restManagerService
+					.readVariableListArrayOfGroupOrIntervention(participantId,
+							cleanedVariableList, false);
+
+			return collectionOfExtendedListVariables;
 		} catch (final Exception e) {
 			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
 					.entity("Could not retrieve variable: " + e.getMessage())

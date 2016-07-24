@@ -6,13 +6,18 @@ $(function () {
 
     $("#REST-status").html("Requesting values...");
     //restTest("variable/read/Test");
-    //restTest("variable/readArray/Test,participantName");
+    //restTest("variable/readMany/Test,participantName");
     //restTest("variable/write/systemDayOfMonth", "Hallo Welt! 👍");
-    //restTest("variable/write/Tedddst", "Hallo Welt! 👍");
+    //restTest("variable/write/TestString", "ABC123");
+
     //restTest("variable/readGroupArray/Test");
     //restTest("variable/readInterventionArray/Test");
-    restTest("variable/calculateGroupAverage/Test");
-    restTest("variable/calculateInterventionAverage/Test");
+
+    //restTest("variable/calculateGroupAverage/Test");
+    //restTest("variable/calculateInterventionAverage/Test");
+
+    //restTest("variable/readGroupArrayMany/Test,TestString");
+    restTest("variable/readInterventionArrayMany/Test,TestString");
 });
 
 // Helpers
@@ -35,7 +40,7 @@ var restTest = function (command, postData) {
         },
         url: config.rest + command,
         success: function (data) {
-            $("#REST-status").html($("#REST-status").html() + "<br/>" + command + " --> SUCCESS: " + JSON.stringify(data));
+            $("#REST-status").html($("#REST-status").html() + "<br/>" + command + " --> SUCCESS: " + JSON.stringify(data, null, 2));
             log(data);
         },
         error: function (xhr, exception) {

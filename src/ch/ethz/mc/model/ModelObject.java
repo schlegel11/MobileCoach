@@ -45,7 +45,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * Basic class for model objects that should be stored in the database or
  * serialized as JSON objects
- * 
+ *
  * @author Andreas Filler
  */
 @Log4j2
@@ -90,7 +90,7 @@ public abstract class ModelObject {
 
 	/**
 	 * Creates a JSON string of the current {@link ModelObject}
-	 * 
+	 *
 	 * @return JSON string
 	 */
 	@JsonIgnore
@@ -123,7 +123,7 @@ public abstract class ModelObject {
 
 	/**
 	 * Creates a {@link UIModelObject} of the current {@link ModelObject}
-	 * 
+	 *
 	 * @return
 	 */
 	@JsonIgnore
@@ -134,7 +134,7 @@ public abstract class ModelObject {
 
 	/**
 	 * Will recursively collect all related {@link ModelObject} for export
-	 * 
+	 *
 	 * @param exportList
 	 *            The {@link ModelObject} itself and all related
 	 *            {@link ModelObject}s
@@ -172,7 +172,7 @@ public abstract class ModelObject {
 
 	/**
 	 * Load {@link ModelObject} from database
-	 * 
+	 *
 	 * @param clazz
 	 *            The {@link ModelObject} subclass to retrieve
 	 * @param id
@@ -203,7 +203,7 @@ public abstract class ModelObject {
 
 	/**
 	 * Deletes {@link ModelObject} from database
-	 * 
+	 *
 	 * @param modelObject
 	 *            The {@link ModelObject} to delete
 	 */
@@ -245,7 +245,7 @@ public abstract class ModelObject {
 
 	/**
 	 * Deletes {@link ModelObject} from database
-	 * 
+	 *
 	 * @param clazz
 	 *            The {@link ModelObject} subclass to delete
 	 * @param id
@@ -284,7 +284,7 @@ public abstract class ModelObject {
 
 	/**
 	 * Deletes several {@link ModelObject}s from database
-	 * 
+	 *
 	 * @param modelObjects
 	 *            The {@link ModelObject}s to delete
 	 */
@@ -298,7 +298,7 @@ public abstract class ModelObject {
 
 	/**
 	 * Find and load a {@link ModelObject} from database
-	 * 
+	 *
 	 * @param clazz
 	 *            The {@link ModelObject} subclass to retrieve
 	 * @param query
@@ -342,7 +342,7 @@ public abstract class ModelObject {
 
 	/**
 	 * Find and load a {@link ModelObject} from database after sorting
-	 * 
+	 *
 	 * @param clazz
 	 *            The {@link ModelObject} subclass to retrieve
 	 * @param query
@@ -397,7 +397,7 @@ public abstract class ModelObject {
 
 	/**
 	 * Find and load {@link ModelObject}s from database
-	 * 
+	 *
 	 * @param clazz
 	 *            The {@link ModelObject} subclass to retrieve
 	 * @param query
@@ -438,7 +438,7 @@ public abstract class ModelObject {
 
 	/**
 	 * Find and load {@link ObjectId}s from database
-	 * 
+	 *
 	 * @param clazz
 	 *            The {@link ModelObject} subclass to retrieve
 	 * @param query
@@ -482,7 +482,7 @@ public abstract class ModelObject {
 
 	/**
 	 * Find, loads and sort {@link ModelObject}s from database
-	 * 
+	 *
 	 * @param clazz
 	 *            The {@link ModelObject} subclass to retrieve
 	 * @param query

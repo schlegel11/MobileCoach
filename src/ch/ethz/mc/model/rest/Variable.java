@@ -17,21 +17,21 @@ package ch.ethz.mc.model.rest;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
- * Wrapper for a variable with a value for REST (extended to describe if the
- * variable belongs to the participant)
+ * Wrapper for a variable with a value for REST
  *
  * @author Andreas Filler
  */
-public class ExtendedVariableWithValue extends VariableWithValue {
-	public ExtendedVariableWithValue(final String variable, final String value,
-			final boolean ownValue) {
-		super(variable, value);
-		this.ownValue = ownValue;
-	}
-
+@AllArgsConstructor
+public class Variable {
 	@Getter
-	private final boolean	ownValue;
+	@Setter
+	private String	variable;
+	@Getter
+	@Setter
+	private String	value;
 }
