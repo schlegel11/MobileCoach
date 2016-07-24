@@ -24,6 +24,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 
@@ -32,6 +33,9 @@ import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 import ch.ethz.mc.model.ui.UIParticipantVariableWithParticipant;
+import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * {@link ModelObject} to represent an {@link ParticipantVariableWithValue}
@@ -45,6 +49,7 @@ import ch.ethz.mc.model.ui.UIParticipantVariableWithParticipant;
  * @author Andreas Filler
  */
 @NoArgsConstructor
+@Log4j2
 public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 	/**
 	 * Default constructor
@@ -55,6 +60,7 @@ public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 
 		this.participant = participant;
 		this.timestamp = timestamp;
+		describesMediaUpload = false;
 	}
 
 	/**
@@ -71,6 +77,10 @@ public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 	@Getter
 	@Setter
 	private long		timestamp;
+
+	@Getter
+	@Setter
+	private boolean		describesMediaUpload;
 
 	/**
 	 * Creates a {@link UIParticipantVariableWithParticipant} with the belonging
@@ -90,7 +100,7 @@ public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 				group == null ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 						: group, organization, organizationUnit, getName(),
-						getValue(), new Date(timestamp));
+				getValue(), new Date(timestamp));
 
 		variable.setRelatedModelObject(this);
 
@@ -108,5 +118,28 @@ public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 	protected void collectThisAndRelatedModelObjectsForExport(
 			final List<ModelObject> exportList) {
 		exportList.add(this);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see ch.ethz.mc.model.ModelObject#performOnDelete()
+	 */
+	@Override
+	@JsonIgnore
+	protected void performOnDelete() {
+		if (describesMediaUpload) {
+			log.debug("Deleting file with reference {}", getValue());
+			try {
+				getFileStorageManagerService().deleteFile(getValue(),
+						FILE_STORES.MEDIA_UPLOAD);
+			} catch (final Exception e) {
+				log.warn(
+						"File belonging to file reference {} could not be deleted: {}",
+						getValue(), e.getMessage());
+			}
+		}
+
+		super.performOnDelete();
 	}
 }

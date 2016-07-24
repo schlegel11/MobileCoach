@@ -281,13 +281,15 @@ public class RESTManagerService {
 	 * @throws ExternallyWriteProtectedVariableException
 	 */
 	public void writeVariable(final ObjectId participantId,
-			final String variable, final String value)
+			final String variable, final String value,
+			final boolean describesMediaUpload)
 					throws ExternallyWriteProtectedVariableException {
 		log.debug("Try to write variable {} for participant {} with value {}",
 				variable, participantId, value);
 
 		try {
-			writeVariableValue(participantId, variable, value);
+			writeVariableValue(participantId, variable, value,
+					describesMediaUpload);
 
 			log.debug("Wrote variable {} for participant {}", variable,
 					participantId);
@@ -535,14 +537,16 @@ public class RESTManagerService {
 	 * @param participantId
 	 * @param variable
 	 * @param value
+	 * @param describesMediaUpload
 	 * @throws ExternallyWriteProtectedVariableException
 	 */
 	@Synchronized
 	private void writeVariableValue(final ObjectId participantId,
-			final String variable, final String value)
+			final String variable, final String value,
+			final boolean describesMediaUpload)
 					throws ExternallyWriteProtectedVariableException {
 		variablesManagerService.externallyWriteVariableForParticipant(
 				participantId, ImplementationConstants.VARIABLE_PREFIX
-				+ variable, value);
+				+ variable, value, describesMediaUpload);
 	}
 }

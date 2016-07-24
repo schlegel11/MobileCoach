@@ -129,6 +129,12 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 			file = interventionAdministrationManagerService.getFileByReference(
 					requestedElement, FILE_STORES.MEDIA_UPLOAD);
 
+			// Check if file exists
+			if (file == null || !file.exists()) {
+				response.sendError(HttpServletResponse.SC_NOT_FOUND);
+				return null;
+			}
+
 			// Retrieve cached/resized version of image if an image is requested
 			val fileExtension = file.getName()
 					.substring(file.getName().lastIndexOf(".")).toLowerCase();
