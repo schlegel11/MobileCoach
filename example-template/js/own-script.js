@@ -1,24 +1,26 @@
 "use strict";
 
+var uploadVariable = "challenge02Image";
+
 // Execute when page is loaded succesful
 $(function () {
     log("Ready");
 
     createListeners();
     $("#REST-status").html("Requesting values...");
-    restTest("variable/read/Test");
-    //restTest("variable/readMany/Test,participantName");
-    //restTest("variable/write/systemDayOfMonth", "Hallo Welt! 👍");
-    //restTest("variable/write/TestString", "ABC123");
+    restTest("variable/read/challenge01Comment");
+    restTest("variable/readMany/challenge02Comment,challenge02Image");
+    
+    restTest("variable/write/challenge02Comment", "Hallo Welt!");
+    
+    restTest("variable/readGroupArray/challenge02Comment");
+    restTest("variable/readInterventionArray/challenge02Comment");
 
-    //restTest("variable/readGroupArray/Test");
-    //restTest("variable/readInterventionArray/Test");
-
-    //restTest("variable/calculateGroupAverage/Test");
-    //restTest("variable/calculateInterventionAverage/Test");
-
-    //restTest("variable/readGroupArrayMany/Test,TestString");
-    //restTest("variable/readInterventionArrayMany/Test,TestString");
+    restTest("variable/readGroupArrayMany/challenge02Comment,challenge02Image");
+    restTest("variable/readInterventionArrayMany/challenge02Comment");
+    
+    restTest("variable/calculateGroupAverage/points");
+    restTest("variable/calculateInterventionAverage/points");
 });
 
 // Helpers
@@ -60,7 +62,7 @@ var createListeners = function () {
             cache: false,
             contentType: false,
             processData: false,
-            url: config.rest + "image/upload/Test",
+            url: config.rest + "image/upload/"+uploadVariable,
             xhr: function () {
                 var myXhr = $.ajaxSettings.xhr();
                 if (myXhr.upload) { // Check if upload property exists

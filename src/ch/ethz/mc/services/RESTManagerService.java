@@ -367,8 +367,9 @@ public class RESTManagerService {
 				break;
 			case SHARED_WITH_GROUP:
 				Iterable<Participant> relevantParticipants = databaseManagerService
-				.findModelObjects(Participant.class,
-						Queries.PARTICIPANT__BY_INTERVENTION_AND_GROUP,
+				.findModelObjects(
+						Participant.class,
+						Queries.PARTICIPANT__BY_INTERVENTION_AND_GROUP_AND_MONITORING_ACTIVE_TRUE,
 						interventionId, group);
 
 				for (val relevantParticipant : relevantParticipants) {
@@ -387,9 +388,11 @@ public class RESTManagerService {
 				}
 				break;
 			case SHARED_WITH_INTERVENTION:
-				relevantParticipants = databaseManagerService.findModelObjects(
-						Participant.class,
-						Queries.PARTICIPANT__BY_INTERVENTION, interventionId);
+				relevantParticipants = databaseManagerService
+						.findModelObjects(
+								Participant.class,
+								Queries.PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE,
+								interventionId);
 
 				for (val relevantParticipant : relevantParticipants) {
 					final ExtendedVariable variableWithValue = new ExtendedVariable(
@@ -469,8 +472,9 @@ public class RESTManagerService {
 				break;
 			case SHARED_WITH_GROUP:
 				Iterable<Participant> relevantParticipants = databaseManagerService
-				.findModelObjects(Participant.class,
-						Queries.PARTICIPANT__BY_INTERVENTION_AND_GROUP,
+				.findModelObjects(
+						Participant.class,
+						Queries.PARTICIPANT__BY_INTERVENTION_AND_GROUP_AND_MONITORING_ACTIVE_TRUE,
 						interventionId, group);
 
 				for (val relevantParticipant : relevantParticipants) {
@@ -495,9 +499,11 @@ public class RESTManagerService {
 				}
 				break;
 			case SHARED_WITH_INTERVENTION:
-				relevantParticipants = databaseManagerService.findModelObjects(
+				relevantParticipants = databaseManagerService
+				.findModelObjects(
 						Participant.class,
-						Queries.PARTICIPANT__BY_INTERVENTION, interventionId);
+						Queries.PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE,
+						interventionId);
 
 				for (val relevantParticipant : relevantParticipants) {
 					extendedListVariable = new ExtendedListVariable(

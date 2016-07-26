@@ -71,7 +71,7 @@ public class VariableAccessService extends AbstractService {
 		log.debug("Token {}: Read variable {}", token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkAccessAndReturnParticipant(token,
+			participantId = checkAccessAndReturnParticipantId(token,
 					request.getSession());
 		} catch (final Exception e) {
 			throw e;
@@ -103,7 +103,7 @@ public class VariableAccessService extends AbstractService {
 		log.debug("Token {}: Read variables {}", token, variables);
 		ObjectId participantId;
 		try {
-			participantId = checkAccessAndReturnParticipant(token,
+			participantId = checkAccessAndReturnParticipantId(token,
 					request.getSession());
 		} catch (final Exception e) {
 			throw e;
@@ -148,7 +148,7 @@ public class VariableAccessService extends AbstractService {
 				token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkAccessAndReturnParticipant(token,
+			participantId = checkAccessAndReturnParticipantId(token,
 					request.getSession());
 		} catch (final Exception e) {
 			throw e;
@@ -185,7 +185,7 @@ public class VariableAccessService extends AbstractService {
 				token, variables);
 		ObjectId participantId;
 		try {
-			participantId = checkAccessAndReturnParticipant(token,
+			participantId = checkAccessAndReturnParticipantId(token,
 					request.getSession());
 		} catch (final Exception e) {
 			throw e;
@@ -227,7 +227,7 @@ public class VariableAccessService extends AbstractService {
 				token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkAccessAndReturnParticipant(token,
+			participantId = checkAccessAndReturnParticipantId(token,
 					request.getSession());
 		} catch (final Exception e) {
 			throw e;
@@ -264,7 +264,7 @@ public class VariableAccessService extends AbstractService {
 				token, variables);
 		ObjectId participantId;
 		try {
-			participantId = checkAccessAndReturnParticipant(token,
+			participantId = checkAccessAndReturnParticipantId(token,
 					request.getSession());
 		} catch (final Exception e) {
 			throw e;
@@ -306,7 +306,7 @@ public class VariableAccessService extends AbstractService {
 				token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkAccessAndReturnParticipant(token,
+			participantId = checkAccessAndReturnParticipantId(token,
 					request.getSession());
 		} catch (final Exception e) {
 			throw e;
@@ -344,7 +344,7 @@ public class VariableAccessService extends AbstractService {
 				token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkAccessAndReturnParticipant(token,
+			participantId = checkAccessAndReturnParticipantId(token,
 					request.getSession());
 		} catch (final Exception e) {
 			throw e;
@@ -382,7 +382,7 @@ public class VariableAccessService extends AbstractService {
 		log.debug("Token {}: Write variable {}", token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkAccessAndReturnParticipant(token,
+			participantId = checkAccessAndReturnParticipantId(token,
 					request.getSession());
 		} catch (final Exception e) {
 			throw e;

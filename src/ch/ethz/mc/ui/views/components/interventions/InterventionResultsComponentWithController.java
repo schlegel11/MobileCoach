@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.interventions;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,7 +52,6 @@ import ch.ethz.mc.ui.views.helper.CaseInsensitiveItemSorter;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanContainer;
-import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.converter.StringToDateConverter;
 import com.vaadin.shared.ui.MultiSelectMode;
 import com.vaadin.ui.Button;
@@ -66,13 +65,12 @@ import com.vaadin.ui.Button.ClickEvent;
 @SuppressWarnings("serial")
 @Log4j2
 public class InterventionResultsComponentWithController extends
-		InterventionResultsComponent {
+InterventionResultsComponent {
 
 	private final Intervention														intervention;
 
 	private Collection<ObjectId>													selectedUIParticipantsIds;
-	private UIVariableWithParticipantForResults										selectedUIVariableWithParticipant			= null;
-	private BeanItem<UIVariableWithParticipantForResults>							selectedUIVariableWithParticipantBeanItem	= null;
+	private UIVariableWithParticipantForResults										selectedUIVariableWithParticipant	= null;
 
 	private final BeanContainer<ObjectId, UIParticipant>							beanContainer;
 
@@ -110,14 +108,14 @@ public class InterventionResultsComponentWithController extends
 		participantsTable.setColumnHeaders(UIParticipant.getColumnHeaders());
 		participantsTable.setConverter(UIParticipant.CREATED,
 				new StringToDateConverter() {
-					@Override
-					protected DateFormat getFormat(final Locale locale) {
-						val dateFormat = DateFormat.getDateTimeInstance(
-								DateFormat.MEDIUM, DateFormat.MEDIUM,
-								Constants.getAdminLocale());
-						return dateFormat;
-					}
-				});
+			@Override
+			protected DateFormat getFormat(final Locale locale) {
+				val dateFormat = DateFormat.getDateTimeInstance(
+						DateFormat.MEDIUM, DateFormat.MEDIUM,
+						Constants.getAdminLocale());
+				return dateFormat;
+			}
+		});
 
 		variablesBeanContainer = new BeanContainer<Integer, UIVariableWithParticipantForResults>(
 				UIVariableWithParticipantForResults.class);
@@ -125,8 +123,8 @@ public class InterventionResultsComponentWithController extends
 
 		variablesTable.setContainerDataSource(variablesBeanContainer);
 		variablesTable
-				.setSortContainerPropertyId(UIVariableWithParticipantForResults
-						.getSortColumn());
+		.setSortContainerPropertyId(UIVariableWithParticipantForResults
+				.getSortColumn());
 		variablesTable.setVisibleColumns(UIVariableWithParticipantForResults
 				.getVisibleColumns());
 		variablesTable.setColumnHeaders(UIVariableWithParticipantForResults
@@ -135,18 +133,18 @@ public class InterventionResultsComponentWithController extends
 		messageDialogBeanContainer = new BeanContainer<Integer, UIDialogMessageWithParticipantForResults>(
 				UIDialogMessageWithParticipantForResults.class);
 		messageDialogBeanContainer
-		.setItemSorter(new CaseInsensitiveItemSorter());
+				.setItemSorter(new CaseInsensitiveItemSorter());
 
 		messageDialogTable.setContainerDataSource(messageDialogBeanContainer);
 		messageDialogTable
-				.setSortContainerPropertyId(UIDialogMessageWithParticipantForResults
-						.getSortColumn());
+		.setSortContainerPropertyId(UIDialogMessageWithParticipantForResults
+				.getSortColumn());
 		messageDialogTable
-				.setVisibleColumns(UIDialogMessageWithParticipantForResults
-						.getVisibleColumns());
+		.setVisibleColumns(UIDialogMessageWithParticipantForResults
+				.getVisibleColumns());
 		messageDialogTable
-				.setColumnHeaders(UIDialogMessageWithParticipantForResults
-						.getColumnHeaders());
+		.setColumnHeaders(UIDialogMessageWithParticipantForResults
+				.getColumnHeaders());
 
 		// handle selection change
 		participantsTable.addValueChangeListener(new ValueChangeListener() {
@@ -169,13 +167,9 @@ public class InterventionResultsComponentWithController extends
 				val objectId = variablesTable.getValue();
 				if (objectId == null) {
 					selectedUIVariableWithParticipant = null;
-					selectedUIVariableWithParticipantBeanItem = null;
 					setVariableWithParticipantSelected(false);
 				} else {
 					selectedUIVariableWithParticipant = getUIModelObjectFromTableByObjectId(
-							variablesTable,
-							UIVariableWithParticipantForResults.class, objectId);
-					selectedUIVariableWithParticipantBeanItem = getBeanItemFromTableByObjectId(
 							variablesTable,
 							UIVariableWithParticipantForResults.class, objectId);
 					setVariableWithParticipantSelected(true);
@@ -227,7 +221,7 @@ public class InterventionResultsComponentWithController extends
 						return "Intervention_"
 								+ intervention.getName().replaceAll(
 										"[^A-Za-z0-9_. ]+", "_")
-								+ "_Participant_All_Data.csv";
+										+ "_Participant_All_Data.csv";
 					}
 				});
 		allDataExportOnDemandFileDownloader.extend(getExportDataButton());
@@ -260,11 +254,11 @@ public class InterventionResultsComponentWithController extends
 						return "Intervention_"
 								+ intervention.getName().replaceAll(
 										"[^A-Za-z0-9_. ]+", "_")
-								+ "_Participant_Variable_Results.csv";
+										+ "_Participant_Variable_Results.csv";
 					}
 				});
 		variablesExportOnDemandFileDownloader
-				.extend(getVariablesExportButton());
+		.extend(getVariablesExportButton());
 
 		val messageDialogExportOnDemandFileDownloader = new OnDemandFileDownloader(
 				new OnDemandStreamResource() {
@@ -295,11 +289,11 @@ public class InterventionResultsComponentWithController extends
 						return "Intervention_"
 								+ intervention.getName().replaceAll(
 										"[^A-Za-z0-9_. ]+", "_")
-								+ "_Participant_Message_Dialog_Results.csv";
+										+ "_Participant_Message_Dialog_Results.csv";
 					}
 				});
 		messageDialogExportOnDemandFileDownloader
-				.extend(getMessageDialogExportButton());
+		.extend(getMessageDialogExportButton());
 
 		adjust();
 	}
@@ -313,7 +307,7 @@ public class InterventionResultsComponentWithController extends
 		log.debug("Update participants");
 		refreshBeanContainer(beanContainer, UIParticipant.class,
 				getInterventionAdministrationManagerService()
-						.getAllParticipantsOfIntervention(intervention.getId()));
+				.getAllParticipantsOfIntervention(intervention.getId()));
 
 		participantsTable.sort();
 
@@ -355,16 +349,16 @@ public class InterventionResultsComponentWithController extends
 
 			for (val variableOfParticipant : variablesOfParticipant.values()) {
 				variablesBeanContainer
-						.addItem(
-								i++,
-								variableOfParticipant
-										.toUIVariableWithParticipantForResults(
-												participant.getId().toString(),
-												participant.getNickname()
-														.equals("") ? Messages
-														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-														: participant
-																.getNickname()));
+				.addItem(
+						i++,
+						variableOfParticipant
+						.toUIVariableWithParticipantForResults(
+								participant.getId().toString(),
+								participant.getNickname()
+								.equals("") ? Messages
+										.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+										: participant
+										.getNickname()));
 			}
 		}
 
@@ -395,7 +389,7 @@ public class InterventionResultsComponentWithController extends
 						val linkedMediaObject = getInterventionAdministrationManagerService()
 								.getMediaObject(
 										relatedMonitoringMessage
-												.getLinkedMediaObject());
+										.getLinkedMediaObject());
 
 						if (linkedMediaObject != null) {
 							containsMediaContentInMessage = true;
@@ -404,34 +398,34 @@ public class InterventionResultsComponentWithController extends
 				}
 
 				messageDialogBeanContainer
-						.addItem(
-								i++,
-								dialogMessageOfParticipant
-										.toUIDialogMessageWithParticipantForResults(
-												participant.getId().toString(),
-												participant.getNickname()
-														.equals("") ? Messages
-														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-														: participant
-																.getNickname(),
-												participant.getLanguage()
-														.getDisplayLanguage(),
-												participant.getGroup() == null ? Messages
-														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-														: participant
-																.getGroup(),
+				.addItem(
+						i++,
+						dialogMessageOfParticipant
+						.toUIDialogMessageWithParticipantForResults(
+								participant.getId().toString(),
+								participant.getNickname()
+								.equals("") ? Messages
+										.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+										: participant
+										.getNickname(),
+										participant.getLanguage()
+										.getDisplayLanguage(),
+										participant.getGroup() == null ? Messages
+												.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+												: participant
+												.getGroup(),
 												participant.getOrganization()
-														.equals("") ? Messages
+												.equals("") ? Messages
 														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 														: participant
-																.getOrganization(),
-														participant
+														.getOrganization(),
+												participant
 														.getOrganizationUnit()
 														.equals("") ? Messages
-																.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-																: participant
+														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+														: participant
 																.getOrganizationUnit(),
-																containsMediaContentInMessage));
+												containsMediaContentInMessage));
 			}
 		}
 
@@ -456,8 +450,8 @@ public class InterventionResultsComponentWithController extends
 								getStringValue(), allPossibleMessageVariables)) {
 
 							getAdminUI()
-									.showWarningNotification(
-											AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
+							.showWarningNotification(
+									AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
 
 							return;
 						} else {
@@ -469,14 +463,14 @@ public class InterventionResultsComponentWithController extends
 
 							for (val participant : selectedParticipants) {
 								interventionExecutionManagerService
-										.sendManualMessage(participant,
-												getStringValue());
+								.sendManualMessage(participant,
+										getStringValue());
 							}
 						}
 
 						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__THE_MESSAGES_WILL_BE_SENT_IN_THE_NEXT_MINUTES);
+						.showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__THE_MESSAGES_WILL_BE_SENT_IN_THE_NEXT_MINUTES);
 
 						adjust();
 
@@ -504,20 +498,20 @@ public class InterventionResultsComponentWithController extends
 								.participantAdjustVariableValue(
 										new ObjectId(
 												selectedUIVariableWithParticipant
-														.getParticipantId()),
-										abstractVariableWithValue.getName(),
-										getStringValue());
+												.getParticipantId()),
+												abstractVariableWithValue.getName(),
+												getStringValue());
 
 						if (changeSuceeded) {
 							updateTables();
 
 							getAdminUI()
-									.showInformationNotification(
-											AdminMessageStrings.NOTIFICATION__VARIABLE_VALUE_CHANGED);
+							.showInformationNotification(
+									AdminMessageStrings.NOTIFICATION__VARIABLE_VALUE_CHANGED);
 						} else {
 							getAdminUI()
-									.showWarningNotification(
-											AdminMessageStrings.NOTIFICATION__SYSTEM_RESERVED_VARIABLE);
+							.showWarningNotification(
+									AdminMessageStrings.NOTIFICATION__SYSTEM_RESERVED_VARIABLE);
 						}
 						closeWindow();
 					}

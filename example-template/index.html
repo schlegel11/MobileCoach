@@ -38,6 +38,12 @@
         <h4>Language: {{language}}</h4>
         <h4>Status of REST calls:</h4>
         <p><span id="REST-status"></span></p>
+        <p>
+            <form id="image-upload" enctype="multipart/form-data">
+                <input name="file" type="file" />
+                <input id="image-upload-button" type="button" value="Upload" />
+            </form>
+        </p>
         <h4>Layout: {{layout}}
         {{#optional_layout_attribute}} - Additional layout: {{optional_layout_attribute}}{{/optional_layout_attribute}}</h4> {{#feedback_url}}
         <h2>
@@ -45,8 +51,9 @@
         </h2> {{/feedback_url}}
     </header>
     
-    {{#done}}
-    <h3>DONE</h3> {{/done}} {{#password_input}}
+    {{#done}}<h3>DONE</h3>{{/done}}
+    {{#disabled}}<h3>DISABLED</h3>{{/disabled}}
+    {{#password_input}}
     <div class="wrap">
         <h3>Password:</h3>
         <form method="POST">
@@ -56,7 +63,7 @@
             <input type="submit" value="Next" />
         </form>
     </div>
-    {{/password_input}} {{^password_input}}{{^done}}
+    {{/password_input}} {{^password_input}}{{^done}}{{^disabled}}
     <div class="wrap">
         {{#is_survey}}{{^text_only}}{{^media_only}}
         <h3>{{#questions_count}}{{questions_count}} Question(s){{/questions_count}}</h3> {{/media_only}}{{/text_only}}{{/is_survey}} {{#validation_error_message}}
@@ -111,13 +118,6 @@
                 <input type="submit" value="Next" /> {{/is_last_slide}}
             </form>
             {{/is_survey}}
-            
-            <p>&nbsp;</p>
-            
-            <form id="image-upload" enctype="multipart/form-data">
-                <input name="file" type="file" />
-                <input id="image-upload-button" type="button" value="Upload" />
-            </form>
         </div>
 
         <!-- Wrapper, no style, only relevant for nice HTML formatting -->
@@ -126,7 +126,7 @@
             <h3>Media here:</h3> {{> media-template}} {{/media_object_url}}
         </div>
     </div>
-    {{/done}}{{/password_input}}
+    {{/disabled]]{{/done}}{{/password_input}}
 
     <footer role="contentinfo">
         <small>Copyright &copy;

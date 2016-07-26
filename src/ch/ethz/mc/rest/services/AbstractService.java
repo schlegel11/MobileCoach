@@ -51,7 +51,7 @@ public abstract class AbstractService {
 	 * @param token
 	 * @param session
 	 */
-	protected ObjectId checkAccessAndReturnParticipant(final String token,
+	protected ObjectId checkAccessAndReturnParticipantId(final String token,
 			final HttpSession session) {
 		log.debug("Checking if token {} fits to session {}", token,
 				session.getId());
