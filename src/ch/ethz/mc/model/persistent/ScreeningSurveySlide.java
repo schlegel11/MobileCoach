@@ -158,6 +158,14 @@ public class ScreeningSurveySlide extends ModelObject {
 	private LString								titleWithPlaceholders;
 
 	/**
+	 * A comment for the author, not visible to any participant
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private String								comment;
+
+	/**
 	 * The type of the question presented to the {@link Participant} of all
 	 * available {@link ScreeningSurveySlideQuestionTypes}
 	 */
@@ -255,11 +263,14 @@ public class ScreeningSurveySlide extends ModelObject {
 				titleWithPlaceholders.toString().equals("") ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 						: titleWithPlaceholders.toString(),
-						questionType.toString(),
-						storeValueToVariableWithNames.length() > 0 ? storeValueToVariableWithNames
-								.toString() : Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET),
-								slideRules);
+				comment.equals("") ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+						: comment,
+								questionType.toString(),
+								storeValueToVariableWithNames.length() > 0 ? storeValueToVariableWithNames
+										.toString() : Messages
+										.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET),
+										slideRules);
 
 		screeningSurveySlide.setRelatedModelObject(this);
 

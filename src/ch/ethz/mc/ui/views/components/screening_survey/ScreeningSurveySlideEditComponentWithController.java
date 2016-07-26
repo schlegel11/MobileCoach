@@ -324,6 +324,8 @@ MediaObjectCreationOrDeleteionListener {
 
 		getTitleWithPlaceholdersTextFieldComponent().getButton()
 		.addClickListener(buttonClickListener);
+		getCommentTextFieldComponent().getButton().addClickListener(
+				buttonClickListener);
 		getOptionalLayoutAttributeTextFieldComponent().getButton()
 		.addClickListener(buttonClickListener);
 		getQuestionTextWithPlaceholdersTextField().getButton()
@@ -413,6 +415,8 @@ MediaObjectCreationOrDeleteionListener {
 
 		getTitleWithPlaceholdersTextFieldComponent().setValue(
 				screeningSurveySlide.getTitleWithPlaceholders().toString());
+		getCommentTextFieldComponent().setValue(
+				screeningSurveySlide.getComment());
 		getOptionalLayoutAttributeTextFieldComponent().setValue(
 				screeningSurveySlide
 				.getOptionalLayoutAttributeWithPlaceholders());
@@ -477,6 +481,9 @@ MediaObjectCreationOrDeleteionListener {
 			} else if (event.getButton() == getTitleWithPlaceholdersTextFieldComponent()
 					.getButton()) {
 				changeTitleWithPlaceholders();
+			} else if (event.getButton() == getCommentTextFieldComponent()
+					.getButton()) {
+				changeComment();
 			} else if (event.getButton() == getOptionalLayoutAttributeTextFieldComponent()
 					.getButton()) {
 				changeOptionalLayoutAttribute();
@@ -715,6 +722,34 @@ MediaObjectCreationOrDeleteionListener {
 									screeningSurveySlide,
 									getLStringValue(),
 									allPossibleVariables);
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						adjust(false);
+
+						closeWindow();
+					}
+				}, null);
+	}
+
+	public void changeComment() {
+		log.debug("Edit comment");
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_COMMENT,
+				screeningSurveySlide.getComment(), null,
+				new ShortStringEditComponent(),
+				new ExtendableButtonClickListener() {
+
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Change comment
+							getScreeningSurveyAdministrationManagerService()
+							.screeningSurveySlideChangeComment(
+									screeningSurveySlide,
+									getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;

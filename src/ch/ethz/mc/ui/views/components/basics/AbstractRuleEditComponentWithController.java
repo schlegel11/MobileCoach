@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.basics;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,13 +36,13 @@ import com.vaadin.ui.ComboBox;
 
 /**
  * Extends the abstract rule edit component with a controller
- * 
+ *
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
 @Log4j2
 public class AbstractRuleEditComponentWithController extends
-		AbstractRuleEditComponent implements ValueChangeListener {
+AbstractRuleEditComponent implements ValueChangeListener {
 
 	public enum TYPES {
 		MONITORING_RULES, SCREENING_SURVEY_RULES, FEEDBACK_RULES, MONITORING_MESSAGE_RULES
@@ -61,8 +61,12 @@ public class AbstractRuleEditComponentWithController extends
 
 	private final ComboBox						ruleEquationSignComboBox;
 
+	private final VariableTextFieldComponent	commentComponent;
+
 	public AbstractRuleEditComponentWithController() {
 		super();
+
+		commentComponent = getCommentVariableTextFieldComponent();
 
 		ruleComponent = getRuleTextFieldComponent();
 		ruleComparisonTermComponent = getRuleComparisonTermTextFieldComponent();
@@ -79,6 +83,7 @@ public class AbstractRuleEditComponentWithController extends
 		}
 
 		val buttonClickListener = new ButtonClickListener();
+		commentComponent.getButton().addClickListener(buttonClickListener);
 		ruleComponent.getButton().addClickListener(buttonClickListener);
 		ruleComparisonTermComponent.getButton().addClickListener(
 				buttonClickListener);
@@ -116,6 +121,8 @@ public class AbstractRuleEditComponentWithController extends
 		ruleComparisonTermComponent.setValue(rule
 				.getRuleComparisonTermWithPlaceholders());
 
+		commentComponent.setValue(rule.getComment());
+
 		this.rule = rule;
 
 		if (initDone) {
@@ -126,7 +133,9 @@ public class AbstractRuleEditComponentWithController extends
 	private class ButtonClickListener implements Button.ClickListener {
 		@Override
 		public void buttonClick(final ClickEvent event) {
-			if (event.getButton() == ruleComponent.getButton()) {
+			if (event.getButton() == commentComponent.getButton()) {
+				editCommentText();
+			} else if (event.getButton() == ruleComponent.getButton()) {
 				editRuleTextWithPlaceholder();
 			} else if (event.getButton() == ruleComparisonTermComponent
 					.getButton()) {
@@ -140,8 +149,34 @@ public class AbstractRuleEditComponentWithController extends
 		log.debug("Changing rule equation sign to {}", event.getProperty()
 				.getValue());
 		getInterventionAdministrationManagerService()
-				.abstractRuleChangeEquationSign(rule,
-						(RuleEquationSignTypes) event.getProperty().getValue());
+		.abstractRuleChangeEquationSign(rule,
+				(RuleEquationSignTypes) event.getProperty().getValue());
+	}
+
+	public void editCommentText() {
+		log.debug("Edit comment");
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_COMMENT,
+				rule.getComment(), null, new ShortStringEditComponent(),
+				new ExtendableButtonClickListener() {
+
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Change comment
+							getInterventionAdministrationManagerService()
+									.abstractRuleChangeComment(rule,
+									getStringValue());
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						adjust(null);
+
+						closeWindow();
+					}
+				}, null);
 	}
 
 	public void editRuleTextWithPlaceholder() {
@@ -151,14 +186,14 @@ public class AbstractRuleEditComponentWithController extends
 			case MONITORING_RULES:
 			case MONITORING_MESSAGE_RULES:
 				allPossibleVariables = getInterventionAdministrationManagerService()
-						.getAllPossibleMonitoringRuleVariablesOfIntervention(
-								rulesRelatedModelObjectId);
+				.getAllPossibleMonitoringRuleVariablesOfIntervention(
+						rulesRelatedModelObjectId);
 				break;
 			case SCREENING_SURVEY_RULES:
 			case FEEDBACK_RULES:
 				allPossibleVariables = getScreeningSurveyAdministrationManagerService()
-						.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
-								rulesRelatedModelObjectId);
+				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
+						rulesRelatedModelObjectId);
 				break;
 			default:
 				allPossibleVariables = null;
@@ -174,9 +209,9 @@ public class AbstractRuleEditComponentWithController extends
 						try {
 							// Change rule text with placeholders
 							getInterventionAdministrationManagerService()
-									.abstractRuleChangeRuleWithPlaceholders(
-											rule, getStringValue(),
-											allPossibleVariables);
+							.abstractRuleChangeRuleWithPlaceholders(
+									rule, getStringValue(),
+									allPossibleVariables);
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -196,14 +231,14 @@ public class AbstractRuleEditComponentWithController extends
 			case MONITORING_RULES:
 			case MONITORING_MESSAGE_RULES:
 				allPossibleVariables = getInterventionAdministrationManagerService()
-						.getAllPossibleMonitoringRuleVariablesOfIntervention(
-								rulesRelatedModelObjectId);
+				.getAllPossibleMonitoringRuleVariablesOfIntervention(
+						rulesRelatedModelObjectId);
 				break;
 			case SCREENING_SURVEY_RULES:
 			case FEEDBACK_RULES:
 				allPossibleVariables = getScreeningSurveyAdministrationManagerService()
-						.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
-								rulesRelatedModelObjectId);
+				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
+						rulesRelatedModelObjectId);
 				break;
 			default:
 				allPossibleVariables = null;
@@ -219,9 +254,9 @@ public class AbstractRuleEditComponentWithController extends
 						try {
 							// Change rule comparison text with placeholders
 							getInterventionAdministrationManagerService()
-									.abstractRuleChangeRuleComparisonTermWithPlaceholders(
-											rule, getStringValue(),
-											allPossibleVariables);
+							.abstractRuleChangeRuleComparisonTermWithPlaceholders(
+									rule, getStringValue(),
+									allPossibleVariables);
 						} catch (final Exception e) {
 							handleException(e);
 							return;

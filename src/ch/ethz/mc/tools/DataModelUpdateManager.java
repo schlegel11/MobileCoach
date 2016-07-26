@@ -85,6 +85,9 @@ public class DataModelUpdateManager {
 				case 4:
 					updateToVersion4();
 					break;
+				case 5:
+					updateToVersion5();
+					break;
 			}
 
 			log.info("Update to version {} done", updateToVersionInThisStep);
@@ -220,9 +223,9 @@ public class DataModelUpdateManager {
 		val participantVariableWithValueCollection = jongo
 				.getCollection("ParticipantVariableWithValue");
 		participantVariableWithValueCollection
-		.update(Queries.EVERYTHING)
-		.multi()
-		.with(Queries.UPDATE_VERSION_3__PARTICIPANT_VARIABLE_WITH_VALUE__CHANGE_1);
+				.update(Queries.EVERYTHING)
+				.multi()
+				.with(Queries.UPDATE_VERSION_3__PARTICIPANT_VARIABLE_WITH_VALUE__CHANGE_1);
 
 		val screeningSurveyCollection = jongo.getCollection("ScreeningSurvey");
 		screeningSurveyCollection.update(Queries.EVERYTHING).multi()
@@ -464,6 +467,21 @@ public class DataModelUpdateManager {
 				}
 			}
 		}
+	}
 
+	/**
+	 * Changes for version 5:
+	 */
+	private static void updateToVersion5() {
+		val collectionsToChange = new String[] { "FeedbackSlide",
+				"FeedbackSlideRule", "MonitoringRule", "MonitoringReplyRule",
+				"MonitoringMessageRule", "ScreeningSurveySlide",
+				"ScreeningSurveySlideRule" };
+		for (val collectionName : collectionsToChange) {
+			log.debug("Adjusting comment of collection {}", collectionName);
+			val collection = jongo.getCollection(collectionName);
+			collection.update(Queries.EVERYTHING).multi()
+					.with(Queries.UPDATE_VERSION_5__GENERAL_UPDATE_FOR_COMMENT);
+		}
 	}
 }

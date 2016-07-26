@@ -2,15 +2,15 @@ package ch.ethz.mc.model.persistent;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -78,6 +78,14 @@ public class FeedbackSlide extends ModelObject {
 	private LString		titleWithPlaceholders;
 
 	/**
+	 * A comment for the author, not visible to any participant
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private String		comment;
+
+	/**
 	 * Enables to add an optional layout attribute for the template generation
 	 * in addition to the template set by the question type containing
 	 * placeholders
@@ -106,7 +114,7 @@ public class FeedbackSlide extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ch.ethz.mc.model.ModelObject#toUIModelObject()
 	 */
 	@Override
@@ -114,7 +122,10 @@ public class FeedbackSlide extends ModelObject {
 		val feedbackSlide = new UIFeedbackSlide(order,
 				titleWithPlaceholders.isEmpty() ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: titleWithPlaceholders.toString());
+						: titleWithPlaceholders.toString(),
+				comment.equals("") ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+						: comment);
 
 		feedbackSlide.setRelatedModelObject(this);
 
@@ -123,7 +134,7 @@ public class FeedbackSlide extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * ch.ethz.mc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
 	 * (java.util.List)
@@ -143,13 +154,13 @@ public class FeedbackSlide extends ModelObject {
 		for (val feedbackSlideRule : ModelObject.find(FeedbackSlideRule.class,
 				Queries.FEEDBACK_SLIDE_RULE__BY_FEEDBACK_SLIDE, getId())) {
 			feedbackSlideRule
-					.collectThisAndRelatedModelObjectsForExport(exportList);
+			.collectThisAndRelatedModelObjectsForExport(exportList);
 		}
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ch.ethz.mc.model.ModelObject#performOnDelete()
 	 */
 	@Override

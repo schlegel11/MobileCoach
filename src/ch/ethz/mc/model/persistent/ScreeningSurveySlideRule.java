@@ -2,15 +2,15 @@ package ch.ethz.mc.model.persistent;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -63,9 +63,10 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 			final boolean showSameSlideBecauseValueNotValidWhenTrue,
 			final String ruleWithPlaceholders,
 			final RuleEquationSignTypes ruleEquationSign,
-			final String ruleComparisonTermWithPlaceholders) {
+			final String ruleComparisonTermWithPlaceholders,
+			final String comment) {
 		super(ruleWithPlaceholders, ruleEquationSign,
-				ruleComparisonTermWithPlaceholders);
+				ruleComparisonTermWithPlaceholders, comment);
 
 		this.belongingScreeningSurveySlide = belongingScreeningSurveySlide;
 		this.order = order;
@@ -152,7 +153,7 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see ch.ethz.mc.model.ModelObject#toUIModelObject()
 	 */
 	@Override
@@ -169,7 +170,7 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 			if (slideWhenTrue != null) {
 				slideNameWhenTrue = slideWhenTrue.getTitleWithPlaceholders()
 						.toString().equals("") ? ImplementationConstants.DEFAULT_OBJECT_NAME
-								: slideWhenTrue.getTitleWithPlaceholders().toString();
+						: slideWhenTrue.getTitleWithPlaceholders().toString();
 			}
 		}
 		if (nextScreeningSurveySlideWhenFalse != null) {
@@ -179,33 +180,33 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 			if (slideWhenFalse != null) {
 				slideNameWhenFalse = slideWhenFalse.getTitleWithPlaceholders()
 						.toString().equals("") ? ImplementationConstants.DEFAULT_OBJECT_NAME
-								: slideWhenFalse.getTitleWithPlaceholders().toString();
+						: slideWhenFalse.getTitleWithPlaceholders().toString();
 			}
 		}
 
 		val screeningSurveySlide = new UIScreeningSurveySlideRule(
 				order,
 				StringUtils.repeat(" → ", level)
-				+ StringHelpers.createRuleName(this),
+						+ StringHelpers.createRuleName(this),
 				storeValueToVariableWithName == null ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 						: Messages
-						.getAdminString(
-								AdminMessageStrings.SCREENING_SURVEY_SLIDE_RULE_EDITING__VALUE_TO_VARIABLE,
-								valueToStoreToVariable,
-								storeValueToVariableWithName),
-								isShowSameSlideBecauseValueNotValidWhenTrue() ? Messages
-										.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-										: Messages
-										.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-										nextScreeningSurveySlideWhenTrue != null ? Messages
-												.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-												+ ": " + slideNameWhenTrue : Messages
-												.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-												nextScreeningSurveySlideWhenFalse != null ? Messages
-														.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-														+ ": " + slideNameWhenFalse : Messages
-														.getAdminString(AdminMessageStrings.UI_MODEL__NO));
+								.getAdminString(
+										AdminMessageStrings.SCREENING_SURVEY_SLIDE_RULE_EDITING__VALUE_TO_VARIABLE,
+										valueToStoreToVariable,
+										storeValueToVariableWithName),
+				isShowSameSlideBecauseValueNotValidWhenTrue() ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
+				nextScreeningSurveySlideWhenTrue != null ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+						+ ": " + slideNameWhenTrue : Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NO),
+				nextScreeningSurveySlideWhenFalse != null ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+						+ ": " + slideNameWhenFalse : Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NO));
 
 		screeningSurveySlide.setRelatedModelObject(this);
 
@@ -214,7 +215,7 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see
 	 * ch.ethz.mc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
 	 * (java.util.List)

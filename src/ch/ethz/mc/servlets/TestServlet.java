@@ -2,15 +2,15 @@ package ch.ethz.mc.servlets;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -144,7 +144,7 @@ public class TestServlet extends HttpServlet {
 				0,
 				"26.10.2015",
 				RuleEquationSignTypes.CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_TRUE_IF_ZERO,
-				"01.01.16");
+				"01.01.16", "");
 		final val x1 = RuleEvaluator.evaluateRule(m1,
 				new ArrayList<AbstractVariableWithValue>());
 		log.debug(">> " + x1.getCalculatedRuleValue());
@@ -154,21 +154,21 @@ public class TestServlet extends HttpServlet {
 				0,
 				"26.10.2015",
 				RuleEquationSignTypes.CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_TRUE_IF_ZERO,
-				"01.01.2016");
+				"01.01.2016", "");
 		final val x2 = RuleEvaluator.evaluateRule(m2,
 				new ArrayList<AbstractVariableWithValue>());
 		log.debug(">> " + x2.getCalculatedRuleValue());
 
 		final MonitoringMessageRule m3 = new MonitoringMessageRule(null, 0,
 				"16.11.", RuleEquationSignTypes.DATE_DIFFERENCE_VALUE_EQUALS,
-				"0");
+				"0", "");
 		final val x3 = RuleEvaluator.evaluateRule(m3,
 				new ArrayList<AbstractVariableWithValue>());
 		log.debug(">> " + x3.isRuleMatchesEquationSign());
 
 		final MonitoringMessageRule m4 = new MonitoringMessageRule(null, 0,
 				"16.11.2015",
-				RuleEquationSignTypes.DATE_DIFFERENCE_VALUE_EQUALS, "0");
+				RuleEquationSignTypes.DATE_DIFFERENCE_VALUE_EQUALS, "0", "");
 		final val x4 = RuleEvaluator.evaluateRule(m4,
 				new ArrayList<AbstractVariableWithValue>());
 		log.debug(">> " + x4.isRuleMatchesEquationSign());
@@ -183,7 +183,7 @@ public class TestServlet extends HttpServlet {
 				0,
 				"position(1,$fieldWithValues)",
 				RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
-				"");
+				"", "");
 		final val x = RuleEvaluator.evaluateRule(m, variables);
 		log.debug(">> " + x.getCalculatedRuleValue());
 	}

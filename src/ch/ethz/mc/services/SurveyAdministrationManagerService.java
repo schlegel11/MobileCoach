@@ -66,16 +66,16 @@ import ch.ethz.mc.ui.NotificationMessageException;
  * @author Andreas Filler
  */
 public class SurveyAdministrationManagerService {
-	private final Object										$lock;
+	private final Object								$lock;
 
-	private static final String									DEFAULT_OBJECT_NAME	= "---";
+	private static final String							DEFAULT_OBJECT_NAME	= "---";
 
 	private static SurveyAdministrationManagerService	instance			= null;
 
-	private final DatabaseManagerService						databaseManagerService;
-	private final FileStorageManagerService						fileStorageManagerService;
-	private final VariablesManagerService						variablesManagerService;
-	private final ModelObjectExchangeService					modelObjectExchangeService;
+	private final DatabaseManagerService				databaseManagerService;
+	private final FileStorageManagerService				fileStorageManagerService;
+	private final VariablesManagerService				variablesManagerService;
+	private final ModelObjectExchangeService			modelObjectExchangeService;
 
 	private SurveyAdministrationManagerService(
 			final DatabaseManagerService databaseManagerService,
@@ -312,7 +312,7 @@ public class SurveyAdministrationManagerService {
 
 		val screeningSurveySlide = new ScreeningSurveySlide(
 				GlobalUniqueIdGenerator.createGlobalUniqueId(),
-				screeningSurveyId, 0, new LString(),
+				screeningSurveyId, 0, new LString(), "",
 				ScreeningSurveySlideQuestionTypes.TEXT_ONLY, "", questions,
 				null, false, null, new LString());
 
@@ -444,6 +444,19 @@ public class SurveyAdministrationManagerService {
 			}
 
 			screeningSurveySlide.setTitleWithPlaceholders(textWithPlaceholders);
+		}
+
+		databaseManagerService.saveModelObject(screeningSurveySlide);
+	}
+
+	@Synchronized
+	public void screeningSurveySlideChangeComment(
+			final ScreeningSurveySlide screeningSurveySlide,
+			final String comment) throws NotificationMessageException {
+		if (comment == null) {
+			screeningSurveySlide.setComment("");
+		} else {
+			screeningSurveySlide.setComment(comment);
 		}
 
 		databaseManagerService.saveModelObject(screeningSurveySlide);
@@ -692,7 +705,7 @@ public class SurveyAdministrationManagerService {
 			final ObjectId screeningSurveySlideId) {
 		val screeningSurveySlideRule = new ScreeningSurveySlideRule(
 				screeningSurveySlideId, 0, 0, "", null, null, null, false, "",
-				RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "");
+				RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "", "");
 
 		val highestOrderSlideRule = databaseManagerService
 				.findOneSortedModelObject(
@@ -841,7 +854,7 @@ public class SurveyAdministrationManagerService {
 	@Synchronized
 	public FeedbackSlide feedbackSlideCreate(final ObjectId feedbackId) {
 		val feedbackSlide = new FeedbackSlide(feedbackId, 0, new LString(), "",
-				null, new LString());
+				"", null, new LString());
 
 		val highestOrderSlide = databaseManagerService
 				.findOneSortedModelObject(FeedbackSlide.class,
@@ -872,6 +885,18 @@ public class SurveyAdministrationManagerService {
 			}
 
 			feedbackSlide.setTitleWithPlaceholders(textWithPlaceholders);
+		}
+
+		databaseManagerService.saveModelObject(feedbackSlide);
+	}
+
+	@Synchronized
+	public void feedbackSlideChangeComment(final FeedbackSlide feedbackSlide,
+			final String comment) throws NotificationMessageException {
+		if (comment == null) {
+			feedbackSlide.setComment("");
+		} else {
+			feedbackSlide.setComment(comment);
 		}
 
 		databaseManagerService.saveModelObject(feedbackSlide);
@@ -955,7 +980,7 @@ public class SurveyAdministrationManagerService {
 	public FeedbackSlideRule feedbackSlideRuleCreate(
 			final ObjectId feedbackSlideId) {
 		val feedbackSlideRule = new FeedbackSlideRule(feedbackSlideId, 0, "",
-				RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "");
+				RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "", "");
 
 		val highestOrderSlideRule = databaseManagerService
 				.findOneSortedModelObject(FeedbackSlideRule.class,
