@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.basics;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,7 +42,7 @@ import com.vaadin.ui.ComboBox;
 @SuppressWarnings("serial")
 @Log4j2
 public class AbstractRuleEditComponentWithController extends
-AbstractRuleEditComponent implements ValueChangeListener {
+		AbstractRuleEditComponent implements ValueChangeListener {
 
 	public enum TYPES {
 		MONITORING_RULES, SCREENING_SURVEY_RULES, FEEDBACK_RULES, MONITORING_MESSAGE_RULES
@@ -141,6 +141,7 @@ AbstractRuleEditComponent implements ValueChangeListener {
 					.getButton()) {
 				editRuleComparisonTextWithPlaceholder();
 			}
+			event.getButton().setEnabled(true);
 		}
 	}
 
@@ -149,8 +150,8 @@ AbstractRuleEditComponent implements ValueChangeListener {
 		log.debug("Changing rule equation sign to {}", event.getProperty()
 				.getValue());
 		getInterventionAdministrationManagerService()
-		.abstractRuleChangeEquationSign(rule,
-				(RuleEquationSignTypes) event.getProperty().getValue());
+				.abstractRuleChangeEquationSign(rule,
+						(RuleEquationSignTypes) event.getProperty().getValue());
 	}
 
 	public void editCommentText() {
@@ -165,8 +166,8 @@ AbstractRuleEditComponent implements ValueChangeListener {
 						try {
 							// Change comment
 							getInterventionAdministrationManagerService()
-									.abstractRuleChangeComment(rule,
-									getStringValue());
+							.abstractRuleChangeComment(rule,
+											getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -186,14 +187,14 @@ AbstractRuleEditComponent implements ValueChangeListener {
 			case MONITORING_RULES:
 			case MONITORING_MESSAGE_RULES:
 				allPossibleVariables = getInterventionAdministrationManagerService()
-				.getAllPossibleMonitoringRuleVariablesOfIntervention(
-						rulesRelatedModelObjectId);
+						.getAllPossibleMonitoringRuleVariablesOfIntervention(
+								rulesRelatedModelObjectId);
 				break;
 			case SCREENING_SURVEY_RULES:
 			case FEEDBACK_RULES:
 				allPossibleVariables = getScreeningSurveyAdministrationManagerService()
-				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
-						rulesRelatedModelObjectId);
+						.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
+								rulesRelatedModelObjectId);
 				break;
 			default:
 				allPossibleVariables = null;
@@ -209,9 +210,9 @@ AbstractRuleEditComponent implements ValueChangeListener {
 						try {
 							// Change rule text with placeholders
 							getInterventionAdministrationManagerService()
-							.abstractRuleChangeRuleWithPlaceholders(
-									rule, getStringValue(),
-									allPossibleVariables);
+									.abstractRuleChangeRuleWithPlaceholders(
+											rule, getStringValue(),
+											allPossibleVariables);
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -231,14 +232,14 @@ AbstractRuleEditComponent implements ValueChangeListener {
 			case MONITORING_RULES:
 			case MONITORING_MESSAGE_RULES:
 				allPossibleVariables = getInterventionAdministrationManagerService()
-				.getAllPossibleMonitoringRuleVariablesOfIntervention(
-						rulesRelatedModelObjectId);
+						.getAllPossibleMonitoringRuleVariablesOfIntervention(
+								rulesRelatedModelObjectId);
 				break;
 			case SCREENING_SURVEY_RULES:
 			case FEEDBACK_RULES:
 				allPossibleVariables = getScreeningSurveyAdministrationManagerService()
-				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
-						rulesRelatedModelObjectId);
+						.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
+								rulesRelatedModelObjectId);
 				break;
 			default:
 				allPossibleVariables = null;
@@ -254,9 +255,9 @@ AbstractRuleEditComponent implements ValueChangeListener {
 						try {
 							// Change rule comparison text with placeholders
 							getInterventionAdministrationManagerService()
-							.abstractRuleChangeRuleComparisonTermWithPlaceholders(
-									rule, getStringValue(),
-									allPossibleVariables);
+									.abstractRuleChangeRuleComparisonTermWithPlaceholders(
+											rule, getStringValue(),
+											allPossibleVariables);
 						} catch (final Exception e) {
 							handleException(e);
 							return;

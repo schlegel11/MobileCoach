@@ -55,6 +55,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class TestServlet extends HttpServlet {
 	private ServletOutputStream	servletOutputStream	= null;
 
+	@SuppressWarnings("unused")
 	private MC					mc;
 
 	@Override
@@ -134,7 +135,8 @@ public class TestServlet extends HttpServlet {
 		// TODO OPTIONAL: Testcases could be defined here
 
 		// dateCalculationTests();
-		languageStringSerializationTest();
+		// languageStringSerializationTest();
+		ruleTests();
 	}
 
 	@SuppressWarnings("unused")
@@ -188,6 +190,7 @@ public class TestServlet extends HttpServlet {
 		log.debug(">> " + x.getCalculatedRuleValue());
 	}
 
+	@SuppressWarnings("unused")
 	private void languageStringSerializationTest() {
 		val l = new LString();
 		l.set(Constants.getInterventionLocales()[1], "DEF");
@@ -208,5 +211,27 @@ public class TestServlet extends HttpServlet {
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	private void ruleTests() {
+		val variables = new ArrayList<AbstractVariableWithValue>();
+		variables.add(new InterventionVariableWithValue(null, "$sex", "2",
+				InterventionVariableWithValuePrivacyTypes.PRIVATE,
+				InterventionVariableWithValueAccessTypes.INTERNAL));
+		variables.add(new InterventionVariableWithValue(null, "$auditGT0Digit",
+				"2", InterventionVariableWithValuePrivacyTypes.PRIVATE,
+				InterventionVariableWithValueAccessTypes.INTERNAL));
+		variables.add(new InterventionVariableWithValue(null, "$alterkDigit",
+				"3", InterventionVariableWithValuePrivacyTypes.PRIVATE,
+				InterventionVariableWithValueAccessTypes.INTERNAL));
+
+		val rule = new MonitoringMessageRule(
+				null,
+				0,
+				"position($sex,position($auditGT0Digit,position($alterkDigit,26,16,15,24),position($alterkDigit,53,60,63,53),position($alterkDigit,21,25,23,24)),position($auditGT0Digit,position($alterkDigit,21,14,13,14),position($alterkDigit,47,45,52,52),position($alterkDigit,33,42,35,34)))",
+				RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
+				"", "");
+		final val x = RuleEvaluator.evaluateRule(rule, variables);
+		log.debug(">> " + x.getCalculatedRuleValue());
 	}
 }

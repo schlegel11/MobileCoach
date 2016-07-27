@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.views;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -93,6 +93,8 @@ public class MainViewComponent extends AbstractCustomComponent {
 				.getAdminString(AdminMessageStrings.MAIN_VIEW__LOGOUT_BUTTON));
 
 		titleLabel.setValue("");
+
+		logoutButton.setDisableOnClick(true);
 
 		// Create menu buttons
 		welcomeButton.getButtonIcon().setSource(
@@ -275,7 +277,7 @@ public class MainViewComponent extends AbstractCustomComponent {
 		logoutButton.setTabIndex(2);
 		buttonsGridLayout.addComponent(logoutButton, 0, 1);
 		buttonsGridLayout
-		.setComponentAlignment(logoutButton, new Alignment(20));
+				.setComponentAlignment(logoutButton, new Alignment(20));
 
 		return buttonsGridLayout;
 	}

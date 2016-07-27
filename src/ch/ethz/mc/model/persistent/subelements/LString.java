@@ -26,7 +26,11 @@ public class LString {
 
 	@JsonIgnore
 	public LString(final String defaultValue) {
-		values.put(Constants.getInterventionLocales()[0], defaultValue);
+		if (defaultValue != null && !defaultValue.endsWith("")) {
+			for (val locale : Constants.getInterventionLocales()) {
+				values.put(locale, defaultValue);
+			}
+		}
 	}
 
 	@JsonIgnore

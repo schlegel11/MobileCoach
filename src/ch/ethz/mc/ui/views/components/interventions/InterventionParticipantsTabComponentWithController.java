@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.interventions;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -64,7 +64,7 @@ import com.vaadin.ui.Button.ClickEvent;
 @SuppressWarnings("serial")
 @Log4j2
 public class InterventionParticipantsTabComponentWithController extends
-InterventionParticipantsTabComponent {
+		InterventionParticipantsTabComponent {
 
 	private final Intervention								intervention;
 	private boolean											isOneScreeningSurveyActive;
@@ -95,14 +95,14 @@ InterventionParticipantsTabComponent {
 		participantsTable.setColumnHeaders(UIParticipant.getColumnHeaders());
 		participantsTable.setConverter(UIParticipant.CREATED,
 				new StringToDateConverter() {
-			@Override
-			protected DateFormat getFormat(final Locale locale) {
-				val dateFormat = DateFormat.getDateTimeInstance(
-						DateFormat.MEDIUM, DateFormat.MEDIUM,
-						Constants.getAdminLocale());
-				return dateFormat;
-			}
-		});
+					@Override
+					protected DateFormat getFormat(final Locale locale) {
+						val dateFormat = DateFormat.getDateTimeInstance(
+								DateFormat.MEDIUM, DateFormat.MEDIUM,
+								Constants.getAdminLocale());
+						return dateFormat;
+					}
+				});
 
 		// handle selection change
 		participantsTable.addValueChangeListener(new ValueChangeListener() {
@@ -128,7 +128,7 @@ InterventionParticipantsTabComponent {
 		participantsEditComponent.getAssignGroupButton().addClickListener(
 				buttonClickListener);
 		participantsEditComponent.getAssignOrganizationButton()
-		.addClickListener(buttonClickListener);
+				.addClickListener(buttonClickListener);
 		participantsEditComponent.getAssignUnitButton().addClickListener(
 				buttonClickListener);
 		participantsEditComponent.getSwitchMessagingButton().addClickListener(
@@ -149,10 +149,18 @@ InterventionParticipantsTabComponent {
 					public InputStream getStream() {
 						val selectedParticipants = convertSelectedToParticipantsList();
 
-						return new FileInputStream(
-								getInterventionAdministrationManagerService()
-								.participantsExport(
-										selectedParticipants));
+						try {
+							return new FileInputStream(
+									getInterventionAdministrationManagerService()
+											.participantsExport(
+													selectedParticipants));
+						} catch (final FileNotFoundException e) {
+							log.warn("Error during export: {}", e.getMessage());
+							throw e;
+						} finally {
+							participantsEditComponent.getExportButton()
+							.setEnabled(true);
+						}
 					}
 
 					@Override
@@ -160,12 +168,13 @@ InterventionParticipantsTabComponent {
 						return "Intervention_"
 								+ intervention.getName().replaceAll(
 										"[^A-Za-z0-9_. ]+", "_")
-										+ "_Participants"
-										+ Constants.getFileExtension();
+								+ "_Participants"
+								+ Constants.getFileExtension();
 					}
 				});
 		onDemandFileDownloader.extend(participantsEditComponent
 				.getExportButton());
+		participantsEditComponent.getExportButton().setDisableOnClick(true);
 	}
 
 	public void adjust() {
@@ -183,7 +192,7 @@ InterventionParticipantsTabComponent {
 		log.debug("Update participants");
 		refreshBeanContainer(beanContainer, UIParticipant.class,
 				getInterventionAdministrationManagerService()
-				.getAllParticipantsOfIntervention(intervention.getId()));
+						.getAllParticipantsOfIntervention(intervention.getId()));
 
 		participantsTable.sort();
 	}
@@ -258,12 +267,12 @@ InterventionParticipantsTabComponent {
 					participantsTable.sort();
 
 					getAdminUI()
-					.showInformationNotification(
-							AdminMessageStrings.NOTIFICATION__PARTICIPANTS_IMPORTED);
+							.showInformationNotification(
+									AdminMessageStrings.NOTIFICATION__PARTICIPANTS_IMPORTED);
 				} catch (final Exception e) {
 					getAdminUI()
-					.showWarningNotification(
-							AdminMessageStrings.NOTIFICATION__PARTICIPANTS_IMPORT_FAILED);
+							.showWarningNotification(
+									AdminMessageStrings.NOTIFICATION__PARTICIPANTS_IMPORT_FAILED);
 				} finally {
 					try {
 						file.delete();
@@ -292,8 +301,8 @@ InterventionParticipantsTabComponent {
 						try {
 							// Change group
 							getInterventionAdministrationManagerService()
-									.participantsSetGroup(selectedParticipants,
-											getStringValue());
+							.participantsSetGroup(selectedParticipants,
+									getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -304,24 +313,24 @@ InterventionParticipantsTabComponent {
 							if (getStringValue().equals("")) {
 								getStringItemProperty(
 										beanContainer
-										.getItem(selectedParticipant
-												.getId()),
-												UIParticipant.GROUP)
-										.setValue(
-												Messages.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET));
+												.getItem(selectedParticipant
+														.getId()),
+										UIParticipant.GROUP)
+												.setValue(
+														Messages.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET));
 							} else {
 								getStringItemProperty(
 										beanContainer
-										.getItem(selectedParticipant
-												.getId()),
-												UIParticipant.GROUP).setValue(
-														getStringValue());
+												.getItem(selectedParticipant
+														.getId()),
+										UIParticipant.GROUP).setValue(
+										getStringValue());
 							}
 						}
 
 						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__PARTICIPANTS_GROUP_CHANGED);
+						.showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__PARTICIPANTS_GROUP_CHANGED);
 						closeWindow();
 					}
 				}, null);
@@ -340,9 +349,9 @@ InterventionParticipantsTabComponent {
 						try {
 							// Change organization
 							getInterventionAdministrationManagerService()
-							.participantsSetOrganization(
-									selectedParticipants,
-									getStringValue());
+									.participantsSetOrganization(
+											selectedParticipants,
+											getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -353,13 +362,13 @@ InterventionParticipantsTabComponent {
 							getStringItemProperty(
 									beanContainer.getItem(selectedParticipant
 											.getId()),
-											UIParticipant.ORGANIZATION).setValue(
-													getStringValue());
+									UIParticipant.ORGANIZATION).setValue(
+									getStringValue());
 						}
 
 						getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__PARTICIPANTS_ORGANIZATION_CHANGED);
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__PARTICIPANTS_ORGANIZATION_CHANGED);
 						closeWindow();
 					}
 				}, null);
@@ -378,9 +387,9 @@ InterventionParticipantsTabComponent {
 						try {
 							// Change organization
 							getInterventionAdministrationManagerService()
-							.participantsSetOrganizationUnit(
-									selectedParticipants,
-									getStringValue());
+									.participantsSetOrganizationUnit(
+											selectedParticipants,
+											getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -391,12 +400,12 @@ InterventionParticipantsTabComponent {
 							getStringItemProperty(
 									beanContainer.getItem(selectedParticipant
 											.getId()), UIParticipant.UNIT)
-											.setValue(getStringValue());
+									.setValue(getStringValue());
 						}
 
 						getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__PARTICIPANTS_ORGANIZATION_UNIT_CHANGED);
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__PARTICIPANTS_ORGANIZATION_UNIT_CHANGED);
 						closeWindow();
 					}
 				}, null);
@@ -412,7 +421,7 @@ InterventionParticipantsTabComponent {
 				try {
 					// Change organization
 					MC.getInstance().getInterventionExecutionManagerService()
-					.participantsSwitchMonitoring(selectedParticipants);
+							.participantsSwitchMonitoring(selectedParticipants);
 				} catch (final Exception e) {
 					handleException(e);
 					return;
@@ -428,8 +437,8 @@ InterventionParticipantsTabComponent {
 				participantsTable.sort();
 
 				getAdminUI()
-				.showInformationNotification(
-						AdminMessageStrings.NOTIFICATION__PARTICIPANTS_MONITORING_SWITCHED);
+						.showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__PARTICIPANTS_MONITORING_SWITCHED);
 				closeWindow();
 			}
 		}, null);
@@ -453,8 +462,8 @@ InterventionParticipantsTabComponent {
 								getStringValue(), allPossibleMessageVariables)) {
 
 							getAdminUI()
-							.showWarningNotification(
-									AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
+									.showWarningNotification(
+											AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
 
 							return;
 						} else {
@@ -466,14 +475,14 @@ InterventionParticipantsTabComponent {
 
 							for (val participant : selectedParticipants) {
 								interventionExecutionManagerService
-								.sendManualMessage(participant,
-										getStringValue());
+										.sendManualMessage(participant,
+												getStringValue());
 							}
 						}
 
 						getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__THE_MESSAGES_WILL_BE_SENT_IN_THE_NEXT_MINUTES);
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__THE_MESSAGES_WILL_BE_SENT_IN_THE_NEXT_MINUTES);
 
 						closeWindow();
 					}
@@ -490,7 +499,7 @@ InterventionParticipantsTabComponent {
 				try {
 					// Delete participants
 					getInterventionAdministrationManagerService()
-					.participantsDelete(selectedParticipants);
+							.participantsDelete(selectedParticipants);
 				} catch (final Exception e) {
 					closeWindow();
 					handleException(e);
@@ -500,8 +509,8 @@ InterventionParticipantsTabComponent {
 				// Adapt UI
 				for (val selectedParticipant : selectedParticipants) {
 					getInterventionParticipantsEditComponent()
-					.getParticipantsTable().removeItem(
-							selectedParticipant.getId());
+							.getParticipantsTable().removeItem(
+									selectedParticipant.getId());
 				}
 
 				getAdminUI().showInformationNotification(

@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.screening_survey;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -59,8 +59,8 @@ import com.vaadin.ui.Table;
 @SuppressWarnings("serial")
 @Log4j2
 public class ScreeningSurveySlideEditComponentWithController extends
-ScreeningSurveySlideEditComponent implements
-MediaObjectCreationOrDeleteionListener {
+		ScreeningSurveySlideEditComponent implements
+		MediaObjectCreationOrDeleteionListener {
 
 	private final ScreeningSurveySlide									screeningSurveySlide;
 
@@ -222,9 +222,9 @@ MediaObjectCreationOrDeleteionListener {
 				log.debug("Adjust question type to {}",
 						screeningSurveySlideQuestionType);
 				getScreeningSurveyAdministrationManagerService()
-				.screeningSurveySlideChangeQuestionType(
-						screeningSurveySlide,
-						screeningSurveySlideQuestionType);
+						.screeningSurveySlideChangeQuestionType(
+								screeningSurveySlide,
+								screeningSurveySlideQuestionType);
 
 				adjust(false);
 
@@ -242,9 +242,9 @@ MediaObjectCreationOrDeleteionListener {
 
 				log.debug("Adjust preselected answer to {}", preselectedAnswer);
 				getScreeningSurveyAdministrationManagerService()
-				.screeningSurveySlideChangePreselectedAnswer(
-						screeningSurveySlide, selectedQuestion,
-						preselectedAnswer);
+						.screeningSurveySlideChangePreselectedAnswer(
+								screeningSurveySlide, selectedQuestion,
+								preselectedAnswer);
 			}
 		};
 
@@ -278,8 +278,8 @@ MediaObjectCreationOrDeleteionListener {
 				}
 				log.debug("Adjust hand over feedback to {}", feedbackToHandOver);
 				getScreeningSurveyAdministrationManagerService()
-				.screeningSurveySlideChangeHandsOverToFeedback(
-						screeningSurveySlide, feedbackToHandOver);
+						.screeningSurveySlideChangeHandsOverToFeedback(
+								screeningSurveySlide, feedbackToHandOver);
 
 				adjust(false);
 			}
@@ -294,8 +294,8 @@ MediaObjectCreationOrDeleteionListener {
 						val newValue = (Boolean) event.getProperty().getValue();
 
 						getScreeningSurveyAdministrationManagerService()
-						.screeningSurveySlideChangeStopScreeningSurvey(
-								screeningSurveySlide, newValue);
+								.screeningSurveySlideChangeStopScreeningSurvey(
+										screeningSurveySlide, newValue);
 
 						adjust(false);
 					}
@@ -323,17 +323,17 @@ MediaObjectCreationOrDeleteionListener {
 		getDeleteRuleButton().addClickListener(buttonClickListener);
 
 		getTitleWithPlaceholdersTextFieldComponent().getButton()
-		.addClickListener(buttonClickListener);
+				.addClickListener(buttonClickListener);
 		getCommentTextFieldComponent().getButton().addClickListener(
 				buttonClickListener);
 		getOptionalLayoutAttributeTextFieldComponent().getButton()
-		.addClickListener(buttonClickListener);
+				.addClickListener(buttonClickListener);
 		getQuestionTextWithPlaceholdersTextField().getButton()
-		.addClickListener(buttonClickListener);
+				.addClickListener(buttonClickListener);
 		getValidationErrorMessageTextFieldComponent().getButton()
-		.addClickListener(buttonClickListener);
+				.addClickListener(buttonClickListener);
 		getDefaultVariableValueTextFieldComponent().getButton()
-		.addClickListener(buttonClickListener);
+				.addClickListener(buttonClickListener);
 		getStoreVariableTextFieldComponent().getButton().addClickListener(
 				buttonClickListener);
 
@@ -377,8 +377,8 @@ MediaObjectCreationOrDeleteionListener {
 			values[i] = uiAnswer.getValue();
 		}
 		getScreeningSurveyAdministrationManagerService()
-		.screeningSurveySlideSetAnswersWithPlaceholdersAndValues(
-				screeningSurveySlide, selectedQuestion, answers, values);
+				.screeningSurveySlideSetAnswersWithPlaceholdersAndValues(
+						screeningSurveySlide, selectedQuestion, answers, values);
 	}
 
 	private void adjustPreselectedAnswer() {
@@ -386,7 +386,7 @@ MediaObjectCreationOrDeleteionListener {
 
 		if (preselectedComboBoxListener != null) {
 			preselectedAnswerComboBox
-			.removeValueChangeListener(preselectedComboBoxListener);
+					.removeValueChangeListener(preselectedComboBoxListener);
 		}
 
 		preselectedAnswerComboBox.removeAllItems();
@@ -405,7 +405,7 @@ MediaObjectCreationOrDeleteionListener {
 		}
 
 		preselectedAnswerComboBox
-		.addValueChangeListener(preselectedComboBoxListener);
+				.addValueChangeListener(preselectedComboBoxListener);
 	}
 
 	private void adjust(final boolean adjustAlsoAnswers) {
@@ -419,7 +419,7 @@ MediaObjectCreationOrDeleteionListener {
 				screeningSurveySlide.getComment());
 		getOptionalLayoutAttributeTextFieldComponent().setValue(
 				screeningSurveySlide
-				.getOptionalLayoutAttributeWithPlaceholders());
+						.getOptionalLayoutAttributeWithPlaceholders());
 		getQuestionTextWithPlaceholdersTextField().setValue(
 				currentQuestion.getQuestionWithPlaceholders().toString());
 		getValidationErrorMessageTextFieldComponent().setValue(
@@ -500,6 +500,7 @@ MediaObjectCreationOrDeleteionListener {
 					.getButton()) {
 				changeStoreResultVariable();
 			}
+			event.getButton().setEnabled(true);
 		}
 	}
 
@@ -529,8 +530,8 @@ MediaObjectCreationOrDeleteionListener {
 
 		try {
 			getScreeningSurveyAdministrationManagerService()
-			.screeningSurveySlideRemoveQuestion(screeningSurveySlide,
-					selectedQuestion);
+					.screeningSurveySlideRemoveQuestion(screeningSurveySlide,
+							selectedQuestion);
 
 			questionsBeanContainer.removeItem(selectedUIQuestion.getOrder());
 			questionsTable.select(questionsBeanContainer.getIdByIndex(0));
@@ -569,8 +570,8 @@ MediaObjectCreationOrDeleteionListener {
 
 		if (getPreselectedAnswerComboBox().isSelected(selectedUIAnswer)) {
 			getScreeningSurveyAdministrationManagerService()
-			.screeningSurveySlideChangePreselectedAnswer(
-					screeningSurveySlide, selectedQuestion, -1);
+					.screeningSurveySlideChangePreselectedAnswer(
+							screeningSurveySlide, selectedQuestion, -1);
 		}
 
 		answersTable.select(null);
@@ -615,7 +616,7 @@ MediaObjectCreationOrDeleteionListener {
 
 						// Adapt UI
 						getLStringItemProperty(beanItem, UIAnswer.ANSWER)
-						.setValue(selectedUIAnswer.getAnswer());
+								.setValue(selectedUIAnswer.getAnswer());
 
 						closeWindow();
 					}
@@ -649,7 +650,7 @@ MediaObjectCreationOrDeleteionListener {
 
 						// Adapt UI
 						getStringItemProperty(beanItem, UIAnswer.VALUE)
-						.setValue(selectedUIAnswer.getValue());
+								.setValue(selectedUIAnswer.getValue());
 
 						closeWindow();
 					}
@@ -661,12 +662,12 @@ MediaObjectCreationOrDeleteionListener {
 
 		if (moveUp
 				&& selectedUIAnswer.getOrder() == answersBeanContainer
-				.getIdByIndex(0)) {
+						.getIdByIndex(0)) {
 			log.debug("Answer is already at top");
 			return;
 		} else if (!moveUp
 				&& selectedUIAnswer.getOrder() == answersBeanContainer
-				.getIdByIndex(answersBeanContainer.size() - 1)) {
+						.getIdByIndex(answersBeanContainer.size() - 1)) {
 			log.debug("Answer is already at bottom");
 			return;
 		}
@@ -718,10 +719,10 @@ MediaObjectCreationOrDeleteionListener {
 						try {
 							// Change title with placeholders
 							getScreeningSurveyAdministrationManagerService()
-							.screeningSurveySlideChangeTitle(
-									screeningSurveySlide,
-									getLStringValue(),
-									allPossibleVariables);
+									.screeningSurveySlideChangeTitle(
+											screeningSurveySlide,
+											getLStringValue(),
+											allPossibleVariables);
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -747,9 +748,9 @@ MediaObjectCreationOrDeleteionListener {
 						try {
 							// Change comment
 							getScreeningSurveyAdministrationManagerService()
-							.screeningSurveySlideChangeComment(
-									screeningSurveySlide,
-									getStringValue());
+									.screeningSurveySlideChangeComment(
+											screeningSurveySlide,
+											getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -770,7 +771,7 @@ MediaObjectCreationOrDeleteionListener {
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_OPTIONAL_LAYOUT_ATTRIBUTE_WITH_PLACEHOLDERS,
 				screeningSurveySlide
-				.getOptionalLayoutAttributeWithPlaceholders(),
+						.getOptionalLayoutAttributeWithPlaceholders(),
 				allPossibleVariables, new PlaceholderStringEditComponent(),
 				new ExtendableButtonClickListener() {
 
@@ -779,9 +780,9 @@ MediaObjectCreationOrDeleteionListener {
 						try {
 							// Change optional layout attribute
 							getScreeningSurveyAdministrationManagerService()
-							.screeningSurveySlideChangeOptionalLayoutAttributeWithPlaceholders(
-									screeningSurveySlide,
-									getStringValue());
+									.screeningSurveySlideChangeOptionalLayoutAttributeWithPlaceholders(
+											screeningSurveySlide,
+											getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -802,7 +803,7 @@ MediaObjectCreationOrDeleteionListener {
 		showModalLStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_QUESTION_TEXT_WITH_PLACEHOLDERS,
 				screeningSurveySlide.getQuestions().get(selectedQuestion)
-				.getQuestionWithPlaceholders(), allPossibleVariables,
+						.getQuestionWithPlaceholders(), allPossibleVariables,
 				new LocalizedPlaceholderStringEditComponent(),
 				new ExtendableButtonClickListener() {
 
@@ -811,11 +812,11 @@ MediaObjectCreationOrDeleteionListener {
 						try {
 							// Change question with placeholders
 							getScreeningSurveyAdministrationManagerService()
-							.screeningSurveySlideChangeQuestion(
-									screeningSurveySlide,
-									selectedQuestion,
-											getLStringValue(),
-									allPossibleVariables);
+									.screeningSurveySlideChangeQuestion(
+											screeningSurveySlide,
+											selectedQuestion,
+									getLStringValue(),
+											allPossibleVariables);
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -835,7 +836,7 @@ MediaObjectCreationOrDeleteionListener {
 								questionsTable, UIQuestion.class,
 								selectedUIQuestion.getOrder());
 						getStringItemProperty(beanItem, UIQuestion.QUESTION)
-						.setValue(selectedUIQuestion.getQuestion());
+								.setValue(selectedUIQuestion.getQuestion());
 
 						adjust(false);
 
@@ -861,10 +862,10 @@ MediaObjectCreationOrDeleteionListener {
 						try {
 							// Change validation error message
 							getScreeningSurveyAdministrationManagerService()
-							.screeningSurveySlideChangeValidationErrorMessage(
-									screeningSurveySlide,
-									getLStringValue(),
-									allPossibleVariables);
+									.screeningSurveySlideChangeValidationErrorMessage(
+											screeningSurveySlide,
+											getLStringValue(),
+											allPossibleVariables);
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -883,7 +884,7 @@ MediaObjectCreationOrDeleteionListener {
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_DEFAULT_VARIABLE_VALUE,
 				screeningSurveySlide.getQuestions().get(selectedQuestion)
-				.getDefaultValue(), null,
+						.getDefaultValue(), null,
 				new ShortStringEditComponent(),
 				new ExtendableButtonClickListener() {
 
@@ -892,9 +893,9 @@ MediaObjectCreationOrDeleteionListener {
 						try {
 							// Change default variable value
 							getScreeningSurveyAdministrationManagerService()
-							.screeningSurveySlideChangeDefaultVariableValue(
-									screeningSurveySlide,
-									selectedQuestion, getStringValue());
+									.screeningSurveySlideChangeDefaultVariableValue(
+											screeningSurveySlide,
+											selectedQuestion, getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -915,7 +916,7 @@ MediaObjectCreationOrDeleteionListener {
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_VARIABLE,
 				screeningSurveySlide.getQuestions().get(selectedQuestion)
-				.getStoreValueToVariableWithName(),
+						.getStoreValueToVariableWithName(),
 				allPossibleVariables,
 				new ShortPlaceholderStringEditComponent(),
 				new ExtendableButtonClickListener() {
@@ -925,9 +926,9 @@ MediaObjectCreationOrDeleteionListener {
 						try {
 							// Change store result to variable
 							getScreeningSurveyAdministrationManagerService()
-							.screeningSurveySlideChangeStoreResultToVariable(
-									screeningSurveySlide,
-									selectedQuestion, getStringValue());
+									.screeningSurveySlideChangeStoreResultToVariable(
+											screeningSurveySlide,
+											selectedQuestion, getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -949,8 +950,8 @@ MediaObjectCreationOrDeleteionListener {
 				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__CREATE_SCREENING_SURVEY_SLIDE_RULE,
 				new ScreeningSurveySlideRuleEditComponentWithController(
 						newScreeningSurveySlideRule, screeningSurveySlide
-						.getScreeningSurvey()),
-						new ExtendableButtonClickListener() {
+								.getScreeningSurvey()),
+				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
@@ -960,8 +961,8 @@ MediaObjectCreationOrDeleteionListener {
 										.toUIModelObject()));
 						rulesTable.select(newScreeningSurveySlideRule.getId());
 						getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_SLIDE_RULE_CREATED);
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_SLIDE_RULE_CREATED);
 
 						closeWindow();
 					}
@@ -977,8 +978,8 @@ MediaObjectCreationOrDeleteionListener {
 				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_SCREENING_SURVEY_SLIDE_RULE,
 				new ScreeningSurveySlideRuleEditComponentWithController(
 						selectedScreeningSurveySlideRule, screeningSurveySlide
-						.getScreeningSurvey()),
-						new ExtendableButtonClickListener() {
+								.getScreeningSurvey()),
+				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
@@ -989,8 +990,8 @@ MediaObjectCreationOrDeleteionListener {
 						rulesTable.select(selectedScreeningSurveySlideRule
 								.getId());
 						getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_SLIDE_RULE_UPDATED);
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_SLIDE_RULE_UPDATED);
 
 						closeWindow();
 					}
@@ -1026,8 +1027,8 @@ MediaObjectCreationOrDeleteionListener {
 				.getRelatedModelObject(ScreeningSurveySlideRule.class);
 
 		getScreeningSurveyAdministrationManagerService()
-		.screeningSurveySlideRuleChangeLevel(
-				selectedScreeningSurveySlideRule, moveUp);
+				.screeningSurveySlideRuleChangeLevel(
+						selectedScreeningSurveySlideRule, moveUp);
 
 		removeAndAddModelObjectToBeanContainer(rulesBeanContainer,
 				selectedScreeningSurveySlideRule);
@@ -1045,8 +1046,8 @@ MediaObjectCreationOrDeleteionListener {
 
 					// Delete rule
 					getScreeningSurveyAdministrationManagerService()
-					.screeningSurveySlideRuleDelete(
-							selectedScreeningSurveySlideRule);
+							.screeningSurveySlideRuleDelete(
+									selectedScreeningSurveySlideRule);
 				} catch (final Exception e) {
 					closeWindow();
 					handleException(e);
@@ -1058,8 +1059,8 @@ MediaObjectCreationOrDeleteionListener {
 						.getRelatedModelObject(ScreeningSurveySlideRule.class)
 						.getId());
 				getAdminUI()
-				.showInformationNotification(
-						AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_SLIDE_RULE_DELETED);
+						.showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_SLIDE_RULE_DELETED);
 
 				closeWindow();
 			}
@@ -1069,7 +1070,7 @@ MediaObjectCreationOrDeleteionListener {
 	@Override
 	public void updateLinkedMediaObjectId(final ObjectId linkedMediaObjectId) {
 		getScreeningSurveyAdministrationManagerService()
-		.screeningSurveySlideSetLinkedMediaObject(screeningSurveySlide,
-				linkedMediaObjectId);
+				.screeningSurveySlideSetLinkedMediaObject(screeningSurveySlide,
+						linkedMediaObjectId);
 	}
 }

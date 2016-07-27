@@ -214,11 +214,19 @@ public class AllInterventionsTabComponentWithController extends
 					@Override
 					@SneakyThrows(FileNotFoundException.class)
 					public InputStream getStream() {
-						return new FileInputStream(
-								getInterventionAdministrationManagerService()
-										.interventionExport(
-												selectedUIIntervention
-														.getRelatedModelObject(Intervention.class)));
+						try {
+							return new FileInputStream(
+									getInterventionAdministrationManagerService()
+											.interventionExport(
+													selectedUIIntervention
+															.getRelatedModelObject(Intervention.class)));
+						} catch (final FileNotFoundException e) {
+							log.warn("Error during export: {}", e.getMessage());
+							throw e;
+						} finally {
+							allInterventionsEditComponent.getExportButton()
+									.setEnabled(true);
+						}
 					}
 
 					@Override
@@ -231,6 +239,7 @@ public class AllInterventionsTabComponentWithController extends
 				});
 		onDemandFileDownloader.extend(allInterventionsEditComponent
 				.getExportButton());
+		allInterventionsEditComponent.getExportButton().setDisableOnClick(true);
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {

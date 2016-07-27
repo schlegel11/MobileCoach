@@ -375,12 +375,14 @@ public class RuleEvaluator {
 		final Function positionInArray = new Function("position", 2,
 				Integer.MAX_VALUE);
 		final Function digitAtPosition = new Function("digit", 2);
+		final Function inRangeCheck = new Function("inrange", 3);
 
 		params.add(firstPosition);
 		params.add(secondPosition);
 		params.add(thirdPosition);
 		params.add(positionInArray);
 		params.add(digitAtPosition);
+		params.add(inRangeCheck);
 
 		final AbstractEvaluator<Double> evaluator = new DoubleEvaluator(params) {
 			private Double[]	argumentsArrays;
@@ -399,6 +401,9 @@ public class RuleEvaluator {
 					return positionInArray(arguments);
 				} else if (function == digitAtPosition) {
 					return digitAtPosition(arguments.next(), arguments.next());
+				} else if (function == inRangeCheck) {
+					return inRangeCheck(arguments.next(), arguments.next(),
+							arguments.next());
 				} else {
 					// If it's another function, pass it to DoubleEvaluator
 					return super.evaluate(function, arguments,
@@ -472,6 +477,22 @@ public class RuleEvaluator {
 				val number = (int) Math.floor(numberDouble);
 
 				return (double) (int) (number / Math.pow(10, position - 1) % 10);
+			}
+
+			/**
+			 * Returns 1 if the value is between min and max, or 0 if not
+			 *
+			 * @param positionDouble
+			 * @param numberDouble
+			 * @return
+			 */
+			private Double inRangeCheck(final Double valueDouble,
+					final Double minDouble, final Double maxDouble) {
+				if (valueDouble >= minDouble && valueDouble <= maxDouble) {
+					return 1d;
+				} else {
+					return 0d;
+				}
 			}
 		};
 

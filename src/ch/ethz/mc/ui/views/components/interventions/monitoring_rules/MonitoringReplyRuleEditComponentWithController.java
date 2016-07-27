@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.interventions.monitoring_rules;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,13 +38,13 @@ import com.vaadin.ui.Button.ClickEvent;
 
 /**
  * Extends the monitoring reply rule edit component with a controller
- * 
+ *
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
 @Log4j2
 public class MonitoringReplyRuleEditComponentWithController extends
-		MonitoringReplyRuleEditComponent {
+MonitoringReplyRuleEditComponent {
 	private final ObjectId									interventionId;
 
 	private final AbstractRuleEditComponentWithController	ruleEditComponent;
@@ -84,35 +84,35 @@ public class MonitoringReplyRuleEditComponentWithController extends
 			}
 		}
 		monitoringMessageComboBox
-				.addValueChangeListener(new ValueChangeListener() {
+		.addValueChangeListener(new ValueChangeListener() {
 
-					@Override
-					public void valueChange(final ValueChangeEvent event) {
-						final UIMonitoringMessageGroup uiMonitoringMessageGroup = (UIMonitoringMessageGroup) event
-								.getProperty().getValue();
+			@Override
+			public void valueChange(final ValueChangeEvent event) {
+				final UIMonitoringMessageGroup uiMonitoringMessageGroup = (UIMonitoringMessageGroup) event
+						.getProperty().getValue();
 
-						ObjectId newMonitoringMessageGroupId;
-						if (uiMonitoringMessageGroup == null) {
-							newMonitoringMessageGroupId = null;
-						} else {
-							newMonitoringMessageGroupId = uiMonitoringMessageGroup
-									.getRelatedModelObject(
-											MonitoringMessageGroup.class)
+				ObjectId newMonitoringMessageGroupId;
+				if (uiMonitoringMessageGroup == null) {
+					newMonitoringMessageGroupId = null;
+				} else {
+					newMonitoringMessageGroupId = uiMonitoringMessageGroup
+							.getRelatedModelObject(
+									MonitoringMessageGroup.class)
 									.getId();
-						}
+				}
 
-						log.debug(
-								"Adjust related monitoring message group to {}",
-								newMonitoringMessageGroupId);
-						getInterventionAdministrationManagerService()
-								.monitoringReplyRuleChangeRelatedMonitoringMessageGroup(
-										monitoringRule,
-										newMonitoringMessageGroupId);
+				log.debug(
+						"Adjust related monitoring message group to {}",
+						newMonitoringMessageGroupId);
+				getInterventionAdministrationManagerService()
+				.monitoringReplyRuleChangeRelatedMonitoringMessageGroup(
+						monitoringRule,
+						newMonitoringMessageGroupId);
 
-						adjust();
+				adjust();
 
-					}
-				});
+			}
+		});
 
 		// Add button listeners
 		val buttonClickListener = new ButtonClickListener();
@@ -129,10 +129,10 @@ public class MonitoringReplyRuleEditComponentWithController extends
 					public void valueChange(final ValueChangeEvent event) {
 						log.debug("Adjust send message if true");
 						getInterventionAdministrationManagerService()
-								.monitoringReplyRuleChangeSendMessageIfTrue(
-										monitoringRule,
-										(boolean) event.getProperty()
-												.getValue());
+						.monitoringReplyRuleChangeSendMessageIfTrue(
+								monitoringRule,
+								(boolean) event.getProperty()
+								.getValue());
 
 						adjust();
 					}
@@ -149,6 +149,7 @@ public class MonitoringReplyRuleEditComponentWithController extends
 					.getButton()) {
 				editStoreResultVariable();
 			}
+			event.getButton().setEnabled(true);
 		}
 	}
 
@@ -184,8 +185,8 @@ public class MonitoringReplyRuleEditComponentWithController extends
 						try {
 							// Change name
 							getInterventionAdministrationManagerService()
-									.monitoringReplyRuleSetStoreResultToVariable(
-											monitoringRule, getStringValue());
+							.monitoringReplyRuleSetStoreResultToVariable(
+									monitoringRule, getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;

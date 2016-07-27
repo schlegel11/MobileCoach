@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -70,23 +70,28 @@ public class LoginView extends AbstractView implements View {
 				log.warn("AUTOMATIC DEBUG LOGIN - BE CAREFUL");
 				getAdminUI().login(Constants.getDefaultAdminUsername(),
 						Constants.getDefaultAdminPassword());
+
+				event.getButton().setEnabled(true);
 			} else {
 				if (!loginViewComponent.getUsernameField().isValid()) {
 					getAdminUI()
-					.showWarningNotification(
-							AdminMessageStrings.NOTIFICATION__NO_VALID_USERNAME);
+							.showWarningNotification(
+									AdminMessageStrings.NOTIFICATION__NO_VALID_USERNAME);
+					event.getButton().setEnabled(true);
 					return;
 				}
 				if (!loginViewComponent.getPasswordField().isValid()) {
 					getAdminUI()
-					.showWarningNotification(
-							AdminMessageStrings.NOTIFICATION__NO_VALID_PASSWORD);
+							.showWarningNotification(
+									AdminMessageStrings.NOTIFICATION__NO_VALID_PASSWORD);
+					event.getButton().setEnabled(true);
 					return;
 				}
 
 				getAdminUI().login(
 						loginViewComponent.getUsernameField().getValue(),
 						loginViewComponent.getPasswordField().getValue());
+				event.getButton().setEnabled(true);
 			}
 		}
 	}

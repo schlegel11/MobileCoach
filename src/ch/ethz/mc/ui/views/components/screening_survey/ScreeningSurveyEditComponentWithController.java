@@ -262,6 +262,7 @@ public class ScreeningSurveyEditComponentWithController extends
 					.getButton()) {
 				editPassword();
 			}
+			event.getButton().setEnabled(true);
 		}
 	}
 
@@ -501,7 +502,8 @@ public class ScreeningSurveyEditComponentWithController extends
 		showModalLStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_NAME_FOR_FEEDBACK,
 				selectedUIFeedback.getRelatedModelObject(Feedback.class)
-						.getName(), null, new LocalizedShortStringEditComponent(),
+						.getName(), null,
+				new LocalizedShortStringEditComponent(),
 				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
@@ -526,8 +528,9 @@ public class ScreeningSurveyEditComponentWithController extends
 						// Adapt UI
 						getStringItemProperty(beanItem,
 								UIFeedback.FEEDBACK_NAME).setValue(
-								selectedUIFeedback.getRelatedModelObject(
-										Feedback.class).getName().toString());
+								selectedUIFeedback
+										.getRelatedModelObject(Feedback.class)
+										.getName().toString());
 						feedbacksTable.sort();
 
 						getAdminUI()
@@ -590,7 +593,9 @@ public class ScreeningSurveyEditComponentWithController extends
 		}
 
 		IntermediateSurveyAndFeedbackParticipantShortURL shortURL = null;
-		if (participant.getAssignedFeedback() == null || !participant.getAssignedFeedback().equals(selectedFeedback.getId())) {
+		if (participant.getAssignedFeedback() == null
+				|| !participant.getAssignedFeedback().equals(
+						selectedFeedback.getId())) {
 			shortURL = getScreeningSurveyExecutionManagerService()
 					.participantSetFeedback(participant,
 							selectedFeedback.getId());

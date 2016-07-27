@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.interventions.monitoring_rules;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,13 +39,13 @@ import com.vaadin.ui.Button.ClickEvent;
 
 /**
  * Extends the monitoring rule edit component with a controller
- * 
+ *
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
 @Log4j2
 public class MonitoringRuleEditComponentWithController extends
-		MonitoringRuleEditComponent {
+MonitoringRuleEditComponent {
 	private final ObjectId											interventionId;
 
 	private final AbstractRuleEditComponentWithController			ruleEditComponent;
@@ -98,55 +98,55 @@ public class MonitoringRuleEditComponentWithController extends
 			}
 		}
 		monitoringMessageComboBox
-				.addValueChangeListener(new ValueChangeListener() {
+		.addValueChangeListener(new ValueChangeListener() {
 
-					@Override
-					public void valueChange(final ValueChangeEvent event) {
-						final UIMonitoringMessageGroup uiMonitoringMessageGroup = (UIMonitoringMessageGroup) event
-								.getProperty().getValue();
+			@Override
+			public void valueChange(final ValueChangeEvent event) {
+				final UIMonitoringMessageGroup uiMonitoringMessageGroup = (UIMonitoringMessageGroup) event
+						.getProperty().getValue();
 
-						ObjectId newMonitoringMessageGroupId;
-						if (uiMonitoringMessageGroup == null) {
-							newMonitoringMessageGroupId = null;
-							currentMonitoringMessageGroup = null;
-						} else {
-							currentMonitoringMessageGroup = uiMonitoringMessageGroup
-									.getRelatedModelObject(MonitoringMessageGroup.class);
-							newMonitoringMessageGroupId = currentMonitoringMessageGroup
-									.getId();
-						}
+				ObjectId newMonitoringMessageGroupId;
+				if (uiMonitoringMessageGroup == null) {
+					newMonitoringMessageGroupId = null;
+					currentMonitoringMessageGroup = null;
+				} else {
+					currentMonitoringMessageGroup = uiMonitoringMessageGroup
+							.getRelatedModelObject(MonitoringMessageGroup.class);
+					newMonitoringMessageGroupId = currentMonitoringMessageGroup
+							.getId();
+				}
 
-						log.debug(
-								"Adjust related monitoring message group to {}",
-								newMonitoringMessageGroupId);
-						getInterventionAdministrationManagerService()
-								.monitoringRuleChangeRelatedMonitoringMessageGroup(
-										monitoringRule,
-										newMonitoringMessageGroupId);
+				log.debug(
+						"Adjust related monitoring message group to {}",
+						newMonitoringMessageGroupId);
+				getInterventionAdministrationManagerService()
+				.monitoringRuleChangeRelatedMonitoringMessageGroup(
+						monitoringRule,
+						newMonitoringMessageGroupId);
 
-						adjust();
+				adjust();
 
-					}
-				});
+			}
+		});
 
 		// Handle sliders
 		final val valueChangeListener = new SliderValueChangeListener();
 		val hourToSendSlider = getHourToSendMessageSlider();
 		hourToSendSlider.setImmediate(true);
 		hourToSendSlider
-				.setMin(ImplementationConstants.HOUR_TO_SEND_MESSAGE_MIN);
+		.setMin(ImplementationConstants.HOUR_TO_SEND_MESSAGE_MIN);
 		hourToSendSlider
-				.setMax(ImplementationConstants.HOUR_TO_SEND_MESSAGE_MAX);
+		.setMax(ImplementationConstants.HOUR_TO_SEND_MESSAGE_MAX);
 		hourToSendSlider.addValueChangeListener(valueChangeListener);
 
 		val hoursUntilHandledAsNotAnsweredSlider = getHoursUntilHandledAsNotAnsweredSlider();
 		hoursUntilHandledAsNotAnsweredSlider.setImmediate(true);
 		hoursUntilHandledAsNotAnsweredSlider
-				.setMin(ImplementationConstants.HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MIN);
+		.setMin(ImplementationConstants.HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MIN);
 		hoursUntilHandledAsNotAnsweredSlider
-				.setMax(ImplementationConstants.HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX);
+		.setMax(ImplementationConstants.HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX);
 		hoursUntilHandledAsNotAnsweredSlider
-				.addValueChangeListener(valueChangeListener);
+		.addValueChangeListener(valueChangeListener);
 
 		// Add button listeners
 		val buttonClickListener = new ButtonClickListener();
@@ -165,14 +165,14 @@ public class MonitoringRuleEditComponentWithController extends
 						val newValue = (boolean) event.getProperty().getValue();
 
 						getInterventionAdministrationManagerService()
-								.monitoringRuleChangeSendMessageIfTrue(
-										monitoringRule, newValue);
+						.monitoringRuleChangeSendMessageIfTrue(
+								monitoringRule, newValue);
 
 						if (newValue
 								&& getStopRuleExecutionAndFinishInterventionIfTrueComboBox()
-										.getValue()) {
+								.getValue()) {
 							getStopRuleExecutionAndFinishInterventionIfTrueComboBox()
-									.setValue(false);
+							.setValue(false);
 						}
 
 						adjust();
@@ -182,27 +182,27 @@ public class MonitoringRuleEditComponentWithController extends
 		getStopRuleExecutionAndFinishInterventionIfTrueComboBox().setValue(
 				monitoringRule.isStopInterventionWhenTrue());
 		getStopRuleExecutionAndFinishInterventionIfTrueComboBox()
-				.addValueChangeListener(new ValueChangeListener() {
+		.addValueChangeListener(new ValueChangeListener() {
 
-					@Override
-					public void valueChange(final ValueChangeEvent event) {
-						log.debug("Adjust stop intervention if true");
-						val newValue = (boolean) event.getProperty().getValue();
+			@Override
+			public void valueChange(final ValueChangeEvent event) {
+				log.debug("Adjust stop intervention if true");
+				val newValue = (boolean) event.getProperty().getValue();
 
-						getInterventionAdministrationManagerService()
-								.monitoringRuleChangeStopInterventionIfTrue(
-										monitoringRule, newValue);
+				getInterventionAdministrationManagerService()
+				.monitoringRuleChangeStopInterventionIfTrue(
+						monitoringRule, newValue);
 
-						if (newValue
-								&& getStopRuleExecutionIfTrueComboBox()
-										.getValue()) {
-							getStopRuleExecutionIfTrueComboBox()
-									.setValue(false);
-						}
+				if (newValue
+						&& getStopRuleExecutionIfTrueComboBox()
+						.getValue()) {
+					getStopRuleExecutionIfTrueComboBox()
+					.setValue(false);
+				}
 
-						adjust();
-					}
-				});
+				adjust();
+			}
+		});
 
 		// Adjust UI for first time
 		adjust();
@@ -215,6 +215,7 @@ public class MonitoringRuleEditComponentWithController extends
 					.getButton()) {
 				editStoreResultVariable();
 			}
+			event.getButton().setEnabled(true);
 		}
 	}
 
@@ -239,15 +240,15 @@ public class MonitoringRuleEditComponentWithController extends
 
 				getReplyRulesIfAnswerLabel().setEnabled(false);
 				getMonitoringReplyRulesEditComponentWithControllerIfAnswer()
-						.setEnabled(false);
+				.setEnabled(false);
 				getMonitoringReplyRulesEditComponentWithControllerIfAnswer()
-						.getRulesTree().setEnabled(false);
+				.getRulesTree().setEnabled(false);
 
 				getReplyRulesIfNoAnswerLabel().setEnabled(false);
 				getMonitoringReplyRulesEditComponentWithControllerIfNoAnswer()
-						.setEnabled(false);
+				.setEnabled(false);
 				getMonitoringReplyRulesEditComponentWithControllerIfNoAnswer()
-						.getRulesTree().setEnabled(false);
+				.getRulesTree().setEnabled(false);
 			} else {
 				getHoursUntilHandledAsNotAnsweredLabel().setEnabled(true);
 				getHoursUntilHandledAsNotAnsweredSlider().setEnabled(true);
@@ -256,15 +257,15 @@ public class MonitoringRuleEditComponentWithController extends
 
 				getReplyRulesIfAnswerLabel().setEnabled(true);
 				getMonitoringReplyRulesEditComponentWithControllerIfAnswer()
-						.setEnabled(true);
+				.setEnabled(true);
 				getMonitoringReplyRulesEditComponentWithControllerIfAnswer()
-						.getRulesTree().setEnabled(true);
+				.getRulesTree().setEnabled(true);
 
 				getReplyRulesIfNoAnswerLabel().setEnabled(true);
 				getMonitoringReplyRulesEditComponentWithControllerIfNoAnswer()
-						.setEnabled(true);
+				.setEnabled(true);
 				getMonitoringReplyRulesEditComponentWithControllerIfNoAnswer()
-						.getRulesTree().setEnabled(true);
+				.getRulesTree().setEnabled(true);
 			}
 
 		} else {
@@ -280,15 +281,15 @@ public class MonitoringRuleEditComponentWithController extends
 
 			getReplyRulesIfAnswerLabel().setEnabled(false);
 			getMonitoringReplyRulesEditComponentWithControllerIfAnswer()
-					.setEnabled(false);
+			.setEnabled(false);
 			getMonitoringReplyRulesEditComponentWithControllerIfAnswer()
-					.getRulesTree().setEnabled(false);
+			.getRulesTree().setEnabled(false);
 
 			getReplyRulesIfNoAnswerLabel().setEnabled(false);
 			getMonitoringReplyRulesEditComponentWithControllerIfNoAnswer()
-					.setEnabled(false);
+			.setEnabled(false);
 			getMonitoringReplyRulesEditComponentWithControllerIfNoAnswer()
-					.getRulesTree().setEnabled(false);
+			.getRulesTree().setEnabled(false);
 		}
 
 		// Adjust sliders
@@ -317,7 +318,7 @@ public class MonitoringRuleEditComponentWithController extends
 		try {
 			getHoursUntilHandledAsNotAnsweredSlider().setValue(
 					(double) monitoringRule
-							.getHoursUntilMessageIsHandledAsUnanswered());
+					.getHoursUntilMessageIsHandledAsUnanswered());
 		} catch (final Exception e) {
 			// Do nothing
 		}
@@ -340,8 +341,8 @@ public class MonitoringRuleEditComponentWithController extends
 						try {
 							// Change name
 							getInterventionAdministrationManagerService()
-									.monitoringRuleSetStoreResultToVariable(
-											monitoringRule, getStringValue());
+							.monitoringRuleSetStoreResultToVariable(
+									monitoringRule, getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -360,16 +361,16 @@ public class MonitoringRuleEditComponentWithController extends
 		public void valueChange(final ValueChangeEvent event) {
 			if (event.getProperty() == getHourToSendMessageSlider()) {
 				getInterventionAdministrationManagerService()
-						.monitoringRuleChangeHourToSendMessage(
-								monitoringRule,
-								((Double) event.getProperty().getValue())
-										.intValue());
+				.monitoringRuleChangeHourToSendMessage(
+						monitoringRule,
+						((Double) event.getProperty().getValue())
+						.intValue());
 			} else if (event.getProperty() == getHoursUntilHandledAsNotAnsweredSlider()) {
 				getInterventionAdministrationManagerService()
-						.monitoringRuleChangeHoursUntilMessageIsHandledAsUnanswered(
-								monitoringRule,
-								((Double) event.getProperty().getValue())
-										.intValue());
+				.monitoringRuleChangeHoursUntilMessageIsHandledAsUnanswered(
+						monitoringRule,
+						((Double) event.getProperty().getValue())
+						.intValue());
 			}
 
 			adjust();

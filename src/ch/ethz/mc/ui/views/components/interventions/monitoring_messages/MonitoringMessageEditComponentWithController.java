@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.interventions.monitoring_messages;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -47,8 +47,8 @@ import com.vaadin.ui.Table;
 @SuppressWarnings("serial")
 @Log4j2
 public class MonitoringMessageEditComponentWithController extends
-MonitoringMessageEditComponent implements
-MediaObjectCreationOrDeleteionListener {
+		MonitoringMessageEditComponent implements
+		MediaObjectCreationOrDeleteionListener {
 
 	private final MonitoringMessage									monitoringMessage;
 
@@ -114,7 +114,7 @@ MediaObjectCreationOrDeleteionListener {
 		getDeleteRuleButton().addClickListener(buttonClickListener);
 
 		getTextWithPlaceholdersTextFieldComponent().getButton()
-		.addClickListener(buttonClickListener);
+				.addClickListener(buttonClickListener);
 		getStoreVariableTextFieldComponent().getButton().addClickListener(
 				buttonClickListener);
 
@@ -146,27 +146,27 @@ MediaObjectCreationOrDeleteionListener {
 			}
 		}
 		intermediateSurveyComboBox
-		.addValueChangeListener(new ValueChangeListener() {
+				.addValueChangeListener(new ValueChangeListener() {
 
-			@Override
-			public void valueChange(final ValueChangeEvent event) {
-				val selectedUIScreeningSurvey = (UIScreeningSurvey) event
-						.getProperty().getValue();
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						val selectedUIScreeningSurvey = (UIScreeningSurvey) event
+								.getProperty().getValue();
 
-				ObjectId intermediateSurveyToSet = null;
-				if (selectedUIScreeningSurvey != null) {
-					intermediateSurveyToSet = selectedUIScreeningSurvey
-							.getRelatedModelObject(
-									ScreeningSurvey.class).getId();
-				}
-				log.debug("Adjust intermediate survey to {}",
-						intermediateSurveyToSet);
-				getInterventionAdministrationManagerService()
-				.monitoringMessageSetLinkedIntermediateSurvey(
-						monitoringMessage,
-						intermediateSurveyToSet);
-			}
-		});
+						ObjectId intermediateSurveyToSet = null;
+						if (selectedUIScreeningSurvey != null) {
+							intermediateSurveyToSet = selectedUIScreeningSurvey
+									.getRelatedModelObject(
+											ScreeningSurvey.class).getId();
+						}
+						log.debug("Adjust intermediate survey to {}",
+								intermediateSurveyToSet);
+						getInterventionAdministrationManagerService()
+								.monitoringMessageSetLinkedIntermediateSurvey(
+										monitoringMessage,
+										intermediateSurveyToSet);
+					}
+				});
 	}
 
 	private void adjust() {
@@ -196,6 +196,7 @@ MediaObjectCreationOrDeleteionListener {
 					.getButton()) {
 				editStoreResultToVariable();
 			}
+			event.getButton().setEnabled(true);
 		}
 	}
 
@@ -215,10 +216,10 @@ MediaObjectCreationOrDeleteionListener {
 						try {
 							// Change text with placeholders
 							getInterventionAdministrationManagerService()
-							.monitoringMessageSetTextWithPlaceholders(
-									monitoringMessage,
-									getLStringValue(),
-									allPossibleMessageVariables);
+									.monitoringMessageSetTextWithPlaceholders(
+											monitoringMessage,
+											getLStringValue(),
+											allPossibleMessageVariables);
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -247,8 +248,8 @@ MediaObjectCreationOrDeleteionListener {
 						try {
 							// Change store result to variable
 							getInterventionAdministrationManagerService()
-							.monitoringMessageSetStoreResultToVariable(
-									monitoringMessage, getStringValue());
+									.monitoringMessageSetStoreResultToVariable(
+											monitoringMessage, getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -270,7 +271,7 @@ MediaObjectCreationOrDeleteionListener {
 				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__CREATE_MONITORING_MESSAGE_RULE,
 				new MonitoringMessageRuleEditComponentWithController(
 						newMonitoringMessageRule, interventionId),
-						new ExtendableButtonClickListener() {
+				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
@@ -280,8 +281,8 @@ MediaObjectCreationOrDeleteionListener {
 										.toUIModelObject()));
 						rulesTable.select(newMonitoringMessageRule.getId());
 						getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_RULE_CREATED);
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_RULE_CREATED);
 
 						closeWindow();
 					}
@@ -297,7 +298,7 @@ MediaObjectCreationOrDeleteionListener {
 				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_MONITORING_MESSAGE_RULE,
 				new MonitoringMessageRuleEditComponentWithController(
 						selectedMonitoringMessageRule, interventionId),
-						new ExtendableButtonClickListener() {
+				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
@@ -307,8 +308,8 @@ MediaObjectCreationOrDeleteionListener {
 						rulesTable.sort();
 						rulesTable.select(selectedMonitoringMessageRule.getId());
 						getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_RULE_UPDATED);
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_RULE_UPDATED);
 
 						closeWindow();
 					}
@@ -347,8 +348,8 @@ MediaObjectCreationOrDeleteionListener {
 
 					// Delete rule
 					getInterventionAdministrationManagerService()
-					.monitoringMessageRuleDelete(
-							selectedMonitoringMessageRule);
+							.monitoringMessageRuleDelete(
+									selectedMonitoringMessageRule);
 				} catch (final Exception e) {
 					closeWindow();
 					handleException(e);
@@ -360,8 +361,8 @@ MediaObjectCreationOrDeleteionListener {
 						.getRelatedModelObject(MonitoringMessageRule.class)
 						.getId());
 				getAdminUI()
-				.showInformationNotification(
-						AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_RULE_DELETED);
+						.showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_RULE_DELETED);
 
 				closeWindow();
 			}
@@ -371,7 +372,7 @@ MediaObjectCreationOrDeleteionListener {
 	@Override
 	public void updateLinkedMediaObjectId(final ObjectId mediaObjectId) {
 		getInterventionAdministrationManagerService()
-		.monitoringMessageSetLinkedMediaObject(monitoringMessage,
-				mediaObjectId);
+				.monitoringMessageSetLinkedMediaObject(monitoringMessage,
+						mediaObjectId);
 	}
 }

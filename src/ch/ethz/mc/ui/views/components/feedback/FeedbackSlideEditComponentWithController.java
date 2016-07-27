@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.feedback;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -46,8 +46,8 @@ import com.vaadin.ui.Table;
 @SuppressWarnings("serial")
 @Log4j2
 public class FeedbackSlideEditComponentWithController extends
-FeedbackSlideEditComponent implements
-MediaObjectCreationOrDeleteionListener {
+		FeedbackSlideEditComponent implements
+		MediaObjectCreationOrDeleteionListener {
 
 	private final FeedbackSlide									feedbackSlide;
 	private final ObjectId										relatedScreeningSurveyId;
@@ -110,13 +110,13 @@ MediaObjectCreationOrDeleteionListener {
 		getDeleteRuleButton().addClickListener(buttonClickListener);
 
 		getTitleWithPlaceholdersTextFieldComponent().getButton()
-		.addClickListener(buttonClickListener);
+				.addClickListener(buttonClickListener);
 		getCommentTextFieldComponent().getButton().addClickListener(
 				buttonClickListener);
 		getOptionalLayoutAttributeTextFieldComponent().getButton()
-		.addClickListener(buttonClickListener);
+				.addClickListener(buttonClickListener);
 		getFeedbackTextWithPlaceholdersTextField().getButton()
-		.addClickListener(buttonClickListener);
+				.addClickListener(buttonClickListener);
 
 		// Handle media object to component
 		if (feedbackSlide.getLinkedMediaObject() == null) {
@@ -168,6 +168,7 @@ MediaObjectCreationOrDeleteionListener {
 					.getButton()) {
 				changeFeedbackTextWithPlaceholders();
 			}
+			event.getButton().setEnabled(true);
 		}
 	}
 
@@ -187,9 +188,9 @@ MediaObjectCreationOrDeleteionListener {
 						try {
 							// Change title with placeholders
 							getScreeningSurveyAdministrationManagerService()
-							.feedbackSlideChangeTitle(feedbackSlide,
-									getLStringValue(),
-									allPossibleVariables);
+									.feedbackSlideChangeTitle(feedbackSlide,
+											getLStringValue(),
+											allPossibleVariables);
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -215,8 +216,8 @@ MediaObjectCreationOrDeleteionListener {
 						try {
 							// Change comment
 							getScreeningSurveyAdministrationManagerService()
-									.feedbackSlideChangeComment(feedbackSlide,
-											getStringValue());
+							.feedbackSlideChangeComment(feedbackSlide,
+									getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -245,8 +246,8 @@ MediaObjectCreationOrDeleteionListener {
 						try {
 							// Change optional layout attribute
 							getScreeningSurveyAdministrationManagerService()
-							.feedbackSlideChangeOptionalLayoutAttributeWithPlaceholders(
-									feedbackSlide, getStringValue());
+									.feedbackSlideChangeOptionalLayoutAttributeWithPlaceholders(
+											feedbackSlide, getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -275,9 +276,9 @@ MediaObjectCreationOrDeleteionListener {
 						try {
 							// Change feedback text with placeholders
 							getScreeningSurveyAdministrationManagerService()
-							.feedbackSlideChangeTextWithPlaceholders(
-									feedbackSlide, getLStringValue(),
-									allPossibleVariables);
+									.feedbackSlideChangeTextWithPlaceholders(
+											feedbackSlide, getLStringValue(),
+											allPossibleVariables);
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -299,19 +300,19 @@ MediaObjectCreationOrDeleteionListener {
 				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__CREATE_FEEDBACK_SLIDE_RULE,
 				new FeedbackSlideRuleEditComponentWithController(
 						newFeedbackSlideRule, relatedScreeningSurveyId),
-						new ExtendableButtonClickListener() {
+				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
 						rulesBeanContainer.addItem(
 								newFeedbackSlideRule.getId(),
 								UIFeedbackSlideRule.class
-								.cast(newFeedbackSlideRule
-										.toUIModelObject()));
+										.cast(newFeedbackSlideRule
+												.toUIModelObject()));
 						rulesTable.select(newFeedbackSlideRule.getId());
 						getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__FEEDBACK_SLIDE_RULE_CREATED);
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__FEEDBACK_SLIDE_RULE_CREATED);
 
 						closeWindow();
 					}
@@ -327,7 +328,7 @@ MediaObjectCreationOrDeleteionListener {
 				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_FEEDBACK_SLIDE_RULE,
 				new FeedbackSlideRuleEditComponentWithController(
 						selectedFeedbackSlideRule, relatedScreeningSurveyId),
-						new ExtendableButtonClickListener() {
+				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
@@ -336,8 +337,8 @@ MediaObjectCreationOrDeleteionListener {
 						rulesTable.sort();
 						rulesTable.select(selectedFeedbackSlideRule.getId());
 						getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__FEEDBACK_SLIDE_RULE_UPDATED);
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__FEEDBACK_SLIDE_RULE_UPDATED);
 
 						closeWindow();
 					}
@@ -375,7 +376,7 @@ MediaObjectCreationOrDeleteionListener {
 
 					// Delete rule
 					getScreeningSurveyAdministrationManagerService()
-					.feedbackSlideRuleDelete(selectedFeedbackSlideRule);
+							.feedbackSlideRuleDelete(selectedFeedbackSlideRule);
 				} catch (final Exception e) {
 					closeWindow();
 					handleException(e);
@@ -384,12 +385,12 @@ MediaObjectCreationOrDeleteionListener {
 
 				// Adapt UI
 				rulesTable
-				.removeItem(selectedUIFeedbackSlideRule
-						.getRelatedModelObject(FeedbackSlideRule.class)
-						.getId());
+						.removeItem(selectedUIFeedbackSlideRule
+								.getRelatedModelObject(FeedbackSlideRule.class)
+								.getId());
 				getAdminUI()
-				.showInformationNotification(
-						AdminMessageStrings.NOTIFICATION__FEEDBACK_SLIDE_RULE_DELETED);
+						.showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__FEEDBACK_SLIDE_RULE_DELETED);
 
 				closeWindow();
 			}
@@ -399,7 +400,7 @@ MediaObjectCreationOrDeleteionListener {
 	@Override
 	public void updateLinkedMediaObjectId(final ObjectId linkedMediaObjectId) {
 		getScreeningSurveyAdministrationManagerService()
-		.feedbackSlideSetLinkedMediaObject(feedbackSlide,
-				linkedMediaObjectId);
+				.feedbackSlideSetLinkedMediaObject(feedbackSlide,
+						linkedMediaObjectId);
 	}
 }
