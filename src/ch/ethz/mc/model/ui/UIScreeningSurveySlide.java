@@ -21,6 +21,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.conf.Messages;
 
 import com.vaadin.data.fieldgroup.PropertyId;
 
@@ -74,6 +75,11 @@ public class UIScreeningSurveySlide extends UIModelObject {
 
 	@Override
 	public String toString() {
-		return titleWithPlaceholders;
+		if (!comment.equals(Messages
+				.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET))) {
+			return titleWithPlaceholders + " (" + comment + ")";
+		} else {
+			return titleWithPlaceholders;
+		}
 	}
 }
