@@ -340,10 +340,10 @@ public class DialogMessage extends ModelObject {
 	@Override
 	public void performOnDelete() {
 		// Delete media object participant short URLs
-		val mediaObjectParticipantShortURLsToDelete = ModelObject
-				.find(MediaObjectParticipantShortURL.class,
-						Queries.MEDIA_OBJECT_PARTICIPANT_SHORT_URL__BY_RELATED_DIALOG_MESSAGE,
-						getId());
+		val mediaObjectParticipantShortURLsToDelete = ModelObject.find(
+				MediaObjectParticipantShortURL.class,
+				Queries.MEDIA_OBJECT_PARTICIPANT_SHORT_URL__BY_DIALOG_MESSAGE,
+				getId());
 
 		ModelObject.delete(mediaObjectParticipantShortURLsToDelete);
 	}

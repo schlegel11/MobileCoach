@@ -2,15 +2,15 @@ package ch.ethz.mc.services.internal;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,6 +30,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 
+import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.memory.MemoryVariable;
@@ -78,17 +79,17 @@ public class VariablesManagerService {
 	private final HashSet<String>			externallyReadableParticipantVariableNames;
 
 	private static SimpleDateFormat			dayInWeekFormatter	= new SimpleDateFormat(
-			"u");
+																		"u");
 	private static SimpleDateFormat			dayOfMonthFormatter	= new SimpleDateFormat(
-			"d");
+																		"d");
 	private static SimpleDateFormat			monthFormatter		= new SimpleDateFormat(
-			"M");
+																		"M");
 	private static SimpleDateFormat			yearFormatter		= new SimpleDateFormat(
-			"yyyy");
+																		"yyyy");
 
 	private VariablesManagerService(
 			final DatabaseManagerService databaseManagerService)
-					throws Exception {
+			throws Exception {
 		log.info("Starting service...");
 
 		this.databaseManagerService = databaseManagerService;
@@ -114,7 +115,7 @@ public class VariablesManagerService {
 
 		allSystemReservedVariableNames = new HashSet<String>();
 		allSystemReservedVariableNames
-		.addAll(writeProtectedReservedVariableNames);
+				.addAll(writeProtectedReservedVariableNames);
 		for (val variable : SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES
 				.values()) {
 			allSystemReservedVariableNames.add(variable.toVariableName());
@@ -122,7 +123,7 @@ public class VariablesManagerService {
 
 		allSystemReservedVariableNamesRelevantForSlides = new HashSet<String>();
 		allSystemReservedVariableNamesRelevantForSlides
-		.addAll(allSystemReservedVariableNames);
+				.addAll(allSystemReservedVariableNames);
 		for (val variable : SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES
 				.values()) {
 			allSystemReservedVariableNamesRelevantForSlides.remove(variable
@@ -143,7 +144,7 @@ public class VariablesManagerService {
 
 	public static VariablesManagerService start(
 			final DatabaseManagerService databaseManagerService)
-					throws Exception {
+			throws Exception {
 		if (instance == null) {
 			instance = new VariablesManagerService(databaseManagerService);
 		}
@@ -261,18 +262,18 @@ public class VariablesManagerService {
 		switch (variable) {
 			case participantDialogOptionEmailData:
 				val dialogOptionEmail = databaseManagerService
-				.findOneModelObject(DialogOption.class,
-						Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
-						participant.getId(), DialogOptionTypes.EMAIL);
+						.findOneModelObject(DialogOption.class,
+								Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
+								participant.getId(), DialogOptionTypes.EMAIL);
 				if (dialogOptionEmail != null) {
 					return dialogOptionEmail.getData();
 				}
 				break;
 			case participantDialogOptionSMSData:
 				val dialogOptionSMS = databaseManagerService
-				.findOneModelObject(DialogOption.class,
-						Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
-						participant.getId(), DialogOptionTypes.SMS);
+						.findOneModelObject(DialogOption.class,
+								Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
+								participant.getId(), DialogOptionTypes.SMS);
 				if (dialogOptionSMS != null) {
 					return dialogOptionSMS.getData();
 				}
@@ -369,8 +370,8 @@ public class VariablesManagerService {
 	@Synchronized
 	public void writeVariableValueOfParticipant(final ObjectId participantId,
 			final String variableName, final String variableValue)
-					throws WriteProtectedVariableException,
-					InvalidVariableNameException {
+			throws WriteProtectedVariableException,
+			InvalidVariableNameException {
 		writeVariableValueOfParticipant(participantId, variableName,
 				variableValue, false, false);
 	}
@@ -379,8 +380,8 @@ public class VariablesManagerService {
 	public void writeVariableValueOfParticipant(final ObjectId participantId,
 			final String variableName, final String variableValue,
 			final boolean overwriteAllowed, final boolean describesMediaUpload)
-					throws WriteProtectedVariableException,
-					InvalidVariableNameException {
+			throws WriteProtectedVariableException,
+			InvalidVariableNameException {
 		log.debug("Storing variable {} with value {} for participant {}",
 				variableName, variableValue, participantId);
 
@@ -435,7 +436,7 @@ public class VariablesManagerService {
 			}
 
 			databaseManagerService
-			.saveModelObject(newParticipantVariableWithValue);
+					.saveModelObject(newParticipantVariableWithValue);
 		}
 	}
 
@@ -456,11 +457,21 @@ public class VariablesManagerService {
 		val participant = databaseManagerService.getModelObjectById(
 				Participant.class, participantId);
 
-		try {
-			participant.setLanguage(new Locale(language));
+		tryLocales: try {
+			val localeParts = language.replace("-", "_").split("_");
+			val localeToSet = new Locale(localeParts[0], localeParts[1]);
+
+			for (val locale : Constants.getInterventionLocales()) {
+				if (locale.equals(localeToSet)) {
+					participant.setLanguage(localeToSet);
+					break tryLocales;
+				}
+			}
+
+			throw new Exception();
 		} catch (final Exception e) {
 			log.warn(
-					"The value {} could not be interpreted as language - so the participant language could not be set",
+					"The value {} could not be interpreted as language (configured for this system) - so the participant language could not be set",
 					language);
 		}
 
@@ -694,7 +705,7 @@ public class VariablesManagerService {
 	public String getExternallyReadableVariableValueForParticipant(
 			final ObjectId participantId, final String variable,
 			final InterventionVariableWithValuePrivacyTypes requestPrivacyType)
-					throws ExternallyReadProtectedVariableException {
+			throws ExternallyReadProtectedVariableException {
 
 		if (allSystemReservedVariableNames.contains(variable)) {
 			// It's a reserved variable
@@ -839,7 +850,7 @@ public class VariablesManagerService {
 	public void externallyWriteVariableForParticipant(
 			final ObjectId participantId, final String variable,
 			final String value, final boolean describesMediaUpload)
-					throws ExternallyWriteProtectedVariableException {
+			throws ExternallyWriteProtectedVariableException {
 		if (allSystemReservedVariableNames.contains(variable)) {
 			// It's a reserved variable; these can't be written in general from
 			// external interfaces

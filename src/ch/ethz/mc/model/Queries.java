@@ -83,6 +83,9 @@ public class Queries {
 	public static final String	SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE_AND_NEXT_SCREENING_SURVEY_SLIDE_WHEN_TRUE																												= "{'belongingScreeningSurveySlide':#,'nextScreeningSurveySlideWhenTrue':#}";
 	public static final String	SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE_AND_NEXT_SCREENING_SURVEY_SLIDE_WHEN_FALSE																												= "{'belongingScreeningSurveySlide':#,'nextScreeningSurveySlideWhenFalse':#}";
 
+	public static final String	INTERMEDIATE_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_PARTICIPANT																																			= "{'participant':#}";
+	public static final String	INTERMEDIATE_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_SURVEY																																				= "{'survey':#}";
+	public static final String	INTERMEDIATE_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_FEEDBACK																																				= "{'feedback':#}";
 	public static final String	INTERMEDIATE_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_PARTICIPANT_AND_SURVEY																																= "{'participant':#,'survey':#}";
 	public static final String	INTERMEDIATE_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_PARTICIPANT_AND_FEEDBACK																																= "{'participant':#,'feedback':#}";
 	public static final String	INTERMEDIATE_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_SHORT_ID																																				= "{'shortId':#}";
@@ -127,7 +130,8 @@ public class Queries {
 	public static final String	MONITORING_REPLY_RULE__BY_MONITORING_RULE																																										= "{$or:[{'isGotAnswerRuleForMonitoringRule':#},{'isGotNoAnswerRuleForMonitoringRule':#}]}";
 
 	public static final String	MEDIA_OBJECT_PARTICIPANT_SHORT_URL__BY_SHORT_ID																																									= "{'shortId':#}";
-	public static final String	MEDIA_OBJECT_PARTICIPANT_SHORT_URL__BY_RELATED_DIALOG_MESSAGE																																					= "{'dialogMessage':#}";
+	public static final String	MEDIA_OBJECT_PARTICIPANT_SHORT_URL__BY_MEDIA_OBJECT																																								= "{'mediaObject':#}";
+	public static final String	MEDIA_OBJECT_PARTICIPANT_SHORT_URL__BY_DIALOG_MESSAGE																																							= "{'dialogMessage':#}";
 	public static final String	MEDIA_OBJECT_PARTICIPANT_SHORT_URL__SORT_BY_SHORT_ID_DESC																																						= "{'shortId':-1}";
 
 	public static final String	PARTICIPANT__BY_INTERVENTION																																													= "{'intervention':#}";

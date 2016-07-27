@@ -445,6 +445,17 @@ public class SurveyExecutionManagerService {
 
 		final val screeningSurvey = getScreeningSurveyById(screeningSurveyId);
 
+		// Check if screening survey template is set
+		log.debug("Check if template is set");
+		if (screeningSurvey.getTemplatePath() == null
+				|| screeningSurvey.getTemplatePath().equals("")) {
+			return templateVariables;
+		} else {
+			templateVariables
+			.put(GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER
+					.toVariable(), screeningSurvey.getTemplatePath());
+		}
+
 		// Set name
 		Participant participant = null;
 		if (participantId != null) {
@@ -452,8 +463,13 @@ public class SurveyExecutionManagerService {
 					Participant.class, participantId);
 
 			if (participant == null) {
-				// Participant id sent, but participant does not exist
-				return null;
+				// Participant does not exist anymore
+				log.debug("Participant does not exist anymore");
+
+				templateVariables.put(
+						SurveySlideTemplateLayoutTypes.DISABLED.toVariable(),
+						true);
+				return templateVariables;
 			} else {
 				templateVariables.put(
 						GeneralSlideTemplateFieldTypes.NAME.toVariable(),
@@ -464,17 +480,6 @@ public class SurveyExecutionManagerService {
 					GeneralSlideTemplateFieldTypes.NAME.toVariable(),
 					screeningSurvey.getName().get(
 							Constants.getInterventionLocales()[0]));
-		}
-
-		// Check if screening survey template is set
-		log.debug("Check if template is set");
-		if (screeningSurvey.getTemplatePath() == null
-				|| screeningSurvey.getTemplatePath().equals("")) {
-			return templateVariables;
-		} else {
-			templateVariables
-					.put(GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER
-							.toVariable(), screeningSurvey.getTemplatePath());
 		}
 
 		// Check if participant already has access (if required)

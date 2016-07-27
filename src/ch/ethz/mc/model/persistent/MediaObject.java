@@ -27,6 +27,7 @@ import lombok.Setter;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 import ch.ethz.mc.model.ModelObject;
+import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.types.MediaObjectTypes;
 import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
 
@@ -124,6 +125,12 @@ public class MediaObject extends ModelObject {
 			}
 		}
 
-		super.performOnDelete();
+		// Delete media object participant short URLs
+		val mediaObjectParticipantShortURLsToDelete = ModelObject.find(
+				MediaObjectParticipantShortURL.class,
+				Queries.MEDIA_OBJECT_PARTICIPANT_SHORT_URL__BY_MEDIA_OBJECT,
+				getId());
+
+		ModelObject.delete(mediaObjectParticipantShortURLsToDelete);
 	}
 }
