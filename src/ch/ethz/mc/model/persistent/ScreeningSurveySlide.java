@@ -2,15 +2,15 @@ package ch.ethz.mc.model.persistent;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -224,7 +224,7 @@ public class ScreeningSurveySlide extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see ch.ethz.mc.model.ModelObject#toUIModelObject()
 	 */
 	@Override
@@ -262,15 +262,15 @@ public class ScreeningSurveySlide extends ModelObject {
 				order,
 				titleWithPlaceholders.toString().equals("") ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: titleWithPlaceholders.toString(),
-				comment.equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: comment,
-								questionType.toString(),
-								storeValueToVariableWithNames.length() > 0 ? storeValueToVariableWithNames
-										.toString() : Messages
-										.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET),
-										slideRules);
+						: titleWithPlaceholders.toShortenedString(40),
+						comment.equals("") ? Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+								: comment,
+				questionType.toString(),
+				storeValueToVariableWithNames.length() > 0 ? storeValueToVariableWithNames
+						.toString() : Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET),
+				slideRules);
 
 		screeningSurveySlide.setRelatedModelObject(this);
 
@@ -279,7 +279,7 @@ public class ScreeningSurveySlide extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see
 	 * ch.ethz.mc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
 	 * (java.util.List)
@@ -301,13 +301,13 @@ public class ScreeningSurveySlide extends ModelObject {
 				Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE,
 				getId())) {
 			screeningSurveySlideRule
-			.collectThisAndRelatedModelObjectsForExport(exportList);
+					.collectThisAndRelatedModelObjectsForExport(exportList);
 		}
 	}
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see ch.ethz.mc.model.ModelObject#performOnDelete()
 	 */
 	@Override

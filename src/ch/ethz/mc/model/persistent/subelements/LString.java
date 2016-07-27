@@ -100,6 +100,37 @@ public class LString {
 		}
 	}
 
+	@JsonIgnore
+	public String toShortenedString(int length) {
+		length = length / Constants.getInterventionLocales().length;
+
+		if (length < 15) {
+			length = 15;
+		}
+
+		if (values.size() == 0) {
+			return "";
+		} else {
+			val stringBuffer = new StringBuffer();
+			for (val locale : Constants.getInterventionLocales()) {
+				if (values.containsKey(locale)) {
+					if (stringBuffer.length() > 0) {
+						stringBuffer.append(" / ");
+					}
+					if (values.get(locale).length() > length) {
+						stringBuffer.append(locale.getDisplayLanguage() + ": "
+								+ values.get(locale).substring(0, length)
+								+ "...");
+					} else {
+						stringBuffer.append(locale.getDisplayLanguage() + ": "
+								+ values.get(locale));
+					}
+				}
+			}
+			return stringBuffer.toString();
+		}
+	}
+
 	@Override
 	@JsonIgnore
 	public LString clone() {

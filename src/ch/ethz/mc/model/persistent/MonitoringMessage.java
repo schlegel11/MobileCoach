@@ -122,19 +122,17 @@ public class MonitoringMessage extends ModelObject {
 
 		final val monitoringMessage = new UIMonitoringMessage(
 				order,
-				textWithPlaceholders.toString().length() > 160 ? textWithPlaceholders
-						.toString().substring(0, 160) + "..."
-						: textWithPlaceholders.toString(),
-						linkedMediaObject != null ? Messages
+				textWithPlaceholders.toShortenedString(80),
+				linkedMediaObject != null ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
+						linkedIntermediateSurvey != null ? Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__YES)
 								: Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-								linkedIntermediateSurvey != null ? Messages
-										.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-										: Messages
-										.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-										storeValueToVariableWithName != null ? storeValueToVariableWithName
-												: "", messageRules);
+								storeValueToVariableWithName != null ? storeValueToVariableWithName
+										: "", messageRules);
 
 		monitoringMessage.setRelatedModelObject(this);
 
