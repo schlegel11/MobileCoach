@@ -904,6 +904,136 @@ public class VariablesManagerService {
 	}
 
 	/**
+	 * Tries to write a voting from a specific participant for a specific
+	 * participant from an external interface
+	 *
+	 * @param participantId
+	 * @param variable
+	 * @param value
+	 * @param describesMediaUpload
+	 * @throws ExternallyWriteProtectedVariableException
+	 */
+	public void externallyWriteVotingFromParticipantForParticipant(
+			final ObjectId participantId,
+			final ObjectId receivingParticipantId, final String variable)
+			throws ExternallyWriteProtectedVariableException {
+		if (allSystemReservedVariableNames.contains(variable)) {
+			// It's a reserved variable; these can't be written in general from
+			// external interfaces
+			throw new ExternallyWriteProtectedVariableException();
+		} else {
+			// Disallow self voting
+			if (participantId.equals(receivingParticipantId)) {
+				throw new ExternallyWriteProtectedVariableException(
+						"The participant cannot vote for herself");
+			}
+
+			// It's a self-created variable
+			val participant = databaseManagerService.getModelObjectById(
+					Participant.class, participantId);
+
+			if (participant == null) {
+				throw new ExternallyWriteProtectedVariableException(
+						"The given participant does not exist anymore, so the voting cannot be written");
+			}
+
+			val receivingParticipant = databaseManagerService
+					.getModelObjectById(Participant.class,
+							receivingParticipantId);
+
+			if (receivingParticipant == null) {
+				throw new ExternallyWriteProtectedVariableException(
+						"The given receiving participant does not exist anymore, so the voting cannot be written");
+			}
+
+			final val dialogStatus = databaseManagerService.findOneModelObject(
+					DialogStatus.class, Queries.DIALOG_STATUS__BY_PARTICIPANT,
+					participantId);
+			if (!participant.isMonitoringActive()) {
+				throw new ExternallyWriteProtectedVariableException(
+						"The given participant is currently disabled - try again later");
+			} else if (dialogStatus == null
+					|| dialogStatus.isMonitoringPerformed()) {
+				throw new ExternallyWriteProtectedVariableException(
+						"The given participant already performed this intervention");
+			}
+
+			final val dialogStatusReceiving = databaseManagerService
+					.findOneModelObject(DialogStatus.class,
+							Queries.DIALOG_STATUS__BY_PARTICIPANT,
+							receivingParticipantId);
+			if (!receivingParticipant.isMonitoringActive()) {
+				throw new ExternallyWriteProtectedVariableException(
+						"The given receiving participant is currently disabled - try again later");
+			} else if (dialogStatusReceiving == null
+					|| dialogStatusReceiving.isMonitoringPerformed()) {
+				throw new ExternallyWriteProtectedVariableException(
+						"The given receiving participant already performed this intervention");
+			}
+
+			// Check rights of intervention variable
+			val interventionVariable = databaseManagerService
+					.findOneModelObject(
+							InterventionVariableWithValue.class,
+							Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME,
+							participant.getIntervention(), variable);
+
+			if (interventionVariable == null) {
+				throw new ExternallyWriteProtectedVariableException(
+						"This voting variable is not defined, so it cannot be written");
+			}
+			if (interventionVariable.getAccessType() != InterventionVariableWithValueAccessTypes.EXTERNALLY_READ_AND_WRITABLE) {
+				throw new ExternallyWriteProtectedVariableException();
+			}
+			// Check privacy (of intervention variable)
+			if (!participant.getIntervention().equals(
+					receivingParticipant.getIntervention())) {
+				throw new ExternallyWriteProtectedVariableException(
+						"This voting variable cannot be written because both participants involved are in different interventions");
+			} else if (interventionVariable.getPrivacyType() == InterventionVariableWithValuePrivacyTypes.PRIVATE) {
+				throw new ExternallyWriteProtectedVariableException(
+						"This voting variable cannot be written by another participant because it's set to private only");
+			} else if (interventionVariable.getPrivacyType() == InterventionVariableWithValuePrivacyTypes.SHARED_WITH_GROUP
+					&& !participant.getGroup().equals(
+							receivingParticipant.getGroup())) {
+				throw new ExternallyWriteProtectedVariableException(
+						"This voting variable cannot be written by another participant from a different group");
+			}
+
+			// Get existing variable of receiving participant
+			val participantVariableWithValue = databaseManagerService
+					.findOneSortedModelObject(
+							ParticipantVariableWithValue.class,
+							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME,
+							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
+							receivingParticipant.getId(), variable);
+
+			// Write variable for receiving participant
+			try {
+				if (participantVariableWithValue != null
+						&& participantVariableWithValue.getValue().length() >= ImplementationConstants.OBJECT_ID_LENGTH) {
+
+					// Check for double voting
+					if (!participantVariableWithValue.getValue().contains(
+							participantId.toHexString())) {
+						writeVariableValueOfParticipant(receivingParticipantId,
+								variable,
+								participantVariableWithValue.getValue() + ","
+										+ participantId.toHexString(), false,
+								false);
+					}
+				} else {
+					writeVariableValueOfParticipant(receivingParticipantId,
+							variable, participantId.toHexString(), false, false);
+				}
+			} catch (final WriteProtectedVariableException
+					| InvalidVariableNameException e) {
+				throw new ExternallyWriteProtectedVariableException();
+			}
+		}
+	}
+
+	/**
 	 * Checks if variable can be written for the given participant
 	 *
 	 * @param participantId

@@ -21,6 +21,12 @@ $(function () {
     
     restTest("variable/calculateGroupAverage/points");
     restTest("variable/calculateInterventionAverage/points");
+    
+    restTest("voting/votings/challenge02Voting");
+    restTest("voting/votingsGroupArray/challenge02Voting");
+    restTest("voting/votingsInterventionArray/challenge02Voting");
+    
+    restTest("voting/vote/challenge02Voting/579a42679afa061cf073416b")
 });
 
 // Helpers
