@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
@@ -345,7 +344,7 @@ public class RuleEvaluator {
 	private static double evaluateCalculatedRuleTerm(
 			final String ruleWithPlaceholders,
 			final Collection<AbstractVariableWithValue> variablesWithValues)
-					throws Exception {
+			throws Exception {
 		String rule = ruleWithPlaceholders;
 
 		// Prevent null pointer exceptions
@@ -411,7 +410,6 @@ public class RuleEvaluator {
 				}
 			}
 
-			@AllArgsConstructor
 			final class PositionItem implements Comparable<PositionItem> {
 				@Getter
 				@Setter
@@ -419,12 +417,27 @@ public class RuleEvaluator {
 				@Getter
 				@Setter
 				private double	value;
+				@Getter
+				@Setter
+				private double	shuffleValue;
+
+				public PositionItem(final int position, final double value) {
+					this.position = position;
+					this.value = value;
+
+					shuffleValue = 0;
+				}
+
+				private void swap() {
+					final double remember = shuffleValue;
+					shuffleValue = value;
+					value = remember;
+				}
 
 				@Override
 				public int compareTo(final PositionItem anotherInstance) {
 					return (int) (anotherInstance.getValue() - value);
 				}
-
 			}
 
 			/**
@@ -445,6 +458,7 @@ public class RuleEvaluator {
 					positionItems.add(new PositionItem(i, arguments.next()));
 				}
 
+				fakeShuffe(positionItems);
 				Collections.sort(positionItems);
 
 				return (double) positionItems.get(position).getPosition();
@@ -492,6 +506,47 @@ public class RuleEvaluator {
 					return 1d;
 				} else {
 					return 0d;
+				}
+			}
+
+			/**
+			 * Fake shuffles the position items; fake in this context means that
+			 * it's shuffled, but same dataset return the same result at every
+			 * run
+			 *
+			 * @param positionItems
+			 */
+			public void fakeShuffe(final ArrayList<PositionItem> positionItems) {
+				val items = positionItems.size();
+
+				for (int i = 0; i < items; i++) {
+					final PositionItem positionItem = positionItems.get(i);
+
+					int modifier1;
+					if (i % 2 == 0) {
+						modifier1 = 1;
+					} else {
+						modifier1 = -1;
+					}
+					int modifier2;
+					if (positionItem.value % 2 == 0) {
+						modifier2 = 1;
+					} else {
+						modifier2 = -1;
+					}
+
+					positionItem.shuffleValue = positionItem.value * modifier1
+							* modifier2;
+
+					positionItem.swap();
+				}
+
+				Collections.sort(positionItems);
+
+				for (int i = 0; i < items; i++) {
+					final PositionItem positionItem = positionItems.get(i);
+
+					positionItem.swap();
 				}
 			}
 		};

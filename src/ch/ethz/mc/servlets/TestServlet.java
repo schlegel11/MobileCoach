@@ -2,15 +2,15 @@ package ch.ethz.mc.servlets;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -225,13 +225,53 @@ public class TestServlet extends HttpServlet {
 				"3", InterventionVariableWithValuePrivacyTypes.PRIVATE,
 				InterventionVariableWithValueAccessTypes.INTERNAL));
 
-		val rule = new MonitoringMessageRule(
+		val rule1 = new MonitoringMessageRule(
 				null,
 				0,
 				"position($sex,position($auditGT0Digit,position($alterkDigit,26,16,15,24),position($alterkDigit,53,60,63,53),position($alterkDigit,21,25,23,24)),position($auditGT0Digit,position($alterkDigit,21,14,13,14),position($alterkDigit,47,45,52,52),position($alterkDigit,33,42,35,34)))",
 				RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
 				"", "");
-		final val x = RuleEvaluator.evaluateRule(rule, variables);
-		log.debug(">> " + x.getCalculatedRuleValue());
+		final val result1 = RuleEvaluator.evaluateRule(rule1, variables);
+		log.debug(">> " + result1.getCalculatedRuleValue());
+
+		val rule2 = new MonitoringMessageRule(
+				null,
+				0,
+				"first(5,3,2,7,2,4,3,5)",
+				RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
+				"", "");
+		final val result2 = RuleEvaluator.evaluateRule(rule2, variables);
+		log.debug(">> " + result2.getCalculatedRuleValue());
+
+		val rule3 = new MonitoringMessageRule(
+				null,
+				0,
+				"second(5,3,2,7,2,4,3,5)",
+				RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
+				"", "");
+		final val result3 = RuleEvaluator.evaluateRule(rule3, variables);
+		log.debug(">> " + result3.getCalculatedRuleValue());
+		final val result4 = RuleEvaluator.evaluateRule(rule3, variables);
+		log.debug(">> " + result4.getCalculatedRuleValue());
+		final val result5 = RuleEvaluator.evaluateRule(rule3, variables);
+		log.debug(">> " + result5.getCalculatedRuleValue());
+
+		val rule5 = new MonitoringMessageRule(
+				null,
+				0,
+				"third(5,3,2,7,2,4,3,5)",
+				RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
+				"", "");
+		final val result7 = RuleEvaluator.evaluateRule(rule5, variables);
+		log.debug(">> " + result7.getCalculatedRuleValue());
+
+		val rule4 = new MonitoringMessageRule(
+				null,
+				0,
+				"position(4,5,3,2,7,2,4,3,5)",
+				RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
+				"", "");
+		final val result6 = RuleEvaluator.evaluateRule(rule4, variables);
+		log.debug(">> " + result6.getCalculatedRuleValue());
 	}
 }

@@ -2,15 +2,15 @@ package ch.ethz.mc.services.internal;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -60,7 +60,7 @@ public class ModelObjectExchangeService {
 	private ModelObjectExchangeService(
 			final DatabaseManagerService databaseManagerService,
 			final FileStorageManagerService fileStorageManagerService)
-			throws Exception {
+					throws Exception {
 		log.info("Starting service...");
 
 		this.databaseManagerService = databaseManagerService;
@@ -72,7 +72,7 @@ public class ModelObjectExchangeService {
 	public static ModelObjectExchangeService start(
 			final DatabaseManagerService databaseManagerService,
 			final FileStorageManagerService fileStorageManagerService)
-			throws Exception {
+					throws Exception {
 		if (instance == null) {
 			instance = new ModelObjectExchangeService(databaseManagerService,
 					fileStorageManagerService);
@@ -111,8 +111,8 @@ public class ModelObjectExchangeService {
 
 			final ExchangeModelObject exchangeModelObject = new ExchangeModelObject(
 					modelObject.getClass().getSimpleName(), modelObject
-							.getClass().getName(), modelObject.getId()
-							.toString(), modelObject.toJSONString());
+					.getClass().getName(), modelObject.getId()
+					.toString(), modelObject.toJSONString());
 
 			// Determine if the model object contains also files that need to be
 			// exported
@@ -122,7 +122,7 @@ public class ModelObjectExchangeService {
 					exchangeModelObject.setFileReference(mediaObject
 							.getFileReference());
 					exchangeModelObject
-							.setFileReferenceSetMethod("setFileReference");
+					.setFileReferenceSetMethod("setFileReference");
 				}
 			}
 
@@ -157,11 +157,11 @@ public class ModelObjectExchangeService {
 					log.debug(
 							"Method {} contains object id {} in model object {} with object id {}",
 							method.getName(), objectIdString, modelObject
-									.getClass().getSimpleName(), modelObject
-									.getId());
+							.getClass().getSimpleName(), modelObject
+							.getId());
 					exchangeModelObject
-							.getObjectIdSetMethodsWithAppropriateValues().put(
-									method.getName(), objectIdString);
+					.getObjectIdSetMethodsWithAppropriateValues().put(
+							method.getName(), objectIdString);
 				}
 			}
 
@@ -188,7 +188,7 @@ public class ModelObjectExchangeService {
 	 */
 	public List<ModelObject> importModelObjects(final File zipFile,
 			final ModelObjectExchangeFormatTypes expectedExchangeFormat)
-			throws FileNotFoundException, IOException {
+					throws FileNotFoundException, IOException {
 		val modelObjects = new ArrayList<ModelObject>();
 
 		val exchangeModelObjects = readZipFile(new ZipFile(zipFile),
@@ -239,17 +239,19 @@ public class ModelObjectExchangeService {
 
 			// Check all exchange model objects for references
 			for (val toCheckExchangeModelObject : exchangeModelObjects) {
+				log.debug("Checking {}", toCheckExchangeModelObject);
 				for (val methodName : toCheckExchangeModelObject
 						.getObjectIdSetMethodsWithAppropriateValues().keySet()) {
+					log.debug("Checking method {}", methodName);
 					final String oldObjectId = toCheckExchangeModelObject
 							.getObjectIdSetMethodsWithAppropriateValues().get(
 									methodName);
 					if (!oldObjectId.equals("")
 							&& oldObjectId
-									.equals(modelObjectToCheckIfIsReferencedOldObjectId)) {
+							.equals(modelObjectToCheckIfIsReferencedOldObjectId)) {
 						toCheckExchangeModelObject
-								.getObjectIdSetMethodsWithAppropriateValues()
-								.put(methodName, "");
+						.getObjectIdSetMethodsWithAppropriateValues()
+						.put(methodName, "");
 
 						// Get appropriate model object
 						final ModelObject modelObjectToAdjust = modelObjects
@@ -266,28 +268,32 @@ public class ModelObjectExchangeService {
 							log.error(
 									"Could not find method to adapt reference on object {}: {}",
 									toCheckExchangeModelObject
-											.getPackageAndClazz(), e
-											.getMessage());
+									.getPackageAndClazz(), e
+									.getMessage());
 							continue;
 						}
 
 						// Set object id as reference
 						try {
+							log.debug("Adjusting {} by setting {} to {}",
+									modelObjectToAdjust.getId(),
+									methodToAdjustObjectIdReference.getName(),
+									modelObjectToCheckIfIsReferencedNewObjectId);
 							methodToAdjustObjectIdReference
-									.invoke(modelObjectToAdjust,
-											modelObjectToCheckIfIsReferencedNewObjectId);
+							.invoke(modelObjectToAdjust,
+									modelObjectToCheckIfIsReferencedNewObjectId);
 						} catch (final Exception e) {
 							log.error(
 									"Could not adjust referenced object id on object {}: {}",
 									toCheckExchangeModelObject
-											.getPackageAndClazz(), e
-											.getMessage());
+									.getPackageAndClazz(), e
+									.getMessage());
 							continue;
 						}
 
 						// Save changes
 						databaseManagerService
-								.saveModelObject(modelObjectToAdjust);
+						.saveModelObject(modelObjectToAdjust);
 					}
 				}
 			}
@@ -386,7 +392,7 @@ public class ModelObjectExchangeService {
 	 */
 	private List<ExchangeModelObject> readZipFile(final ZipFile zipFile,
 			final ModelObjectExchangeFormatTypes expectedExchangeFormat)
-			throws IOException {
+					throws IOException {
 		val exchangeModelObjects = new ArrayList<ExchangeModelObject>();
 
 		// Ensure correct exchange format and version
@@ -450,7 +456,7 @@ public class ModelObjectExchangeService {
 						temporaryFile);
 				@Cleanup
 				final InputStream zipEntryInputStream = zipFile
-						.getInputStream(zipEntry);
+				.getInputStream(zipEntry);
 				IOUtils.copy(zipEntryInputStream, fileOutputStream);
 
 				final String newFileReference = fileStorageManagerService
@@ -463,11 +469,11 @@ public class ModelObjectExchangeService {
 			} else {
 				// Extracting exchange model object
 				final byte[] exchangeModelObjectBytes = new byte[(int) zipEntry
-						.getSize()];
+				                                                 .getSize()];
 
 				@Cleanup
 				final InputStream zipEntryInputStream = zipFile
-						.getInputStream(zipEntry);
+				.getInputStream(zipEntry);
 				zipEntryInputStream.read(exchangeModelObjectBytes);
 
 				final ExchangeModelObject exchangeModelObject = ExchangeModelObject
@@ -477,8 +483,8 @@ public class ModelObjectExchangeService {
 				// Adjusting file reference from old to new
 				if (exchangeModelObject.getFileReference() != null) {
 					exchangeModelObject
-							.setFileReference(oldToNewFileReferencesHashtable
-									.get(exchangeModelObject.getFileReference()));
+					.setFileReference(oldToNewFileReferencesHashtable
+							.get(exchangeModelObject.getFileReference()));
 				}
 
 				exchangeModelObjects.add(exchangeModelObject);

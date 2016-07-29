@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.screening_survey;
 
 /*
  * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -193,19 +193,19 @@ public class ScreeningSurveyEditComponent extends AbstractClosableEditComponent 
 		// common part: create layout
 		mainLayout = new VerticalLayout();
 		mainLayout.setImmediate(false);
-		mainLayout.setWidth("700px");
+		mainLayout.setWidth("800px");
 		mainLayout.setHeight("-1px");
 		mainLayout.setMargin(true);
 		mainLayout.setSpacing(true);
 
 		// top-level component properties
-		setWidth("700px");
+		setWidth("800px");
 		setHeight("-1px");
 
 		// switchScreeningSurveyButton
 		switchScreeningSurveyButton = new Button();
 		switchScreeningSurveyButton
-				.setCaption("!!! Activate/deactivate Screening Survey");
+		.setCaption("!!! Activate/deactivate Screening Survey");
 		switchScreeningSurveyButton.setImmediate(true);
 		switchScreeningSurveyButton.setWidth("100.0%");
 		switchScreeningSurveyButton.setHeight("-1px");
@@ -298,7 +298,7 @@ public class ScreeningSurveyEditComponent extends AbstractClosableEditComponent 
 		passwordLabel.setWidth("-1px");
 		passwordLabel.setHeight("-1px");
 		passwordLabel
-				.setValue("!!! Password required to participate (optional)");
+		.setValue("!!! Password required to participate (optional)");
 		switchesLayoutGroup.addComponent(passwordLabel, 0, 0);
 
 		// passwordTextFieldComponent
@@ -428,7 +428,7 @@ public class ScreeningSurveyEditComponent extends AbstractClosableEditComponent 
 		editFeedbackButton = new Button();
 		editFeedbackButton.setCaption("!!! Edit");
 		editFeedbackButton
-				.setIcon(new ThemeResource("img/edit-icon-small.png"));
+		.setIcon(new ThemeResource("img/edit-icon-small.png"));
 		editFeedbackButton.setImmediate(true);
 		editFeedbackButton.setWidth("100px");
 		editFeedbackButton.setHeight("-1px");
@@ -448,7 +448,7 @@ public class ScreeningSurveyEditComponent extends AbstractClosableEditComponent 
 		showFeedbackButton = new Button();
 		showFeedbackButton.setCaption("!!! Show");
 		showFeedbackButton
-				.setIcon(new ThemeResource("img/play-icon-small.png"));
+		.setIcon(new ThemeResource("img/play-icon-small.png"));
 		showFeedbackButton.setImmediate(true);
 		showFeedbackButton.setWidth("100px");
 		showFeedbackButton.setHeight("-1px");
