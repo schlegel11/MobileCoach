@@ -77,6 +77,10 @@ E.g., to define the system property for a **MobileCoach** instance running at yo
 
 Extend your tomcat configuration files or startup scripts with this setting.
 
+Also the following should be added to avoid encoding problems on several operating systems:
+
+	-Dfile.encoding=UTF8
+
 You should also add the following parameters to avoid problems with the Log4J logging system:
 
 	-Dmc_logging_folder=/tmp -Dmc_logging_console_level=INFO -Dmc_logging_rolling_file_level=INFO
