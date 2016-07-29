@@ -100,19 +100,25 @@ ScreeningSurveySlideRuleEditComponent {
 
 		val jumpIfTrueComboBox = getJumpIfTrueComboBox();
 		val jumpIfFalseComboBox = getJumpIfFalseComboBox();
+
 		for (val screeningSurveySlide : allScreeningSurveySlidesOfScreeningSurvey) {
 			val uiScreeningSurveySlide = screeningSurveySlide.toUIModelObject();
-			jumpIfTrueComboBox.addItem(uiScreeningSurveySlide);
-			jumpIfFalseComboBox.addItem(uiScreeningSurveySlide);
-			if (screeningSurveySlide.getId().equals(
-					screeningSurveySlideRule
-					.getNextScreeningSurveySlideWhenTrue())) {
-				jumpIfTrueComboBox.select(uiScreeningSurveySlide);
-			}
-			if (screeningSurveySlide.getId().equals(
-					screeningSurveySlideRule
-					.getNextScreeningSurveySlideWhenFalse())) {
-				jumpIfFalseComboBox.select(uiScreeningSurveySlide);
+			// Add if not the same slide as the rule belongs to
+			if (!screeningSurveySlide.getId()
+					.equals(screeningSurveySlideRule
+							.getBelongingScreeningSurveySlide())) {
+				jumpIfTrueComboBox.addItem(uiScreeningSurveySlide);
+				jumpIfFalseComboBox.addItem(uiScreeningSurveySlide);
+				if (screeningSurveySlide.getId().equals(
+						screeningSurveySlideRule
+						.getNextScreeningSurveySlideWhenTrue())) {
+					jumpIfTrueComboBox.select(uiScreeningSurveySlide);
+				}
+				if (screeningSurveySlide.getId().equals(
+						screeningSurveySlideRule
+						.getNextScreeningSurveySlideWhenFalse())) {
+					jumpIfFalseComboBox.select(uiScreeningSurveySlide);
+				}
 			}
 		}
 
