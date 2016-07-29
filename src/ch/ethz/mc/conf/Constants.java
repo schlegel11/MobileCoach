@@ -43,6 +43,9 @@ import ch.ethz.mc.tools.StringHelpers;
  */
 @Log4j2
 public class Constants {
+	/**
+	 * Remembers if the configuration settings have already been injected
+	 */
 	private static boolean		injectionPerformed					= false;
 
 	/**
@@ -51,6 +54,7 @@ public class Constants {
 	 * 
 	 * CAUTION: Can NOT be defined in configuration file
 	 */
+	// TODO for RELEASE Switch always to "true" before release
 	public static final boolean	VAADIN_PRODUCTION_MODE				= true;
 
 	/**
@@ -58,7 +62,7 @@ public class Constants {
 	 * 
 	 * CAUTION: Can NOT be defined in configuration file
 	 */
-	// TODO Switch off before release
+	// TODO for RELEASE Switch always to "false" before release
 	public static final boolean	RUN_TESTS_AT_STARTUP				= false;
 
 	/**
