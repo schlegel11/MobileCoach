@@ -4,15 +4,15 @@ import java.awt.RenderingHints;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -84,10 +84,13 @@ public class ImplementationConstants {
 	// CAUTION: If this is changed it also needs to be adjusted in the web.xml
 	// configuration
 	public static final String	REST_API_PATH														= "api";
-	public static final String	REST_API_VERSION													= "v01";
 	public static final String	FILE_STREAMING_SERVLET_PATH											= "files";
 	public static final String	SHORT_ID_FILE_STREAMING_SERVLET_PATH								= "files-short";
 	public static final String	SHORT_ID_SCREEN_SURVEY_AND_FEEDBACK_SERVLET_PATH					= "surveys-short";
+
+	public static final String	REST_API_VERSION													= "v01";
+	public static final String	REST_API_CREDITS_CHECK_VARIABLE_POSTFIX								= "Check";
+	public static final String	REST_API_CREDITS_REMINDER_VARIABLE_POSTFIX							= "Reminder";
 
 	public static final String	PARTICIPANT_SESSION_ATTRIBUTE_EXPECTED								= "mc.vaadin.assigned_participant.expected";
 	public static final String	PARTICIPANT_SESSION_ATTRIBUTE_DESCRIPTION							= "mc.vaadin.assigned_participant.description";
@@ -110,15 +113,15 @@ public class ImplementationConstants {
 	public static final int		OBJECT_ID_LENGTH													= 24;
 
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_ONE_OBJECT_ID							= "[a-f0-9]{"
-																											+ OBJECT_ID_LENGTH
-																											+ "}";
+			+ OBJECT_ID_LENGTH
+			+ "}";
 	public static final String	REGULAR_EXPRESSION_TO_VALIDATE_CALCULATED_RULE						= "^[\\$a-zA-Z0-9_\\+\\-%*/^().,]*$";
 	public static final String	REGULAR_EXPRESSION_TO_VALIDATE_VARIABLE_NAME						= "^\\$[a-zA-Z0-9_]*$";
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_VARIABLES_IN_STRING						= "\\$[a-zA-Z0-9_]+";
 	public static final String	VARIABLE_MATCH_MODIFIER												= "#";
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_MODIFIED_VARIABLES_IN_STRING			= VARIABLE_MATCH_MODIFIER
-			+ "[a-zA-Z0-9_]+"
-			+ VARIABLE_MATCH_MODIFIER;
+																											+ "[a-zA-Z0-9_]+"
+																											+ VARIABLE_MATCH_MODIFIER;
 	public static final String	VARIABLE_VALUE_MODIFIER_START										= "{";
 	public static final String	VARIABLE_VALUE_MODIFIER_END											= "}";
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_VALUE_MODIFIER							= "\\{[^\\}]+\\}";

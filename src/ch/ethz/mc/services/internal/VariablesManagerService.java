@@ -982,9 +982,14 @@ public class VariablesManagerService {
 				throw new ExternallyWriteProtectedVariableException(
 						"This voting variable is not defined, so it cannot be written");
 			}
-			if (interventionVariable.getAccessType() != InterventionVariableWithValueAccessTypes.EXTERNALLY_READ_AND_WRITABLE) {
+			if (interventionVariable.getAccessType() == InterventionVariableWithValueAccessTypes.INTERNAL) {
 				throw new ExternallyWriteProtectedVariableException();
 			}
+			if (interventionVariable.getAccessType() == InterventionVariableWithValueAccessTypes.EXTERNALLY_READ_AND_WRITABLE) {
+				throw new ExternallyWriteProtectedVariableException(
+						"Security problem: The variable is directly writable from outside, so voting can not be done");
+			}
+
 			// Check privacy (of intervention variable)
 			if (!participant.getIntervention().equals(
 					receivingParticipant.getIntervention())) {
@@ -1025,6 +1030,183 @@ public class VariablesManagerService {
 				} else {
 					writeVariableValueOfParticipant(receivingParticipantId,
 							variable, participantId.toHexString(), false, false);
+				}
+			} catch (final WriteProtectedVariableException
+					| InvalidVariableNameException e) {
+				throw new ExternallyWriteProtectedVariableException();
+			}
+		}
+	}
+
+	/**
+	 * Tries to write credit for given participant and credit name to given
+	 * variable
+	 *
+	 * @param participantId
+	 * @param creditName
+	 * @param variable
+	 * @throws ExternallyWriteProtectedVariableException
+	 */
+	public void externallyWriteCreditWithNameForParticipantToVariable(
+			final ObjectId participantId, String creditName,
+			final String variable)
+			throws ExternallyWriteProtectedVariableException {
+		if (allSystemReservedVariableNames.contains(variable)) {
+			// It's a reserved variable; these can't be written in general from
+			// external interfaces
+			throw new ExternallyWriteProtectedVariableException();
+		} else {
+			// It's a self-created variable
+			val participant = databaseManagerService.getModelObjectById(
+					Participant.class, participantId);
+
+			if (participant == null) {
+				throw new ExternallyWriteProtectedVariableException(
+						"The given participant does not exist anymore, so the voting cannot be written");
+			}
+
+			val dialogStatus = databaseManagerService.findOneModelObject(
+					DialogStatus.class, Queries.DIALOG_STATUS__BY_PARTICIPANT,
+					participantId);
+			if (!participant.isMonitoringActive()) {
+				throw new ExternallyWriteProtectedVariableException(
+						"The given participant is currently disabled - try again later");
+			} else if (dialogStatus == null
+					|| dialogStatus.isMonitoringPerformed()) {
+				throw new ExternallyWriteProtectedVariableException(
+						"The given participant already performed this intervention");
+			}
+
+			// Get involved intervention variables
+			val checkVariable = variable
+					+ ImplementationConstants.REST_API_CREDITS_CHECK_VARIABLE_POSTFIX;
+			val reminderVariable = variable
+					+ ImplementationConstants.REST_API_CREDITS_REMINDER_VARIABLE_POSTFIX;
+
+			val interventionVariable = databaseManagerService
+					.findOneModelObject(
+							InterventionVariableWithValue.class,
+							Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME,
+							participant.getIntervention(), variable);
+			val interventionCheckVariable = databaseManagerService
+					.findOneModelObject(
+							InterventionVariableWithValue.class,
+							Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME,
+							participant.getIntervention(), checkVariable);
+			val interventionReminderVariable = databaseManagerService
+					.findOneModelObject(
+							InterventionVariableWithValue.class,
+							Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME,
+							participant.getIntervention(), reminderVariable);
+
+			// Check credit name
+			if (creditName.length() == 0 || creditName.contains(",")) {
+				throw new ExternallyWriteProtectedVariableException(
+						"This credit name is not valid, so credit cannot be written");
+			}
+
+			// Check rights of involved intervention variable
+			if (interventionVariable == null) {
+				throw new ExternallyWriteProtectedVariableException(
+						"This credit variable is not defined, so it cannot be written");
+			}
+			if (interventionCheckVariable == null) {
+				throw new ExternallyWriteProtectedVariableException(
+						"This credits check variable "
+								+ checkVariable
+								+ " is not defined, so credit can not be checked/written");
+			}
+			if (interventionReminderVariable == null) {
+				throw new ExternallyWriteProtectedVariableException(
+						"This credits reminder variable "
+								+ reminderVariable
+								+ " is not defined, so credit can not be remembered/written");
+			}
+			if (interventionVariable.getAccessType() == InterventionVariableWithValueAccessTypes.INTERNAL) {
+				throw new ExternallyWriteProtectedVariableException("The credit variable has to be externally readable");
+			}
+			if (interventionVariable.getAccessType() == InterventionVariableWithValueAccessTypes.EXTERNALLY_READ_AND_WRITABLE) {
+				throw new ExternallyWriteProtectedVariableException(
+						"Security problem: The variable is directly writable from outside, so credit can not be checked/written");
+			}
+			if (interventionCheckVariable.getAccessType() == InterventionVariableWithValueAccessTypes.INTERNAL) {
+				throw new ExternallyWriteProtectedVariableException("The check variable has to be externally readable");
+			}
+			if (interventionCheckVariable.getAccessType() == InterventionVariableWithValueAccessTypes.EXTERNALLY_READ_AND_WRITABLE) {
+				throw new ExternallyWriteProtectedVariableException(
+						"Security problem: The check variable is directly writable from outside, so credit can not be checked/written");
+			}
+			if (interventionReminderVariable.getAccessType() == InterventionVariableWithValueAccessTypes.INTERNAL) {
+				throw new ExternallyWriteProtectedVariableException("The reminder variable has to be externally readable");
+			}
+			if (interventionReminderVariable.getAccessType() == InterventionVariableWithValueAccessTypes.EXTERNALLY_READ_AND_WRITABLE) {
+				throw new ExternallyWriteProtectedVariableException(
+						"Security problem: The reminder variable is directly writable from outside, so credit can not be checked/written");
+			}
+
+			// Check if credit name is accepted
+			if (!("," + interventionCheckVariable.getValue() + ",")
+					.contains("," + creditName + ",")) {
+				throw new ExternallyWriteProtectedVariableException(
+						"The credit name is unkown so credit can not be written");
+			}
+
+			// Get existing reminder variable of participant
+			val participantReminderVariableWithValue = databaseManagerService
+					.findOneSortedModelObject(
+							ParticipantVariableWithValue.class,
+							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME,
+							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
+							participantId, reminderVariable);
+
+			// Remember credit for participant
+			try {
+				if (participantReminderVariableWithValue != null) {
+					// Check for double credits
+					if (("," + participantReminderVariableWithValue.getValue() + ",")
+							.contains("," + creditName + ",")) {
+						// Credit has already been written, so simply return
+						return;
+					} else {
+						writeVariableValueOfParticipant(participantId,
+								reminderVariable,
+								participantReminderVariableWithValue.getValue()
+										+ "," + creditName, false, false);
+					}
+				} else {
+					writeVariableValueOfParticipant(participantId,
+							reminderVariable, creditName, false, false);
+				}
+			} catch (final WriteProtectedVariableException
+					| InvalidVariableNameException e) {
+				throw new ExternallyWriteProtectedVariableException();
+			}
+
+			// Get existing credit variable of participant
+			val participantCreditVariableWithValue = databaseManagerService
+					.findOneSortedModelObject(
+							ParticipantVariableWithValue.class,
+							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME,
+							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
+							participantId, variable);
+
+			// Write credit for participant
+			try {
+				if (participantCreditVariableWithValue != null) {
+					if (participantCreditVariableWithValue.getValue().length() > 0) {
+						writeVariableValueOfParticipant(
+								participantId,
+								variable,
+								String.valueOf(Integer
+										.parseInt(participantCreditVariableWithValue
+												.getValue()) + 1), false, false);
+					} else {
+						writeVariableValueOfParticipant(participantId,
+								variable, "1", false, false);
+					}
+				} else {
+					writeVariableValueOfParticipant(participantId, variable,
+							"1", false, false);
 				}
 			} catch (final WriteProtectedVariableException
 					| InvalidVariableNameException e) {

@@ -26,7 +26,9 @@ $(function () {
     restTest("voting/votingsGroupArray/challenge02Votes");
     restTest("voting/votingsInterventionArray/challenge02Votes");
     
-    restTest("voting/vote/challenge02Voting/579a42679afa061cf073416b")
+    restTest("voting/vote/challenge02Voting/579a42679afa061cf073416b");
+        
+    restTest("credits/storeCredit/points/challenge02");
 });
 
 // Helpers
