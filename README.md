@@ -150,16 +150,30 @@ An extended backend user guide will be published in the following months.
 
 ## Release notes
 
-### 1.3.2
+### 1.4.0
 
 **Enhancements**
 
+* Support for interventions with several languages (which can be defined for a system)
+* Variables with group support (sharing for whole intervention or group)
+* REST interface for dynamic variable access with:
+	* Variable based security system (to ensure privacy for private variables)
+	* Bulk retrieval
+	* Participant media upload
+	* Average calculation
+	* Credits collection system
+* Surveys at any time (which can be referenced in messages)
+* Support for virtual server names (e.g. in Tomcat 8.5 or newer)
+
 **Changes**
 
-* The configuration parameter **feedbackLinkingBaseURL** has been replaced by a generic **surveyLinkingBaseURL** - You should adjust your configuration files accordingly
+* Optimized for Java 8 and Tomcat 8+
+* The configuration parameter **feedbackLinkingBaseURL** has bee* n replaced by a generic **surveyLinkingBaseURL** - You should adjust your configuration files accordingly
 
 **Bugfixes**
 
+* Many small UI improvements
+* Many small source code improvements
 
 ### 1.3.1
 
