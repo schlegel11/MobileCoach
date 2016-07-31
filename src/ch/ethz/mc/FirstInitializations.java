@@ -44,9 +44,32 @@ public class FirstInitializations implements ServletContextListener {
 	public void contextInitialized(final ServletContextEvent event) {
 		val contextPath = event.getServletContext().getContextPath()
 				.toLowerCase().replaceFirst("^/", "");
-		val configurationsFileString = System
-				.getProperty(contextPath
-						+ ImplementationConstants.SYSTEM_CONFIGURATION_PROPERTY_POSTFIX);
+
+		String configurationsFileString = null;
+
+		// Tries to get specific configuration based on virtual server
+		// configuration
+		try {
+			val serverNameElements = event.getServletContext()
+					.getVirtualServerName().split("/");
+			
+			configurationsFileString = System
+					.getProperty(serverNameElements[serverNameElements.length-1].toLowerCase()
+							+ "."
+							+ contextPath
+							+ ImplementationConstants.SYSTEM_CONFIGURATION_PROPERTY_POSTFIX);
+		} catch (final Exception e) {
+			System.err
+					.println("Error at getting virtual server based configuration file: "
+							+ e.getMessage());
+		}
+
+		if (configurationsFileString == null
+				|| !new File(configurationsFileString).exists()) {
+			configurationsFileString = System
+					.getProperty(contextPath
+							+ ImplementationConstants.SYSTEM_CONFIGURATION_PROPERTY_POSTFIX);
+		}
 
 		val loggingFolder = getLoggingFolder(configurationsFileString);
 		val loggingConsoleLevel = getLoggingConsoleLevel(configurationsFileString);

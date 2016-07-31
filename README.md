@@ -69,13 +69,18 @@ The *FileServletWrapper* is an optional component for the MobileCoach system. To
 
 The whole **MobileCoach** can be configured using one configuration file **configuration.properties** which is included in the repository containing example values. All folders mentioned in this file should be created before the first startup of the **MobileCoach** system.
 
-Your adjusted copy of the **configuration.properties** can be placed anywhere on your system, but the file need to be referenced as system property with the name **[YOUR CONTEXT PATH in lower case].configuration**. Otherwise the default configuration from the **Constants.java** will be used - and you won't like it.
+Your adjusted copy of the **configuration.properties** can be placed anywhere on your system, but the file need to be referenced as system property with the name **[YOUR CONTEXT PATH in lower case].configuration** (or **virtualservername.xyz.[YOUR CONTEXT PATH in lower case].configuration** if you run several virtual servers). Otherwise the default configuration from the **Constants.java** will be used - and you won't like it.
 
 E.g., to define the system property for a **MobileCoach** instance running at your server in the path "/MC" (deployed using a MC.war) you can start your java runtime with the following parameter:
 	
 	-Dmc.configuration="/PATH_TO_YOUR_FILE/configuration.properties"
 
 Extend your tomcat configuration files or startup scripts with this setting.
+
+If you are using Tomcat8.5 or newer, with the support for virtual servers, then you can provide several configuration files for each server by adjusting the configuration parameter as follows:
+
+	-Dvirtualservername.xyz.mc.configuration="/PATH_TO_YOUR_FILE/configuration.properties"
+
 
 Also the following should be added to avoid encoding problems on several operating systems:
 
