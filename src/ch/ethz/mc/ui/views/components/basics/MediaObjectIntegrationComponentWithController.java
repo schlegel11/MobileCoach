@@ -36,6 +36,7 @@ import ch.ethz.mc.conf.ThemeImageStrings;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.persistent.MediaObject;
 import ch.ethz.mc.model.persistent.types.MediaObjectTypes;
+import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.ui.NotificationMessageException;
 
 import com.vaadin.server.ErrorHandler;
@@ -108,7 +109,8 @@ MediaObjectIntegrationComponent {
 						+ "/"
 						+ mediaObject.getId()
 						+ "/"
-						+ mediaObject.getName();
+						+ StringHelpers.cleanFilenameString(mediaObject
+								.getName());
 				log.debug("Streaming file {} with file servlet",
 						externalReference);
 			} else {

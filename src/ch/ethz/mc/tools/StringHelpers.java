@@ -163,6 +163,19 @@ public class StringHelpers {
 	}
 
 	/**
+	 * Creates a clean filename of the given string {@link String}
+	 *
+	 * @param filenameString
+	 * @return
+	 */
+	public static String cleanFilenameString(final String filenameString) {
+		val newValue = filenameString.replaceAll(
+				ImplementationConstants.REGULAR_EXPRESSION_TO_CLEAN_FILE_NAMES,
+				"_");
+		return newValue;
+	}
+
+	/**
 	 * Creates a clean {@link String} of the given double value
 	 *
 	 * @param doubleValue

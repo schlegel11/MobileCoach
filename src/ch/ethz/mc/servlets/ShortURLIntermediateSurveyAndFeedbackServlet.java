@@ -521,11 +521,14 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 		if (!baseURL.endsWith("/")) {
 			baseURL += "/";
 		}
-		final String normalizedBaseURL = baseURL
-				.replaceAll(
-						"/"
-								+ ImplementationConstants.REGULAR_EXPRESSION_TO_MATCH_ONE_OBJECT_ID
-								+ "/$", "/");
+		final String normalizedBaseURL = request
+				.getRequestURL()
+				.toString()
+				.substring(
+						0,
+						request.getRequestURL().toString()
+								.indexOf(request.getRequestURI()))
+				+ request.getContextPath() + "/";
 
 		templateVariables.put(
 				GeneralSlideTemplateFieldTypes.BASE_URL.toVariable(), baseURL);
@@ -539,30 +542,13 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 		// REST API URL
 		templateVariables.put(
 				GeneralSlideTemplateFieldTypes.REST_API_URL.toVariable(),
-				request.getRequestURL()
-						.toString()
-						.substring(
-								0,
-								request.getRequestURL().toString()
-										.indexOf(request.getRequestURI()))
-						+ request.getContextPath()
-						+ "/"
-						+ ImplementationConstants.REST_API_PATH
-						+ "/"
+				normalizedBaseURL + ImplementationConstants.REST_API_PATH + "/"
 						+ ImplementationConstants.REST_API_VERSION + "/");
 
 		// Uploaded media content URL
 		templateVariables.put(
 				GeneralSlideTemplateFieldTypes.UPLOADED_MEDIA_CONTENT_URL
-						.toVariable(),
-				request.getRequestURL()
-						.toString()
-						.substring(
-								0,
-								request.getRequestURL().toString()
-										.indexOf(request.getRequestURI()))
-						+ request.getContextPath()
-						+ "/"
+						.toVariable(), normalizedBaseURL
 						+ ImplementationConstants.FILE_STREAMING_SERVLET_PATH
 						+ "/");
 
