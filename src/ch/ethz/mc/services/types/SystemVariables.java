@@ -3,7 +3,7 @@ package ch.ethz.mc.services.types;
 import ch.ethz.mc.conf.ImplementationConstants;
 
 /*
- * Copyright (C) 2013-2015 MobileCoach Team at the Health-IS Lab
+ * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
  *
  * For details see README.md file in the root folder of this project.
  *
