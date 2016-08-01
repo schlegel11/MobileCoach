@@ -616,7 +616,7 @@ public class ScreeningSurveyEditComponentWithController extends
 						getAdminUI().getPage().getLocation().toString()
 								.lastIndexOf("/") + 1)
 				+ ImplementationConstants.SHORT_ID_SCREEN_SURVEY_AND_FEEDBACK_SERVLET_PATH
-				+ "/" + shortURL.calculateIdPartOfURL();
+				+ "/" + shortURL.calculateIdPartOfURL()+"/";
 
 		getAdminUI().getPage().open(url, "_blank");
 	}

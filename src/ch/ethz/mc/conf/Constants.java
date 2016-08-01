@@ -94,7 +94,7 @@ public class Constants {
 	@Getter
 	private static String		mediaObjectLinkingBaseURL			= "https://f.mobile-coach.eu/";
 	@Getter
-	private static String		surveyLinkingBaseURL				= "https://web.mobile-coach.eu/";
+	private static String		surveyLinkingBaseURL				= "https://w.mobile-coach.eu/";
 
 	private static String		acceptedStopWordsSeparatedByComma	= "stop,stopp";
 
