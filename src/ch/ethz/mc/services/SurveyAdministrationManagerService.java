@@ -2,15 +2,15 @@ package ch.ethz.mc.services;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,6 +25,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import lombok.Synchronized;
@@ -82,7 +83,7 @@ public class SurveyAdministrationManagerService {
 			final FileStorageManagerService fileStorageManagerService,
 			final VariablesManagerService variablesManagerService,
 			final ModelObjectExchangeService modelObjectExchangeService)
-			throws Exception {
+					throws Exception {
 		$lock = MC.getInstance();
 
 		log.info("Starting service...");
@@ -100,7 +101,7 @@ public class SurveyAdministrationManagerService {
 			final FileStorageManagerService fileStorageManagerService,
 			final VariablesManagerService variablesManagerService,
 			final ModelObjectExchangeService modelObjectExchangeService)
-			throws Exception {
+					throws Exception {
 		if (instance == null) {
 			instance = new SurveyAdministrationManagerService(
 					databaseManagerService, fileStorageManagerService,
@@ -229,7 +230,7 @@ public class SurveyAdministrationManagerService {
 	@Synchronized
 	public ScreeningSurvey screeningSurveyImport(final File file,
 			final ObjectId interventionId, final boolean duplicate)
-			throws FileNotFoundException, IOException {
+					throws FileNotFoundException, IOException {
 		val importedModelObjects = modelObjectExchangeService
 				.importModelObjects(file, ModelObjectExchangeFormatTypes.SURVEY);
 
@@ -269,7 +270,7 @@ public class SurveyAdministrationManagerService {
 
 		log.debug("Recursively collect all model objects related to the screening survey");
 		screeningSurvey
-				.collectThisAndRelatedModelObjectsForExport(modelObjectsToExport);
+		.collectThisAndRelatedModelObjectsForExport(modelObjectsToExport);
 
 		log.debug("Export screening survey");
 		return modelObjectExchangeService.exportModelObjects(
@@ -441,7 +442,7 @@ public class SurveyAdministrationManagerService {
 			final ScreeningSurveySlide screeningSurveySlide,
 			final LString textWithPlaceholders,
 			final List<String> allPossibleMessageVariables)
-			throws NotificationMessageException {
+					throws NotificationMessageException {
 		if (textWithPlaceholders == null) {
 			screeningSurveySlide.setTitleWithPlaceholders(new LString());
 		} else {
@@ -484,7 +485,7 @@ public class SurveyAdministrationManagerService {
 			final ScreeningSurveySlide screeningSurveySlide,
 			final String optionalLayoutAttributeWithPlaceholders) {
 		screeningSurveySlide
-				.setOptionalLayoutAttributeWithPlaceholders(optionalLayoutAttributeWithPlaceholders);
+		.setOptionalLayoutAttributeWithPlaceholders(optionalLayoutAttributeWithPlaceholders);
 
 		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
@@ -494,7 +495,7 @@ public class SurveyAdministrationManagerService {
 			final ScreeningSurveySlide screeningSurveySlide,
 			final int questionPosition, final LString textWithPlaceholders,
 			final List<String> allPossibleMessageVariables)
-			throws NotificationMessageException {
+					throws NotificationMessageException {
 		val question = screeningSurveySlide.getQuestions()
 				.get(questionPosition);
 
@@ -528,7 +529,7 @@ public class SurveyAdministrationManagerService {
 	public void screeningSurveySlideChangeDefaultVariableValue(
 			final ScreeningSurveySlide screeningSurveySlide,
 			final int questionPosition, final String text)
-			throws NotificationMessageException {
+					throws NotificationMessageException {
 		val question = screeningSurveySlide.getQuestions()
 				.get(questionPosition);
 
@@ -545,7 +546,7 @@ public class SurveyAdministrationManagerService {
 	public void screeningSurveySlideChangeStoreResultToVariable(
 			final ScreeningSurveySlide screeningSurveySlide,
 			final int questionPosition, final String variableName)
-			throws NotificationMessageException {
+					throws NotificationMessageException {
 		val question = screeningSurveySlide.getQuestions()
 				.get(questionPosition);
 
@@ -590,7 +591,7 @@ public class SurveyAdministrationManagerService {
 			final ScreeningSurveySlide screeningSurveySlide,
 			final LString textWithPlaceholders,
 			final List<String> allPossibleMessageVariables)
-			throws NotificationMessageException {
+					throws NotificationMessageException {
 		if (textWithPlaceholders == null) {
 			screeningSurveySlide.setValidationErrorMessage(new LString());
 		} else {
@@ -601,7 +602,7 @@ public class SurveyAdministrationManagerService {
 			}
 
 			screeningSurveySlide
-					.setValidationErrorMessage(textWithPlaceholders);
+			.setValidationErrorMessage(textWithPlaceholders);
 		}
 
 		databaseManagerService.saveModelObject(screeningSurveySlide);
@@ -635,10 +636,10 @@ public class SurveyAdministrationManagerService {
 						ScreeningSurveySlide.class,
 						moveUp ? Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY_AND_ORDER_LOWER
 								: Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY_AND_ORDER_HIGHER,
-						moveUp ? Queries.SCREENING_SURVEY_SLIDE__SORT_BY_ORDER_DESC
-								: Queries.SCREENING_SURVEY_SLIDE__SORT_BY_ORDER_ASC,
-						screeningSurveySlide.getScreeningSurvey(),
-						screeningSurveySlide.getOrder());
+								moveUp ? Queries.SCREENING_SURVEY_SLIDE__SORT_BY_ORDER_DESC
+										: Queries.SCREENING_SURVEY_SLIDE__SORT_BY_ORDER_ASC,
+										screeningSurveySlide.getScreeningSurvey(),
+										screeningSurveySlide.getOrder());
 
 		if (screeningSurveySlideToSwapWith == null) {
 			return null;
@@ -647,7 +648,7 @@ public class SurveyAdministrationManagerService {
 		// Swap order
 		final int order = screeningSurveySlide.getOrder();
 		screeningSurveySlide
-				.setOrder(screeningSurveySlideToSwapWith.getOrder());
+		.setOrder(screeningSurveySlideToSwapWith.getOrder());
 		screeningSurveySlideToSwapWith.setOrder(order);
 
 		databaseManagerService.saveModelObject(screeningSurveySlide);
@@ -668,7 +669,7 @@ public class SurveyAdministrationManagerService {
 	@Synchronized
 	public void screeningSurveySlideDelete(
 			final ScreeningSurveySlide screeningSurveySlide)
-			throws NotificationMessageException {
+					throws NotificationMessageException {
 		val otherScreeningSurveySlides = databaseManagerService
 				.findModelObjects(ScreeningSurveySlide.class,
 						Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY,
@@ -724,7 +725,7 @@ public class SurveyAdministrationManagerService {
 
 		if (highestOrderSlideRule != null) {
 			screeningSurveySlideRule
-					.setOrder(highestOrderSlideRule.getOrder() + 1);
+			.setOrder(highestOrderSlideRule.getOrder() + 1);
 		}
 
 		databaseManagerService.saveModelObject(screeningSurveySlideRule);
@@ -783,7 +784,7 @@ public class SurveyAdministrationManagerService {
 			}
 
 			screeningSurveySlideRule
-					.setStoreValueToVariableWithName(variableName);
+			.setStoreValueToVariableWithName(variableName);
 
 			databaseManagerService.saveModelObject(screeningSurveySlideRule);
 		}
@@ -794,7 +795,7 @@ public class SurveyAdministrationManagerService {
 			final ScreeningSurveySlideRule screeningSurveySlideRule,
 			final boolean newValue) {
 		screeningSurveySlideRule
-				.setShowSameSlideBecauseValueNotValidWhenTrue(newValue);
+		.setShowSameSlideBecauseValueNotValidWhenTrue(newValue);
 
 		if (newValue) {
 			screeningSurveySlideRule.setNextScreeningSurveySlideWhenTrue(null);
@@ -814,11 +815,11 @@ public class SurveyAdministrationManagerService {
 						ScreeningSurveySlideRule.class,
 						moveUp ? Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE_AND_ORDER_LOWER
 								: Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE_AND_ORDER_HIGHER,
-						moveUp ? Queries.SCREENING_SURVEY_SLIDE_RULE__SORT_BY_ORDER_DESC
-								: Queries.SCREENING_SURVEY_SLIDE_RULE__SORT_BY_ORDER_ASC,
-						screeningSurveySlideRule
-								.getBelongingScreeningSurveySlide(),
-						screeningSurveySlideRule.getOrder());
+								moveUp ? Queries.SCREENING_SURVEY_SLIDE_RULE__SORT_BY_ORDER_DESC
+										: Queries.SCREENING_SURVEY_SLIDE_RULE__SORT_BY_ORDER_ASC,
+										screeningSurveySlideRule
+										.getBelongingScreeningSurveySlide(),
+										screeningSurveySlideRule.getOrder());
 
 		if (screeningSurveySlideRuleToSwapWith == null) {
 			return null;
@@ -832,7 +833,7 @@ public class SurveyAdministrationManagerService {
 
 		databaseManagerService.saveModelObject(screeningSurveySlideRule);
 		databaseManagerService
-				.saveModelObject(screeningSurveySlideRuleToSwapWith);
+		.saveModelObject(screeningSurveySlideRuleToSwapWith);
 
 		return screeningSurveySlideRuleToSwapWith;
 	}
@@ -844,10 +845,10 @@ public class SurveyAdministrationManagerService {
 			final ObjectId selectedScreeningSurveySlideId) {
 		if (isTrueCase) {
 			screeningSurveySlideRule
-					.setNextScreeningSurveySlideWhenTrue(selectedScreeningSurveySlideId);
+			.setNextScreeningSurveySlideWhenTrue(selectedScreeningSurveySlideId);
 		} else {
 			screeningSurveySlideRule
-					.setNextScreeningSurveySlideWhenFalse(selectedScreeningSurveySlideId);
+			.setNextScreeningSurveySlideWhenFalse(selectedScreeningSurveySlideId);
 		}
 
 		databaseManagerService.saveModelObject(screeningSurveySlideRule);
@@ -882,7 +883,7 @@ public class SurveyAdministrationManagerService {
 	public void feedbackSlideChangeTitle(final FeedbackSlide feedbackSlide,
 			final LString textWithPlaceholders,
 			final List<String> allPossibleFeedbackVariables)
-			throws NotificationMessageException {
+					throws NotificationMessageException {
 		if (textWithPlaceholders == null) {
 			feedbackSlide.setTitleWithPlaceholders(new LString());
 		} else {
@@ -915,7 +916,7 @@ public class SurveyAdministrationManagerService {
 			final FeedbackSlide feedbackSlide,
 			final LString textWithPlaceholders,
 			final List<String> allPossibleFeedbackVariables)
-			throws NotificationMessageException {
+					throws NotificationMessageException {
 		if (textWithPlaceholders == null) {
 			feedbackSlide.setTitleWithPlaceholders(new LString());
 		} else {
@@ -936,7 +937,7 @@ public class SurveyAdministrationManagerService {
 			final FeedbackSlide feedbackSlide,
 			final String optionalLayoutAttributeWithPlaceholders) {
 		feedbackSlide
-				.setOptionalLayoutAttributeWithPlaceholders(optionalLayoutAttributeWithPlaceholders);
+		.setOptionalLayoutAttributeWithPlaceholders(optionalLayoutAttributeWithPlaceholders);
 
 		databaseManagerService.saveModelObject(feedbackSlide);
 	}
@@ -950,9 +951,9 @@ public class SurveyAdministrationManagerService {
 						FeedbackSlide.class,
 						moveUp ? Queries.FEEDBACK_SLIDE__BY_FEEDBACK_AND_ORDER_LOWER
 								: Queries.FEEDBACK_SLIDE__BY_FEEDBACK_AND_ORDER_HIGHER,
-						moveUp ? Queries.FEEDBACK_SLIDE__SORT_BY_ORDER_DESC
-								: Queries.FEEDBACK_SLIDE__SORT_BY_ORDER_ASC,
-						feedbackSlide.getFeedback(), feedbackSlide.getOrder());
+								moveUp ? Queries.FEEDBACK_SLIDE__SORT_BY_ORDER_DESC
+										: Queries.FEEDBACK_SLIDE__SORT_BY_ORDER_ASC,
+										feedbackSlide.getFeedback(), feedbackSlide.getOrder());
 
 		if (feedbackSlideToSwapWith == null) {
 			return null;
@@ -1014,10 +1015,10 @@ public class SurveyAdministrationManagerService {
 						FeedbackSlideRule.class,
 						moveUp ? Queries.FEEDBACK_SLIDE_RULE__BY_FEEDBACK_SLIDE_AND_ORDER_LOWER
 								: Queries.FEEDBACK_SLIDE_RULE__BY_FEEDBACK_SLIDE_AND_ORDER_HIGHER,
-						moveUp ? Queries.FEEDBACK_SLIDE_RULE__SORT_BY_ORDER_DESC
-								: Queries.FEEDBACK_SLIDE_RULE__SORT_BY_ORDER_ASC,
-						feedbackSlideRule.getBelongingFeedbackSlide(),
-						feedbackSlideRule.getOrder());
+								moveUp ? Queries.FEEDBACK_SLIDE_RULE__SORT_BY_ORDER_DESC
+										: Queries.FEEDBACK_SLIDE_RULE__SORT_BY_ORDER_ASC,
+										feedbackSlideRule.getBelongingFeedbackSlide(),
+										feedbackSlideRule.getOrder());
 
 		if (feedbackSlideRuleToSwapWith == null) {
 			return null;
@@ -1250,19 +1251,44 @@ public class SurveyAdministrationManagerService {
 		variables.addAll(variablesManagerService
 				.getAllInterventionVariableNamesOfIntervention(screeningSurvey
 						.getIntervention()));
-		variables
+
+		if (screeningSurvey.isIntermediateSurvey()) {
+			val screeningSurveysOfIntervention = databaseManagerService
+					.findModelObjects(ScreeningSurvey.class,
+							Queries.SCREENING_SURVEY__BY_INTERVENTION,
+							screeningSurvey.getIntervention());
+
+			for (val screeningSurveyOfIntervention : screeningSurveysOfIntervention) {
+				variables
 				.addAll(variablesManagerService
-						.getAllScreeningSurveyVariableNamesOfScreeningSurvey(screeningSurveyId));
+						.getAllSurveyVariableNamesOfSurvey(screeningSurveyOfIntervention
+								.getId()));
 
-		Collections.sort(variables);
+			}
 
-		return variables;
+			variables
+			.addAll(variablesManagerService
+					.getAllMonitoringMessageVariableNamesOfIntervention(screeningSurvey
+							.getIntervention()));
+			variables
+			.addAll(variablesManagerService
+					.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(screeningSurvey
+							.getIntervention()));
+		} else {
+			variables.addAll(variablesManagerService
+					.getAllSurveyVariableNamesOfSurvey(screeningSurveyId));
+		}
+
+		final List<String> variablesList = new ArrayList<String>(variables);
+		Collections.sort(variablesList);
+
+		return variablesList;
 	}
 
 	@Synchronized
 	public List<String> getAllWritableScreenigSurveyVariablesOfScreeningSurvey(
 			final ObjectId screeningSurveyId) {
-		val variables = new ArrayList<String>();
+		val variables = new HashSet<String>();
 
 		variables.addAll(variablesManagerService
 				.getAllWritableSystemReservedVariableNames());
@@ -1273,13 +1299,37 @@ public class SurveyAdministrationManagerService {
 		variables.addAll(variablesManagerService
 				.getAllInterventionVariableNamesOfIntervention(screeningSurvey
 						.getIntervention()));
-		variables
-				.addAll(variablesManagerService
-						.getAllScreeningSurveyVariableNamesOfScreeningSurvey(screeningSurveyId));
 
-		Collections.sort(variables);
+		if (screeningSurvey.isIntermediateSurvey()) {
+			val screeningSurveysOfIntervention = databaseManagerService
+					.findModelObjects(ScreeningSurvey.class,
+							Queries.SCREENING_SURVEY__BY_INTERVENTION,
+							screeningSurvey.getIntervention());
 
-		return variables;
+			for (val screeningSurveyOfIntervention : screeningSurveysOfIntervention) {
+				variables
+						.addAll(variablesManagerService
+								.getAllSurveyVariableNamesOfSurvey(screeningSurveyOfIntervention
+										.getId()));
+			}
+
+			variables
+					.addAll(variablesManagerService
+							.getAllMonitoringMessageVariableNamesOfIntervention(screeningSurvey
+									.getIntervention()));
+			variables
+					.addAll(variablesManagerService
+							.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(screeningSurvey
+									.getIntervention()));
+		} else {
+			variables.addAll(variablesManagerService
+					.getAllSurveyVariableNamesOfSurvey(screeningSurveyId));
+		}
+
+		final List<String> variablesList = new ArrayList<String>(variables);
+		Collections.sort(variablesList);
+
+		return variablesList;
 	}
 
 	@Synchronized

@@ -551,23 +551,23 @@ public class VariablesManagerService {
 		return variables;
 	}
 
-	public Set<String> getAllScreeningSurveyVariableNamesOfIntervention(
+	public Set<String> getAllSurveyVariableNamesOfIntervention(
 			final ObjectId interventionId) {
 		val variables = new HashSet<String>();
 
-		val screeningSurveyModelObjects = databaseManagerService
+		val surveyModelObjects = databaseManagerService
 				.findModelObjects(ScreeningSurvey.class,
 						Queries.SCREENING_SURVEY__BY_INTERVENTION,
 						interventionId);
-		for (val screeningSurveyModelObject : screeningSurveyModelObjects) {
-			val screeningSurveySlideModelObjects = databaseManagerService
+		for (val surveyModelObject : surveyModelObjects) {
+			val surveySlideModelObjects = databaseManagerService
 					.findModelObjects(
 							ScreeningSurveySlide.class,
 							Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY,
-							screeningSurveyModelObject.getId());
+							surveyModelObject.getId());
 
-			for (val screeningSurveySlideModelObject : screeningSurveySlideModelObjects) {
-				for (val question : screeningSurveySlideModelObject
+			for (val surveySlideModelObject : surveySlideModelObjects) {
+				for (val question : surveySlideModelObject
 						.getQuestions()) {
 					if (question.getStoreValueToVariableWithName() != null) {
 						variables.add(question
@@ -575,19 +575,18 @@ public class VariablesManagerService {
 					}
 				}
 
-				val screeningSurveySlideRuleModelObjects = databaseManagerService
+				val surveySlideRuleModelObjects = databaseManagerService
 						.findModelObjects(
 								ScreeningSurveySlideRule.class,
 								Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE,
-								screeningSurveySlideModelObject.getId());
+								surveySlideModelObject.getId());
 
-				for (val screeningSurveySlideRuleModelObject : screeningSurveySlideRuleModelObjects) {
-					if (screeningSurveySlideRuleModelObject
+				for (val surveySlideRuleModelObject : surveySlideRuleModelObjects) {
+					if (surveySlideRuleModelObject
 							.getStoreValueToVariableWithName() != null) {
-						variables.add(screeningSurveySlideRuleModelObject
+						variables.add(surveySlideRuleModelObject
 								.getStoreValueToVariableWithName());
 					}
-
 				}
 			}
 		}
@@ -595,32 +594,32 @@ public class VariablesManagerService {
 		return variables;
 	}
 
-	public Set<String> getAllScreeningSurveyVariableNamesOfScreeningSurvey(
-			final ObjectId screeningSurveyId) {
+	public Set<String> getAllSurveyVariableNamesOfSurvey(
+			final ObjectId surveyId) {
 		val variables = new HashSet<String>();
 
-		val screeningSurveySlideModelObjects = databaseManagerService
+		val surveySlideModelObjects = databaseManagerService
 				.findModelObjects(ScreeningSurveySlide.class,
 						Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY,
-						screeningSurveyId);
+						surveyId);
 
-		for (val screeningSurveySlideModelObject : screeningSurveySlideModelObjects) {
-			for (val question : screeningSurveySlideModelObject.getQuestions()) {
+		for (val surveySlideModelObject : surveySlideModelObjects) {
+			for (val question : surveySlideModelObject.getQuestions()) {
 				if (question.getStoreValueToVariableWithName() != null) {
 					variables.add(question.getStoreValueToVariableWithName());
 				}
 			}
 
-			val screeningSurveySlideRuleModelObjects = databaseManagerService
+			val surveySlideRuleModelObjects = databaseManagerService
 					.findModelObjects(
 							ScreeningSurveySlideRule.class,
 							Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE,
-							screeningSurveySlideModelObject.getId());
+							surveySlideModelObject.getId());
 
-			for (val screeningSurveySlideRuleModelObject : screeningSurveySlideRuleModelObjects) {
-				if (screeningSurveySlideRuleModelObject
+			for (val surveySlideRuleModelObject : surveySlideRuleModelObjects) {
+				if (surveySlideRuleModelObject
 						.getStoreValueToVariableWithName() != null) {
-					variables.add(screeningSurveySlideRuleModelObject
+					variables.add(surveySlideRuleModelObject
 							.getStoreValueToVariableWithName());
 				}
 

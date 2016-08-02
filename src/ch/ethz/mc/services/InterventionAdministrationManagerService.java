@@ -1722,7 +1722,7 @@ public class InterventionAdministrationManagerService {
 				.getAllInterventionVariableNamesOfIntervention(interventionId));
 		variables
 				.addAll(variablesManagerService
-						.getAllScreeningSurveyVariableNamesOfIntervention(interventionId));
+						.getAllSurveyVariableNamesOfIntervention(interventionId));
 		variables
 				.addAll(variablesManagerService
 						.getAllMonitoringMessageVariableNamesOfIntervention(interventionId));
@@ -1747,7 +1747,7 @@ public class InterventionAdministrationManagerService {
 				.getAllInterventionVariableNamesOfIntervention(interventionId));
 		variables
 				.addAll(variablesManagerService
-						.getAllScreeningSurveyVariableNamesOfIntervention(interventionId));
+						.getAllSurveyVariableNamesOfIntervention(interventionId));
 		variables
 				.addAll(variablesManagerService
 						.getAllMonitoringMessageVariableNamesOfIntervention(interventionId));
@@ -1772,7 +1772,7 @@ public class InterventionAdministrationManagerService {
 				.getAllInterventionVariableNamesOfIntervention(interventionId));
 		variables
 				.addAll(variablesManagerService
-						.getAllScreeningSurveyVariableNamesOfIntervention(interventionId));
+						.getAllSurveyVariableNamesOfIntervention(interventionId));
 		variables
 				.addAll(variablesManagerService
 						.getAllMonitoringMessageVariableNamesOfIntervention(interventionId));
@@ -1797,7 +1797,7 @@ public class InterventionAdministrationManagerService {
 				.getAllInterventionVariableNamesOfIntervention(interventionId));
 		variables
 				.addAll(variablesManagerService
-						.getAllScreeningSurveyVariableNamesOfIntervention(interventionId));
+						.getAllSurveyVariableNamesOfIntervention(interventionId));
 		variables
 				.addAll(variablesManagerService
 						.getAllMonitoringMessageVariableNamesOfIntervention(interventionId));
