@@ -555,10 +555,9 @@ public class VariablesManagerService {
 			final ObjectId interventionId) {
 		val variables = new HashSet<String>();
 
-		val surveyModelObjects = databaseManagerService
-				.findModelObjects(ScreeningSurvey.class,
-						Queries.SCREENING_SURVEY__BY_INTERVENTION,
-						interventionId);
+		val surveyModelObjects = databaseManagerService.findModelObjects(
+				ScreeningSurvey.class,
+				Queries.SCREENING_SURVEY__BY_INTERVENTION, interventionId);
 		for (val surveyModelObject : surveyModelObjects) {
 			val surveySlideModelObjects = databaseManagerService
 					.findModelObjects(
@@ -567,8 +566,7 @@ public class VariablesManagerService {
 							surveyModelObject.getId());
 
 			for (val surveySlideModelObject : surveySlideModelObjects) {
-				for (val question : surveySlideModelObject
-						.getQuestions()) {
+				for (val question : surveySlideModelObject.getQuestions()) {
 					if (question.getStoreValueToVariableWithName() != null) {
 						variables.add(question
 								.getStoreValueToVariableWithName());
@@ -594,14 +592,12 @@ public class VariablesManagerService {
 		return variables;
 	}
 
-	public Set<String> getAllSurveyVariableNamesOfSurvey(
-			final ObjectId surveyId) {
+	public Set<String> getAllSurveyVariableNamesOfSurvey(final ObjectId surveyId) {
 		val variables = new HashSet<String>();
 
-		val surveySlideModelObjects = databaseManagerService
-				.findModelObjects(ScreeningSurveySlide.class,
-						Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY,
-						surveyId);
+		val surveySlideModelObjects = databaseManagerService.findModelObjects(
+				ScreeningSurveySlide.class,
+				Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY, surveyId);
 
 		for (val surveySlideModelObject : surveySlideModelObjects) {
 			for (val question : surveySlideModelObject.getQuestions()) {
@@ -693,17 +689,19 @@ public class VariablesManagerService {
 	 */
 	/**
 	 * Tries to read an variable of a specific participant from an external
-	 * interface
+	 * interface or service
 	 *
 	 * @param participantId
 	 * @param variable
 	 * @param requestPrivacyType
+	 * @param isService
 	 * @return
 	 * @throws ExternallyReadProtectedVariableException
 	 */
 	public String getExternallyReadableVariableValueForParticipant(
 			final ObjectId participantId, final String variable,
-			final InterventionVariableWithValuePrivacyTypes requestPrivacyType)
+			final InterventionVariableWithValuePrivacyTypes requestPrivacyType,
+			boolean isService)
 			throws ExternallyReadProtectedVariableException {
 
 		if (allSystemReservedVariableNames.contains(variable)) {
@@ -711,7 +709,7 @@ public class VariablesManagerService {
 			if (externallyReadableSystemVariableNames.contains(variable)) {
 				// Check privacy
 				if (requestPrivacyType
-						.isLessRestrictiveThan(InterventionVariableWithValuePrivacyTypes.PRIVATE)) {
+						.isNotCoveredBy(InterventionVariableWithValuePrivacyTypes.PRIVATE)) {
 					throw new ExternallyReadProtectedVariableException(
 							"The variable "
 									+ variable
@@ -732,7 +730,7 @@ public class VariablesManagerService {
 					.contains(variable)) {
 				// Check privacy
 				if (requestPrivacyType
-						.isLessRestrictiveThan(InterventionVariableWithValuePrivacyTypes.PRIVATE)) {
+						.isNotCoveredBy(InterventionVariableWithValuePrivacyTypes.PRIVATE)) {
 					throw new ExternallyReadProtectedVariableException(
 							"The variable "
 									+ variable
@@ -807,11 +805,23 @@ public class VariablesManagerService {
 			}
 
 			// Check access
-			if (interventionVariable.getAccessType() == InterventionVariableWithValueAccessTypes.INTERNAL) {
-				throw new ExternallyReadProtectedVariableException();
+			if (isService) {
+				if (interventionVariable
+						.getAccessType()
+						.isNotCoveredBy(
+								InterventionVariableWithValueAccessTypes.MANAGEABLE_BY_SERVICE)) {
+					throw new ExternallyReadProtectedVariableException();
+				}
+			} else {
+				if (interventionVariable
+						.getAccessType()
+						.isNotCoveredBy(
+								InterventionVariableWithValueAccessTypes.EXTERNALLY_READABLE)) {
+					throw new ExternallyReadProtectedVariableException();
+				}
 			}
 			// Check privacy
-			if (requestPrivacyType.isLessRestrictiveThan(interventionVariable
+			if (requestPrivacyType.isNotCoveredBy(interventionVariable
 					.getPrivacyType())) {
 				throw new ExternallyReadProtectedVariableException(
 						"The variable "
@@ -887,7 +897,10 @@ public class VariablesManagerService {
 				throw new ExternallyWriteProtectedVariableException(
 						"This variable is not defined, so it cannot be written");
 			}
-			if (interventionVariable.getAccessType() != InterventionVariableWithValueAccessTypes.EXTERNALLY_READ_AND_WRITABLE) {
+			if (interventionVariable
+					.getAccessType()
+					.isNotCoveredBy(
+							InterventionVariableWithValueAccessTypes.EXTERNALLY_READ_AND_WRITABLE)) {
 				throw new ExternallyWriteProtectedVariableException();
 			}
 
@@ -904,7 +917,7 @@ public class VariablesManagerService {
 
 	/**
 	 * Tries to write a voting from a specific participant for a specific
-	 * participant from an external interface
+	 * participant from an service interface
 	 *
 	 * @param participantId
 	 * @param variable
@@ -912,7 +925,7 @@ public class VariablesManagerService {
 	 * @param describesMediaUpload
 	 * @throws ExternallyWriteProtectedVariableException
 	 */
-	public void externallyWriteVotingFromParticipantForParticipant(
+	public void serviceWriteVotingFromParticipantForParticipant(
 			final ObjectId participantId,
 			final ObjectId receivingParticipantId, final String variable)
 			throws ExternallyWriteProtectedVariableException {
@@ -981,12 +994,18 @@ public class VariablesManagerService {
 				throw new ExternallyWriteProtectedVariableException(
 						"This voting variable is not defined, so it cannot be written");
 			}
-			if (interventionVariable.getAccessType() == InterventionVariableWithValueAccessTypes.INTERNAL) {
+			if (interventionVariable
+					.getAccessType()
+					.isNotCoveredBy(
+							InterventionVariableWithValueAccessTypes.MANAGEABLE_BY_SERVICE)) {
 				throw new ExternallyWriteProtectedVariableException();
 			}
-			if (interventionVariable.getAccessType() == InterventionVariableWithValueAccessTypes.EXTERNALLY_READ_AND_WRITABLE) {
+			if (interventionVariable
+					.getAccessType()
+					.isCoveredBy(
+							InterventionVariableWithValueAccessTypes.EXTERNALLY_READABLE)) {
 				throw new ExternallyWriteProtectedVariableException(
-						"Security problem: The variable is directly writable from outside, so voting can not be done");
+						"Security problem: The variable is directly readable/writable from outside - allows hacking");
 			}
 
 			// Check privacy (of intervention variable)
@@ -994,10 +1013,16 @@ public class VariablesManagerService {
 					receivingParticipant.getIntervention())) {
 				throw new ExternallyWriteProtectedVariableException(
 						"This voting variable cannot be written because both participants involved are in different interventions");
-			} else if (interventionVariable.getPrivacyType() == InterventionVariableWithValuePrivacyTypes.PRIVATE) {
+			} else if (interventionVariable
+					.getPrivacyType()
+					.isNotCoveredBy(
+							InterventionVariableWithValuePrivacyTypes.SHARED_WITH_GROUP)) {
 				throw new ExternallyWriteProtectedVariableException(
-						"This voting variable cannot be written by another participant because it's set to private only");
-			} else if (interventionVariable.getPrivacyType() == InterventionVariableWithValuePrivacyTypes.SHARED_WITH_GROUP
+						"This voting variable cannot be written by another participant because it's not shared with at least the group");
+			} else if (interventionVariable
+					.getPrivacyType()
+					.isNotCoveredBy(
+							InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION)
 					&& !participant.getGroup().equals(
 							receivingParticipant.getGroup())) {
 				throw new ExternallyWriteProtectedVariableException(
@@ -1039,14 +1064,14 @@ public class VariablesManagerService {
 
 	/**
 	 * Tries to write credit for given participant and credit name to given
-	 * variable
+	 * variable from a service
 	 *
 	 * @param participantId
 	 * @param creditName
 	 * @param variable
 	 * @throws ExternallyWriteProtectedVariableException
 	 */
-	public void externallyWriteCreditWithNameForParticipantToVariable(
+	public void serviceWriteCreditWithNameForParticipantToVariable(
 			final ObjectId participantId, String creditName,
 			final String variable)
 			throws ExternallyWriteProtectedVariableException {
@@ -1121,26 +1146,47 @@ public class VariablesManagerService {
 								+ reminderVariable
 								+ " is not defined, so credit can not be remembered/written");
 			}
-			if (interventionVariable.getAccessType() == InterventionVariableWithValueAccessTypes.INTERNAL) {
-				throw new ExternallyWriteProtectedVariableException("The credit variable has to be externally readable");
-			}
-			if (interventionVariable.getAccessType() == InterventionVariableWithValueAccessTypes.EXTERNALLY_READ_AND_WRITABLE) {
+			if (interventionVariable
+					.getAccessType()
+					.isNotCoveredBy(
+							InterventionVariableWithValueAccessTypes.MANAGEABLE_BY_SERVICE)) {
 				throw new ExternallyWriteProtectedVariableException(
-						"Security problem: The variable is directly writable from outside, so credit can not be checked/written");
+						"The credit variable has to be manageably by service");
 			}
-			if (interventionCheckVariable.getAccessType() == InterventionVariableWithValueAccessTypes.INTERNAL) {
-				throw new ExternallyWriteProtectedVariableException("The check variable has to be externally readable");
-			}
-			if (interventionCheckVariable.getAccessType() == InterventionVariableWithValueAccessTypes.EXTERNALLY_READ_AND_WRITABLE) {
+			if (interventionVariable
+					.getAccessType()
+					.isCoveredBy(
+							InterventionVariableWithValueAccessTypes.EXTERNALLY_READ_AND_WRITABLE)) {
 				throw new ExternallyWriteProtectedVariableException(
-						"Security problem: The check variable is directly writable from outside, so credit can not be checked/written");
+						"Security problem: The variable is directly writable from outside - allows hacking");
 			}
-			if (interventionReminderVariable.getAccessType() == InterventionVariableWithValueAccessTypes.INTERNAL) {
-				throw new ExternallyWriteProtectedVariableException("The reminder variable has to be externally readable");
-			}
-			if (interventionReminderVariable.getAccessType() == InterventionVariableWithValueAccessTypes.EXTERNALLY_READ_AND_WRITABLE) {
+			if (interventionCheckVariable
+					.getAccessType()
+					.isNotCoveredBy(
+							InterventionVariableWithValueAccessTypes.MANAGEABLE_BY_SERVICE)) {
 				throw new ExternallyWriteProtectedVariableException(
-						"Security problem: The reminder variable is directly writable from outside, so credit can not be checked/written");
+						"The check variable has to be manageably by service");
+			}
+			if (interventionCheckVariable
+					.getAccessType()
+					.isCoveredBy(
+							InterventionVariableWithValueAccessTypes.EXTERNALLY_READABLE)) {
+				throw new ExternallyWriteProtectedVariableException(
+						"Security problem: The check variable is directly readable/writable from outside - allows hacking");
+			}
+			if (interventionReminderVariable
+					.getAccessType()
+					.isNotCoveredBy(
+							InterventionVariableWithValueAccessTypes.MANAGEABLE_BY_SERVICE)) {
+				throw new ExternallyWriteProtectedVariableException(
+						"The reminder variable has to be manageably by service");
+			}
+			if (interventionReminderVariable
+					.getAccessType()
+					.isCoveredBy(
+							InterventionVariableWithValueAccessTypes.EXTERNALLY_READABLE)) {
+				throw new ExternallyWriteProtectedVariableException(
+						"Security problem: The reminder variable is directly readable/writable from outside - allows hacking");
 			}
 
 			// Check if credit name is accepted
@@ -1221,8 +1267,8 @@ public class VariablesManagerService {
 	 * @param variable
 	 * @return
 	 */
-	public boolean checkVariableForExternalWriting(
-			final ObjectId participantId, final String variable) {
+	public boolean checkVariableForServiceWriting(final ObjectId participantId,
+			final String variable) {
 		if (allSystemReservedVariableNames.contains(variable)) {
 			return false;
 		} else {
@@ -1244,7 +1290,10 @@ public class VariablesManagerService {
 			if (interventionVariable == null) {
 				return false;
 			}
-			if (interventionVariable.getAccessType() != InterventionVariableWithValueAccessTypes.EXTERNALLY_READ_AND_WRITABLE) {
+			if (interventionVariable
+					.getAccessType()
+					.isNotCoveredBy(
+							InterventionVariableWithValueAccessTypes.MANAGEABLE_BY_SERVICE)) {
 				return false;
 			}
 

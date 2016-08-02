@@ -85,7 +85,7 @@ public class VariableAccessService extends AbstractService {
 			}
 
 			return restManagerService.readVariable(participantId,
-					variable.trim());
+					variable.trim(), false);
 		} catch (final Exception e) {
 			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
 					.entity("Could not retrieve variable: " + e.getMessage())
@@ -123,7 +123,7 @@ public class VariableAccessService extends AbstractService {
 				}
 
 				resultVariables.add(restManagerService.readVariable(
-						participantId, variable.trim()));
+						participantId, variable.trim(), false));
 			}
 
 			collectionOfVariables.setSize(resultVariables.size());
@@ -163,7 +163,7 @@ public class VariableAccessService extends AbstractService {
 
 			val collectionOfExtendedVariables = restManagerService
 					.readVariableArrayOfGroupOrIntervention(participantId,
-							variable.trim(), true);
+							variable.trim(), true, false);
 
 			return collectionOfExtendedVariables;
 		} catch (final Exception e) {
@@ -205,7 +205,7 @@ public class VariableAccessService extends AbstractService {
 
 			val collectionOfExtendedListVariables = restManagerService
 					.readVariableListArrayOfGroupOrIntervention(participantId,
-							cleanedVariableList, true);
+							cleanedVariableList, true, false);
 
 			return collectionOfExtendedListVariables;
 		} catch (final Exception e) {
@@ -242,7 +242,7 @@ public class VariableAccessService extends AbstractService {
 
 			val collectionOfExtendedVariables = restManagerService
 					.readVariableArrayOfGroupOrIntervention(participantId,
-							variable.trim(), false);
+							variable.trim(), false, false);
 
 			return collectionOfExtendedVariables;
 		} catch (final Exception e) {
@@ -284,7 +284,7 @@ public class VariableAccessService extends AbstractService {
 
 			val collectionOfExtendedListVariables = restManagerService
 					.readVariableListArrayOfGroupOrIntervention(participantId,
-							cleanedVariableList, false);
+							cleanedVariableList, false, false);
 
 			return collectionOfExtendedListVariables;
 		} catch (final Exception e) {
@@ -321,7 +321,7 @@ public class VariableAccessService extends AbstractService {
 
 			val variableAverage = restManagerService
 					.calculateAverageOfVariableArrayOfGroupOrIntervention(
-							participantId, variable.trim(), true);
+							participantId, variable.trim(), true, false);
 
 			return variableAverage;
 		} catch (final Exception e) {
@@ -359,7 +359,7 @@ public class VariableAccessService extends AbstractService {
 
 			val variableAverage = restManagerService
 					.calculateAverageOfVariableArrayOfGroupOrIntervention(
-							participantId, variable.trim(), false);
+							participantId, variable.trim(), false, false);
 
 			return variableAverage;
 		} catch (final Exception e) {

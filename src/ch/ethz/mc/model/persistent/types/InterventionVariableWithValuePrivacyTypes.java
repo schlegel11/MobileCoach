@@ -34,18 +34,18 @@ public enum InterventionVariableWithValuePrivacyTypes {
 		this.intValue = intValue;
 	}
 
-	// public boolean isAllowedToAccessByRequest(
-	// final InterventionVariableWithValuePrivacyTypes requestType) {
-	// if (requestType.getIntValue() <= intValue) {
-	// return true;
-	// } else {
-	// return false;
-	// }
-	// }
-
-	public boolean isLessRestrictiveThan(
+	public boolean isCoveredBy(
 			final InterventionVariableWithValuePrivacyTypes privacyTypeToCompareTo) {
-		if (intValue > privacyTypeToCompareTo.getIntValue()) {
+		if (intValue >= privacyTypeToCompareTo.getIntValue()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public boolean isNotCoveredBy(
+			final InterventionVariableWithValuePrivacyTypes privacyTypeToCompareTo) {
+		if (intValue < privacyTypeToCompareTo.getIntValue()) {
 			return true;
 		} else {
 			return false;

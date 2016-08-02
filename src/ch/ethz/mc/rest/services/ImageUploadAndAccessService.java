@@ -90,7 +90,7 @@ public class ImageUploadAndAccessService extends AbstractFileUploadService {
 		}
 
 		val uploadToVariableAllowed = restManagerService
-				.checkVariableForWritingRights(participantId, variable);
+				.checkVariableForServiceWritingRights(participantId, variable);
 		if (uploadToVariableAllowed == false) {
 			throw new WebApplicationException(Response
 					.serverError()
