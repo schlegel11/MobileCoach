@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.interventions;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,14 +36,14 @@ import com.vaadin.ui.TabSheet.Tab;
 
 /**
  * Extends the intervention editing container component with a controller
- * 
+ *
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
 @Log4j2
 public class InterventionEditingContainerComponentWithController extends
-		InterventionEditingContainerComponent implements
-		SelectedTabChangeListener {
+InterventionEditingContainerComponent implements
+SelectedTabChangeListener {
 
 	private boolean			editingAllowed								= false;
 	private final List<Tab>	availableTabsToSwitchDependingOnMessaging	= new ArrayList<Tab>();
@@ -66,69 +66,69 @@ public class InterventionEditingContainerComponentWithController extends
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						allInterventionsTabComponentWithController
-								.returnToInterventionList();
+						.returnToInterventionList();
 					}
 				});
 
-		// Handle accordion change
-		getContentAccordion().addSelectedTabChangeListener(this);
+		// Handle tab sheet change
+		getContentTabSheet().addSelectedTabChangeListener(this);
 
-		// Fill Accordion
+		// Fill tab sheet
 		// Add basic settings tab
 		addPointableTab(
-				getContentAccordion(),
+				getContentTabSheet(),
 				new InterventionBasicSettingsAndModulesTabComponentWithController(
 						intervention, this),
-				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__BASIC_SETTINGS_AND_MODULES_TAB,
-				ThemeImageStrings.COMPONENT_ICON);
+						AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__BASIC_SETTINGS_AND_MODULES_TAB,
+						ThemeImageStrings.COMPONENT_ICON);
 
 		// Add intervention screening surveys tab
 		registerToSetEditingDependingOnMessaging(addPointableTab(
-				getContentAccordion(),
+				getContentTabSheet(),
 				new InterventionScreeningSurveysTabComponentWithController(
 						intervention),
-				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__SCREENING_SURVEYS_TAB,
-				ThemeImageStrings.COMPONENT_ICON));
+						AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__SCREENING_SURVEYS_TAB,
+						ThemeImageStrings.COMPONENT_ICON));
 
 		// Add intervention participants tab
 		addPointableTab(
-				getContentAccordion(),
+				getContentTabSheet(),
 				new InterventionParticipantsTabComponentWithController(
 						intervention),
-				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__PARTICIPANTS_TAB,
-				ThemeImageStrings.COMPONENT_ICON);
+						AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__PARTICIPANTS_TAB,
+						ThemeImageStrings.COMPONENT_ICON);
 
 		// Add intervention variables tab
 		registerToSetEditingDependingOnMessaging(addPointableTab(
-				getContentAccordion(),
+				getContentTabSheet(),
 				new InterventionVariablesTabComponentWithController(
 						intervention),
-				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__VARIABLES_TAB,
-				ThemeImageStrings.COMPONENT_ICON));
+						AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__VARIABLES_TAB,
+						ThemeImageStrings.COMPONENT_ICON));
 
 		// Add monitoring rules tab
 		registerToSetEditingDependingOnMessaging(addPointableTab(
-				getContentAccordion(),
+				getContentTabSheet(),
 				new MonitoringRulesEditComponentWithController(intervention),
 				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__MONITORING_RULES_TAB,
 				ThemeImageStrings.COMPONENT_ICON));
 
 		// Add monitoring message groups tab
 		registerToSetEditingDependingOnMessaging(addPointableTab(
-				getContentAccordion(),
+				getContentTabSheet(),
 				new MonitoringMessageGroupsTabComponentWithController(
 						intervention),
-				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__MONITORING_MESSAGE_GROUPS_TAB,
-				ThemeImageStrings.COMPONENT_ICON));
+						AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__MONITORING_MESSAGE_GROUPS_TAB,
+						ThemeImageStrings.COMPONENT_ICON));
 
 		if (getUISession().isAdmin()) {
 			// Add intervention access tab
 			addPointableTab(
-					getContentAccordion(),
+					getContentTabSheet(),
 					new InterventionAccessTabComponentWithController(
 							intervention),
-					AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__ACCESS_TAB,
-					ThemeImageStrings.COMPONENT_ICON);
+							AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__ACCESS_TAB,
+							ThemeImageStrings.COMPONENT_ICON);
 		}
 
 	}

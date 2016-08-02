@@ -107,7 +107,7 @@ public class ScreeningSurveyEditComponentWithController extends
 		feedbacksTable.setSortAscending(true);
 		feedbacksTable.setSortEnabled(false);
 
-		// handle survey type adjusments (hide feedback area for intermediate
+		// handle survey type adjustments (hide feedback area for intermediate
 		// surveys)
 		if (screeningSurvey.isIntermediateSurvey()) {
 			getFeedbacksLabel().setVisible(false);
@@ -323,24 +323,23 @@ public class ScreeningSurveyEditComponentWithController extends
 
 	public void switchActiveOrInactive() {
 		log.debug("Switch screening survey");
-		showConfirmationWindow(new ExtendableButtonClickListener() {
 
-			@Override
-			public void buttonClick(final ClickEvent event) {
-				try {
-					getScreeningSurveyAdministrationManagerService()
-							.screeningSurveySetActive(screeningSurvey,
-									!screeningSurvey.isActive());
-				} catch (final Exception e) {
-					closeWindow();
-					handleException(e);
-					return;
-				}
+		try {
+			// Change type
+			getScreeningSurveyAdministrationManagerService()
+					.screeningSurveySetActive(screeningSurvey,
+							!screeningSurvey.isActive());
+		} catch (final Exception e) {
+			handleException(e);
+			return;
+		}
 
-				adjustActiveOrInactive();
-				closeWindow();
-			}
-		}, null);
+		// Adapt UI
+		adjustActiveOrInactive();
+
+		getAdminUI()
+				.showInformationNotification(
+						AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_STATUS_CHANGED);
 	}
 
 	public void editSlide() {

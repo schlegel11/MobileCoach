@@ -123,6 +123,8 @@ InterventionScreeningSurveysTabComponent {
 				buttonClickListener);
 		screeningSurveysEditComponent.getSwitchTypeButton().addClickListener(
 				buttonClickListener);
+		screeningSurveysEditComponent.getSwitchStatusButton().addClickListener(
+				buttonClickListener);
 		screeningSurveysEditComponent.getRenameButton().addClickListener(
 				buttonClickListener);
 		screeningSurveysEditComponent.getEditButton().addClickListener(
@@ -188,6 +190,9 @@ InterventionScreeningSurveysTabComponent {
 			} else if (event.getButton() == interventionScreeningSurveyEditComponent
 					.getSwitchTypeButton()) {
 				switchTypeOfScreeningSurvey();
+			} else if (event.getButton() == interventionScreeningSurveyEditComponent
+					.getSwitchStatusButton()) {
+				switchStatusOfScreeningSurvey();
 			} else if (event.getButton() == interventionScreeningSurveyEditComponent
 					.getRenameButton()) {
 				renameScreeningSurvey();
@@ -376,6 +381,39 @@ InterventionScreeningSurveysTabComponent {
 		getAdminUI()
 		.showInformationNotification(
 				AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_TYPE_CHANGED);
+	}
+
+	public void switchStatusOfScreeningSurvey() {
+		log.debug("Switch status of screening survey");
+
+		try {
+			val selectedScreeningSurvey = selectedUIScreeningSurvey
+					.getRelatedModelObject(ScreeningSurvey.class);
+
+			// Change type
+			getScreeningSurveyAdministrationManagerService()
+			.screeningSurveySetActive(selectedScreeningSurvey,
+					!selectedScreeningSurvey.isActive());
+		} catch (final Exception e) {
+			handleException(e);
+			return;
+		}
+
+		// Adapt UI
+		val selectedScreeningSurvey = selectedUIScreeningSurvey
+				.getRelatedModelObject(ScreeningSurvey.class);
+
+		val screeningSurveysTable = getInterventionScreeningSurveyEditComponent()
+				.getScreeningSurveysTable();
+
+		removeAndAddModelObjectToBeanContainer(beanContainer,
+				selectedScreeningSurvey);
+		screeningSurveysTable.sort();
+		screeningSurveysTable.select(selectedScreeningSurvey.getId());
+
+		getAdminUI()
+		.showInformationNotification(
+				AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_STATUS_CHANGED);
 	}
 
 	public void renameScreeningSurvey() {
