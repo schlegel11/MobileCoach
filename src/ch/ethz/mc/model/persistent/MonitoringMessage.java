@@ -2,15 +2,15 @@ package ch.ethz.mc.model.persistent;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -101,7 +101,7 @@ public class MonitoringMessage extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see ch.ethz.mc.model.ModelObject#toUIModelObject()
 	 */
 	@Override
@@ -126,13 +126,13 @@ public class MonitoringMessage extends ModelObject {
 				linkedMediaObject != null ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
 						: Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NO),
+				linkedIntermediateSurvey != null ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+						: Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-						linkedIntermediateSurvey != null ? Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-								: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-								storeValueToVariableWithName != null ? storeValueToVariableWithName
-										: "", messageRules);
+				storeValueToVariableWithName != null ? storeValueToVariableWithName
+						: "", messageRules);
 
 		monitoringMessage.setRelatedModelObject(this);
 
@@ -141,13 +141,13 @@ public class MonitoringMessage extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see
 	 * ch.ethz.mc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
 	 * (java.util.List)
 	 */
 	@Override
-	protected void collectThisAndRelatedModelObjectsForExport(
+	public void collectThisAndRelatedModelObjectsForExport(
 			final List<ModelObject> exportList) {
 		exportList.add(this);
 
@@ -163,13 +163,13 @@ public class MonitoringMessage extends ModelObject {
 						Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE,
 						getId())) {
 			monitoringMessageRule
-			.collectThisAndRelatedModelObjectsForExport(exportList);
+					.collectThisAndRelatedModelObjectsForExport(exportList);
 		}
 	}
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see ch.ethz.mc.model.ModelObject#performOnDelete()
 	 */
 	@Override

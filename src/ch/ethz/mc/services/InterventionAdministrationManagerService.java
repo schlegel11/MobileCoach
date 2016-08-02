@@ -793,6 +793,56 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
+	public MonitoringMessage monitoringMessageImport(final File file)
+			throws FileNotFoundException, IOException {
+		val importedModelObjects = modelObjectExchangeService
+				.importModelObjects(file,
+						ModelObjectExchangeFormatTypes.MONITORING_MESSAGE);
+
+		for (val modelObject : importedModelObjects) {
+			if (modelObject instanceof MonitoringMessage) {
+				val monitoringMessage = (MonitoringMessage) modelObject;
+
+				// Adjust order
+				monitoringMessage.setOrder(0);
+
+				val highestOrderSlide = databaseManagerService
+						.findOneSortedModelObject(
+								MonitoringMessage.class,
+								Queries.MONITORING_MESSAGE__BY_MONITORING_MESSAGE_GROUP,
+								Queries.MONITORING_MESSAGE__SORT_BY_ORDER_DESC,
+								monitoringMessage.getMonitoringMessageGroup());
+
+				if (highestOrderSlide != null) {
+					monitoringMessage
+							.setOrder(highestOrderSlide.getOrder() + 1);
+				}
+
+				databaseManagerService.saveModelObject(monitoringMessage);
+
+				return monitoringMessage;
+			}
+		}
+
+		return null;
+	}
+
+	@Synchronized
+	public File monitoringMessageExport(
+			final MonitoringMessage monitoringMessage) {
+		final List<ModelObject> modelObjectsToExport = new ArrayList<ModelObject>();
+
+		log.debug("Recursively collect all model objects related to the monitoring message");
+		monitoringMessage
+		.collectThisAndRelatedModelObjectsForExport(modelObjectsToExport);
+
+		log.debug("Export monitoring message");
+		return modelObjectExchangeService.exportModelObjects(
+				modelObjectsToExport,
+				ModelObjectExchangeFormatTypes.MONITORING_MESSAGE);
+	}
+
+	@Synchronized
 	public void monitoringMessageDelete(
 			final MonitoringMessage monitoringMessage) {
 		databaseManagerService.deleteModelObject(monitoringMessage);
@@ -1720,9 +1770,8 @@ public class InterventionAdministrationManagerService {
 
 		variables.addAll(variablesManagerService
 				.getAllInterventionVariableNamesOfIntervention(interventionId));
-		variables
-				.addAll(variablesManagerService
-						.getAllSurveyVariableNamesOfIntervention(interventionId));
+		variables.addAll(variablesManagerService
+				.getAllSurveyVariableNamesOfIntervention(interventionId));
 		variables
 				.addAll(variablesManagerService
 						.getAllMonitoringMessageVariableNamesOfIntervention(interventionId));
@@ -1745,9 +1794,8 @@ public class InterventionAdministrationManagerService {
 
 		variables.addAll(variablesManagerService
 				.getAllInterventionVariableNamesOfIntervention(interventionId));
-		variables
-				.addAll(variablesManagerService
-						.getAllSurveyVariableNamesOfIntervention(interventionId));
+		variables.addAll(variablesManagerService
+				.getAllSurveyVariableNamesOfIntervention(interventionId));
 		variables
 				.addAll(variablesManagerService
 						.getAllMonitoringMessageVariableNamesOfIntervention(interventionId));
@@ -1770,9 +1818,8 @@ public class InterventionAdministrationManagerService {
 
 		variables.addAll(variablesManagerService
 				.getAllInterventionVariableNamesOfIntervention(interventionId));
-		variables
-				.addAll(variablesManagerService
-						.getAllSurveyVariableNamesOfIntervention(interventionId));
+		variables.addAll(variablesManagerService
+				.getAllSurveyVariableNamesOfIntervention(interventionId));
 		variables
 				.addAll(variablesManagerService
 						.getAllMonitoringMessageVariableNamesOfIntervention(interventionId));
@@ -1795,9 +1842,8 @@ public class InterventionAdministrationManagerService {
 
 		variables.addAll(variablesManagerService
 				.getAllInterventionVariableNamesOfIntervention(interventionId));
-		variables
-				.addAll(variablesManagerService
-						.getAllSurveyVariableNamesOfIntervention(interventionId));
+		variables.addAll(variablesManagerService
+				.getAllSurveyVariableNamesOfIntervention(interventionId));
 		variables
 				.addAll(variablesManagerService
 						.getAllMonitoringMessageVariableNamesOfIntervention(interventionId));
