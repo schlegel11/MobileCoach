@@ -45,9 +45,8 @@ STEPS:
 		<!-- Adjustments -->
 		<delete file="release/stats.sh" />
 		<delete file="release/WebContent/WEB-INF/lib/FileServletWrapper.jar" />
-		<echo file="release/.gitignore" append="false">
-			build/classes
-		</echo>
+		<echo file="release/.gitignore" append="false"
+			message="build${line.separator}out" />
 
 		<!-- Version info -->
 		<loadfile property="version" srcFile="WebContent/WEB-INF/version.txt" />
