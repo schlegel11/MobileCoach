@@ -286,18 +286,19 @@ public class RESTManagerService {
 	 * @param participantId
 	 * @param variable
 	 * @param value
+	 * @param isService
 	 * @throws ExternallyWriteProtectedVariableException
 	 */
 	public void writeVariable(final ObjectId participantId,
 			final String variable, final String value,
-			final boolean describesMediaUpload)
+			final boolean describesMediaUpload, final boolean isService)
 			throws ExternallyWriteProtectedVariableException {
 		log.debug("Try to write variable {} for participant {} with value {}",
 				variable, participantId, value);
 
 		try {
 			writeVariableValue(participantId, variable, value,
-					describesMediaUpload);
+					describesMediaUpload, isService);
 
 			log.debug("Wrote variable {} for participant {}", variable,
 					participantId);
@@ -384,7 +385,7 @@ public class RESTManagerService {
 			final String variable, final boolean isService)
 			throws ExternallyReadProtectedVariableException {
 		return variablesManagerService
-				.getExternallyReadableVariableValueForParticipant(
+				.externallyReadVariableValueForParticipant(
 						participantId, ImplementationConstants.VARIABLE_PREFIX
 								+ variable,
 						InterventionVariableWithValuePrivacyTypes.PRIVATE,
@@ -447,7 +448,7 @@ public class RESTManagerService {
 					final ExtendedVariable variableWithValue = new ExtendedVariable(
 							variable,
 							variablesManagerService
-									.getExternallyReadableVariableValueForParticipant(
+									.externallyReadVariableValueForParticipant(
 											relevantParticipant.getId(),
 											ImplementationConstants.VARIABLE_PREFIX
 													+ variable,
@@ -471,7 +472,7 @@ public class RESTManagerService {
 					final ExtendedVariable variableWithValue = new ExtendedVariable(
 							variable,
 							variablesManagerService
-									.getExternallyReadableVariableValueForParticipant(
+									.externallyReadVariableValueForParticipant(
 											relevantParticipant.getId(),
 											ImplementationConstants.VARIABLE_PREFIX
 													+ variable,
@@ -566,7 +567,7 @@ public class RESTManagerService {
 								.add(new Variable(
 										variable,
 										variablesManagerService
-												.getExternallyReadableVariableValueForParticipant(
+												.externallyReadVariableValueForParticipant(
 														relevantParticipant
 																.getId(),
 														ImplementationConstants.VARIABLE_PREFIX
@@ -595,7 +596,7 @@ public class RESTManagerService {
 								.add(new Variable(
 										variable,
 										variablesManagerService
-												.getExternallyReadableVariableValueForParticipant(
+												.externallyReadVariableValueForParticipant(
 														relevantParticipant
 																.getId(),
 														ImplementationConstants.VARIABLE_PREFIX
@@ -624,16 +625,17 @@ public class RESTManagerService {
 	 * @param variable
 	 * @param value
 	 * @param describesMediaUpload
+	 * @param isService
 	 * @throws ExternallyWriteProtectedVariableException
 	 */
 	@Synchronized
 	private void writeVariableValue(final ObjectId participantId,
 			final String variable, final String value,
-			final boolean describesMediaUpload)
+			final boolean describesMediaUpload, final boolean isService)
 			throws ExternallyWriteProtectedVariableException {
 		variablesManagerService.externallyWriteVariableForParticipant(
 				participantId, ImplementationConstants.VARIABLE_PREFIX
-						+ variable, value, describesMediaUpload);
+						+ variable, value, describesMediaUpload, isService);
 	}
 
 	/**

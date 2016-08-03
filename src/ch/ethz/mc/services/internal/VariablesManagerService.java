@@ -685,7 +685,7 @@ public class VariablesManagerService {
 	}
 
 	/*
-	 * External access methods
+	 * External or service access methods
 	 */
 	/**
 	 * Tries to read an variable of a specific participant from an external
@@ -698,22 +698,21 @@ public class VariablesManagerService {
 	 * @return
 	 * @throws ExternallyReadProtectedVariableException
 	 */
-	public String getExternallyReadableVariableValueForParticipant(
+	public String externallyReadVariableValueForParticipant(
 			final ObjectId participantId, final String variable,
 			final InterventionVariableWithValuePrivacyTypes requestPrivacyType,
-			boolean isService)
-			throws ExternallyReadProtectedVariableException {
+			boolean isService) throws ExternallyReadProtectedVariableException {
 
 		if (allSystemReservedVariableNames.contains(variable)) {
 			// It's a reserved variable
 			if (externallyReadableSystemVariableNames.contains(variable)) {
 				// Check privacy
-				if (requestPrivacyType
-						.isNotCoveredBy(InterventionVariableWithValuePrivacyTypes.PRIVATE)) {
+				if (!InterventionVariableWithValuePrivacyTypes.PRIVATE
+						.isAllowedAtGivenOrLessRestrictivePrivacyType(requestPrivacyType)) {
 					throw new ExternallyReadProtectedVariableException(
 							"The variable "
 									+ variable
-									+ " cannot be requested for the whole group or intervention");
+									+ " can only be requested for the participant itself");
 				}
 
 				try {
@@ -729,12 +728,12 @@ public class VariablesManagerService {
 			} else if (externallyReadableParticipantVariableNames
 					.contains(variable)) {
 				// Check privacy
-				if (requestPrivacyType
-						.isNotCoveredBy(InterventionVariableWithValuePrivacyTypes.PRIVATE)) {
+				if (!InterventionVariableWithValuePrivacyTypes.PRIVATE
+						.isAllowedAtGivenOrLessRestrictivePrivacyType(requestPrivacyType)) {
 					throw new ExternallyReadProtectedVariableException(
 							"The variable "
 									+ variable
-									+ " cannot be requested for the whole group or intervention");
+									+ " can only be requested for the participant itself");
 				}
 
 				val participant = databaseManagerService.getModelObjectById(
@@ -806,27 +805,28 @@ public class VariablesManagerService {
 
 			// Check access
 			if (isService) {
-				if (interventionVariable
+				if (!interventionVariable
 						.getAccessType()
-						.isNotCoveredBy(
+						.isAllowedAtGivenOrLessRestrictiveAccessType(
 								InterventionVariableWithValueAccessTypes.MANAGEABLE_BY_SERVICE)) {
 					throw new ExternallyReadProtectedVariableException();
 				}
 			} else {
-				if (interventionVariable
+				if (!interventionVariable
 						.getAccessType()
-						.isNotCoveredBy(
+						.isAllowedAtGivenOrLessRestrictiveAccessType(
 								InterventionVariableWithValueAccessTypes.EXTERNALLY_READABLE)) {
 					throw new ExternallyReadProtectedVariableException();
 				}
 			}
 			// Check privacy
-			if (requestPrivacyType.isNotCoveredBy(interventionVariable
-					.getPrivacyType())) {
+			if (!interventionVariable.getPrivacyType()
+					.isAllowedAtGivenOrLessRestrictivePrivacyType(
+							requestPrivacyType)) {
 				throw new ExternallyReadProtectedVariableException(
-						"The variable "
-								+ variable
-								+ " cannot be requested for the whole group or intervention");
+						"The variable " + variable
+								+ " cannot be requested for "
+								+ requestPrivacyType.toString());
 			}
 
 			// Find variable value for participant
@@ -848,18 +848,19 @@ public class VariablesManagerService {
 
 	/**
 	 * Tries to write a new variable value for a specific variable of a
-	 * participant from an external interface
+	 * participant from an external interface or service
 	 *
 	 * @param participantId
 	 * @param variable
 	 * @param value
 	 * @param describesMediaUpload
+	 * @param isService
 	 * @throws ExternallyWriteProtectedVariableException
 	 */
 	public void externallyWriteVariableForParticipant(
 			final ObjectId participantId, final String variable,
-			final String value, final boolean describesMediaUpload)
-			throws ExternallyWriteProtectedVariableException {
+			final String value, final boolean describesMediaUpload,
+			boolean isService) throws ExternallyWriteProtectedVariableException {
 		if (allSystemReservedVariableNames.contains(variable)) {
 			// It's a reserved variable; these can't be written in general from
 			// external interfaces
@@ -897,11 +898,20 @@ public class VariablesManagerService {
 				throw new ExternallyWriteProtectedVariableException(
 						"This variable is not defined, so it cannot be written");
 			}
-			if (interventionVariable
-					.getAccessType()
-					.isNotCoveredBy(
-							InterventionVariableWithValueAccessTypes.EXTERNALLY_READ_AND_WRITABLE)) {
-				throw new ExternallyWriteProtectedVariableException();
+			if (isService) {
+				if (!interventionVariable
+						.getAccessType()
+						.isAllowedAtGivenOrLessRestrictiveAccessType(
+								InterventionVariableWithValueAccessTypes.MANAGEABLE_BY_SERVICE)) {
+					throw new ExternallyWriteProtectedVariableException();
+				}
+			} else {
+				if (!interventionVariable
+						.getAccessType()
+						.isAllowedAtGivenOrLessRestrictiveAccessType(
+								InterventionVariableWithValueAccessTypes.EXTERNALLY_READ_AND_WRITABLE)) {
+					throw new ExternallyWriteProtectedVariableException();
+				}
 			}
 
 			// Write variable for participant
@@ -994,15 +1004,15 @@ public class VariablesManagerService {
 				throw new ExternallyWriteProtectedVariableException(
 						"This voting variable is not defined, so it cannot be written");
 			}
-			if (interventionVariable
+			if (!interventionVariable
 					.getAccessType()
-					.isNotCoveredBy(
+					.isAllowedAtGivenOrLessRestrictiveAccessType(
 							InterventionVariableWithValueAccessTypes.MANAGEABLE_BY_SERVICE)) {
 				throw new ExternallyWriteProtectedVariableException();
 			}
 			if (interventionVariable
 					.getAccessType()
-					.isCoveredBy(
+					.isAllowedAtGivenOrLessRestrictiveAccessType(
 							InterventionVariableWithValueAccessTypes.EXTERNALLY_READABLE)) {
 				throw new ExternallyWriteProtectedVariableException(
 						"Security problem: The variable is directly readable/writable from outside - allows hacking");
@@ -1013,15 +1023,15 @@ public class VariablesManagerService {
 					receivingParticipant.getIntervention())) {
 				throw new ExternallyWriteProtectedVariableException(
 						"This voting variable cannot be written because both participants involved are in different interventions");
-			} else if (interventionVariable
+			} else if (!interventionVariable
 					.getPrivacyType()
-					.isNotCoveredBy(
+					.isAllowedAtGivenOrLessRestrictivePrivacyType(
 							InterventionVariableWithValuePrivacyTypes.SHARED_WITH_GROUP)) {
 				throw new ExternallyWriteProtectedVariableException(
 						"This voting variable cannot be written by another participant because it's not shared with at least the group");
-			} else if (interventionVariable
+			} else if (!interventionVariable
 					.getPrivacyType()
-					.isNotCoveredBy(
+					.isAllowedAtGivenOrLessRestrictivePrivacyType(
 							InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION)
 					&& !participant.getGroup().equals(
 							receivingParticipant.getGroup())) {
@@ -1146,44 +1156,44 @@ public class VariablesManagerService {
 								+ reminderVariable
 								+ " is not defined, so credit can not be remembered/written");
 			}
-			if (interventionVariable
+			if (!interventionVariable
 					.getAccessType()
-					.isNotCoveredBy(
+					.isAllowedAtGivenOrLessRestrictiveAccessType(
 							InterventionVariableWithValueAccessTypes.MANAGEABLE_BY_SERVICE)) {
 				throw new ExternallyWriteProtectedVariableException(
 						"The credit variable has to be manageably by service");
 			}
 			if (interventionVariable
 					.getAccessType()
-					.isCoveredBy(
+					.isAllowedAtGivenOrLessRestrictiveAccessType(
 							InterventionVariableWithValueAccessTypes.EXTERNALLY_READ_AND_WRITABLE)) {
 				throw new ExternallyWriteProtectedVariableException(
 						"Security problem: The variable is directly writable from outside - allows hacking");
 			}
-			if (interventionCheckVariable
+			if (!interventionCheckVariable
 					.getAccessType()
-					.isNotCoveredBy(
+					.isAllowedAtGivenOrLessRestrictiveAccessType(
 							InterventionVariableWithValueAccessTypes.MANAGEABLE_BY_SERVICE)) {
 				throw new ExternallyWriteProtectedVariableException(
 						"The check variable has to be manageably by service");
 			}
 			if (interventionCheckVariable
 					.getAccessType()
-					.isCoveredBy(
+					.isAllowedAtGivenOrLessRestrictiveAccessType(
 							InterventionVariableWithValueAccessTypes.EXTERNALLY_READABLE)) {
 				throw new ExternallyWriteProtectedVariableException(
 						"Security problem: The check variable is directly readable/writable from outside - allows hacking");
 			}
-			if (interventionReminderVariable
+			if (!interventionReminderVariable
 					.getAccessType()
-					.isNotCoveredBy(
+					.isAllowedAtGivenOrLessRestrictiveAccessType(
 							InterventionVariableWithValueAccessTypes.MANAGEABLE_BY_SERVICE)) {
 				throw new ExternallyWriteProtectedVariableException(
 						"The reminder variable has to be manageably by service");
 			}
 			if (interventionReminderVariable
 					.getAccessType()
-					.isCoveredBy(
+					.isAllowedAtGivenOrLessRestrictiveAccessType(
 							InterventionVariableWithValueAccessTypes.EXTERNALLY_READABLE)) {
 				throw new ExternallyWriteProtectedVariableException(
 						"Security problem: The reminder variable is directly readable/writable from outside - allows hacking");
@@ -1290,9 +1300,9 @@ public class VariablesManagerService {
 			if (interventionVariable == null) {
 				return false;
 			}
-			if (interventionVariable
+			if (!interventionVariable
 					.getAccessType()
-					.isNotCoveredBy(
+					.isAllowedAtGivenOrLessRestrictiveAccessType(
 							InterventionVariableWithValueAccessTypes.MANAGEABLE_BY_SERVICE)) {
 				return false;
 			}

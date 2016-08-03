@@ -28,7 +28,7 @@ import lombok.extern.log4j.Log4j2;
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.rest.services.CreditsService;
-import ch.ethz.mc.rest.services.ImageUploadAndAccessService;
+import ch.ethz.mc.rest.services.ImageUploadService;
 import ch.ethz.mc.rest.services.VariableAccessService;
 import ch.ethz.mc.rest.services.VotingService;
 
@@ -51,7 +51,7 @@ public class RESTServiceApplication extends Application {
 
 		// Variable access service
 		services.add(new CreditsService(restManagerService));
-		services.add(new ImageUploadAndAccessService(restManagerService));
+		services.add(new ImageUploadService(restManagerService));
 		services.add(new VariableAccessService(restManagerService));
 		services.add(new VotingService(restManagerService));
 

@@ -1,6 +1,6 @@
 "use strict";
 
-var uploadVariable = "challenge02Image";
+var uploadVariable = "challengeImage01";
 
 // Execute when page is loaded succesful
 $(function () {
@@ -8,27 +8,28 @@ $(function () {
 
     createListeners();
     $("#REST-status").html("Requesting values...");
-    restTest("variable/read/challenge01Comment");
-    restTest("variable/readMany/challenge02Comment,challenge02Image");
+    restTest("variable/read/challengeComment01");
+    restTest("variable/readMany/challengeComment01,challengeImage01");
     
-    restTest("variable/write/challenge02Comment", "Hallo Welt!");
-    
-    restTest("variable/readGroupArray/challenge02Comment");
-    restTest("variable/readInterventionArray/challenge02Comment");
+    restTest("variable/write/challengeComment02", "Hallo Welt!");
 
-    restTest("variable/readGroupArrayMany/challenge02Comment,challenge02Image");
-    restTest("variable/readInterventionArrayMany/challenge02Comment");
+    restTest("variable/readGroupArray/challengeComment01");
+    restTest("variable/readInterventionArray/challengeComment01");
+
+    restTest("variable/readGroupArrayMany/challengeComment01,challengeImage01");
+    restTest("variable/readInterventionArrayMany/challengeComment02");
     
     restTest("variable/calculateGroupAverage/points");
     restTest("variable/calculateInterventionAverage/points");
     
-    restTest("voting/votings/challenge02Votes");
-    restTest("voting/votingsGroupArray/challenge02Votes");
-    restTest("voting/votingsInterventionArray/challenge02Votes");
+    restTest("voting/votings/challengeVotes02");
+    restTest("voting/votingsGroupArray/challengeVotes02");
+    restTest("voting/votingsInterventionArray/challengeVotes02");
     
-    restTest("voting/vote/challenge02Voting/579a42679afa061cf073416b");
-        
-    restTest("credits/storeCredit/points/challenge02");
+    restTest("voting/vote/challengeVoting02/579a42679afa061cf073416b");
+
+    restTest("variable/read/points");
+    restTest("credits/storeCredit/points/c02");
 });
 
 // Helpers

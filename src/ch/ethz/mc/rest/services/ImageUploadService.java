@@ -44,13 +44,17 @@ import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
 import ch.ethz.mc.services.internal.VariablesManagerService.ExternallyWriteProtectedVariableException;
 import ch.ethz.mc.tools.StringValidator;
 
+/**
+ * Service to allow upload of images using REST
+ *
+ * @author Andreas Filler
+ */
 @Path("/v01/image")
 @Log4j2
-public class ImageUploadAndAccessService extends AbstractFileUploadService {
+public class ImageUploadService extends AbstractFileUploadService {
 	RESTManagerService	restManagerService;
 
-	public ImageUploadAndAccessService(
-			final RESTManagerService restManagerService) {
+	public ImageUploadService(final RESTManagerService restManagerService) {
 		super(restManagerService);
 		this.restManagerService = restManagerService;
 	}
@@ -139,7 +143,7 @@ public class ImageUploadAndAccessService extends AbstractFileUploadService {
 		// Store reference to variable
 		try {
 			restManagerService.writeVariable(participantId, variable,
-					fileReference.replace("/", "-"), true);
+					fileReference.replace("/", "-"), true, true);
 		} catch (final ExternallyWriteProtectedVariableException e) {
 			try {
 				restManagerService.getFileStorageManagerService().deleteFile(

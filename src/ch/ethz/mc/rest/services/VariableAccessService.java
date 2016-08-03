@@ -396,7 +396,7 @@ public class VariableAccessService extends AbstractService {
 			}
 
 			restManagerService.writeVariable(participantId, variable.trim(),
-					content, false);
+					content, false, false);
 		} catch (final Exception e) {
 			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
 					.entity("Could not write variable: " + e.getMessage())
