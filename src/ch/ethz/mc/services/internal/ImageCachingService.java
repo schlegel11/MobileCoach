@@ -2,15 +2,15 @@ package ch.ethz.mc.services.internal;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -158,9 +158,17 @@ public class ImageCachingService {
 				+ RandomStringUtils.randomAlphanumeric(40) + "-" + key + ".jpg";
 
 		try {
-			BufferedImage image = ImageIO.read(sourceImageFile);
+			final BufferedImage readImage = ImageIO.read(sourceImageFile);
 
-			if (image.getColorModel().getTransparency() != Transparency.OPAQUE) {
+			final int w = readImage.getWidth();
+			final int h = readImage.getHeight();
+			BufferedImage image = new BufferedImage(w, h,
+					BufferedImage.TYPE_INT_ARGB);
+
+			final int[] rgb = readImage.getRGB(0, 0, w, h, null, 0, w);
+			image.setRGB(0, 0, w, h, rgb, 0, w);
+
+			if (readImage.getColorModel().getTransparency() != Transparency.OPAQUE) {
 				image = fillTransparentPixels(image, Color.WHITE);
 			}
 
