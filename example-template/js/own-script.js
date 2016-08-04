@@ -8,24 +8,25 @@ $(function () {
 
     createListeners();
     $("#REST-status").html("Requesting values...");
+
     restTest("variable/read/challengeComment01");
     restTest("variable/readMany/challengeComment01,challengeImage01");
-    
+
     restTest("variable/write/challengeComment02", "Hallo Welt!");
 
     restTest("variable/readGroupArray/challengeComment01");
     restTest("variable/readInterventionArray/challengeComment01");
 
-    restTest("variable/readGroupArrayMany/challengeComment01,challengeImage01");
+    restTest("variable/readGroupArrayMany/challengeComment01,challengeImage0");
     restTest("variable/readInterventionArrayMany/challengeComment02");
-    
+
     restTest("variable/calculateGroupAverage/points");
     restTest("variable/calculateInterventionAverage/points");
-    
+
     restTest("voting/votings/challengeVotes02");
     restTest("voting/votingsGroupArray/challengeVotes02");
     restTest("voting/votingsInterventionArray/challengeVotes02");
-    
+
     restTest("voting/vote/challengeVoting02/579a42679afa061cf073416b");
 
     restTest("variable/read/points");
@@ -45,18 +46,20 @@ var restTest = function (command, postData) {
     $.ajax({
         type: postData == null ? "GET" : "POST",
         data: postData,
-        dataType: postData == null ? "json" : "text/plain",
+        dataType: postData == null ? "json" : "text",
         contentType: postData == null ? "application/json; charset=UTF-8" : "text/plain; charset=UTF-8",
         beforeSend: function (request) {
             request.setRequestHeader("token", config.token);
         },
         url: config.rest + command,
         success: function (data) {
+            log("SUCCESS: " + command);
             $("#REST-status").html($("#REST-status").html() + "<br/>" + command + " --> SUCCESS: " + JSON.stringify(data, null, 2));
-            log(data);
+            log("Returned: " + data);
         },
         error: function (xhr, exception) {
-            $("#REST-status").html($("#REST-status").html() + "<br/>" + command + " --> " + xhr.status + " (" + xhr.statusText + "): " + xhr.responseText);
+            log("ERROR: " + command);
+            $("#REST-status").html($("#REST-status").html() + "<br/>" + command + " --> ERROR: " + xhr.status + " (" + xhr.statusText + "): " + xhr.responseText);
         }
     });
 };
@@ -68,10 +71,11 @@ var createListeners = function () {
         $.ajax({
             type: "POST",
             data: formData,
+            mimeType: "text/plain",
             cache: false,
             contentType: false,
             processData: false,
-            url: config.rest + "image/upload/"+uploadVariable,
+            url: config.rest + "image/upload/" + uploadVariable,
             xhr: function () {
                 var myXhr = $.ajaxSettings.xhr();
                 if (myXhr.upload) { // Check if upload property exists
@@ -83,11 +87,13 @@ var createListeners = function () {
                 request.setRequestHeader("token", config.token);
             },
             success: function (data) {
+                log("UPLOAD SUCCESS");
                 $("#REST-status").html($("#REST-status").html() + "<br/>UPLOAD --> SUCCESS: " + JSON.stringify(data, null, 2));
                 log(data);
             },
             error: function (xhr, exception) {
-                $("#REST-status").html($("#REST-status").html() + "<br/>UPLOAD --> " + xhr.status + " (" + xhr.statusText + "): " + xhr.responseText);
+                log("UPLOAD ERROR");
+                $("#REST-status").html($("#REST-status").html() + "<br/>UPLOAD --> ERROR: " + xhr.status + " (" + xhr.statusText + "): " + xhr.responseText);
             }
         });
     });

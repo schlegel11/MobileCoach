@@ -376,6 +376,7 @@ public class VariableAccessService extends AbstractService {
 	@POST
 	@Path("/write/{variable}")
 	@Consumes("text/plain")
+	@Produces("text/plain")
 	public Response variableWrite(@HeaderParam("token") final String token,
 			@PathParam("variable") final String variable,
 			@Context final HttpServletRequest request, String content) {
@@ -403,6 +404,6 @@ public class VariableAccessService extends AbstractService {
 					.build());
 		}
 
-		return Response.ok().build();
+		return Response.ok("OK").build();
 	}
 }
