@@ -316,10 +316,12 @@ public class RESTManagerService {
 	 * @param participantId
 	 * @param receivingParticipantId
 	 * @param variable
+	 * @param addVote
 	 * @throws ExternallyWriteProtectedVariableException
 	 */
 	public void writeVoting(final ObjectId participantId,
-			final ObjectId receivingParticipantId, final String variable)
+			final ObjectId receivingParticipantId, final String variable,
+			final boolean addVote)
 			throws ExternallyWriteProtectedVariableException {
 		log.debug(
 				"Try to write voting {} for participant {} from participant {}",
@@ -327,7 +329,7 @@ public class RESTManagerService {
 
 		try {
 			writeVotingFromParticipantForParticipant(participantId,
-					receivingParticipantId, variable);
+					receivingParticipantId, variable, addVote);
 
 			log.debug("Wrote voting {} for participant {} from participant {}",
 					variable, receivingParticipantId, participantId);
@@ -385,9 +387,8 @@ public class RESTManagerService {
 			final String variable, final boolean isService)
 			throws ExternallyReadProtectedVariableException {
 		return variablesManagerService
-				.externallyReadVariableValueForParticipant(
-						participantId, ImplementationConstants.VARIABLE_PREFIX
-								+ variable,
+				.externallyReadVariableValueForParticipant(participantId,
+						ImplementationConstants.VARIABLE_PREFIX + variable,
 						InterventionVariableWithValuePrivacyTypes.PRIVATE,
 						isService);
 	}
@@ -447,14 +448,13 @@ public class RESTManagerService {
 				for (val relevantParticipant : relevantParticipants) {
 					final ExtendedVariable variableWithValue = new ExtendedVariable(
 							variable,
-							variablesManagerService
-									.externallyReadVariableValueForParticipant(
-											relevantParticipant.getId(),
-											ImplementationConstants.VARIABLE_PREFIX
-													+ variable,
-											InterventionVariableWithValuePrivacyTypes.SHARED_WITH_GROUP,
-									isService), relevantParticipant
-									.getId().toHexString(),
+							variablesManagerService.externallyReadVariableValueForParticipant(
+									relevantParticipant.getId(),
+									ImplementationConstants.VARIABLE_PREFIX
+									+ variable,
+									InterventionVariableWithValuePrivacyTypes.SHARED_WITH_GROUP,
+									isService), relevantParticipant.getId()
+									.toHexString(),
 							participantId.equals(relevantParticipant.getId()),
 							null);
 
@@ -471,14 +471,13 @@ public class RESTManagerService {
 				for (val relevantParticipant : relevantParticipants) {
 					final ExtendedVariable variableWithValue = new ExtendedVariable(
 							variable,
-							variablesManagerService
-									.externallyReadVariableValueForParticipant(
-											relevantParticipant.getId(),
-											ImplementationConstants.VARIABLE_PREFIX
-													+ variable,
-											InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION,
-											isService), relevantParticipant
-									.getId().toHexString(),
+							variablesManagerService.externallyReadVariableValueForParticipant(
+									relevantParticipant.getId(),
+									ImplementationConstants.VARIABLE_PREFIX
+									+ variable,
+									InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION,
+									isService), relevantParticipant.getId()
+									.toHexString(),
 							participantId.equals(relevantParticipant.getId()),
 							null);
 
@@ -644,17 +643,20 @@ public class RESTManagerService {
 	 * @param participantId
 	 * @param receivingParticipantId
 	 * @param variable
+	 * @param addVote
 	 * @throws ExternallyWriteProtectedVariableException
 	 */
 	@Synchronized
 	private void writeVotingFromParticipantForParticipant(
 			final ObjectId participantId,
-			final ObjectId receivingParticipantId, final String variable)
+			final ObjectId receivingParticipantId, final String variable,
+			final boolean addVote)
 			throws ExternallyWriteProtectedVariableException {
 		variablesManagerService
 				.serviceWriteVotingFromParticipantForParticipant(participantId,
 						receivingParticipantId,
-						ImplementationConstants.VARIABLE_PREFIX + variable);
+						ImplementationConstants.VARIABLE_PREFIX + variable,
+						addVote);
 	}
 
 	/**

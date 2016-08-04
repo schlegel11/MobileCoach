@@ -930,15 +930,15 @@ public class VariablesManagerService {
 	 * participant from an service interface
 	 *
 	 * @param participantId
+	 * @param receivingParticipantId
 	 * @param variable
-	 * @param value
-	 * @param describesMediaUpload
+	 * @param addVote
 	 * @throws ExternallyWriteProtectedVariableException
 	 */
 	public void serviceWriteVotingFromParticipantForParticipant(
 			final ObjectId participantId,
-			final ObjectId receivingParticipantId, final String variable)
-			throws ExternallyWriteProtectedVariableException {
+			final ObjectId receivingParticipantId, final String variable,
+			boolean addVote) throws ExternallyWriteProtectedVariableException {
 		if (allSystemReservedVariableNames.contains(variable)) {
 			// It's a reserved variable; these can't be written in general from
 			// external interfaces
@@ -1049,21 +1049,56 @@ public class VariablesManagerService {
 
 			// Write variable for receiving participant
 			try {
-				if (participantVariableWithValue != null
-						&& participantVariableWithValue.getValue().length() >= ImplementationConstants.OBJECT_ID_LENGTH) {
+				if (addVote) {
+					// ADD voting
+					if (participantVariableWithValue != null
+							&& participantVariableWithValue.getValue().length() >= ImplementationConstants.OBJECT_ID_LENGTH) {
 
-					// Check for double voting
-					if (!participantVariableWithValue.getValue().contains(
-							participantId.toHexString())) {
+						// Check for double voting
+						if (!participantVariableWithValue.getValue().contains(
+								participantId.toHexString())) {
+							writeVariableValueOfParticipant(
+									receivingParticipantId,
+									variable,
+									participantVariableWithValue.getValue()
+											+ "," + participantId.toHexString(),
+									false, false);
+						}
+					} else {
 						writeVariableValueOfParticipant(receivingParticipantId,
-								variable,
-								participantVariableWithValue.getValue() + ","
-										+ participantId.toHexString(), false,
+								variable, participantId.toHexString(), false,
 								false);
 					}
 				} else {
-					writeVariableValueOfParticipant(receivingParticipantId,
-							variable, participantId.toHexString(), false, false);
+					// REMOVE voting
+					if (participantVariableWithValue != null
+							&& participantVariableWithValue.getValue().length() >= ImplementationConstants.OBJECT_ID_LENGTH) {
+
+						// Check for existence of voting
+						if (participantVariableWithValue.getValue().contains(
+								participantId.toHexString() + ",")) {
+							// Voting with ","
+							writeVariableValueOfParticipant(
+									receivingParticipantId,
+									variable,
+									participantVariableWithValue.getValue()
+											.replace(
+													participantId.toHexString()
+															+ ",", ""), false,
+									false);
+						} else if (participantVariableWithValue.getValue()
+								.contains(participantId.toHexString())) {
+							// Voting at end of list
+							writeVariableValueOfParticipant(
+									receivingParticipantId,
+									variable,
+									participantVariableWithValue
+											.getValue()
+											.replace(
+													participantId.toHexString(),
+													""), false, false);
+						}
+					}
 				}
 			} catch (final WriteProtectedVariableException
 					| InvalidVariableNameException e) {

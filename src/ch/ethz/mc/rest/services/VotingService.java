@@ -2,15 +2,15 @@ package ch.ethz.mc.rest.services;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,12 +36,13 @@ import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.rest.CollectionOfExtendedVariables;
+import ch.ethz.mc.model.rest.OK;
 import ch.ethz.mc.model.rest.Variable;
 import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mc.tools.StringValidator;
 
 /**
- * Service to read voting values and to vote for using REST
+ * Service to read voting values and to vote/unvote using REST
  *
  * @author Andreas Filler
  */
@@ -216,6 +217,7 @@ public class VotingService extends AbstractService {
 	 */
 	@GET
 	@Path("/vote/{variable}/{receivingParticipant}")
+	@Produces("application/json")
 	public Response votingVote(
 			@HeaderParam("token") final String token,
 			@PathParam("variable") final String variable,
@@ -249,13 +251,59 @@ public class VotingService extends AbstractService {
 			}
 
 			restManagerService.writeVoting(participantId,
-					receivingParticipantId, variable.trim());
+					receivingParticipantId, variable.trim(), true);
 		} catch (final Exception e) {
 			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
 					.entity("Could not write voting: " + e.getMessage())
 					.build());
 		}
 
-		return Response.ok().build();
+		return Response.ok(new OK()).build();
+	}
+
+	@GET
+	@Path("/unvote/{variable}/{receivingParticipant}")
+	@Produces("application/json")
+	public Response votingUnvote(
+			@HeaderParam("token") final String token,
+			@PathParam("variable") final String variable,
+			@PathParam("receivingParticipant") final String receivingParticipantIdString,
+			@Context final HttpServletRequest request) {
+		log.debug("Token {}: Remove voting {} for participant {}", token,
+				receivingParticipantIdString);
+		ObjectId participantId;
+		try {
+			participantId = checkAccessAndReturnParticipantId(token,
+					request.getSession());
+		} catch (final Exception e) {
+			throw e;
+		}
+
+		ObjectId receivingParticipantId;
+		if (ObjectId.isValid(receivingParticipantIdString)) {
+			receivingParticipantId = new ObjectId(receivingParticipantIdString);
+		} else {
+			throw new WebApplicationException(Response
+					.status(Status.BAD_REQUEST)
+					.entity("The given receiving participant is not valid")
+					.build());
+		}
+
+		try {
+			if (!StringValidator
+					.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
+							+ variable.trim())) {
+				throw new Exception("The variable name is not valid");
+			}
+
+			restManagerService.writeVoting(participantId,
+					receivingParticipantId, variable.trim(), false);
+		} catch (final Exception e) {
+			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
+					.entity("Could not write voting: " + e.getMessage())
+					.build());
+		}
+
+		return Response.ok(new OK()).build();
 	}
 }

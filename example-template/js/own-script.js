@@ -27,7 +27,8 @@ $(function () {
     restTest("voting/votingsGroupArray/challengeVotes02");
     restTest("voting/votingsInterventionArray/challengeVotes02");
 
-    restTest("voting/vote/challengeVoting02/579a42679afa061cf073416b");
+    restTest("voting/vote/challengeVotes02/579a42679afa061cf073416b");
+    restTest("voting/unvote/challengeVotes02/579a42679afa061cf073416b");
 
     restTest("variable/read/points");
     restTest("credits/storeCredit/points/c02");
@@ -46,7 +47,7 @@ var restTest = function (command, postData) {
     $.ajax({
         type: postData == null ? "GET" : "POST",
         data: postData,
-        dataType: postData == null ? "json" : "text",
+        dataType: "json",
         contentType: postData == null ? "application/json; charset=UTF-8" : "text/plain; charset=UTF-8",
         beforeSend: function (request) {
             request.setRequestHeader("token", config.token);
@@ -71,7 +72,6 @@ var createListeners = function () {
         $.ajax({
             type: "POST",
             data: formData,
-            mimeType: "text/plain",
             cache: false,
             contentType: false,
             processData: false,

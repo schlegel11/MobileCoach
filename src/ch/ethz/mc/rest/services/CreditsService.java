@@ -22,6 +22,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -32,6 +33,7 @@ import lombok.extern.log4j.Log4j2;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.model.rest.OK;
 import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mc.tools.StringValidator;
 
@@ -53,6 +55,7 @@ public class CreditsService extends AbstractService {
 	 */
 	@GET
 	@Path("/storeCredit/{variable}/{creditName}")
+	@Produces("application/json")
 	public Response storeCredit(@HeaderParam("token") final String token,
 			@PathParam("variable") final String variable,
 			@PathParam("creditName") final String creditName,
@@ -82,6 +85,6 @@ public class CreditsService extends AbstractService {
 					.build());
 		}
 
-		return Response.ok().build();
+		return Response.ok(new OK()).build();
 	}
 }
