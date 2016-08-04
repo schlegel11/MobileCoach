@@ -1075,28 +1075,16 @@ public class VariablesManagerService {
 							&& participantVariableWithValue.getValue().length() >= ImplementationConstants.OBJECT_ID_LENGTH) {
 
 						// Check for existence of voting
-						if (participantVariableWithValue.getValue().contains(
-								participantId.toHexString() + ",")) {
-							// Voting with ","
+						if (("," + participantVariableWithValue.getValue() + ",")
+								.contains("," + participantId.toHexString()
+										+ ",")) {
+							val newValue = participantVariableWithValue
+									.getValue()
+									.replace(participantId.toHexString(), "")
+									.replace(",,", ",");
 							writeVariableValueOfParticipant(
-									receivingParticipantId,
-									variable,
-									participantVariableWithValue.getValue()
-											.replace(
-													participantId.toHexString()
-															+ ",", ""), false,
-									false);
-						} else if (participantVariableWithValue.getValue()
-								.contains(participantId.toHexString())) {
-							// Voting at end of list
-							writeVariableValueOfParticipant(
-									receivingParticipantId,
-									variable,
-									participantVariableWithValue
-											.getValue()
-											.replace(
-													participantId.toHexString(),
-													""), false, false);
+									receivingParticipantId, variable, newValue,
+									false, false);
 						}
 					}
 				}

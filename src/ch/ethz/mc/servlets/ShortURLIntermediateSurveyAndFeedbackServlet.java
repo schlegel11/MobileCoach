@@ -346,22 +346,6 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 			}
 		}
 
-		session.setAttribute(GeneralSessionAttributeTypes.VALIDATOR.toString(),
-				true);
-		if (session.getAttribute(GeneralSessionAttributeTypes.TOKEN.toString()) == null) {
-			session.setAttribute(GeneralSessionAttributeTypes.TOKEN.toString(),
-					StringHelpers.createRandomString(40));
-		}
-		if (surveyId != null) {
-			session.setAttribute(
-					GeneralSessionAttributeTypes.CURRENT_SESSION.toString(),
-					surveyId);
-		} else if (feedbackId != null) {
-			session.setAttribute(
-					GeneralSessionAttributeTypes.CURRENT_SESSION.toString(),
-					feedbackId);
-		}
-
 		// Reset session if there already is a running session but for a
 		// different participant
 		if (session
@@ -383,9 +367,27 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 			}
 		}
 
+		// Set current participant for session
 		session.setAttribute(
 				GeneralSessionAttributeTypes.CURRENT_PARTICIPANT.toString(),
 				participantId);
+
+		// Create token
+		session.setAttribute(GeneralSessionAttributeTypes.VALIDATOR.toString(),
+				true);
+		if (session.getAttribute(GeneralSessionAttributeTypes.TOKEN.toString()) == null) {
+			session.setAttribute(GeneralSessionAttributeTypes.TOKEN.toString(),
+					StringHelpers.createRandomString(40));
+		}
+		if (surveyId != null) {
+			session.setAttribute(
+					GeneralSessionAttributeTypes.CURRENT_SESSION.toString(),
+					surveyId);
+		} else if (feedbackId != null) {
+			session.setAttribute(
+					GeneralSessionAttributeTypes.CURRENT_SESSION.toString(),
+					feedbackId);
+		}
 
 		// Handle survey or feedback request
 		if (surveyId != null) {

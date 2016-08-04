@@ -377,16 +377,6 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			}
 		}
 
-		session.setAttribute(GeneralSessionAttributeTypes.VALIDATOR.toString(),
-				true);
-		if (session.getAttribute(GeneralSessionAttributeTypes.TOKEN.toString()) == null) {
-			session.setAttribute(GeneralSessionAttributeTypes.TOKEN.toString(),
-					StringHelpers.createRandomString(40));
-		}
-		session.setAttribute(
-				GeneralSessionAttributeTypes.CURRENT_SESSION.toString(),
-				screeningSurveyId);
-
 		// Reset session if there already is a running session but for a
 		// different participant
 		ObjectId participantId;
@@ -419,6 +409,17 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				}
 			}
 		}
+
+		// Create token
+		session.setAttribute(GeneralSessionAttributeTypes.VALIDATOR.toString(),
+				true);
+		if (session.getAttribute(GeneralSessionAttributeTypes.TOKEN.toString()) == null) {
+			session.setAttribute(GeneralSessionAttributeTypes.TOKEN.toString(),
+					StringHelpers.createRandomString(40));
+		}
+		session.setAttribute(
+				GeneralSessionAttributeTypes.CURRENT_SESSION.toString(),
+				screeningSurveyId);
 
 		// Get information from session
 		boolean accessGranted;
@@ -536,7 +537,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 
 		// Uploaded media content URL
 		templateVariables.put(
-				GeneralSlideTemplateFieldTypes.UPLOADED_MEDIA_CONTENT_URL.toVariable(),
+				GeneralSlideTemplateFieldTypes.UPLOADED_MEDIA_CONTENT_URL
+						.toVariable(),
 				request.getRequestURL()
 						.toString()
 						.substring(

@@ -2,15 +2,15 @@ package ch.ethz.mc.services.internal;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,8 +31,10 @@ import java.util.HashMap;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
+import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.FileImageOutputStream;
 
 import lombok.extern.log4j.Log4j2;
@@ -106,8 +108,16 @@ public class ImageCachingService {
 	public File requestCacheImage(final File sourceImageFile, final int width,
 			final int height, final boolean withWatermark,
 			final boolean withCropping) {
-		final String key = sourceImageFile.getName() + "-" + width + "-"
-				+ height + "-" + withWatermark + "-" + withCropping;
+		final String key = sourceImageFile.getAbsoluteFile().getParentFile()
+				.getName()
+				+ "-"
+				+ width
+				+ "-"
+				+ height
+				+ "-"
+				+ withWatermark
+				+ "-"
+				+ withCropping;
 
 		log.debug("Requesting image with key '{}'", key);
 
@@ -158,19 +168,19 @@ public class ImageCachingService {
 				+ RandomStringUtils.randomAlphanumeric(40) + "-" + key + ".jpg";
 
 		try {
-			final BufferedImage readImage = ImageIO.read(sourceImageFile);
+			BufferedImage readImage = ImageIO.read(sourceImageFile);
+
+			if (readImage.getColorModel().getTransparency() != Transparency.OPAQUE) {
+				readImage = fillTransparentPixels(readImage, Color.WHITE);
+			}
 
 			final int w = readImage.getWidth();
 			final int h = readImage.getHeight();
-			BufferedImage image = new BufferedImage(w, h,
-					BufferedImage.TYPE_INT_ARGB);
+			final BufferedImage image = new BufferedImage(w, h,
+					BufferedImage.TYPE_INT_RGB);
 
 			final int[] rgb = readImage.getRGB(0, 0, w, h, null, 0, w);
 			image.setRGB(0, 0, w, h, rgb, 0, w);
-
-			if (readImage.getColorModel().getTransparency() != Transparency.OPAQUE) {
-				image = fillTransparentPixels(image, Color.WHITE);
-			}
 
 			targetImageFile = new File(mediaCacheFolder, filename);
 			resizeAndWriteFile(image, width, height, withWatermark,
@@ -332,7 +342,9 @@ public class ImageCachingService {
 
 		jpgWriter.setOutput(outputStream);
 		final IIOImage outputImage = new IIOImage(image, null, null);
-		jpgWriter.write(null, outputImage, jpgWriteParam);
+		final IIOMetadata metaData = jpgWriter.getDefaultImageMetadata(
+				new ImageTypeSpecifier(image), jpgWriteParam);
+		jpgWriter.write(metaData, outputImage, jpgWriteParam);
 		jpgWriter.dispose();
 	}
 }
