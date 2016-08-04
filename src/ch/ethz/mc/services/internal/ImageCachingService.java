@@ -23,6 +23,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.Transparency;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -105,9 +106,8 @@ public class ImageCachingService {
 	public File requestCacheImage(final File sourceImageFile, final int width,
 			final int height, final boolean withWatermark,
 			final boolean withCropping) {
-		final String key = sourceImageFile.getAbsolutePath().replace("/", "-")
-				+ "-" + width + "-" + height + "-" + withWatermark + "-"
-				+ withCropping;
+		final String key = sourceImageFile.getName() + "-" + width + "-"
+				+ height + "-" + withWatermark + "-" + withCropping;
 
 		log.debug("Requesting image with key '{}'", key);
 
@@ -158,7 +158,11 @@ public class ImageCachingService {
 				+ RandomStringUtils.randomAlphanumeric(40) + "-" + key + ".jpg";
 
 		try {
-			final BufferedImage image = ImageIO.read(sourceImageFile);
+			BufferedImage image = ImageIO.read(sourceImageFile);
+
+			if (image.getColorModel().getTransparency() != Transparency.OPAQUE) {
+				image = fillTransparentPixels(image, Color.WHITE);
+			}
 
 			targetImageFile = new File(mediaCacheFolder, filename);
 			resizeAndWriteFile(image, width, height, withWatermark,
@@ -168,6 +172,27 @@ public class ImageCachingService {
 		}
 
 		return targetImageFile;
+	}
+
+	/**
+	 * Fills transparent pixels for PNG/JPG compatibility
+	 *
+	 * @param image
+	 * @param fillColor
+	 * @return
+	 */
+	private BufferedImage fillTransparentPixels(final BufferedImage image,
+			final Color fillColor) {
+		final int w = image.getWidth();
+		final int h = image.getHeight();
+		final BufferedImage newImage = new BufferedImage(w, h,
+				BufferedImage.TYPE_INT_RGB);
+		final Graphics2D g = newImage.createGraphics();
+		g.setColor(fillColor);
+		g.fillRect(0, 0, w, h);
+		g.drawRenderedImage(image, null);
+		g.dispose();
+		return newImage;
 	}
 
 	/**
