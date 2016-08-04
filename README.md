@@ -150,6 +150,21 @@ An extended backend user guide will be published in the following months.
 
 ## Release notes
 
+### 1.4.1
+
+**Enhancements**
+
+* More compact user interface (saves space on screen)
+* Duplication for monitoring messages
+
+**Changes**
+
+* none
+
+**Bugfixes**
+
+* Many bugfixes for the features introduced in 1.4.0
+
 ### 1.4.0
 
 **Enhancements**
