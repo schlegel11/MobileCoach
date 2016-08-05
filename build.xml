@@ -38,9 +38,9 @@ This can be set in the "JRE" tab when configuring an ANT task in the eclipse GUI
 		<get src="https://bitbucket.org/mobilecoach/mobilecoach-fileservletwrapper/raw/eebf577521bfb782458b3db1911cfb031e786ebe/out/FileServletWrapper.jar" dest="WebContent/WEB-INF/lib/" verbose="true" usetimestamp="true" />
 
 		<!-- Compiling using eclipse -->
-		<eclipse.refreshLocal resource="" depth="infinite" />
-		<eclipse.incrementalBuild project="." kind="full" />
-
+		<basename property="project" file="${basedir}" />
+		<eclipse.refreshLocal resource="${project}" depth="infinite" />
+		<eclipse.incrementalBuild project="${project}" kind="full" />
 
 		<!-- Create .war file -->
 		<war destfile="out/MC.war" webxml="WebContent/WEB-INF/web.xml" update="true">
@@ -59,7 +59,7 @@ This can be set in the "JRE" tab when configuring an ANT task in the eclipse GUI
 		<eclipse.incrementalBuild project="." kind="full" />
 
 		<!-- Refresh -->
-		<eclipse.refreshLocal resource="" depth="infinite" />
+		<eclipse.refreshLocal resource="${project}" depth="infinite" />
 	</target>
 
 </project>
