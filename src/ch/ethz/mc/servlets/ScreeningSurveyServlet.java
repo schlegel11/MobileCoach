@@ -77,6 +77,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 	 */
 	@Override
 	public void init(final ServletConfig servletConfig) throws ServletException {
+		super.init(servletConfig);
 		// Only start servlet if context is ready
 		if (!MC.getInstance().isReady()) {
 			log.error("Servlet {} can't be started. Context is not ready!",
@@ -92,7 +93,6 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		mustacheFactory = createMustacheFactory();
 
 		log.info("Servlet initialized.");
-		super.init(servletConfig);
 	}
 
 	/**

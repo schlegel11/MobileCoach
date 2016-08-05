@@ -2,15 +2,15 @@ package ch.ethz.mc.servlets;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -46,6 +46,7 @@ public class DefaultWrapperServlet extends HttpServlet {
 	 */
 	@Override
 	public void init(final ServletConfig servletConfig) throws ServletException {
+		super.init(servletConfig);
 		// Only start servlet if context is ready
 		if (!MC.getInstance().isReady()) {
 			log.error("Servlet {} can't be started. Context is not ready!",
@@ -56,12 +57,11 @@ public class DefaultWrapperServlet extends HttpServlet {
 		log.info("Initializing servlet...");
 
 		log.info("Servlet initialized.");
-		super.init(servletConfig);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see
 	 * javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest
 	 * , javax.servlet.http.HttpServletResponse)
