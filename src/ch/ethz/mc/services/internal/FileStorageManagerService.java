@@ -33,6 +33,7 @@ import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.MediaObject;
+import ch.ethz.mc.model.persistent.ParticipantVariableWithValue;
 
 import com.google.gwt.thirdparty.guava.common.io.Files;
 
@@ -89,10 +90,10 @@ public class FileStorageManagerService {
 			throw new FileNotFoundException();
 		}
 
-		// Checking for file consistency in both ways:
+		// Checking for file file storage consistency in both ways:
 		// a) Check if all required files exist
 		// a) Delete unused files
-		val requiredFileRefernces = new HashSet<String>();
+		HashSet<String> requiredFileReferences = new HashSet<String>();
 
 		log.info("Checking media objects and storage folder for consistency:");
 		val mediaObjects = databaseManagerService.findModelObjects(
@@ -101,7 +102,7 @@ public class FileStorageManagerService {
 		for (val mediaObject : mediaObjects) {
 			if (mediaObject.getFileReference() != null) {
 				final String fileReference = mediaObject.getFileReference();
-				requiredFileRefernces.add(fileReference.split("/")[0]);
+				requiredFileReferences.add(fileReference.split("/")[0]);
 				if (getFileByReference(fileReference, FILE_STORES.STORAGE) == null) {
 					log.warn(
 							"Media object {} contains missing file reference {}",
@@ -114,7 +115,45 @@ public class FileStorageManagerService {
 			if (file.isDirectory()
 					&& file.getName().startsWith(
 							ImplementationConstants.FILE_STORAGE_PREFIX)
-					&& !requiredFileRefernces.contains(file.getName())) {
+					&& !requiredFileReferences.contains(file.getName())) {
+				log.debug("Deleting unused resource {}", file.getAbsolutePath());
+				for (val nestedFile : file.listFiles()) {
+					nestedFile.delete();
+				}
+				file.delete();
+			}
+		}
+
+		// Checking for media upload file consistency in both ways:
+		// a) Check if all required files exist
+		// a) Delete unused files
+		requiredFileReferences = new HashSet<String>();
+
+		log.info("Checking variables and media upload folder for consistency:");
+		val mediaUploadVariables = databaseManagerService
+				.findModelObjects(
+						ParticipantVariableWithValue.class,
+						Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_DESCRIBES_MEDIA_UPLOAD,
+						true);
+
+		for (val mediaUploadVariable : mediaUploadVariables) {
+			if (mediaUploadVariable.getValue() != null) {
+				final String fileReference = mediaUploadVariable.getValue();
+				requiredFileReferences.add(fileReference.split("-")[0]);
+				if (getFileByReference(fileReference, FILE_STORES.MEDIA_UPLOAD) == null) {
+					log.warn(
+							"Media upload variable {} contains missing file reference {}",
+							mediaUploadVariable.getId(),
+							mediaUploadVariable.getValue());
+				}
+			}
+		}
+
+		for (val file : mediaUploadFolder.listFiles()) {
+			if (file.isDirectory()
+					&& file.getName().startsWith(
+							ImplementationConstants.FILE_STORAGE_PREFIX)
+							&& !requiredFileReferences.contains(file.getName())) {
 				log.debug("Deleting unused resource {}", file.getAbsolutePath());
 				for (val nestedFile : file.listFiles()) {
 					nestedFile.delete();
