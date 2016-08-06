@@ -108,11 +108,23 @@ public class HackingServlet extends HttpServlet {
 		// defined here
 
 		try {
-			// createQuiz();
-			// createdModelObjects.clear();
-			createExtraMessages();
-			// createdModelObjects.clear();
-
+			createQuiz("Emotion");
+			createdModelObjects.clear();
+			createQuiz("Stress");
+			createdModelObjects.clear();
+			createQuiz("Stress&Smoking");
+			createdModelObjects.clear();
+			createQuiz("Norm 1");
+			createdModelObjects.clear();
+			createQuiz("Norm 2");
+			createdModelObjects.clear();
+			createQuiz("Health Smoke");
+			createdModelObjects.clear();
+			createQuiz("Health NoSmoke");
+			createdModelObjects.clear();
+			createQuiz("Add");
+			createdModelObjects.clear();
+			// createExtraMessages();
 			// createdModelObjects.clear();
 		} catch (final IOException e) {
 			log.error("Error at bulk operation: {}", e.getMessage());
@@ -125,13 +137,13 @@ public class HackingServlet extends HttpServlet {
 		}
 	}
 
-	private void createQuiz() throws IOException {
-		val operationName = "create quiz";
+	private void createQuiz(final String quizName) throws IOException {
+		val operationName = "create quiz " + quizName;
 		log.debug(">> Starting {} operation...", operationName);
 
 		val PERFORM_CHANGE = false;
 		val interventionId = new ObjectId("579f775d9afa068926c91af5");
-		val quiz = "Add";
+		val quiz = quizName;
 		val quizReplyVariable = "$replyQuiz"
 				+ quiz.replace("&", "").replace(" ", "");
 
@@ -214,8 +226,6 @@ public class HackingServlet extends HttpServlet {
 
 						lString = fillLString(i, values, fields);
 						monitoringMessage.setTextWithPlaceholders(lString);
-						monitoringMessage
-						.setStoreValueToVariableWithName(quizReplyVariable);
 
 						db.saveModelObject(monitoringMessage);
 
