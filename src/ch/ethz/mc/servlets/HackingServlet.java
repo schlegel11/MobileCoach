@@ -2,15 +2,15 @@ package ch.ethz.mc.servlets;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -41,6 +41,7 @@ import ch.ethz.mc.model.AbstractModelObjectAccessService;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.persistent.MonitoringMessage;
 import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
+import ch.ethz.mc.model.persistent.MonitoringMessageRule;
 import ch.ethz.mc.model.persistent.subelements.LString;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import ch.ethz.mc.services.InterventionAdministrationManagerService;
@@ -108,24 +109,26 @@ public class HackingServlet extends HttpServlet {
 		// defined here
 
 		try {
-			createQuiz("Emotion");
-			createdModelObjects.clear();
-			createQuiz("Stress");
-			createdModelObjects.clear();
-			createQuiz("Stress&Smoking");
-			createdModelObjects.clear();
-			createQuiz("Norm 1");
-			createdModelObjects.clear();
-			createQuiz("Norm 2");
-			createdModelObjects.clear();
-			createQuiz("Health Smoke");
-			createdModelObjects.clear();
-			createQuiz("Health NoSmoke");
-			createdModelObjects.clear();
-			createQuiz("Add");
-			createdModelObjects.clear();
+			// createQuiz("Emotion");
+			// createdModelObjects.clear();
+			// createQuiz("Stress");
+			// createdModelObjects.clear();
+			// createQuiz("Stress&Smoking");
+			// createdModelObjects.clear();
+			// createQuiz("Norm 1");
+			// createdModelObjects.clear();
+			// createQuiz("Norm 2");
+			// createdModelObjects.clear();
+			// createQuiz("Health Smoke");
+			// createdModelObjects.clear();
+			// createQuiz("Health NoSmoke");
+			// createdModelObjects.clear();
+			// createQuiz("Add");
+			// createdModelObjects.clear();
 			// createExtraMessages();
 			// createdModelObjects.clear();
+			createStageMessages();
+			createdModelObjects.clear();
 		} catch (final IOException e) {
 			log.error("Error at bulk operation: {}", e.getMessage());
 
@@ -137,6 +140,7 @@ public class HackingServlet extends HttpServlet {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void createQuiz(final String quizName) throws IOException {
 		val operationName = "create quiz " + quizName;
 		log.debug(">> Starting {} operation...", operationName);
@@ -154,9 +158,9 @@ public class HackingServlet extends HttpServlet {
 		val files = new String[] {
 				"import_quiz_"
 						+ quiz.toLowerCase().replace("&", "_")
-						.replace(" ", "_") + "_DE.txt",
-						"import_quiz_"
-								+ quiz.toLowerCase().replace("&", "_")
+								.replace(" ", "_") + "_DE.txt",
+				"import_quiz_"
+						+ quiz.toLowerCase().replace("&", "_")
 								.replace(" ", "_") + "_FR.txt" };
 
 		for (int i = 0; i < fields.length; i++) {
@@ -183,8 +187,8 @@ public class HackingServlet extends HttpServlet {
 				switch (i) {
 					case 0:
 						monitoringMessageGroupQuiz = iam
-						.monitoringMessageGroupCreate("Quiz " + quiz,
-								interventionId);
+								.monitoringMessageGroupCreate("Quiz " + quiz,
+										interventionId);
 
 						iam.monitoringMessageGroupSetMessagesExceptAnswer(
 								monitoringMessageGroupQuiz, true);
@@ -207,7 +211,7 @@ public class HackingServlet extends HttpServlet {
 						LString lString = fillLString(i, values, fields);
 						monitoringMessage.setTextWithPlaceholders(lString);
 						monitoringMessage
-						.setStoreValueToVariableWithName(quizReplyVariable);
+								.setStoreValueToVariableWithName(quizReplyVariable);
 
 						db.saveModelObject(monitoringMessage);
 
@@ -235,13 +239,13 @@ public class HackingServlet extends HttpServlet {
 											.getId());
 
 							monitoringMessageRule
-							.setComment("Check quiz result");
+									.setComment("Check quiz result");
 							monitoringMessageRule
-							.setRuleWithPlaceholders(quizReplyVariable);
+									.setRuleWithPlaceholders(quizReplyVariable);
 							monitoringMessageRule
-							.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+									.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
 							monitoringMessageRule
-							.setRuleComparisonTermWithPlaceholders("");
+									.setRuleComparisonTermWithPlaceholders("");
 
 							db.saveModelObject(monitoringMessageRule);
 						}
@@ -268,7 +272,7 @@ public class HackingServlet extends HttpServlet {
 		val fields = new String[] { "de", "fr", "counter" };
 		val files = new String[] { "import_extra_messages_DE.txt",
 				"import_extra_messages_FR.txt",
-		"import_extra_messages_Counter.txt" };
+				"import_extra_messages_Counter.txt" };
 
 		for (int i = 0; i < fields.length; i++) {
 			fillValuesTable(values, PATH, files[i], fields[i]);
@@ -299,15 +303,88 @@ public class HackingServlet extends HttpServlet {
 						.monitoringMessageRuleCreate(monitoringMessage.getId());
 
 				monitoringMessageRule
-				.setComment("Date difference to $participation_extra_goal is "
+						.setComment("Date difference to $participation_extra_goal is "
+								+ values.get(fields[2]).get(i));
+				monitoringMessageRule
+						.setRuleWithPlaceholders("$participation_extra_goal");
+				monitoringMessageRule
+						.setRuleEquationSign(RuleEquationSignTypes.DATE_DIFFERENCE_VALUE_EQUALS);
+				monitoringMessageRule
+						.setRuleComparisonTermWithPlaceholders(values.get(
+								fields[2]).get(i));
+
+				db.saveModelObject(monitoringMessageRule);
+			}
+		}
+
+		log.debug(">> Finished {} operation", operationName);
+	}
+
+	private void createStageMessages() throws IOException {
+		val operationName = "create stage messages";
+		log.debug(">> Starting {} operation...", operationName);
+
+		val PERFORM_CHANGE = false;
+		val monitoringMessageGroupId = new ObjectId("57a633ec9afa06572deab1a5");
+
+		// Load values
+		val values = new Hashtable<String, List<String>>();
+
+		val fields = new String[] { "de", "fr", "before", "after" };
+		val files = new String[] { "import_stage_DE.txt",
+				"import_stage_FR.txt", "import_stage_before.txt",
+				"import_stage_after.txt" };
+
+		for (int i = 0; i < fields.length; i++) {
+			fillValuesTable(values, PATH, files[i], fields[i]);
+		}
+
+		val countGiver = fields[0];
+
+		// Check content
+		for (int i = 0; i < values.get(countGiver).size(); i++) {
+			String element = "";
+			for (final String field : fields) {
+				element += "\n" + field + ": "
+						+ values.get(field).get(i).replaceAll("\n", " // ");
+			}
+			log.debug(">> Element {}: {}", i, element);
+
+			// Perform operation
+			if (PERFORM_CHANGE) {
+				val monitoringMessage = iam
+						.monitoringMessageCreate(monitoringMessageGroupId);
+
+				val lString = fillLString(i, values, fields);
+				monitoringMessage.setTextWithPlaceholders(lString);
+
+				db.saveModelObject(monitoringMessage);
+
+				MonitoringMessageRule monitoringMessageRule = iam
+						.monitoringMessageRuleCreate(monitoringMessage.getId());
+
+				monitoringMessageRule.setComment("Check $stageCurrent matches "
 						+ values.get(fields[2]).get(i));
+				monitoringMessageRule.setRuleWithPlaceholders("$stageCurrent");
 				monitoringMessageRule
-				.setRuleWithPlaceholders("$participation_extra_goal");
+						.setRuleEquationSign(RuleEquationSignTypes.TEXT_VALUE_MATCHES_REGULAR_EXPRESSION);
 				monitoringMessageRule
-				.setRuleEquationSign(RuleEquationSignTypes.DATE_DIFFERENCE_VALUE_EQUALS);
+						.setRuleComparisonTermWithPlaceholders(values.get(
+								fields[2]).get(i));
+
+				db.saveModelObject(monitoringMessageRule);
+
+				monitoringMessageRule = iam
+						.monitoringMessageRuleCreate(monitoringMessage.getId());
+
+				monitoringMessageRule.setComment("Check $stageNew matches "
+						+ values.get(fields[3]).get(i));
+				monitoringMessageRule.setRuleWithPlaceholders("$stageNew");
 				monitoringMessageRule
-				.setRuleComparisonTermWithPlaceholders(values.get(
-						fields[2]).get(i));
+						.setRuleEquationSign(RuleEquationSignTypes.TEXT_VALUE_MATCHES_REGULAR_EXPRESSION);
+				monitoringMessageRule
+						.setRuleComparisonTermWithPlaceholders(values.get(
+								fields[3]).get(i));
 
 				db.saveModelObject(monitoringMessageRule);
 			}
@@ -327,7 +404,7 @@ public class HackingServlet extends HttpServlet {
 	 */
 	private void fillValuesTable(final Hashtable<String, List<String>> values,
 			final String path, final String filename, final String field)
-					throws IOException {
+			throws IOException {
 		// Read file
 		final FileReader fileReader = new FileReader(new File(path, filename));
 		final BufferedReader bufferedReader = new BufferedReader(fileReader);
@@ -380,7 +457,7 @@ public class HackingServlet extends HttpServlet {
 	 * Private class for hacking database manager service
 	 */
 	private class HackingDatabaseManager extends
-	AbstractModelObjectAccessService {
+			AbstractModelObjectAccessService {
 
 		@Override
 		public void saveModelObject(final ModelObject modelObject) {
