@@ -17,12 +17,14 @@ package ch.ethz.mc.ui.views.components.basics;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.lang.NullArgumentException;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
@@ -217,6 +219,7 @@ AbstractMonitoringRulesEditComponent {
 		getEditButton().addClickListener(buttonClickListener);
 		getExpandButton().addClickListener(buttonClickListener);
 		getCollapseButton().addClickListener(buttonClickListener);
+		getDuplicateButton().addClickListener(buttonClickListener);
 		getDeleteButton().addClickListener(buttonClickListener);
 	}
 
@@ -235,12 +238,8 @@ AbstractMonitoringRulesEditComponent {
 		}
 
 		for (final AbstractMonitoringRule abstractMonitoringRule : existingMonitoringRules) {
-			if (parentMonitoringRuleId == null) {
-				addItemToTree(abstractMonitoringRule.getId(), null);
-			} else {
-				addItemToTree(abstractMonitoringRule.getId(),
-						parentMonitoringRuleId);
-			}
+			addItemToTree(abstractMonitoringRule.getId(),
+					parentMonitoringRuleId);
 
 			monitoringRuleIdCache.add(abstractMonitoringRule.getId());
 
@@ -261,6 +260,8 @@ AbstractMonitoringRulesEditComponent {
 				expandOrCollapseTree(true);
 			} else if (event.getButton() == getCollapseButton()) {
 				expandOrCollapseTree(false);
+			} else if (event.getButton() == getDuplicateButton()) {
+				duplicateRule();
 			} else if (event.getButton() == getDeleteButton()) {
 				deleteRule();
 			}
@@ -371,7 +372,8 @@ AbstractMonitoringRulesEditComponent {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
-						addItemToTree(newAbstractMonitoringRule.getId(), null);
+						addItemToTree(newAbstractMonitoringRule.getId(),
+								selectedMonitoringRuleId);
 						rulesTree.select(newAbstractMonitoringRule.getId());
 
 						getAdminUI()
@@ -484,7 +486,6 @@ AbstractMonitoringRulesEditComponent {
 		}
 		// Care for sub structure when creating a new node
 		if (selectedMonitoringRuleId != null) {
-			container.setParent(monitoringRuleId, selectedMonitoringRuleId);
 			rulesTree.expandItem(selectedMonitoringRuleId);
 		}
 	}
@@ -500,9 +501,57 @@ AbstractMonitoringRulesEditComponent {
 					sameLevelTargetItemId, intervention.getId());
 		} else {
 			getInterventionAdministrationManagerService()
-					.monitoringReplyRuleMove(movement.ordinal(), sourceItemId,
-							parentItemId, sameLevelTargetItemId,
-							relatedMonitoringRuleId, isGotAnswerRule);
+			.monitoringReplyRuleMove(movement.ordinal(), sourceItemId,
+					parentItemId, sameLevelTargetItemId,
+					relatedMonitoringRuleId, isGotAnswerRule);
+		}
+	}
+
+	public void duplicateRule() {
+		log.debug("Duplicate rule");
+
+		final File temporaryBackupFile;
+		if (isMonitoringRule) {
+			temporaryBackupFile = getInterventionAdministrationManagerService()
+					.monitoringRuleExport(selectedMonitoringRuleId);
+		} else {
+			temporaryBackupFile = getInterventionAdministrationManagerService()
+					.monitoringReplyRuleExport(selectedMonitoringRuleId);
+		}
+
+		try {
+			final AbstractMonitoringRule importedMonitoringRule;
+			if (isMonitoringRule) {
+				importedMonitoringRule = getInterventionAdministrationManagerService()
+						.monitoringRuleImport(temporaryBackupFile);
+			} else {
+				importedMonitoringRule = getInterventionAdministrationManagerService()
+						.monitoringReplyRuleImport(temporaryBackupFile);
+			}
+
+			if (importedMonitoringRule == null) {
+				throw new NullArgumentException(
+						"Imported monitoring rule not found in import");
+			}
+
+			// Adapt UI
+			addItemToTree(importedMonitoringRule.getId(),
+					importedMonitoringRule.getIsSubRuleOfMonitoringRule());
+			rulesTree.select(importedMonitoringRule.getId());
+
+			adjust();
+
+			getAdminUI().showInformationNotification(
+					AdminMessageStrings.NOTIFICATION__RULE_DUPLICATED);
+		} catch (final Exception e) {
+			getAdminUI().showWarningNotification(
+					AdminMessageStrings.NOTIFICATION__RULE_DUPLICATION_FAILED);
+		}
+
+		try {
+			temporaryBackupFile.delete();
+		} catch (final Exception f) {
+			// Do nothing
 		}
 	}
 
