@@ -45,6 +45,7 @@ STEPS:
 		<!-- Adjustments -->
 		<delete file="release/stats.sh" />
 		<delete file="release/WebContent/WEB-INF/lib/FileServletWrapper.jar" />
+		<delete file="release/src/ch/ethz/mc/servlets/HackingServlet.java" />
 		<echo file="release/.gitignore" append="false"
 			message="build${line.separator}out${line.separator}FileServletWrapper.jar" />
 
