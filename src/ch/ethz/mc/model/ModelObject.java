@@ -29,6 +29,8 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 import org.bson.types.ObjectId;
 import org.jongo.Jongo;
 import org.jongo.MongoCollection;
@@ -109,6 +111,17 @@ public abstract class ModelObject {
 		}
 	}
 
+	/**
+	 * Creates a multiline string of the current {@link ModelObject}
+	 *
+	 * @return
+	 */
+	@JsonIgnore
+	public String toMultiLineString() {
+		return ToStringBuilder.reflectionToString(this,
+				ToStringStyle.MULTI_LINE_STYLE);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -117,8 +130,8 @@ public abstract class ModelObject {
 	@JsonIgnore
 	@Override
 	public String toString() {
-		return "[{" + this.getClass().getSimpleName() + "} id: " + id
-				+ ", content: " + toJSONString() + "]";
+		return "[" + this.getClass().getSimpleName() + "@" + id + ": "
+				+ toJSONString() + "]";
 	}
 
 	/**

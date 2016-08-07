@@ -37,6 +37,7 @@ import ch.ethz.mc.model.ui.UIModule;
 import ch.ethz.mc.modules.AbstractModule;
 import ch.ethz.mc.tools.OnDemandFileDownloader;
 import ch.ethz.mc.tools.OnDemandFileDownloader.OnDemandStreamResource;
+import ch.ethz.mc.tools.ReportGenerator;
 import ch.ethz.mc.ui.views.MainView;
 import ch.ethz.mc.ui.views.components.basics.FileUploadComponentWithController;
 import ch.ethz.mc.ui.views.components.basics.FileUploadComponentWithController.UploadListener;
@@ -208,7 +209,7 @@ public class AllInterventionsTabComponentWithController extends
 				buttonClickListener);
 
 		// Special handle for export button
-		val onDemandFileDownloader = new OnDemandFileDownloader(
+		val onDemandFileDownloaderExport = new OnDemandFileDownloader(
 				new OnDemandStreamResource() {
 
 					@Override
@@ -237,9 +238,45 @@ public class AllInterventionsTabComponentWithController extends
 								+ Constants.getFileExtension();
 					}
 				});
-		onDemandFileDownloader.extend(allInterventionsEditComponent
+		onDemandFileDownloaderExport.extend(allInterventionsEditComponent
 				.getExportButton());
 		allInterventionsEditComponent.getExportButton().setDisableOnClick(true);
+
+		// Special handle for report button
+		val onDemandFileDownloaderReport = new OnDemandFileDownloader(
+				new OnDemandStreamResource() {
+
+					@Override
+					@SneakyThrows(FileNotFoundException.class)
+					public InputStream getStream() {
+						try {
+							return new FileInputStream(
+									ReportGenerator
+											.getInstance()
+											.generateReport(
+													selectedUIIntervention
+															.getRelatedModelObject(Intervention.class)));
+						} catch (final FileNotFoundException e) {
+							log.warn("Error during report generation: {}",
+									e.getMessage());
+							throw e;
+						} finally {
+							allInterventionsEditComponent.getReportButton()
+									.setEnabled(true);
+						}
+					}
+
+					@Override
+					public String getFilename() {
+						return "Intervention_"
+								+ selectedUIIntervention.getInterventionName()
+										.replaceAll("[^A-Za-z0-9_. ]+", "_")
+								+ ".html";
+					}
+				});
+		onDemandFileDownloaderReport.extend(allInterventionsEditComponent
+				.getReportButton());
+		allInterventionsEditComponent.getReportButton().setDisableOnClick(true);
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
