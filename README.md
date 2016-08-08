@@ -81,10 +81,9 @@ If you are using Tomcat8.5 or newer, with the support for virtual servers, then 
 
 	-Dvirtualservername.xyz.mc.configuration="/PATH_TO_YOUR_FILE/configuration.properties"
 
+Also the following should be added to avoid encoding problems on several operating systems and/or RAM problems:
 
-Also the following should be added to avoid encoding problems on several operating systems:
-
-	-Dfile.encoding=UTF8
+	-server -Dfile.encoding=UTF8 -Djava.awt.headless=true -Xms2g -Xmx2g
 
 You should also add the following parameters to avoid problems with the Log4J logging system:
 
@@ -101,6 +100,9 @@ Change the **defaultAdminPassword** before the first startup. The user **admin**
 
 **Suggestion:**   
 You lost the password of the user **admin**? Shutdown the system, rename the user **admin** in the database collection **Author** to another unique name (never delete anything) and startup the system again.
+
+**Suggestion:**   
+*Mobile Coach* is tested with Apache Tomcat 8(.5)
 
 After deploying a (newly created) web archive (**.war**) to your server you can access the **MobileCoach** on your server at
 	
