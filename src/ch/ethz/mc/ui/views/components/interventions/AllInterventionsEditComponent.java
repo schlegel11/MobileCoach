@@ -116,10 +116,14 @@ public class AllInterventionsEditComponent extends AbstractCustomComponent {
 		}
 
 		// FIXME Module system has to be reimplemented in a more modular way in
-		// an upcoming release Hide modules table from now on
+		// an upcoming release - Hide modules table from now on
 		modulesLabel.setVisible(false);
 		modulesTable.setVisible(false);
 		openModuleButton.setVisible(false);
+
+		// FIXME Report feature is not completely implemented - Hide button
+		// until it's finalized
+		reportButton.setVisible(false);
 
 		// set table formatter
 		allInterventionsTable
@@ -289,7 +293,7 @@ public class AllInterventionsEditComponent extends AbstractCustomComponent {
 		problemsButton = new Button();
 		problemsButton.setCaption("!!! Problems");
 		problemsButton
-				.setIcon(new ThemeResource("img/problems-icon-small.png"));
+		.setIcon(new ThemeResource("img/problems-icon-small.png"));
 		problemsButton.setImmediate(true);
 		problemsButton.setWidth("100px");
 		problemsButton.setHeight("-1px");
