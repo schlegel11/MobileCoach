@@ -2,15 +2,15 @@ package ch.ethz.mc.model;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,6 +28,7 @@ public class Queries {
 	public static final String	OBJECT_ID																																																		= "{'_id':#}";
 
 	public static final String	INTERVENTION__ACTIVE_TRUE																																														= "{'active':true}";
+	public static final String	INTERVENTION__ACTIVE_TRUE_AND_AUTOMATICALLY_FINISH_SCREENING_SURVEYS_TRUE																																		= "{'active':true,'automaticallyFinishScreeningSurveys':true}";
 	public static final String	INTERVENTION__ACTIVE_TRUE_MONITORING_ACTIVE_TRUE																																								= "{'active':true,'monitoringActive':true}";
 
 	public static final String	SCREENING_SURVEY__ACTIVE_TRUE																																													= "{'active':true}";
@@ -166,7 +167,7 @@ public class Queries {
 
 	// Special
 	public static final String	EVERYTHING																																																		= "{}";
-	public static final String	UPDATE_VERSION_1__INTERVENTION__CHANGE_1																																										= "{$set:{'assignedSenderIdentification':null } }";
+	public static final String	UPDATE_VERSION_1__INTERVENTION__CHANGE_1																																										= "{$set:{'assignedSenderIdentification':null}}";
 	public static final String	UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_1																																										= "{$set:{'screeningSurveyStartedTimestamp':0}}";
 	public static final String	UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_2																																										= "{$set:{'monitoringStartedTimestamp' : 0 } }";
 	public static final String	UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_3																																										= "{$set:{'lastVisitedScreeningSurveySlide':null}}";
@@ -185,4 +186,5 @@ public class Queries {
 	public static final String	UPDATE_VERSION_3__GENERAL_UPDATE_FOR_FILLED_LSTRING																																								= "{$set:{'#':{'values':{#:#}}}}";
 	public static final String	UPDATE_VERSION_3__GENERAL_UPDATE_FOR_EMPTY_LSTRING																																								= "{$set:{'#':{'values':{}}}}";
 	public static final String	UPDATE_VERSION_5__GENERAL_UPDATE_FOR_COMMENT																																									= "{$set:{'comment':''}}";
+	public static final String	UPDATE_VERSION_6__INTERVENTION__CHANGE_1																																										= "{$set:{'automaticallyFinishScreeningSurveys':false}}";
 }

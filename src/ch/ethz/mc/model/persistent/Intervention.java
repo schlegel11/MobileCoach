@@ -2,15 +2,15 @@ package ch.ethz.mc.model.persistent;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,16 +34,16 @@ import ch.ethz.mc.model.ui.UIModelObject;
 
 /**
  * {@link ModelObject} to represent an {@link Intervention}
- * 
+ *
  * An {@link Intervention} describes the whole project consisting of a
  * {@link ScreeningSurvey}, {@link MonitoringRule}s and {@link Participant}s.
  * It's the heart of the whole system.
- * 
+ *
  * @author Andreas Filler
  */
 /**
  * @author Andreas Filler
- * 
+ *
  */
 @NoArgsConstructor
 @AllArgsConstructor
@@ -82,6 +82,14 @@ public class Intervention extends ModelObject {
 	private boolean	monitoringActive;
 
 	/**
+	 * Defines if {@link ScreeningSurvey}s of participants where all relevant
+	 * monitoring data is available will automatically be finished by the system
+	 */
+	@Getter
+	@Setter
+	private boolean	automaticallyFinishScreeningSurveys;
+
+	/**
 	 * The sender identification used to send messages to the
 	 * {@link Participant}s
 	 */
@@ -91,7 +99,7 @@ public class Intervention extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ch.ethz.mc.model.ModelObject#toUIModelObject()
 	 */
 	@Override
@@ -102,15 +110,15 @@ public class Intervention extends ModelObject {
 				active ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
 						: Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE),
+						monitoringActive,
+						monitoringActive ? Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
+								: Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE),
-				monitoringActive,
-				monitoringActive ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE),
-				assignedSenderIdentification == null ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: assignedSenderIdentification);
+								assignedSenderIdentification == null ? Messages
+										.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+										: assignedSenderIdentification);
 
 		intervention.setRelatedModelObject(this);
 
@@ -119,7 +127,7 @@ public class Intervention extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * ch.ethz.mc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
 	 * (java.util.List)
@@ -133,7 +141,7 @@ public class Intervention extends ModelObject {
 		for (val screeningSurvey : ModelObject.find(ScreeningSurvey.class,
 				Queries.SCREENING_SURVEY__BY_INTERVENTION, getId())) {
 			screeningSurvey
-					.collectThisAndRelatedModelObjectsForExport(exportList);
+			.collectThisAndRelatedModelObjectsForExport(exportList);
 		}
 
 		// Add intervention variables with values
@@ -142,14 +150,14 @@ public class Intervention extends ModelObject {
 				Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION,
 				getId())) {
 			interventionVariableWithValue
-					.collectThisAndRelatedModelObjectsForExport(exportList);
+			.collectThisAndRelatedModelObjectsForExport(exportList);
 		}
 
 		// Add monitoring rules
 		for (val monitoringRules : ModelObject.find(MonitoringRule.class,
 				Queries.MONITORING_RULE__BY_INTERVENTION, getId())) {
 			monitoringRules
-					.collectThisAndRelatedModelObjectsForExport(exportList);
+			.collectThisAndRelatedModelObjectsForExport(exportList);
 		}
 
 		// Add monitoring message groups
@@ -157,13 +165,13 @@ public class Intervention extends ModelObject {
 				MonitoringMessageGroup.class,
 				Queries.MONITORING_MESSAGE_GROUP__BY_INTERVENTION, getId())) {
 			monitoringMessageGroups
-					.collectThisAndRelatedModelObjectsForExport(exportList);
+			.collectThisAndRelatedModelObjectsForExport(exportList);
 		}
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ch.ethz.mc.model.ModelObject#performOnDelete()
 	 */
 	@Override

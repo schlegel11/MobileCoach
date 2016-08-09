@@ -974,7 +974,8 @@ public class SurveyExecutionManagerService {
 	 * Tries to finish all unfinished {@link ScreeningSurvey}s of
 	 * {@link Participant} with the following state:
 	 *
-	 * - the belonging intervention is active
+	 * - the belonging intervention is active and automatic finishing of surveys
+	 * is on
 	 * - the participant has all data for monitoring available
 	 * - the participant has not finished the screening survey
 	 * - the participant has not finished the monitoring
@@ -983,8 +984,9 @@ public class SurveyExecutionManagerService {
 	@Synchronized
 	public void finishUnfinishedScreeningSurveys() {
 		for (final val interventionId : databaseManagerService
-				.findModelObjectIds(Intervention.class,
-						Queries.INTERVENTION__ACTIVE_TRUE)) {
+				.findModelObjectIds(
+						Intervention.class,
+						Queries.INTERVENTION__ACTIVE_TRUE_AND_AUTOMATICALLY_FINISH_SCREENING_SURVEYS_TRUE)) {
 			for (final val participant : databaseManagerService
 					.findModelObjects(Participant.class,
 							Queries.PARTICIPANT__BY_INTERVENTION,

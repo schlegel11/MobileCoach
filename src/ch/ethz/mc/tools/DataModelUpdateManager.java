@@ -88,6 +88,9 @@ public class DataModelUpdateManager {
 				case 5:
 					updateToVersion5();
 					break;
+				case 6:
+					updateToVersion6();
+					break;
 			}
 
 			log.info("Update to version {} done", updateToVersionInThisStep);
@@ -483,5 +486,14 @@ public class DataModelUpdateManager {
 			collection.update(Queries.EVERYTHING).multi()
 					.with(Queries.UPDATE_VERSION_5__GENERAL_UPDATE_FOR_COMMENT);
 		}
+	}
+
+	/**
+	 * Changes for version 6:
+	 */
+	private static void updateToVersion6() {
+		val interventionCollection = jongo.getCollection("Intervention");
+		interventionCollection.update(Queries.EVERYTHING).multi()
+				.with(Queries.UPDATE_VERSION_6__INTERVENTION__CHANGE_1);
 	}
 }
