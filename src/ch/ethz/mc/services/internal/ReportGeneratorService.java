@@ -90,7 +90,7 @@ public class ReportGeneratorService {
 		@Override
 		public String stringify(final Object object) {
 			if (object instanceof AbstractSerializableTable) {
-				return ((AbstractSerializableTable) object).toSpecialTable();
+				return ((AbstractSerializableTable) object).toTable();
 			} else if (object instanceof List<?>) {
 				val buffer = new StringBuffer();
 				for (val item : (List<?>) object) {

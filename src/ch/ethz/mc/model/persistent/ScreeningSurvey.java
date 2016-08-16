@@ -187,23 +187,54 @@ public class ScreeningSurvey extends ModelObject {
 							Queries.INTERMEDIATE_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_SURVEY,
 							getId());
 			ModelObject
-					.delete(intermediateSurveysAndFeedbackParticipantShortURLsToDelete);
+			.delete(intermediateSurveysAndFeedbackParticipantShortURLsToDelete);
 		}
 	}
 
 	@Override
 	@JsonIgnore
-	public String toSpecialTable() {
-		String table = getH() + "Name:" + getS() + escape(name) + "\n";
-		table += getH() + "Template:" + getS() + escape(templatePath) + "\n";
-		table += getH() + "Passord:" + getS() + escape(password) + "\n";
-		table += getH()
-				+ "Type:"
-				+ getS()
-				+ (intermediateSurvey ? "Intermediate Survey"
-						: "Screening Survey") + "\n";
-		table += getH() + "Activation Status:" + getS() + formatStatus(active)
-				+ "\n";
+	public String toTable() {
+		String table = wrapRow(wrapHeader("Name:") + wrapField(escape(name)));
+		table += wrapRow(wrapHeader("Template:")
+				+ wrapField(escape(templatePath)));
+		table += wrapRow(wrapHeader("Password:") + wrapField(escape(password)));
+		table += wrapRow(wrapHeader("Type:")
+				+ wrapField(intermediateSurvey ? "Intermediate Survey"
+						: "Screening Survey"));
+		table += wrapRow(wrapHeader("Activation Status:")
+				+ wrapField(formatStatus(active)));
+
+		// Slides
+		StringBuffer buffer = new StringBuffer();
+		val screeningSurveySlides = ModelObject.findSorted(
+				ScreeningSurveySlide.class,
+				Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY,
+				Queries.SCREENING_SURVEY_SLIDE__SORT_BY_ORDER_ASC, getId());
+
+		for (val screeningSurveySlide : screeningSurveySlides) {
+			buffer.append(screeningSurveySlide.toTable());
+		}
+
+		if (buffer.length() > 0) {
+			table += wrapRow(wrapHeader("Slides:")
+					+ wrapField(buffer.toString()));
+		}
+
+		// Feedbacks
+		buffer = new StringBuffer();
+		val feedbacks = ModelObject.findSorted(Feedback.class,
+				Queries.FEEDBACK__BY_SCREENING_SURVEY,
+				Queries.FEEDBACK__SORT_BY_ORDER_ASC, getId());
+
+		for (val feedback : feedbacks) {
+			buffer.append(feedback.toTable());
+		}
+
+		if (buffer.length() > 0) {
+			table += wrapRow(wrapHeader("Feedbacks:")
+					+ wrapField(buffer.toString()));
+		}
+
 		return wrapTable(table);
 	}
 }

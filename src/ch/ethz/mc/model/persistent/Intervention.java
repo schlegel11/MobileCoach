@@ -215,18 +215,18 @@ public class Intervention extends ModelObject {
 
 	@Override
 	@JsonIgnore
-	public String toSpecialTable() {
-		String table = getH() + "Name:" + getS() + escape(name) + "\n";
-		table += getH() + "Created:" + getS() + formatDate(created) + "\n";
-		table += getH() + "Intervention Status:" + getS()
-				+ formatStatus(active) + "\n";
-		table += getH() + "Monitoring Status:" + getS() + formatStatus(active)
-				+ "\n";
-		table += getH() + "Screening Surveys shall automatically be finished:"
-				+ getS() + formatStatus(automaticallyFinishScreeningSurveys)
-				+ "\n";
-		table += getH() + "Assigned Sender Identification:" + getS()
-				+ assignedSenderIdentification + "\n";
+	public String toTable() {
+		String table = wrapRow(wrapHeader("Name:") + wrapField(escape(name)));
+		table += wrapRow(wrapHeader("Created:")
+				+ wrapField(formatDate(created)));
+		table += wrapRow(wrapHeader("Intervention Status:")
+				+ wrapField(formatStatus(active)));
+		table += wrapRow(wrapHeader("Monitoring Status:")
+				+ wrapField(formatStatus(active)));
+		table += wrapRow(wrapHeader("Screening Surveys shall automatically be finished:")
+				+ wrapField(formatStatus(automaticallyFinishScreeningSurveys)));
+		table += wrapRow(wrapHeader("Assigned Sender Identification:")
+				+ wrapField(assignedSenderIdentification));
 		return wrapTable(table);
 	}
 }

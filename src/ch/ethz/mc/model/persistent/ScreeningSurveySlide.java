@@ -32,12 +32,15 @@ import org.bson.types.ObjectId;
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Messages;
+import ch.ethz.mc.model.AbstractSerializableTable;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.subelements.LString;
 import ch.ethz.mc.model.persistent.types.ScreeningSurveySlideQuestionTypes;
 import ch.ethz.mc.model.ui.UIModelObject;
 import ch.ethz.mc.model.ui.UIScreeningSurveySlide;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * {@link ModelObject} to represent an {@link ScreeningSurveySlide}
@@ -59,7 +62,7 @@ public class ScreeningSurveySlide extends ModelObject {
 	 */
 	@NoArgsConstructor
 	@AllArgsConstructor
-	public static class Question {
+	public static class Question extends AbstractSerializableTable {
 		/**
 		 * The question presented to the {@link Participant} containing
 		 * placeholders
@@ -116,6 +119,31 @@ public class ScreeningSurveySlide extends ModelObject {
 		@Setter
 		@NonNull
 		private String		defaultValue;
+
+		@Override
+		@JsonIgnore
+		public String toTable() {
+			String table = wrapRow(wrapHeader("Question:")
+					+ wrapField(escape(questionWithPlaceholders)));
+
+			for (int i = 0; i < answersWithPlaceholders.length; i++) {
+				table += wrapRow(wrapHeader("Answer " + (i + 1) + ":")
+						+ wrapField(escape(answersWithPlaceholders[i])));
+				table += wrapRow(wrapHeader("Value " + (i + 1) + ":")
+						+ wrapField(escape(answerValues[i])));
+			}
+
+			if (preSelectedAnswer >= 0) {
+				table += wrapRow(wrapHeader("Preselected Answer:")
+						+ wrapField(escape(answersWithPlaceholders[preSelectedAnswer])));
+			}
+			table += wrapRow(wrapHeader("Store value to variable:")
+					+ wrapField(escape(storeValueToVariableWithName)));
+			table += wrapRow(wrapHeader("Default Value:")
+					+ wrapField(escape(defaultValue)));
+
+			return wrapTable(table);
+		}
 	}
 
 	/**
@@ -263,9 +291,9 @@ public class ScreeningSurveySlide extends ModelObject {
 				titleWithPlaceholders.toString().equals("") ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 						: titleWithPlaceholders.toShortenedString(40),
-						comment.equals("") ? Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-								: comment,
+				comment.equals("") ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+						: comment,
 				questionType.toString(),
 				storeValueToVariableWithNames.length() > 0 ? storeValueToVariableWithNames
 						.toString() : Messages
@@ -326,5 +354,62 @@ public class ScreeningSurveySlide extends ModelObject {
 				Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE,
 				getId());
 		ModelObject.delete(rulesToDelete);
+	}
+
+	@Override
+	@JsonIgnore
+	public String toTable() {
+		String table = wrapRow(wrapHeader("Title:")
+				+ wrapField(escape(titleWithPlaceholders)));
+		table += wrapRow(wrapHeader("Comment:") + wrapField(escape(comment)));
+		table += wrapRow(wrapHeader("Question Type:")
+				+ wrapField(escape(questionType.toString())));
+
+		// Questions
+		final StringBuffer buffer = new StringBuffer();
+		for (val question : questions) {
+			buffer.append(question.toTable());
+		}
+
+		if (buffer.length() > 0) {
+			table += wrapRow(wrapHeader("Questions:")
+					+ wrapField(buffer.toString()));
+		}
+
+		table += wrapRow(wrapHeader("Optional Layout Attributes:")
+				+ wrapField(escape(optionalLayoutAttributeWithPlaceholders)));
+
+		table += wrapRow(wrapHeader("Is last slide:")
+				+ wrapField(formatStatus(isLastSlide)));
+
+		if (handsOverToFeedback != null) {
+			val feedback = ModelObject.get(Feedback.class, handsOverToFeedback);
+			if (feedback != null) {
+				table += wrapRow(wrapHeader("Hands over to Feedback:")
+						+ wrapField(escape(feedback.getName())));
+			} else {
+				table += wrapRow(wrapHeader("Hands over to Feedback:")
+						+ wrapField(formatWarning("Feedback set, but not found")));
+			}
+
+		}
+
+		// Slide Rules
+		// TODO
+		// buffer = new StringBuffer();
+		// val screeningSurveySlides = ModelObject.findSorted(
+		// ScreeningSurveySlide.class,
+		// Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY,
+		// Queries.SCREENING_SURVEY_SLIDE__SORT_BY_ORDER_ASC, getId());
+		//
+		// for (val screeningSurveySlide : screeningSurveySlides) {
+		// buffer.append(screeningSurveySlide.toSpecialTable() + "\n");
+		// }
+		//
+		// if (buffer.length() > 0) {
+		// table += getH() + "Slides:" + getS() + buffer.toString();
+		// }
+
+		return wrapTable(table);
 	}
 }
