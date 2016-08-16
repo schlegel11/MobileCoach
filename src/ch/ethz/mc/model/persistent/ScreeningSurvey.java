@@ -36,6 +36,8 @@ import ch.ethz.mc.model.persistent.subelements.LString;
 import ch.ethz.mc.model.ui.UIModelObject;
 import ch.ethz.mc.model.ui.UIScreeningSurvey;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * {@link ModelObject} to represent an {@link ScreeningSurvey}
  *
@@ -187,5 +189,21 @@ public class ScreeningSurvey extends ModelObject {
 			ModelObject
 					.delete(intermediateSurveysAndFeedbackParticipantShortURLsToDelete);
 		}
+	}
+
+	@Override
+	@JsonIgnore
+	public String toSpecialTable() {
+		String table = getH() + "Name:" + getS() + escape(name) + "\n";
+		table += getH() + "Template:" + getS() + escape(templatePath) + "\n";
+		table += getH() + "Passord:" + getS() + escape(password) + "\n";
+		table += getH()
+				+ "Type:"
+				+ getS()
+				+ (intermediateSurvey ? "Intermediate Survey"
+						: "Screening Survey") + "\n";
+		table += getH() + "Activation Status:" + getS() + formatStatus(active)
+				+ "\n";
+		return wrapTable(table);
 	}
 }

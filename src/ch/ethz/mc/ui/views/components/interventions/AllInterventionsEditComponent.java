@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.interventions;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -123,40 +123,40 @@ public class AllInterventionsEditComponent extends AbstractCustomComponent {
 
 		// FIXME Report feature is not completely implemented - Hide button
 		// until it's finalized
-		reportButton.setVisible(false);
+		// reportButton.setVisible(false);
 
 		// set table formatter
 		allInterventionsTable
-		.setCellStyleGenerator(new Table.CellStyleGenerator() {
-			@Override
-			public String getStyle(final Table source,
-					final Object itemId, final Object propertyId) {
-				if (propertyId != null) {
-					if (propertyId
-							.equals(UIIntervention.INTERVENTION_STATUS)) {
-						val uiIntervention = getUIModelObjectFromTableByObjectId(
-								source, UIIntervention.class, itemId);
-						if (uiIntervention
-								.isBooleanInterventionStatus()) {
-							return "active";
-						} else {
-							return "inactive";
+				.setCellStyleGenerator(new Table.CellStyleGenerator() {
+					@Override
+					public String getStyle(final Table source,
+							final Object itemId, final Object propertyId) {
+						if (propertyId != null) {
+							if (propertyId
+									.equals(UIIntervention.INTERVENTION_STATUS)) {
+								val uiIntervention = getUIModelObjectFromTableByObjectId(
+										source, UIIntervention.class, itemId);
+								if (uiIntervention
+										.isBooleanInterventionStatus()) {
+									return "active";
+								} else {
+									return "inactive";
+								}
+							} else if (propertyId
+									.equals(UIIntervention.MONITORING_STATUS)) {
+								val uiIntervention = getUIModelObjectFromTableByObjectId(
+										source, UIIntervention.class, itemId);
+								if (uiIntervention.isBooleanMessagingStatus()) {
+									return "active";
+								} else {
+									return "inactive";
+								}
+							}
 						}
-					} else if (propertyId
-							.equals(UIIntervention.MONITORING_STATUS)) {
-						val uiIntervention = getUIModelObjectFromTableByObjectId(
-								source, UIIntervention.class, itemId);
-						if (uiIntervention.isBooleanMessagingStatus()) {
-							return "active";
-						} else {
-							return "inactive";
-						}
-					}
-				}
 
-				return null;
-			}
-		});
+						return null;
+					}
+				});
 	}
 
 	protected void adjust(final boolean interventionSelected,
@@ -293,7 +293,7 @@ public class AllInterventionsEditComponent extends AbstractCustomComponent {
 		problemsButton = new Button();
 		problemsButton.setCaption("!!! Problems");
 		problemsButton
-		.setIcon(new ThemeResource("img/problems-icon-small.png"));
+				.setIcon(new ThemeResource("img/problems-icon-small.png"));
 		problemsButton.setImmediate(true);
 		problemsButton.setWidth("100px");
 		problemsButton.setHeight("-1px");

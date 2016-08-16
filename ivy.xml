@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE ivy-module [
 	<!ENTITY log4j.version "2.2">
-	<!ENTITY commons-lang.version "2.6">
+	<!ENTITY commons-lang3.version "3.4">
 	<!ENTITY commons-collection.version "3.2.1">
 	<!ENTITY commons-io.version "2.4">
 	<!ENTITY geronimo-validation_1.0_spec.version "1.1">
@@ -47,8 +47,8 @@
 			rev="&log4j.version;" />
 
 		<!-- Apache Commons -->
-		<dependency org="commons-lang" name="commons-lang"
-			rev="&commons-lang.version;" />
+		<dependency org="org.apache.commons" name="commons-lang3"
+			rev="&commons-lang3.version;" />
 		<dependency org="commons-collections" name="commons-collections"
 			rev="&commons-collection.version;" />
 		<dependency org="commons-io" name="commons-io" rev="&commons-io.version;" />

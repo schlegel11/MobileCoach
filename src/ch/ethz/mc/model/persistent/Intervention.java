@@ -32,6 +32,8 @@ import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.ui.UIIntervention;
 import ch.ethz.mc.model.ui.UIModelObject;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * {@link ModelObject} to represent an {@link Intervention}
  *
@@ -209,5 +211,22 @@ public class Intervention extends ModelObject {
 		val screeningSurveysToDelete = ModelObject.find(ScreeningSurvey.class,
 				Queries.SCREENING_SURVEY__BY_INTERVENTION, getId());
 		ModelObject.delete(screeningSurveysToDelete);
+	}
+
+	@Override
+	@JsonIgnore
+	public String toSpecialTable() {
+		String table = getH() + "Name:" + getS() + escape(name) + "\n";
+		table += getH() + "Created:" + getS() + formatDate(created) + "\n";
+		table += getH() + "Intervention Status:" + getS()
+				+ formatStatus(active) + "\n";
+		table += getH() + "Monitoring Status:" + getS() + formatStatus(active)
+				+ "\n";
+		table += getH() + "Screening Surveys shall automatically be finished:"
+				+ getS() + formatStatus(automaticallyFinishScreeningSurveys)
+				+ "\n";
+		table += getH() + "Assigned Sender Identification:" + getS()
+				+ assignedSenderIdentification + "\n";
+		return wrapTable(table);
 	}
 }

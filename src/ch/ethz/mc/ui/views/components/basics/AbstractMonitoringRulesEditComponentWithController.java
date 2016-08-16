@@ -24,7 +24,6 @@ import java.util.Set;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
-import org.apache.commons.lang.NullArgumentException;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
@@ -530,7 +529,7 @@ AbstractMonitoringRulesEditComponent {
 			}
 
 			if (importedMonitoringRule == null) {
-				throw new NullArgumentException(
+				throw new Exception(
 						"Imported monitoring rule not found in import");
 			}
 

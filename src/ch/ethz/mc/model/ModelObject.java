@@ -2,15 +2,15 @@ package ch.ethz.mc.model;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,9 +28,9 @@ import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
-import org.apache.commons.lang.NotImplementedException;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
+import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.bson.types.ObjectId;
 import org.jongo.Jongo;
 import org.jongo.MongoCollection;
@@ -51,7 +51,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Andreas Filler
  */
 @Log4j2
-public abstract class ModelObject {
+public abstract class ModelObject extends AbstractSerializableTable {
 	/**
 	 * The id of the {@link ModelObject}
 	 */
@@ -124,7 +124,7 @@ public abstract class ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ch.ethz.mc.model.ModelObject#toJSONString()
 	 */
 	@JsonIgnore
@@ -142,7 +142,7 @@ public abstract class ModelObject {
 	@JsonIgnore
 	public UIModelObject toUIModelObject() {
 		log.error("A model object should have been transformed to a UI model object, but the conversion is not implemented!");
-		throw new NotImplementedException(this.getClass());
+		throw new NotImplementedException(this.getClass().getName());
 	}
 
 	/**

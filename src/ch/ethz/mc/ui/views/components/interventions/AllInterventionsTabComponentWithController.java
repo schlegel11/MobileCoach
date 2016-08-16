@@ -26,9 +26,9 @@ import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
-import org.apache.commons.lang.NullArgumentException;
 import org.bson.types.ObjectId;
 
+import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.persistent.Intervention;
@@ -37,7 +37,6 @@ import ch.ethz.mc.model.ui.UIModule;
 import ch.ethz.mc.modules.AbstractModule;
 import ch.ethz.mc.tools.OnDemandFileDownloader;
 import ch.ethz.mc.tools.OnDemandFileDownloader.OnDemandStreamResource;
-import ch.ethz.mc.tools.ReportGenerator;
 import ch.ethz.mc.ui.views.MainView;
 import ch.ethz.mc.ui.views.components.basics.FileUploadComponentWithController;
 import ch.ethz.mc.ui.views.components.basics.FileUploadComponentWithController.UploadListener;
@@ -251,8 +250,8 @@ public class AllInterventionsTabComponentWithController extends
 					public InputStream getStream() {
 						try {
 							return new FileInputStream(
-									ReportGenerator
-											.getInstance()
+									MC.getInstance()
+											.getReportGeneratorService()
 											.generateReport(
 													selectedUIIntervention
 															.getRelatedModelObject(Intervention.class)));
@@ -368,7 +367,7 @@ public class AllInterventionsTabComponentWithController extends
 							.interventionImport(temporaryBackupFile, true);
 
 					if (importedIntervention == null) {
-						throw new NullArgumentException(
+						throw new Exception(
 								"Imported intervention not found in import");
 					}
 
@@ -416,7 +415,7 @@ public class AllInterventionsTabComponentWithController extends
 							.interventionImport(file, false);
 
 					if (importedIntervention == null) {
-						throw new NullArgumentException(
+						throw new Exception(
 								"Imported intervention not found in import");
 					}
 

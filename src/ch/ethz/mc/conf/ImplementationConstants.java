@@ -4,15 +4,15 @@ import java.awt.RenderingHints;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -120,8 +120,8 @@ public class ImplementationConstants {
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_VARIABLES_IN_STRING						= "\\$[a-zA-Z0-9_]+";
 	public static final String	VARIABLE_MATCH_MODIFIER												= "#";
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_MODIFIED_VARIABLES_IN_STRING			= VARIABLE_MATCH_MODIFIER
-			+ "[a-zA-Z0-9_]+"
-			+ VARIABLE_MATCH_MODIFIER;
+																											+ "[a-zA-Z0-9_]+"
+																											+ VARIABLE_MATCH_MODIFIER;
 	public static final String	VARIABLE_VALUE_MODIFIER_START										= "{";
 	public static final String	VARIABLE_VALUE_MODIFIER_END											= "}";
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_VALUE_MODIFIER							= "\\{[^\\}]+\\}";
@@ -132,4 +132,7 @@ public class ImplementationConstants {
 	public static final String	REGULAR_EXPRESSION_TO_CLEAN_DOUBLE_VALUES							= "\\.0+$";
 
 	public static final String	REGULAR_EXPRESSION_TO_FIND_BOLD_STRING_PARTS						= "\\*([\\w\\s]+)\\*";
+
+	public static final String	REPORT_TABLE_HEADER													= "##HEADER##";
+	public static final String	REPORT_TABLE_SEPARATOR												= "##SEP##";
 }

@@ -22,7 +22,6 @@ import java.io.File;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
-import org.apache.commons.lang.NullArgumentException;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
@@ -211,7 +210,7 @@ public class FeedbackEditComponentWithController extends FeedbackEditComponent {
 					.feedbackSlideImport(temporaryBackupFile, true);
 
 			if (importedFeedbackSlide == null) {
-				throw new NullArgumentException(
+				throw new Exception(
 						"Imported slide not found in import");
 			}
 
