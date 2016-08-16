@@ -162,4 +162,17 @@ public class AbstractSerializableTable {
 	protected String formatWarning(final String warning) {
 		return "⚠️ " + warning;
 	}
+
+	/**
+	 * Creates a link
+	 *
+	 * @param reference
+	 * @param name
+	 * @return
+	 */
+	@JsonIgnore
+	protected String createLink(final String reference, final String name) {
+		return "<a href=\"" + reference + "\" target=\"_blank\">"
+				+ escape(name) + "</a>";
+	}
 }

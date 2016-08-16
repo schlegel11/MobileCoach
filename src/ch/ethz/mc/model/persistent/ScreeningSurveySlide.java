@@ -2,15 +2,15 @@ package ch.ethz.mc.model.persistent;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,6 +31,7 @@ import org.bson.types.ObjectId;
 
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.AbstractSerializableTable;
 import ch.ethz.mc.model.ModelObject;
@@ -39,6 +40,7 @@ import ch.ethz.mc.model.persistent.subelements.LString;
 import ch.ethz.mc.model.persistent.types.ScreeningSurveySlideQuestionTypes;
 import ch.ethz.mc.model.ui.UIModelObject;
 import ch.ethz.mc.model.ui.UIScreeningSurveySlide;
+import ch.ethz.mc.tools.StringHelpers;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -252,7 +254,7 @@ public class ScreeningSurveySlide extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ch.ethz.mc.model.ModelObject#toUIModelObject()
 	 */
 	@Override
@@ -291,14 +293,14 @@ public class ScreeningSurveySlide extends ModelObject {
 				titleWithPlaceholders.toString().equals("") ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 						: titleWithPlaceholders.toShortenedString(40),
-				comment.equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: comment,
-				questionType.toString(),
-				storeValueToVariableWithNames.length() > 0 ? storeValueToVariableWithNames
-						.toString() : Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET),
-				slideRules);
+						comment.equals("") ? Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+								: comment,
+								questionType.toString(),
+								storeValueToVariableWithNames.length() > 0 ? storeValueToVariableWithNames
+										.toString() : Messages
+										.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET),
+										slideRules);
 
 		screeningSurveySlide.setRelatedModelObject(this);
 
@@ -307,7 +309,7 @@ public class ScreeningSurveySlide extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * ch.ethz.mc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
 	 * (java.util.List)
@@ -329,13 +331,13 @@ public class ScreeningSurveySlide extends ModelObject {
 				Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE,
 				getId())) {
 			screeningSurveySlideRule
-					.collectThisAndRelatedModelObjectsForExport(exportList);
+			.collectThisAndRelatedModelObjectsForExport(exportList);
 		}
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ch.ethz.mc.model.ModelObject#performOnDelete()
 	 */
 	@Override
@@ -364,9 +366,11 @@ public class ScreeningSurveySlide extends ModelObject {
 		table += wrapRow(wrapHeader("Comment:") + wrapField(escape(comment)));
 		table += wrapRow(wrapHeader("Question Type:")
 				+ wrapField(escape(questionType.toString())));
+		table += wrapRow(wrapHeader("Optional Layout Attributes:")
+				+ wrapField(escape(optionalLayoutAttributeWithPlaceholders)));
 
 		// Questions
-		final StringBuffer buffer = new StringBuffer();
+		StringBuffer buffer = new StringBuffer();
 		for (val question : questions) {
 			buffer.append(question.toTable());
 		}
@@ -376,8 +380,30 @@ public class ScreeningSurveySlide extends ModelObject {
 					+ wrapField(buffer.toString()));
 		}
 
-		table += wrapRow(wrapHeader("Optional Layout Attributes:")
-				+ wrapField(escape(optionalLayoutAttributeWithPlaceholders)));
+		if (linkedMediaObject != null) {
+			val mediaObject = ModelObject.get(MediaObject.class,
+					linkedMediaObject);
+			if (mediaObject != null) {
+				String externalReference;
+				if (mediaObject.getFileReference() != null) {
+					externalReference = ImplementationConstants.FILE_STREAMING_SERVLET_PATH
+							+ "/"
+							+ mediaObject.getId()
+							+ "/"
+							+ StringHelpers.cleanFilenameString(mediaObject
+									.getName());
+				} else {
+					externalReference = mediaObject.getUrlReference();
+				}
+
+				table += wrapRow(wrapHeader("Linked Media Object:")
+						+ wrapField(createLink(externalReference,
+								mediaObject.getName())));
+			} else {
+				table += wrapRow(wrapHeader("Linked Media Object:")
+						+ wrapField(formatWarning("Media Object set, but not found")));
+			}
+		}
 
 		table += wrapRow(wrapHeader("Is last slide:")
 				+ wrapField(formatStatus(isLastSlide)));
@@ -395,21 +421,24 @@ public class ScreeningSurveySlide extends ModelObject {
 		}
 
 		// Slide Rules
-		// TODO
-		// buffer = new StringBuffer();
-		// val screeningSurveySlides = ModelObject.findSorted(
-		// ScreeningSurveySlide.class,
-		// Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY,
-		// Queries.SCREENING_SURVEY_SLIDE__SORT_BY_ORDER_ASC, getId());
-		//
-		// for (val screeningSurveySlide : screeningSurveySlides) {
-		// buffer.append(screeningSurveySlide.toSpecialTable() + "\n");
-		// }
-		//
-		// if (buffer.length() > 0) {
-		// table += getH() + "Slides:" + getS() + buffer.toString();
-		// }
+		buffer = new StringBuffer();
+		val screeningSurveySlideRules = ModelObject
+				.findSorted(
+						ScreeningSurveySlide.class,
+						Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE,
+						Queries.SCREENING_SURVEY_SLIDE_RULE__SORT_BY_ORDER_ASC,
+						getId());
+
+		for (val screeningSurveySlideRule : screeningSurveySlideRules) {
+			buffer.append(screeningSurveySlideRule.toTable());
+		}
+
+		if (buffer.length() > 0) {
+			table += wrapRow(wrapHeader("Rules:")
+					+ wrapField(buffer.toString()));
+		}
 
 		return wrapTable(table);
 	}
+
 }
