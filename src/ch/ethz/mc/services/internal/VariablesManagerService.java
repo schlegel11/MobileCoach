@@ -162,6 +162,13 @@ public class VariablesManagerService {
 	 */
 	public Hashtable<String, AbstractVariableWithValue> getAllVariablesWithValuesOfParticipantAndSystem(
 			final Participant participant) {
+		return getAllVariablesWithValuesOfParticipantAndSystem(participant,
+				null);
+	}
+
+	public Hashtable<String, AbstractVariableWithValue> getAllVariablesWithValuesOfParticipantAndSystem(
+			final Participant participant,
+			MonitoringMessage relatedMonitoringMessage) {
 		val variablesWithValues = new Hashtable<String, AbstractVariableWithValue>();
 
 		// Add all read/write participant variables
@@ -213,7 +220,7 @@ public class VariablesManagerService {
 		val date = new Date(InternalDateTime.currentTimeMillis());
 		for (val variable : SystemVariables.READ_ONLY_SYSTEM_VARIABLES.values()) {
 			val readOnlySystemVariableValue = getReadOnlySystemVariableValue(
-					date, variable);
+					date, variable,  relatedMonitoringMessage);
 
 			if (readOnlySystemVariableValue != null) {
 				addToHashtable(variablesWithValues, variable.toVariableName(),
@@ -292,7 +299,8 @@ public class VariablesManagerService {
 	}
 
 	private String getReadOnlySystemVariableValue(final Date date,
-			final READ_ONLY_SYSTEM_VARIABLES variable) {
+			final READ_ONLY_SYSTEM_VARIABLES variable,
+			MonitoringMessage relatedMonitoringMessage) {
 		switch (variable) {
 			case systemDayInWeek:
 				return dayInWeekFormatter.format(date);
@@ -302,6 +310,21 @@ public class VariablesManagerService {
 				return monthFormatter.format(date);
 			case systemYear:
 				return yearFormatter.format(date);
+			case systemLinkedSurvey:
+				if (relatedMonitoringMessage != null
+						&& relatedMonitoringMessage
+								.getLinkedIntermediateSurvey() != null) {
+					return ImplementationConstants.PLACEHOLDER_LINKED_SURVEY;
+				} else {
+					return "";
+				}
+			case systemLinkedMediaObject:
+				if (relatedMonitoringMessage != null
+						&& relatedMonitoringMessage.getLinkedMediaObject() != null) {
+					return ImplementationConstants.PLACEHOLDER_LINKED_MEDIA_OBJECT;
+				} else {
+					return "";
+				}
 		}
 		return null;
 	}
@@ -721,7 +744,7 @@ public class VariablesManagerService {
 							READ_ONLY_SYSTEM_VARIABLES.valueOf(variable
 									.replace(
 											ImplementationConstants.VARIABLE_PREFIX,
-											"")));
+											"")), null);
 				} catch (final Exception e) {
 					return null;
 				}

@@ -559,7 +559,7 @@ InterventionScreeningSurveysTabComponent {
 			}
 
 			val surveyShortURL = getInterventionExecutionManagerService()
-					.screeningSurveyParticipantShortURLEnsure(participantId,
+					.intermediateSurveyParticipantShortURLEnsure(participantId,
 							survey.getId());
 
 			final String url = getAdminUI()

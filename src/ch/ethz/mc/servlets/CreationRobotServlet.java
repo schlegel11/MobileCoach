@@ -1000,7 +1000,6 @@ public class CreationRobotServlet extends HttpServlet {
 		log.debug(">> Finished {} operation", operationName);
 	}
 
-	@SuppressWarnings("unused")
 	private void createGenericBaselineMessages() throws IOException {
 		val operationName = "create generic baseline messages";
 		log.debug(">> Starting {} operation...", operationName);
