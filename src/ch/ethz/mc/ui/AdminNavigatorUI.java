@@ -37,6 +37,7 @@ import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.VaadinServletRequest;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
@@ -86,6 +87,19 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener,
 		getPage()
 				.setTitle(
 						Messages.getAdminString(AdminMessageStrings.APPLICATION__NAME_LONG));
+
+		// Store normalized base URL
+		val servletRequest = (VaadinServletRequest) request;
+
+		final String normalizedBaseURL = servletRequest
+				.getRequestURL()
+				.toString()
+				.substring(
+						0,
+						servletRequest.getRequestURL().toString()
+								.indexOf(servletRequest.getRequestURI()))
+				+ request.getContextPath() + "/";
+		uiSession.setBaseURL(normalizedBaseURL);
 
 		// Configure the error handler for the UI
 		setErrorHandler(new DefaultErrorHandler() {
@@ -138,7 +152,10 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener,
 	protected void resetSession() {
 		log.debug("Resetting UI session");
 
+		String baseURL = null;
 		if (uiSession != null) {
+			baseURL = uiSession.getBaseURL();
+
 			getLockingService().releaseLockOfUISession(uiSession);
 			uiSession.clearWrappedSession();
 		}
@@ -147,6 +164,7 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener,
 		log.debug("Creating new UI session based on session {}",
 				session.getId());
 		uiSession = new UISession(session);
+		uiSession.setBaseURL(baseURL);
 	}
 
 	public void showInformationNotification(final AdminMessageStrings message,

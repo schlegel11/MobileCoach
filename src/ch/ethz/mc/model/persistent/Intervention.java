@@ -213,6 +213,11 @@ public class Intervention extends ModelObject {
 		ModelObject.delete(screeningSurveysToDelete);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see ch.ethz.mc.model.AbstractSerializableTable#toTable()
+	 */
 	@Override
 	@JsonIgnore
 	public String toTable() {
@@ -224,7 +229,7 @@ public class Intervention extends ModelObject {
 		table += wrapRow(wrapHeader("Monitoring Status:")
 				+ wrapField(formatStatus(active)));
 		table += wrapRow(wrapHeader("Screening Surveys shall automatically be finished:")
-				+ wrapField(formatStatus(automaticallyFinishScreeningSurveys)));
+				+ wrapField(formatYesNo(automaticallyFinishScreeningSurveys)));
 		table += wrapRow(wrapHeader("Assigned Sender Identification:")
 				+ wrapField(assignedSenderIdentification));
 		return wrapTable(table);

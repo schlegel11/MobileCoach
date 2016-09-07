@@ -22,12 +22,17 @@ import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.val;
 
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.model.ModelObject;
+import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.concepts.AbstractMonitoringRule;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
+import ch.ethz.mc.tools.StringHelpers;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * {@link ModelObject} to represent an {@link MonitoringReplyRule}
@@ -96,5 +101,56 @@ public class MonitoringReplyRule extends AbstractMonitoringRule {
 	public void collectThisAndRelatedModelObjectsForExport(
 			final List<ModelObject> exportList) {
 		exportList.add(this);
+	}
+
+	@JsonIgnore
+	public String toTable(final int level, final ObjectId monitoringRuleId,
+			final boolean replyRuleCase) {
+		val style = level > 0 ? "border-left-width: " + 20 * level + "px;" : "";
+
+		String table = wrapRow(wrapHeader("Rule:", style)
+				+ wrapField(escape(StringHelpers.createRuleName(this, false))));
+		table += wrapRow(wrapHeader("Comment:", style)
+				+ wrapField(escape(getComment())));
+
+		table += wrapRow(wrapHeader("Variable to store value to:", style)
+				+ wrapField(escape(getStoreValueToVariableWithName())));
+		table += wrapRow(wrapHeader("Send message when TRUE:", style)
+				+ wrapField(formatYesNo(isSendMessageIfTrue())));
+
+		if (getRelatedMonitoringMessageGroup() != null) {
+			val messageGroup = ModelObject.get(MonitoringMessageGroup.class,
+					getRelatedMonitoringMessageGroup());
+			if (messageGroup != null) {
+				table += wrapRow(wrapHeader(
+						"Monitoring Message Group to send from:", style)
+						+ wrapField(escape(messageGroup.getName())));
+			} else {
+				table += wrapRow(wrapHeader(
+						"Monitoring Message Group to send from:", style)
+						+ wrapField(formatWarning("Message Group set, but not found")));
+			}
+		}
+
+		// Sub Rules
+		val subReplyRules = ModelObject
+				.findSorted(
+						MonitoringReplyRule.class,
+						replyRuleCase ? Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_ANSWER
+								: Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_NO_ANSWER,
+						Queries.MONITORING_RULE__SORT_BY_ORDER_ASC,
+								monitoringRuleId, getId());
+
+		final StringBuffer buffer = new StringBuffer();
+		for (val subReplyRule : subReplyRules) {
+			buffer.append(subReplyRule.toTable(level + 1, monitoringRuleId,
+					replyRuleCase));
+		}
+
+		if (buffer.length() > 0) {
+			return wrapTable(table) + buffer.toString();
+		} else {
+			return wrapTable(table);
+		}
 	}
 }

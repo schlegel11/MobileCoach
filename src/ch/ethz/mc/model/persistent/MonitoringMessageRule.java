@@ -34,6 +34,8 @@ import ch.ethz.mc.model.ui.UIModelObject;
 import ch.ethz.mc.model.ui.UIMonitoringMessageRule;
 import ch.ethz.mc.tools.StringHelpers;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * {@link ModelObject} to represent an {@link MonitoringMessageRule}
  *
@@ -86,7 +88,7 @@ public class MonitoringMessageRule extends AbstractRule {
 	@Override
 	public UIModelObject toUIModelObject() {
 		val monitoringMessage = new UIMonitoringMessageRule(order,
-				StringHelpers.createRuleName(this));
+				StringHelpers.createRuleName(this, true));
 
 		monitoringMessage.setRelatedModelObject(this);
 
@@ -104,5 +106,21 @@ public class MonitoringMessageRule extends AbstractRule {
 	protected void collectThisAndRelatedModelObjectsForExport(
 			final List<ModelObject> exportList) {
 		exportList.add(this);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see ch.ethz.mc.model.AbstractSerializableTable#toTable()
+	 */
+	@Override
+	@JsonIgnore
+	public String toTable() {
+		String table = wrapRow(wrapHeader("Rule:")
+				+ wrapField(escape(StringHelpers.createRuleName(this, false))));
+		table += wrapRow(wrapHeader("Comment:")
+				+ wrapField(escape(getComment())));
+
+		return wrapTable(table);
 	}
 }

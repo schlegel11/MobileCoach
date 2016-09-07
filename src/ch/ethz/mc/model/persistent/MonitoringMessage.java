@@ -36,6 +36,9 @@ import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.subelements.LString;
 import ch.ethz.mc.model.ui.UIModelObject;
 import ch.ethz.mc.model.ui.UIMonitoringMessage;
+import ch.ethz.mc.tools.StringHelpers;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * {@link ModelObject} to represent an {@link MonitoringMessage}
@@ -126,7 +129,7 @@ public class MonitoringMessage extends ModelObject {
 				linkedMediaObject != null ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
 						: Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NO),
+								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
 				linkedIntermediateSurvey != null ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
 						: Messages
@@ -191,4 +194,71 @@ public class MonitoringMessage extends ModelObject {
 		ModelObject.delete(rulesToDelete);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ch.ethz.mc.model.AbstractSerializableTable#toTable()
+	 */
+	@Override
+	@JsonIgnore
+	public String toTable() {
+		String table = wrapRow(wrapHeader("Text:")
+				+ wrapField(escape(textWithPlaceholders)));
+
+		if (linkedMediaObject != null) {
+			val mediaObject = ModelObject.get(MediaObject.class,
+					linkedMediaObject);
+			if (mediaObject != null) {
+				String externalReference;
+				if (mediaObject.getFileReference() != null) {
+					externalReference = "javascript:showMediaObject('"
+							+ mediaObject.getId()
+							+ "/"
+							+ StringHelpers.cleanFilenameString(mediaObject
+									.getName()) + "')";
+				} else {
+					externalReference = mediaObject.getUrlReference();
+				}
+
+				table += wrapRow(wrapHeader("Linked Media Object:")
+						+ wrapField(createLink(externalReference,
+								mediaObject.getName())));
+			} else {
+				table += wrapRow(wrapHeader("Linked Media Object:")
+						+ wrapField(formatWarning("Media Object set, but not found")));
+			}
+		}
+
+		if (linkedIntermediateSurvey != null) {
+			val linkedSurvey = ModelObject.get(ScreeningSurvey.class,
+					linkedIntermediateSurvey);
+			if (linkedSurvey != null) {
+				table += wrapRow(wrapHeader("Linked intermediate survey:")
+						+ wrapField(escape(linkedSurvey.getName())));
+			} else {
+				table += wrapRow(wrapHeader("Linked intermediate survey:")
+						+ wrapField(formatWarning("Survey set, but not found")));
+			}
+		}
+
+		table += wrapRow(wrapHeader("Store value to variable:")
+				+ wrapField(escape(storeValueToVariableWithName)));
+
+		// Monitoring Message Rules
+		final StringBuffer buffer = new StringBuffer();
+		val rules = ModelObject.findSorted(MonitoringMessageRule.class,
+				Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE,
+				Queries.MONITORING_MESSAGE_RULE__SORT_BY_ORDER_ASC, getId());
+
+		for (val rule : rules) {
+			buffer.append(rule.toTable());
+		}
+
+		if (buffer.length() > 0) {
+			table += wrapRow(wrapHeader("Rules:")
+					+ wrapField(buffer.toString()));
+		}
+
+		return wrapTable(table);
+	}
 }

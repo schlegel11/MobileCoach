@@ -34,6 +34,8 @@ import ch.ethz.mc.model.ui.UIFeedbackSlideRule;
 import ch.ethz.mc.model.ui.UIModelObject;
 import ch.ethz.mc.tools.StringHelpers;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * {@link ModelObject} to represent an {@link FeedbackSlideRule}
  *
@@ -85,7 +87,7 @@ public class FeedbackSlideRule extends AbstractRule {
 	@Override
 	public UIModelObject toUIModelObject() {
 		val screeningSurveySlide = new UIFeedbackSlideRule(order,
-				StringHelpers.createRuleName(this));
+				StringHelpers.createRuleName(this, true));
 
 		screeningSurveySlide.setRelatedModelObject(this);
 
@@ -103,5 +105,21 @@ public class FeedbackSlideRule extends AbstractRule {
 	protected void collectThisAndRelatedModelObjectsForExport(
 			final List<ModelObject> exportList) {
 		exportList.add(this);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ch.ethz.mc.model.AbstractSerializableTable#toTable()
+	 */
+	@Override
+	@JsonIgnore
+	public String toTable() {
+		String table = wrapRow(wrapHeader("Rule:")
+				+ wrapField(escape(StringHelpers.createRuleName(this, false))));
+		table += wrapRow(wrapHeader("Comment:")
+				+ wrapField(escape(getComment())));
+
+		return wrapTable(table);
 	}
 }

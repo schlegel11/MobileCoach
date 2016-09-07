@@ -35,6 +35,9 @@ import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.subelements.LString;
 import ch.ethz.mc.model.ui.UIFeedbackSlide;
 import ch.ethz.mc.model.ui.UIModelObject;
+import ch.ethz.mc.tools.StringHelpers;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * {@link ModelObject} to represent an {@link FeedbackSlide}
@@ -123,9 +126,9 @@ public class FeedbackSlide extends ModelObject {
 				titleWithPlaceholders.isEmpty() ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 						: titleWithPlaceholders.toShortenedString(40),
-						comment.equals("") ? Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-								: comment);
+				comment.equals("") ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+						: comment);
 
 		feedbackSlide.setRelatedModelObject(this);
 
@@ -178,5 +181,63 @@ public class FeedbackSlide extends ModelObject {
 		val rulesToDelete = ModelObject.find(FeedbackSlideRule.class,
 				Queries.FEEDBACK_SLIDE_RULE__BY_FEEDBACK_SLIDE, getId());
 		ModelObject.delete(rulesToDelete);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ch.ethz.mc.model.AbstractSerializableTable#toTable()
+	 */
+	@Override
+	@JsonIgnore
+	public String toTable() {
+		String table = wrapRow(wrapHeader("Title:")
+				+ wrapField(escape(titleWithPlaceholders)));
+		table += wrapRow(wrapHeader("Comment:") + wrapField(escape(comment)));
+		table += wrapRow(wrapHeader("Optional Layout Attributes:")
+				+ wrapField(escape(optionalLayoutAttributeWithPlaceholders)));
+		table += wrapRow(wrapHeader("Text:")
+				+ wrapField(escape(textWithPlaceholders)));
+
+		if (linkedMediaObject != null) {
+			val mediaObject = ModelObject.get(MediaObject.class,
+					linkedMediaObject);
+			if (mediaObject != null) {
+				String externalReference;
+				if (mediaObject.getFileReference() != null) {
+					externalReference = "javascript:showMediaObject('"
+							+ mediaObject.getId()
+							+ "/"
+							+ StringHelpers.cleanFilenameString(mediaObject
+									.getName()) + "')";
+				} else {
+					externalReference = mediaObject.getUrlReference();
+				}
+
+				table += wrapRow(wrapHeader("Linked Media Object:")
+						+ wrapField(createLink(externalReference,
+								mediaObject.getName())));
+			} else {
+				table += wrapRow(wrapHeader("Linked Media Object:")
+						+ wrapField(formatWarning("Media Object set, but not found")));
+			}
+		}
+
+		// Slide Rules
+		final StringBuffer buffer = new StringBuffer();
+		val rules = ModelObject.findSorted(FeedbackSlideRule.class,
+				Queries.FEEDBACK_SLIDE_RULE__BY_FEEDBACK_SLIDE,
+				Queries.FEEDBACK_SLIDE_RULE__SORT_BY_ORDER_ASC, getId());
+
+		for (val rule : rules) {
+			buffer.append(rule.toTable());
+		}
+
+		if (buffer.length() > 0) {
+			table += wrapRow(wrapHeader("Rules:")
+					+ wrapField(buffer.toString()));
+		}
+
+		return wrapTable(table);
 	}
 }

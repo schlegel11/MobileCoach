@@ -2,15 +2,15 @@ package ch.ethz.mc.model.persistent;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -113,7 +113,7 @@ public class ScreeningSurvey extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see ch.ethz.mc.model.ModelObject#toUIModelObject()
 	 */
 	@Override
@@ -123,12 +123,12 @@ public class ScreeningSurvey extends ModelObject {
 				intermediateSurvey ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__SURVEY__INTERMEDIATE)
 						: Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__SURVEY__SCREENING),
-						password,
-						active,
-						active ? Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
-								: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__SURVEY__SCREENING),
+				password,
+				active,
+				active ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
+						: Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE));
 
 		screeningSurvey.setRelatedModelObject(this);
@@ -138,7 +138,7 @@ public class ScreeningSurvey extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see
 	 * ch.ethz.mc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
 	 * (java.util.List)
@@ -153,7 +153,7 @@ public class ScreeningSurvey extends ModelObject {
 				ScreeningSurveySlide.class,
 				Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY, getId())) {
 			screeningSurveySlide
-			.collectThisAndRelatedModelObjectsForExport(exportList);
+					.collectThisAndRelatedModelObjectsForExport(exportList);
 		}
 
 		// Add feedback
@@ -165,7 +165,7 @@ public class ScreeningSurvey extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see ch.ethz.mc.model.ModelObject#performOnDelete()
 	 */
 	@Override
@@ -187,10 +187,15 @@ public class ScreeningSurvey extends ModelObject {
 							Queries.INTERMEDIATE_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_SURVEY,
 							getId());
 			ModelObject
-			.delete(intermediateSurveysAndFeedbackParticipantShortURLsToDelete);
+					.delete(intermediateSurveysAndFeedbackParticipantShortURLsToDelete);
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ch.ethz.mc.model.AbstractSerializableTable#toTable()
+	 */
 	@Override
 	@JsonIgnore
 	public String toTable() {
@@ -206,13 +211,13 @@ public class ScreeningSurvey extends ModelObject {
 
 		// Slides
 		StringBuffer buffer = new StringBuffer();
-		val screeningSurveySlides = ModelObject.findSorted(
+		val slides = ModelObject.findSorted(
 				ScreeningSurveySlide.class,
 				Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY,
 				Queries.SCREENING_SURVEY_SLIDE__SORT_BY_ORDER_ASC, getId());
 
-		for (val screeningSurveySlide : screeningSurveySlides) {
-			buffer.append(screeningSurveySlide.toTable());
+		for (val slide : slides) {
+			buffer.append(slide.toTable());
 		}
 
 		if (buffer.length() > 0) {

@@ -2,15 +2,15 @@ package ch.ethz.mc.model;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,7 +38,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class AbstractSerializableTable {
 	@JsonIgnore
 	private final SimpleDateFormat	longDateFormat	= new SimpleDateFormat(
-															"yyyy-MM-dd HH:mm:ss");
+			"yyyy-MM-dd HH:mm:ss");
 
 	/**
 	 * Creates a HTML table string of the current {@link ModelObject}
@@ -69,8 +69,22 @@ public class AbstractSerializableTable {
 	 */
 	@JsonIgnore
 	protected String wrapRow(final String tableString) {
-		return ImplementationConstants.REPORT_TABLE_ROW.replace("|",
-				tableString);
+		return ImplementationConstants.REPORT_TABLE_ROW.replace("#", "")
+				.replace("|", tableString);
+	}
+
+	/**
+	 * Wrap table row for HTML table serializing
+	 *
+	 * @param tableString
+	 * @param additionalStyle
+	 * @return
+	 */
+	@JsonIgnore
+	protected String wrapRow(final String tableString,
+			final String additionalStyle) {
+		return ImplementationConstants.REPORT_TABLE_ROW.replace("#",
+				"style=\"" + additionalStyle + "\"").replace("|", tableString);
 	}
 
 	/**
@@ -81,8 +95,22 @@ public class AbstractSerializableTable {
 	 */
 	@JsonIgnore
 	protected String wrapHeader(final String tableString) {
-		return ImplementationConstants.REPORT_TABLE_HEADER_FIELD.replace("|",
-				tableString);
+		return ImplementationConstants.REPORT_TABLE_HEADER_FIELD.replace("#",
+				"").replace("|", tableString);
+	}
+
+	/**
+	 * Wrap table header for HTML table serializing
+	 *
+	 * @param tableString
+	 * @param additionalStyle
+	 * @return
+	 */
+	@JsonIgnore
+	protected String wrapHeader(final String tableString,
+			final String additionalStyle) {
+		return ImplementationConstants.REPORT_TABLE_HEADER_FIELD.replace("#",
+				"style=\"" + additionalStyle + "\"").replace("|", tableString);
 	}
 
 	/**
@@ -93,8 +121,22 @@ public class AbstractSerializableTable {
 	 */
 	@JsonIgnore
 	protected String wrapField(final String tableString) {
-		return ImplementationConstants.REPORT_TABLE_NORMAL_FIELD.replace("|",
-				tableString);
+		return ImplementationConstants.REPORT_TABLE_NORMAL_FIELD.replace("#",
+				"").replace("|", tableString);
+	}
+
+	/**
+	 * Wrap table field for HTML table serializing
+	 *
+	 * @param tableString
+	 * @param additionalStyle
+	 * @return
+	 */
+	@JsonIgnore
+	protected String wrapField(final String tableString,
+			final String additionalStyle) {
+		return ImplementationConstants.REPORT_TABLE_NORMAL_FIELD.replace("#",
+				"style=\"" + additionalStyle + "\"").replace("|", tableString);
 	}
 
 	/**
@@ -142,7 +184,7 @@ public class AbstractSerializableTable {
 	}
 
 	/**
-	 * Formats the given boolean
+	 * Formats the given boolean as status
 	 *
 	 * @param status
 	 * @return
@@ -150,6 +192,18 @@ public class AbstractSerializableTable {
 	@JsonIgnore
 	protected String formatStatus(final boolean status) {
 		return status ? "✅" : "🔴";
+	}
+
+	/**
+	 * Formats the given boolean as yes/no
+	 *
+	 * @param status
+	 * @return
+	 */
+	@JsonIgnore
+	protected String formatYesNo(final boolean yesNo) {
+		return yesNo ? "<span class=\"yes\">YES 👍</span>"
+				: "<span class=\"no\">NO ✋</span>";
 	}
 
 	/**

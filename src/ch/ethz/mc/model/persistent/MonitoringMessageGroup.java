@@ -2,15 +2,15 @@ package ch.ethz.mc.model.persistent;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,13 +33,15 @@ import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.ui.UIModelObject;
 import ch.ethz.mc.model.ui.UIMonitoringMessageGroup;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * {@link ModelObject} to represent an {@link MonitoringMessageGroup}
- * 
+ *
  * An {@link MonitoringMessageGroup} contains one ore more
  * {@link MonitoringMessage}s that will be sent to {@link Participant}s during
  * an {@link Intervention}.
- * 
+ *
  * @author Andreas Filler
  */
 @NoArgsConstructor
@@ -96,7 +98,7 @@ public class MonitoringMessageGroup extends ModelObject {
 	/**
 	 * Defines if the {@link MonitoringMessage}s in the group expect to be
 	 * answeres by the {@link Participant}
-	 * 
+	 *
 	 */
 	@Getter
 	@Setter
@@ -104,7 +106,7 @@ public class MonitoringMessageGroup extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ch.ethz.mc.model.ModelObject#toUIModelObject()
 	 */
 	@Override
@@ -119,7 +121,7 @@ public class MonitoringMessageGroup extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * ch.ethz.mc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
 	 * (java.util.List)
@@ -134,13 +136,13 @@ public class MonitoringMessageGroup extends ModelObject {
 				Queries.MONITORING_MESSAGE__BY_MONITORING_MESSAGE_GROUP,
 				getId())) {
 			monitoringMessage
-					.collectThisAndRelatedModelObjectsForExport(exportList);
+			.collectThisAndRelatedModelObjectsForExport(exportList);
 		}
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ch.ethz.mc.model.ModelObject#performOnDelete()
 	 */
 	@Override
@@ -151,5 +153,41 @@ public class MonitoringMessageGroup extends ModelObject {
 				getId());
 
 		ModelObject.delete(monitoringMessagesToDelete);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see ch.ethz.mc.model.AbstractSerializableTable#toTable()
+	 */
+	@Override
+	@JsonIgnore
+	public String toTable() {
+		String table = wrapRow(wrapHeader("Name:") + wrapField(escape(name)));
+		table += wrapRow(wrapHeader("Expect to be answered:")
+				+ wrapField(formatYesNo(messagesExpectAnswer)));
+		table += wrapRow(wrapHeader("Send in random order:")
+				+ wrapField(formatYesNo(sendInRandomOrder)));
+		table += wrapRow(wrapHeader("Send from same position if sending as reply:")
+				+ wrapField(formatYesNo(sendInRandomOrder)));
+		table += wrapRow(wrapHeader("Validation Expression:")
+				+ wrapField(escape(validationExpression)));
+
+		// Messages
+		final StringBuffer buffer = new StringBuffer();
+		val messages = ModelObject.findSorted(MonitoringMessage.class,
+				Queries.MONITORING_MESSAGE__BY_MONITORING_MESSAGE_GROUP,
+				Queries.MONITORING_MESSAGE__SORT_BY_ORDER_ASC, getId());
+
+		for (val message : messages) {
+			buffer.append(message.toTable());
+		}
+
+		if (buffer.length() > 0) {
+			table += wrapRow(wrapHeader("Messages:")
+					+ wrapField(buffer.toString()));
+		}
+
+		return wrapTable(table);
 	}
 }

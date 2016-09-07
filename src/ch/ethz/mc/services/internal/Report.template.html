@@ -4,10 +4,17 @@
 <head>
 <meta charset="utf-8">
 <title>MobileCoach (MC) - Report</title>
+<link rel="stylesheet"
+	href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/themes/smoothness/jquery-ui.css">
 <style type="text/css">
 body {
 	font-family: Tahoma, Arial, sans-serif;
 	padding: 20px 20px 20px 20px;
+	font-size: 0.9em;
+}
+
+.ui-widget {
+	font-family: Tahoma, Arial, sans-serif;
 }
 
 h1 {
@@ -47,7 +54,7 @@ table {
 }
 
 th, td {
-	border: 2px solid gray;
+	border: 2px solid lightgray;
 	padding: 2px 2px 2px 2px;
 	vertical-align: top;
 	white-space: pre-line;
@@ -63,20 +70,61 @@ th {
 	color: red;
 	font-weight: bold;
 }
+
+.yes {
+	color: green;
+}
+
+.no {
+	color: red;
+}
 </style>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/jquery-ui.min.js"></script>
+<script type="text/javascript">
+	var config = {
+		mediaObjectBaseURL : "{{{mediaObjectBaseURL}}}"
+	};
+
+	var showMediaObject = function(reference) {
+		var w = window.open(config.mediaObjectBaseURL + reference, "_blank");
+		w.focus();
+	};
+
+	$(function() {
+		$("#accordion").accordion({
+			collapsible : true,
+			heightStyle : "content"
+		});
+		$("#accordion-surveys").accordion({
+			collapsible : true,
+			heightStyle : "content"
+		});
+	});
+</script>
+
 </head>
 
 <body>
 	<h1>Report of intervention "{{intervention.name}}"</h1>
-	<h2>Basic Information Data</h2>
-	{{{intervention}}}
-	<h2>Surveys</h2>
-	<h3>Screening Surveys</h3>
-	{{{screeningSurveys}}}
-	<h3>Intermediate Surveys</h3>
-	{{{intermediateSurveys}}}
-	<h2>Monitoring Rules</h2>
-	<h2>Monitoring Message Groups and Messages</h2>
+	<div id="accordion">
+		<h2>Basic Settings</h2>
+		<div>{{{intervention}}}</div>
+		<h2>Surveys</h2>
+		<div id="accordion-surveys">
+			<h3>Screening Surveys</h3>
+			<div>{{{screeningSurveys}}}</div>
+			<h3>Intermediate Surveys</h3>
+			<div>{{{intermediateSurveys}}}</div>
+		</div>
+		<h2>Monitoring Rules</h2>
+		<div>{{{monitoringRules}}}</div>
+		<h2>Monitoring Message Groups and Messages</h2>
+		<div>{{{monitoringMessageGroups}}}</div>
+	</div>
+
 	<footer>Created using MobileCoach {{version}} at {{timestamp}}</footer>
 </body>
 

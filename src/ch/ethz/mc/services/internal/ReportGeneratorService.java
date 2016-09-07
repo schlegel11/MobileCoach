@@ -2,15 +2,15 @@ package ch.ethz.mc.services.internal;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,9 +34,12 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.Constants;
+import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.AbstractSerializableTable;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.Intervention;
+import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
+import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
 
 import com.github.mustachejava.DefaultMustacheFactory;
@@ -104,7 +107,8 @@ public class ReportGeneratorService {
 	}
 
 	@Synchronized
-	public File generateReport(final Intervention intervention) {
+	public File generateReport(final Intervention intervention,
+			final String baseURL) {
 		// Create temporary file
 		File reportFile = null;
 		try {
@@ -119,8 +123,16 @@ public class ReportGeneratorService {
 		// Collect variables
 		val templateVariables = new HashMap<String, Object>();
 
+		templateVariables.put("mediaObjectBaseURL", baseURL
+				+ ImplementationConstants.FILE_STREAMING_SERVLET_PATH + "/");
+		templateVariables.put("version", Constants.getVersion());
+		templateVariables.put("timestamp",
+				longDateFormat.format(new Date(System.currentTimeMillis())));
+
+		// Intervention
 		templateVariables.put("intervention", intervention);
 
+		// Surveys
 		val surveys = databaseManagerService
 				.findModelObjects(ScreeningSurvey.class,
 						Queries.SCREENING_SURVEY__BY_INTERVENTION,
@@ -138,15 +150,41 @@ public class ReportGeneratorService {
 
 		templateVariables.put("screeningSurveys", screeningSurveys);
 		templateVariables.put("intermediateSurveys", intermediateSurveys);
-		templateVariables.put("version", Constants.getVersion());
-		templateVariables.put("timestamp",
-				longDateFormat.format(new Date(System.currentTimeMillis())));
+
+		// Monitoring Rules
+		val rulesOnRootLevelIterable = databaseManagerService
+				.findSortedModelObjects(MonitoringRule.class,
+						Queries.MONITORING_RULE__BY_INTERVENTION_AND_PARENT,
+						Queries.MONITORING_RULE__SORT_BY_ORDER_ASC,
+						intervention.getId(), null);
+
+		val monitoringRules = new ArrayList<MonitoringRule>();
+		for (val monitoringRule : rulesOnRootLevelIterable) {
+			monitoringRules.add(monitoringRule);
+		}
+
+		templateVariables.put("monitoringRules", monitoringRules);
+
+		// Monitoring Message Groups and Messages
+		val monitoringMessageGroupsIterable = databaseManagerService
+				.findSortedModelObjects(MonitoringMessageGroup.class,
+						Queries.MONITORING_MESSAGE_GROUP__BY_INTERVENTION,
+						Queries.MONITORING_MESSAGE_GROUP__SORT_BY_ORDER_ASC,
+						intervention.getId());
+
+		val monitoringMessageGroups = new ArrayList<MonitoringMessageGroup>();
+		for (val monitoringMessageGroup : monitoringMessageGroupsIterable) {
+			monitoringMessageGroups.add(monitoringMessageGroup);
+		}
+
+		templateVariables.put("monitoringMessageGroups",
+				monitoringMessageGroups);
 
 		// Fill template
 		try {
 			@Cleanup
 			val templateInputStream = ReportGeneratorService.class
-			.getResourceAsStream("Report.template.html");
+					.getResourceAsStream("Report.template.html");
 			@Cleanup
 			val templateInputStreamReader = new InputStreamReader(
 					templateInputStream, "UTF-8");

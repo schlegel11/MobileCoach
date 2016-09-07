@@ -415,8 +415,8 @@ AbstractMonitoringRulesEditComponent {
 											selectedMonitoringRuleId);
 						}
 
-						final String name = StringHelpers
-								.createRuleName(selectedAbstractMonitoringRule);
+						final String name = StringHelpers.createRuleName(
+								selectedAbstractMonitoringRule, true);
 
 						ThemeResource icon;
 						if (selectedAbstractMonitoringRule
@@ -458,8 +458,8 @@ AbstractMonitoringRulesEditComponent {
 					.getMonitoringReplyRule(monitoringRuleId);
 		}
 
-		final String name = StringHelpers
-				.createRuleName(abstractMonitoringRule);
+		final String name = StringHelpers.createRuleName(
+				abstractMonitoringRule, true);
 
 		ThemeResource icon;
 		if (abstractMonitoringRule.isSendMessageIfTrue()) {

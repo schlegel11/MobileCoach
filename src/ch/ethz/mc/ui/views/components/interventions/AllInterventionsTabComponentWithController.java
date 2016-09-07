@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.interventions;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -58,7 +58,7 @@ import com.vaadin.ui.Button.ClickEvent;
 @SuppressWarnings("serial")
 @Log4j2
 public class AllInterventionsTabComponentWithController extends
-		AllInterventionsTabComponent {
+AllInterventionsTabComponent {
 
 	private final MainView													mainView;
 
@@ -254,7 +254,8 @@ public class AllInterventionsTabComponentWithController extends
 											.getReportGeneratorService()
 											.generateReport(
 													selectedUIIntervention
-															.getRelatedModelObject(Intervention.class)));
+															.getRelatedModelObject(Intervention.class),
+													getUISession().getBaseURL()));
 						} catch (final FileNotFoundException e) {
 							log.warn("Error during report generation: {}",
 									e.getMessage());
@@ -340,11 +341,11 @@ public class AllInterventionsTabComponentWithController extends
 								.getId(), UIIntervention.class
 								.cast(newIntervention.toUIModelObject()));
 						getAllInterventionsEditComponent()
-								.getAllInterventionsTable().select(
-										newIntervention.getId());
+						.getAllInterventionsTable().select(
+								newIntervention.getId());
 						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__INTERVENTION_CREATED);
+						.showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__INTERVENTION_CREATED);
 
 						closeWindow();
 					}
@@ -360,7 +361,7 @@ public class AllInterventionsTabComponentWithController extends
 				final File temporaryBackupFile = getInterventionAdministrationManagerService()
 						.interventionExport(
 								selectedUIIntervention
-										.getRelatedModelObject(Intervention.class));
+								.getRelatedModelObject(Intervention.class));
 
 				try {
 					final Intervention importedIntervention = getInterventionAdministrationManagerService()
@@ -376,18 +377,18 @@ public class AllInterventionsTabComponentWithController extends
 							.getId(), UIIntervention.class
 							.cast(importedIntervention.toUIModelObject()));
 					getAllInterventionsEditComponent()
-							.getAllInterventionsTable().select(
-									importedIntervention.getId());
+					.getAllInterventionsTable().select(
+							importedIntervention.getId());
 					getAllInterventionsEditComponent()
-							.getAllInterventionsTable().sort();
+					.getAllInterventionsTable().sort();
 
 					getAdminUI()
-							.showInformationNotification(
-									AdminMessageStrings.NOTIFICATION__INTERVENTION_DUPLICATED);
+					.showInformationNotification(
+							AdminMessageStrings.NOTIFICATION__INTERVENTION_DUPLICATED);
 				} catch (final Exception e) {
 					getAdminUI()
-							.showWarningNotification(
-									AdminMessageStrings.NOTIFICATION__INTERVENTION_DUPLICATION_FAILED);
+					.showWarningNotification(
+							AdminMessageStrings.NOTIFICATION__INTERVENTION_DUPLICATION_FAILED);
 				}
 
 				try {
@@ -424,18 +425,18 @@ public class AllInterventionsTabComponentWithController extends
 							.getId(), UIIntervention.class
 							.cast(importedIntervention.toUIModelObject()));
 					getAllInterventionsEditComponent()
-							.getAllInterventionsTable().select(
-									importedIntervention.getId());
+					.getAllInterventionsTable().select(
+							importedIntervention.getId());
 					getAllInterventionsEditComponent()
-							.getAllInterventionsTable().sort();
+					.getAllInterventionsTable().sort();
 
 					getAdminUI()
-							.showInformationNotification(
-									AdminMessageStrings.NOTIFICATION__INTERVENTION_IMPORTED);
+					.showInformationNotification(
+							AdminMessageStrings.NOTIFICATION__INTERVENTION_IMPORTED);
 				} catch (final Exception e) {
 					getAdminUI()
-							.showWarningNotification(
-									AdminMessageStrings.NOTIFICATION__INTERVENTION_IMPORT_FAILED);
+					.showWarningNotification(
+							AdminMessageStrings.NOTIFICATION__INTERVENTION_IMPORT_FAILED);
 				} finally {
 					try {
 						file.delete();
@@ -456,7 +457,7 @@ public class AllInterventionsTabComponentWithController extends
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_NAME_FOR_INTERVENTION,
 				selectedUIIntervention
-						.getRelatedModelObject(Intervention.class).getName(),
+				.getRelatedModelObject(Intervention.class).getName(),
 				null, new ShortStringEditComponent(),
 				new ExtendableButtonClickListener() {
 					@Override
@@ -467,9 +468,9 @@ public class AllInterventionsTabComponentWithController extends
 
 							// Change name
 							getInterventionAdministrationManagerService()
-									.interventionChangeName(
-											selectedIntervention,
-											getStringValue());
+							.interventionChangeName(
+									selectedIntervention,
+									getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -478,12 +479,12 @@ public class AllInterventionsTabComponentWithController extends
 						// Adapt UI
 						getStringItemProperty(selectedUIInterventionBeanItem,
 								UIIntervention.INTERVENTION_NAME).setValue(
-								selectedUIIntervention.getRelatedModelObject(
-										Intervention.class).getName());
+										selectedUIIntervention.getRelatedModelObject(
+												Intervention.class).getName());
 
 						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__INTERVENTION_RENAMED);
+						.showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__INTERVENTION_RENAMED);
 						closeWindow();
 					}
 				}, null);
@@ -543,7 +544,7 @@ public class AllInterventionsTabComponentWithController extends
 
 					// Delete intervention
 					getInterventionAdministrationManagerService()
-							.interventionDelete(selectedIntervention);
+					.interventionDelete(selectedIntervention);
 				} catch (final Exception e) {
 					closeWindow();
 					handleException(e);
@@ -552,9 +553,9 @@ public class AllInterventionsTabComponentWithController extends
 
 				// Adapt UI
 				getAllInterventionsEditComponent().getAllInterventionsTable()
-						.removeItem(
-								selectedUIIntervention.getRelatedModelObject(
-										Intervention.class).getId());
+				.removeItem(
+						selectedUIIntervention.getRelatedModelObject(
+								Intervention.class).getId());
 				getAdminUI().showInformationNotification(
 						AdminMessageStrings.NOTIFICATION__INTERVENTION_DELETED);
 

@@ -2,15 +2,15 @@ package ch.ethz.mc.model.persistent;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,6 +31,9 @@ import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.concepts.AbstractMonitoringRule;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
+import ch.ethz.mc.tools.StringHelpers;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * {@link ModelObject} to represent an {@link MonitoringRule}
@@ -107,7 +110,7 @@ public class MonitoringRule extends AbstractMonitoringRule {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * ch.ethz.mc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
 	 * (java.util.List)
@@ -123,13 +126,13 @@ public class MonitoringRule extends AbstractMonitoringRule {
 				Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE, getId(),
 				getId())) {
 			monitoringReplyRule
-					.collectThisAndRelatedModelObjectsForExport(exportList);
+			.collectThisAndRelatedModelObjectsForExport(exportList);
 		}
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ch.ethz.mc.model.ModelObject#performOnDelete()
 	 */
 	@Override
@@ -145,5 +148,124 @@ public class MonitoringRule extends AbstractMonitoringRule {
 		val monitoringRulesToDelete = ModelObject.find(MonitoringRule.class,
 				Queries.MONITORING_RULE__BY_PARENT, getId());
 		ModelObject.delete(monitoringRulesToDelete);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see ch.ethz.mc.model.AbstractSerializableTable#toTable()
+	 */
+	@Override
+	@JsonIgnore
+	public String toTable() {
+		return toTable(0);
+	}
+
+	@JsonIgnore
+	public String toTable(final int level) {
+		val style = level > 0 ? "border-left-width: " + 20 * level + "px;" : "";
+
+		String table = wrapRow(wrapHeader("Rule:", style)
+				+ wrapField(escape(StringHelpers.createRuleName(this, false))));
+		table += wrapRow(wrapHeader("Comment:", style)
+				+ wrapField(escape(getComment())));
+
+		table += wrapRow(wrapHeader("Variable to store value to:", style)
+				+ wrapField(escape(getStoreValueToVariableWithName())));
+		table += wrapRow(wrapHeader("Send message when TRUE:", style)
+				+ wrapField(formatYesNo(isSendMessageIfTrue())));
+		table += wrapRow(wrapHeader("Stop Intervention when TRUE:", style)
+				+ wrapField(formatYesNo(stopInterventionWhenTrue)));
+
+		if (isSendMessageIfTrue()) {
+			table += wrapRow(wrapHeader("Hour to send message:", style)
+					+ wrapField(escape(hourToSendMessage + ":00")));
+		}
+
+		if (getRelatedMonitoringMessageGroup() != null) {
+			val messageGroup = ModelObject.get(MonitoringMessageGroup.class,
+					getRelatedMonitoringMessageGroup());
+			if (messageGroup != null) {
+				table += wrapRow(wrapHeader(
+						"Monitoring Message Group to send from:", style)
+						+ wrapField(escape(messageGroup.getName())));
+
+				if (messageGroup.isMessagesExpectAnswer()) {
+					final int daysUntilMessageIsHandledAsUnanswered = (int) Math
+							.floor(getHoursUntilMessageIsHandledAsUnanswered() / 24);
+					final int hoursWithoutDaysUntilMessageIsHandledAsUnanswered = getHoursUntilMessageIsHandledAsUnanswered()
+							- daysUntilMessageIsHandledAsUnanswered * 24;
+
+					table += wrapRow(wrapHeader(
+							"Hours until message is handled as unanswered:",
+							style)
+							+ wrapField(escape(daysUntilMessageIsHandledAsUnanswered
+									+ " day(s), "
+									+ hoursWithoutDaysUntilMessageIsHandledAsUnanswered
+									+ " hour(s)")));
+
+					/*
+					 * Reply Rules
+					 */
+
+					// Reply-Case
+					Iterable<MonitoringReplyRule> replyRulesOnRootLevel = ModelObject
+							.findSorted(
+									MonitoringReplyRule.class,
+									Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_ANSWER,
+									Queries.MONITORING_RULE__SORT_BY_ORDER_ASC,
+									getId(), null);
+
+					StringBuffer buffer = new StringBuffer();
+					for (val replyRule : replyRulesOnRootLevel) {
+						buffer.append(replyRule.toTable(0, getId(), true));
+					}
+
+					if (buffer.length() > 0) {
+						table += wrapRow(wrapHeader("Reply Rules:", style)
+								+ wrapField(buffer.toString()));
+					}
+
+					// No-Reply-Case
+					replyRulesOnRootLevel = ModelObject
+							.findSorted(
+									MonitoringReplyRule.class,
+									Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_NO_ANSWER,
+									Queries.MONITORING_RULE__SORT_BY_ORDER_ASC,
+									getId(), null);
+
+					buffer = new StringBuffer();
+					for (val replyRule : replyRulesOnRootLevel) {
+						buffer.append(replyRule.toTable(0, getId(), false));
+					}
+
+					if (buffer.length() > 0) {
+						table += wrapRow(wrapHeader("No-Reply Rules:", style)
+								+ wrapField(buffer.toString()));
+					}
+				}
+			} else {
+				table += wrapRow(wrapHeader(
+						"Monitoring Message Group to send from:", style)
+						+ wrapField(formatWarning("Message Group set, but not found")));
+			}
+		}
+
+		// Sub Rules
+		val subRules = ModelObject.findSorted(MonitoringRule.class,
+				Queries.MONITORING_RULE__BY_INTERVENTION_AND_PARENT,
+				Queries.MONITORING_RULE__SORT_BY_ORDER_ASC, intervention,
+				getId());
+
+		final StringBuffer buffer = new StringBuffer();
+		for (val subRule : subRules) {
+			buffer.append(subRule.toTable(level + 1));
+		}
+
+		if (buffer.length() > 0) {
+			return wrapTable(table) + buffer.toString();
+		} else {
+			return wrapTable(table);
+		}
 	}
 }
