@@ -26,6 +26,7 @@ import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.persistent.Feedback;
+import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlideRule;
 import ch.ethz.mc.model.persistent.subelements.LString;
@@ -33,6 +34,7 @@ import ch.ethz.mc.model.persistent.types.ScreeningSurveySlideQuestionTypes;
 import ch.ethz.mc.model.ui.UIAnswer;
 import ch.ethz.mc.model.ui.UIFeedback;
 import ch.ethz.mc.model.ui.UIQuestion;
+import ch.ethz.mc.model.ui.UIScreeningSurvey;
 import ch.ethz.mc.model.ui.UIScreeningSurveySlideRule;
 import ch.ethz.mc.tools.StringValidator;
 import ch.ethz.mc.ui.NotificationMessageException;
@@ -80,6 +82,7 @@ MediaObjectCreationOrDeleteionListener {
 	private final ValueChangeListener									preselectedComboBoxListener;
 
 	public ScreeningSurveySlideEditComponentWithController(
+			final ObjectId interventionId,
 			final ScreeningSurveySlide screeningSurveySlide) {
 		super();
 
@@ -249,6 +252,44 @@ MediaObjectCreationOrDeleteionListener {
 		};
 
 		adjustPreselectedAnswer();
+
+		val intermediateSurveys = getScreeningSurveyAdministrationManagerService()
+				.getAllIntermediateSurveysOfIntervention(interventionId);
+
+		val intermediateSurveyComboBox = getIntermediateSurveyComboBox();
+		for (val intermediateSurvey : intermediateSurveys) {
+			val uiIntermediateSurvey = intermediateSurvey.toUIModelObject();
+			intermediateSurveyComboBox.addItem(uiIntermediateSurvey);
+			if (screeningSurveySlide.getLinkedIntermediateSurvey() != null
+					&& screeningSurveySlide.getLinkedIntermediateSurvey()
+					.equals(intermediateSurvey.getId())) {
+				intermediateSurveyComboBox.select(uiIntermediateSurvey);
+			}
+		}
+		intermediateSurveyComboBox
+		.addValueChangeListener(new ValueChangeListener() {
+
+			@Override
+			public void valueChange(final ValueChangeEvent event) {
+				val selectedUIIntermediateSurvey = (UIScreeningSurvey) event
+						.getProperty().getValue();
+
+				ObjectId linkedIntermediateSurvey = null;
+				if (selectedUIIntermediateSurvey != null) {
+					linkedIntermediateSurvey = selectedUIIntermediateSurvey
+							.getRelatedModelObject(
+									ScreeningSurvey.class).getId();
+				}
+				log.debug("Adjust linked intermediate survey to {}",
+						linkedIntermediateSurvey);
+				getScreeningSurveyAdministrationManagerService()
+				.screeningSurveySlideChangeLinkedIntermediateSurvey(
+						screeningSurveySlide,
+						linkedIntermediateSurvey);
+
+				adjust(false);
+			}
+		});
 
 		val feedbacks = getScreeningSurveyAdministrationManagerService()
 				.getAllFeedbacksOfScreeningSurvey(

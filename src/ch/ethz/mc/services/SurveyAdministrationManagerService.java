@@ -195,13 +195,22 @@ public class SurveyAdministrationManagerService {
 				throw new NotificationMessageException(
 						AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_CANT_CHANGE_TYPE_1);
 			}
+			val surveySlidesLinkingIntermediateSurvey = databaseManagerService
+					.findModelObjects(
+							ScreeningSurveySlide.class,
+							Queries.SCREENING_SURVEY_SLIDE__BY_LINKED_INTERMEDIATE_SURVEY,
+							screeningSurvey.getId());
+			if (surveySlidesLinkingIntermediateSurvey.iterator().hasNext()) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_CANT_CHANGE_TYPE_2);
+			}
 		} else {
 			val feedbacksOfSurvey = databaseManagerService.findModelObjects(
 					Feedback.class, Queries.FEEDBACK__BY_SCREENING_SURVEY,
 					screeningSurvey.getId());
 			if (feedbacksOfSurvey.iterator().hasNext()) {
 				throw new NotificationMessageException(
-						AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_CANT_CHANGE_TYPE_2);
+						AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_CANT_CHANGE_TYPE_3);
 			}
 		}
 
@@ -300,6 +309,15 @@ public class SurveyAdministrationManagerService {
 				throw new NotificationMessageException(
 						AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_CANT_DELETE);
 			}
+			val surveySlidesLinkingIntermediateSurvey = databaseManagerService
+					.findModelObjects(
+							ScreeningSurveySlide.class,
+							Queries.SCREENING_SURVEY_SLIDE__BY_LINKED_INTERMEDIATE_SURVEY,
+							screeningSurveyToDelete.getId());
+			if (surveySlidesLinkingIntermediateSurvey.iterator().hasNext()) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_CANT_DELETE);
+			}
 		}
 
 		databaseManagerService.deleteModelObject(screeningSurveyToDelete);
@@ -315,7 +333,7 @@ public class SurveyAdministrationManagerService {
 				GlobalUniqueIdGenerator.createGlobalUniqueId(),
 				screeningSurveyId, 0, new LString(), "",
 				ScreeningSurveySlideQuestionTypes.TEXT_ONLY, "", questions,
-				null, false, null, new LString());
+				null, null, false, null, new LString());
 
 		val question = new ScreeningSurveySlide.Question(new LString(),
 				new LString[0], new String[0], -1, null, "");
@@ -604,6 +622,15 @@ public class SurveyAdministrationManagerService {
 			screeningSurveySlide
 					.setValidationErrorMessage(textWithPlaceholders);
 		}
+
+		databaseManagerService.saveModelObject(screeningSurveySlide);
+	}
+
+	@Synchronized
+	public void screeningSurveySlideChangeLinkedIntermediateSurvey(
+			final ScreeningSurveySlide screeningSurveySlide,
+			final ObjectId intermediateSurveyId) {
+		screeningSurveySlide.setLinkedIntermediateSurvey(intermediateSurveyId);
 
 		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
@@ -1308,19 +1335,19 @@ public class SurveyAdministrationManagerService {
 
 			for (val screeningSurveyOfIntervention : screeningSurveysOfIntervention) {
 				variables
-				.addAll(variablesManagerService
-						.getAllSurveyVariableNamesOfSurvey(screeningSurveyOfIntervention
-								.getId()));
+						.addAll(variablesManagerService
+								.getAllSurveyVariableNamesOfSurvey(screeningSurveyOfIntervention
+										.getId()));
 			}
 
 			variables
-			.addAll(variablesManagerService
-					.getAllMonitoringMessageVariableNamesOfIntervention(screeningSurvey
-							.getIntervention()));
+					.addAll(variablesManagerService
+							.getAllMonitoringMessageVariableNamesOfIntervention(screeningSurvey
+									.getIntervention()));
 			variables
-			.addAll(variablesManagerService
-					.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(screeningSurvey
-							.getIntervention()));
+					.addAll(variablesManagerService
+							.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(screeningSurvey
+									.getIntervention()));
 		} else {
 			variables.addAll(variablesManagerService
 					.getAllSurveyVariableNamesOfSurvey(screeningSurveyId));

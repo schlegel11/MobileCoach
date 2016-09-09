@@ -75,7 +75,7 @@ import com.github.mustachejava.MustacheFactory;
 public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 	private MustacheFactory					mustacheFactory;
 
-	private SurveyExecutionManagerService	screeningSurveyExecutionManagerService;
+	private SurveyExecutionManagerService	surveyExecutionManagerService;
 
 	/**
 	 * @see Servlet#init(ServletConfig)
@@ -89,8 +89,8 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 					this.getClass());
 			throw new ServletException("Context is not ready!");
 		}
-		screeningSurveyExecutionManagerService = MC.getInstance()
-				.getScreeningSurveyExecutionManagerService();
+		surveyExecutionManagerService = MC.getInstance()
+				.getSurveyExecutionManagerService();
 
 		log.info("Initializing servlet...");
 
@@ -132,7 +132,7 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 			// Get appropriate short id object
 			val shortIdLong = IntermediateSurveyAndFeedbackParticipantShortURL
 					.validateURLIdPartAndReturnShortId(pathParts[0]);
-			val shortId = screeningSurveyExecutionManagerService
+			val shortId = surveyExecutionManagerService
 					.getIntermediateSurveyAndFeedbackParticipantShortURL(shortIdLong);
 			if (shortId == null
 					|| !shortId.validateSecretInGivenIdPart(pathParts[0])) {
@@ -146,7 +146,7 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 					// Only object ids of active intermediate surveys or
 					// feedbacks surveys are accepted
 					if (shortId.getSurvey() != null
-							&& screeningSurveyExecutionManagerService
+							&& surveyExecutionManagerService
 									.screeningSurveyCheckIfActiveAndOfGivenType(
 											shortId.getSurvey(), true)) {
 						handleTemplateRequest(request, response,
@@ -154,7 +154,7 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 								null);
 						return;
 					} else if (shortId.getFeedback() != null
-							&& screeningSurveyExecutionManagerService
+							&& surveyExecutionManagerService
 									.feedbackCheckIfActiveByBelongingParticipant(
 											shortId.getParticipant(),
 											shortId.getFeedback())) {
@@ -209,11 +209,11 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 
 		boolean isSurveyRequest;
 		if (surveyId != null) {
-			survey = screeningSurveyExecutionManagerService
+			survey = surveyExecutionManagerService
 					.getScreeningSurveyById(surveyId);
 			isSurveyRequest = true;
 		} else {
-			feedback = screeningSurveyExecutionManagerService
+			feedback = surveyExecutionManagerService
 					.getFeedbackById(feedbackId);
 			isSurveyRequest = false;
 		}
@@ -228,7 +228,7 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 				isSurveyRequest ? surveyId : feedbackId);
 
 		final File basicTemplateFolder = new File(
-				screeningSurveyExecutionManagerService.getTemplatePath(),
+				surveyExecutionManagerService.getTemplatePath(),
 				isSurveyRequest ? survey.getTemplatePath()
 						: feedback.getTemplatePath());
 		final File requestedFile = new File(basicTemplateFolder, fileRequest);
@@ -439,7 +439,7 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 
 			// Decide which slide should be send to the participant
 			try {
-				templateVariables = screeningSurveyExecutionManagerService
+				templateVariables = surveyExecutionManagerService
 						.getAppropriateScreeningSurveySlide(participantId,
 								accessGranted, false, surveyId, resultValues,
 								checkValue, session);
@@ -487,7 +487,7 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 
 			// Decide which slide should be send to the participant
 			try {
-				templateVariables = screeningSurveyExecutionManagerService
+				templateVariables = surveyExecutionManagerService
 						.getAppropriateFeedbackSlide(participantId, feedbackId,
 								navigationValue, checkValue, session);
 
@@ -658,7 +658,7 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 	 */
 	private MustacheFactory createMustacheFactory() {
 		val mustacheFactory = new DefaultMustacheFactory(
-				screeningSurveyExecutionManagerService.getTemplatePath());
+				surveyExecutionManagerService.getTemplatePath());
 		return mustacheFactory;
 	}
 }

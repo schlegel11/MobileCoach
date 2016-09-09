@@ -299,7 +299,7 @@ public class ScreeningSurveyEditComponentWithController extends
 
 		showModalClosableEditWindow(
 				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__CREATE_SCREENING_SURVEY_SLIDE,
-				new ScreeningSurveySlideEditComponentWithController(
+				new ScreeningSurveySlideEditComponentWithController(screeningSurvey.getIntervention(),
 						newScreeningSurveySlide),
 				new ExtendableButtonClickListener() {
 					@Override
@@ -348,7 +348,7 @@ public class ScreeningSurveyEditComponentWithController extends
 
 		showModalClosableEditWindow(
 				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_SCREENING_SURVEY_SLIDE,
-				new ScreeningSurveySlideEditComponentWithController(
+				new ScreeningSurveySlideEditComponentWithController(screeningSurvey.getIntervention(),
 						selectedScreeningSurveySlide),
 				new ExtendableButtonClickListener() {
 					@Override
@@ -594,7 +594,7 @@ public class ScreeningSurveyEditComponentWithController extends
 		if (participant.getAssignedFeedback() == null
 				|| !participant.getAssignedFeedback().equals(
 						selectedFeedback.getId())) {
-			shortURL = getScreeningSurveyExecutionManagerService()
+			shortURL = getSurveyExecutionManagerService()
 					.participantSetFeedback(participant,
 							selectedFeedback.getId());
 		}

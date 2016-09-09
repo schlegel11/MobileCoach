@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -79,8 +79,8 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 				.getScreeningSurveyAdministrationManagerService();
 	}
 
-	protected SurveyExecutionManagerService getScreeningSurveyExecutionManagerService() {
-		return MC.getInstance().getScreeningSurveyExecutionManagerService();
+	protected SurveyExecutionManagerService getSurveyExecutionManagerService() {
+		return MC.getInstance().getSurveyExecutionManagerService();
 	}
 
 	protected UISession getUISession() {
@@ -98,7 +98,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	 * @author Andreas Filler
 	 */
 	public abstract class ExtendableButtonClickListener implements
-			Button.ClickListener {
+	Button.ClickListener {
 		@Setter
 		private Window							belongingWindow;
 
@@ -190,7 +190,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 			okButtonClickListener.setBelongingWindow(modalWindow);
 			okButtonClickListener.setBelongingComponent(stringValueComponent);
 			stringValueComponent
-					.registerOkButtonListener(okButtonClickListener);
+			.registerOkButtonListener(okButtonClickListener);
 		}
 
 		// Register cancel button listener if provided or a simple window closer
@@ -198,17 +198,17 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 		if (cancelButtonClickListener != null) {
 			cancelButtonClickListener.setBelongingWindow(modalWindow);
 			cancelButtonClickListener
-					.setBelongingComponent(stringValueComponent);
+			.setBelongingComponent(stringValueComponent);
 			stringValueComponent
-					.registerCancelButtonListener(cancelButtonClickListener);
+			.registerCancelButtonListener(cancelButtonClickListener);
 		} else {
 			stringValueComponent
-					.registerCancelButtonListener(new Button.ClickListener() {
-						@Override
-						public void buttonClick(final ClickEvent event) {
-							modalWindow.close();
-						}
-					});
+			.registerCancelButtonListener(new Button.ClickListener() {
+				@Override
+				public void buttonClick(final ClickEvent event) {
+					modalWindow.close();
+				}
+			});
 		}
 
 		// show window
@@ -265,7 +265,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 			okButtonClickListener.setBelongingWindow(modalWindow);
 			okButtonClickListener.setBelongingComponent(stringValueComponent);
 			stringValueComponent
-					.registerOkButtonListener(okButtonClickListener);
+			.registerOkButtonListener(okButtonClickListener);
 		}
 
 		// Register cancel button listener if provided or a simple window closer
@@ -273,17 +273,17 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 		if (cancelButtonClickListener != null) {
 			cancelButtonClickListener.setBelongingWindow(modalWindow);
 			cancelButtonClickListener
-					.setBelongingComponent(stringValueComponent);
+			.setBelongingComponent(stringValueComponent);
 			stringValueComponent
-					.registerCancelButtonListener(cancelButtonClickListener);
+			.registerCancelButtonListener(cancelButtonClickListener);
 		} else {
 			stringValueComponent
-					.registerCancelButtonListener(new Button.ClickListener() {
-						@Override
-						public void buttonClick(final ClickEvent event) {
-							modalWindow.close();
-						}
-					});
+			.registerCancelButtonListener(new Button.ClickListener() {
+				@Override
+				public void buttonClick(final ClickEvent event) {
+					modalWindow.close();
+				}
+			});
 		}
 
 		// show window
@@ -353,17 +353,17 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 		if (closeButtonClickListener != null) {
 			closeButtonClickListener.setBelongingWindow(modalWindow);
 			closeButtonClickListener
-					.setBelongingComponent(closableEditComponent);
+			.setBelongingComponent(closableEditComponent);
 			closableEditComponent
-					.registerOkButtonListener(closeButtonClickListener);
+			.registerOkButtonListener(closeButtonClickListener);
 		} else {
 			closableEditComponent
-					.registerOkButtonListener(new Button.ClickListener() {
-						@Override
-						public void buttonClick(final ClickEvent event) {
-							modalWindow.close();
-						}
-					});
+			.registerOkButtonListener(new Button.ClickListener() {
+				@Override
+				public void buttonClick(final ClickEvent event) {
+					modalWindow.close();
+				}
+			});
 		}
 
 		// show window
@@ -390,7 +390,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 			okButtonClickListener.setBelongingWindow(modalWindow);
 			okButtonClickListener.setBelongingComponent(confirmationComponent);
 			confirmationComponent
-					.registerOkButtonListener(okButtonClickListener);
+			.registerOkButtonListener(okButtonClickListener);
 		}
 
 		// Register cancel button listener if provided or a simple window closer
@@ -398,17 +398,17 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 		if (cancelButtonClickListener != null) {
 			cancelButtonClickListener.setBelongingWindow(modalWindow);
 			cancelButtonClickListener
-					.setBelongingComponent(confirmationComponent);
+			.setBelongingComponent(confirmationComponent);
 			confirmationComponent
-					.registerCancelButtonListener(cancelButtonClickListener);
+			.registerCancelButtonListener(cancelButtonClickListener);
 		} else {
 			confirmationComponent
-					.registerCancelButtonListener(new Button.ClickListener() {
-						@Override
-						public void buttonClick(final ClickEvent event) {
-							modalWindow.close();
-						}
-					});
+			.registerCancelButtonListener(new Button.ClickListener() {
+				@Override
+				public void buttonClick(final ClickEvent event) {
+					modalWindow.close();
+				}
+			});
 		}
 
 		// show window
@@ -620,7 +620,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 		if (exception instanceof NotificationMessageException) {
 			getAdminUI().showWarningNotification(
 					((NotificationMessageException) exception)
-							.getNotificationMessage());
+					.getNotificationMessage());
 			log.debug("Expected error occurred: {}", exception.getMessage());
 		} else {
 			getAdminUI().showErrorNotification(
@@ -640,7 +640,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	@SuppressWarnings("unchecked")
 	protected <SubClassOfUIModelObject extends UIModelObject> void removeAndAddModelObjectToBeanContainer(
 
-	final BeanContainer<ObjectId, SubClassOfUIModelObject> beanContainer,
+			final BeanContainer<ObjectId, SubClassOfUIModelObject> beanContainer,
 			final ModelObject modelObject) {
 		beanContainer.removeItem(modelObject.getId());
 		beanContainer.addItem(modelObject.getId(),

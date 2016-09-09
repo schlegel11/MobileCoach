@@ -228,6 +228,13 @@ public class ScreeningSurveySlide extends ModelObject {
 	private ObjectId							linkedMediaObject;
 
 	/**
+	 * <strong>OPTIONAL:</strong> A survey to potentially hand over to if set
+	 */
+	@Getter
+	@Setter
+	private ObjectId							linkedIntermediateSurvey;
+
+	/**
 	 * Slide presentation stops after this slide and {@link ScreeningSurvey} is
 	 * marked as performed by {@link Participant}
 	 */

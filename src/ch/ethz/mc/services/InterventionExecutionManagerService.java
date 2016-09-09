@@ -2,15 +2,15 @@ package ch.ethz.mc.services;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -49,7 +49,6 @@ import ch.ethz.mc.model.memory.ReceivedMessage;
 import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.DialogStatus;
-import ch.ethz.mc.model.persistent.IntermediateSurveyAndFeedbackParticipantShortURL;
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.MediaObject;
 import ch.ethz.mc.model.persistent.MediaObjectParticipantShortURL;
@@ -86,7 +85,7 @@ public class InterventionExecutionManagerService {
 	private static InterventionExecutionManagerService	instance			= null;
 
 	private static SimpleDateFormat						dayInWeekFormatter	= new SimpleDateFormat(
-																					"u");
+			"u");
 	private final String[]								acceptedStopWords;
 
 	private final DatabaseManagerService				databaseManagerService;
@@ -94,6 +93,7 @@ public class InterventionExecutionManagerService {
 	final CommunicationManagerService					communicationManagerService;
 
 	final InterventionAdministrationManagerService		interventionAdministrationManagerService;
+	final SurveyExecutionManagerService					surveyExecutionManagerService;
 
 	private final IncomingMessageWorker					incomingMessageWorker;
 	private final OutgoingMessageWorker					outgoingMessageWorker;
@@ -104,8 +104,8 @@ public class InterventionExecutionManagerService {
 			final VariablesManagerService variablesManagerService,
 			final CommunicationManagerService communicationManagerService,
 			final InterventionAdministrationManagerService interventionAdministrationManagerService,
-			final SurveyExecutionManagerService screeningSurveyExecutionManagerService)
-			throws Exception {
+			final SurveyExecutionManagerService surveyExecutionManagerService)
+					throws Exception {
 		$lock = MC.getInstance();
 
 		log.info("Starting service...");
@@ -114,6 +114,7 @@ public class InterventionExecutionManagerService {
 		this.variablesManagerService = variablesManagerService;
 		this.communicationManagerService = communicationManagerService;
 		this.interventionAdministrationManagerService = interventionAdministrationManagerService;
+		this.surveyExecutionManagerService = surveyExecutionManagerService;
 
 		// Remember stop words
 		acceptedStopWords = Constants.getAcceptedStopWords();
@@ -127,7 +128,7 @@ public class InterventionExecutionManagerService {
 				communicationManagerService);
 		incomingMessageWorker.start();
 		monitoringSchedulingWorker = new MonitoringSchedulingWorker(this,
-				screeningSurveyExecutionManagerService);
+				surveyExecutionManagerService);
 		monitoringSchedulingWorker.start();
 
 		log.info("Started.");
@@ -139,7 +140,7 @@ public class InterventionExecutionManagerService {
 			final CommunicationManagerService communicationManagerService,
 			final InterventionAdministrationManagerService interventionAdministrationManagerService,
 			final SurveyExecutionManagerService screeningSurveyExecutionManagerService)
-			throws Exception {
+					throws Exception {
 		if (instance == null) {
 			instance = new InterventionExecutionManagerService(
 					databaseManagerService, variablesManagerService,
@@ -208,7 +209,7 @@ public class InterventionExecutionManagerService {
 
 				if (dialogStatus != null
 						&& dialogStatus
-								.isDataForMonitoringParticipationAvailable()) {
+						.isDataForMonitoringParticipationAvailable()) {
 					participant.setMonitoringActive(true);
 				}
 			}
@@ -231,8 +232,8 @@ public class InterventionExecutionManagerService {
 				timestampToSendMessage, -1, answerExpected, -1, -1, null, null,
 				false, relatedMonitoringRule == null ? null
 						: relatedMonitoringRule.getId(),
-				relatedMonitoringMessage == null ? null
-						: relatedMonitoringMessage.getId(), false, manuallySent);
+						relatedMonitoringMessage == null ? null
+								: relatedMonitoringMessage.getId(), false, manuallySent);
 
 		// Check linked media object
 		MediaObject linkedMediaObject = null;
@@ -305,8 +306,10 @@ public class InterventionExecutionManagerService {
 
 			// Integrate intermediate survey URL
 			if (linkedIntermediateSurvey != null) {
-				val intermediateSurveyShortURL = intermediateSurveyParticipantShortURLEnsure(
-						participant.getId(), linkedIntermediateSurvey.getId());
+				val intermediateSurveyShortURL = surveyExecutionManagerService
+						.intermediateSurveyParticipantShortURLEnsure(
+								participant.getId(),
+								linkedIntermediateSurvey.getId());
 
 				val intermediateSurveyShortURLString = intermediateSurveyShortURL
 						.calculateURL();
@@ -326,7 +329,7 @@ public class InterventionExecutionManagerService {
 
 			dialogMessage.setMessage(message + URLsToAdd);
 			dialogMessage
-					.setStatus(DialogMessageStatusTypes.PREPARED_FOR_SENDING);
+			.setStatus(DialogMessageStatusTypes.PREPARED_FOR_SENDING);
 		}
 
 		databaseManagerService.saveModelObject(dialogMessage);
@@ -346,7 +349,7 @@ public class InterventionExecutionManagerService {
 	@Synchronized
 	public void dialogMessageSetProblemSolved(final ObjectId dialogMessageId,
 			final String newUncleanedButCorrectedResult)
-			throws NotificationMessageException {
+					throws NotificationMessageException {
 		log.debug("Marking dialog message {} as problem solved");
 
 		val dialogMessage = databaseManagerService.getModelObjectById(
@@ -358,7 +361,7 @@ public class InterventionExecutionManagerService {
 					DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
 					dialogMessage.getAnswerReceivedTimestamp(),
 					StringHelpers
-							.cleanReceivedMessageString(newUncleanedButCorrectedResult),
+					.cleanReceivedMessageString(newUncleanedButCorrectedResult),
 					dialogMessage.getAnswerReceivedRaw());
 		} else if (dialogMessage.getStatus() == DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY) {
 			dialogMessage.setAnswerNotAutomaticallyProcessable(false);
@@ -397,11 +400,11 @@ public class InterventionExecutionManagerService {
 				if (monitoringRule != null) {
 					final long isUnansweredAfterTimestamp = timeStampOfEvent
 							+ monitoringRule
-									.getHoursUntilMessageIsHandledAsUnanswered()
+							.getHoursUntilMessageIsHandledAsUnanswered()
 							* ImplementationConstants.HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR;
 
 					dialogMessage
-							.setIsUnansweredAfterTimestamp(isUnansweredAfterTimestamp);
+					.setIsUnansweredAfterTimestamp(isUnansweredAfterTimestamp);
 				}
 			}
 			dialogMessage.setSentTimestamp(timeStampOfEvent);
@@ -450,39 +453,6 @@ public class InterventionExecutionManagerService {
 		}
 	}
 
-	// Intermediate Survey and Feedback Participant Short URL
-	@Synchronized
-	public IntermediateSurveyAndFeedbackParticipantShortURL intermediateSurveyParticipantShortURLEnsure(
-			final ObjectId participantId, final ObjectId screeningSurveyId) {
-
-		val existingShortIdObject = databaseManagerService
-				.findOneModelObject(
-						IntermediateSurveyAndFeedbackParticipantShortURL.class,
-						Queries.INTERMEDIATE_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_PARTICIPANT_AND_SURVEY,
-						participantId, screeningSurveyId);
-
-		if (existingShortIdObject != null) {
-			return existingShortIdObject;
-		} else {
-			val newestShortIdObject = databaseManagerService
-					.findOneSortedModelObject(
-							IntermediateSurveyAndFeedbackParticipantShortURL.class,
-							Queries.ALL,
-							Queries.INTERMEDIATE_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__SORT_BY_SHORT_ID_DESC);
-
-			final long nextShortId = newestShortIdObject == null ? 1
-					: newestShortIdObject.getShortId() + 1;
-
-			val newShortIdObject = new IntermediateSurveyAndFeedbackParticipantShortURL(
-					nextShortId, StringHelpers.createRandomString(4),
-					participantId, screeningSurveyId, null);
-
-			databaseManagerService.saveModelObject(newShortIdObject);
-
-			return newShortIdObject;
-		}
-	}
-
 	// Dialog Message
 	@Synchronized
 	private void dialogMessageCreateAsUnexpectedReceived(
@@ -516,7 +486,7 @@ public class InterventionExecutionManagerService {
 
 		for (val pendingDialogMessage : pendingDialogMessages) {
 			pendingDialogMessage
-					.setStatus(DialogMessageStatusTypes.PREPARED_FOR_SENDING);
+			.setStatus(DialogMessageStatusTypes.PREPARED_FOR_SENDING);
 
 			databaseManagerService.saveModelObject(pendingDialogMessage);
 		}
@@ -601,7 +571,7 @@ public class InterventionExecutionManagerService {
 
 	/*
 	 * MAIN methods -
-	 * 
+	 *
 	 * (the following two methods contain the elemental parts of
 	 * the monitoring process)
 	 */
@@ -650,33 +620,33 @@ public class InterventionExecutionManagerService {
 								"Store value '{}' (cleaned: '{}') of message to '{}' for participant {}",
 								dialogMessage.getAnswerReceived(),
 								cleanedMessageValue, relatedMonitoringMessage
-										.getStoreValueToVariableWithName(),
+								.getStoreValueToVariableWithName(),
 								participant.getId());
 						try {
 							if (relatedMonitoringMessage
 									.getStoreValueToVariableWithName() != null
 									&& !relatedMonitoringMessage
-											.getStoreValueToVariableWithName()
-											.equals("")) {
+									.getStoreValueToVariableWithName()
+									.equals("")) {
 								variablesManagerService
-										.writeVariableValueOfParticipant(
-												participant.getId(),
-												relatedMonitoringMessage
-														.getStoreValueToVariableWithName(),
-												cleanedMessageValue);
+								.writeVariableValueOfParticipant(
+										participant.getId(),
+										relatedMonitoringMessage
+										.getStoreValueToVariableWithName(),
+										cleanedMessageValue);
 							}
 							variablesManagerService
-									.writeVariableValueOfParticipant(
-											participant.getId(),
-											SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantMessageReply
-													.toVariableName(),
-											cleanedMessageValue, true, false);
+							.writeVariableValueOfParticipant(
+									participant.getId(),
+									SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantMessageReply
+									.toVariableName(),
+									cleanedMessageValue, true, false);
 						} catch (final Exception e) {
 							log.error(
 									"Could not store value '{}' of message to '{}' for participant {}: {}",
 									dialogMessage.getAnswerReceived(),
 									relatedMonitoringMessage
-											.getStoreValueToVariableWithName(),
+									.getStoreValueToVariableWithName(),
 									participant.getId(), e.getMessage());
 						}
 					}
@@ -710,7 +680,7 @@ public class InterventionExecutionManagerService {
 								false,
 								dialogMessage.getRelatedMonitoringMessage(),
 								dialogMessage
-										.getRelatedMonitoringRuleForReplyRules(),
+								.getRelatedMonitoringRuleForReplyRules(),
 								reactOnAnsweredMessages);
 
 						recursiveRuleResolver.resolve();
@@ -769,8 +739,8 @@ public class InterventionExecutionManagerService {
 
 			if (dialogStatus != null
 					&& !dialogStatus
-							.getDateIndexOfLastDailyMonitoringProcessing()
-							.equals(dateIndex)) {
+					.getDateIndexOfLastDailyMonitoringProcessing()
+					.equals(dateIndex)) {
 				log.debug(
 						"Participant {} has not been scheduled today! Start scheduling...",
 						participant.getId());
@@ -863,10 +833,10 @@ public class InterventionExecutionManagerService {
 				// FIXME Special solution for MC tobacco & ready4life
 				try {
 					variablesManagerService
-							.writeVariableValueOfParticipant(
-									dialogOption.getParticipant(),
-									ImplementationConstants.VARIABLE_DEFINING_PARTICIPATION_IN_MOBILE_COACH_EXTRA,
-									"0");
+					.writeVariableValueOfParticipant(
+							dialogOption.getParticipant(),
+							ImplementationConstants.VARIABLE_DEFINING_PARTICIPATION_IN_MOBILE_COACH_EXTRA,
+							"0");
 				} catch (final Exception e) {
 					log.warn(
 							"Caution: Error when performing MobileCoach+ fix: {}",
@@ -875,7 +845,7 @@ public class InterventionExecutionManagerService {
 				/*
 				 * dialogMessageCreateAsUnexpectedReceived(
 				 * dialogOption.getParticipant(), receivedMessage);
-				 * 
+				 *
 				 * dialogStatusSetMonitoringFinished(dialogOption.getParticipant(
 				 * ));
 				 */
@@ -910,11 +880,11 @@ public class InterventionExecutionManagerService {
 			val relatedMonitoringMessageGroup = databaseManagerService
 					.getModelObjectById(MonitoringMessageGroup.class,
 							relatedMonitoringMessage
-									.getMonitoringMessageGroup());
+							.getMonitoringMessageGroup());
 			if (relatedMonitoringMessageGroup.getValidationExpression() != null
 					&& !cleanedMessageValue
-							.matches(relatedMonitoringMessageGroup
-									.getValidationExpression())) {
+					.matches(relatedMonitoringMessageGroup
+							.getValidationExpression())) {
 
 				dialogMessageStatusChangesAfterSending(dialogMessage.getId(),
 						DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
@@ -948,7 +918,7 @@ public class InterventionExecutionManagerService {
 				val dialogOption = getDialogOptionByParticipantAndType(
 						dialogMessageToSend.getParticipant(),
 						communicationManagerService
-								.getSupportedDialogOptionType());
+						.getSupportedDialogOptionType());
 
 				if (dialogOption != null) {
 					log.debug("Sending prepared message to {}",
@@ -956,7 +926,7 @@ public class InterventionExecutionManagerService {
 					communicationManagerService.sendMessage(dialogOption,
 							dialogMessageToSend.getId(),
 							dialogMessageWithPhoneNumberToSend
-									.getMessageSenderIdentification(),
+							.getMessageSenderIdentification(),
 							dialogMessageToSend.getMessage(),
 							dialogMessageToSend.isMessageExpectsAnswer());
 					sentMessages++;
@@ -1084,14 +1054,14 @@ public class InterventionExecutionManagerService {
 												participantId,
 												DialogMessageStatusTypes.PREPARED_FOR_SENDING,
 												InternalDateTime
-														.currentTimeMillis());
+												.currentTimeMillis());
 
 								for (val dialogMessageWaitingToBeSendOfParticipant : dialogMessagesWaitingToBeSendOfParticipant) {
 									dialogMessagesWaitingToBeSend
-											.add(new DialogMessageWithSenderIdentification(
-													dialogMessageWaitingToBeSendOfParticipant,
-													intervention
-															.getAssignedSenderIdentification()));
+									.add(new DialogMessageWithSenderIdentification(
+											dialogMessageWaitingToBeSendOfParticipant,
+											intervention
+											.getAssignedSenderIdentification()));
 								}
 							}
 						}
@@ -1384,14 +1354,14 @@ public class InterventionExecutionManagerService {
 		val fileWriter = new FileWriter(statisticsFile);
 		statistics.store(fileWriter,
 				ImplementationConstants.LOGGING_APPLICATION_NAME
-						+ " Statistics File");
+				+ " Statistics File");
 		fileWriter.flush();
 
 		@Cleanup
 		val stringWriter = new StringWriter();
 		statistics.store(stringWriter,
 				ImplementationConstants.LOGGING_APPLICATION_NAME
-						+ " Statistics File");
+				+ " Statistics File");
 		stringWriter.flush();
 		log.debug(stringWriter.toString());
 	}

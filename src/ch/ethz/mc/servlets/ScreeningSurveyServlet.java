@@ -70,7 +70,7 @@ import com.github.mustachejava.MustacheFactory;
 public class ScreeningSurveyServlet extends HttpServlet {
 	private MustacheFactory					mustacheFactory;
 
-	private SurveyExecutionManagerService	screeningSurveyExecutionManagerService;
+	private SurveyExecutionManagerService	surveyExecutionManagerService;
 
 	/**
 	 * @see Servlet#init(ServletConfig)
@@ -84,8 +84,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 					this.getClass());
 			throw new ServletException("Context is not ready!");
 		}
-		screeningSurveyExecutionManagerService = MC.getInstance()
-				.getScreeningSurveyExecutionManagerService();
+		surveyExecutionManagerService = MC.getInstance()
+				.getSurveyExecutionManagerService();
 
 		log.info("Initializing servlet...");
 
@@ -125,7 +125,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 					// Only object ids of active screening surveys (non
 					// intermediate) surveys are accepted
 					if (ObjectId.isValid(pathParts[0])) {
-						if (screeningSurveyExecutionManagerService
+						if (surveyExecutionManagerService
 								.screeningSurveyCheckIfActiveAndOfGivenType(
 										new ObjectId(pathParts[0]), false)) {
 							handleTemplateRequest(request, response,
@@ -178,7 +178,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			final HttpServletResponse response,
 			final ObjectId screeningSurveyId, final String fileRequest)
 			throws ServletException, IOException {
-		val screeningSurvey = screeningSurveyExecutionManagerService
+		val screeningSurvey = surveyExecutionManagerService
 				.getScreeningSurveyById(screeningSurveyId);
 
 		if (screeningSurvey == null) {
@@ -190,7 +190,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				fileRequest, screeningSurveyId);
 
 		final File basicTemplateFolder = new File(
-				screeningSurveyExecutionManagerService.getTemplatePath(),
+				surveyExecutionManagerService.getTemplatePath(),
 				screeningSurvey.getTemplatePath());
 		final File requestedFile = new File(basicTemplateFolder, fileRequest);
 
@@ -285,7 +285,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 
 		if (Constants.isListOpenScreenSurveysOnBaseURL()) {
 			// Get all active non intermediate screening surveys
-			val activeScreeningSurveys = screeningSurveyExecutionManagerService
+			val activeScreeningSurveys = surveyExecutionManagerService
 					.getActiveNonItermediateScreeningSurveys();
 
 			if (activeScreeningSurveys != null) {
@@ -470,7 +470,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 
 		// Decide which slide should be send to the participant
 		try {
-			templateVariables = screeningSurveyExecutionManagerService
+			templateVariables = surveyExecutionManagerService
 					.getAppropriateScreeningSurveySlide(participantId,
 							accessGranted, true, screeningSurveyId,
 							resultValues, checkValue, session);
@@ -642,7 +642,7 @@ public class ScreeningSurveyServlet extends HttpServlet {
 	 */
 	private MustacheFactory createMustacheFactory() {
 		val mustacheFactory = new DefaultMustacheFactory(
-				screeningSurveyExecutionManagerService.getTemplatePath());
+				surveyExecutionManagerService.getTemplatePath());
 		return mustacheFactory;
 	}
 }

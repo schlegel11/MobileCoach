@@ -2,15 +2,15 @@ package ch.ethz.mc.services.types;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -120,6 +120,10 @@ public enum SurveySlideTemplateFieldTypes {
 	 */
 	VALIDATION_ERROR_MESSAGE,
 	/**
+	 * <strong>OPTIONAL:</strong> Can contain the URL to an intermediate survey
+	 */
+	INTERMEDIATE_SURVEY_URL,
+	/**
 	 * Is true, when the slide is the last slide of the screening survey
 	 */
 	IS_LAST_SLIDE;
@@ -136,7 +140,7 @@ public enum SurveySlideTemplateFieldTypes {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.lang.Enum#toString()
 	 */
 	@Override

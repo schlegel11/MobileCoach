@@ -73,6 +73,7 @@ public class Queries {
 	public static final String	SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY_AND_ORDER_LOWER																																						= "{'screeningSurvey':#,'order':{$lt:#}}";
 	public static final String	SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY_AND_ORDER_HIGHER																																					= "{'screeningSurvey':#,'order':{$gt:#}}";
 	public static final String	SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY_AND_GLOBAL_UNIQUE_ID																																				= "{'screeningSurvey':#,'globalUniqueId':#}";
+	public static final String	SCREENING_SURVEY_SLIDE__BY_LINKED_INTERMEDIATE_SURVEY																																							= "{'linkedIntermediateSurvey':#}";
 	public static final String	SCREENING_SURVEY_SLIDE__SORT_BY_ORDER_ASC																																										= "{'order':1}";
 	public static final String	SCREENING_SURVEY_SLIDE__SORT_BY_ORDER_DESC																																										= "{'order':-1}";
 
@@ -188,4 +189,5 @@ public class Queries {
 	public static final String	UPDATE_VERSION_3__GENERAL_UPDATE_FOR_EMPTY_LSTRING																																								= "{$set:{'#':{'values':{}}}}";
 	public static final String	UPDATE_VERSION_5__GENERAL_UPDATE_FOR_COMMENT																																									= "{$set:{'comment':''}}";
 	public static final String	UPDATE_VERSION_6__INTERVENTION__CHANGE_1																																										= "{$set:{'automaticallyFinishScreeningSurveys':false}}";
+	public static final String	UPDATE_VERSION_6__SCREENING_SURVEY_SLIDE__CHANGE_1																																								= "{$set:{'linkedIntermediateSurvey':null}}";
 }

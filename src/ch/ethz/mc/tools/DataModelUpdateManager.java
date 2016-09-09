@@ -2,15 +2,15 @@ package ch.ethz.mc.tools;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -123,35 +123,35 @@ public class DataModelUpdateManager {
 	private static void updateToVersion1() {
 		val interventionCollection = jongo.getCollection("Intervention");
 		interventionCollection.update(Queries.EVERYTHING).multi()
-				.with(Queries.UPDATE_VERSION_1__INTERVENTION__CHANGE_1);
+		.with(Queries.UPDATE_VERSION_1__INTERVENTION__CHANGE_1);
 
 		val dialogStatusCollection = jongo.getCollection(DialogStatus.class
 				.getSimpleName());
 		dialogStatusCollection.update(Queries.EVERYTHING).multi()
-				.with(Queries.UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_1);
+		.with(Queries.UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_1);
 		dialogStatusCollection.update(Queries.EVERYTHING).multi()
-				.with(Queries.UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_2);
+		.with(Queries.UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_2);
 		dialogStatusCollection.update(Queries.EVERYTHING).multi()
-				.with(Queries.UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_3);
+		.with(Queries.UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_3);
 		dialogStatusCollection.update(Queries.EVERYTHING).multi()
-				.with(Queries.UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_4);
+		.with(Queries.UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_4);
 		dialogStatusCollection.update(Queries.EVERYTHING).multi()
-				.with(Queries.UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_5);
+		.with(Queries.UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_5);
 
 		val screeningSurveySlideCollection = jongo
 				.getCollection("ScreeningSurveySlide");
 		screeningSurveySlideCollection
-				.update(Queries.EVERYTHING)
-				.multi()
-				.with(Queries.UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE__CHANGE_1);
+		.update(Queries.EVERYTHING)
+		.multi()
+		.with(Queries.UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE__CHANGE_1);
 		screeningSurveySlideCollection
-				.update(Queries.EVERYTHING)
-				.multi()
-				.with(Queries.UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE__CHANGE_2);
+		.update(Queries.EVERYTHING)
+		.multi()
+		.with(Queries.UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE__CHANGE_2);
 		screeningSurveySlideCollection
-				.update(Queries.EVERYTHING)
-				.multi()
-				.with(Queries.UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE__CHANGE_3);
+		.update(Queries.EVERYTHING)
+		.multi()
+		.with(Queries.UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE__CHANGE_3);
 
 		val screeningSurveySlides = screeningSurveySlideCollection.find(
 				Queries.EVERYTHING).as(ScreeningSurveySlide.class);
@@ -164,9 +164,9 @@ public class DataModelUpdateManager {
 		val screeningSurveySlideRuleCollection = jongo
 				.getCollection("ScreeningSurveySlideRule");
 		screeningSurveySlideRuleCollection
-				.update(Queries.EVERYTHING)
-				.multi()
-				.with(Queries.UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE_RULE__CHANGE_1);
+		.update(Queries.EVERYTHING)
+		.multi()
+		.with(Queries.UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE_RULE__CHANGE_1);
 	}
 
 	/**
@@ -197,7 +197,7 @@ public class DataModelUpdateManager {
 					oldScreeningSurveySlide.getTitleWithPlaceholders(),
 					oldScreeningSurveySlide.getQuestionType(),
 					oldScreeningSurveySlide
-							.getOptionalLayoutAttributeWithPlaceholders(),
+					.getOptionalLayoutAttributeWithPlaceholders(),
 					questions, oldScreeningSurveySlide.getLinkedMediaObject(),
 					oldScreeningSurveySlide.isLastSlide(),
 					oldScreeningSurveySlide.getHandsOverToFeedback(),
@@ -226,43 +226,43 @@ public class DataModelUpdateManager {
 		val participantVariableWithValueCollection = jongo
 				.getCollection("ParticipantVariableWithValue");
 		participantVariableWithValueCollection
-				.update(Queries.EVERYTHING)
-				.multi()
-				.with(Queries.UPDATE_VERSION_3__PARTICIPANT_VARIABLE_WITH_VALUE__CHANGE_1);
+		.update(Queries.EVERYTHING)
+		.multi()
+		.with(Queries.UPDATE_VERSION_3__PARTICIPANT_VARIABLE_WITH_VALUE__CHANGE_1);
 
 		val screeningSurveyCollection = jongo.getCollection("ScreeningSurvey");
 		screeningSurveyCollection.update(Queries.EVERYTHING).multi()
-				.with(Queries.UPDATE_VERSION_3__SCREENING_SURVEY__CHANGE_1);
+		.with(Queries.UPDATE_VERSION_3__SCREENING_SURVEY__CHANGE_1);
 
 		val monitoringMessageCollection = jongo
 				.getCollection("MonitoringMessage");
 		monitoringMessageCollection.update(Queries.EVERYTHING).multi()
-				.with(Queries.UPDATE_VERSION_3__MONITORING_MESSAGE__CHANGE_1);
+		.with(Queries.UPDATE_VERSION_3__MONITORING_MESSAGE__CHANGE_1);
 
 		val mediaObjectCollection = jongo.getCollection("MediaObject");
 		mediaObjectCollection.update(Queries.EVERYTHING).multi()
-				.with(Queries.UPDATE_VERSION_3__MEDIA_OBJECT__CHANGE_1);
+		.with(Queries.UPDATE_VERSION_3__MEDIA_OBJECT__CHANGE_1);
 
 		val localeToSet = Constants.getInterventionLocales()[0];
 
 		val participantCollection = jongo.getCollection("Participant");
 		participantCollection
-				.update(Queries.EVERYTHING)
-				.multi()
-				.with(Queries.UPDATE_VERSION_3__PARTICIPANT__CHANGE_1,
-						localeToSet);
+		.update(Queries.EVERYTHING)
+		.multi()
+		.with(Queries.UPDATE_VERSION_3__PARTICIPANT__CHANGE_1,
+				localeToSet);
 		participantCollection.update(Queries.EVERYTHING).multi()
-				.with(Queries.UPDATE_VERSION_3__PARTICIPANT__CHANGE_2);
+		.with(Queries.UPDATE_VERSION_3__PARTICIPANT__CHANGE_2);
 
 		updateLStrings(jongo.getCollection("Feedback"),
 				new String[] { "name" }, localeToSet);
 		updateLStrings(jongo.getCollection("FeedbackSlide"), new String[] {
-				"titleWithPlaceholders", "textWithPlaceholders" }, localeToSet);
+			"titleWithPlaceholders", "textWithPlaceholders" }, localeToSet);
 		updateLStrings(jongo.getCollection("ScreeningSurvey"),
 				new String[] { "name" }, localeToSet);
 		updateLStrings(jongo.getCollection("ScreeningSurveySlide"),
 				new String[] { "titleWithPlaceholders",
-						"validationErrorMessage" }, localeToSet);
+		"validationErrorMessage" }, localeToSet);
 		updateLStrings(jongo.getCollection("MonitoringMessage"),
 				new String[] { "textWithPlaceholders" }, localeToSet);
 
@@ -277,19 +277,19 @@ public class DataModelUpdateManager {
 		MinimalObject[] minimalObjects = (MinimalObject[]) IteratorUtils
 				.toArray(
 						collection.find(Queries.EVERYTHING)
-								.projection(Queries.OBJECT_ID, 1)
-								.as(MinimalObject.class).iterator(),
+						.projection(Queries.OBJECT_ID, 1)
+						.as(MinimalObject.class).iterator(),
 						MinimalObject.class);
 
 		for (val minimalObject : minimalObjects) {
 			final MongoCursor<LazyDBList> questionArray = collection.find(
 					Queries.OBJECT_ID, minimalObject.getId()).map(
-					new ResultHandler<LazyDBList>() {
-						@Override
-						public LazyDBList map(final DBObject result) {
-							return (LazyDBList) result.get(fieldQuestions);
-						}
-					});
+							new ResultHandler<LazyDBList>() {
+								@Override
+								public LazyDBList map(final DBObject result) {
+									return (LazyDBList) result.get(fieldQuestions);
+								}
+							});
 
 			int i = 0;
 			while (questionArray.hasNext()) {
@@ -300,19 +300,19 @@ public class DataModelUpdateManager {
 					val fieldValue = (String) dbItem.get(subField);
 					if (fieldValue == null || fieldValue.equals("")) {
 						collection
-								.update(Queries.OBJECT_ID,
-										minimalObject.getId())
+						.update(Queries.OBJECT_ID,
+								minimalObject.getId())
 								.with(Queries.UPDATE_VERSION_3__GENERAL_UPDATE_FOR_EMPTY_LSTRING,
 										fieldQuestions + "." + i + "."
 												+ subField);
 					} else {
 						collection
-								.update(Queries.OBJECT_ID,
-										minimalObject.getId())
+						.update(Queries.OBJECT_ID,
+								minimalObject.getId())
 								.with(Queries.UPDATE_VERSION_3__GENERAL_UPDATE_FOR_FILLED_LSTRING,
 										fieldQuestions + "." + i + "."
 												+ subField,
-										localeToSet.toString(), fieldValue);
+												localeToSet.toString(), fieldValue);
 					}
 					i++;
 				}
@@ -327,19 +327,19 @@ public class DataModelUpdateManager {
 
 		minimalObjects = (MinimalObject[]) IteratorUtils.toArray(
 				collection.find(Queries.EVERYTHING)
-						.projection(Queries.OBJECT_ID, 1)
-						.as(MinimalObject.class).iterator(),
+				.projection(Queries.OBJECT_ID, 1)
+				.as(MinimalObject.class).iterator(),
 				MinimalObject.class);
 
 		for (val minimalObject : minimalObjects) {
 			final MongoCursor<LazyDBList> questionArray = collection.find(
 					Queries.OBJECT_ID, minimalObject.getId()).map(
-					new ResultHandler<LazyDBList>() {
-						@Override
-						public LazyDBList map(final DBObject result) {
-							return (LazyDBList) result.get(fieldQuestions);
-						}
-					});
+							new ResultHandler<LazyDBList>() {
+								@Override
+								public LazyDBList map(final DBObject result) {
+									return (LazyDBList) result.get(fieldQuestions);
+								}
+							});
 
 			int i = 0;
 			while (questionArray.hasNext()) {
@@ -353,19 +353,19 @@ public class DataModelUpdateManager {
 						val fieldValue = (String) rawSubItem;
 						if (fieldValue == null || fieldValue.equals("")) {
 							collection
-									.update(Queries.OBJECT_ID,
-											minimalObject.getId())
+							.update(Queries.OBJECT_ID,
+									minimalObject.getId())
 									.with(Queries.UPDATE_VERSION_3__GENERAL_UPDATE_FOR_EMPTY_LSTRING,
 											fieldQuestions + "." + i + "."
 													+ subField + "." + j);
 						} else {
 							collection
-									.update(Queries.OBJECT_ID,
-											minimalObject.getId())
+							.update(Queries.OBJECT_ID,
+									minimalObject.getId())
 									.with(Queries.UPDATE_VERSION_3__GENERAL_UPDATE_FOR_FILLED_LSTRING,
 											fieldQuestions + "." + i + "."
 													+ subField + "." + j,
-											localeToSet.toString(), fieldValue);
+													localeToSet.toString(), fieldValue);
 						}
 						j++;
 					}
@@ -401,9 +401,9 @@ public class DataModelUpdateManager {
 					InterventionVariableWithValueAccessTypes.INTERNAL);
 
 			interventionVariableWithValueCollection
-					.remove(oldInterventionVariableWithValue.getId());
+			.remove(oldInterventionVariableWithValue.getId());
 			interventionVariableWithValueCollection
-					.save(newInterventionVariableWithValue);
+			.save(newInterventionVariableWithValue);
 		}
 
 		val participantVariableWithValueCollection = jongo
@@ -427,9 +427,9 @@ public class DataModelUpdateManager {
 					oldParticipantVariableWithValue.getLastUpdated());
 
 			participantVariableWithValueCollection
-					.remove(oldParticipantVariableWithValue.getId());
+			.remove(oldParticipantVariableWithValue.getId());
 			participantVariableWithValueCollection
-					.save(newParticipantVariableWithValue);
+			.save(newParticipantVariableWithValue);
 		}
 	}
 
@@ -440,29 +440,29 @@ public class DataModelUpdateManager {
 			for (val field : fields) {
 				final MongoCursor<String> fieldValues = collection.find(
 						Queries.OBJECT_ID, minimalObject.getId()).map(
-						new ResultHandler<String>() {
-							@Override
-							public String map(final DBObject result) {
-								if (result.get(field) instanceof String) {
-									return (String) result.get(field);
-								} else {
-									return null;
-								}
-							}
-						});
+								new ResultHandler<String>() {
+									@Override
+									public String map(final DBObject result) {
+										if (result.get(field) instanceof String) {
+											return (String) result.get(field);
+										} else {
+											return null;
+										}
+									}
+								});
 				while (fieldValues.hasNext()) {
 					val fieldValue = fieldValues.next();
 
 					if (fieldValue == null || fieldValue.equals("")) {
 						collection
-								.update(Queries.OBJECT_ID,
-										minimalObject.getId())
+						.update(Queries.OBJECT_ID,
+								minimalObject.getId())
 								.with(Queries.UPDATE_VERSION_3__GENERAL_UPDATE_FOR_EMPTY_LSTRING,
 										field);
 					} else {
 						collection
-								.update(Queries.OBJECT_ID,
-										minimalObject.getId())
+						.update(Queries.OBJECT_ID,
+								minimalObject.getId())
 								.with(Queries.UPDATE_VERSION_3__GENERAL_UPDATE_FOR_FILLED_LSTRING,
 										field, localeToSet.toString(),
 										fieldValue);
@@ -479,12 +479,12 @@ public class DataModelUpdateManager {
 		val collectionsToChange = new String[] { "FeedbackSlide",
 				"FeedbackSlideRule", "MonitoringRule", "MonitoringReplyRule",
 				"MonitoringMessageRule", "ScreeningSurveySlide",
-				"ScreeningSurveySlideRule" };
+		"ScreeningSurveySlideRule" };
 		for (val collectionName : collectionsToChange) {
 			log.debug("Adjusting comment of collection {}", collectionName);
 			val collection = jongo.getCollection(collectionName);
 			collection.update(Queries.EVERYTHING).multi()
-					.with(Queries.UPDATE_VERSION_5__GENERAL_UPDATE_FOR_COMMENT);
+			.with(Queries.UPDATE_VERSION_5__GENERAL_UPDATE_FOR_COMMENT);
 		}
 	}
 
@@ -494,6 +494,13 @@ public class DataModelUpdateManager {
 	private static void updateToVersion6() {
 		val interventionCollection = jongo.getCollection("Intervention");
 		interventionCollection.update(Queries.EVERYTHING).multi()
-				.with(Queries.UPDATE_VERSION_6__INTERVENTION__CHANGE_1);
+		.with(Queries.UPDATE_VERSION_6__INTERVENTION__CHANGE_1);
+
+		val screeningSurveySlideCollection = jongo
+				.getCollection("ScreeningSurveySlide");
+		screeningSurveySlideCollection
+				.update(Queries.EVERYTHING)
+				.multi()
+				.with(Queries.UPDATE_VERSION_6__SCREENING_SURVEY_SLIDE__CHANGE_1);
 	}
 }
