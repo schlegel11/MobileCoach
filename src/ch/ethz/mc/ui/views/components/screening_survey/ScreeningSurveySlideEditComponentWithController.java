@@ -136,7 +136,7 @@ MediaObjectCreationOrDeleteionListener {
 		answersTable.setSortEnabled(false);
 
 		// Rules table
-		val rulesOfScreeningSurveySlide = getScreeningSurveyAdministrationManagerService()
+		val rulesOfScreeningSurveySlide = getSurveyAdministrationManagerService()
 				.getAllScreeningSurveySlideRulesOfScreeningSurveySlide(
 						screeningSurveySlide.getId());
 
@@ -224,7 +224,7 @@ MediaObjectCreationOrDeleteionListener {
 
 				log.debug("Adjust question type to {}",
 						screeningSurveySlideQuestionType);
-				getScreeningSurveyAdministrationManagerService()
+				getSurveyAdministrationManagerService()
 				.screeningSurveySlideChangeQuestionType(
 						screeningSurveySlide,
 						screeningSurveySlideQuestionType);
@@ -244,7 +244,7 @@ MediaObjectCreationOrDeleteionListener {
 				}
 
 				log.debug("Adjust preselected answer to {}", preselectedAnswer);
-				getScreeningSurveyAdministrationManagerService()
+				getSurveyAdministrationManagerService()
 				.screeningSurveySlideChangePreselectedAnswer(
 						screeningSurveySlide, selectedQuestion,
 						preselectedAnswer);
@@ -253,7 +253,7 @@ MediaObjectCreationOrDeleteionListener {
 
 		adjustPreselectedAnswer();
 
-		val intermediateSurveys = getScreeningSurveyAdministrationManagerService()
+		val intermediateSurveys = getSurveyAdministrationManagerService()
 				.getAllIntermediateSurveysOfIntervention(interventionId);
 
 		val intermediateSurveyComboBox = getIntermediateSurveyComboBox();
@@ -282,7 +282,7 @@ MediaObjectCreationOrDeleteionListener {
 				}
 				log.debug("Adjust linked intermediate survey to {}",
 						linkedIntermediateSurvey);
-				getScreeningSurveyAdministrationManagerService()
+				getSurveyAdministrationManagerService()
 				.screeningSurveySlideChangeLinkedIntermediateSurvey(
 						screeningSurveySlide,
 						linkedIntermediateSurvey);
@@ -291,7 +291,7 @@ MediaObjectCreationOrDeleteionListener {
 			}
 		});
 
-		val feedbacks = getScreeningSurveyAdministrationManagerService()
+		val feedbacks = getSurveyAdministrationManagerService()
 				.getAllFeedbacksOfScreeningSurvey(
 						screeningSurveySlide.getScreeningSurvey());
 
@@ -318,7 +318,7 @@ MediaObjectCreationOrDeleteionListener {
 							.getRelatedModelObject(Feedback.class).getId();
 				}
 				log.debug("Adjust hand over feedback to {}", feedbackToHandOver);
-				getScreeningSurveyAdministrationManagerService()
+				getSurveyAdministrationManagerService()
 				.screeningSurveySlideChangeHandsOverToFeedback(
 						screeningSurveySlide, feedbackToHandOver);
 
@@ -334,7 +334,7 @@ MediaObjectCreationOrDeleteionListener {
 					public void valueChange(final ValueChangeEvent event) {
 						val newValue = (Boolean) event.getProperty().getValue();
 
-						getScreeningSurveyAdministrationManagerService()
+						getSurveyAdministrationManagerService()
 						.screeningSurveySlideChangeStopScreeningSurvey(
 								screeningSurveySlide, newValue);
 
@@ -418,7 +418,7 @@ MediaObjectCreationOrDeleteionListener {
 			answers[i] = uiAnswer.getAnswer();
 			values[i] = uiAnswer.getValue();
 		}
-		getScreeningSurveyAdministrationManagerService()
+		getSurveyAdministrationManagerService()
 		.screeningSurveySlideSetAnswersWithPlaceholdersAndValues(
 				screeningSurveySlide, selectedQuestion, answers, values);
 	}
@@ -558,7 +558,7 @@ MediaObjectCreationOrDeleteionListener {
 		}
 
 		log.debug("New question has id {}", newId);
-		val question = getScreeningSurveyAdministrationManagerService()
+		val question = getSurveyAdministrationManagerService()
 				.screeningSurveySlideAddQuestion(screeningSurveySlide);
 		val uiQuestion = new UIQuestion(newId,
 				question.getQuestionWithPlaceholders().isEmpty() ? Messages
@@ -603,7 +603,7 @@ MediaObjectCreationOrDeleteionListener {
 				currentQuestion.getStoreValueToVariableWithName(),
 				currentQuestion.getDefaultValue());
 
-		val createdQuestion = getScreeningSurveyAdministrationManagerService()
+		val createdQuestion = getSurveyAdministrationManagerService()
 				.screeningSurveySlideAddQuestion(screeningSurveySlide,
 						newQuestion);
 		val uiQuestion = new UIQuestion(
@@ -621,7 +621,7 @@ MediaObjectCreationOrDeleteionListener {
 		log.debug("Delete question");
 
 		try {
-			getScreeningSurveyAdministrationManagerService()
+			getSurveyAdministrationManagerService()
 			.screeningSurveySlideRemoveQuestion(screeningSurveySlide,
 					selectedQuestion);
 
@@ -661,7 +661,7 @@ MediaObjectCreationOrDeleteionListener {
 		answersBeanContainer.removeItem(selectedUIAnswer.getOrder());
 
 		if (getPreselectedAnswerComboBox().isSelected(selectedUIAnswer)) {
-			getScreeningSurveyAdministrationManagerService()
+			getSurveyAdministrationManagerService()
 			.screeningSurveySlideChangePreselectedAnswer(
 					screeningSurveySlide, selectedQuestion, -1);
 		}
@@ -674,7 +674,7 @@ MediaObjectCreationOrDeleteionListener {
 
 	public void editAnswerAnswer() {
 		log.debug("Edit answer answer with placeholders");
-		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
+		val allPossibleVariables = getSurveyAdministrationManagerService()
 				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 						screeningSurveySlide.getScreeningSurvey());
 		showModalLStringValueEditWindow(
@@ -796,7 +796,7 @@ MediaObjectCreationOrDeleteionListener {
 
 	public void changeTitleWithPlaceholders() {
 		log.debug("Edit title with placeholder");
-		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
+		val allPossibleVariables = getSurveyAdministrationManagerService()
 				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 						screeningSurveySlide.getScreeningSurvey());
 		showModalLStringValueEditWindow(
@@ -810,7 +810,7 @@ MediaObjectCreationOrDeleteionListener {
 					public void buttonClick(final ClickEvent event) {
 						try {
 							// Change title with placeholders
-							getScreeningSurveyAdministrationManagerService()
+							getSurveyAdministrationManagerService()
 							.screeningSurveySlideChangeTitle(
 									screeningSurveySlide,
 									getLStringValue(),
@@ -839,7 +839,7 @@ MediaObjectCreationOrDeleteionListener {
 					public void buttonClick(final ClickEvent event) {
 						try {
 							// Change comment
-							getScreeningSurveyAdministrationManagerService()
+							getSurveyAdministrationManagerService()
 							.screeningSurveySlideChangeComment(
 									screeningSurveySlide,
 									getStringValue());
@@ -857,7 +857,7 @@ MediaObjectCreationOrDeleteionListener {
 
 	public void changeOptionalLayoutAttribute() {
 		log.debug("Edit optional layout attribute");
-		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
+		val allPossibleVariables = getSurveyAdministrationManagerService()
 				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 						screeningSurveySlide.getScreeningSurvey());
 		showModalStringValueEditWindow(
@@ -871,7 +871,7 @@ MediaObjectCreationOrDeleteionListener {
 					public void buttonClick(final ClickEvent event) {
 						try {
 							// Change optional layout attribute
-							getScreeningSurveyAdministrationManagerService()
+							getSurveyAdministrationManagerService()
 							.screeningSurveySlideChangeOptionalLayoutAttributeWithPlaceholders(
 									screeningSurveySlide,
 									getStringValue());
@@ -889,7 +889,7 @@ MediaObjectCreationOrDeleteionListener {
 
 	public void changeQuestionWithPlaceholders() {
 		log.debug("Edit question with placeholder");
-		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
+		val allPossibleVariables = getSurveyAdministrationManagerService()
 				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 						screeningSurveySlide.getScreeningSurvey());
 		showModalLStringValueEditWindow(
@@ -903,7 +903,7 @@ MediaObjectCreationOrDeleteionListener {
 					public void buttonClick(final ClickEvent event) {
 						try {
 							// Change question with placeholders
-							getScreeningSurveyAdministrationManagerService()
+							getSurveyAdministrationManagerService()
 							.screeningSurveySlideChangeQuestion(
 									screeningSurveySlide,
 									selectedQuestion,
@@ -939,7 +939,7 @@ MediaObjectCreationOrDeleteionListener {
 
 	public void changeValidationErrorMessage() {
 		log.debug("Edit validation error message");
-		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
+		val allPossibleVariables = getSurveyAdministrationManagerService()
 				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 						screeningSurveySlide.getScreeningSurvey());
 		showModalLStringValueEditWindow(
@@ -953,7 +953,7 @@ MediaObjectCreationOrDeleteionListener {
 					public void buttonClick(final ClickEvent event) {
 						try {
 							// Change validation error message
-							getScreeningSurveyAdministrationManagerService()
+							getSurveyAdministrationManagerService()
 							.screeningSurveySlideChangeValidationErrorMessage(
 									screeningSurveySlide,
 									getLStringValue(),
@@ -984,7 +984,7 @@ MediaObjectCreationOrDeleteionListener {
 					public void buttonClick(final ClickEvent event) {
 						try {
 							// Change default variable value
-							getScreeningSurveyAdministrationManagerService()
+							getSurveyAdministrationManagerService()
 							.screeningSurveySlideChangeDefaultVariableValue(
 									screeningSurveySlide,
 									selectedQuestion, getStringValue());
@@ -1002,7 +1002,7 @@ MediaObjectCreationOrDeleteionListener {
 
 	public void changeStoreResultVariable() {
 		log.debug("Edit store result to variable");
-		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
+		val allPossibleVariables = getSurveyAdministrationManagerService()
 				.getAllWritableScreenigSurveyVariablesOfScreeningSurvey(
 						screeningSurveySlide.getScreeningSurvey());
 		showModalStringValueEditWindow(
@@ -1017,7 +1017,7 @@ MediaObjectCreationOrDeleteionListener {
 					public void buttonClick(final ClickEvent event) {
 						try {
 							// Change store result to variable
-							getScreeningSurveyAdministrationManagerService()
+							getSurveyAdministrationManagerService()
 							.screeningSurveySlideChangeStoreResultToVariable(
 									screeningSurveySlide,
 									selectedQuestion, getStringValue());
@@ -1035,7 +1035,7 @@ MediaObjectCreationOrDeleteionListener {
 
 	public void createRule() {
 		log.debug("Create rule");
-		val newScreeningSurveySlideRule = getScreeningSurveyAdministrationManagerService()
+		val newScreeningSurveySlideRule = getSurveyAdministrationManagerService()
 				.screeningSurveySlideRuleCreate(screeningSurveySlide.getId());
 
 		showModalClosableEditWindow(
@@ -1095,7 +1095,7 @@ MediaObjectCreationOrDeleteionListener {
 
 		val selectedScreeningSurveySlideRule = selectedUIScreeningSurveySlideRule
 				.getRelatedModelObject(ScreeningSurveySlideRule.class);
-		val swappedScreeningSurveySlideRule = getScreeningSurveyAdministrationManagerService()
+		val swappedScreeningSurveySlideRule = getSurveyAdministrationManagerService()
 				.screeningSurveySlideRuleMove(selectedScreeningSurveySlideRule,
 						moveUp);
 
@@ -1118,7 +1118,7 @@ MediaObjectCreationOrDeleteionListener {
 		val selectedScreeningSurveySlideRule = selectedUIScreeningSurveySlideRule
 				.getRelatedModelObject(ScreeningSurveySlideRule.class);
 
-		getScreeningSurveyAdministrationManagerService()
+		getSurveyAdministrationManagerService()
 		.screeningSurveySlideRuleChangeLevel(
 				selectedScreeningSurveySlideRule, moveUp);
 
@@ -1137,7 +1137,7 @@ MediaObjectCreationOrDeleteionListener {
 					val selectedScreeningSurveySlideRule = selectedUIScreeningSurveySlideRule.getRelatedModelObject(ScreeningSurveySlideRule.class);
 
 					// Delete rule
-					getScreeningSurveyAdministrationManagerService()
+					getSurveyAdministrationManagerService()
 					.screeningSurveySlideRuleDelete(
 							selectedScreeningSurveySlideRule);
 				} catch (final Exception e) {
@@ -1161,7 +1161,7 @@ MediaObjectCreationOrDeleteionListener {
 
 	@Override
 	public void updateLinkedMediaObjectId(final ObjectId linkedMediaObjectId) {
-		getScreeningSurveyAdministrationManagerService()
+		getSurveyAdministrationManagerService()
 		.screeningSurveySlideSetLinkedMediaObject(screeningSurveySlide,
 				linkedMediaObjectId);
 	}

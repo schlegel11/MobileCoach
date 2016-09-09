@@ -268,7 +268,7 @@ public class ScreeningSurveySlide extends ModelObject {
 		// Number of slide rules
 		int slideRules = 0;
 		val screeningSurveySlideRules = MC.getInstance()
-				.getScreeningSurveyAdministrationManagerService()
+				.getSurveyAdministrationManagerService()
 				.getAllScreeningSurveySlideRulesOfScreeningSurveySlide(getId());
 
 		if (screeningSurveySlideRules != null) {

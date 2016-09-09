@@ -132,7 +132,7 @@ public class MonitoringMessageEditComponentWithController extends
 		adjust();
 
 		// Handle combo boxes
-		val intermediateSurveys = getScreeningSurveyAdministrationManagerService()
+		val intermediateSurveys = getSurveyAdministrationManagerService()
 				.getAllIntermediateSurveysOfIntervention(interventionId);
 
 		val intermediateSurveyComboBox = getIntermediateSurveyComboBox();

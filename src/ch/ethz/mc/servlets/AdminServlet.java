@@ -139,11 +139,15 @@ public class AdminServlet extends VaadinServlet implements SessionInitListener,
 
 	@Override
 	public void sessionDestroy(final SessionDestroyEvent event) {
-		val sessionId = event.getSession().getSession().getId();
+		try {
+			val sessionId = event.getSession().getSession().getId();
 
-		log.debug("Session {} destroyed", sessionId);
+			log.debug("Session {} destroyed", sessionId);
 
-		MC.getInstance().getLockingService()
-				.releaseAllLocksOfSession(sessionId);
+			MC.getInstance().getLockingService()
+			.releaseAllLocksOfSession(sessionId);
+		} catch (final NullPointerException e) {
+			// Session was no UI session
+		}
 	}
 }

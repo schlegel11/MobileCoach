@@ -78,10 +78,10 @@ public class ScreeningSurveyEditComponentWithController extends
 		feedbacksTable = getFeedbacksTable();
 
 		// table content
-		val slidesOfScreeningSurvey = getScreeningSurveyAdministrationManagerService()
+		val slidesOfScreeningSurvey = getSurveyAdministrationManagerService()
 				.getAllScreeningSurveySlidesOfScreeningSurvey(
 						screeningSurvey.getId());
-		val feedbacksOfScreeningSurvey = getScreeningSurveyAdministrationManagerService()
+		val feedbacksOfScreeningSurvey = getSurveyAdministrationManagerService()
 				.getAllFeedbacksOfScreeningSurvey(screeningSurvey.getId());
 
 		slidesBeanContainer = createBeanContainerForModelObjects(
@@ -148,7 +148,7 @@ public class ScreeningSurveyEditComponentWithController extends
 		});
 
 		// Handle combo box
-		val templatePaths = getScreeningSurveyAdministrationManagerService()
+		val templatePaths = getSurveyAdministrationManagerService()
 				.getAllTemplatePaths();
 
 		val templatePathComboBox = getTemplatePathComboBox();
@@ -166,7 +166,7 @@ public class ScreeningSurveyEditComponentWithController extends
 						.getValue();
 
 				log.debug("Adjust template path to {}", templatePath);
-				getScreeningSurveyAdministrationManagerService()
+				getSurveyAdministrationManagerService()
 						.screeningSurveyChangeTemplatePath(screeningSurvey,
 								templatePath);
 
@@ -277,7 +277,7 @@ public class ScreeningSurveyEditComponentWithController extends
 					public void buttonClick(final ClickEvent event) {
 						try {
 							// Change password
-							getScreeningSurveyAdministrationManagerService()
+							getSurveyAdministrationManagerService()
 									.screeningSurveyChangePassword(
 											screeningSurvey, getStringValue());
 						} catch (final Exception e) {
@@ -294,7 +294,7 @@ public class ScreeningSurveyEditComponentWithController extends
 
 	public void createSlide() {
 		log.debug("Create slide");
-		val newScreeningSurveySlide = getScreeningSurveyAdministrationManagerService()
+		val newScreeningSurveySlide = getSurveyAdministrationManagerService()
 				.screeningSurveySlideCreate(screeningSurvey.getId());
 
 		showModalClosableEditWindow(
@@ -325,7 +325,7 @@ public class ScreeningSurveyEditComponentWithController extends
 
 		try {
 			// Change type
-			getScreeningSurveyAdministrationManagerService()
+			getSurveyAdministrationManagerService()
 					.screeningSurveySetActive(screeningSurvey,
 							!screeningSurvey.isActive());
 		} catch (final Exception e) {
@@ -371,13 +371,13 @@ public class ScreeningSurveyEditComponentWithController extends
 	public void duplicateSlide() {
 		log.debug("Duplicate slide");
 
-		final File temporaryBackupFile = getScreeningSurveyAdministrationManagerService()
+		final File temporaryBackupFile = getSurveyAdministrationManagerService()
 				.screeningSurveySlideExport(
 						selectedUIScreeningSurveySlide
 								.getRelatedModelObject(ScreeningSurveySlide.class));
 
 		try {
-			final ScreeningSurveySlide importedScreeningSurveySlide = getScreeningSurveyAdministrationManagerService()
+			final ScreeningSurveySlide importedScreeningSurveySlide = getSurveyAdministrationManagerService()
 					.screeningSurveySlideImport(temporaryBackupFile, true);
 
 			if (importedScreeningSurveySlide == null) {
@@ -411,7 +411,7 @@ public class ScreeningSurveyEditComponentWithController extends
 
 		val selectedScreeningSurveySlide = selectedUIScreeningSurveySlide
 				.getRelatedModelObject(ScreeningSurveySlide.class);
-		val swappedScreeningSurveySlide = getScreeningSurveyAdministrationManagerService()
+		val swappedScreeningSurveySlide = getSurveyAdministrationManagerService()
 				.screeningSurveySlideMove(selectedScreeningSurveySlide, moveUp);
 
 		if (swappedScreeningSurveySlide == null) {
@@ -436,7 +436,7 @@ public class ScreeningSurveyEditComponentWithController extends
 					val selectedScreeningSurveySlide = selectedUIScreeningSurveySlide.getRelatedModelObject(ScreeningSurveySlide.class);
 
 					// Delete variable
-					getScreeningSurveyAdministrationManagerService()
+					getSurveyAdministrationManagerService()
 							.screeningSurveySlideDelete(
 									selectedScreeningSurveySlide);
 				} catch (final Exception e) {
@@ -471,7 +471,7 @@ public class ScreeningSurveyEditComponentWithController extends
 							val newFeedbackName = getLStringValue();
 
 							// Create feedback
-							newFeedback = getScreeningSurveyAdministrationManagerService()
+							newFeedback = getSurveyAdministrationManagerService()
 									.feedbackCreate(newFeedbackName,
 											screeningSurvey.getId());
 						} catch (final Exception e) {
@@ -515,7 +515,7 @@ public class ScreeningSurveyEditComponentWithController extends
 									selectedFeedback.getId());
 
 							// Change name
-							getScreeningSurveyAdministrationManagerService()
+							getSurveyAdministrationManagerService()
 									.feedbackChangeName(selectedFeedback,
 											getLStringValue());
 						} catch (final Exception e) {
@@ -628,7 +628,7 @@ public class ScreeningSurveyEditComponentWithController extends
 					val selectedFeedback = selectedUIFeedback.getRelatedModelObject(Feedback.class);
 
 					// Delete variable
-					getScreeningSurveyAdministrationManagerService()
+					getSurveyAdministrationManagerService()
 							.feedbackDelete(selectedFeedback);
 				} catch (final Exception e) {
 					closeWindow();

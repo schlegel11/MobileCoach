@@ -74,6 +74,18 @@
 		<url-pattern>/api/*</url-pattern>
 	</servlet-mapping>
 
+	<!-- Proprietary Solution for ready4life START -->
+	<servlet>
+		<servlet-name>r4l Admin</servlet-name>
+		<jsp-file>/r4l-admin.jsp</jsp-file>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>r4l Admin</servlet-name>
+		<url-pattern>/r4l-admin</url-pattern>
+	</servlet-mapping>
+	<!-- Proprietary Solution for ready4life END -->
+
 	<mime-mapping>
 		<extension>md</extension>
 		<mime-type>text/plain</mime-type>

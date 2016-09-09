@@ -178,7 +178,7 @@ public class InterventionParticipantsTabComponentWithController extends
 
 	public void adjust() {
 		log.debug("Check access rights for participants based on screening surveys");
-		isOneScreeningSurveyActive = getScreeningSurveyAdministrationManagerService()
+		isOneScreeningSurveyActive = getSurveyAdministrationManagerService()
 				.isOneScreeningSurveyOfInterventionActive(intervention.getId());
 
 		getInterventionParticipantsEditComponent().updateButtonStatus(

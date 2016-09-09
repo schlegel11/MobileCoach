@@ -80,7 +80,7 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 		// table content
 		beanContainer = createBeanContainerForModelObjects(
 				UIScreeningSurvey.class,
-				getScreeningSurveyAdministrationManagerService()
+				getSurveyAdministrationManagerService()
 						.getAllScreeningSurveysOfIntervention(
 								intervention.getId()));
 
@@ -144,7 +144,7 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 					public InputStream getStream() {
 						try {
 							return new FileInputStream(
-									getScreeningSurveyAdministrationManagerService()
+									getSurveyAdministrationManagerService()
 											.screeningSurveyExport(
 													selectedUIScreeningSurvey
 															.getRelatedModelObject(ScreeningSurvey.class)));
@@ -224,7 +224,7 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 							val newScreeningSurveyName = getLStringValue();
 
 							// Create intervention
-							newScreeningSurvey = getScreeningSurveyAdministrationManagerService()
+							newScreeningSurvey = getSurveyAdministrationManagerService()
 									.screeningSurveyCreate(
 											newScreeningSurveyName,
 											intervention.getId());
@@ -255,13 +255,13 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 
 			@Override
 			public void buttonClick(final ClickEvent event) {
-				final File temporaryBackupFile = getScreeningSurveyAdministrationManagerService()
+				final File temporaryBackupFile = getSurveyAdministrationManagerService()
 						.screeningSurveyExport(
 								selectedUIScreeningSurvey
 										.getRelatedModelObject(ScreeningSurvey.class));
 
 				try {
-					final ScreeningSurvey importedScreeningSurvey = getScreeningSurveyAdministrationManagerService()
+					final ScreeningSurvey importedScreeningSurvey = getSurveyAdministrationManagerService()
 							.screeningSurveyImport(temporaryBackupFile,
 									intervention.getId(), true);
 
@@ -311,7 +311,7 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 				log.debug("File upload sucessful, starting import of screening survey");
 
 				try {
-					final ScreeningSurvey importedScreeningSurvey = getScreeningSurveyAdministrationManagerService()
+					final ScreeningSurvey importedScreeningSurvey = getSurveyAdministrationManagerService()
 							.screeningSurveyImport(file, intervention.getId(),
 									false);
 
@@ -360,7 +360,7 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 					.getRelatedModelObject(ScreeningSurvey.class);
 
 			// Change type
-			getScreeningSurveyAdministrationManagerService()
+			getSurveyAdministrationManagerService()
 					.screeningSurveySwitchType(selectedScreeningSurvey);
 		} catch (final Exception e) {
 			handleException(e);
@@ -390,7 +390,7 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 					.getRelatedModelObject(ScreeningSurvey.class);
 
 			// Change type
-			getScreeningSurveyAdministrationManagerService()
+			getSurveyAdministrationManagerService()
 					.screeningSurveySetActive(selectedScreeningSurvey,
 							!selectedScreeningSurvey.isActive());
 		} catch (final Exception e) {
@@ -431,7 +431,7 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 									.getRelatedModelObject(ScreeningSurvey.class);
 
 							// Change name
-							getScreeningSurveyAdministrationManagerService()
+							getSurveyAdministrationManagerService()
 									.screeningSurveyChangeName(
 											selectedScreeningSurvey,
 											getLStringValue());
@@ -496,7 +496,7 @@ public class InterventionScreeningSurveysTabComponentWithController extends
 					val selectedScreeningSurvey = selectedUIScreeningSurvey.getRelatedModelObject(ScreeningSurvey.class);
 
 					// Delete intervention
-					getScreeningSurveyAdministrationManagerService()
+					getSurveyAdministrationManagerService()
 							.screeningSurveyDelete(selectedScreeningSurvey);
 				} catch (final Exception e) {
 					closeWindow();

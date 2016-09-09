@@ -72,7 +72,7 @@ public class MC implements ServletContextListener {
 	@Getter
 	InterventionAdministrationManagerService	interventionAdministrationManagerService;
 	@Getter
-	SurveyAdministrationManagerService			screeningSurveyAdministrationManagerService;
+	SurveyAdministrationManagerService			surveyAdministrationManagerService;
 	@Getter
 	InterventionExecutionManagerService			interventionExecutionManagerService;
 	@Getter
@@ -115,14 +115,14 @@ public class MC implements ServletContextListener {
 			lockingService = LockingService.start();
 
 			// Controller services
-			screeningSurveyAdministrationManagerService = SurveyAdministrationManagerService
+			surveyAdministrationManagerService = SurveyAdministrationManagerService
 					.start(databaseManagerService, fileStorageManagerService,
 							variablesManagerService, modelObjectExchangeService);
 			interventionAdministrationManagerService = InterventionAdministrationManagerService
 					.start(databaseManagerService, fileStorageManagerService,
 							variablesManagerService,
 							modelObjectExchangeService,
-							screeningSurveyAdministrationManagerService);
+							surveyAdministrationManagerService);
 			surveyExecutionManagerService = SurveyExecutionManagerService
 					.start(databaseManagerService, fileStorageManagerService,
 							variablesManagerService,
@@ -162,7 +162,7 @@ public class MC implements ServletContextListener {
 			restManagerService.stop();
 			surveyExecutionManagerService.stop();
 			interventionExecutionManagerService.stop();
-			screeningSurveyAdministrationManagerService.stop();
+			surveyAdministrationManagerService.stop();
 			interventionAdministrationManagerService.stop();
 			modelObjectExchangeService.stop();
 			communicationManagerService.stop();

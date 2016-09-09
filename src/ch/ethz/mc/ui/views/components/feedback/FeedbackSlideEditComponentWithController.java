@@ -70,7 +70,7 @@ public class FeedbackSlideEditComponentWithController extends
 		rulesTable = getRulesTable();
 
 		// table content
-		val rulesOfFeedbackSlide = getScreeningSurveyAdministrationManagerService()
+		val rulesOfFeedbackSlide = getSurveyAdministrationManagerService()
 				.getAllFeedbackSlideRulesOfFeedbackSlide(feedbackSlide.getId());
 
 		rulesBeanContainer = createBeanContainerForModelObjects(
@@ -174,7 +174,7 @@ public class FeedbackSlideEditComponentWithController extends
 
 	public void changeTitleWithPlaceholders() {
 		log.debug("Edit title with placeholder");
-		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
+		val allPossibleVariables = getSurveyAdministrationManagerService()
 				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 						relatedScreeningSurveyId);
 		showModalLStringValueEditWindow(
@@ -187,7 +187,7 @@ public class FeedbackSlideEditComponentWithController extends
 					public void buttonClick(final ClickEvent event) {
 						try {
 							// Change title with placeholders
-							getScreeningSurveyAdministrationManagerService()
+							getSurveyAdministrationManagerService()
 									.feedbackSlideChangeTitle(feedbackSlide,
 											getLStringValue(),
 											allPossibleVariables);
@@ -215,7 +215,7 @@ public class FeedbackSlideEditComponentWithController extends
 					public void buttonClick(final ClickEvent event) {
 						try {
 							// Change comment
-							getScreeningSurveyAdministrationManagerService()
+							getSurveyAdministrationManagerService()
 							.feedbackSlideChangeComment(feedbackSlide,
 									getStringValue());
 						} catch (final Exception e) {
@@ -232,7 +232,7 @@ public class FeedbackSlideEditComponentWithController extends
 
 	public void changeOptionalLayoutAttributeWithPlaceholders() {
 		log.debug("Edit optional layout attribute with placeholders");
-		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
+		val allPossibleVariables = getSurveyAdministrationManagerService()
 				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 						relatedScreeningSurveyId);
 		showModalStringValueEditWindow(
@@ -245,7 +245,7 @@ public class FeedbackSlideEditComponentWithController extends
 					public void buttonClick(final ClickEvent event) {
 						try {
 							// Change optional layout attribute
-							getScreeningSurveyAdministrationManagerService()
+							getSurveyAdministrationManagerService()
 									.feedbackSlideChangeOptionalLayoutAttributeWithPlaceholders(
 											feedbackSlide, getStringValue());
 						} catch (final Exception e) {
@@ -262,7 +262,7 @@ public class FeedbackSlideEditComponentWithController extends
 
 	public void changeFeedbackTextWithPlaceholders() {
 		log.debug("Edit feedback text with placeholders");
-		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
+		val allPossibleVariables = getSurveyAdministrationManagerService()
 				.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 						relatedScreeningSurveyId);
 		showModalLStringValueEditWindow(
@@ -275,7 +275,7 @@ public class FeedbackSlideEditComponentWithController extends
 					public void buttonClick(final ClickEvent event) {
 						try {
 							// Change feedback text with placeholders
-							getScreeningSurveyAdministrationManagerService()
+							getSurveyAdministrationManagerService()
 									.feedbackSlideChangeTextWithPlaceholders(
 											feedbackSlide, getLStringValue(),
 											allPossibleVariables);
@@ -293,7 +293,7 @@ public class FeedbackSlideEditComponentWithController extends
 
 	public void createRule() {
 		log.debug("Create rule");
-		val newFeedbackSlideRule = getScreeningSurveyAdministrationManagerService()
+		val newFeedbackSlideRule = getSurveyAdministrationManagerService()
 				.feedbackSlideRuleCreate(feedbackSlide.getId());
 
 		showModalClosableEditWindow(
@@ -350,7 +350,7 @@ public class FeedbackSlideEditComponentWithController extends
 
 		val selectedFeedbackSlideRule = selectedUIFeedbackSlideRule
 				.getRelatedModelObject(FeedbackSlideRule.class);
-		val swappedFeedbackSlideRule = getScreeningSurveyAdministrationManagerService()
+		val swappedFeedbackSlideRule = getSurveyAdministrationManagerService()
 				.feedbackSlideRuleMove(selectedFeedbackSlideRule, moveUp);
 
 		if (swappedFeedbackSlideRule == null) {
@@ -375,7 +375,7 @@ public class FeedbackSlideEditComponentWithController extends
 					val selectedFeedbackSlideRule = selectedUIFeedbackSlideRule.getRelatedModelObject(FeedbackSlideRule.class);
 
 					// Delete rule
-					getScreeningSurveyAdministrationManagerService()
+					getSurveyAdministrationManagerService()
 							.feedbackSlideRuleDelete(selectedFeedbackSlideRule);
 				} catch (final Exception e) {
 					closeWindow();
@@ -399,7 +399,7 @@ public class FeedbackSlideEditComponentWithController extends
 
 	@Override
 	public void updateLinkedMediaObjectId(final ObjectId linkedMediaObjectId) {
-		getScreeningSurveyAdministrationManagerService()
+		getSurveyAdministrationManagerService()
 				.feedbackSlideSetLinkedMediaObject(feedbackSlide,
 						linkedMediaObjectId);
 	}

@@ -71,7 +71,7 @@ ScreeningSurveySlideRuleEditComponent {
 
 			log.debug("Adjust case {} to screening survey slide {}",
 					isTrueCase ? "true" : "false", selectedScreeningSurveySlide);
-			getScreeningSurveyAdministrationManagerService()
+			getSurveyAdministrationManagerService()
 			.screeningSurveySlideRuleSetJumpToSlide(
 					screeningSurveySlideRule, isTrueCase,
 					selectedScreeningSurveySlide);
@@ -95,7 +95,7 @@ ScreeningSurveySlideRuleEditComponent {
 		 * Adjust own components
 		 */
 		// Handle combo boxes
-		val allScreeningSurveySlidesOfScreeningSurvey = getScreeningSurveyAdministrationManagerService()
+		val allScreeningSurveySlidesOfScreeningSurvey = getSurveyAdministrationManagerService()
 				.getAllScreeningSurveySlidesOfScreeningSurvey(screeningSurveyId);
 
 		val jumpIfTrueComboBox = getJumpIfTrueComboBox();
@@ -130,7 +130,7 @@ ScreeningSurveySlideRuleEditComponent {
 					public void valueChange(final ValueChangeEvent event) {
 						val newValue = (Boolean) event.getProperty().getValue();
 
-						getScreeningSurveyAdministrationManagerService()
+						getSurveyAdministrationManagerService()
 						.screeningSurveySlideRuleChangeShowSameSlideBecauseValueNotValidWhenTrue(
 								screeningSurveySlideRule, newValue);
 
@@ -199,7 +199,7 @@ ScreeningSurveySlideRuleEditComponent {
 
 	public void changeVariableToStoreValueTo() {
 		log.debug("Edit variable to store value to");
-		val allPossibleVariables = getScreeningSurveyAdministrationManagerService()
+		val allPossibleVariables = getSurveyAdministrationManagerService()
 				.getAllWritableScreenigSurveyVariablesOfScreeningSurvey(
 						screeningSurveyId);
 		showModalStringValueEditWindow(
@@ -213,7 +213,7 @@ ScreeningSurveySlideRuleEditComponent {
 					public void buttonClick(final ClickEvent event) {
 						try {
 							// Change variable to store value to
-							getScreeningSurveyAdministrationManagerService()
+							getSurveyAdministrationManagerService()
 							.screeningSurveySlideRuleChangeVariableToStoreValueTo(
 									screeningSurveySlideRule,
 									getStringValue());
@@ -242,7 +242,7 @@ ScreeningSurveySlideRuleEditComponent {
 					public void buttonClick(final ClickEvent event) {
 						try {
 							// Change value to store to variable
-							getScreeningSurveyAdministrationManagerService()
+							getSurveyAdministrationManagerService()
 							.screeningSurveySlideRuleChangeValueToStoreToVariable(
 									screeningSurveySlideRule,
 									getStringValue());

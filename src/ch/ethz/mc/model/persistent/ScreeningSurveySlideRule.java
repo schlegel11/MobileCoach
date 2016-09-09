@@ -167,7 +167,7 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 
 		if (nextScreeningSurveySlideWhenTrue != null) {
 			val slideWhenTrue = MC.getInstance()
-					.getScreeningSurveyAdministrationManagerService()
+					.getSurveyAdministrationManagerService()
 					.getScreeningSurveySlide(nextScreeningSurveySlideWhenTrue);
 			if (slideWhenTrue != null) {
 				slideNameWhenTrue = (slideWhenTrue.getTitleWithPlaceholders()
@@ -180,7 +180,7 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 		}
 		if (nextScreeningSurveySlideWhenFalse != null) {
 			val slideWhenFalse = MC.getInstance()
-					.getScreeningSurveyAdministrationManagerService()
+					.getSurveyAdministrationManagerService()
 					.getScreeningSurveySlide(nextScreeningSurveySlideWhenFalse);
 			if (slideWhenFalse != null) {
 				slideNameWhenFalse = (slideWhenFalse.getTitleWithPlaceholders()

@@ -62,7 +62,7 @@ public class FeedbackEditComponentWithController extends FeedbackEditComponent {
 		slidesTable = getFeedbackSlidesTable();
 
 		// table content
-		val slidesOfFeedback = getScreeningSurveyAdministrationManagerService()
+		val slidesOfFeedback = getSurveyAdministrationManagerService()
 				.getAllFeedbackSlidesOfFeedback(feedback.getId());
 
 		slidesBeanContainer = createBeanContainerForModelObjects(
@@ -93,7 +93,7 @@ public class FeedbackEditComponentWithController extends FeedbackEditComponent {
 		});
 
 		// Handle combo box
-		val templatePaths = getScreeningSurveyAdministrationManagerService()
+		val templatePaths = getSurveyAdministrationManagerService()
 				.getAllTemplatePaths();
 
 		val templatePathComboBox = getTemplatePathComboBox();
@@ -111,7 +111,7 @@ public class FeedbackEditComponentWithController extends FeedbackEditComponent {
 						.getValue();
 
 				log.debug("Adjust template path to {}", templatePath);
-				getScreeningSurveyAdministrationManagerService()
+				getSurveyAdministrationManagerService()
 						.feedbackChangeTemplatePath(feedback, templatePath);
 			}
 		});
@@ -147,7 +147,7 @@ public class FeedbackEditComponentWithController extends FeedbackEditComponent {
 
 	public void createSlide() {
 		log.debug("Create slide");
-		val newFeedbackSlide = getScreeningSurveyAdministrationManagerService()
+		val newFeedbackSlide = getSurveyAdministrationManagerService()
 				.feedbackSlideCreate(feedback.getId());
 
 		showModalClosableEditWindow(
@@ -200,13 +200,13 @@ public class FeedbackEditComponentWithController extends FeedbackEditComponent {
 	public void duplicateSlide() {
 		log.debug("Duplicate slide");
 
-		final File temporaryBackupFile = getScreeningSurveyAdministrationManagerService()
+		final File temporaryBackupFile = getSurveyAdministrationManagerService()
 				.feedbackSlideExport(
 						selectedUIFeedbackSlide
 								.getRelatedModelObject(FeedbackSlide.class));
 
 		try {
-			final FeedbackSlide importedFeedbackSlide = getScreeningSurveyAdministrationManagerService()
+			final FeedbackSlide importedFeedbackSlide = getSurveyAdministrationManagerService()
 					.feedbackSlideImport(temporaryBackupFile, true);
 
 			if (importedFeedbackSlide == null) {
@@ -239,7 +239,7 @@ public class FeedbackEditComponentWithController extends FeedbackEditComponent {
 
 		val selectedFeedbackSlide = selectedUIFeedbackSlide
 				.getRelatedModelObject(FeedbackSlide.class);
-		val swappedFeedbackSlide = getScreeningSurveyAdministrationManagerService()
+		val swappedFeedbackSlide = getSurveyAdministrationManagerService()
 				.feedbackSlideMove(selectedFeedbackSlide, moveUp);
 
 		if (swappedFeedbackSlide == null) {
@@ -264,7 +264,7 @@ public class FeedbackEditComponentWithController extends FeedbackEditComponent {
 					val selectedFeedbackSlide = selectedUIFeedbackSlide.getRelatedModelObject(FeedbackSlide.class);
 
 					// Delete variable
-					getScreeningSurveyAdministrationManagerService()
+					getSurveyAdministrationManagerService()
 							.feedbackSlideDelete(selectedFeedbackSlide);
 				} catch (final Exception e) {
 					closeWindow();

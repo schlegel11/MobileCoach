@@ -192,7 +192,7 @@ public class AbstractRuleEditComponentWithController extends
 				break;
 			case SCREENING_SURVEY_RULES:
 			case FEEDBACK_RULES:
-				allPossibleVariables = getScreeningSurveyAdministrationManagerService()
+				allPossibleVariables = getSurveyAdministrationManagerService()
 						.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 								rulesRelatedModelObjectId);
 				break;
@@ -237,7 +237,7 @@ public class AbstractRuleEditComponentWithController extends
 				break;
 			case SCREENING_SURVEY_RULES:
 			case FEEDBACK_RULES:
-				allPossibleVariables = getScreeningSurveyAdministrationManagerService()
+				allPossibleVariables = getSurveyAdministrationManagerService()
 						.getAllPossibleScreenigSurveyVariablesOfScreeningSurvey(
 								rulesRelatedModelObjectId);
 				break;
