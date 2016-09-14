@@ -38,8 +38,8 @@ import ch.ethz.mc.services.InterventionExecutionManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
 
 /**
- * The {@link ShortURLMediaObjectURLAndFileStreamingServlet} serves files contained in
- * {@link MediaObject}s, which are referenced by
+ * The {@link ShortURLMediaObjectURLAndFileStreamingServlet} serves files
+ * contained in {@link MediaObject}s, which are referenced by
  * {@link MediaObjectParticipantShortURL}s
  * 
  * The library used for serving the files is published under the LGPL license.
@@ -123,6 +123,13 @@ public class ShortURLMediaObjectURLAndFileStreamingServlet extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
+
+		// FIXME Special (ugly) solution for ready4life
+		interventionExecutionManagerService
+				.rememberMediaObjectForDialogMessage(
+						mediaObjectParticipantShortURL.getDialogMessage(),
+						mediaObject);
+		// End of solution
 
 		// Mark media object as seen
 		interventionExecutionManagerService

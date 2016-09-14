@@ -28,6 +28,7 @@ import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.Constants;
@@ -38,6 +39,7 @@ import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.DialogStatus;
 import ch.ethz.mc.model.persistent.IntermediateSurveyAndFeedbackParticipantShortURL;
 import ch.ethz.mc.model.persistent.InterventionVariableWithValue;
+import ch.ethz.mc.model.persistent.MediaObject;
 import ch.ethz.mc.model.persistent.MonitoringMessage;
 import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
 import ch.ethz.mc.model.persistent.MonitoringReplyRule;
@@ -220,7 +222,7 @@ public class VariablesManagerService {
 		val date = new Date(InternalDateTime.currentTimeMillis());
 		for (val variable : SystemVariables.READ_ONLY_SYSTEM_VARIABLES.values()) {
 			val readOnlySystemVariableValue = getReadOnlySystemVariableValue(
-					date, variable,  relatedMonitoringMessage);
+					date, variable, relatedMonitoringMessage);
 
 			if (readOnlySystemVariableValue != null) {
 				addToHashtable(variablesWithValues, variable.toVariableName(),
@@ -1315,6 +1317,46 @@ public class VariablesManagerService {
 			}
 		}
 	}
+
+	// FIXME Special (ugly) solution for ready4life
+	public void rememberMediaObjectForParticipant(Participant participant,
+			MediaObject mediaObject) {
+		if (mediaObject.getFileReference() != null
+				&& mediaObject.getName().toLowerCase().endsWith(".mp4")) {
+			val name = mediaObject.getName();
+			val nameParts = name.replace(" ", "_").split("_");
+
+			if (nameParts.length > 0 && StringUtils.isNumeric(nameParts[0])) {
+				val id = Integer.parseInt(nameParts[0]);
+				if (id > 0 && id < 23) {
+					String variableName = String.valueOf(id);
+					if (variableName.length() == 1) {
+						variableName = "0" + variableName;
+					}
+					try {
+						val value = externallyReadVariableValueForParticipant(
+								participant.getId(),
+								"$videoShared" + variableName,
+								InterventionVariableWithValuePrivacyTypes.PRIVATE,
+								true);
+
+						if (value.equals("0")) {
+							externallyWriteVariableForParticipant(
+									participant.getId(), "$videoShared"
+											+ variableName, "1", false, true);
+						}
+					} catch (Exception e) {
+						log.error("Error at ready4life variable hack: {}",
+								e.getMessage());
+					}
+				}
+
+				log.error("Found media object to remember: {}", id);
+			}
+		}
+	}
+
+	// End of solution
 
 	/**
 	 * Checks if variable can be written for the given participant

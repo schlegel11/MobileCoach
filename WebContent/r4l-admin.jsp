@@ -77,6 +77,10 @@
 	groups.put("42", "Genf und Waadt ab 01.11.");
 	groups.put("43", "Genf und Waadt ab 01.12.");
 	groups.put("44", "Genf und Waadt ab 01.01.");
+	groups.put("51", "LUNGENLIGA intern ab 01.10.");
+	groups.put("52", "LUNGENLIGA intern ab 01.11.");
+	groups.put("53", "LUNGENLIGA intern ab 01.12.");
+	groups.put("54", "LUNGENLIGA intern ab 01.01.");
 
 	Hashtable<String, String> challenges = new Hashtable<String, String>();
 	challenges.put("challenge#01", "1. Challenge");

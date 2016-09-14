@@ -825,6 +825,14 @@ public class SurveyExecutionManagerService {
 								nextSlide.getLinkedMediaObject());
 
 				if (mediaObject.getFileReference() != null) {
+					// FIXME Special (ugly) solution for ready4life
+					if (participant != null) {
+						variablesManagerService
+						.rememberMediaObjectForParticipant(participant,
+								mediaObject);
+					}
+					// End of solution
+
 					templateVariables.put(
 							GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL
 									.toVariable(),

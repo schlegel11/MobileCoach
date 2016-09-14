@@ -43,13 +43,13 @@ public class ImplementationConstants {
 	public static final long	DAYS_TO_TIME_IN_MILLIS_MULTIPLICATOR												= 24 * 60 * 60 * 1000;
 
 	public static final long	MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITHOUT_SIMULATOR	= 300;
-	public static final long	MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITH_SIMULATOR		= 60;
+	public static final long	MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITH_SIMULATOR		= 15;
 
 	public static final long	MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR					= 60;
-	public static final long	MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR						= 30;
+	public static final long	MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR						= 7;
 
 	public static final long	MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR						= 60;
-	public static final long	MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR							= 30;
+	public static final long	MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR							= 7;
 
 	// FIXME Special solution for MC tobacco & ready4life
 	public static String		VARIABLE_DEFINING_PARTICIPATION_IN_MOBILE_COACH_EXTRA								= "$participation_extra";
@@ -58,7 +58,7 @@ public class ImplementationConstants {
 	public static final long	MAILING_SEND_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS								= 5 * 60;
 	public static final int		MAILING_MAXIMUM_THREAD_COUNT														= 25;
 
-	public static final long	SIMULATOR_TIME_UPDATE_INTERVAL_IN_SECONDS											= 10;
+	public static final long	SIMULATOR_TIME_UPDATE_INTERVAL_IN_SECONDS											= 5;
 
 	public static final int		SURVEY_FILE_CACHE_IN_MINUTES														= 3600;
 
