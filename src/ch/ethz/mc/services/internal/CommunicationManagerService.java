@@ -488,7 +488,6 @@ public class CommunicationManagerService {
 						+ messageSender + ",Notify=none");
 				mailMessage.setText(message, "ISO-8859-1");
 
-				mailMessage.setText(message);
 				Transport.send(mailMessage);
 			}
 

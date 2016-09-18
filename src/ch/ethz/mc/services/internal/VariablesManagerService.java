@@ -1351,7 +1351,7 @@ public class VariablesManagerService {
 					}
 				}
 
-				log.error("Found media object to remember: {}", id);
+				log.debug("Found media object to remember: {}", id);
 			}
 		}
 	}

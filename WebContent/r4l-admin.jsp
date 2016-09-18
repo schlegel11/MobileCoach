@@ -85,6 +85,11 @@
 	Hashtable<String, String> challenges = new Hashtable<String, String>();
 	challenges.put("challenge#01", "1. Challenge");
 	challenges.put("challenge#02", "2. Challenge");
+	challenges.put("challenge#03", "3. Challenge");
+	challenges.put("challenge#04", "4. Challenge");
+	challenges.put("challenge#05", "5. Challenge");
+	challenges.put("challenge#06", "6. Challenge");
+	challenges.put("challenge#07", "7. Challenge");
 
 	// Data preparation
 	Hashtable<String, Participant> groupParticipants = new Hashtable<String, Participant>();

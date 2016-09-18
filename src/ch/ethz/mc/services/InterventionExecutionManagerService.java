@@ -30,6 +30,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 import lombok.Cleanup;
 import lombok.Synchronized;
@@ -872,7 +873,6 @@ public class InterventionExecutionManagerService {
 		} else {
 			// Check if result is in general automatically
 			// processable
-
 			val relatedMonitoringMessage = databaseManagerService
 					.getModelObjectById(MonitoringMessage.class,
 							dialogMessage.getRelatedMonitoringMessage());
@@ -881,10 +881,12 @@ public class InterventionExecutionManagerService {
 					.getModelObjectById(MonitoringMessageGroup.class,
 							relatedMonitoringMessage
 									.getMonitoringMessageGroup());
+
 			if (relatedMonitoringMessageGroup.getValidationExpression() != null
 					&& !cleanedMessageValue
 							.matches(relatedMonitoringMessageGroup
 									.getValidationExpression())) {
+				// Has validation expression, but does not match
 
 				dialogMessageStatusChangesAfterSending(dialogMessage.getId(),
 						DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
@@ -892,13 +894,51 @@ public class InterventionExecutionManagerService {
 						cleanedMessageValue, receivedMessage.getMessage());
 
 				return;
+			} else if (relatedMonitoringMessageGroup.getValidationExpression() != null
+					&& cleanedMessageValue
+							.matches(relatedMonitoringMessageGroup
+									.getValidationExpression())) {
+				// Has validation expression and matches
+
+				val matcher = Pattern
+						.compile(
+								relatedMonitoringMessageGroup
+										.getValidationExpression()).matcher(
+								cleanedMessageValue);
+
+				if (matcher.groupCount() > 0) {
+					// Pattern has a group
+					matcher.find();
+
+					dialogMessageStatusChangesAfterSending(
+							dialogMessage.getId(),
+							DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
+							receivedMessage.getReceivedTimestamp(),
+							matcher.group(1), receivedMessage.getMessage());
+
+					return;
+				} else {
+					// Pattern has no group
+					dialogMessageStatusChangesAfterSending(
+							dialogMessage.getId(),
+							DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
+							receivedMessage.getReceivedTimestamp(),
+							cleanedMessageValue, receivedMessage.getMessage());
+
+					return;
+				}
+			} else {
+				// Has no validation expression
+
+				dialogMessageStatusChangesAfterSending(
+						dialogMessage.getId(),
+						DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
+						receivedMessage.getReceivedTimestamp(),
+						cleanedMessageValue, receivedMessage.getMessage());
+
+				return;
 			}
 		}
-
-		dialogMessageStatusChangesAfterSending(dialogMessage.getId(),
-				DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
-				receivedMessage.getReceivedTimestamp(), cleanedMessageValue,
-				receivedMessage.getMessage());
 	}
 
 	@Synchronized

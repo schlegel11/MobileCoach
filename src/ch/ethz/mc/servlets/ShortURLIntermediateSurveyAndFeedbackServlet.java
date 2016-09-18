@@ -558,6 +558,8 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 		if (surveyId != null) {
 			templateVariables.put(
 					SurveySlideTemplateFieldTypes.IS_SURVEY.toVariable(), true);
+			templateVariables.put(
+					SurveySlideTemplateFieldTypes.IS_INTERMEDIATE_SURVEY.toVariable(), true);
 		} else {
 			templateVariables.put(
 					FeedbackSlideTemplateFieldTypes.IS_FEEDBACK.toVariable(),
