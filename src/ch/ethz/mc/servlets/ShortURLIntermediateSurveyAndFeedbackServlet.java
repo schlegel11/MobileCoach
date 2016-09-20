@@ -591,10 +591,12 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 			}
 		}
 
-		// Adjust media object URL
+		// Adjust media object URL for real media objects
 		if (templateVariables
 				.get(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL
-						.toVariable()) != null) {
+						.toVariable()) != null && templateVariables
+								.get(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_URL
+										.toVariable()) == null) {
 			templateVariables
 					.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL
 							.toVariable(),

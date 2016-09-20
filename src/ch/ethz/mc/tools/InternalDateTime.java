@@ -20,6 +20,7 @@ package ch.ethz.mc.tools;
 import java.util.concurrent.TimeUnit;
 
 import lombok.extern.log4j.Log4j2;
+import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.ImplementationConstants;
 
 /**
@@ -50,14 +51,18 @@ public class InternalDateTime {
 	 * Simulates a step one hour into the future
 	 */
 	public static void nextHour() {
-		hourOffsetCount++;
+		synchronized (MC.getInstance()) {
+			hourOffsetCount++;
+		}
 	}
 
 	/**
 	 * Simulates a step one day into the future
 	 */
 	public static void nextDay() {
-		hourOffsetCount += 24;
+		synchronized (MC.getInstance()) {
+			hourOffsetCount += 24;
+		}
 	}
 
 	/**

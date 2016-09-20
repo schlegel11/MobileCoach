@@ -83,13 +83,13 @@
 	groups.put("54", "LUNGENLIGA intern ab 01.01.");
 
 	Hashtable<String, String> challenges = new Hashtable<String, String>();
-	challenges.put("challenge#01", "1. Challenge");
-	challenges.put("challenge#02", "2. Challenge");
-	challenges.put("challenge#03", "3. Challenge");
-	challenges.put("challenge#04", "4. Challenge");
-	challenges.put("challenge#05", "5. Challenge");
-	challenges.put("challenge#06", "6. Challenge");
-	challenges.put("challenge#07", "7. Challenge");
+	challenges.put("challenge#01", "1. Challenge - Own positive activity picture + message");
+	challenges.put("challenge#02", "2. Challenge - Own anti-stress picture + message");
+	challenges.put("challenge#03", "3. Challenge - Own say NO message");
+	challenges.put("challenge#04", "4. Challenge - Own motivational message + picture (Non-Smoker smokestatus=2)");
+	challenges.put("challenge#05", "5. Challenge - Own quit message + picture (Smoker c/d)");
+	challenges.put("challenge#06", "6. Challenge - Own quit message + picture (Non-Smoker smokestatus!=2)");
+	challenges.put("challenge#07", "7. Challenge - Booster be healthy message + picture");
 
 	// Data preparation
 	Hashtable<String, Participant> groupParticipants = new Hashtable<String, Participant>();
