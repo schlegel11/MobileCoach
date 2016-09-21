@@ -49,7 +49,6 @@
 	
 	// Data change
 	if (request.getParameter("action") != null &&request.getParameter("challenge") != null && request.getParameter("participant") != null) {
-		log.warn(request.getParameter("action"));
 		boolean action = Boolean.parseBoolean(request.getParameter("action"));
 		String challenge = request.getParameter("challenge");
 		ObjectId participantId = new ObjectId(request.getParameter("participant"));

@@ -1103,10 +1103,15 @@ public class VariablesManagerService {
 						if (("," + participantVariableWithValue.getValue() + ",")
 								.contains("," + participantId.toHexString()
 										+ ",")) {
-							val newValue = participantVariableWithValue
+							String newValue = participantVariableWithValue
 									.getValue()
 									.replace(participantId.toHexString(), "")
 									.replace(",,", ",");
+							
+							if (newValue.endsWith(",")) {
+								newValue = newValue.substring(0, newValue.length()-1);
+							}
+							
 							writeVariableValueOfParticipant(
 									receivingParticipantId, variable, newValue,
 									false, false);
