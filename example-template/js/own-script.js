@@ -9,29 +9,29 @@ $(function () {
     createListeners();
     $("#REST-status").html("Requesting values...");
 
-    restTest("variable/read/challengeComment01");
-    restTest("variable/readMany/challengeComment01,challengeImage01");
-
-    restTest("variable/write/challengeComment02", "Hallo Welt!");
-
-    restTest("variable/readGroupArray/challengeComment01");
-    restTest("variable/readInterventionArray/challengeComment01");
-
-    restTest("variable/readGroupArrayMany/challengeComment01,challengeImage0");
-    restTest("variable/readInterventionArrayMany/challengeComment02");
-
-    restTest("variable/calculateGroupAverage/points");
-    restTest("variable/calculateInterventionAverage/points");
-
-    restTest("voting/votings/challengeVotes02");
-    restTest("voting/votingsGroupArray/challengeVotes02");
-    restTest("voting/votingsInterventionArray/challengeVotes02");
-
-    restTest("voting/vote/challengeVotes02/579a42679afa061cf073416b");
-    restTest("voting/unvote/challengeVotes02/579a42679afa061cf073416b");
-
-    restTest("variable/read/points");
-    restTest("credits/storeCredit/points/c02");
+//    restTest("variable/read/challengeComment01");
+//    restTest("variable/readMany/challengeComment01,challengeImage01");
+//
+//    restTest("variable/write/challengeComment02", "Hallo Welt!");
+//
+//    restTest("variable/readGroupArray/challengeComment01");
+//    restTest("variable/readInterventionArray/challengeComment01");
+//
+//    restTest("variable/readGroupArrayMany/challengeComment01,challengeImage0");
+//    restTest("variable/readInterventionArrayMany/challengeComment02");
+//
+//    restTest("variable/calculateGroupAverage/points");
+//    restTest("variable/calculateInterventionAverage/points");
+//
+//    restTest("voting/votings/challengeVotes02");
+//    restTest("voting/votingsGroupArray/challengeVotes02");
+//    restTest("voting/votingsInterventionArray/challengeVotes02");
+//
+//    restTest("voting/vote/challengeVotes02/579a42679afa061cf073416b");
+//    restTest("voting/unvote/challengeVotes02/579a42679afa061cf073416b");
+//
+//    restTest("variable/read/points");
+//    restTest("credits/storeCredit/points/c02");
 });
 
 // Helpers
