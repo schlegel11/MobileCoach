@@ -17,6 +17,8 @@
         var config = {
             debug: true,
             isFeedback: {{#is_feedback}}true{{/is_feedback}}{{#is_survey}}false{{/is_survey}},
+            isSurvey: {{#is_feedback}}false{{/is_feedback}}{{#is_survey}}true{{/is_survey}},
+            isIntermediateSurvey: {{#is_intermediate_survey}}true{{/is_intermediate_survey}}{{^is_intermediate_survey}}false{{/is_intermediate_survey}},
             layout: "{{layout}}",
             token: "{{token}}",
             rest: "{{rest_api_url}}",
@@ -46,6 +48,7 @@
         </p>
         <h4>Layout: {{layout}}
         {{#optional_layout_attribute}} - Additional layout: {{optional_layout_attribute}}{{/optional_layout_attribute}}</h4> {{#feedback_url}}
+        {{#intermediate_survey_url}}<h4>Linked intermediate survey:</h4><p><a href="{{intermediate_survey_url}}">{{intermediate_survey_url}}</a></p>{{/intermediate_survey_url}}
         <h2>
             <a href="{{feedback_url}}">Feeback available here</a>
         </h2> {{/feedback_url}}
