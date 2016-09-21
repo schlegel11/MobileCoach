@@ -16,6 +16,7 @@
 	<!ENTITY mustache.java.version "0.8.14">
 	<!ENTITY java.mail.version "1.4.7">
 	<!ENTITY java-image-scaling.version "0.8.6">
+	<!ENTITY thumbnailator.version "0.4.8">
 	<!ENTITY resteasy.version "3.0.17.Final">
 	<!ENTITY jcsv.version "1.4.0">
 ]>
@@ -110,6 +111,9 @@
 
 		<!-- Java Image Scaling -->
 		<dependency org="com.mortennobel" name="java-image-scaling" rev="&java-image-scaling.version;"/>
+
+		<!-- Thumbnailator -->
+		<dependency org="net.coobird" name="thumbnailator" rev="&thumbnailator.version;"/>
 
 		<!-- RESTeasy -->
 		<dependency org="org.jboss.resteasy" name="resteasy-jaxrs" rev="&resteasy.version;" />
