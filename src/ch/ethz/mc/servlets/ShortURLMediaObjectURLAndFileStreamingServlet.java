@@ -124,13 +124,6 @@ public class ShortURLMediaObjectURLAndFileStreamingServlet extends HttpServlet {
 			return;
 		}
 
-		// FIXME Special (ugly) solution for ready4life
-		interventionExecutionManagerService
-				.rememberMediaObjectForDialogMessage(
-						mediaObjectParticipantShortURL.getDialogMessage(),
-						mediaObject);
-		// End of solution
-
 		// Mark media object as seen
 		interventionExecutionManagerService
 				.dialogMessageSetMediaContentViewed(mediaObjectParticipantShortURL
