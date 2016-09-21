@@ -30,6 +30,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 import lombok.Cleanup;
 import lombok.Synchronized;
@@ -830,25 +831,10 @@ public class InterventionExecutionManagerService {
 				log.debug("Received stop message by participant {}",
 						dialogOption.getParticipant());
 
-				// FIXME Special solution for MC tobacco & ready4life
-				try {
-					variablesManagerService
-							.writeVariableValueOfParticipant(
-									dialogOption.getParticipant(),
-									ImplementationConstants.VARIABLE_DEFINING_PARTICIPATION_IN_MOBILE_COACH_EXTRA,
-									"0");
-				} catch (final Exception e) {
-					log.warn(
-							"Caution: Error when performing MobileCoach+ fix: {}",
-							e.getMessage());
-				}
-				/*
-				 * dialogMessageCreateAsUnexpectedReceived(
-				 * dialogOption.getParticipant(), receivedMessage);
-				 * 
-				 * dialogStatusSetMonitoringFinished(dialogOption.getParticipant(
-				 * ));
-				 */
+				dialogMessageCreateAsUnexpectedReceived(
+						dialogOption.getParticipant(), receivedMessage);
+
+				dialogStatusSetMonitoringFinished(dialogOption.getParticipant());
 
 				return;
 			}
@@ -872,7 +858,6 @@ public class InterventionExecutionManagerService {
 		} else {
 			// Check if result is in general automatically
 			// processable
-
 			val relatedMonitoringMessage = databaseManagerService
 					.getModelObjectById(MonitoringMessage.class,
 							dialogMessage.getRelatedMonitoringMessage());
@@ -881,10 +866,12 @@ public class InterventionExecutionManagerService {
 					.getModelObjectById(MonitoringMessageGroup.class,
 							relatedMonitoringMessage
 									.getMonitoringMessageGroup());
+
 			if (relatedMonitoringMessageGroup.getValidationExpression() != null
 					&& !cleanedMessageValue
 							.matches(relatedMonitoringMessageGroup
 									.getValidationExpression())) {
+				// Has validation expression, but does not match
 
 				dialogMessageStatusChangesAfterSending(dialogMessage.getId(),
 						DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
@@ -892,13 +879,51 @@ public class InterventionExecutionManagerService {
 						cleanedMessageValue, receivedMessage.getMessage());
 
 				return;
+			} else if (relatedMonitoringMessageGroup.getValidationExpression() != null
+					&& cleanedMessageValue
+							.matches(relatedMonitoringMessageGroup
+									.getValidationExpression())) {
+				// Has validation expression and matches
+
+				val matcher = Pattern
+						.compile(
+								relatedMonitoringMessageGroup
+										.getValidationExpression()).matcher(
+								cleanedMessageValue);
+
+				if (matcher.groupCount() > 0) {
+					// Pattern has a group
+					matcher.find();
+
+					dialogMessageStatusChangesAfterSending(
+							dialogMessage.getId(),
+							DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
+							receivedMessage.getReceivedTimestamp(),
+							matcher.group(1), receivedMessage.getMessage());
+
+					return;
+				} else {
+					// Pattern has no group
+					dialogMessageStatusChangesAfterSending(
+							dialogMessage.getId(),
+							DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
+							receivedMessage.getReceivedTimestamp(),
+							cleanedMessageValue, receivedMessage.getMessage());
+
+					return;
+				}
+			} else {
+				// Has no validation expression
+
+				dialogMessageStatusChangesAfterSending(
+						dialogMessage.getId(),
+						DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
+						receivedMessage.getReceivedTimestamp(),
+						cleanedMessageValue, receivedMessage.getMessage());
+
+				return;
 			}
 		}
-
-		dialogMessageStatusChangesAfterSending(dialogMessage.getId(),
-				DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
-				receivedMessage.getReceivedTimestamp(), cleanedMessageValue,
-				receivedMessage.getMessage());
 	}
 
 	@Synchronized
@@ -1243,30 +1268,6 @@ public class InterventionExecutionManagerService {
 
 		return true;
 	}
-
-	// FIXME Special (ugly) solution for ready4life
-	@Synchronized
-	public void rememberMediaObjectForDialogMessage(
-			final ObjectId dialogMessageId, final MediaObject mediaObject) {
-		val dialogMessage = databaseManagerService.getModelObjectById(
-				DialogMessage.class, dialogMessageId);
-
-		if (dialogMessage == null) {
-			return;
-		}
-
-		val participant = databaseManagerService.getModelObjectById(
-				Participant.class, dialogMessage.getParticipant());
-
-		if (participant == null) {
-			return;
-		}
-
-		variablesManagerService.rememberMediaObjectForParticipant(participant,
-				mediaObject);
-	}
-
-	// End of solution
 
 	@Synchronized
 	public void createStatistics(final File statisticsFile) throws IOException {

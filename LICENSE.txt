@@ -61,3 +61,6 @@ available under the following proprietary licenses:
      https://java.net/projects/javamail/pages/License
    * Java Image Scaling
      https://opensource.org/licenses/BSD-3-Clause
+   * Thumbnailator
+     https://github.com/coobird/thumbnailator/blob/master/LICENSE
+   

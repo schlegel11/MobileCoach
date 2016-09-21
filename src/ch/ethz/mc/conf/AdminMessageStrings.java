@@ -2,15 +2,15 @@ package ch.ethz.mc.conf;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -66,7 +66,7 @@ public enum AdminMessageStrings {
 	// Account tab
 	ACCOUNT_TAB__SET_PASSWORD, ACCOUNT_TAB__ACCOUNT_INFORMATION,
 	// Simulator component
-	SIMULATOR_COMPONENT__SEND_SIMULATED_MESSAGE, SIMULATOR_COMPONENT__JUMP_ONE_HOUR_TO_THE_FUTURE, SIMULATOR_COMPONENT__THE_CURRENT_SIMULATED_TIME_IS_X, SIMULATOR_COMPONENT__SIMULATOR, SIMULATOR_COMPONENT__SYSTEM, SIMULATOR_COMPONENT__PARTICIPANT, SIMULATOR_COMPONENT__ACTIVATE_FAST_FORWARD_MODE, SIMULATOR_COMPONENT__DEACTIVATE_FAST_FORWARD_MODE,
+	SIMULATOR_COMPONENT__SEND_SIMULATED_MESSAGE, SIMULATOR_COMPONENT__JUMP_ONE_HOUR_TO_THE_FUTURE, SIMULATOR_COMPONENT__JUMP_ONE_DAY_TO_THE_FUTURE, SIMULATOR_COMPONENT__THE_CURRENT_SIMULATED_TIME_IS_X, SIMULATOR_COMPONENT__SIMULATOR, SIMULATOR_COMPONENT__SYSTEM, SIMULATOR_COMPONENT__PARTICIPANT, SIMULATOR_COMPONENT__ACTIVATE_FAST_FORWARD_MODE, SIMULATOR_COMPONENT__DEACTIVATE_FAST_FORWARD_MODE,
 	/*
 	 * VIEWS
 	 */

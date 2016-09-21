@@ -38,6 +38,7 @@ import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.FileImageOutputStream;
 
 import lombok.extern.log4j.Log4j2;
+import net.coobird.thumbnailator.Thumbnails;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
@@ -168,7 +169,9 @@ public class ImageCachingService {
 				+ RandomStringUtils.randomAlphanumeric(40) + "-" + key + ".jpg";
 
 		try {
-			BufferedImage readImage = ImageIO.read(sourceImageFile);
+			// Read image with interpretation of EXIF information
+			BufferedImage readImage = Thumbnails.of(sourceImageFile).scale(1)
+					.asBufferedImage();
 
 			if (readImage.getColorModel().getTransparency() != Transparency.OPAQUE) {
 				readImage = fillTransparentPixels(readImage, Color.WHITE);

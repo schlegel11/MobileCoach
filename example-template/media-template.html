@@ -10,5 +10,8 @@
     {{/media_object_type_audio}}	
     {{#media_object_type_video}}
         <audio src="{{media_object_url}}"/>
-    {{/media_object_type_video}}	
+    {{/media_object_type_video}}
+    {{#media_object_type_url}}
+        <a href="{{{media_object_url}}}">{{media_object_url}}</a>
+    {{/media_object_type_url}}		
 {{/media_object_url}}

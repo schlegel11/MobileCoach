@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.basics;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -66,7 +66,7 @@ import com.vaadin.ui.Tree.TreeTargetDetails;
 @SuppressWarnings("serial")
 @Log4j2
 public abstract class AbstractMonitoringRulesEditComponentWithController extends
-AbstractMonitoringRulesEditComponent {
+		AbstractMonitoringRulesEditComponent {
 
 	private Intervention			intervention;
 
@@ -84,11 +84,11 @@ AbstractMonitoringRulesEditComponent {
 	public static final String		ICON						= "icon";
 
 	private final ThemeResource		RULE_ICON					= new ThemeResource(
-			ThemeImageStrings.RULE_ICON_SMALL);
+																		ThemeImageStrings.RULE_ICON_SMALL);
 	private final ThemeResource		MESSAGE_RULE_ICON			= new ThemeResource(
-			ThemeImageStrings.MESSAGE_ICON_SMALL);
+																		ThemeImageStrings.MESSAGE_ICON_SMALL);
 	private final ThemeResource		STOP_RULE_ICON				= new ThemeResource(
-			ThemeImageStrings.STOP_ICON_SMALL);
+																		ThemeImageStrings.STOP_ICON_SMALL);
 
 	private HierarchicalContainer	container;
 
@@ -183,12 +183,12 @@ AbstractMonitoringRulesEditComponent {
 						abstractMonitoringRule.getId());
 				if (isMonitoringRule) {
 					getInterventionAdministrationManagerService()
-					.monitoringRuleDelete(
-							abstractMonitoringRule.getId());
+							.monitoringRuleDelete(
+									abstractMonitoringRule.getId());
 				} else {
 					getInterventionAdministrationManagerService()
-					.monitoringReplyRuleDelete(
-							abstractMonitoringRule.getId());
+							.monitoringReplyRuleDelete(
+									abstractMonitoringRule.getId());
 				}
 			}
 		}
@@ -283,7 +283,7 @@ AbstractMonitoringRulesEditComponent {
 			String resultVariable;
 			if (selectedMonitoringRule.getStoreValueToVariableWithName() == null
 					|| selectedMonitoringRule.getStoreValueToVariableWithName()
-					.equals("")) {
+							.equals("")) {
 				resultVariable = ImplementationConstants.DEFAULT_OBJECT_NAME;
 			} else {
 				resultVariable = selectedMonitoringRule
@@ -299,7 +299,7 @@ AbstractMonitoringRulesEditComponent {
 					final MonitoringMessageGroup monitoringMessageGroup = getInterventionAdministrationManagerService()
 							.getMonitoringMessageGroup(
 									selectedMonitoringRule
-									.getRelatedMonitoringMessageGroup());
+											.getRelatedMonitoringMessageGroup());
 					if (monitoringMessageGroup == null) {
 						sendMessage = Messages
 								.getAdminString(AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_MESSAGE_FROM_ALREADY_DELETED_GROUP);
@@ -376,8 +376,8 @@ AbstractMonitoringRulesEditComponent {
 						rulesTree.select(newAbstractMonitoringRule.getId());
 
 						getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__MONITORING_RULE_CREATED);
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__MONITORING_RULE_CREATED);
 
 						adjust();
 
@@ -424,7 +424,7 @@ AbstractMonitoringRulesEditComponent {
 							icon = MESSAGE_RULE_ICON;
 						} else if (isMonitoringRule
 								&& ((MonitoringRule) selectedAbstractMonitoringRule)
-								.isStopInterventionWhenTrue()) {
+										.isStopInterventionWhenTrue()) {
 							icon = STOP_RULE_ICON;
 						} else {
 							icon = RULE_ICON;
@@ -435,8 +435,8 @@ AbstractMonitoringRulesEditComponent {
 						item.getItemProperty(ICON).setValue(icon);
 
 						getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__MONITORING_RULE_UPDATED);
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__MONITORING_RULE_UPDATED);
 
 						adjust();
 
@@ -466,7 +466,7 @@ AbstractMonitoringRulesEditComponent {
 			icon = MESSAGE_RULE_ICON;
 		} else if (isMonitoringRule
 				&& ((MonitoringRule) abstractMonitoringRule)
-				.isStopInterventionWhenTrue()) {
+						.isStopInterventionWhenTrue()) {
 			icon = STOP_RULE_ICON;
 		} else {
 			icon = RULE_ICON;
@@ -494,15 +494,21 @@ AbstractMonitoringRulesEditComponent {
 			final ObjectId sameLevelTargetItemId) {
 		log.debug("Moving {} {} (parent: {} / same level target: {} )",
 				sourceItemId, movement, parentItemId, sameLevelTargetItemId);
+		if (sameLevelTargetItemId != null
+				&& sourceItemId.equals(sameLevelTargetItemId)) {
+			log.debug("Can't move item on itself");
+			return;
+		}
+
 		if (isMonitoringRule) {
 			getInterventionAdministrationManagerService().monitoringRuleMove(
 					movement.ordinal(), sourceItemId, parentItemId,
 					sameLevelTargetItemId, intervention.getId());
 		} else {
 			getInterventionAdministrationManagerService()
-			.monitoringReplyRuleMove(movement.ordinal(), sourceItemId,
-					parentItemId, sameLevelTargetItemId,
-					relatedMonitoringRuleId, isGotAnswerRule);
+					.monitoringReplyRuleMove(movement.ordinal(), sourceItemId,
+							parentItemId, sameLevelTargetItemId,
+							relatedMonitoringRuleId, isGotAnswerRule);
 		}
 	}
 
@@ -565,11 +571,11 @@ AbstractMonitoringRulesEditComponent {
 					// Delete rule
 					if (isMonitoringRule) {
 						getInterventionAdministrationManagerService()
-						.monitoringRuleDelete(selectedMonitoringRuleId);
+								.monitoringRuleDelete(selectedMonitoringRuleId);
 					} else {
 						getInterventionAdministrationManagerService()
-						.monitoringReplyRuleDelete(
-								selectedMonitoringRuleId);
+								.monitoringReplyRuleDelete(
+										selectedMonitoringRuleId);
 					}
 				} catch (final Exception e) {
 					closeWindow();
@@ -581,8 +587,8 @@ AbstractMonitoringRulesEditComponent {
 				container.removeItemRecursively(selectedMonitoringRuleId);
 
 				getAdminUI()
-				.showInformationNotification(
-						AdminMessageStrings.NOTIFICATION__MONITORING_RULE_DELETED);
+						.showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__MONITORING_RULE_DELETED);
 
 				rulesTree.select(null);
 

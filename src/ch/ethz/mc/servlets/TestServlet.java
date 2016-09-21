@@ -136,7 +136,7 @@ public class TestServlet extends HttpServlet {
 
 		// dateCalculationTests();
 		// languageStringSerializationTest();
-		ruleTests();
+		// ruleTests();
 	}
 
 	@SuppressWarnings("unused")
@@ -213,6 +213,7 @@ public class TestServlet extends HttpServlet {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void ruleTests() {
 		val variables = new ArrayList<AbstractVariableWithValue>();
 		variables.add(new InterventionVariableWithValue(null, "$sex", "2",

@@ -152,6 +152,23 @@ An extended backend user guide will be published in the following months.
 
 ## Release notes
 
+### 1.4.2
+
+**Enhancements**
+
+* Report generator to validate the modelled intervention
+* Several small enhancements
+
+**Changes**
+
+* none
+
+**Bugfixes**
+
+* Automatic image rotation for iOS images based on EXIF information
+* Many bugfixes for the features introduced in 1.4.0-1.4.1
+* Bugfix for dropping a rule on itself, which could lead to cyclic rules
+
 ### 1.4.1
 
 **Enhancements**
