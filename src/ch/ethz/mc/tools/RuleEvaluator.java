@@ -2,15 +2,15 @@ package ch.ethz.mc.tools;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,6 +22,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import lombok.Getter;
@@ -50,6 +51,9 @@ public class RuleEvaluator {
 	 * Evaluates an {@link AbstractRule} including the given
 	 * {@link AbstractVariableWithValue}s
 	 *
+	 * @param locale
+	 *            Locale used for rule resolution, esp. for number formatting of
+	 *            double values
 	 * @param rule
 	 *            The {@link AbstractRule} to evaluate
 	 * @param variablesWithValues
@@ -58,7 +62,8 @@ public class RuleEvaluator {
 	 * @return {@link RuleEvaluationResult} contains several information about
 	 *         the rule evaluation
 	 */
-	public static RuleEvaluationResult evaluateRule(final AbstractRule rule,
+	public static RuleEvaluationResult evaluateRule(final Locale locale,
+			final AbstractRule rule,
 			final Collection<AbstractVariableWithValue> variablesWithValues) {
 		val ruleEvaluationResult = new RuleEvaluationResult();
 
@@ -86,7 +91,7 @@ public class RuleEvaluator {
 							rule.getRuleComparisonTermWithPlaceholders(),
 							variablesWithValues);
 					ruleEvaluationResult
-					.setCalculatedRuleComparisonTermValue(ruleComparisonTermResult);
+							.setCalculatedRuleComparisonTermValue(ruleComparisonTermResult);
 				} catch (final Exception e) {
 					throw new Exception(
 							"Could not parse rule comparision term: "
@@ -99,7 +104,7 @@ public class RuleEvaluator {
 				// Evaluate rule
 				final String ruleResult;
 				try {
-					ruleResult = evaluateTextRuleTerm(
+					ruleResult = evaluateTextRuleTerm(locale,
 							rule.getRuleWithPlaceholders(), variablesWithValues);
 					ruleEvaluationResult.setTextRuleValue(ruleResult);
 				} catch (final Exception e) {
@@ -110,11 +115,11 @@ public class RuleEvaluator {
 				// Evaluate rule comparison term
 				final String ruleComparisonTermResult;
 				try {
-					ruleComparisonTermResult = evaluateTextRuleTerm(
+					ruleComparisonTermResult = evaluateTextRuleTerm(locale,
 							rule.getRuleComparisonTermWithPlaceholders(),
 							variablesWithValues);
 					ruleEvaluationResult
-					.setTextRuleComparisonTermValue(ruleComparisonTermResult);
+							.setTextRuleComparisonTermValue(ruleComparisonTermResult);
 				} catch (final Exception e) {
 					throw new Exception(
 							"Could not parse rule comparision term: "
@@ -139,19 +144,19 @@ public class RuleEvaluator {
 					break;
 				case CALCULATED_VALUE_IS_SMALLER_OR_EQUAL_THAN:
 					if (ruleEvaluationResult.getCalculatedRuleValue() <= ruleEvaluationResult
-					.getCalculatedRuleComparisonTermValue()) {
+							.getCalculatedRuleComparisonTermValue()) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
 				case CALCULATED_VALUE_EQUALS:
 					if (ruleEvaluationResult.getCalculatedRuleValue() == ruleEvaluationResult
-					.getCalculatedRuleComparisonTermValue()) {
+							.getCalculatedRuleComparisonTermValue()) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
 				case CALCULATED_VALUE_IS_BIGGER_OR_EQUAL_THAN:
 					if (ruleEvaluationResult.getCalculatedRuleValue() >= ruleEvaluationResult
-					.getCalculatedRuleComparisonTermValue()) {
+							.getCalculatedRuleComparisonTermValue()) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
@@ -197,8 +202,8 @@ public class RuleEvaluator {
 							.matches(
 									"^"
 											+ ruleEvaluationResult
-											.getTextRuleComparisonTermValue()
-											.trim() + "$")) {
+													.getTextRuleComparisonTermValue()
+													.trim() + "$")) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
@@ -210,8 +215,8 @@ public class RuleEvaluator {
 							.matches(
 									"^"
 											+ ruleEvaluationResult
-											.getTextRuleComparisonTermValue()
-											.trim() + "$")) {
+													.getTextRuleComparisonTermValue()
+													.trim() + "$")) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
@@ -560,6 +565,9 @@ public class RuleEvaluator {
 	/**
 	 * Evaluates a text rule {@link String}
 	 *
+	 * @param locale
+	 *            Locale used for rule resolution, esp. for number formatting of
+	 *            double values
 	 * @param ruleWithPlaceholders
 	 *            String to evaluate
 	 * @param variablesWithValues
@@ -567,10 +575,10 @@ public class RuleEvaluator {
 	 *            before evaluation
 	 * @return Value of the rule evaluation
 	 */
-	private static String evaluateTextRuleTerm(
+	private static String evaluateTextRuleTerm(final Locale locale,
 			final String ruleWithPlaceholders,
 			final Collection<AbstractVariableWithValue> variablesWithValues)
-					throws Exception {
+			throws Exception {
 		final String rule = ruleWithPlaceholders;
 
 		// Prevent null pointer exceptions
@@ -583,7 +591,7 @@ public class RuleEvaluator {
 
 		// Replace variables with their according values
 		val result = VariableStringReplacer
-				.findVariablesAndReplaceWithTextValues(rule,
+				.findVariablesAndReplaceWithTextValues(locale, rule,
 						variablesWithValues, "");
 
 		log.debug("Result of rule {} is {}", rule, result);

@@ -19,17 +19,19 @@ package ch.ethz.mc.tools;
  */
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 
 /**
  * Replaces variables in Strings with the according values
- * 
+ *
  * @author Andreas Filler
  */
 @Log4j2
@@ -37,7 +39,7 @@ public class VariableStringReplacer {
 	/**
 	 * Finds variables within the given {@link String} and replaces them with
 	 * the appropriate calculatable variable values
-	 * 
+	 *
 	 * @param stringWithVariables
 	 *            The {@link String} to search for variables
 	 * @param variablesWithValues
@@ -135,7 +137,9 @@ public class VariableStringReplacer {
 	/**
 	 * Finds variables within the given {@link String} and replaces them with
 	 * the appropriate text variable values
-	 * 
+	 *
+	 * @param locale
+	 *            The {@link Locale} of the {@link Participant}
 	 * @param stringWithVariables
 	 *            The {@link String} to search for variables
 	 * @param variablesWithValues
@@ -147,7 +151,7 @@ public class VariableStringReplacer {
 	 * @return The String filled with variable values
 	 */
 	public static String findVariablesAndReplaceWithTextValues(
-			String stringWithVariables,
+			final Locale locale, String stringWithVariables,
 			final Collection<AbstractVariableWithValue> variablesWithValues,
 			final String notFoundReplacer) {
 		// Prevent null pointer exceptions
@@ -235,8 +239,14 @@ public class VariableStringReplacer {
 								+ modifier
 								+ ImplementationConstants.VARIABLE_VALUE_MODIFIER_END;
 						try {
-							val formattedValue = String.format(modifier,
-									Double.parseDouble(value));
+							String formattedValue;
+							if (locale == null) {
+								formattedValue = String.format(modifier,
+										Double.parseDouble(value));
+							} else {
+								formattedValue = String.format(locale,
+										modifier, Double.parseDouble(value));
+							}
 							stringWithVariables = stringWithVariables.replace(
 									formattedVariable, formattedValue);
 						} catch (final Exception e) {
