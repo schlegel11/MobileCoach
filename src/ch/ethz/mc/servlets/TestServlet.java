@@ -2,15 +2,15 @@ package ch.ethz.mc.servlets;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -147,7 +147,7 @@ public class TestServlet extends HttpServlet {
 				"26.10.2015",
 				RuleEquationSignTypes.CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_TRUE_IF_ZERO,
 				"01.01.16", "");
-		final val x1 = RuleEvaluator.evaluateRule(m1,
+		final val x1 = RuleEvaluator.evaluateRule(null, m1,
 				new ArrayList<AbstractVariableWithValue>());
 		log.debug(">> " + x1.getCalculatedRuleValue());
 
@@ -157,21 +157,21 @@ public class TestServlet extends HttpServlet {
 				"26.10.2015",
 				RuleEquationSignTypes.CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_TRUE_IF_ZERO,
 				"01.01.2016", "");
-		final val x2 = RuleEvaluator.evaluateRule(m2,
+		final val x2 = RuleEvaluator.evaluateRule(null, m2,
 				new ArrayList<AbstractVariableWithValue>());
 		log.debug(">> " + x2.getCalculatedRuleValue());
 
 		final MonitoringMessageRule m3 = new MonitoringMessageRule(null, 0,
 				"16.11.", RuleEquationSignTypes.DATE_DIFFERENCE_VALUE_EQUALS,
 				"0", "");
-		final val x3 = RuleEvaluator.evaluateRule(m3,
+		final val x3 = RuleEvaluator.evaluateRule(null, m3,
 				new ArrayList<AbstractVariableWithValue>());
 		log.debug(">> " + x3.isRuleMatchesEquationSign());
 
 		final MonitoringMessageRule m4 = new MonitoringMessageRule(null, 0,
 				"16.11.2015",
 				RuleEquationSignTypes.DATE_DIFFERENCE_VALUE_EQUALS, "0", "");
-		final val x4 = RuleEvaluator.evaluateRule(m4,
+		final val x4 = RuleEvaluator.evaluateRule(null, m4,
 				new ArrayList<AbstractVariableWithValue>());
 		log.debug(">> " + x4.isRuleMatchesEquationSign());
 
@@ -186,7 +186,7 @@ public class TestServlet extends HttpServlet {
 				"position(1,$fieldWithValues)",
 				RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
 				"", "");
-		final val x = RuleEvaluator.evaluateRule(m, variables);
+		final val x = RuleEvaluator.evaluateRule(null, m, variables);
 		log.debug(">> " + x.getCalculatedRuleValue());
 	}
 
@@ -232,7 +232,7 @@ public class TestServlet extends HttpServlet {
 				"position($sex,position($auditGT0Digit,position($alterkDigit,26,16,15,24),position($alterkDigit,53,60,63,53),position($alterkDigit,21,25,23,24)),position($auditGT0Digit,position($alterkDigit,21,14,13,14),position($alterkDigit,47,45,52,52),position($alterkDigit,33,42,35,34)))",
 				RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
 				"", "");
-		final val result1 = RuleEvaluator.evaluateRule(rule1, variables);
+		final val result1 = RuleEvaluator.evaluateRule(null, rule1, variables);
 		log.debug(">> " + result1.getCalculatedRuleValue());
 
 		val rule2 = new MonitoringMessageRule(
@@ -241,7 +241,7 @@ public class TestServlet extends HttpServlet {
 				"first(5,3,2,7,2,4,3,5)",
 				RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
 				"", "");
-		final val result2 = RuleEvaluator.evaluateRule(rule2, variables);
+		final val result2 = RuleEvaluator.evaluateRule(null, rule2, variables);
 		log.debug(">> " + result2.getCalculatedRuleValue());
 
 		val rule3 = new MonitoringMessageRule(
@@ -250,11 +250,11 @@ public class TestServlet extends HttpServlet {
 				"second(5,3,2,7,2,4,3,5)",
 				RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
 				"", "");
-		final val result3 = RuleEvaluator.evaluateRule(rule3, variables);
+		final val result3 = RuleEvaluator.evaluateRule(null, rule3, variables);
 		log.debug(">> " + result3.getCalculatedRuleValue());
-		final val result4 = RuleEvaluator.evaluateRule(rule3, variables);
+		final val result4 = RuleEvaluator.evaluateRule(null, rule3, variables);
 		log.debug(">> " + result4.getCalculatedRuleValue());
-		final val result5 = RuleEvaluator.evaluateRule(rule3, variables);
+		final val result5 = RuleEvaluator.evaluateRule(null, rule3, variables);
 		log.debug(">> " + result5.getCalculatedRuleValue());
 
 		val rule5 = new MonitoringMessageRule(
@@ -263,7 +263,7 @@ public class TestServlet extends HttpServlet {
 				"third(5,3,2,7,2,4,3,5)",
 				RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
 				"", "");
-		final val result7 = RuleEvaluator.evaluateRule(rule5, variables);
+		final val result7 = RuleEvaluator.evaluateRule(null, rule5, variables);
 		log.debug(">> " + result7.getCalculatedRuleValue());
 
 		val rule4 = new MonitoringMessageRule(
@@ -272,7 +272,7 @@ public class TestServlet extends HttpServlet {
 				"position(4,5,3,2,7,2,4,3,5)",
 				RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
 				"", "");
-		final val result6 = RuleEvaluator.evaluateRule(rule4, variables);
+		final val result6 = RuleEvaluator.evaluateRule(null, rule4, variables);
 		log.debug(">> " + result6.getCalculatedRuleValue());
 	}
 }

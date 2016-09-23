@@ -2,15 +2,15 @@ package ch.ethz.mc.services.internal;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -107,14 +107,14 @@ public class RecursiveAbstractMonitoringRulesResolver {
 	}
 
 	public class MessageSendingResultForMonitoringRule extends
-			AbstractMessageSendingResultForAbstractMontoringRule {
+	AbstractMessageSendingResultForAbstractMontoringRule {
 		@Getter
 		@Setter
 		private MonitoringRule	monitoringRuleThatCausedMessageSending	= null;
 	}
 
 	public class MessageSendingResultForMonitoringReplyRule extends
-			AbstractMessageSendingResultForAbstractMontoringRule {
+	AbstractMessageSendingResultForAbstractMontoringRule {
 	}
 
 	/*
@@ -171,7 +171,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				log.warn(
 						"There is no message group defined in rule {} to send a message to participant {}",
 						resultToCreateMessageFor
-								.getAbstractMonitoringRuleRequiredToPrepareMessage(),
+						.getAbstractMonitoringRuleRequiredToPrepareMessage(),
 						participant.getId());
 
 				resultToCreateMessageFor.setMessageTextToSend(null);
@@ -185,31 +185,31 @@ public class RecursiveAbstractMonitoringRulesResolver {
 					.getModelObjectById(
 							MonitoringMessageGroup.class,
 							resultToCreateMessageFor
-									.getAbstractMonitoringRuleRequiredToPrepareMessage()
-									.getRelatedMonitoringMessageGroup());
+							.getAbstractMonitoringRuleRequiredToPrepareMessage()
+							.getRelatedMonitoringMessageGroup());
 
 			if (monitoringMessageGroup == null) {
 				log.warn(
 						"The monitoring message group {} for participant {} could not be found",
 						resultToCreateMessageFor
-								.getAbstractMonitoringRuleRequiredToPrepareMessage()
-								.getRelatedMonitoringMessageGroup(),
+						.getAbstractMonitoringRuleRequiredToPrepareMessage()
+						.getRelatedMonitoringMessageGroup(),
 						participant.getId());
 
 				continue;
 			}
 
 			resultToCreateMessageFor
-					.setMonitoringRuleExpectsAnswer(monitoringMessageGroup
-							.isMessagesExpectAnswer());
+			.setMonitoringRuleExpectsAnswer(monitoringMessageGroup
+					.isMessagesExpectAnswer());
 
 			val determinedMonitoringMessageToSend = determineMessageToSend(monitoringMessageGroup);
 			if (determinedMonitoringMessageToSend == null) {
 				log.warn(
 						"There are no more messages left in message group {} to send a message to participant {}",
 						resultToCreateMessageFor
-								.getAbstractMonitoringRuleRequiredToPrepareMessage()
-								.getRelatedMonitoringMessageGroup(),
+						.getAbstractMonitoringRuleRequiredToPrepareMessage()
+						.getRelatedMonitoringMessageGroup(),
 						participant.getId());
 
 				resultToCreateMessageFor.setMessageTextToSend(null);
@@ -219,16 +219,16 @@ public class RecursiveAbstractMonitoringRulesResolver {
 
 			// Remember message that will be sent
 			resultToCreateMessageFor
-					.setMonitoringMessageToSend(determinedMonitoringMessageToSend);
+			.setMonitoringMessageToSend(determinedMonitoringMessageToSend);
 
 			// Determine message text to send
 			val variablesWithValues = variablesManagerService
 					.getAllVariablesWithValuesOfParticipantAndSystem(
 							participant, determinedMonitoringMessageToSend);
 			val messageTextToSend = VariableStringReplacer
-					.findVariablesAndReplaceWithTextValues(
-							determinedMonitoringMessageToSend
-									.getTextWithPlaceholders().get(participant),
+					.findVariablesAndReplaceWithTextValues(participant
+							.getLanguage(), determinedMonitoringMessageToSend
+							.getTextWithPlaceholders().get(participant),
 							variablesWithValues.values(), "");
 
 			resultToCreateMessageFor.setMessageTextToSend(messageTextToSend);
@@ -260,7 +260,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 									Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_ANSWER,
 									Queries.MONITORING_REPLY_RULE__SORT_BY_ORDER_ASC,
 									relatedMonitoringRuleForReplyRuleCase
-											.getId(), null);
+									.getId(), null);
 				} else {
 					rulesOnCurrentLevel = databaseManagerService
 							.findSortedModelObjects(
@@ -268,7 +268,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 									Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_NO_ANSWER,
 									Queries.MONITORING_REPLY_RULE__SORT_BY_ORDER_ASC,
 									relatedMonitoringRuleForReplyRuleCase
-											.getId(), null);
+									.getId(), null);
 				}
 			}
 		} else {
@@ -287,7 +287,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 									Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_ANSWER,
 									Queries.MONITORING_REPLY_RULE__SORT_BY_ORDER_ASC,
 									relatedMonitoringRuleForReplyRuleCase
-											.getId(), parent.getId());
+									.getId(), parent.getId());
 				} else {
 					rulesOnCurrentLevel = databaseManagerService
 							.findSortedModelObjects(
@@ -295,7 +295,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 									Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_NO_ANSWER,
 									Queries.MONITORING_REPLY_RULE__SORT_BY_ORDER_ASC,
 									relatedMonitoringRuleForReplyRuleCase
-											.getId(), parent.getId());
+									.getId(), parent.getId());
 				}
 			}
 		}
@@ -339,8 +339,8 @@ public class RecursiveAbstractMonitoringRulesResolver {
 		val variablesWithValues = variablesManagerService
 				.getAllVariablesWithValuesOfParticipantAndSystem(participant);
 
-		val ruleResult = RuleEvaluator.evaluateRule(rule,
-				variablesWithValues.values());
+		val ruleResult = RuleEvaluator.evaluateRule(participant.getLanguage(),
+				rule, variablesWithValues.values());
 
 		if (!ruleResult.isEvaluatedSuccessful()) {
 			log.error("Error when validating rule {} of participant {}: {}",
@@ -365,7 +365,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 						ruleResult.isCalculatedRule() ? StringHelpers
 								.cleanDoubleValue(ruleResult
 										.getCalculatedRuleValue()) : ruleResult
-								.getTextRuleValue());
+										.getTextRuleValue());
 			} catch (final Exception e) {
 				log.warn("Could not write variable value: {}", e.getMessage());
 			}
@@ -422,7 +422,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 
 		@SuppressWarnings("unchecked")
 		final List<MonitoringMessage> messages = IteratorUtils
-				.toList(iterableMessages.iterator());
+		.toList(iterableMessages.iterator());
 
 		if (!isMonitoringRule
 				&& messageGroup.isSendSamePositionIfSendingAsReply()) {
@@ -439,7 +439,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 
 			@SuppressWarnings("unchecked")
 			final List<MonitoringMessage> originalMessages = IteratorUtils
-					.toList(originalIterableMessages.iterator());
+			.toList(originalIterableMessages.iterator());
 
 			for (int i = 0; i < originalMessages.size(); i++) {
 				if (originalMessages
@@ -447,7 +447,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 						.getId()
 						.equals(relatedMonitoringMessageForReplyRuleCase
 								.getId())
-						&& i < messages.size()) {
+								&& i < messages.size()) {
 					val message = messages.get(i);
 					log.debug(
 							"Monitoring message {} is at the same position as monitoring message {} and will thereofore be used as reply on answer",
@@ -490,7 +490,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 										DialogMessage.class,
 										Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_RELATED_MONITORING_MESSAGE,
 										participant.getId(), message.getId())
-								.iterator();
+										.iterator();
 
 						CollectionUtils.addAll(dialogMessages,
 								dialogMessagesIterator);
@@ -533,7 +533,8 @@ public class RecursiveAbstractMonitoringRulesResolver {
 										.getAllVariablesWithValuesOfParticipantAndSystem(participant);
 							}
 
-							val ruleResult = RuleEvaluator.evaluateRule(rule,
+							val ruleResult = RuleEvaluator.evaluateRule(
+									participant.getLanguage(), rule,
 									variablesWithValues.values());
 
 							if (!ruleResult.isEvaluatedSuccessful()) {
@@ -553,16 +554,16 @@ public class RecursiveAbstractMonitoringRulesResolver {
 					}
 				}
 
-				if (i == 0) {
-					log.debug("All message in this group were already used for the participant...so start over and use least used message");
-				} else if (i == 1) {
-					log.debug("All messages were already used for the participant and no least used message could be determined...so start over and use ANY message that fits the rules");
-				} else if (i == 2) {
-					log.warn(
-							"No message fits the rules! Message group {} ({}) should be checked for participant {}",
-							messageGroup.getId(), messageGroup.getName(),
-							participant.getId());
-				}
+			if (i == 0) {
+				log.debug("All message in this group were already used for the participant...so start over and use least used message");
+			} else if (i == 1) {
+				log.debug("All messages were already used for the participant and no least used message could be determined...so start over and use ANY message that fits the rules");
+			} else if (i == 2) {
+				log.warn(
+						"No message fits the rules! Message group {} ({}) should be checked for participant {}",
+						messageGroup.getId(), messageGroup.getName(),
+						participant.getId());
+			}
 			}
 		}
 

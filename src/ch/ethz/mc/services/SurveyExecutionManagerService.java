@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 
 import javax.servlet.http.HttpSession;
 
@@ -781,7 +782,8 @@ public class SurveyExecutionManagerService {
 
 			// Optional layout attribute
 			final val optionalLayoutAttribute = VariableStringReplacer
-					.findVariablesAndReplaceWithTextValues(nextSlide
+					.findVariablesAndReplaceWithTextValues(participant
+							.getLanguage(), nextSlide
 							.getOptionalLayoutAttributeWithPlaceholders(),
 							variablesWithValues.values(), "");
 			templateVariables.put(
@@ -800,7 +802,8 @@ public class SurveyExecutionManagerService {
 
 			// Title
 			final val title = VariableStringReplacer
-					.findVariablesAndReplaceWithTextValues(nextSlide
+					.findVariablesAndReplaceWithTextValues(participant
+							.getLanguage(), nextSlide
 							.getTitleWithPlaceholders().get(participant),
 							variablesWithValues.values(), "");
 			templateVariables.put(
@@ -810,7 +813,8 @@ public class SurveyExecutionManagerService {
 			if (formerSlide != null && nextSlide != null
 					&& formerSlide.getId().equals(nextSlide.getId())) {
 				final val validationErrorMessage = VariableStringReplacer
-						.findVariablesAndReplaceWithTextValues(nextSlide
+						.findVariablesAndReplaceWithTextValues(participant
+								.getLanguage(), nextSlide
 								.getValidationErrorMessage().get(participant),
 								variablesWithValues.values(), "");
 				templateVariables.put(
@@ -880,9 +884,10 @@ public class SurveyExecutionManagerService {
 				// Question
 				final val questionText = VariableStringReplacer
 						.findVariablesAndReplaceWithTextValues(
+								participant.getLanguage(),
 								question.getQuestionWithPlaceholders().get(
-										participant),
-										variablesWithValues.values(), "");
+										participant), variablesWithValues
+										.values(), "");
 				questionObject.put(SurveySlideTemplateFieldTypes.QUESTION_TEXT
 						.toVariable(), questionText);
 				questionObject.put(
@@ -908,6 +913,7 @@ public class SurveyExecutionManagerService {
 					final val answerWithPlaceholder = answersWithPlaceholders[j];
 					final val finalAnswerText = VariableStringReplacer
 							.findVariablesAndReplaceWithTextValues(
+									participant.getLanguage(),
 									answerWithPlaceholder.get(participant),
 									variablesWithValues.values(), "");
 
@@ -968,7 +974,7 @@ public class SurveyExecutionManagerService {
 				templateVariables.put(
 						SurveySlideTemplateFieldTypes.INTERMEDIATE_SURVEY_URL
 						.toVariable(), linkedIntermediateSurveyShortURL
-								.calculateURL());
+						.calculateURL());
 			}
 
 			// Is last slide
@@ -1262,7 +1268,8 @@ public class SurveyExecutionManagerService {
 
 				// Evaluate rule
 				final val ruleResult = RuleEvaluator.evaluateRule(
-						formerSlideRule, variablesWithValues.values());
+						participant.getLanguage(), formerSlideRule,
+						variablesWithValues.values());
 
 				if (!ruleResult.isEvaluatedSuccessful()) {
 					log.error(
@@ -1511,9 +1518,9 @@ public class SurveyExecutionManagerService {
 		final val variablesWithValues = variablesManagerService
 				.getAllVariablesWithValuesOfParticipantAndSystem(participant);
 
-		final val nextSlide = getNextFeedbackSlide(formerSlide,
-				participant.getAssignedFeedback(), variablesWithValues,
-				showNextSlide);
+		final val nextSlide = getNextFeedbackSlide(participant.getLanguage(),
+				formerSlide, participant.getAssignedFeedback(),
+				variablesWithValues, showNextSlide);
 
 		if (nextSlide == null) {
 			// Feedback done
@@ -1534,7 +1541,8 @@ public class SurveyExecutionManagerService {
 					.toString(), newCheckValue);
 
 			// Check if slide is first or last slide
-			final val priorAppropriateSlide = getNextFeedbackSlide(nextSlide,
+			final val priorAppropriateSlide = getNextFeedbackSlide(
+					participant.getLanguage(), nextSlide,
 					participant.getAssignedFeedback(), variablesWithValues,
 					false);
 			if (priorAppropriateSlide == null) {
@@ -1542,7 +1550,8 @@ public class SurveyExecutionManagerService {
 						FeedbackSlideTemplateFieldTypes.IS_FIRST_SLIDE
 						.toVariable(), true);
 			}
-			final val nextAppropriateSlide = getNextFeedbackSlide(nextSlide,
+			final val nextAppropriateSlide = getNextFeedbackSlide(
+					participant.getLanguage(), nextSlide,
 					participant.getAssignedFeedback(), variablesWithValues,
 					true);
 			if (nextAppropriateSlide == null) {
@@ -1580,7 +1589,8 @@ public class SurveyExecutionManagerService {
 
 			// Optional layout attribute
 			final val optionalLayoutAttribute = VariableStringReplacer
-					.findVariablesAndReplaceWithTextValues(nextSlide
+					.findVariablesAndReplaceWithTextValues(participant
+							.getLanguage(), nextSlide
 							.getOptionalLayoutAttributeWithPlaceholders(),
 							variablesWithValues.values(), "");
 			templateVariables.put(
@@ -1610,7 +1620,8 @@ public class SurveyExecutionManagerService {
 
 			// Title
 			final val title = VariableStringReplacer
-					.findVariablesAndReplaceWithTextValues(nextSlide
+					.findVariablesAndReplaceWithTextValues(participant
+							.getLanguage(), nextSlide
 							.getTitleWithPlaceholders().get(participant),
 							variablesWithValues.values(), "");
 			templateVariables.put(
@@ -1669,9 +1680,9 @@ public class SurveyExecutionManagerService {
 
 			// Text
 			final val text = VariableStringReplacer
-					.findVariablesAndReplaceWithTextValues(nextSlide
-							.getTextWithPlaceholders().get(participant),
-							variablesWithValues.values(), "");
+					.findVariablesAndReplaceWithTextValues(participant
+							.getLanguage(), nextSlide.getTextWithPlaceholders()
+							.get(participant), variablesWithValues.values(), "");
 			templateVariables.put(
 					FeedbackSlideTemplateFieldTypes.TEXT.toVariable(), text);
 		}
@@ -1683,6 +1694,7 @@ public class SurveyExecutionManagerService {
 	 * Determines which {@link FeedbackSlide} is the next slide to present to
 	 * the user
 	 *
+	 * @param locale
 	 * @param formerSlide
 	 * @param feedbackId
 	 * @param variablesWithValues
@@ -1691,6 +1703,7 @@ public class SurveyExecutionManagerService {
 	 */
 	@Synchronized
 	private FeedbackSlide getNextFeedbackSlide(
+			final Locale locale,
 			final FeedbackSlide formerSlide,
 			final ObjectId feedbackId,
 			final Hashtable<String, AbstractVariableWithValue> variablesWithValues,
@@ -1727,8 +1740,8 @@ public class SurveyExecutionManagerService {
 			log.debug("Executing slide rules");
 			boolean allRulesAreTrue = true;
 			for (final val slideRule : slideRules) {
-				final val ruleResult = RuleEvaluator.evaluateRule(slideRule,
-						variablesWithValues.values());
+				final val ruleResult = RuleEvaluator.evaluateRule(locale,
+						slideRule, variablesWithValues.values());
 
 				if (!ruleResult.isEvaluatedSuccessful()) {
 					log.error("Error when validating rule: "
