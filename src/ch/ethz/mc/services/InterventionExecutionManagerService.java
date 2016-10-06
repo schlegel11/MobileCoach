@@ -196,9 +196,16 @@ public class InterventionExecutionManagerService {
 
 	// Participant
 	@Synchronized
-	public void participantsSwitchMonitoring(
+	public List<Participant> participantsSwitchMonitoring(
 			final List<Participant> participants) {
-		for (val participant : participants) {
+		final List<Participant> adjustedParticipants = new ArrayList<Participant>();
+
+		for (Participant participant : participants) {
+			// Ensure to have the latest version of the participant before
+			// changing it
+			participant = databaseManagerService.getModelObjectById(
+					Participant.class, participant.getId());
+			adjustedParticipants.add(participant);
 
 			if (participant.isMonitoringActive()) {
 				participant.setMonitoringActive(false);
@@ -217,6 +224,8 @@ public class InterventionExecutionManagerService {
 
 			databaseManagerService.saveModelObject(participant);
 		}
+
+		return adjustedParticipants;
 	}
 
 	// Dialog message
