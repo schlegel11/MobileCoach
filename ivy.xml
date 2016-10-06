@@ -23,14 +23,14 @@
 <ivy-module version="2.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
-	<info organisation="ch.ethz" module="mc" />
+	<info organisation="ch.ethz" module="mc" revision="latest"/>
 	<configurations>
 		<!-- The default configuration, which should be deployed to the server -->
 		<conf name="default" />
 		<!-- A configuration only needed when compiling the widget set. Should 
 			not be deployed to the server -->
 		<conf name="widgetset-compile" />
-		<!-- A configuration used in compilation of server side classes only. Should 
+		<!-- A configuration used in compilation of server side classes only. Should not
 			be deployed to the server -->
 		<conf name="nodeploy" />
 	</configurations>
