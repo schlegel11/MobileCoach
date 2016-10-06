@@ -2,15 +2,15 @@ package ch.ethz.mc.services.internal;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -173,20 +173,14 @@ public class ImageCachingService {
 			BufferedImage readImage = Thumbnails.of(sourceImageFile).scale(1)
 					.asBufferedImage();
 
+			// Handle transparent images
 			if (readImage.getColorModel().getTransparency() != Transparency.OPAQUE) {
-				readImage = fillTransparentPixels(readImage, Color.WHITE);
+				readImage = redrawWithHandlingOfTransparentPixels(readImage,
+						Color.WHITE);
 			}
 
-			final int w = readImage.getWidth();
-			final int h = readImage.getHeight();
-			final BufferedImage image = new BufferedImage(w, h,
-					BufferedImage.TYPE_INT_RGB);
-
-			final int[] rgb = readImage.getRGB(0, 0, w, h, null, 0, w);
-			image.setRGB(0, 0, w, h, rgb, 0, w);
-
 			targetImageFile = new File(mediaCacheFolder, filename);
-			resizeAndWriteFile(image, width, height, withWatermark,
+			resizeAndWriteFile(readImage, width, height, withWatermark,
 					targetImageFile, withCropping);
 		} catch (final Exception e) {
 			log.warn("Can't perform image transformation: {}", e.getMessage());
@@ -196,14 +190,14 @@ public class ImageCachingService {
 	}
 
 	/**
-	 * Fills transparent pixels for PNG/JPG compatibility
+	 * Redraws with handling for transparent pixels for PNG/JPG compatibility
 	 *
 	 * @param image
 	 * @param fillColor
 	 * @return
 	 */
-	private BufferedImage fillTransparentPixels(final BufferedImage image,
-			final Color fillColor) {
+	private BufferedImage redrawWithHandlingOfTransparentPixels(
+			final BufferedImage image, final Color fillColor) {
 		final int w = image.getWidth();
 		final int h = image.getHeight();
 		final BufferedImage newImage = new BufferedImage(w, h,
