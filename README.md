@@ -152,6 +152,20 @@ An extended backend user guide will be published in the following months.
 
 ## Release notes
 
+### 1.4.3
+
+**Enhancements**
+
+* Monitoring can be switched for participants while surveys are active
+
+**Changes**
+
+* none
+
+**Bugfixes**
+
+* Bugfix for variables with duplicate timestamps (which could occur under very rare conditions)
+
 ### 1.4.2
 
 **Enhancements**
