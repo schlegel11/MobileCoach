@@ -1,16 +1,16 @@
 package ch.ethz.mc.servlets;
 
 /*
- * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ * Copyright (C) 2013-2017 MobileCoach Team at the Health-IS Lab at the Health-IS Lab
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -50,14 +50,14 @@ import com.vaadin.server.VaadinServlet;
 @WebServlet(displayName = "Admin UI", urlPatterns = { "/admin/*", "/VAADIN/*" }, initParams = {
 		@WebInitParam(name = "pushmode", value = "automatic"),
 		@WebInitParam(name = "closeIdleSessions", value = "true"),
-		@WebInitParam(name = "heartbeatInterval", value = "300") }, asyncSupported = true, loadOnStartup = 1)
+		@WebInitParam(name = "heartbeatInterval", value = "300") }, asyncSupported = false, loadOnStartup = 1)
 @VaadinServletConfiguration(productionMode = Constants.VAADIN_PRODUCTION_MODE, ui = AdminNavigatorUI.class)
 @Log4j2
 public class AdminServlet extends VaadinServlet implements SessionInitListener,
-		SessionDestroyListener {
+SessionDestroyListener {
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.vaadin.server.VaadinServlet#init(javax.servlet.ServletConfig)
 	 */
 	@Override
@@ -75,7 +75,7 @@ public class AdminServlet extends VaadinServlet implements SessionInitListener,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.vaadin.server.VaadinServlet#servletInitialized()
 	 */
 	@Override
@@ -126,15 +126,15 @@ public class AdminServlet extends VaadinServlet implements SessionInitListener,
 		log.debug("Setting new session timeout");
 
 		event.getSession()
-				.getSession()
-				.setMaxInactiveInterval(
-						ImplementationConstants.UI_SESSION_TIMEOUT_IN_SECONDS);
+		.getSession()
+		.setMaxInactiveInterval(
+				ImplementationConstants.UI_SESSION_TIMEOUT_IN_SECONDS);
 
 		event.getSession()
-		.getSession()
-		.setAttribute(
-				ImplementationConstants.UI_SESSION_ATTRIBUTE_DETECTOR,
-				true);
+				.getSession()
+				.setAttribute(
+						ImplementationConstants.UI_SESSION_ATTRIBUTE_DETECTOR,
+						true);
 	}
 
 	@Override
@@ -145,7 +145,7 @@ public class AdminServlet extends VaadinServlet implements SessionInitListener,
 			log.debug("Session {} destroyed", sessionId);
 
 			MC.getInstance().getLockingService()
-			.releaseAllLocksOfSession(sessionId);
+					.releaseAllLocksOfSession(sessionId);
 		} catch (final NullPointerException e) {
 			// Session was no UI session
 		}
