@@ -451,15 +451,47 @@ public class VariablesManagerService {
 			}
 		} else {
 			log.debug("Creating new variable");
-			val newParticipantVariableWithValue = new ParticipantVariableWithValue(
-					participantId, InternalDateTime.currentTimeMillis(),
-					variableName, variableValue == null ? "" : variableValue);
-			if (describesMediaUpload) {
-				newParticipantVariableWithValue.setDescribesMediaUpload(true);
-			}
+			val participantVariableWithValue = databaseManagerService
+					.findOneSortedModelObject(
+							ParticipantVariableWithValue.class,
+							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME,
+							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
+							participantId, variableName);
 
-			databaseManagerService
-					.saveModelObject(newParticipantVariableWithValue);
+			if (participantVariableWithValue == null) {
+				val newParticipantVariableWithValue = new ParticipantVariableWithValue(
+						participantId, InternalDateTime.currentTimeMillis(),
+						variableName, variableValue == null ? ""
+								: variableValue);
+				if (describesMediaUpload) {
+					newParticipantVariableWithValue
+							.setDescribesMediaUpload(true);
+				}
+
+				databaseManagerService
+						.saveModelObject(newParticipantVariableWithValue);
+			} else {
+				// Ensure that the new timestamp is definitely newer than the
+				// existing ones
+				long creationTimestamp = InternalDateTime.currentTimeMillis();
+
+				if (creationTimestamp <= participantVariableWithValue
+						.getTimestamp()) {
+					creationTimestamp = participantVariableWithValue
+							.getTimestamp() + 1;
+				}
+
+				val newParticipantVariableWithValue = new ParticipantVariableWithValue(
+						participantId, creationTimestamp, variableName,
+						variableValue == null ? "" : variableValue);
+				if (describesMediaUpload) {
+					newParticipantVariableWithValue
+							.setDescribesMediaUpload(true);
+				}
+
+				databaseManagerService
+						.saveModelObject(newParticipantVariableWithValue);
+			}
 		}
 	}
 
@@ -1105,11 +1137,12 @@ public class VariablesManagerService {
 									.getValue()
 									.replace(participantId.toHexString(), "")
 									.replace(",,", ",");
-							
+
 							if (newValue.endsWith(",")) {
-								newValue = newValue.substring(0, newValue.length()-1);
+								newValue = newValue.substring(0,
+										newValue.length() - 1);
 							}
-							
+
 							writeVariableValueOfParticipant(
 									receivingParticipantId, variable, newValue,
 									false, false);
