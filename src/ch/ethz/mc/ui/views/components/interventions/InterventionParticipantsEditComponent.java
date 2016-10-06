@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.interventions;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,7 +45,7 @@ import com.vaadin.ui.VerticalLayout;
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class InterventionParticipantsEditComponent extends
-		AbstractCustomComponent {
+AbstractCustomComponent {
 
 	/*- VaadinEditorProperties={"grid":"RegularGrid,20","showGrid":true,"snapToGrid":true,"snapToObject":true,"movingGuides":false,"snappingDistance":10} */
 
@@ -163,7 +163,7 @@ public class InterventionParticipantsEditComponent extends
 	public void updateButtonStatus(
 			final Collection<ObjectId> selectedUIParticipantsIds,
 			final boolean interventionMonitoringActive,
-			final boolean oneScreeningSurveyActive) {
+			final boolean atLeastOneSurveyActive) {
 		// Import button
 		if (interventionMonitoringActive) {
 			importButton.setEnabled(false);
@@ -181,18 +181,14 @@ public class InterventionParticipantsEditComponent extends
 			} else {
 				sendMessageButton.setEnabled(false);
 			}
-			if (!oneScreeningSurveyActive && !interventionMonitoringActive) {
+			if (!atLeastOneSurveyActive && !interventionMonitoringActive) {
 				exportButton.setEnabled(true);
 				assignGroupButton.setEnabled(true);
 				assignOrganizationButton.setEnabled(true);
 				assignUnitButton.setEnabled(true);
 				deleteButton.setEnabled(true);
 			}
-			if (oneScreeningSurveyActive) {
-				switchMessagingButton.setEnabled(false);
-			} else {
-				switchMessagingButton.setEnabled(true);
-			}
+			switchMessagingButton.setEnabled(true);
 		}
 	}
 
