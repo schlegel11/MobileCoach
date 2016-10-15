@@ -53,6 +53,8 @@
 		<dependency org="commons-collections" name="commons-collections"
 			rev="&commons-collection.version;" />
 		<dependency org="commons-io" name="commons-io" rev="&commons-io.version;" />
+		<dependency org="commons-httpclient" name="commons-httpclient" rev="3.1"/>
+		
 
 		<!-- Apache Bean validation -->
 		<!-- currently not required <dependency org="org.apache.geronimo.specs" 
@@ -124,5 +126,8 @@
 
 		<!-- jcsv -->
 		<dependency org="com.googlecode.jcsv" name="jcsv" rev="&jcsv.version;" />
+		
+		<!-- JSON -->
+		<dependency org="org.json" name="json" rev="20160810"/>
 	</dependencies>
 </ivy-module>

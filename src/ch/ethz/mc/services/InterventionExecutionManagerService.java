@@ -72,6 +72,7 @@ import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.tools.VariableStringReplacer;
 import ch.ethz.mc.ui.NotificationMessageException;
+import ch.ethz.mobilecoach.services.MattermostMessagingService;
 
 /**
  * Cares for the orchestration of the {@link Intervention}s as well as all
@@ -95,7 +96,7 @@ public class InterventionExecutionManagerService {
 
 	final InterventionAdministrationManagerService		interventionAdministrationManagerService;
 	final SurveyExecutionManagerService					surveyExecutionManagerService;
-
+	
 	private final IncomingMessageWorker					incomingMessageWorker;
 	private final OutgoingMessageWorker					outgoingMessageWorker;
 	private final MonitoringSchedulingWorker			monitoringSchedulingWorker;

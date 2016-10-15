@@ -38,6 +38,7 @@ import ch.ethz.mc.services.internal.ModelObjectExchangeService;
 import ch.ethz.mc.services.internal.ReportGeneratorService;
 import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.tools.InternalDateTime;
+import ch.ethz.mobilecoach.services.*;
 
 /**
  * @author Andreas Filler
@@ -79,6 +80,13 @@ public class MC implements ServletContextListener {
 	SurveyExecutionManagerService				surveyExecutionManagerService;
 	@Getter
 	RESTManagerService							restManagerService;
+	
+	@Getter
+	MattermostMessagingService					mattermostMessagingService;
+	@Getter
+	MattermostManagementService					mattermostManagementService;
+	@Getter
+	RichConversationService						richConversationService;
 
 	@Override
 	public void contextInitialized(final ServletContextEvent event) {
@@ -107,7 +115,10 @@ public class MC implements ServletContextListener {
 					.start(fileStorageManagerService.getMediaCacheFolder());
 			variablesManagerService = VariablesManagerService
 					.start(databaseManagerService);
-			communicationManagerService = CommunicationManagerService.start();
+			mattermostManagementService = MattermostManagementService.start();
+			mattermostMessagingService = MattermostMessagingService.start(mattermostManagementService);
+			richConversationService = RichConversationService.start(mattermostMessagingService);
+			communicationManagerService = CommunicationManagerService.start(richConversationService);
 			modelObjectExchangeService = ModelObjectExchangeService.start(
 					databaseManagerService, fileStorageManagerService);
 			reportGeneratorService = ReportGeneratorService
@@ -135,6 +146,9 @@ public class MC implements ServletContextListener {
 			restManagerService = RESTManagerService.start(
 					databaseManagerService, fileStorageManagerService,
 					variablesManagerService);
+			
+
+			
 		} catch (final Exception e) {
 			noErrorsOccurred = false;
 			log.error("Error at starting services: {}", e);

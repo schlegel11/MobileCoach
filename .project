@@ -3,6 +3,7 @@
 	<name>MC</name>
 	<comment></comment>
 	<projects>
+		<project>ChatLibEngine-Java</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

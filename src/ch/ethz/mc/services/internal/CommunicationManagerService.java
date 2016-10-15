@@ -63,6 +63,7 @@ import ch.ethz.mc.services.InterventionExecutionManagerService;
 import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mc.tools.Simulator;
 import ch.ethz.mc.tools.StringHelpers;
+import ch.ethz.mobilecoach.services.RichConversationService;
 
 /**
  * Handles communication with SMS gateway
@@ -74,6 +75,7 @@ public class CommunicationManagerService {
 	private static CommunicationManagerService	instance	= null;
 
 	private InterventionExecutionManagerService	interventionExecutionManagerService;
+	private final RichConversationService		richConversationService;
 
 	private final Session						incomingMailSession;
 	private final Session						outgoingMailSession;
@@ -92,9 +94,11 @@ public class CommunicationManagerService {
 
 	private final List<MailingThread>			runningMailingThreads;
 
-	private CommunicationManagerService() throws Exception {
+	private CommunicationManagerService(final RichConversationService richConversationService) throws Exception {
+		this.richConversationService = richConversationService;
+		
 		log.info("Starting service...");
-
+		
 		runningMailingThreads = new ArrayList<MailingThread>();
 
 		// Mailing configuration
@@ -149,9 +153,9 @@ public class CommunicationManagerService {
 		log.info("Started.");
 	}
 
-	public static CommunicationManagerService start() throws Exception {
+	public static CommunicationManagerService start(final RichConversationService richConversationService) throws Exception {
 		if (instance == null) {
-			instance = new CommunicationManagerService();
+			instance = new CommunicationManagerService(richConversationService);
 		}
 		return instance;
 	}
