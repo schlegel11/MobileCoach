@@ -72,6 +72,8 @@ import ch.ethz.mobilecoach.services.RichConversationService;
  */
 @Log4j2
 public class CommunicationManagerService {
+	private final boolean 						USE_RICH_CONVERSATION = true;
+	
 	private static CommunicationManagerService	instance	= null;
 
 	private InterventionExecutionManagerService	interventionExecutionManagerService;
@@ -476,23 +478,32 @@ public class CommunicationManagerService {
 			log.debug("Sending mail for outgoing SMS to {} with text {}",
 					dialogOption.getData(), message);
 
-			if (dialogOption.getData().equals(
+			if (!USE_RICH_CONVERSATION && dialogOption.getData().equals(
 					Constants.getSmsSimulationNumber())) {
 				log.debug("IT'S ONLY SIMULATED");
 				Simulator.getInstance().simulateSMSBySystem(message);
 			} else {
-				val mailMessage = new MimeMessage(outgoingMailSession);
-
-				mailMessage.setFrom(new InternetAddress(smsEmailFrom));
-				mailMessage.addRecipient(Message.RecipientType.TO,
-						new InternetAddress(smsEmailTo));
-				mailMessage.setSubject("UserKey=" + smsUserKey + ",Password="
-						+ smsUserPassword + ",Recipient="
-						+ dialogOption.getData() + ",Originator="
-						+ messageSender + ",Notify=none");
-				mailMessage.setText(message, "ISO-8859-1");
-
-				Transport.send(mailMessage);
+				
+				if (USE_RICH_CONVERSATION){
+					
+					String recipient  = dialogOption.getData();
+					richConversationService.sendMessage(messageSender, recipient, message);
+					
+				} else {
+					
+					val mailMessage = new MimeMessage(outgoingMailSession);
+	
+					mailMessage.setFrom(new InternetAddress(smsEmailFrom));
+					mailMessage.addRecipient(Message.RecipientType.TO,
+							new InternetAddress(smsEmailTo));
+					mailMessage.setSubject("UserKey=" + smsUserKey + ",Password="
+							+ smsUserPassword + ",Recipient="
+							+ dialogOption.getData() + ",Originator="
+							+ messageSender + ",Notify=none");
+					mailMessage.setText(message, "ISO-8859-1");
+	
+					Transport.send(mailMessage);
+				}
 			}
 
 			log.debug("Message sent to {}", dialogOption.getData());

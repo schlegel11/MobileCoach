@@ -25,6 +25,7 @@ public class RichConversationService {
 		return service;
 	}
 	
+	
 	public void startTestConversation(){
         ConversationRepository repository = new ConversationRepository();
 
@@ -37,6 +38,11 @@ public class RichConversationService {
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
+	}
+
+
+	public void sendMessage(String sender, String recipient, String message) {
+		mattermostMessagingService.sendMessage(sender, recipient, message);
 	}
 
 }

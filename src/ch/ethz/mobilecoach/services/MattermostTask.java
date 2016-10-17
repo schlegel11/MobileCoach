@@ -19,7 +19,7 @@ public class MattermostTask<RESULT> {
 		this.payload = payload;
 	}
 	
-	public MattermostTask setToken(String token){
+	public MattermostTask<RESULT> setToken(String token){
 		this.token = token;
 		return this;
 	}
@@ -46,7 +46,7 @@ public class MattermostTask<RESULT> {
 	            	throw new Exception("Status " + new Integer(responseCode) + ": " + post.getResponseBodyAsString());
 	            }
 			} catch (Exception e) {
-				log.error("Error connecting to Mattermost", e);
+				log.error("Error completing Mattermost task", e);
 				numberOfTriesCompleted++;
 			}
 		}

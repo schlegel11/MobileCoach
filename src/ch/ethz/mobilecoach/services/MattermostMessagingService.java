@@ -5,11 +5,57 @@ import org.json.JSONObject;
 
 import lombok.Getter;
 
+/*
+ * Responsibilities:
+ * 
+ * - logging in to Mattermost with the coach's account
+ * - sending messages to Mattermost
+ * - receiving messages from Mattermost
+ */
+
 public class MattermostMessagingService {
 	
 	private MattermostManagementService managementService;
-	
 	private String mcUserToken;
+	
+
+	// Construction
+	
+	private MattermostMessagingService(MattermostManagementService managementService){
+		this.managementService = managementService;
+	}
+	
+	
+	public static MattermostMessagingService start(MattermostManagementService managementService){
+		MattermostMessagingService service = new MattermostMessagingService(managementService);
+		service.login();
+		return service;
+	}
+	
+	// Sending
+	
+	public void sendMessage(String sender, String recipient, String message){
+		ensureLoggedIn();
+		
+		if (!managementService.existsUserForParticipant(recipient)){
+			// TODO: create the user before, when the user completed the sign up survey
+			managementService.createParticipantUser(recipient);
+		}
+		
+        String channelId = managementService.getCoachingChannelId(recipient);
+        String teamId = managementService.getTeamId(recipient);
+        String userId = managementService.getUserId(recipient);
+		
+        JSONObject json = new JSONObject();
+        json.put("message", message);
+        json.put("user_id", userId);
+        json.put("channel_id", channelId);
+        
+		new MattermostTask<Void>(managementService.host + "api/v3/teams/" + teamId + "/channels/" + channelId + "/posts/create", json)
+			.setToken(mcUserToken).run();
+	}
+	
+	// Login
 	
 	private void login(){        
         mcUserToken = null;        
@@ -27,25 +73,9 @@ public class MattermostMessagingService {
 		}.run();
 	}
 	
-	public void addListener(){
-		
-		
+	private void ensureLoggedIn(){
+		if (mcUserToken == null){
+			login();
+		}
 	}
-	
-	private MattermostMessagingService(MattermostManagementService managementService){
-		this.managementService = managementService;
-	}
-	
-	
-	public static MattermostMessagingService start(MattermostManagementService managementService){
-		MattermostMessagingService service = new MattermostMessagingService(managementService);
-		service.login();
-		return service;
-	}
-	
-	public void sendMessage(String recipientId){
-		
-		
-	}
-
 }
