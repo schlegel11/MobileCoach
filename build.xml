@@ -49,8 +49,10 @@ This can be set in the "JRE" tab when configuring an ANT task in the eclipse GUI
 		</path>
 		<taskdef resource="net/sf/antcontrib/antlib.xml" classpathref="additional-libs" />
 		<loadfile property="active-modules" srcFile="WebContent/WEB-INF/active-modules.txt" />
-		<for list="${active-modules}" delimiter="," param="module">
+		<for list="MC-Listeners,${active-modules}" delimiter="," param="module">
 			<sequential>
+				<echo message="Building @{module}..." />
+				<ant antfile="../@{module}/build.xml" dir="../@{module}" target="build" />
 				<echo message="Integrating module @{module}..." />
 				<copy todir="lib" overwrite="no">
 					<fileset dir="../@{module}/out" />

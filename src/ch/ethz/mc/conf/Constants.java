@@ -272,16 +272,29 @@ public class Constants {
 		try {
 			if (version == null) {
 				@Cleanup
-				val inputStream = servletContext
+				val inputStream1 = servletContext
 						.getResourceAsStream("/WEB-INF/version.txt");
 				@Cleanup
-				val inputStreamReader = new InputStreamReader(inputStream);
+				val inputStreamReader1 = new InputStreamReader(inputStream1);
 				@Cleanup
-				val bufferedInputStreamReader = new BufferedReader(
-						inputStreamReader);
+				val bufferedInputStreamReader1 = new BufferedReader(
+						inputStreamReader1);
 
-				version = bufferedInputStreamReader.readLine() + " - DM: "
-						+ DATA_MODEL_VERSION;
+				val versionString = bufferedInputStreamReader1.readLine();
+
+				@Cleanup
+				val inputStream2 = servletContext
+						.getResourceAsStream("/WEB-INF/active-modules.txt");
+				@Cleanup
+				val inputStreamReader2 = new InputStreamReader(inputStream2);
+				@Cleanup
+				val bufferedInputStreamReader2 = new BufferedReader(
+						inputStreamReader2);
+
+				val modulesString = bufferedInputStreamReader2.readLine();
+
+				version = versionString + " - Modules: " + modulesString
+						+ " - DM: " + DATA_MODEL_VERSION;
 			}
 		} catch (final Exception e) {
 			log.error("Error at parsing version file: {}", e.getMessage());
