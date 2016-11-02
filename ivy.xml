@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <!DOCTYPE ivy-module [
+	<!ENTITY mc.version "1.5.0">
 	<!ENTITY log4j.version "2.2">
 	<!ENTITY commons-lang3.version "3.4">
 	<!ENTITY commons-collection.version "3.2.1">
@@ -19,11 +20,14 @@
 	<!ENTITY thumbnailator.version "0.4.8">
 	<!ENTITY resteasy.version "3.0.17.Final">
 	<!ENTITY jcsv.version "1.4.0">
+	<!ENTITY ant-contrib.version "1.0b3">
+	<!ENTITY mc-listeners.version "1.5.0">
+	<!ENTITY mcm-mattermost.version "1.0.0">
 ]>
 <ivy-module version="2.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
-	<info organisation="ch.ethz" module="mc" revision="latest"/>
+	<info organisation="ch.ethz" module="mc" revision="&mc.version;"/>
 	<configurations>
 		<!-- The default configuration, which should be deployed to the server -->
 		<conf name="default" />
@@ -124,5 +128,14 @@
 
 		<!-- jcsv -->
 		<dependency org="com.googlecode.jcsv" name="jcsv" rev="&jcsv.version;" />
+		
+		<!-- Ant-Contrib -->
+		<dependency org="ant-contrib" name="ant-contrib" rev="&ant-contrib.version;" />
+		
+		<!-- MobileCoach Listeners -->
+		<dependency org="ch.ethz" name="mc-listeners" rev="&mc-listeners.version;" conf="nodeploy" />
+
+		<!-- MobileCoach Modules -->
+		<dependency org="ch.ethz" name="mcm-mattermost" rev="&mcm-mattermost.version;" conf="nodeploy" />
 	</dependencies>
 </ivy-module>
