@@ -2,15 +2,15 @@ package ch.ethz.mc;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,6 +26,7 @@ import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.services.InterventionAdministrationManagerService;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
+import ch.ethz.mc.services.ModuleManagerService;
 import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mc.services.SurveyAdministrationManagerService;
 import ch.ethz.mc.services.SurveyExecutionManagerService;
@@ -79,6 +80,8 @@ public class MC implements ServletContextListener {
 	SurveyExecutionManagerService				surveyExecutionManagerService;
 	@Getter
 	RESTManagerService							restManagerService;
+	@Getter
+	ModuleManagerService						moduleManagerService;
 
 	@Override
 	public void contextInitialized(final ServletContextEvent event) {
@@ -135,6 +138,9 @@ public class MC implements ServletContextListener {
 			restManagerService = RESTManagerService.start(
 					databaseManagerService, fileStorageManagerService,
 					variablesManagerService);
+			moduleManagerService = ModuleManagerService.start(
+					databaseManagerService, fileStorageManagerService,
+					variablesManagerService);
 		} catch (final Exception e) {
 			noErrorsOccurred = false;
 			log.error("Error at starting services: {}", e);
@@ -159,6 +165,7 @@ public class MC implements ServletContextListener {
 		try {
 			lockingService.stop();
 			reportGeneratorService.stop();
+			moduleManagerService.stop();
 			restManagerService.stop();
 			surveyExecutionManagerService.stop();
 			interventionExecutionManagerService.stop();
