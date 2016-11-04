@@ -267,6 +267,15 @@ public class VariablesManagerService {
 			final Participant participant,
 			final READ_WRITE_PARTICIPANT_VARIABLES variable) {
 		switch (variable) {
+			case participantDialogOptionSMSData:
+				val dialogOptionSMS = databaseManagerService
+						.findOneModelObject(DialogOption.class,
+								Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
+								participant.getId(), DialogOptionTypes.SMS);
+				if (dialogOptionSMS != null) {
+					return dialogOptionSMS.getData();
+				}
+				break;
 			case participantDialogOptionEmailData:
 				val dialogOptionEmail = databaseManagerService
 						.findOneModelObject(DialogOption.class,
@@ -276,13 +285,13 @@ public class VariablesManagerService {
 					return dialogOptionEmail.getData();
 				}
 				break;
-			case participantDialogOptionSMSData:
-				val dialogOptionSMS = databaseManagerService
+			case participantDialogOptionTokenData:
+				val dialogOptionToken = databaseManagerService
 						.findOneModelObject(DialogOption.class,
 								Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
-								participant.getId(), DialogOptionTypes.SMS);
-				if (dialogOptionSMS != null) {
-					return dialogOptionSMS.getData();
+								participant.getId(), DialogOptionTypes.TOKEN);
+				if (dialogOptionToken != null) {
+					return dialogOptionToken.getData();
 				}
 				break;
 			case participantName:
@@ -424,17 +433,22 @@ public class VariablesManagerService {
 					.valueOf(variableName.substring(1));
 
 			switch (readWriteVariableName) {
+				case participantDialogOptionSMSData:
+					log.debug("Setting variable 'participantDialogOptionSMSData'");
+					participantSetDialogOption(participantId,
+							DialogOptionTypes.SMS,
+							StringHelpers.cleanPhoneNumber(variableValue));
+					break;
 				case participantDialogOptionEmailData:
 					log.debug("Setting variable 'participantDialogOptionEmailData'");
 					participantSetDialogOption(participantId,
 							DialogOptionTypes.EMAIL,
 							StringHelpers.cleanEmailAddress(variableValue));
 					break;
-				case participantDialogOptionSMSData:
-					log.debug("Setting variable 'participantDialogOptionSMSData'");
+				case participantDialogOptionTokenData:
+					log.debug("Setting variable 'participantDialogOptionTokenData'");
 					participantSetDialogOption(participantId,
-							DialogOptionTypes.SMS,
-							StringHelpers.cleanPhoneNumber(variableValue));
+							DialogOptionTypes.TOKEN, variableValue);
 					break;
 				case participantName:
 					log.debug("Setting variable 'participantName'");

@@ -17,11 +17,13 @@ package ch.ethz.mc.services;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Set;
 
 import lombok.Getter;
+import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
@@ -40,16 +42,20 @@ import ch.ethz.mc.services.internal.VariablesManagerService;
  */
 @Log4j2
 public class ModuleManagerService {
-	private final Object					$lock;
+	private final Object								$lock;
 
-	private static ModuleManagerService		instance	= null;
+	private static ModuleManagerService					instance	= null;
 
-	private final DatabaseManagerService	databaseManagerService;
 	@Getter
-	private final FileStorageManagerService	fileStorageManagerService;
-	private final VariablesManagerService	variablesManagerService;
+	private final DatabaseManagerService				databaseManagerService;
+	@Getter
+	private final FileStorageManagerService				fileStorageManagerService;
+	@Getter
+	private final VariablesManagerService				variablesManagerService;
 
-	private final List<AbstractModule>		modules;
+	private final Dictionary<String, AbstractModule>	modules;
+
+	// Adapters of modules
 
 	private ModuleManagerService(
 			final DatabaseManagerService databaseManagerService,
@@ -60,26 +66,28 @@ public class ModuleManagerService {
 
 		log.info("Starting service...");
 
-		this.databaseManagerService = databaseManagerService;
-		this.fileStorageManagerService = fileStorageManagerService;
-		this.variablesManagerService = variablesManagerService;
+		synchronized ($lock) {
+			this.databaseManagerService = databaseManagerService;
+			this.fileStorageManagerService = fileStorageManagerService;
+			this.variablesManagerService = variablesManagerService;
 
-		modules = new ArrayList<AbstractModule>();
+			modules = new Hashtable<String, AbstractModule>();
 
-		log.info("Finding and starting modules...");
-		final Reflections reflections = new Reflections(AbstractModule.class
-				.getPackage().getName());
-		final Set<Class<? extends AbstractModule>> moduleClasses = reflections
-				.getSubTypesOf(AbstractModule.class);
-		val moduleClassesIterator = moduleClasses.iterator();
+			log.info("Finding and starting modules...");
+			final Reflections reflections = new Reflections(
+					AbstractModule.class.getPackage().getName());
+			final Set<Class<? extends AbstractModule>> moduleClasses = reflections
+					.getSubTypesOf(AbstractModule.class);
 
-		while (moduleClassesIterator.hasNext()) {
-			val moduleClass = moduleClassesIterator.next();
-			log.info("Initializing module {}", moduleClass.getName());
-			val module = moduleClass.getConstructor(ModuleManagerService.class)
-					.newInstance(this);
+			val moduleClassesIterator = moduleClasses.iterator();
+			while (moduleClassesIterator.hasNext()) {
+				val moduleClass = moduleClassesIterator.next();
+				log.info("Initializing module {}", moduleClass.getName());
+				val module = moduleClass.getConstructor(
+						ModuleManagerService.class).newInstance(this);
 
-			modules.add(module);
+				modules.put(module.getKey(), module);
+			}
 		}
 
 		log.info("Started.");
@@ -97,13 +105,52 @@ public class ModuleManagerService {
 		return instance;
 	}
 
+	@Synchronized
 	public void stop() throws Exception {
 		log.info("Stopping service...");
 
-		for (val module : modules) {
+		val modulesIterator = modules.elements();
+		while (modulesIterator.hasMoreElements()) {
+			val module = modulesIterator.nextElement();
 			module.stop();
 		}
 
 		log.info("Stopped.");
 	}
+
+	/*
+	 * Module access methods
+	 */
+	/**
+	 * Get all modules
+	 *
+	 * @return
+	 */
+	public Enumeration<AbstractModule> getAllModules() {
+		return modules.elements();
+	}
+
+	/**
+	 * Get module by key
+	 *
+	 * @param key
+	 * @return
+	 */
+	public AbstractModule getModuleByKey(final String key) {
+		return modules.get(key);
+	}
+
+	/**
+	 * Check if a specific module exists
+	 *
+	 * @param key
+	 * @return
+	 */
+	public boolean moduleExists(final String key) {
+		return modules.get(key) != null;
+	}
+
+	/*
+	 * Adapter Management
+	 */
 }

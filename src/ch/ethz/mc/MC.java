@@ -2,15 +2,15 @@ package ch.ethz.mc;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -65,9 +65,11 @@ public class MC implements ServletContextListener {
 
 	@Getter
 	ReportGeneratorService						reportGeneratorService;
-
 	@Getter
 	LockingService								lockingService;
+
+	@Getter
+	ModuleManagerService						moduleManagerService;
 
 	// Controller services
 	@Getter
@@ -80,8 +82,6 @@ public class MC implements ServletContextListener {
 	SurveyExecutionManagerService				surveyExecutionManagerService;
 	@Getter
 	RESTManagerService							restManagerService;
-	@Getter
-	ModuleManagerService						moduleManagerService;
 
 	@Override
 	public void contextInitialized(final ServletContextEvent event) {
@@ -101,7 +101,7 @@ public class MC implements ServletContextListener {
 
 		log.info("Starting up services...");
 		try {
-			// Internal services
+			// Internal services (Before-controller services)
 			databaseManagerService = DatabaseManagerService
 					.start(Constants.DATA_MODEL_VERSION);
 			fileStorageManagerService = FileStorageManagerService
@@ -110,12 +110,15 @@ public class MC implements ServletContextListener {
 					.start(fileStorageManagerService.getMediaCacheFolder());
 			variablesManagerService = VariablesManagerService
 					.start(databaseManagerService);
-			communicationManagerService = CommunicationManagerService.start();
+			// communicationManagerService =
+			// CommunicationManagerService.start();
 			modelObjectExchangeService = ModelObjectExchangeService.start(
 					databaseManagerService, fileStorageManagerService);
-			reportGeneratorService = ReportGeneratorService
-					.start(databaseManagerService);
-			lockingService = LockingService.start();
+
+			// Module service
+			moduleManagerService = ModuleManagerService.start(
+					databaseManagerService, fileStorageManagerService,
+					variablesManagerService);
 
 			// Controller services
 			surveyAdministrationManagerService = SurveyAdministrationManagerService
@@ -138,9 +141,11 @@ public class MC implements ServletContextListener {
 			restManagerService = RESTManagerService.start(
 					databaseManagerService, fileStorageManagerService,
 					variablesManagerService);
-			moduleManagerService = ModuleManagerService.start(
-					databaseManagerService, fileStorageManagerService,
-					variablesManagerService);
+
+			// Internal services (After-controller services)
+			reportGeneratorService = ReportGeneratorService
+					.start(databaseManagerService);
+			lockingService = LockingService.start();
 		} catch (final Exception e) {
 			noErrorsOccurred = false;
 			log.error("Error at starting services: {}", e);
@@ -163,30 +168,37 @@ public class MC implements ServletContextListener {
 		InternalDateTime.setFastForwardMode(false);
 
 		try {
+			// Internal services (After-controller services)
 			if (lockingService != null) {
 				lockingService.stop();
 			}
 			if (reportGeneratorService != null) {
 				reportGeneratorService.stop();
 			}
-			if (moduleManagerService != null) {
-				moduleManagerService.stop();
-			}
+
+			// Controller services
 			if (restManagerService != null) {
 				restManagerService.stop();
-			}
-			if (surveyExecutionManagerService != null) {
-				surveyExecutionManagerService.stop();
 			}
 			if (interventionExecutionManagerService != null) {
 				interventionExecutionManagerService.stop();
 			}
-			if (surveyAdministrationManagerService != null) {
-				surveyAdministrationManagerService.stop();
+			if (surveyExecutionManagerService != null) {
+				surveyExecutionManagerService.stop();
 			}
 			if (interventionAdministrationManagerService != null) {
 				interventionAdministrationManagerService.stop();
 			}
+			if (surveyAdministrationManagerService != null) {
+				surveyAdministrationManagerService.stop();
+			}
+
+			// Module service
+			if (moduleManagerService != null) {
+				moduleManagerService.stop();
+			}
+
+			// Internal services (Before-controller services)
 			if (modelObjectExchangeService != null) {
 				modelObjectExchangeService.stop();
 			}

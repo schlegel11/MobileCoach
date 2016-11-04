@@ -2,15 +2,15 @@ package ch.ethz.mc.services.internal;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,11 +19,8 @@ package ch.ethz.mc.services.internal;
  */
 import java.io.StringReader;
 import java.net.URLDecoder;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import javax.mail.Authenticator;
@@ -32,13 +29,11 @@ import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
@@ -75,76 +70,10 @@ public class CommunicationManagerService {
 
 	private InterventionExecutionManagerService	interventionExecutionManagerService;
 
-	private final Session						incomingMailSession;
-	private final Session						outgoingMailSession;
-
-	private final String						mailboxProtocol;
-	private final String						mailboxFolder;
-	private final String						mailSubjectStartsWith;
-
-	private final String						smsEmailFrom;
-	private final String						smsEmailTo;
-	private final String						smsUserKey;
-	private final String						smsUserPassword;
-
-	private final DocumentBuilderFactory		documentBuilderFactory;
-	private final SimpleDateFormat				receiverDateFormat;
-
-	private final List<MailingThread>			runningMailingThreads;
-
 	private CommunicationManagerService() throws Exception {
 		log.info("Starting service...");
 
-		runningMailingThreads = new ArrayList<MailingThread>();
-
-		// Mailing configuration
-		val mailhostIncoming = Constants.getMailhostIncoming();
-		mailboxProtocol = Constants.getMailboxProtocol();
-		mailboxFolder = Constants.getMailboxFolder();
-		val mailhostOutgoing = Constants.getMailhostOutgoing();
-		val mailUser = Constants.getMailUser();
-		val mailPassword = Constants.getMailPassword();
-		mailSubjectStartsWith = Constants.getMailSubjectStartsWith();
-		boolean useAuthentication;
-		if (mailUser != null && !mailUser.equals("")) {
-			log.debug("Using authentication for mail servers");
-			useAuthentication = true;
-		} else {
-			log.debug("Using no authentication for mail servers");
-			useAuthentication = false;
-		}
-
-		// SMS configuration
-		smsEmailFrom = Constants.getSmsEmailFrom();
-		smsEmailTo = Constants.getSmsEmailTo();
-		smsUserKey = Constants.getSmsUserKey();
-		smsUserPassword = Constants.getSmsUserPassword();
-
-		// General properties
-		val properties = new Properties();
-		properties.setProperty("mail.pop3.host", mailhostIncoming);
-		properties.setProperty("mail.smtp.host", mailhostOutgoing);
-		if (useAuthentication) {
-			properties.setProperty("mail.pop3.auth", "true");
-			properties.setProperty("mail.smtp.auth", "true");
-		}
-		log.debug(properties);
-
-		// Setup mail sessions
-		if (useAuthentication) {
-			incomingMailSession = Session.getInstance(properties,
-					new PasswordAuthenticator(mailUser, mailPassword));
-			outgoingMailSession = Session.getInstance(properties,
-					new PasswordAuthenticator(mailUser, mailPassword));
-		} else {
-			incomingMailSession = Session.getInstance(properties);
-			outgoingMailSession = Session.getInstance(properties);
-		}
-
-		// Prepare XML parsing
-		documentBuilderFactory = DocumentBuilderFactory.newInstance();
-		documentBuilderFactory.setNamespaceAware(true);
-		receiverDateFormat = new SimpleDateFormat("ddMMyyyyHHmmss", Locale.US);
+		// TODO
 
 		log.info("Started.");
 	}
@@ -160,14 +89,8 @@ public class CommunicationManagerService {
 		log.info("Stopping service...");
 
 		log.debug("Stopping mailing threads...");
-		synchronized (runningMailingThreads) {
-			for (val runningMailingThread : runningMailingThreads) {
-				synchronized (runningMailingThread) {
-					runningMailingThread.interrupt();
-					runningMailingThread.join();
-				}
-			}
-		}
+
+		// TODO
 
 		log.info("Stopped.");
 	}
@@ -192,9 +115,9 @@ public class CommunicationManagerService {
 				messageSender, message, messageExpectsAnswer);
 
 		interventionExecutionManagerService
-		.dialogMessageStatusChangesForSending(dialogMessageId,
-				DialogMessageStatusTypes.SENDING,
-				InternalDateTime.currentTimeMillis());
+				.dialogMessageStatusChangesForSending(dialogMessageId,
+						DialogMessageStatusTypes.SENDING,
+						InternalDateTime.currentTimeMillis());
 
 		synchronized (runningMailingThreads) {
 			runningMailingThreads.add(mailingThread);
@@ -264,7 +187,7 @@ public class CommunicationManagerService {
 								.evaluate("/aspsms/DateReceived",
 										document.getDocumentElement(),
 										XPathConstants.NODESET)).item(0)
-										.getTextContent();
+								.getTextContent();
 
 						val receivedTimestamp = receiverDateFormat.parse(
 								receivedTimestampString).getTime();
@@ -272,11 +195,11 @@ public class CommunicationManagerService {
 						// Abjust for simulated date and time
 						if (Constants.isSimulatedDateAndTime()) {
 							receivedMessage
-							.setReceivedTimestamp(InternalDateTime
-									.currentTimeMillis());
+									.setReceivedTimestamp(InternalDateTime
+											.currentTimeMillis());
 						} else {
 							receivedMessage
-							.setReceivedTimestamp(receivedTimestamp);
+									.setReceivedTimestamp(receivedTimestamp);
 						}
 
 						val messageStringEncoded = ((NodeList) xPath.evaluate(
@@ -374,16 +297,16 @@ public class CommunicationManagerService {
 
 				if (messageExpectsAnswer) {
 					interventionExecutionManagerService
-					.dialogMessageStatusChangesForSending(
-							dialogMessageId,
-							DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
-							InternalDateTime.currentTimeMillis());
+							.dialogMessageStatusChangesForSending(
+									dialogMessageId,
+									DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
+									InternalDateTime.currentTimeMillis());
 				} else {
 					interventionExecutionManagerService
-					.dialogMessageStatusChangesForSending(
-							dialogMessageId,
-							DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
-							InternalDateTime.currentTimeMillis());
+							.dialogMessageStatusChangesForSending(
+									dialogMessageId,
+									DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
+									InternalDateTime.currentTimeMillis());
 				}
 
 				removeFromList();
@@ -400,16 +323,16 @@ public class CommunicationManagerService {
 			for (int i = 0; i < ImplementationConstants.MAILING_SEND_RETRIES; i++) {
 				try {
 					TimeUnit.SECONDS
-					.sleep(simulatorActive ? ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR
-							: ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR);
+							.sleep(simulatorActive ? ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR
+									: ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR);
 				} catch (final InterruptedException e) {
 					log.warn("Interrupted messaging sending approach {}", i);
 
 					interventionExecutionManagerService
-					.dialogMessageStatusChangesForSending(
-							dialogMessageId,
-							DialogMessageStatusTypes.PREPARED_FOR_SENDING,
-							InternalDateTime.currentTimeMillis());
+							.dialogMessageStatusChangesForSending(
+									dialogMessageId,
+									DialogMessageStatusTypes.PREPARED_FOR_SENDING,
+									InternalDateTime.currentTimeMillis());
 
 					return;
 				}
@@ -419,16 +342,16 @@ public class CommunicationManagerService {
 
 					if (messageExpectsAnswer) {
 						interventionExecutionManagerService
-						.dialogMessageStatusChangesForSending(
-								dialogMessageId,
-								DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
-								InternalDateTime.currentTimeMillis());
+								.dialogMessageStatusChangesForSending(
+										dialogMessageId,
+										DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
+										InternalDateTime.currentTimeMillis());
 					} else {
 						interventionExecutionManagerService
-						.dialogMessageStatusChangesForSending(
-								dialogMessageId,
-								DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
-								InternalDateTime.currentTimeMillis());
+								.dialogMessageStatusChangesForSending(
+										dialogMessageId,
+										DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
+										InternalDateTime.currentTimeMillis());
 					}
 
 					removeFromList();
@@ -444,9 +367,9 @@ public class CommunicationManagerService {
 					dialogOption.getData());
 
 			interventionExecutionManagerService
-			.dialogMessageStatusChangesForSending(dialogMessageId,
-					DialogMessageStatusTypes.PREPARED_FOR_SENDING,
-					InternalDateTime.currentTimeMillis());
+					.dialogMessageStatusChangesForSending(dialogMessageId,
+							DialogMessageStatusTypes.PREPARED_FOR_SENDING,
+							InternalDateTime.currentTimeMillis());
 
 			removeFromList();
 		}
@@ -468,7 +391,7 @@ public class CommunicationManagerService {
 		 */
 		private void sendMessage(final DialogOption dialogOption,
 				final String messageSender, final String message)
-						throws AddressException, MessagingException {
+				throws AddressException, MessagingException {
 			log.debug("Sending mail for outgoing SMS to {} with text {}",
 					dialogOption.getData(), message);
 

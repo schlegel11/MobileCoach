@@ -19,10 +19,12 @@ package ch.ethz.mc.modules;
  */
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Synchronized;
 import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 
+import ch.ethz.mc.MC;
 import ch.ethz.mc.model.ui.UIModule;
 import ch.ethz.mc.services.ModuleManagerService;
 import ch.ethz.mc.ui.views.components.AbstractClosableEditComponent;
@@ -39,26 +41,44 @@ import com.vaadin.ui.Button.ClickListener;
 @SuppressWarnings("serial")
 @Log4j2
 public abstract class AbstractModule extends AbstractClosableEditComponent {
-	@Getter(value = AccessLevel.PRIVATE)
+	private final Object				$lock;
+
+	@Getter(value = AccessLevel.PROTECTED)
 	private final ModuleManagerService	moduleManagerService;
 
-	public AbstractModule(final ModuleManagerService moduleManagerService) {
-		log.info("Starting module {}", getName());
+	public AbstractModule(final ModuleManagerService moduleManagerService)
+			throws Exception {
+		$lock = MC.getInstance();
+
 		this.moduleManagerService = moduleManagerService;
+
+		start();
 	}
 
 	/**
 	 * Method to stop a module (can be overwritten)
 	 */
-	public void stop() {
+	@Synchronized
+	public void start() throws Exception {
+		log.info("Starting module {}", getName());
+	}
+
+	/**
+	 * Method to stop a module (can be overwritten)
+	 *
+	 * @throws Exception
+	 */
+	@Synchronized
+	public void stop() throws Exception {
 		log.info("Stopping module {}", getName());
 	}
 
 	/**
-	 * Called before the module window itself is shown for a specific
-	 * intervention
+	 * The unique key of the module
+	 *
+	 * @return
 	 */
-	public abstract void prepareToShow(final ObjectId interventionId);
+	public abstract String getKey();
 
 	/**
 	 * The name of the module
@@ -66,6 +86,12 @@ public abstract class AbstractModule extends AbstractClosableEditComponent {
 	 * @return
 	 */
 	public abstract String getName();
+
+	/**
+	 * Called before the module window itself is shown for a specific
+	 * intervention
+	 */
+	public abstract void prepareToShow(final ObjectId interventionId);
 
 	/**
 	 * The button to close the module
