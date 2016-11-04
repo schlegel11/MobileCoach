@@ -21,9 +21,7 @@
 	<!ENTITY resteasy.version "3.0.17.Final">
 	<!ENTITY jcsv.version "1.4.0">
 	<!ENTITY ant-contrib.version "1.0b3">
-	<!ENTITY mc-listeners.version "1.5.0">
-	<!ENTITY mcm-mattermost.version "1.0.0">
-	<!ENTITY mcm-sms-aspsms.version "1.0.0">
+	<!ENTITY org-reflections.version "0.9.10">
 ]>
 <ivy-module version="2.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -132,12 +130,8 @@
 		
 		<!-- Ant-Contrib -->
 		<dependency org="ant-contrib" name="ant-contrib" rev="&ant-contrib.version;" />
-		
-		<!-- MobileCoach Listeners (always required) -->
-		<dependency org="ch.ethz" name="mc-listeners" rev="&mc-listeners.version;" conf="nodeploy" />
 
-		<!-- MobileCoach Modules (can be commented out if not required, but should match with active-modules.txt) -->
-		<dependency org="ch.ethz" name="mcm-sms-aspsms" rev="&mcm-sms-aspsms.version;" conf="nodeploy" />
-		<!-- <dependency org="ch.ethz" name="mcm-mattermost" rev="&mcm-mattermost.version;" conf="nodeploy" /> -->
+		<!-- org.reflections -->
+		<dependency org="org.reflections" name="reflections" rev="&org-reflections.version;" />
 	</dependencies>
 </ivy-module>

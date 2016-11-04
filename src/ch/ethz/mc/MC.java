@@ -163,20 +163,48 @@ public class MC implements ServletContextListener {
 		InternalDateTime.setFastForwardMode(false);
 
 		try {
-			lockingService.stop();
-			reportGeneratorService.stop();
-			moduleManagerService.stop();
-			restManagerService.stop();
-			surveyExecutionManagerService.stop();
-			interventionExecutionManagerService.stop();
-			surveyAdministrationManagerService.stop();
-			interventionAdministrationManagerService.stop();
-			modelObjectExchangeService.stop();
-			communicationManagerService.stop();
-			variablesManagerService.stop();
-			imageCachingService.stop();
-			fileStorageManagerService.stop();
-			databaseManagerService.stop();
+			if (lockingService != null) {
+				lockingService.stop();
+			}
+			if (reportGeneratorService != null) {
+				reportGeneratorService.stop();
+			}
+			if (moduleManagerService != null) {
+				moduleManagerService.stop();
+			}
+			if (restManagerService != null) {
+				restManagerService.stop();
+			}
+			if (surveyExecutionManagerService != null) {
+				surveyExecutionManagerService.stop();
+			}
+			if (interventionExecutionManagerService != null) {
+				interventionExecutionManagerService.stop();
+			}
+			if (surveyAdministrationManagerService != null) {
+				surveyAdministrationManagerService.stop();
+			}
+			if (interventionAdministrationManagerService != null) {
+				interventionAdministrationManagerService.stop();
+			}
+			if (modelObjectExchangeService != null) {
+				modelObjectExchangeService.stop();
+			}
+			if (communicationManagerService != null) {
+				communicationManagerService.stop();
+			}
+			if (variablesManagerService != null) {
+				variablesManagerService.stop();
+			}
+			if (imageCachingService != null) {
+				imageCachingService.stop();
+			}
+			if (fileStorageManagerService != null) {
+				fileStorageManagerService.stop();
+			}
+			if (databaseManagerService != null) {
+				databaseManagerService.stop();
+			}
 		} catch (final Exception e) {
 			log.warn("Error at stopping services: {}", e);
 		}

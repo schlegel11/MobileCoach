@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE ivysettings>
 <ivysettings>
-	<settings defaultResolver="default" />
+	<settings defaultResolver="default" circularDependencyStrategy="ignore" />
 	<resolvers>
 		<chain name="default">
 			<!-- Public Maven repository -->

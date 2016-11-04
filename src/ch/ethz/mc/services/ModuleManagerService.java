@@ -17,9 +17,18 @@ package ch.ethz.mc.services;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import lombok.Getter;
+import lombok.val;
 import lombok.extern.log4j.Log4j2;
+
+import org.reflections.Reflections;
+
 import ch.ethz.mc.MC;
+import ch.ethz.mc.modules.AbstractModule;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService;
 import ch.ethz.mc.services.internal.VariablesManagerService;
@@ -33,12 +42,14 @@ import ch.ethz.mc.services.internal.VariablesManagerService;
 public class ModuleManagerService {
 	private final Object					$lock;
 
-	private static ModuleManagerService	instance	= null;
+	private static ModuleManagerService		instance	= null;
 
 	private final DatabaseManagerService	databaseManagerService;
 	@Getter
 	private final FileStorageManagerService	fileStorageManagerService;
 	private final VariablesManagerService	variablesManagerService;
+
+	private final List<AbstractModule>		modules;
 
 	private ModuleManagerService(
 			final DatabaseManagerService databaseManagerService,
@@ -52,6 +63,24 @@ public class ModuleManagerService {
 		this.databaseManagerService = databaseManagerService;
 		this.fileStorageManagerService = fileStorageManagerService;
 		this.variablesManagerService = variablesManagerService;
+
+		modules = new ArrayList<AbstractModule>();
+
+		log.info("Finding and starting modules...");
+		final Reflections reflections = new Reflections(AbstractModule.class
+				.getPackage().getName());
+		final Set<Class<? extends AbstractModule>> moduleClasses = reflections
+				.getSubTypesOf(AbstractModule.class);
+		val moduleClassesIterator = moduleClasses.iterator();
+
+		while (moduleClassesIterator.hasNext()) {
+			val moduleClass = moduleClassesIterator.next();
+			log.info("Initializing module {}", moduleClass.getName());
+			val module = moduleClass.getConstructor(ModuleManagerService.class)
+					.newInstance(this);
+
+			modules.add(module);
+		}
 
 		log.info("Started.");
 	}
@@ -70,6 +99,10 @@ public class ModuleManagerService {
 
 	public void stop() throws Exception {
 		log.info("Stopping service...");
+
+		for (val module : modules) {
+			module.stop();
+		}
 
 		log.info("Stopped.");
 	}

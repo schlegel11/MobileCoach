@@ -3,6 +3,7 @@
 	<name>MC</name>
 	<comment></comment>
 	<projects>
+		<project>MCM-SMS-ASPSMS</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

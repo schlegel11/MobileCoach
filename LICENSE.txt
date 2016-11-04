@@ -47,6 +47,9 @@ also available under the Apache License:
      https://github.com/resteasy/Resteasy
    * jcsv
      https://code.google.com/p/jcsv/
+   * Ant-Contrib
+     http://ant-contrib.sourceforge.net/
+     
    
 This software uses the following software components, which are 
 available under the LGPL License:
@@ -58,9 +61,11 @@ This software uses the following software components, which are
 available under the following proprietary licenses:
 
    * JavaMail
-     https://java.net/projects/javamail/pages/License
+     https://java.net/projects/javamail/ - License: https://java.net/projects/javamail/pages/License
    * Java Image Scaling
-     https://opensource.org/licenses/BSD-3-Clause
+     https://github.com/mortennobel/java-image-scaling - License: https://opensource.org/licenses/BSD-3-Clause
    * Thumbnailator
-     https://github.com/coobird/thumbnailator/blob/master/LICENSE
+     https://github.com/coobird/thumbnailator - License: https://github.com/coobird/thumbnailator/blob/master/LICENSE
+   * org.reflections
+     https://github.com/ronmamo/reflections - License: http://www.wtfpl.net/
    
