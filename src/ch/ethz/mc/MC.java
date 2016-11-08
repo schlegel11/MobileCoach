@@ -17,6 +17,7 @@ package ch.ethz.mc;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
@@ -106,6 +107,8 @@ public class MC implements ServletContextListener {
 
 		log.info("Starting up services...");
 		try {
+			ServletContext servletContext = event.getServletContext();
+			
 			// Internal services
 			databaseManagerService = DatabaseManagerService
 					.start(Constants.DATA_MODEL_VERSION);
@@ -117,7 +120,7 @@ public class MC implements ServletContextListener {
 					.start(databaseManagerService);
 			mattermostManagementService = MattermostManagementService.start();
 			mattermostMessagingService = MattermostMessagingService.start(mattermostManagementService);
-			richConversationService = RichConversationService.start(mattermostMessagingService);
+			richConversationService = RichConversationService.start(mattermostMessagingService, servletContext);
 			communicationManagerService = CommunicationManagerService.start(richConversationService);
 			modelObjectExchangeService = ModelObjectExchangeService.start(
 					databaseManagerService, fileStorageManagerService);
@@ -145,8 +148,7 @@ public class MC implements ServletContextListener {
 							surveyExecutionManagerService);
 			restManagerService = RESTManagerService.start(
 					databaseManagerService, fileStorageManagerService,
-					variablesManagerService);
-			
+					variablesManagerService);			
 
 			
 		} catch (final Exception e) {

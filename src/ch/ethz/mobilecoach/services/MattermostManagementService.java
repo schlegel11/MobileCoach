@@ -27,7 +27,7 @@ public class MattermostManagementService {
 	
 	public final String host = "http://localhost:8065/";
 	public final String emailHost = "localhost";
-	public final String teamId = "13sufqasuigx3jgskph45g7mic"; // TODO: map the intervention to a team
+	public final String teamId = "zafnzyjo9frytcjrmf31zeabcw"; // TODO: map the intervention to a team
 	
 	private String adminUserPassword = "12345678";
 	private String adminUserLogin = "dm1"; // will use name or email from configuration
