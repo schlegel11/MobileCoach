@@ -13,7 +13,7 @@ import lombok.Getter;
  * - receiving messages from Mattermost
  */
 
-public class MattermostMessagingService {
+public class MattermostMessagingService implements MessagingService {
 	
 	private MattermostManagementService managementService;
 	private String mcUserToken;
@@ -26,7 +26,7 @@ public class MattermostMessagingService {
 	}
 	
 	
-	public static MattermostMessagingService start(MattermostManagementService managementService){
+	public static MessagingService start(MattermostManagementService managementService){
 		MattermostMessagingService service = new MattermostMessagingService(managementService);
 		service.login();
 		return service;
@@ -34,6 +34,10 @@ public class MattermostMessagingService {
 	
 	// Sending
 	
+	/* (non-Javadoc)
+	 * @see ch.ethz.mobilecoach.services.MessagingService#sendMessage(java.lang.String, java.lang.String, java.lang.String)
+	 */
+	@Override
 	public void sendMessage(String sender, String recipient, String message){
 		ensureLoggedIn();
 		

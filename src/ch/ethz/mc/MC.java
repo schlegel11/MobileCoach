@@ -83,11 +83,13 @@ public class MC implements ServletContextListener {
 	RESTManagerService							restManagerService;
 	
 	@Getter
-	MattermostMessagingService					mattermostMessagingService;
+	MessagingService					mattermostMessagingService;
 	@Getter
 	MattermostManagementService					mattermostManagementService;
 	@Getter
 	RichConversationService						richConversationService;
+	@Getter
+	ResourceConversationManagementService resourceConversationManagementService;
 
 	@Override
 	public void contextInitialized(final ServletContextEvent event) {
@@ -120,7 +122,8 @@ public class MC implements ServletContextListener {
 					.start(databaseManagerService);
 			mattermostManagementService = MattermostManagementService.start();
 			mattermostMessagingService = MattermostMessagingService.start(mattermostManagementService);
-			richConversationService = RichConversationService.start(mattermostMessagingService, servletContext);
+			resourceConversationManagementService = ResourceConversationManagementService.start(servletContext);
+			richConversationService = RichConversationService.start(mattermostMessagingService, resourceConversationManagementService);
 			communicationManagerService = CommunicationManagerService.start(richConversationService);
 			modelObjectExchangeService = ModelObjectExchangeService.start(
 					databaseManagerService, fileStorageManagerService);

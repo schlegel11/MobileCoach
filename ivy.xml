@@ -129,5 +129,9 @@
 		
 		<!-- JSON -->
 		<dependency org="org.json" name="json" rev="20160810"/>
+		
+		
+		<!-- JUnit -->
+		<dependency org="junit" name="junit-dep" rev="4.8.2"/>
 	</dependencies>
 </ivy-module>

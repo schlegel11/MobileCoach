@@ -18,16 +18,15 @@ import ch.ethz.mobilecoach.services.MattermostManagementService.UserConfiguratio
 
 public class RichConversationService {
 
-	private MattermostMessagingService	mattermostMessagingService;
-	
-	private ConversationRepository repository = new ConversationRepository();
-	
+	private MessagingService	mattermostMessagingService;
+	private ConversationManagementService conversationManagementService;
 	private HashMap<String, VariableStore> variableStores = new HashMap<>();
 	private HashMap<String, ChatEngine> chatEngines = new HashMap<>();	
 
-	private RichConversationService(MattermostMessagingService mattermostMessagingService, ServletContext context) throws Exception {
+	private RichConversationService(MessagingService mattermostMessagingService, ConversationManagementService conversationManagementService) throws Exception {
 		this.mattermostMessagingService = mattermostMessagingService;
-
+		this.conversationManagementService = conversationManagementService;
+		
 		/*
 		 * TODO:
 		 * 
@@ -45,24 +44,22 @@ public class RichConversationService {
 		 *     to communicate with the Mattermost server.
 		 */
 
-		InputStream stream = this.getClass().getResourceAsStream(context.getRealPath("/test-conversation1.xml"));
-		DomParser parser = new DomParser(repository, null);
-		parser.parse(stream);
 	}
 
 	public static RichConversationService start(
-			MattermostMessagingService mattermostMessagingService, ServletContext context) throws Exception {
-		RichConversationService service = new RichConversationService(mattermostMessagingService, context);
+			MessagingService mattermostMessagingService, ConversationManagementService conversationManagementService) throws Exception {
+		RichConversationService service = new RichConversationService(mattermostMessagingService, conversationManagementService);
 		return service;
 	}
 
 	public void sendMessage(String sender, String recipient, String message) throws ExecutionException {
 		final String START_CONVERSATION_PREFIX = "start-conversation:";
 		if (message.startsWith(START_CONVERSATION_PREFIX)){
+			ConversationRepository repository = conversationManagementService.getRepository(null); // TODO: use Intervention id to get the repository
 			
 			// start a conversation
 			VariableStore variableStore = new InMemoryVariableStore();
-			MattermostConnector ui = new MattermostConnector();
+			MattermostConnector ui = new MattermostConnector(sender, recipient);
 			ChatEngine engine = new ChatEngine(repository, ui, variableStore);
 			chatEngines.put(recipient, engine);
 			
@@ -83,11 +80,18 @@ public class RichConversationService {
 	private class MattermostConnector implements ConversationUI {
 		
 		private UserReplyListener listener;
+		
+		private String sender;
+		private String recipient;
+		
+		public MattermostConnector(String sender, String recipient){
+			this.sender = sender;
+			this.recipient = recipient;
+		}
 
 		@Override
 		public void showMessage(Message message) {
-			// TODO Auto-generated method stub
-			
+			mattermostMessagingService.sendMessage(sender, recipient, message.text);
 		}
 
 		@Override
