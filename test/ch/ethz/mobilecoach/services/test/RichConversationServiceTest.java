@@ -27,6 +27,7 @@ public class RichConversationServiceTest {
     	service.sendMessage("dummy", "test-user-id1", "start-conversation:test-conversation1");
     	
     	assertEquals("Hi there!", ms.messages.get(0));
+    	assertEquals("Are you ready for a challenge?", ms.messages.get(2));    	   	
     }
     
     public class MessagingServiceMock implements MessagingService {
@@ -35,7 +36,7 @@ public class RichConversationServiceTest {
 		@Override
 		public void sendMessage(String sender, String recipient, String message) {
 			messages.add(message);
-		}    	
+		}
     }
     
     public class ConversationManagementServiceMock implements ConversationManagementService {

@@ -1,6 +1,6 @@
 package ch.ethz.mobilecoach.services;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.UUID;
 
 import lombok.Getter;
@@ -25,12 +25,12 @@ import org.json.JSONObject;
 @Log4j
 public class MattermostManagementService {
 	
-	public final String host = "http://localhost:8065/";
+	public final String host = "http://dev.cdhi.ethz.ch/";
 	public final String emailHost = "localhost";
-	public final String teamId = "zafnzyjo9frytcjrmf31zeabcw"; // TODO: map the intervention to a team
+	public final String teamId = "zx19spwe9py78noo7qyxyyj8yy"; // TODO: map the intervention to a team
 	
-	private String adminUserPassword = "12345678";
-	private String adminUserLogin = "dm1"; // will use name or email from configuration
+	private String adminUserPassword = "c4dhimatrchtr";
+	private String adminUserLogin = "admin"; // will use name or email from configuration
 	private String adminUserToken = null;
 	
 	@Getter
@@ -40,7 +40,7 @@ public class MattermostManagementService {
 	@Getter
 	private String mcUserLogin;	
 	
-	private HashMap<String, UserConfiguration> participants = new HashMap<>();
+	private LinkedHashMap<String, UserConfiguration> participants = new LinkedHashMap<>();
 	
 	public static MattermostManagementService start(){
 		MattermostManagementService service = new MattermostManagementService();

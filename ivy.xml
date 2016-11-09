@@ -133,5 +133,11 @@
 		
 		<!-- JUnit -->
 		<dependency org="junit" name="junit-dep" rev="4.8.2"/>
+		
+		<!-- Tyrus (WebSocket API) -->
+		<dependency org="org.glassfish.tyrus" name="tyrus-client" rev="1.13"/>
+		
+		<!-- Tomcat Juli (logging) -->
+		<dependency org="org.apache.tomcat" name="tomcat-juli" rev="9.0.0.M11"/>
 	</dependencies>
 </ivy-module>

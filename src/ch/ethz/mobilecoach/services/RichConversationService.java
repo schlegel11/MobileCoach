@@ -1,10 +1,11 @@
 package ch.ethz.mobilecoach.services;
 
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import javax.servlet.ServletContext;
 
+import lombok.Getter;
 import ch.ethz.mobilecoach.chatlib.engine.conversation.ConversationUI;
 import ch.ethz.mobilecoach.chatlib.engine.conversation.UserReplyListener;
 import ch.ethz.mobilecoach.chatlib.engine.ChatEngine;
@@ -18,12 +19,12 @@ import ch.ethz.mobilecoach.services.MattermostManagementService.UserConfiguratio
 
 public class RichConversationService {
 
-	private MessagingService	mattermostMessagingService;
+	private MattermostMessagingService	mattermostMessagingService;
 	private ConversationManagementService conversationManagementService;
-	private HashMap<String, VariableStore> variableStores = new HashMap<>();
-	private HashMap<String, ChatEngine> chatEngines = new HashMap<>();	
+	private LinkedHashMap<String, VariableStore> variableStores = new LinkedHashMap<>();
+	private LinkedHashMap<String, ChatEngine> chatEngines = new LinkedHashMap<>();	
 
-	private RichConversationService(MessagingService mattermostMessagingService, ConversationManagementService conversationManagementService) throws Exception {
+	private RichConversationService(MattermostMessagingService mattermostMessagingService, ConversationManagementService conversationManagementService) throws Exception {
 		this.mattermostMessagingService = mattermostMessagingService;
 		this.conversationManagementService = conversationManagementService;
 		
@@ -39,15 +40,12 @@ public class RichConversationService {
 		 * [ ] Put the conversation files in an appropriate place (as resources,
 		 *     and load them into a ConversationRepository (in future: one per
 		 *     intervention).
-		 * 
-		 * [ ] Create a new conversationUI implementation which uses WebSockets / REST 
-		 *     to communicate with the Mattermost server.
 		 */
 
 	}
 
 	public static RichConversationService start(
-			MessagingService mattermostMessagingService, ConversationManagementService conversationManagementService) throws Exception {
+			MattermostMessagingService mattermostMessagingService, ConversationManagementService conversationManagementService) throws Exception {
 		RichConversationService service = new RichConversationService(mattermostMessagingService, conversationManagementService);
 		return service;
 	}
@@ -58,10 +56,26 @@ public class RichConversationService {
 			ConversationRepository repository = conversationManagementService.getRepository(null); // TODO: use Intervention id to get the repository
 			
 			// start a conversation
+			// TODO (DR): make sure these objects get cleaned up when a new conversation starts
 			VariableStore variableStore = new InMemoryVariableStore();
 			MattermostConnector ui = new MattermostConnector(sender, recipient);
 			ChatEngine engine = new ChatEngine(repository, ui, variableStore);
 			chatEngines.put(recipient, engine);
+			
+			mattermostMessagingService.setListener(recipient, ui);
+			
+			ui.setUserReplyListener(new UserReplyListener(){
+				@Override
+				public void userReplied(Message message) {
+					String participantId = ui.getRecipient();
+					
+					if (chatEngines.containsKey(participantId)){
+						engine.handleInput(message.answerOptionId);
+					} else {
+						// TODO (DR): store the message for the MC system to collect it
+					}
+				}
+			});
 			
 			String conversation = message.substring(START_CONVERSATION_PREFIX.length());
 			engine.startConversation(conversation);
@@ -77,11 +91,13 @@ public class RichConversationService {
 		}
 	}
 	
-	private class MattermostConnector implements ConversationUI {
+	private class MattermostConnector implements ConversationUI, MattermostMessagingService.MessageListener {
 		
 		private UserReplyListener listener;
 		
 		private String sender;
+		
+		@Getter
 		private String recipient;
 		
 		public MattermostConnector(String sender, String recipient){
@@ -103,6 +119,12 @@ public class RichConversationService {
 		public void delay(Runnable callback, Integer milliseconds) {
 			// TODO Auto-generated method stub
 			callback.run();
+		}
+
+		public void receiveMessage(String message) {
+			if (this.listener != null){
+				this.listener.userReplied(new Message(message, Message.SENDER_USER));
+			}
 		}
 		
 	}

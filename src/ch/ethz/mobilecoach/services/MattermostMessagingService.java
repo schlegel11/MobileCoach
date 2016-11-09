@@ -1,9 +1,19 @@
 package ch.ethz.mobilecoach.services;
 
+import java.net.URI;
+import java.util.LinkedHashMap;
+
+import javax.websocket.ClientEndpointConfig;
+import javax.websocket.ContainerProvider;
+import javax.websocket.Endpoint;
+import javax.websocket.EndpointConfig;
+import javax.websocket.MessageHandler;
+import javax.websocket.OnOpen;
+import javax.websocket.Session;
+import javax.websocket.WebSocketContainer;
+
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.json.JSONObject;
-
-import lombok.Getter;
 
 /*
  * Responsibilities:
@@ -23,13 +33,29 @@ public class MattermostMessagingService implements MessagingService {
 	
 	private MattermostMessagingService(MattermostManagementService managementService){
 		this.managementService = managementService;
+	}	
+	
+	public static MattermostMessagingService start(MattermostManagementService managementService){
+		MattermostMessagingService service = new MattermostMessagingService(managementService);
+		service.login();
+		service.connectToWebSocket();
+		
+		return service;
 	}
 	
 	
-	public static MessagingService start(MattermostManagementService managementService){
-		MattermostMessagingService service = new MattermostMessagingService(managementService);
-		service.login();
-		return service;
+	private void connectToWebSocket(){
+		final String authToken = mcUserToken;	
+		WebSocketConfigurator configurator = new WebSocketConfigurator(authToken);		
+		ClientEndpointConfig clientConfig = ClientEndpointConfig.Builder.create().configurator(configurator).build();
+				
+	    WebSocketEndpoint ws = new WebSocketEndpoint();
+        WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+        try {
+			container.connectToServer(ws, clientConfig, new URI(managementService.host.replaceFirst("http:", "ws:") + "api/v3/users/websocket"));
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		} 
 	}
 	
 	// Sending
@@ -68,18 +94,79 @@ public class MattermostMessagingService implements MessagingService {
         json.put("password", managementService.getMcUserPassword());
         
         final MattermostMessagingService self = this;
-		new MattermostTask<Void>(managementService.host + "api/v3/users/login", json){
+		new MattermostTask<String>(managementService.host + "api/v3/users/login", json){
 			@Override
-			Void handleResponse(PostMethod method){
-				self.mcUserToken = method.getResponseHeader("Token").getValue();
-				return null;
+			String handleResponse(PostMethod method){
+				return self.mcUserToken = method.getResponseHeader("Token").getValue();
 			}
 		}.run();
+		
+		
+		
 	}
 	
 	private void ensureLoggedIn(){
 		if (mcUserToken == null){
 			login();
+		}
+	}
+	
+	/*
+	 *  Receiving
+	 */
+	
+	LinkedHashMap<String, MessageListener> listeners = new LinkedHashMap<>();
+	
+	public interface MessageListener {
+		public void receiveMessage(String message);
+	}
+	
+	
+	public void setListener(String userId, MessageListener listener){
+		listeners.put(userId, listener);
+	}
+	
+	
+	void receiveMessage(String senderId, String message){
+		if (listeners.containsKey(senderId)){
+			listeners.get(senderId).receiveMessage(message);
+		}
+	}
+	
+	
+	/*
+	 *  Endpoint for the WebSocket
+	 */
+	public class WebSocketEndpoint extends Endpoint {
+		
+		
+		private void receiveMessageAtEndpoint(String senderId, String message){
+			receiveMessage(senderId,message);
+		}
+
+		@OnOpen
+		public void onOpen(Session session, EndpointConfig config) {
+
+			session.addMessageHandler(new MessageHandler.Whole<String>() {
+
+				@Override
+				public void onMessage(String msg) {
+					
+					// parse message
+					
+					JSONObject message = new JSONObject(msg);
+					if ("posted".equals(message.getString("event"))){
+						JSONObject post = message.getJSONObject("data").getJSONObject("post");
+						
+						String userId = post.getString("user_id");
+						String messageText = post.getString("message");
+						
+						receiveMessageAtEndpoint(userId, messageText);						
+					}
+				}
+			});
+			
+			
 		}
 	}
 }
