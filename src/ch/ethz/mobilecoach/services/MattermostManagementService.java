@@ -13,7 +13,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j;
 
-/*
+/**
+ * 
+ * Manages accounts and channels in a Mattermost instance.
+ * 
+ * @author Dominik Rüegger
+ * 
+ * 
  * Responsibilities:
  * - logging in to Mattermost with the admin account
  * - creating a Mattermost user for the coach

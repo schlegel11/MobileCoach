@@ -15,14 +15,18 @@ import javax.websocket.WebSocketContainer;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.json.JSONObject;
 
-/*
+/**
+ * Sends and receives messages from a Mattermost instance.
+ * 
+ * @author Dominik Rüegger
+ * 
+ * 
  * Responsibilities:
  * 
  * - logging in to Mattermost with the coach's account
  * - sending messages to Mattermost
  * - receiving messages from Mattermost
  */
-
 public class MattermostMessagingService implements MessagingService {
 	
 	private MattermostManagementService managementService;
@@ -52,7 +56,7 @@ public class MattermostMessagingService implements MessagingService {
 	    WebSocketEndpoint ws = new WebSocketEndpoint();
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         try {
-			container.connectToServer(ws, clientConfig, new URI(managementService.host_url.replaceFirst("http:", "ws:") + "api/v3/users/websocket"));
+			container.connectToServer(ws, clientConfig, new URI(managementService.host_url.replaceFirst("http:", "ws:") + "users/websocket"));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		} 
