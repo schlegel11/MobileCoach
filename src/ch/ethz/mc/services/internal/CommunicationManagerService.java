@@ -63,6 +63,7 @@ import ch.ethz.mc.services.InterventionExecutionManagerService;
 import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mc.tools.Simulator;
 import ch.ethz.mc.tools.StringHelpers;
+import ch.ethz.mobilecoach.chatlib.engine.ExecutionException;
 import ch.ethz.mobilecoach.services.RichConversationService;
 
 /**
@@ -487,7 +488,11 @@ public class CommunicationManagerService {
 				if (USE_RICH_CONVERSATION){
 					
 					String recipient  = dialogOption.getData();
-					richConversationService.sendMessage(messageSender, recipient, message);
+					try {
+						richConversationService.sendMessage(messageSender, recipient, message);
+					} catch (ExecutionException e) {
+						throw new MessagingException("Error executing rich conversation.", e);
+					}
 					
 				} else {
 					

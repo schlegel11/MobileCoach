@@ -59,6 +59,7 @@ public class VariableAccessService extends AbstractService {
 		super(restManagerService);
 	}
 
+	
 	/*
 	 * Read functions
 	 */
