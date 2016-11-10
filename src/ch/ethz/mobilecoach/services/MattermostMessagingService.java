@@ -100,9 +100,6 @@ public class MattermostMessagingService implements MessagingService {
 				return self.mcUserToken = method.getResponseHeader("Token").getValue();
 			}
 		}.run();
-		
-		
-		
 	}
 	
 	private void ensureLoggedIn(){
@@ -116,10 +113,6 @@ public class MattermostMessagingService implements MessagingService {
 	 */
 	
 	LinkedHashMap<String, MessageListener> listeners = new LinkedHashMap<>();
-	
-	public interface MessageListener {
-		public void receiveMessage(String message);
-	}
 	
 	
 	public void setListener(String userId, MessageListener listener){

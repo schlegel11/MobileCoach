@@ -37,6 +37,11 @@ public class RichConversationServiceTest {
 		public void sendMessage(String sender, String recipient, String message) {
 			messages.add(message);
 		}
+
+		@Override
+		public void setListener(String userId, MessageListener listener) {
+			// do nothing
+		}
     }
     
     public class ConversationManagementServiceMock implements ConversationManagementService {

@@ -83,7 +83,7 @@ public class MC implements ServletContextListener {
 	RESTManagerService							restManagerService;
 	
 	@Getter
-	MessagingService					mattermostMessagingService;
+	MattermostMessagingService					mattermostMessagingService;
 	@Getter
 	MattermostManagementService					mattermostManagementService;
 	@Getter

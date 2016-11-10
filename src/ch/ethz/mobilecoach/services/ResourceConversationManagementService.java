@@ -24,7 +24,7 @@ public class ResourceConversationManagementService implements
 	public static ResourceConversationManagementService start(ServletContext servletContext) {
 		ResourceConversationManagementService result = new ResourceConversationManagementService(servletContext);
 		try {
-			result.loadResourceFile("/test-conversation1.xml");
+			result.loadResourceFile("test-conversation1.xml");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -38,7 +38,8 @@ public class ResourceConversationManagementService implements
 	
 	
 	public void loadResourceFile(String file) throws Exception {
-		InputStream stream = this.getClass().getResourceAsStream(servletContext.getRealPath(file));
+		String path = servletContext.getRealPath(file);
+		InputStream stream = this.getClass().getResourceAsStream(path);
 		DomParser parser = new DomParser(repository, null);
 		parser.parse(stream);
 	}

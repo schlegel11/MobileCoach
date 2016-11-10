@@ -19,13 +19,13 @@ import ch.ethz.mobilecoach.services.MattermostManagementService.UserConfiguratio
 
 public class RichConversationService {
 
-	private MattermostMessagingService	mattermostMessagingService;
+	private MessagingService messagingService;
 	private ConversationManagementService conversationManagementService;
 	private LinkedHashMap<String, VariableStore> variableStores = new LinkedHashMap<>();
 	private LinkedHashMap<String, ChatEngine> chatEngines = new LinkedHashMap<>();	
 
-	private RichConversationService(MattermostMessagingService mattermostMessagingService, ConversationManagementService conversationManagementService) throws Exception {
-		this.mattermostMessagingService = mattermostMessagingService;
+	private RichConversationService(MessagingService mattermostMessagingService, ConversationManagementService conversationManagementService) throws Exception {
+		this.messagingService = mattermostMessagingService;
 		this.conversationManagementService = conversationManagementService;
 		
 		/*
@@ -45,8 +45,8 @@ public class RichConversationService {
 	}
 
 	public static RichConversationService start(
-			MattermostMessagingService mattermostMessagingService, ConversationManagementService conversationManagementService) throws Exception {
-		RichConversationService service = new RichConversationService(mattermostMessagingService, conversationManagementService);
+			MessagingService messagingService, ConversationManagementService conversationManagementService) throws Exception {
+		RichConversationService service = new RichConversationService(messagingService, conversationManagementService);
 		return service;
 	}
 
@@ -62,7 +62,7 @@ public class RichConversationService {
 			ChatEngine engine = new ChatEngine(repository, ui, variableStore);
 			chatEngines.put(recipient, engine);
 			
-			mattermostMessagingService.setListener(recipient, ui);
+			messagingService.setListener(recipient, ui);
 			
 			ui.setUserReplyListener(new UserReplyListener(){
 				@Override
@@ -87,11 +87,11 @@ public class RichConversationService {
 			}
 			
 			// send a message
-			mattermostMessagingService.sendMessage(sender, recipient, message);
+			messagingService.sendMessage(sender, recipient, message);
 		}
 	}
 	
-	private class MattermostConnector implements ConversationUI, MattermostMessagingService.MessageListener {
+	private class MattermostConnector implements ConversationUI, MessagingService.MessageListener {
 		
 		private UserReplyListener listener;
 		
@@ -107,7 +107,7 @@ public class RichConversationService {
 
 		@Override
 		public void showMessage(Message message) {
-			mattermostMessagingService.sendMessage(sender, recipient, message.text);
+			messagingService.sendMessage(sender, recipient, message.text);
 		}
 
 		@Override
