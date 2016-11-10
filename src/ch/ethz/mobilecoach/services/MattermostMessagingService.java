@@ -52,7 +52,7 @@ public class MattermostMessagingService implements MessagingService {
 	    WebSocketEndpoint ws = new WebSocketEndpoint();
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         try {
-			container.connectToServer(ws, clientConfig, new URI(managementService.host.replaceFirst("http:", "ws:") + "api/v3/users/websocket"));
+			container.connectToServer(ws, clientConfig, new URI(managementService.host_url.replaceFirst("http:", "ws:") + "api/v3/users/websocket"));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		} 
@@ -72,7 +72,7 @@ public class MattermostMessagingService implements MessagingService {
 			managementService.createParticipantUser(recipient);
 		}
 		
-        String channelId = managementService.getCoachingChannelId(recipient);
+        String channelId = managementService.getUserConfiguration(recipient).getChannels().get(0).getId();
         String teamId = managementService.getTeamId(recipient);
         String userId = managementService.getUserId(recipient);
 		
@@ -81,7 +81,7 @@ public class MattermostMessagingService implements MessagingService {
         json.put("user_id", userId);
         json.put("channel_id", channelId);
         
-		new MattermostTask<Void>(managementService.host + "api/v3/teams/" + teamId + "/channels/" + channelId + "/posts/create", json)
+		new MattermostTask<Void>(managementService.host_url + "teams/" + teamId + "/channels/" + channelId + "/posts/create", json)
 			.setToken(mcUserToken).run();
 	}
 	
@@ -92,12 +92,12 @@ public class MattermostMessagingService implements MessagingService {
         JSONObject json = new JSONObject();
         json.put("login_id", managementService.getMcUserLogin());
         json.put("password", managementService.getMcUserPassword());
-        
-        final MattermostMessagingService self = this;
-		new MattermostTask<String>(managementService.host + "api/v3/users/login", json){
+          
+		this.mcUserToken = new MattermostTask<String>(managementService.host_url + "users/login", json){
+
 			@Override
 			String handleResponse(PostMethod method){
-				return self.mcUserToken = method.getResponseHeader("Token").getValue();
+				return method.getResponseHeader("Token").getValue();
 			}
 		}.run();
 	}

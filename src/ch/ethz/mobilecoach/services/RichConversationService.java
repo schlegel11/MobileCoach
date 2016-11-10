@@ -1,21 +1,16 @@
 package ch.ethz.mobilecoach.services;
 
-import java.io.InputStream;
 import java.util.LinkedHashMap;
 
-import javax.servlet.ServletContext;
-
-import lombok.Getter;
-import ch.ethz.mobilecoach.chatlib.engine.conversation.ConversationUI;
-import ch.ethz.mobilecoach.chatlib.engine.conversation.UserReplyListener;
 import ch.ethz.mobilecoach.chatlib.engine.ChatEngine;
 import ch.ethz.mobilecoach.chatlib.engine.ConversationRepository;
 import ch.ethz.mobilecoach.chatlib.engine.ExecutionException;
+import ch.ethz.mobilecoach.chatlib.engine.conversation.ConversationUI;
+import ch.ethz.mobilecoach.chatlib.engine.conversation.UserReplyListener;
 import ch.ethz.mobilecoach.chatlib.engine.model.Message;
 import ch.ethz.mobilecoach.chatlib.engine.variables.InMemoryVariableStore;
 import ch.ethz.mobilecoach.chatlib.engine.variables.VariableStore;
-import ch.ethz.mobilecoach.chatlib.engine.xml.DomParser;
-import ch.ethz.mobilecoach.services.MattermostManagementService.UserConfiguration;
+import lombok.Getter;
 
 public class RichConversationService {
 

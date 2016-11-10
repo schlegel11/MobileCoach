@@ -1,11 +1,6 @@
 package ch.ethz.mobilecoach.services;
 
 
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.List;
-
-import javax.websocket.ClientEndpoint;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
 import javax.websocket.MessageHandler;

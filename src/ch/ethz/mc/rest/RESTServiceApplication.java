@@ -23,14 +23,15 @@ import java.util.Set;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.rest.services.AppService;
 import ch.ethz.mc.rest.services.CreditsService;
 import ch.ethz.mc.rest.services.ImageUploadService;
 import ch.ethz.mc.rest.services.VariableAccessService;
 import ch.ethz.mc.rest.services.VotingService;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Service application for REST interface
@@ -48,16 +49,18 @@ public class RESTServiceApplication extends Application {
 		services = new HashSet<Object>();
 
 		final val restManagerService = MC.getInstance().getRestManagerService();
+		final val matterMostService = MC.getInstance().getMattermostManagementService();
 
 		// Variable access service
 		services.add(new CreditsService(restManagerService));
 		services.add(new ImageUploadService(restManagerService));
 		services.add(new VariableAccessService(restManagerService));
 		services.add(new VotingService(restManagerService));
+		services.add(new AppService(matterMostService));
 
 		log.info("Started.");
 	}
-
+	
 	@Override
 	public Set<Object> getSingletons() {
 		return services;
