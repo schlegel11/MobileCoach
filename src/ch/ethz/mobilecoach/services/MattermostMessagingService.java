@@ -3,8 +3,6 @@ package ch.ethz.mobilecoach.services;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.json.JSONObject;
 
-import lombok.Getter;
-
 /*
  * Responsibilities:
  * 
@@ -42,7 +40,7 @@ public class MattermostMessagingService {
 			managementService.createParticipantUser(recipient);
 		}
 		
-        String channelId = managementService.getCoachingChannelId(recipient);
+        String channelId = managementService.getUserConfiguration(recipient).getChannels().get(0).getId();
         String teamId = managementService.getTeamId(recipient);
         String userId = managementService.getUserId(recipient);
 		
@@ -51,7 +49,7 @@ public class MattermostMessagingService {
         json.put("user_id", userId);
         json.put("channel_id", channelId);
         
-		new MattermostTask<Void>(managementService.host + "api/v3/teams/" + teamId + "/channels/" + channelId + "/posts/create", json)
+		new MattermostTask<Void>(managementService.host_url + "api/v3/teams/" + teamId + "/channels/" + channelId + "/posts/create", json)
 			.setToken(mcUserToken).run();
 	}
 	
@@ -64,7 +62,7 @@ public class MattermostMessagingService {
         json.put("password", managementService.getMcUserPassword());
         
         final MattermostMessagingService self = this;
-		new MattermostTask<Void>(managementService.host + "api/v3/users/login", json){
+		new MattermostTask<Void>(managementService.host_url + "users/login", json){
 			@Override
 			Void handleResponse(PostMethod method){
 				self.mcUserToken = method.getResponseHeader("Token").getValue();
