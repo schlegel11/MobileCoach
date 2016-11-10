@@ -1,5 +1,7 @@
 package ch.ethz.mobilecoach.services;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 
 import javax.servlet.ServletContext;
@@ -25,6 +27,7 @@ public class ResourceConversationManagementService implements
 		ResourceConversationManagementService result = new ResourceConversationManagementService(servletContext);
 		try {
 			result.loadResourceFile("test-conversation1.xml");
+			result.loadResourceFile("milestone1-test.xml");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -37,9 +40,10 @@ public class ResourceConversationManagementService implements
 	}
 	
 	
-	public void loadResourceFile(String file) throws Exception {
-		String path = servletContext.getRealPath(file);
-		InputStream stream = this.getClass().getResourceAsStream(path);
+	public void loadResourceFile(String fileName) throws Exception {
+		String path = servletContext.getRealPath(fileName);
+		File file = new File(path);
+		InputStream stream = new FileInputStream(file); //this.getClass().getResourceAsStream(path);
 		DomParser parser = new DomParser(repository, null);
 		parser.parse(stream);
 	}

@@ -4,11 +4,11 @@ import java.net.URI;
 import java.util.LinkedHashMap;
 
 import javax.websocket.ClientEndpointConfig;
+import javax.websocket.CloseReason;
 import javax.websocket.ContainerProvider;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
 import javax.websocket.MessageHandler;
-import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
@@ -32,6 +32,10 @@ public class MattermostMessagingService implements MessagingService {
 	private MattermostManagementService managementService;
 	private String mcUserToken;
 	
+	private WebSocketEndpoint webSocketEndpoint;
+	
+	private Runnable onCloseListener;
+	
 
 	// Construction
 	
@@ -52,11 +56,18 @@ public class MattermostMessagingService implements MessagingService {
 		final String authToken = mcUserToken;	
 		WebSocketConfigurator configurator = new WebSocketConfigurator(authToken);		
 		ClientEndpointConfig clientConfig = ClientEndpointConfig.Builder.create().configurator(configurator).build();
+		
+		onCloseListener = new Runnable(){
+			@Override
+			public void run() {
+				connectToWebSocket();
+			}
+		};
 				
-	    WebSocketEndpoint ws = new WebSocketEndpoint();
+		webSocketEndpoint = new WebSocketEndpoint();
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         try {
-			container.connectToServer(ws, clientConfig, new URI(managementService.host_url.replaceFirst("http:", "ws:") + "users/websocket"));
+			container.connectToServer(webSocketEndpoint, clientConfig, new URI(managementService.host_url.replaceFirst("http:", "ws:") + "users/websocket"));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		} 
@@ -79,6 +90,8 @@ public class MattermostMessagingService implements MessagingService {
         String channelId = managementService.getUserConfiguration(recipient).getChannels().get(0).getId();
         String teamId = managementService.getTeamId(recipient);
         String userId = managementService.getUserId(recipient);
+        
+        senderIdToRecipient.put(userId, recipient);
 		
         JSONObject json = new JSONObject();
         json.put("message", message);
@@ -116,19 +129,27 @@ public class MattermostMessagingService implements MessagingService {
 	 *  Receiving
 	 */
 	
-	LinkedHashMap<String, MessageListener> listeners = new LinkedHashMap<>();
+	// Mapping Mattermost userids to MobileCoach user ids
+	LinkedHashMap<String, String> senderIdToRecipient = new LinkedHashMap<>();
 	
 	
-	public void setListener(String userId, MessageListener listener){
-		listeners.put(userId, listener);
+	LinkedHashMap<String, MessageListener> listenerForRecipient = new LinkedHashMap<>();
+	
+	
+	public void setListener(String recipient, MessageListener listener){
+		listenerForRecipient.put(recipient, listener);
 	}
 	
 	
-	void receiveMessage(String senderId, String message){
-		if (listeners.containsKey(senderId)){
-			listeners.get(senderId).receiveMessage(message);
+	private void receiveMessage(String senderId, String message){
+		if (senderIdToRecipient.containsKey(senderId)){
+			String recipient = senderIdToRecipient.get(senderId);
+			if (listenerForRecipient.containsKey(recipient)){
+				listenerForRecipient.get(recipient).receiveMessage(message);
+			}
 		}
 	}
+	
 	
 	
 	/*
@@ -140,8 +161,21 @@ public class MattermostMessagingService implements MessagingService {
 		private void receiveMessageAtEndpoint(String senderId, String message){
 			receiveMessage(senderId,message);
 		}
-
-		@OnOpen
+		
+		
+		@Override
+		public void onClose(Session session, CloseReason closeReason){
+			if (onCloseListener != null){
+				onCloseListener.run();
+			}
+		}
+		
+		public void onError(Session session, Throwable thr){
+			System.out.println(thr.getMessage());
+		}
+		
+		
+		@Override
 		public void onOpen(Session session, EndpointConfig config) {
 
 			session.addMessageHandler(new MessageHandler.Whole<String>() {
@@ -153,17 +187,24 @@ public class MattermostMessagingService implements MessagingService {
 					
 					JSONObject message = new JSONObject(msg);
 					if ("posted".equals(message.getString("event"))){
-						JSONObject post = message.getJSONObject("data").getJSONObject("post");
+						try { 
+							JSONObject data = message.getJSONObject("data");
+							String postString = data.getString("post");
+							JSONObject post = new JSONObject(postString);
+							
+			
+							String userId = post.getString("user_id");
+							String messageText = post.getString("message");
+							
+							receiveMessageAtEndpoint(userId, messageText);	
 						
-						String userId = post.getString("user_id");
-						String messageText = post.getString("message");
-						
-						receiveMessageAtEndpoint(userId, messageText);						
+						} catch (Exception e){
+							e.printStackTrace();
+						}											
 					}
 				}
+
 			});
-			
-			
 		}
 	}
 }

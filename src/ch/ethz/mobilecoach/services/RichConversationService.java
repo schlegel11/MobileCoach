@@ -102,7 +102,9 @@ public class RichConversationService {
 
 		@Override
 		public void showMessage(Message message) {
-			messagingService.sendMessage(sender, recipient, message.text);
+			if (Message.SENDER_COACH.equals(message.sender)){
+				messagingService.sendMessage(sender, recipient, message.text);
+			}
 		}
 
 		@Override
@@ -118,7 +120,9 @@ public class RichConversationService {
 
 		public void receiveMessage(String message) {
 			if (this.listener != null){
-				this.listener.userReplied(new Message(message, Message.SENDER_USER));
+				Message msg = new Message(message, Message.SENDER_USER);
+				msg.answerOptionId = message; // TODO (DR): pick the right option
+				this.listener.userReplied(msg);
 			}
 		}
 		

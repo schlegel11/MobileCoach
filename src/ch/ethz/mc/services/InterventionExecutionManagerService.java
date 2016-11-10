@@ -738,15 +738,19 @@ public class InterventionExecutionManagerService {
 			// Check if participant has already been scheduled today
 			val dialogStatus = getDialogStatusByParticipant(participant.getId());
 
+			//TODO: switch back to monday-only start (make it configurable)
 			// Only start interventions on Monday
+			/*
 			if (dialogStatus != null
 					&& dialogStatus.getMonitoringDaysParticipated() == 0
-					&& todayDayIndex != 1) {
+					&& todayDayIndex != 1 
+					) {
 				log.debug(
 						"Participant {} has not been scheduled at all! Wait until next monday to start with scheduling...",
 						participant.getId());
 				continue;
 			}
+			*/
 
 			if (dialogStatus != null
 					&& !dialogStatus

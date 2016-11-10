@@ -8,8 +8,7 @@ public interface MessagingService {
 	public interface MessageListener {
 		public void receiveMessage(String message);  // TODO (DR): receive not just the message string
 	}
-	
-	
-	public void setListener(String userId, MessageListener listener);
+			
+	public void setListener(String recipient, MessageListener listener);
 	
 }
