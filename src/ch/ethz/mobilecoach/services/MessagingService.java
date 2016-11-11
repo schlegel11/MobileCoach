@@ -1,8 +1,12 @@
 package ch.ethz.mobilecoach.services;
 
+import ch.ethz.mobilecoach.app.Post;
+
 public interface MessagingService {
 
-	public abstract void sendMessage(String sender, String recipient, String message);
+	public void sendMessage(String sender, String recipient, String message);
+	
+	public void sendMessage(String sender, String recipient, Post post);
 	
 	
 	public interface MessageListener {

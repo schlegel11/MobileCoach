@@ -2,11 +2,15 @@ package ch.ethz.mobilecoach.services;
 
 import java.util.LinkedHashMap;
 
+
+import ch.ethz.mobilecoach.app.Post;
+import ch.ethz.mobilecoach.app.Option;
 import ch.ethz.mobilecoach.chatlib.engine.ChatEngine;
 import ch.ethz.mobilecoach.chatlib.engine.ConversationRepository;
 import ch.ethz.mobilecoach.chatlib.engine.ExecutionException;
 import ch.ethz.mobilecoach.chatlib.engine.conversation.ConversationUI;
 import ch.ethz.mobilecoach.chatlib.engine.conversation.UserReplyListener;
+import ch.ethz.mobilecoach.chatlib.engine.model.AnswerOption;
 import ch.ethz.mobilecoach.chatlib.engine.model.Message;
 import ch.ethz.mobilecoach.chatlib.engine.variables.InMemoryVariableStore;
 import ch.ethz.mobilecoach.chatlib.engine.variables.VariableStore;
@@ -103,7 +107,22 @@ public class RichConversationService {
 		@Override
 		public void showMessage(Message message) {
 			if (Message.SENDER_COACH.equals(message.sender)){
-				messagingService.sendMessage(sender, recipient, message.text);
+				
+				Post post = new Post();
+				post.setMessage(message.text);
+				
+				//if (Message.ANSWER_TYPE_MULTIPLE_CHOICE.equals(message.answerType)){
+				if (message.answerOptions.size() > 0){
+					
+					post.setPostType(Post.POST_TYPE_SELECT_ONE);
+					
+					for (AnswerOption answerOption: message.answerOptions){
+						Option option = new Option(answerOption.text, answerOption.value);
+						post.getOptions().add(option);
+					}
+				}
+				
+				messagingService.sendMessage(sender, recipient, post);
 			}
 		}
 

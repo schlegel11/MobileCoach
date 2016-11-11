@@ -15,6 +15,8 @@ import javax.websocket.WebSocketContainer;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.json.JSONObject;
 
+import ch.ethz.mobilecoach.app.Post;
+
 /**
  * Sends and receives messages from a Mattermost instance.
  * 
@@ -73,13 +75,19 @@ public class MattermostMessagingService implements MessagingService {
 		} 
 	}
 	
+	
+
+	
 	// Sending
 	
-	/* (non-Javadoc)
-	 * @see ch.ethz.mobilecoach.services.MessagingService#sendMessage(java.lang.String, java.lang.String, java.lang.String)
-	 */
 	@Override
 	public void sendMessage(String sender, String recipient, String message){
+		Post post = new Post();
+		post.setMessage(message);
+		sendMessage(sender, recipient, post);
+	}
+
+	public void sendMessage(String sender, String recipient, Post post){
 		ensureLoggedIn();
 		
 		if (!managementService.existsUserForParticipant(recipient)){
@@ -94,7 +102,8 @@ public class MattermostMessagingService implements MessagingService {
         senderIdToRecipient.put(userId, recipient);
 		
         JSONObject json = new JSONObject();
-        json.put("message", message);
+        json.put("props", new JSONObject(post));
+        json.put("message", post.getMessage());
         json.put("user_id", userId);
         json.put("channel_id", channelId);
         
