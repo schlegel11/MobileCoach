@@ -29,7 +29,9 @@ public class MattermostTask<RESULT> {
 		int numberOfTriesCompleted = 0;
 		boolean success = false;
 		
-		while (!success && numberOfTriesCompleted < 3){
+		final int MAX_TRIES = 3;
+		
+		while (!success && numberOfTriesCompleted < MAX_TRIES){
 			PostMethod post = new PostMethod(this.url);
 			
 			if (this.token != null){
@@ -48,14 +50,16 @@ public class MattermostTask<RESULT> {
 			} catch (Exception e) {
 				log.error("Error completing Mattermost task", e);
 				numberOfTriesCompleted++;
+				if (MAX_TRIES <= numberOfTriesCompleted){
+					throw new RuntimeException(e);
+				}
 			}
 		}
 		
-		// TODO: throw exception if retrying failed
 		return null;
 	}
 	
 	RESULT handleResponse(PostMethod method) throws Exception {
 		return null;
-	};	
+	};
 }

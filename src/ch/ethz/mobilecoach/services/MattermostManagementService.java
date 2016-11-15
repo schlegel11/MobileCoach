@@ -1,6 +1,7 @@
 package ch.ethz.mobilecoach.services;
 
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -9,9 +10,12 @@ import java.util.UUID;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.json.JSONObject;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j;
+import ch.ethz.mobilecoach.model.persistent.subelements.MattermostChannel;
+import ch.ethz.mobilecoach.model.persistent.subelements.MattermostUser;
+import ch.ethz.mc.services.internal.DatabaseManagerService;
+import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
 
 /**
  * 
@@ -33,6 +37,10 @@ import lombok.extern.log4j.Log4j;
 
 @Log4j
 public class MattermostManagementService {
+	
+	private final int TOKEN_RENEWAL_AFTER_DAYS = 10;
+	
+	private final DatabaseManagerService databaseManagerService;
 
 	public final String host_url = "http://dev.cdhi.ethz.ch/api/v3/";
 	public final String emailHost = "localhost";
@@ -59,10 +67,14 @@ public class MattermostManagementService {
 	@Getter
 	private String mcUserLogin;	
 
-	private LinkedHashMap<String, UserConfiguration> participants = new LinkedHashMap<>();
+	
+	
+	public MattermostManagementService (DatabaseManagerService databaseManagerService){
+		this.databaseManagerService = databaseManagerService;
+	}
 
-	public static MattermostManagementService start(){
-		MattermostManagementService service = new MattermostManagementService();
+	public static MattermostManagementService start(DatabaseManagerService databaseManagerService){
+		MattermostManagementService service = new MattermostManagementService(databaseManagerService);
 		service.loginAdmin();
 		service.createMobileCoachUser();
 		return service;
@@ -74,55 +86,59 @@ public class MattermostManagementService {
 
 	public void createMobileCoachUser(){
 		ensureAuthentication();
-		UserConfiguration credentials = createMattermostUser();
-		addUserToTeam(credentials.userId, teamId);
-		mcUserId = credentials.userId;
-		mcUserLogin = credentials.email;
-		mcUserPassword = credentials.password;
+		MattermostUserConfiguration credentials = createMattermostUser();
+		addUserToTeam(credentials.getUserId(), teamId);
+		mcUserId = credentials.getUserId();
+		mcUserLogin = credentials.getEmail();
+		mcUserPassword = credentials.getPassword();
 	}
 
-	public UserConfiguration createParticipantUser(String participantId){
+	public MattermostUserConfiguration createParticipantUser(String participantId){
 		ensureAuthentication();
-		UserConfiguration config = createMattermostUser();
-		addUserToTeam(config.userId, teamId);
+		MattermostUserConfiguration config = createMattermostUser();
+		
+		addUserToTeam(config.getUserId(), teamId);
 		
 		String userShortId = config.getUserId().substring(0, 5);
-		Channel coachingChannel = createPrivateChannel(userShortId + " Coaching", "BOT");
-		Channel managerChannel = createPrivateChannel(userShortId + " Support", "HUMAN");
+		MattermostChannel coachingChannel = createPrivateChannel(userShortId + " Coaching", "BOT");
+		MattermostChannel managerChannel = createPrivateChannel(userShortId + " Support", "HUMAN");
 		
-		List<Channel> channels = config.getChannels();
+		List<MattermostChannel> channels = config.getChannels();
 		channels.add(coachingChannel);
 		channels.add(managerChannel);
 		
-		List<User> users = config.getUsers();
-		users.add(new User(this.mcUserId, "Coach"));
-		users.add(new User(config.getUserId(), "You"));
-		users.add(new User(managerUserId, "Manager"));
+		List<MattermostUser> users = config.getUsers();
+		users.add(new MattermostUser(this.mcUserId, "Coach"));
+		users.add(new MattermostUser(config.getUserId(), "You"));
+		users.add(new MattermostUser(managerUserId, "Manager"));
 		
 		
-		addUserToChannel(config.userId, coachingChannel.getId());
+		addUserToChannel(config.getUserId(), coachingChannel.getId());
 		addUserToChannel(mcUserId, coachingChannel.getId());
 		addUserToChannel(managerUserId, coachingChannel.getId());
 		
-		addUserToChannel(config.userId, managerChannel.getId());
+		addUserToChannel(config.getUserId(), managerChannel.getId());
 		addUserToChannel(managerUserId, managerChannel.getId());
-		participants.put(participantId, config);
+		
+		config.setParticipantId(participantId);
+		databaseManagerService.saveModelObject(config);
+		
 		return config;
 	}
 
-	private Channel createPrivateChannel(String name, String type){
+	private MattermostChannel createPrivateChannel(String name, String type){
 		JSONObject json = new JSONObject()
 				.put("name", UUID.randomUUID().toString())
 				.put("display_name", name)
-				.put("type", type); // private channel
+				.put("type", "P"); // private channel
 
-		String channelId= new MattermostTask<String>(host_url + "teams/"+teamId+"/channels/create", json){
+		String channelId = new MattermostTask<String>(host_url + "teams/"+teamId+"/channels/create", json){
 			@Override
 			String handleResponse(PostMethod method) throws Exception {
 				return new JSONObject(method.getResponseBodyAsString()).getString("id");
 			}
 		}.setToken(adminUserToken).run();
-		return new Channel(name, type, channelId);
+		return new MattermostChannel(name, type, channelId);
 	}
 
 	private void addUserToChannel(String userId, String channelId){
@@ -139,7 +155,7 @@ public class MattermostManagementService {
 		}.setToken(adminUserToken).run();
 	}
 
-	private UserConfiguration createMattermostUser(){
+	private MattermostUserConfiguration createMattermostUser(){
 		String username = UUID.randomUUID().toString();
 		String password = UUID.randomUUID().toString(); // TODO: use a cryptographically secure random generator
 		String email = username + "@" + emailHost;
@@ -158,16 +174,23 @@ public class MattermostManagementService {
 			}
 		}.setToken(adminUserToken).run();
 		
-		List<Channel> channels = new ArrayList<Channel>();		
-		List<User> users = new ArrayList<>();
+		List<MattermostChannel> channels = new ArrayList<MattermostChannel>();		
+		List<MattermostUser> users = new ArrayList<>();
+		
 		String token = createATokenForUser(username, password);
+		
+		// Save a timestamp, mostly to know when the token was created.
+		// Use *real* time, as Mattermost also uses real (not simulated) time
+		long timestamp = System.currentTimeMillis(); 
 
-		return new UserConfiguration(userId, email, password, token, this.locale, channels, users, this.teamId, this.host_url);
+		return new MattermostUserConfiguration(
+				null, userId, email, password, token, 
+				this.locale, channels, users, this.teamId, this.host_url,
+				timestamp, timestamp);
 	}
 
 	private void addUserToTeam(String userId, String teamId){
-		JSONObject json = new JSONObject()
-				.put("user_id", userId);
+		JSONObject json = new JSONObject().put("user_id", userId);
 		new MattermostTask<Void>(host_url + "teams/" + teamId + "/add_user_to_team", json).setToken(adminUserToken).run();
 	}
 
@@ -175,27 +198,28 @@ public class MattermostManagementService {
 	 * 		Providing Information
 	 */
 
-	public List<Channel> getChannels(String participantId) {
-		return participants.get(participantId).getChannels();
-	}
-
-	public String getUserId(String participantId) {
-		return participants.get(participantId).getUserId();
-	}
-
 	public String getTeamId(String participantId) {
 		// TODO: return team id based on the intervention
 		return this.teamId;
 	}
 
 	public Boolean existsUserForParticipant(String participantId){
-
-		return participants.containsKey(participantId);
-
+		return null != databaseManagerService.findOneModelObject(MattermostUserConfiguration.class, "{'participantId':#}", participantId);
 	}
 
-	public UserConfiguration getUserConfiguration(String participantId){
-		return participants.get(participantId);
+	public MattermostUserConfiguration getUserConfiguration(String participantId){
+		// TODO: renew token when it is close to expiration
+		MattermostUserConfiguration config =  databaseManagerService.findOneModelObject(MattermostUserConfiguration.class, "{'participantId':#}", participantId);
+		
+		long tokenRenewalAfter = config.getTokenTimestamp() + 1000 * 24 * 3600 * TOKEN_RENEWAL_AFTER_DAYS;
+		if (config != null && (System.currentTimeMillis() > tokenRenewalAfter)){
+			String token = createATokenForUser(config.getEmail(), config.getPassword());
+			config.setToken(token);
+			config.setTokenTimestamp(System.currentTimeMillis());
+			databaseManagerService.saveModelObject(config);
+		}
+		
+		return config;
 	}
 
 
@@ -246,44 +270,12 @@ public class MattermostManagementService {
 	 * 		Utility Classes
 	 */
 
-	@AllArgsConstructor
-	public class UserConfiguration implements UserConfigurationIfc {
-		@Getter
-		private final String userId;
-		@Getter
-		private final String email;
-		@Getter
-		private final String password;
-		@Getter
-		private final String token;
-		@Getter
-		private final String locale;
-		@Getter
-		private final List<Channel> channels;
-		@Getter
-		private final List<User> users;
-		@Getter
-		private final String teamId;
-		@Getter
-		private final String url;
-	}
-
 	
-	public interface UserConfigurationIfc{
-		public String getUserId();
-		public String getEmail();
-		public String getToken();
-		public String getLocale();
-		public List<Channel> getChannels();
-		public List<User>getUsers();
-	}
-	
-
 	public class UserConfigurationForAuthentication {
 
-		private UserConfiguration userConfiguration;
+		private MattermostUserConfiguration userConfiguration;
 
-		public UserConfigurationForAuthentication(UserConfiguration userConfiguration){
+		public UserConfigurationForAuthentication(MattermostUserConfiguration userConfiguration){
 			this.userConfiguration = userConfiguration;
 		}
 
@@ -299,11 +291,11 @@ public class MattermostManagementService {
 			return userConfiguration.getLocale();
 		}
 
-		public List<Channel> getChannels() {
+		public List<MattermostChannel> getChannels() {
 			return userConfiguration.getChannels();
 		}
 
-		public List<User> getUsers() {	
+		public List<MattermostUser> getUsers() {	
 			return userConfiguration.getUsers();
 		}
 		
@@ -315,23 +307,4 @@ public class MattermostManagementService {
 			return userConfiguration.getUrl();
 		}
 	}
-
-	@AllArgsConstructor
-	public class Channel{
-		@Getter
-		private String name;
-		@Getter
-		private String type;
-		@Getter
-		private String id;
-	}
-
-	@AllArgsConstructor
-	public class User{
-		@Getter
-		private String id;
-		@Getter
-		private String name;
-	}
-
 }

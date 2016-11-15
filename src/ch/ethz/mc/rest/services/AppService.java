@@ -10,10 +10,9 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
+import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
 import ch.ethz.mobilecoach.services.MattermostManagementService;
-import ch.ethz.mobilecoach.services.MattermostManagementService.UserConfiguration;
 import ch.ethz.mobilecoach.services.MattermostManagementService.UserConfigurationForAuthentication;
-import ch.ethz.mobilecoach.services.MattermostManagementService.UserConfigurationIfc;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -50,16 +49,16 @@ public class AppService {
 			throw new WebApplicationException(Response.serverError().entity("Invalid Credential Format").build());
 		}
 		
-		UserConfiguration userConfiguration = fetchUserConfiguration(authentication);
+		MattermostUserConfiguration userConfiguration = fetchUserConfiguration(authentication);
 		
 		return new Result(this.mattMgmtService.new UserConfigurationForAuthentication(userConfiguration));
 	}
 
 
 
-	private UserConfiguration fetchUserConfiguration(
+	private MattermostUserConfiguration fetchUserConfiguration(
 			final String authentication) {
-		UserConfiguration userConfig;
+		MattermostUserConfiguration userConfig;
 
 		if(mattMgmtService.existsUserForParticipant(authentication)){
 			userConfig = mattMgmtService.getUserConfiguration(authentication);

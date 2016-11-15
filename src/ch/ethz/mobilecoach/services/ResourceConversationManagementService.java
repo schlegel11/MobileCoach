@@ -43,7 +43,7 @@ public class ResourceConversationManagementService implements
 	public void loadResourceFile(String fileName) throws Exception {
 		String path = servletContext.getRealPath(fileName);
 		File file = new File(path);
-		InputStream stream = new FileInputStream(file); //this.getClass().getResourceAsStream(path);
+		InputStream stream = new FileInputStream(file);
 		DomParser parser = new DomParser(repository, null);
 		parser.parse(stream);
 	}

@@ -16,6 +16,7 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.json.JSONObject;
 
 import ch.ethz.mobilecoach.app.Post;
+import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
 
 /**
  * Sends and receives messages from a Mattermost instance.
@@ -95,9 +96,10 @@ public class MattermostMessagingService implements MessagingService {
 			managementService.createParticipantUser(recipient);
 		}
 		
-        String channelId = managementService.getUserConfiguration(recipient).getChannels().get(0).getId();
-        String teamId = managementService.getTeamId(recipient);
-        String userId = managementService.getUserId(recipient);
+		MattermostUserConfiguration config = managementService.getUserConfiguration(recipient);
+        String channelId = config.getChannels().get(0).getId();
+        String teamId = config.getTeamId();
+        String userId = config.getUserId();
         
         senderIdToRecipient.put(userId, recipient);
 		
