@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mobile-coach>
+
+    <conversation id="milestone1-test">
+        <message>Hi there!</message>
+        <message>This is a test...</message>
+        <question text="Are you ready for a challenge? :)">
+            <answer text="Yes!">
+            	<message>Great!</message>
+            </answer>
+            <answer text="No">
+            	<message>Too bad!</message>
+            </answer>
+        </question>
+        <message>See you soon!</message>
+    </conversation>
+
+</mobile-coach>

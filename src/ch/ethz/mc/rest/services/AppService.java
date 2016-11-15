@@ -12,7 +12,12 @@ import javax.ws.rs.core.Response;
 
 import ch.ethz.mobilecoach.services.MattermostManagementService;
 import ch.ethz.mobilecoach.services.MattermostManagementService.UserConfiguration;
+import ch.ethz.mobilecoach.services.MattermostManagementService.UserConfigurationForAuthentication;
 import ch.ethz.mobilecoach.services.MattermostManagementService.UserConfigurationIfc;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Service to read/write variables using REST
  *
@@ -35,18 +40,19 @@ public class AppService {
 	@GET
 	@Path("/getconfig")
 	@Produces("application/json")
-	public UserConfigurationIfc variableRead(@Context final HttpServletRequest request, @HeaderParam("Authentication") final String authentication) throws BadRequestException{
+	public Result variableRead(@Context final HttpServletRequest request, @HeaderParam("Authentication") final String authentication) throws BadRequestException{
+		
+		if (authentication == null){
+			throw new WebApplicationException(Response.status(400).entity("Missing header 'Authenication'.").build());
+		}
 
-		if(!authentication.startsWith(CONST)){ 
-
-			throw new WebApplicationException(Response
-					.serverError()
-					.entity("Invalid Credential Format").build());
+		if(!authentication.startsWith(CONST)){
+			throw new WebApplicationException(Response.serverError().entity("Invalid Credential Format").build());
 		}
 		
 		UserConfiguration userConfiguration = fetchUserConfiguration(authentication);
 		
-		return this.mattMgmtService.new UserConfigurationForAuthentication(userConfiguration);
+		return new Result(this.mattMgmtService.new UserConfigurationForAuthentication(userConfiguration));
 	}
 
 
@@ -61,5 +67,14 @@ public class AppService {
 			userConfig = mattMgmtService.createParticipantUser(authentication);
 		}
 		return userConfig;
+	}
+	
+	@AllArgsConstructor
+	class Result {
+		
+		@Getter
+		@Setter
+		private UserConfigurationForAuthentication mattermost;
+		
 	}
 }

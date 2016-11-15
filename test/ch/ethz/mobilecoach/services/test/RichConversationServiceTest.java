@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
+import ch.ethz.mobilecoach.app.Post;
 import ch.ethz.mobilecoach.chatlib.engine.ConversationRepository;
 import ch.ethz.mobilecoach.chatlib.engine.xml.DomParser;
 import ch.ethz.mobilecoach.services.ConversationManagementService;
@@ -41,6 +42,12 @@ public class RichConversationServiceTest {
 		@Override
 		public void setListener(String userId, MessageListener listener) {
 			// do nothing
+		}
+
+		@Override
+		public void sendMessage(String sender, String recipient, Post post) {
+			// TODO Auto-generated method stub
+			
 		}
     }
     

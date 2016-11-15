@@ -42,6 +42,14 @@ public class MattermostManagementService {
 	private String adminUserLogin = "admin"; // will use name or email from configuration
 	private String adminUserToken = null;
 	private String locale = "de";
+	
+	
+	@Getter
+	private String managerUserId = "95x5w43ywty4myq83pr9ri6dsy";
+	@Getter
+	private String managerUserPassword = "mobile";	
+	@Getter
+	private String managerUserLogin = "coach";	
 
 
 	@Getter
@@ -75,12 +83,31 @@ public class MattermostManagementService {
 
 	public UserConfiguration createParticipantUser(String participantId){
 		ensureAuthentication();
-		UserConfiguration credentials = createMattermostUser();
-		addUserToTeam(credentials.userId, teamId);
-		addUserToChannel(credentials.userId, credentials.getChannels().get(0).getId());
-		addUserToChannel(mcUserId, credentials.getChannels().get(0).getId());
-		participants.put(participantId, credentials);
-		return credentials;
+		UserConfiguration config = createMattermostUser();
+		addUserToTeam(config.userId, teamId);
+		
+		String userShortId = config.getUserId().substring(0, 5);
+		Channel coachingChannel = createPrivateChannel(userShortId + " Coaching", "BOT");
+		Channel managerChannel = createPrivateChannel(userShortId + " Support", "HUMAN");
+		
+		List<Channel> channels = config.getChannels();
+		channels.add(coachingChannel);
+		channels.add(managerChannel);
+		
+		List<User> users = config.getUsers();
+		users.add(new User(this.mcUserId, "Coach"));
+		users.add(new User(config.getUserId(), "You"));
+		users.add(new User(managerUserId, "Manager"));
+		
+		
+		addUserToChannel(config.userId, coachingChannel.getId());
+		addUserToChannel(mcUserId, coachingChannel.getId());
+		addUserToChannel(managerUserId, coachingChannel.getId());
+		
+		addUserToChannel(config.userId, managerChannel.getId());
+		addUserToChannel(managerUserId, managerChannel.getId());
+		participants.put(participantId, config);
+		return config;
 	}
 
 	private Channel createPrivateChannel(String name, String type){
@@ -122,8 +149,7 @@ public class MattermostManagementService {
 				.put("username", username)
 				.put("password", password);
 
-		// TODO: remove logging
-		log.error("***** CREATED MOBILECOACH USER *****: "+ username + " : " + password);
+		log.info("Created Mattermost User: "+ username + " : " + password);
 
 		String userId = new MattermostTask<String>(host_url + "users/create", json){
 			@Override
@@ -131,16 +157,12 @@ public class MattermostManagementService {
 				return new JSONObject(method.getResponseBodyAsString()).getString("id");
 			}
 		}.setToken(adminUserToken).run();
-
-		Channel channel = createPrivateChannel("MC Hammer Channel", "P");
-		List<Channel> channels = new ArrayList<Channel>(); 
-		channels.add(channel);
-		User user = new User(this.mcUserId, "MC Hammer");
+		
+		List<Channel> channels = new ArrayList<Channel>();		
 		List<User> users = new ArrayList<>();
-		users.add(user);
 		String token = createATokenForUser(username, password);
 
-		return new UserConfiguration(userId, email, password, token, this.locale, channels, users);
+		return new UserConfiguration(userId, email, password, token, this.locale, channels, users, this.teamId, this.host_url);
 	}
 
 	private void addUserToTeam(String userId, String teamId){
@@ -240,6 +262,10 @@ public class MattermostManagementService {
 		private final List<Channel> channels;
 		@Getter
 		private final List<User> users;
+		@Getter
+		private final String teamId;
+		@Getter
+		private final String url;
 	}
 
 	
@@ -253,7 +279,7 @@ public class MattermostManagementService {
 	}
 	
 
-	public class UserConfigurationForAuthentication implements UserConfigurationIfc{
+	public class UserConfigurationForAuthentication {
 
 		private UserConfiguration userConfiguration;
 
@@ -261,37 +287,34 @@ public class MattermostManagementService {
 			this.userConfiguration = userConfiguration;
 		}
 
-		@Override
-		public String getUserId() {
+		public String getUser_id() {
 			return userConfiguration.getUserId();
 		}
 
-		@Override
-		public String getEmail() {
-			return userConfiguration.getEmail();
-		}
-
-		@Override
 		public String getToken() {
 			return userConfiguration.getToken();
 		}
 
-		@Override
 		public String getLocale() {
 			return userConfiguration.getLocale();
 		}
 
-		@Override
 		public List<Channel> getChannels() {
 			return userConfiguration.getChannels();
 		}
 
-		@Override
 		public List<User> getUsers() {	
 			return userConfiguration.getUsers();
 		}
+		
+		public String getTeam_id() {
+			return userConfiguration.getTeamId();
+		}
+		
+		public String getUrl() {
+			return userConfiguration.getUrl();
+		}
 	}
-
 
 	@AllArgsConstructor
 	public class Channel{
@@ -306,9 +329,9 @@ public class MattermostManagementService {
 	@AllArgsConstructor
 	public class User{
 		@Getter
-		private String name;
-		@Getter
 		private String id;
+		@Getter
+		private String name;
 	}
 
 }

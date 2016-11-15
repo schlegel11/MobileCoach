@@ -21,6 +21,6 @@
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry combineaccessrules="false" kind="src" path="/ChatLibEngine-Java"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/mobilecoach-scriptengine"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
