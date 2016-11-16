@@ -1,4 +1,6 @@
-package ch.ethz.mc.model.memory;
+package ch.ethz.mc.modules.interfaces;
+
+import ch.ethz.mc.modules.AbstractModule;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
@@ -17,24 +19,16 @@ package ch.ethz.mc.model.memory;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
-import ch.ethz.mc.model.persistent.DialogMessage;
-
 /**
- * Wrapper for dialog messages to also contain the appropriate sender's
- * identification
- * 
+ * Used to detect module adapter interfaces
+ *
  * @author Andreas Filler
- * 
  */
-@ToString
-@AllArgsConstructor
-public class DialogMessageWithSenderIdentification {
-	@Getter
-	private final DialogMessage	dialogMessage;
-
-	@Getter
-	private final String		messageSenderIdentification;
+public interface ModuleAdapterInterface {
+	/**
+	 * Returns the belonging {@link AbstractModule}
+	 *
+	 * @return
+	 */
+	public AbstractModule getBelongingModule();
 }

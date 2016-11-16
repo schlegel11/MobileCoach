@@ -50,8 +50,8 @@ public class IncomingMessageWorker extends Thread {
 		val simulatorActive = Constants.isSimulatedDateAndTime();
 		try {
 			TimeUnit.SECONDS
-					.sleep(simulatorActive ? ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR
-							: ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR);
+					.sleep(simulatorActive ? ImplementationConstants.MESSAGE_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR
+							: ImplementationConstants.MESSAGE_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR);
 		} catch (final InterruptedException e) {
 			interrupt();
 			log.debug("Incoming message worker received signal to stop (before first run)");
@@ -85,8 +85,8 @@ public class IncomingMessageWorker extends Thread {
 					(System.currentTimeMillis() - startingTime) / 1000.0);
 			try {
 				TimeUnit.SECONDS
-						.sleep(simulatorActive ? ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR
-								: ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR);
+						.sleep(simulatorActive ? ImplementationConstants.MESSAGE_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR
+								: ImplementationConstants.MESSAGE_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR);
 			} catch (final InterruptedException e) {
 				interrupt();
 				log.debug("Incoming message worker received signal to stop");

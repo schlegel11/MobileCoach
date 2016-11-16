@@ -291,7 +291,8 @@ public class InterventionAdministrationManagerService {
 	@Synchronized
 	public Intervention interventionCreate(final String name) {
 		val intervention = new Intervention(name,
-				InternalDateTime.currentTimeMillis(), false, false, false, null);
+				InternalDateTime.currentTimeMillis(), false, false,
+				new String[] {}, new String[] {}, false);
 
 		if (name.equals("")) {
 			intervention.setName(ImplementationConstants.DEFAULT_OBJECT_NAME);
@@ -326,15 +327,6 @@ public class InterventionAdministrationManagerService {
 		} else {
 			intervention.setName(newName);
 		}
-
-		databaseManagerService.saveModelObject(intervention);
-	}
-
-	@Synchronized
-	public void interventionChangeSenderIdentification(
-			final Intervention intervention,
-			final String newSenderIdentification) {
-		intervention.setAssignedSenderIdentification(newSenderIdentification);
 
 		databaseManagerService.saveModelObject(intervention);
 	}

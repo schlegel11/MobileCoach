@@ -24,12 +24,13 @@ import lombok.Synchronized;
 import lombok.val;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.memory.ReceivedMessage;
+import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 
 public class Simulator {
 	private static Simulator				instance;
 
-	private final List<ReceivedMessage>		simulatedReceivedSMS	= new ArrayList<ReceivedMessage>();
-	private final List<SimulatorListener>	simulatorListeners		= new ArrayList<Simulator.SimulatorListener>();
+	private final List<ReceivedMessage>		simulatedReceivedMessages	= new ArrayList<ReceivedMessage>();
+	private final List<SimulatorListener>	simulatorListeners			= new ArrayList<Simulator.SimulatorListener>();
 
 	private Simulator() {
 		// Do nothing
@@ -46,9 +47,10 @@ public class Simulator {
 
 	// Method for system to look for new simulated messages
 	public ReceivedMessage[] getSimulatedReceivedMessages() {
-		val returnArray = simulatedReceivedSMS.toArray(new ReceivedMessage[0]);
+		val returnArray = simulatedReceivedMessages
+				.toArray(new ReceivedMessage[0]);
 
-		simulatedReceivedSMS.clear();
+		simulatedReceivedMessages.clear();
 
 		return returnArray;
 	}
@@ -68,27 +70,22 @@ public class Simulator {
 
 	// Methods for simulation
 	@Synchronized
-	public void simulateSMSBySystem(final String message) {
+	public void simulateMessageBySystem(final String message) {
 		for (final val simulatorListener : simulatorListeners) {
 			try {
 				simulatorListener.newSimulatedMessageFromSystem(message);
 			} catch (final Exception e) {
 				// do nothing
-
 			}
 		}
 	}
 
 	@Synchronized
-	public void simulateSMSReplyByParticipant(
-			final String senderIdentification, final String message) {
-		val simulatedReceivedMessage = new ReceivedMessage();
-		simulatedReceivedMessage.setMessage(message);
-		simulatedReceivedMessage.setReceivedTimestamp(InternalDateTime
-				.currentTimeMillis());
-		simulatedReceivedMessage.setSender(Constants.getSmsSimulationNumber());
-		simulatedReceivedMessage.setRecipient(senderIdentification);
-		simulatedReceivedSMS.add(simulatedReceivedMessage);
+	public void simulateMessageReplyByParticipant(DialogOptionTypes dialogOptionType, final String interventionModuleIdentifier, final String message) {
+		val simulatedReceivedMessage = new ReceivedMessage(
+				dialogOptionType, Constants.getSmsSimulationNumber(),interventionModuleIdentifier,
+				message, null, InternalDateTime.currentTimeMillis());
+		simulatedReceivedMessages.add(simulatedReceivedMessage);
 	}
 
 	// Helper interface

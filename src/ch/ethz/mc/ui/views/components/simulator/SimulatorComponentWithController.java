@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.simulator;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,6 +29,7 @@ import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.conf.Messages;
+import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.model.ui.UISimulatedMessage;
 import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mc.tools.Simulator;
@@ -47,14 +48,16 @@ import com.vaadin.ui.Button.ClickEvent;
 @SuppressWarnings("serial")
 @Log4j2
 public class SimulatorComponentWithController extends SimulatorComponent
-		implements SimulatorListener {
+implements SimulatorListener {
 
 	private final BeanItemContainer<UISimulatedMessage>	beanContainer;
 
-	private final DateFormat							dateFormat;
-
 	@Setter
-	private String										senderIdentification;
+	private DialogOptionTypes							dialogOptionType;
+	@Setter
+	private String										interventionModuleIdentifier;
+
+	private final DateFormat							dateFormat;
 
 	public SimulatorComponentWithController() {
 		super();
@@ -93,7 +96,7 @@ public class SimulatorComponentWithController extends SimulatorComponent
 
 					try {
 						TimeUnit.SECONDS
-								.sleep(ImplementationConstants.SIMULATOR_TIME_UPDATE_INTERVAL_IN_SECONDS);
+						.sleep(ImplementationConstants.SIMULATOR_TIME_UPDATE_INTERVAL_IN_SECONDS);
 					} catch (final InterruptedException e) {
 						interrupt();
 					}
@@ -137,11 +140,11 @@ public class SimulatorComponentWithController extends SimulatorComponent
 	@Synchronized
 	protected void updateTime() {
 		getCurrentTimeLabel()
-				.setValue(
-						Messages.getAdminString(
-								AdminMessageStrings.SIMULATOR_COMPONENT__THE_CURRENT_SIMULATED_TIME_IS_X,
-								dateFormat.format(new Date(InternalDateTime
-										.currentTimeMillis())),
+		.setValue(
+				Messages.getAdminString(
+						AdminMessageStrings.SIMULATOR_COMPONENT__THE_CURRENT_SIMULATED_TIME_IS_X,
+						dateFormat.format(new Date(InternalDateTime
+								.currentTimeMillis())),
 								InternalDateTime.isFastForwardMode()));
 
 		getAdminUI().push();
@@ -195,8 +198,8 @@ public class SimulatorComponentWithController extends SimulatorComponent
 
 		addMessageToTable(false, messageToSend);
 
-		Simulator.getInstance().simulateSMSReplyByParticipant(
-				senderIdentification, messageToSend);
+		Simulator.getInstance().simulateMessageReplyByParticipant(
+				dialogOptionType, interventionModuleIdentifier, messageToSend);
 	}
 
 	@Override
@@ -214,8 +217,8 @@ public class SimulatorComponentWithController extends SimulatorComponent
 				isSystemMessage ? Messages
 						.getAdminString(AdminMessageStrings.SIMULATOR_COMPONENT__SYSTEM)
 						: Messages
-								.getAdminString(AdminMessageStrings.SIMULATOR_COMPONENT__PARTICIPANT),
-				message);
+						.getAdminString(AdminMessageStrings.SIMULATOR_COMPONENT__PARTICIPANT),
+						message);
 
 		beanContainer.addItem(uiSimulatedMessage);
 

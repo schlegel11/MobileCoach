@@ -2,24 +2,26 @@ package ch.ethz.mc.services;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Set;
 
 import lombok.Getter;
@@ -31,6 +33,7 @@ import org.reflections.Reflections;
 
 import ch.ethz.mc.MC;
 import ch.ethz.mc.modules.AbstractModule;
+import ch.ethz.mc.modules.interfaces.ModuleAdapterInterface;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService;
 import ch.ethz.mc.services.internal.VariablesManagerService;
@@ -53,15 +56,13 @@ public class ModuleManagerService {
 	@Getter
 	private final VariablesManagerService				variablesManagerService;
 
-	private final Dictionary<String, AbstractModule>	modules;
-
-	// Adapters of modules
+	private final Dictionary<String, AbstractModule>	modulesTable;
 
 	private ModuleManagerService(
 			final DatabaseManagerService databaseManagerService,
 			final FileStorageManagerService fileStorageManagerService,
 			final VariablesManagerService variablesManagerService)
-			throws Exception {
+					throws Exception {
 		$lock = MC.getInstance();
 
 		log.info("Starting service...");
@@ -71,7 +72,7 @@ public class ModuleManagerService {
 			this.fileStorageManagerService = fileStorageManagerService;
 			this.variablesManagerService = variablesManagerService;
 
-			modules = new Hashtable<String, AbstractModule>();
+			modulesTable = new Hashtable<String, AbstractModule>();
 
 			log.info("Finding and starting modules...");
 			final Reflections reflections = new Reflections(
@@ -86,7 +87,7 @@ public class ModuleManagerService {
 				val module = moduleClass.getConstructor(
 						ModuleManagerService.class).newInstance(this);
 
-				modules.put(module.getKey(), module);
+				modulesTable.put(module.getKey(), module);
 			}
 		}
 
@@ -97,7 +98,7 @@ public class ModuleManagerService {
 			final DatabaseManagerService databaseManagerService,
 			final FileStorageManagerService fileStorageManagerService,
 			final VariablesManagerService variablesManagerService)
-			throws Exception {
+					throws Exception {
 		if (instance == null) {
 			instance = new ModuleManagerService(databaseManagerService,
 					fileStorageManagerService, variablesManagerService);
@@ -109,7 +110,7 @@ public class ModuleManagerService {
 	public void stop() throws Exception {
 		log.info("Stopping service...");
 
-		val modulesIterator = modules.elements();
+		val modulesIterator = modulesTable.elements();
 		while (modulesIterator.hasMoreElements()) {
 			val module = modulesIterator.nextElement();
 			module.stop();
@@ -127,7 +128,7 @@ public class ModuleManagerService {
 	 * @return
 	 */
 	public Enumeration<AbstractModule> getAllModules() {
-		return modules.elements();
+		return modulesTable.elements();
 	}
 
 	/**
@@ -137,7 +138,7 @@ public class ModuleManagerService {
 	 * @return
 	 */
 	public AbstractModule getModuleByKey(final String key) {
-		return modules.get(key);
+		return modulesTable.get(key);
 	}
 
 	/**
@@ -147,10 +148,30 @@ public class ModuleManagerService {
 	 * @return
 	 */
 	public boolean moduleExists(final String key) {
-		return modules.get(key) != null;
+		return modulesTable.get(key) != null;
 	}
 
 	/*
 	 * Adapter Management
 	 */
+	/**
+	 * Return adapters of a specific type given as {@link Class}
+	 *
+	 * @param clazz
+	 * @return
+	 */
+	@Synchronized
+	public <ReturningAdapterClass extends ModuleAdapterInterface> List<ReturningAdapterClass> getRegisteredAdapters(
+			final Class<ReturningAdapterClass> clazz) {
+		final List<ReturningAdapterClass> allAdapters = new ArrayList<ReturningAdapterClass>();
+
+		val modules = modulesTable.elements();
+		while (modules.hasMoreElements()) {
+			val module = modules.nextElement();
+
+			allAdapters.addAll(module.getRegisteredAdapters(clazz));
+		}
+
+		return allAdapters;
+	}
 }

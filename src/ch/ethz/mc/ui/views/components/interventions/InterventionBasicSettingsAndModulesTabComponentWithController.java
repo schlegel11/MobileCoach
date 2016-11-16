@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.interventions;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,11 +20,8 @@ package ch.ethz.mc.ui.views.components.interventions;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 import ch.ethz.mc.MC;
-import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.persistent.Intervention;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 
@@ -36,7 +33,7 @@ import com.vaadin.ui.Button.ClickEvent;
 @SuppressWarnings("serial")
 @Log4j2
 public class InterventionBasicSettingsAndModulesTabComponentWithController
-extends InterventionBasicSettingsAndModulesTabComponent {
+		extends InterventionBasicSettingsAndModulesTabComponent {
 
 	private final Intervention											intervention;
 
@@ -56,49 +53,17 @@ extends InterventionBasicSettingsAndModulesTabComponent {
 
 		// Set the first time before other tabs are constructed
 		interventionEditingContainerComponentWithController
-		.setEditingDependingOnMessaging(!intervention
-				.isMonitoringActive());
+				.setEditingDependingOnMessaging(!intervention
+						.isMonitoringActive());
 
 		val interventionBasicSettingsComponent = getInterventionBasicSettingsAndModulesComponent();
-
-		// Handle combo box
-		val senderIdentifications = Constants.getSmsPhoneNumberFrom();
-
-		val senderIdentificationComboBox = interventionBasicSettingsComponent
-				.getSenderIdentificationSelectionComboBox();
-		for (val senderIdentification : senderIdentifications) {
-			senderIdentificationComboBox.addItem(senderIdentification);
-			if (intervention.getAssignedSenderIdentification() != null
-					&& intervention.getAssignedSenderIdentification().equals(
-							senderIdentification)) {
-				senderIdentificationComboBox.select(senderIdentification);
-			}
-		}
-		senderIdentificationComboBox
-		.addValueChangeListener(new ValueChangeListener() {
-
-			@Override
-			public void valueChange(final ValueChangeEvent event) {
-				final String senderIdentification = (String) event
-						.getProperty().getValue();
-
-				log.debug("Adjust sender identification to {}",
-						senderIdentification);
-				getInterventionAdministrationManagerService()
-				.interventionChangeSenderIdentification(
-						intervention, senderIdentification);
-
-				adjust();
-
-			}
-		});
 
 		// Handle buttons
 		val buttonClickListener = new ButtonClickListener();
 		interventionBasicSettingsComponent.getSwitchInterventionButton()
-		.addClickListener(buttonClickListener);
+				.addClickListener(buttonClickListener);
 		interventionBasicSettingsComponent.getSwitchMessagingButton()
-		.addClickListener(buttonClickListener);
+				.addClickListener(buttonClickListener);
 
 		// Set start state
 		adjust();
@@ -106,19 +71,16 @@ extends InterventionBasicSettingsAndModulesTabComponent {
 
 	private void adjust() {
 		getInterventionBasicSettingsAndModulesComponent().adjust(
-				intervention.isActive(), intervention.isMonitoringActive());
+				intervention.isActive(), intervention.isMonitoringActive(),
+				intervention.getAssignedModuleIdentifiers());
 
 		if (lastInterventionMonitoringState != intervention
 				.isMonitoringActive()) {
 			// Messaging status has been changed, so adapt UI
 			interventionEditingContainerComponentWithController
-			.setEditingDependingOnMessaging(!intervention
-					.isMonitoringActive());
+					.setEditingDependingOnMessaging(!intervention
+							.isMonitoringActive());
 		}
-
-		getInterventionBasicSettingsAndModulesComponent()
-		.getSimulatorComponent().setSenderIdentification(
-				intervention.getAssignedSenderIdentification());
 
 		lastInterventionMonitoringState = intervention.isMonitoringActive();
 	}
@@ -147,9 +109,9 @@ extends InterventionBasicSettingsAndModulesTabComponent {
 			public void buttonClick(final ClickEvent event) {
 				try {
 					MC.getInstance()
-					.getInterventionExecutionManagerService()
-					.interventionSetStatus(intervention,
-							!intervention.isActive());
+							.getInterventionExecutionManagerService()
+							.interventionSetStatus(intervention,
+									!intervention.isActive());
 				} catch (final Exception e) {
 					closeWindow();
 					handleException(e);
@@ -170,9 +132,9 @@ extends InterventionBasicSettingsAndModulesTabComponent {
 			public void buttonClick(final ClickEvent event) {
 				try {
 					MC.getInstance()
-					.getInterventionExecutionManagerService()
-					.interventionSetMonitoring(intervention,
-							!intervention.isMonitoringActive());
+							.getInterventionExecutionManagerService()
+							.interventionSetMonitoring(intervention,
+									!intervention.isMonitoringActive());
 				} catch (final Exception e) {
 					closeWindow();
 					handleException(e);

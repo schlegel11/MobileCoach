@@ -56,14 +56,14 @@ public class Intervention extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String	name;
+	private String		name;
 
 	/**
 	 * Timestamp when the {@link Intervention} has been created
 	 */
 	@Getter
 	@Setter
-	private long	created;
+	private long		created;
 
 	/**
 	 * Defines if the whole intervention is active. If this value is false, also
@@ -72,7 +72,7 @@ public class Intervention extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private boolean	active;
+	private boolean		active;
 
 	/**
 	 * Defines if the monitoring in this {@link Intervention} is active. If not
@@ -81,7 +81,23 @@ public class Intervention extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private boolean	monitoringActive;
+	private boolean		monitoringActive;
+
+	/**
+	 * Set modules active for a specific intervention
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private String[]	assignedModules;
+
+	/**
+	 * Allows modules to differentiate between several interventions
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private String[]	assignedModuleIdentifiers;
 
 	/**
 	 * Defines if {@link ScreeningSurvey}s of participants where all relevant
@@ -89,15 +105,7 @@ public class Intervention extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private boolean	automaticallyFinishScreeningSurveys;
-
-	/**
-	 * The sender identification used to send messages to the
-	 * {@link Participant}s
-	 */
-	@Getter
-	@Setter
-	private String	assignedSenderIdentification;
+	private boolean		automaticallyFinishScreeningSurveys;
 
 	/*
 	 * (non-Javadoc)
@@ -117,10 +125,7 @@ public class Intervention extends ModelObject {
 				monitoringActive ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
 						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE),
-				assignedSenderIdentification == null ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: assignedSenderIdentification);
+								.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE));
 
 		intervention.setRelatedModelObject(this);
 
@@ -230,8 +235,6 @@ public class Intervention extends ModelObject {
 				+ wrapField(formatStatus(monitoringActive)));
 		table += wrapRow(wrapHeader("Screening Surveys shall automatically be finished:")
 				+ wrapField(formatYesNo(automaticallyFinishScreeningSurveys)));
-		table += wrapRow(wrapHeader("Assigned Sender Identification:")
-				+ wrapField(assignedSenderIdentification));
 		return wrapTable(table);
 	}
 }

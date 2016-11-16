@@ -1,8 +1,4 @@
-package ch.ethz.mc.modules;
-
-import java.util.List;
-
-import ch.ethz.mc.model.memory.ReceivedMessage;
+package ch.ethz.mc.modules.adapters;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
@@ -21,7 +17,13 @@ import ch.ethz.mc.model.memory.ReceivedMessage;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public interface MessageRetrievalAdapterInterface {
+import java.util.List;
+
+import ch.ethz.mc.model.memory.ReceivedMessage;
+import ch.ethz.mc.modules.interfaces.ModuleAdapterInterface;
+
+public abstract class AbstractMessageRetrievalAdapter implements
+		ModuleAdapterInterface {
 
 	/**
 	 * Allows to retrieve messages from a specific gateway
@@ -29,6 +31,5 @@ public interface MessageRetrievalAdapterInterface {
 	 * @param dialogOption
 	 * @param message
 	 */
-	public List<ReceivedMessage> receiveMessages();
-
+	public abstract List<ReceivedMessage> receiveMessages();
 }
