@@ -1,9 +1,6 @@
 package ch.ethz.mobilecoach.services;
 
-
-import java.sql.Date;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -61,11 +58,11 @@ public class MattermostManagementService {
 
 
 	@Getter
-	private String mcUserId;
+	private String mcUserId = "rhwwrccsgjgwfjj8jwroxpcroc";
 	@Getter
-	private String mcUserPassword;	
+	private String mcUserPassword = "165dba95-5ed3-4642-aeba-ccbc5de9cf67";	
 	@Getter
-	private String mcUserLogin;	
+	private String mcUserLogin = "49b9c6c2-3a1d-4633-b44a-ebb2a3e70e57@localhost";	
 
 	
 	
@@ -76,7 +73,7 @@ public class MattermostManagementService {
 	public static MattermostManagementService start(DatabaseManagerService databaseManagerService){
 		MattermostManagementService service = new MattermostManagementService(databaseManagerService);
 		service.loginAdmin();
-		service.createMobileCoachUser();
+		//service.createMobileCoachUser(); // TODO: create a new Coach user if none exists or is configured
 		return service;
 	}
 
@@ -86,6 +83,7 @@ public class MattermostManagementService {
 
 	public void createMobileCoachUser(){
 		ensureAuthentication();
+		
 		MattermostUserConfiguration credentials = createMattermostUser();
 		addUserToTeam(credentials.getUserId(), teamId);
 		mcUserId = credentials.getUserId();
