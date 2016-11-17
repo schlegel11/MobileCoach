@@ -1,2 +1,5 @@
 .settings
 /target
+/src/main/webapp/VAADIN/widgetsets
+/out
+/src/main/webapp/VAADIN/themes/mc/styles.css
