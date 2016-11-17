@@ -1,8 +1,2 @@
-build
-javadoc
-WebContent/VAADIN/widgetsets/ch.ethz.mc.ui.widgetset.McWidgetset
-src/ch/ethz/mc/ui/widgetset
-out
-WebContent/VAADIN/themes/mc/styles.css
-FileServletWrapper.jar
-release
+.settings
+/target
