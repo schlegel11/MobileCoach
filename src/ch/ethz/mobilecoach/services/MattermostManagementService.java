@@ -206,7 +206,6 @@ public class MattermostManagementService {
 	}
 
 	public MattermostUserConfiguration getUserConfiguration(String participantId){
-		// TODO: renew token when it is close to expiration
 		MattermostUserConfiguration config =  databaseManagerService.findOneModelObject(MattermostUserConfiguration.class, "{'participantId':#}", participantId);
 		
 		long tokenRenewalAfter = config.getTokenTimestamp() + 1000 * 24 * 3600 * TOKEN_RENEWAL_AFTER_DAYS;

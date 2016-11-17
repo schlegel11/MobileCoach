@@ -10,7 +10,7 @@ public interface MessagingService {
 	
 	
 	public interface MessageListener {
-		public void receiveMessage(String message);  // TODO (DR): receive not just the message string
+		public void receivePost(Post post);
 	}
 			
 	public void setListener(String recipient, MessageListener listener);

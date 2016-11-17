@@ -16,6 +16,7 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.json.JSONObject;
 
 import ch.ethz.mobilecoach.app.Post;
+import ch.ethz.mobilecoach.app.Results;
 import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
 
 /**
@@ -152,11 +153,11 @@ public class MattermostMessagingService implements MessagingService {
 	}
 	
 	
-	private void receiveMessage(String senderId, String message){
+	private void receiveMessage(String senderId, Post post){
 		if (senderIdToRecipient.containsKey(senderId)){
 			String recipient = senderIdToRecipient.get(senderId);
 			if (listenerForRecipient.containsKey(recipient)){
-				listenerForRecipient.get(recipient).receiveMessage(message);
+				listenerForRecipient.get(recipient).receivePost(post);
 			}
 		}
 	}
@@ -169,8 +170,8 @@ public class MattermostMessagingService implements MessagingService {
 	public class WebSocketEndpoint extends Endpoint {
 		
 		
-		private void receiveMessageAtEndpoint(String senderId, String message){
-			receiveMessage(senderId,message);
+		private void receiveMessageAtEndpoint(String senderId, Post post){
+			receiveMessage(senderId, post);
 		}
 		
 		
@@ -198,16 +199,27 @@ public class MattermostMessagingService implements MessagingService {
 					
 					JSONObject message = new JSONObject(msg);
 					if ("posted".equals(message.getString("event"))){
-						try { 
+						try { 							
 							JSONObject data = message.getJSONObject("data");
 							String postString = data.getString("post");
-							JSONObject post = new JSONObject(postString);
 							
+							JSONObject post = new JSONObject(postString);
 			
 							String userId = post.getString("user_id");
 							String messageText = post.getString("message");
 							
-							receiveMessageAtEndpoint(userId, messageText);	
+							JSONObject props = post.getJSONObject("props");
+							Results results = null;
+							
+							if (props.has("results")){
+								results = new Results(props.getJSONObject("results").getString("selected"));
+							}
+							
+							Post postObject = new Post();
+							postObject.setMessage(messageText);
+							postObject.setResults(results);
+							
+							receiveMessageAtEndpoint(userId, postObject);	
 						
 						} catch (Exception e){
 							e.printStackTrace();
