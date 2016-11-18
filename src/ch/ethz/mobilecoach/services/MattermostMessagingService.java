@@ -17,6 +17,7 @@ import org.json.JSONObject;
 
 import ch.ethz.mobilecoach.app.Post;
 import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
+import ch.ethz.mobilecoach.model.persistent.OneSignalUserConfiguration;
 
 /**
  * Sends and receives messages from a Mattermost instance.
@@ -95,6 +96,7 @@ public class MattermostMessagingService implements MessagingService {
 			// TODO: create the user before, when the user completed the sign up survey
 			managementService.createParticipantUser(recipient);
 		}
+	
 		
 		MattermostUserConfiguration config = managementService.getUserConfiguration(recipient);
         String channelId = config.getChannels().get(0).getId();
@@ -111,6 +113,37 @@ public class MattermostMessagingService implements MessagingService {
         
 		new MattermostTask<Void>(managementService.host_url + "teams/" + teamId + "/channels/" + channelId + "/posts/create", json)
 			.setToken(mcUserToken).run();
+		
+		if(null != managementService.findOneSignalObject(recipient)){
+			return;
+		}
+		
+		sendPushNotification(recipient, post);	
+	}
+
+	
+	
+	private void sendPushNotification(String recipient, Post post) {
+		
+		OneSignalUserConfiguration oneSignalUserConfiguration = managementService.findOneSignalObject(recipient);
+		String playerId = oneSignalUserConfiguration.getPlayerId();
+		
+		LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+		headers.put("Content-Type", "application/json");
+		headers.put("Authorization", "Basic ZjA3ZTkzNDEtYmRjMi00Y2M2LWEwOWItZTk2MzE2YTQ0NWQw");	
+		String url = "https://onesignal.com/api/v1/notifications";
+		
+		JSONObject json2 = new JSONObject()
+				.put("app_id", MattermostManagementService.appID)     
+				.put("contents", new JSONObject().put("en", post.getMessage()))
+				.put("include_player_ids", playerId);
+
+		new OneSignalTask<String>(url, json2, headers){
+			@Override
+			String handleResponse(PostMethod method) throws Exception {
+				return new JSONObject(method.getResponseBodyAsString()).getString("id");
+			}
+		}.run();
 	}
 	
 	// Login

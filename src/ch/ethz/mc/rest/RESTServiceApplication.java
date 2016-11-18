@@ -28,6 +28,7 @@ import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.rest.services.AppService;
 import ch.ethz.mc.rest.services.CreditsService;
 import ch.ethz.mc.rest.services.ImageUploadService;
+import ch.ethz.mc.rest.services.OneSignalAppService;
 import ch.ethz.mc.rest.services.VariableAccessService;
 import ch.ethz.mc.rest.services.VotingService;
 import lombok.val;
@@ -57,6 +58,7 @@ public class RESTServiceApplication extends Application {
 		services.add(new VariableAccessService(restManagerService));
 		services.add(new VotingService(restManagerService));
 		services.add(new AppService(matterMostService));
+		services.add(new OneSignalAppService(matterMostService));
 
 		log.info("Started.");
 	}

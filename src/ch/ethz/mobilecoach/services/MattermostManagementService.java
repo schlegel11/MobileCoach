@@ -1,7 +1,6 @@
 package ch.ethz.mobilecoach.services;
 
 
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,12 +9,13 @@ import java.util.UUID;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.json.JSONObject;
 
-import lombok.Getter;
-import lombok.extern.log4j.Log4j;
-import ch.ethz.mobilecoach.model.persistent.subelements.MattermostChannel;
-import ch.ethz.mobilecoach.model.persistent.subelements.MattermostUser;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
+import ch.ethz.mobilecoach.model.persistent.OneSignalUserConfiguration;
+import ch.ethz.mobilecoach.model.persistent.subelements.MattermostChannel;
+import ch.ethz.mobilecoach.model.persistent.subelements.MattermostUser;
+import lombok.Getter;
+import lombok.extern.log4j.Log4j;
 
 /**
  * 
@@ -37,9 +37,9 @@ import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
 
 @Log4j
 public class MattermostManagementService {
-	
+
 	private final int TOKEN_RENEWAL_AFTER_DAYS = 10;
-	
+
 	private final DatabaseManagerService databaseManagerService;
 
 	public final String host_url = "http://dev.cdhi.ethz.ch/api/v3/";
@@ -51,7 +51,8 @@ public class MattermostManagementService {
 	private String adminUserToken = null;
 	private String locale = "de";
 	
-	
+	public final static String appID = "325068aa-fc63-411c-a07e-b3e73c455e8e";
+
 	@Getter
 	private String managerUserId = "95x5w43ywty4myq83pr9ri6dsy";
 	@Getter
@@ -67,8 +68,8 @@ public class MattermostManagementService {
 	@Getter
 	private String mcUserLogin;	
 
-	
-	
+
+
 	public MattermostManagementService (DatabaseManagerService databaseManagerService){
 		this.databaseManagerService = databaseManagerService;
 	}
@@ -93,36 +94,94 @@ public class MattermostManagementService {
 		mcUserPassword = credentials.getPassword();
 	}
 
+
+	public OneSignalUserConfiguration findOneSignalObject(String authentication){
+
+		OneSignalUserConfiguration oneSignalUserConfiguration = databaseManagerService.findOneModelObject(OneSignalUserConfiguration.class, "{'participantId':#}", authentication);
+
+		return oneSignalUserConfiguration;
+	}
+
+
+	public void addDeviceToOneSignal(OneSignalUserConfiguration oneSignalUserConfiguration, String authentication, String deviceID, String deviceType){
+
+		if(!oneSignalUserConfiguration.getDeviceIds().contains(deviceID)) {
+			
+			String playerID = addDeviceToOneSignal(deviceID, deviceType);
+			
+			oneSignalUserConfiguration.setPlayerId(playerID);
+			oneSignalUserConfiguration.getDeviceIds().add(deviceID);
+			databaseManagerService.saveModelObject(oneSignalUserConfiguration);
+		}
+	}
+
+	private String addDeviceToOneSignal(String deviceID, String deviceType) {
+		LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+		
+		headers.put("Content-Type", "application/json");
+		
+		String url = "https://onesignal.com/api/v1/players";
+		
+		JSONObject json = new JSONObject()
+				.put("app_id", appID)     
+				.put("identifier", deviceID)
+				.put("device_type", Integer.valueOf(deviceType));
+
+		
+		String playerID = new OneSignalTask<String>(url, json, headers){
+			@Override
+			String handleResponse(PostMethod method) throws Exception {
+				return new JSONObject(method.getResponseBodyAsString()).getString("id");
+			}
+		}.run();
+	
+		return playerID;
+	}
+
+
+
+	public void creatOneSignalObject(String participantId, String deviceID, String deviceType){
+		
+		String playerID = addDeviceToOneSignal(deviceID, deviceType);
+		long timestamp = System.currentTimeMillis(); 
+		List<String> deviceIds = new ArrayList<>();
+		deviceIds.add(deviceID);
+		OneSignalUserConfiguration config = new OneSignalUserConfiguration(participantId, deviceIds, playerID, deviceType,timestamp);
+		
+		databaseManagerService.saveModelObject(config);	
+	}
+
+
+
 	public MattermostUserConfiguration createParticipantUser(String participantId){
 		ensureAuthentication();
 		MattermostUserConfiguration config = createMattermostUser();
-		
+
 		addUserToTeam(config.getUserId(), teamId);
-		
+
 		String userShortId = config.getUserId().substring(0, 5);
 		MattermostChannel coachingChannel = createPrivateChannel(userShortId + " Coaching", "BOT");
 		MattermostChannel managerChannel = createPrivateChannel(userShortId + " Support", "HUMAN");
-		
+
 		List<MattermostChannel> channels = config.getChannels();
 		channels.add(coachingChannel);
 		channels.add(managerChannel);
-		
+
 		List<MattermostUser> users = config.getUsers();
 		users.add(new MattermostUser(this.mcUserId, "Coach"));
 		users.add(new MattermostUser(config.getUserId(), "You"));
-		users.add(new MattermostUser(managerUserId, "Manager"));
-		
-		
+		users.add(new MattermostUser(managerUserId, "Manager"));		
+
 		addUserToChannel(config.getUserId(), coachingChannel.getId());
 		addUserToChannel(mcUserId, coachingChannel.getId());
 		addUserToChannel(managerUserId, coachingChannel.getId());
-		
+
 		addUserToChannel(config.getUserId(), managerChannel.getId());
 		addUserToChannel(managerUserId, managerChannel.getId());
-		
+
 		config.setParticipantId(participantId);
 		databaseManagerService.saveModelObject(config);
-		
+
 		return config;
 	}
 
@@ -173,12 +232,12 @@ public class MattermostManagementService {
 				return new JSONObject(method.getResponseBodyAsString()).getString("id");
 			}
 		}.setToken(adminUserToken).run();
-		
+
 		List<MattermostChannel> channels = new ArrayList<MattermostChannel>();		
 		List<MattermostUser> users = new ArrayList<>();
-		
+
 		String token = createATokenForUser(username, password);
-		
+
 		// Save a timestamp, mostly to know when the token was created.
 		// Use *real* time, as Mattermost also uses real (not simulated) time
 		long timestamp = System.currentTimeMillis(); 
@@ -210,7 +269,7 @@ public class MattermostManagementService {
 	public MattermostUserConfiguration getUserConfiguration(String participantId){
 		// TODO: renew token when it is close to expiration
 		MattermostUserConfiguration config =  databaseManagerService.findOneModelObject(MattermostUserConfiguration.class, "{'participantId':#}", participantId);
-		
+
 		long tokenRenewalAfter = config.getTokenTimestamp() + 1000 * 24 * 3600 * TOKEN_RENEWAL_AFTER_DAYS;
 		if (config != null && (System.currentTimeMillis() > tokenRenewalAfter)){
 			String token = createATokenForUser(config.getEmail(), config.getPassword());
@@ -218,7 +277,7 @@ public class MattermostManagementService {
 			config.setTokenTimestamp(System.currentTimeMillis());
 			databaseManagerService.saveModelObject(config);
 		}
-		
+
 		return config;
 	}
 
@@ -270,7 +329,7 @@ public class MattermostManagementService {
 	 * 		Utility Classes
 	 */
 
-	
+
 	public class UserConfigurationForAuthentication {
 
 		private MattermostUserConfiguration userConfiguration;
@@ -298,11 +357,11 @@ public class MattermostManagementService {
 		public List<MattermostUser> getUsers() {	
 			return userConfiguration.getUsers();
 		}
-		
+
 		public String getTeam_id() {
 			return userConfiguration.getTeamId();
 		}
-		
+
 		public String getUrl() {
 			return userConfiguration.getUrl();
 		}
