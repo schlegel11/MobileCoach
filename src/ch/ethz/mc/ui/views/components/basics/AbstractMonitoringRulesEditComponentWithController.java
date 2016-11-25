@@ -78,17 +78,19 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 
 	private Tree					rulesTree;
 
-	private ObjectId				selectedMonitoringRuleId	= null;
+	private ObjectId				selectedMonitoringRuleId		= null;
 
-	public static final String		NAME						= "name";
-	public static final String		ICON						= "icon";
+	public static final String		NAME							= "name";
+	public static final String		ICON							= "icon";
 
-	private final ThemeResource		RULE_ICON					= new ThemeResource(
-																		ThemeImageStrings.RULE_ICON_SMALL);
-	private final ThemeResource		MESSAGE_RULE_ICON			= new ThemeResource(
-																		ThemeImageStrings.MESSAGE_ICON_SMALL);
-	private final ThemeResource		STOP_RULE_ICON				= new ThemeResource(
-																		ThemeImageStrings.STOP_ICON_SMALL);
+	private final ThemeResource		RULE_ICON						= new ThemeResource(
+																			ThemeImageStrings.RULE_ICON_SMALL);
+	private final ThemeResource		MESSAGE_RULE_ICON				= new ThemeResource(
+																			ThemeImageStrings.MESSAGE_ICON_SMALL);
+	private final ThemeResource		SUPERVISOR_MESSAGE_RULE_ICON	= new ThemeResource(
+																			ThemeImageStrings.SUPERVISOR_ICON_SMALL);
+	private final ThemeResource		STOP_RULE_ICON					= new ThemeResource(
+																			ThemeImageStrings.STOP_ICON_SMALL);
 
 	private HierarchicalContainer	container;
 
@@ -292,9 +294,16 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 
 			String sendMessage;
 			if (selectedMonitoringRule.isSendMessageIfTrue()) {
+				val recipient = selectedMonitoringRule
+						.isSendMessageToSupervisor() ? Messages
+								.getAdminString(AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__TO_SUPERVISOR)
+								: Messages
+								.getAdminString(AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__TO_PARTICIPANT);
 				if (selectedMonitoringRule.getRelatedMonitoringMessageGroup() == null) {
 					sendMessage = Messages
-							.getAdminString(AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_MESSAGE_BUT_NO_GROUP_SELECTED);
+							.getAdminString(
+													AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_MESSAGE_BUT_NO_GROUP_SELECTED,
+													recipient);
 				} else {
 					final MonitoringMessageGroup monitoringMessageGroup = getInterventionAdministrationManagerService()
 							.getMonitoringMessageGroup(
@@ -302,11 +311,14 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 											.getRelatedMonitoringMessageGroup());
 					if (monitoringMessageGroup == null) {
 						sendMessage = Messages
-								.getAdminString(AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_MESSAGE_FROM_ALREADY_DELETED_GROUP);
+								.getAdminString(
+														AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_MESSAGE_FROM_ALREADY_DELETED_GROUP,
+														recipient);
 					} else {
 						sendMessage = Messages
 								.getAdminString(
 										AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_MESSAGE_FROM_GROUP,
+														recipient,
 										monitoringMessageGroup.getName());
 					}
 				}
@@ -421,7 +433,12 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 						ThemeResource icon;
 						if (selectedAbstractMonitoringRule
 								.isSendMessageIfTrue()) {
-							icon = MESSAGE_RULE_ICON;
+							if (selectedAbstractMonitoringRule
+									.isSendMessageToSupervisor()) {
+								icon = SUPERVISOR_MESSAGE_RULE_ICON;
+							} else {
+								icon = MESSAGE_RULE_ICON;
+							}
 						} else if (isMonitoringRule
 								&& ((MonitoringRule) selectedAbstractMonitoringRule)
 										.isStopInterventionWhenTrue()) {
@@ -463,7 +480,11 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 
 		ThemeResource icon;
 		if (abstractMonitoringRule.isSendMessageIfTrue()) {
-			icon = MESSAGE_RULE_ICON;
+			if (abstractMonitoringRule.isSendMessageToSupervisor()) {
+				icon = SUPERVISOR_MESSAGE_RULE_ICON;
+			} else {
+				icon = MESSAGE_RULE_ICON;
+			}
 		} else if (isMonitoringRule
 				&& ((MonitoringRule) abstractMonitoringRule)
 						.isStopInterventionWhenTrue()) {

@@ -91,6 +91,9 @@ public class DataModelUpdateManager {
 				case 6:
 					updateToVersion6();
 					break;
+				case 7:
+					updateToVersion7();
+					break;
 			}
 
 			log.info("Update to version {} done", updateToVersionInThisStep);
@@ -502,5 +505,25 @@ public class DataModelUpdateManager {
 				.update(Queries.EVERYTHING)
 				.multi()
 				.with(Queries.UPDATE_VERSION_6__SCREENING_SURVEY_SLIDE__CHANGE_1);
+	}
+
+	/**
+	 * Changes for version 7:
+	 */
+	private static void updateToVersion7() {
+		val monitoringRuleCollection = jongo.getCollection("MonitoringRule");
+		monitoringRuleCollection.update(Queries.EVERYTHING).multi()
+		.with(Queries.UPDATE_VERSION_7__MONITORING_RULE__CHANGE_1);
+
+		val monitoringReplyRuleCollection = jongo
+				.getCollection("MonitoringReplyRule");
+		monitoringReplyRuleCollection
+		.update(Queries.EVERYTHING)
+		.multi()
+		.with(Queries.UPDATE_VERSION_7__MONITORING_REPLY_RULE__CHANGE_1);
+
+		val dialogMessageCollection = jongo.getCollection("DialogMessage");
+		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+				.with(Queries.UPDATE_VERSION_7__DIALOG_MESSAGE__CHANGE_1);
 	}
 }
