@@ -155,6 +155,7 @@ public class Queries {
 	public static final String	PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC																																							= "{'timestamp':-1}";
 
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT																																													= "{'participant':#}";
+	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_MESSAGE_TYPE																																									= "{'participant':#,'supervisorMessage':#}";
 	public static final String	DIALOG_MESSAGE__BY_RELATED_MONITORING_MESSAGE_AND_SENT_AFTER_TIMESTAMP																																			= "{'relatedMonitoringMessage':#,'sentTimestamp':{$gt:#}}";
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS																																										= "{'participant':#,'status':#}";
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_NOT_AUTOMATICALLY_PROCESSABLE_AND_UNANSWERED_AFTER_TIMESTAMP_HIGHER																								= "{'participant':#,'status':#,'answerNotAutomaticallyProcessable':#,'isUnansweredAfterTimestamp':{$gt:#}}";
@@ -192,4 +193,5 @@ public class Queries {
 	public static final String	UPDATE_VERSION_6__SCREENING_SURVEY_SLIDE__CHANGE_1																																								= "{$set:{'linkedIntermediateSurvey':null}}";
 	public static final String	UPDATE_VERSION_7__MONITORING_RULE__CHANGE_1																																										= "{$set:{'sendMessageToSupervisor':false}}";
 	public static final String	UPDATE_VERSION_7__MONITORING_REPLY_RULE__CHANGE_1																																								= "{$set:{'sendMessageToSupervisor':false}}";
+	public static final String	UPDATE_VERSION_7__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'supervisorMessage':false}}";
 }

@@ -2,15 +2,15 @@ package ch.ethz.mc.ui.views.components.interventions;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,7 +35,7 @@ import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.ui.UIDialogMessageProblemViewWithParticipant;
 import ch.ethz.mc.model.ui.UIDialogMessageWithParticipant;
 import ch.ethz.mc.tools.StringValidator;
-import ch.ethz.mc.ui.views.components.basics.PlaceholderStringEditComponent;
+import ch.ethz.mc.ui.views.components.basics.PlaceholderStringEditWithCheckBoxComponent;
 import ch.ethz.mc.ui.views.components.basics.ShortStringEditComponent;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -53,7 +53,7 @@ import com.vaadin.ui.Button.ClickEvent;
 @SuppressWarnings("serial")
 @Log4j2
 public class InterventionProblemsComponentWithController extends
-		InterventionProblemsComponent {
+InterventionProblemsComponent {
 
 	private final Intervention															intervention;
 
@@ -82,14 +82,14 @@ public class InterventionProblemsComponentWithController extends
 
 		dialogMessagesTable.setContainerDataSource(beanContainer);
 		dialogMessagesTable
-				.setSortContainerPropertyId(UIDialogMessageProblemViewWithParticipant
-						.getSortColumn());
+		.setSortContainerPropertyId(UIDialogMessageProblemViewWithParticipant
+				.getSortColumn());
 		dialogMessagesTable
-				.setVisibleColumns(UIDialogMessageProblemViewWithParticipant
-						.getVisibleColumns());
+		.setVisibleColumns(UIDialogMessageProblemViewWithParticipant
+				.getVisibleColumns());
 		dialogMessagesTable
-				.setColumnHeaders(UIDialogMessageProblemViewWithParticipant
-						.getColumnHeaders());
+		.setColumnHeaders(UIDialogMessageProblemViewWithParticipant
+				.getColumnHeaders());
 		dialogMessagesTable.setConverter(
 				UIDialogMessageProblemViewWithParticipant.SENT_TIMESTAMP,
 				new StringToDateConverter() {
@@ -102,26 +102,26 @@ public class InterventionProblemsComponentWithController extends
 					}
 				});
 		dialogMessagesTable
-				.setConverter(
-						UIDialogMessageProblemViewWithParticipant.ANSWER_RECEIVED_TIMESTAMP,
-						new StringToDateConverter() {
-							@Override
-							protected DateFormat getFormat(final Locale locale) {
-								val dateFormat = DateFormat
-										.getDateTimeInstance(DateFormat.MEDIUM,
-												DateFormat.MEDIUM,
-												Constants.getAdminLocale());
-								return dateFormat;
-							}
-						});
+		.setConverter(
+				UIDialogMessageProblemViewWithParticipant.ANSWER_RECEIVED_TIMESTAMP,
+				new StringToDateConverter() {
+					@Override
+					protected DateFormat getFormat(final Locale locale) {
+						val dateFormat = DateFormat
+								.getDateTimeInstance(DateFormat.MEDIUM,
+										DateFormat.MEDIUM,
+										Constants.getAdminLocale());
+						return dateFormat;
+					}
+				});
 
 		messageDialogBeanContainer = new BeanContainer<Integer, UIDialogMessageWithParticipant>(
 				UIDialogMessageWithParticipant.class);
 
 		messageDialogTable.setContainerDataSource(messageDialogBeanContainer);
 		messageDialogTable
-				.setSortContainerPropertyId(UIDialogMessageWithParticipant
-						.getSortColumn());
+		.setSortContainerPropertyId(UIDialogMessageWithParticipant
+				.getSortColumn());
 		messageDialogTable.setVisibleColumns(UIDialogMessageWithParticipant
 				.getVisibleColumns());
 		messageDialogTable.setColumnHeaders(UIDialogMessageWithParticipant
@@ -178,16 +178,16 @@ public class InterventionProblemsComponentWithController extends
 							participant.getNickname().equals("") ? Messages
 									.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 									: participant.getNickname(),
-							participant.getLanguage().getDisplayLanguage(),
-							participant.getGroup() == null ? Messages
-									.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-											: participant.getGroup(),
-							participant.getOrganization().equals("") ? Messages
-									.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-									: participant.getOrganization(),
-							participant.getOrganizationUnit().equals("") ? Messages
-									.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-									: participant.getOrganizationUnit());
+									participant.getLanguage().getDisplayLanguage(),
+									participant.getGroup() == null ? Messages
+											.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+									: participant.getGroup(),
+											participant.getOrganization().equals("") ? Messages
+													.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+													: participant.getOrganization(),
+													participant.getOrganizationUnit().equals("") ? Messages
+															.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+															: participant.getOrganizationUnit());
 
 			beanContainer.addItem(dialogMessage.getId(), uiDialogMessage);
 		}
@@ -231,7 +231,7 @@ public class InterventionProblemsComponentWithController extends
 						val linkedMediaObject = getInterventionAdministrationManagerService()
 								.getMediaObject(
 										relatedMonitoringMessage
-												.getLinkedMediaObject());
+										.getLinkedMediaObject());
 
 						if (linkedMediaObject != null) {
 							containsMediaContentInMessage = true;
@@ -240,34 +240,34 @@ public class InterventionProblemsComponentWithController extends
 				}
 
 				messageDialogBeanContainer
-						.addItem(
-								i++,
-								dialogMessageOfParticipant
-										.toUIDialogMessageWithParticipant(
-												participant.getId().toString(),
-												participant.getNickname()
-														.equals("") ? Messages
-														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-														: participant
-																.getNickname(),
-												participant.getLanguage()
-														.getDisplayLanguage(),
-												participant.getGroup() == null ? Messages
-														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-														: participant
-																.getGroup(),
+				.addItem(
+						i++,
+						dialogMessageOfParticipant
+						.toUIDialogMessageWithParticipant(
+								participant.getId().toString(),
+								participant.getNickname()
+								.equals("") ? Messages
+										.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+										: participant
+										.getNickname(),
+										participant.getLanguage()
+										.getDisplayLanguage(),
+										participant.getGroup() == null ? Messages
+												.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+												: participant
+												.getGroup(),
 												participant.getOrganization()
-														.equals("") ? Messages
+												.equals("") ? Messages
 														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 														: participant
-																.getOrganization(),
-														participant
+														.getOrganization(),
+												participant
 														.getOrganizationUnit()
 														.equals("") ? Messages
-																.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-																: participant
+														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+														: participant
 																.getOrganizationUnit(),
-																containsMediaContentInMessage));
+												containsMediaContentInMessage));
 			}
 		}
 
@@ -301,9 +301,9 @@ public class InterventionProblemsComponentWithController extends
 					try {
 						// Set case as solved
 						MC.getInstance()
-								.getInterventionExecutionManagerService()
-								.dialogMessageSetProblemSolved(
-										dialogMessage.getId(), null);
+						.getInterventionExecutionManagerService()
+						.dialogMessageSetProblemSolved(
+								dialogMessage.getId(), null);
 
 					} catch (final Exception e) {
 						handleException(e);
@@ -340,10 +340,10 @@ public class InterventionProblemsComponentWithController extends
 							try {
 								// Set case as solved
 								MC.getInstance()
-										.getInterventionExecutionManagerService()
-										.dialogMessageSetProblemSolved(
-												dialogMessage.getId(),
-												getStringValue());
+								.getInterventionExecutionManagerService()
+								.dialogMessageSetProblemSolved(
+										dialogMessage.getId(),
+										getStringValue());
 
 							} catch (final Exception e) {
 								handleException(e);
@@ -360,8 +360,8 @@ public class InterventionProblemsComponentWithController extends
 							beanContainer.removeItem(dialogMessage.getId());
 
 							getAdminUI()
-									.showInformationNotification(
-											AdminMessageStrings.NOTIFICATION__CASE_SOLVED);
+							.showInformationNotification(
+									AdminMessageStrings.NOTIFICATION__CASE_SOLVED);
 							closeWindow();
 						}
 					}, null);
@@ -373,10 +373,17 @@ public class InterventionProblemsComponentWithController extends
 		val allPossibleMessageVariables = getInterventionAdministrationManagerService()
 				.getAllPossibleMonitoringRuleVariablesOfIntervention(
 						intervention.getId());
+
+		val placeholderStringEditWithCheckboxComponent = new PlaceholderStringEditWithCheckBoxComponent();
+		localize(
+				placeholderStringEditWithCheckboxComponent
+						.getUniversalCheckBox(),
+				AdminMessageStrings.MONITORING_RULE_EDITING__SEND_TO_SUPERVISOR);
+
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__SEND_MESSAGE_TO_SELECTED_PARTICIPANT,
 				"", allPossibleMessageVariables,
-				new PlaceholderStringEditComponent(),
+				placeholderStringEditWithCheckboxComponent,
 				new ExtendableButtonClickListener() {
 
 					@Override
@@ -386,8 +393,8 @@ public class InterventionProblemsComponentWithController extends
 								getStringValue(), allPossibleMessageVariables)) {
 
 							getAdminUI()
-									.showWarningNotification(
-											AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
+							.showWarningNotification(
+									AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
 
 							return;
 						} else {
@@ -403,13 +410,16 @@ public class InterventionProblemsComponentWithController extends
 									.getParticipant(participantId);
 
 							interventionExecutionManagerService
-									.sendManualMessage(participant,
-											getStringValue());
+							.sendManualMessage(participant,
+											placeholderStringEditWithCheckboxComponent
+													.getUniversalCheckBox()
+													.getValue(),
+									getStringValue());
 						}
 
 						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__THE_MESSAGES_WILL_BE_SENT_IN_THE_NEXT_MINUTES);
+						.showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__THE_MESSAGES_WILL_BE_SENT_IN_THE_NEXT_MINUTES);
 
 						closeWindow();
 					}
