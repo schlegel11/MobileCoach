@@ -1,5 +1,7 @@
 package ch.ethz.mobilecoach.services;
 
+import lombok.extern.log4j.Log4j2;
+
 import java.net.URI;
 import java.util.LinkedHashMap;
 
@@ -31,6 +33,8 @@ import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
  * - sending messages to Mattermost
  * - receiving messages from Mattermost
  */
+
+@Log4j2
 public class MattermostMessagingService implements MessagingService {
 	
 	private MattermostManagementService managementService;
@@ -58,7 +62,7 @@ public class MattermostMessagingService implements MessagingService {
 	
 	private void connectToWebSocket(){
 		final String authToken = mcUserToken;	
-		WebSocketConfigurator configurator = new WebSocketConfigurator(authToken);		
+		WebSocketConfigurator configurator = new WebSocketConfigurator(authToken);
 		ClientEndpointConfig clientConfig = ClientEndpointConfig.Builder.create().configurator(configurator).build();
 		
 		onCloseListener = new Runnable(){
@@ -169,6 +173,8 @@ public class MattermostMessagingService implements MessagingService {
 	 */
 	public class WebSocketEndpoint extends Endpoint {
 		
+		Session session;
+		
 		
 		private void receiveMessageAtEndpoint(String senderId, Post post){
 			receiveMessage(senderId, post);
@@ -177,18 +183,29 @@ public class MattermostMessagingService implements MessagingService {
 		
 		@Override
 		public void onClose(Session session, CloseReason closeReason){
+			log.error("WebSocket connection closed. Reason: " + closeReason.toString());
 			if (onCloseListener != null){
 				onCloseListener.run();
 			}
 		}
 		
+		@Override
 		public void onError(Session session, Throwable thr){
-			System.out.println(thr.getMessage());
+			log.error(thr.getMessage());
+		}
+		
+			
+		public void sendMessage(String message) {
+			session.getAsyncRemote().sendText(message);
 		}
 		
 		
 		@Override
 		public void onOpen(Session session, EndpointConfig config) {
+			
+			log.info("WebSocket connection opened.");
+			
+			this.session = session;
 
 			session.addMessageHandler(new MessageHandler.Whole<String>() {
 
@@ -197,8 +214,19 @@ public class MattermostMessagingService implements MessagingService {
 					
 					// parse message
 					
+					log.error("WebSocket message received: " + msg); // TODO (DR): don't log all messages that are received
+					
 					JSONObject message = new JSONObject(msg);
-					if ("posted".equals(message.getString("event"))){
+					String event = message.getString("event");
+					
+					/*
+					if ("ping".equals(event)){
+						sendMessage("{\"event\":\"pong\"}");
+					}
+					*/
+					
+					
+					if ("posted".equals(event)){
 						try { 							
 							JSONObject data = message.getJSONObject("data");
 							String postString = data.getString("post");
