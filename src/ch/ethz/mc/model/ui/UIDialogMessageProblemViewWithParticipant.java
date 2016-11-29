@@ -2,15 +2,15 @@ package ch.ethz.mc.model.ui;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,6 +39,8 @@ public class UIDialogMessageProblemViewWithParticipant extends UIModelObject {
 	public static final String	ORGANIZATION_UNIT			= "organizationUnit";
 
 	public static final String	MESSAGE						= "message";
+	public static final String	TYPE						= "type";
+
 	public static final String	SENT_TIMESTAMP				= "sentTimestamp";
 
 	public static final String	ANSWER						= "answer";
@@ -63,6 +65,9 @@ public class UIDialogMessageProblemViewWithParticipant extends UIModelObject {
 	@PropertyId(ORGANIZATION_UNIT)
 	private String				organizationUnit;
 
+	@PropertyId(TYPE)
+	private String				type;
+
 	@PropertyId(MESSAGE)
 	private String				message;
 
@@ -80,7 +85,7 @@ public class UIDialogMessageProblemViewWithParticipant extends UIModelObject {
 
 	public static Object[] getVisibleColumns() {
 		return new Object[] { PARTICIPANT_ID, PARTICIPANT_NAME, LANGUAGE,
-				GROUP, ORGANIZATION, ORGANIZATION_UNIT, MESSAGE,
+				GROUP, ORGANIZATION, ORGANIZATION_UNIT, TYPE, MESSAGE,
 				SENT_TIMESTAMP, ANSWER, RAW_ANSWER, ANSWER_RECEIVED_TIMESTAMP };
 	}
 
@@ -92,6 +97,7 @@ public class UIDialogMessageProblemViewWithParticipant extends UIModelObject {
 				localize(AdminMessageStrings.UI_COLUMNS__GROUP),
 				localize(AdminMessageStrings.UI_COLUMNS__ORGANIZATION),
 				localize(AdminMessageStrings.UI_COLUMNS__ORGANIZATION_UNIT),
+				localize(AdminMessageStrings.UI_COLUMNS__TYPE),
 				localize(AdminMessageStrings.UI_COLUMNS__MESSAGE),
 				localize(AdminMessageStrings.UI_COLUMNS__SENT_TIMESTAMP),
 				localize(AdminMessageStrings.UI_COLUMNS__ANSWER),
