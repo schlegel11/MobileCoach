@@ -55,8 +55,8 @@ This can be set in the "JRE" tab when configuring an ANT task in the eclipse GUI
 		<delete dir="lib" />
 
 		<!-- Compiling using eclipse -->
-		<eclipse.refreshLocal resource="" depth="infinite" />
-		<eclipse.incrementalBuild project="." kind="full" />
+		<eclipse.refreshLocal resource="${project}" depth="infinite" />
+		<eclipse.incrementalBuild project="${project}" kind="full" />
 
 		<!-- Refresh -->
 		<eclipse.refreshLocal resource="${project}" depth="infinite" />

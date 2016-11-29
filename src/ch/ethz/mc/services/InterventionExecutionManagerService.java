@@ -55,6 +55,7 @@ import ch.ethz.mc.model.persistent.MediaObject;
 import ch.ethz.mc.model.persistent.MediaObjectParticipantShortURL;
 import ch.ethz.mc.model.persistent.MonitoringMessage;
 import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
+import ch.ethz.mc.model.persistent.MonitoringReplyRule;
 import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
@@ -236,12 +237,12 @@ public class InterventionExecutionManagerService {
 			final boolean manuallySent, final long timestampToSendMessage,
 			final MonitoringRule relatedMonitoringRule,
 			final MonitoringMessage relatedMonitoringMessage,
-			final boolean answerExpected) {
+			final boolean supervisorMessage, final boolean answerExpected) {
 		log.debug("Create message and prepare for sending");
 		val dialogMessage = new DialogMessage(participant.getId(), 0,
 				DialogMessageStatusTypes.PREPARED_FOR_SENDING, message,
-				timestampToSendMessage, -1, answerExpected, -1, -1, null, null,
-				false, relatedMonitoringRule == null ? null
+				timestampToSendMessage, -1, supervisorMessage, answerExpected,
+				-1, -1, null, null, false, relatedMonitoringRule == null ? null
 						: relatedMonitoringRule.getId(),
 						relatedMonitoringMessage == null ? null
 								: relatedMonitoringMessage.getId(), false, manuallySent);
@@ -470,7 +471,7 @@ public class InterventionExecutionManagerService {
 			final ObjectId participantId, final ReceivedMessage receivedMessage) {
 		val dialogMessage = new DialogMessage(participantId, 0,
 				DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY, "", -1, -1,
-				false, -1, receivedMessage.getReceivedTimestamp(),
+				false, false, -1, receivedMessage.getReceivedTimestamp(),
 				receivedMessage.getMessage(), receivedMessage.getMessage(),
 				true, null, null, false, false);
 
@@ -707,6 +708,12 @@ public class InterventionExecutionManagerService {
 						if (messageToSendTask.getMessageTextToSend() != null) {
 							log.debug("Preparing reply message for sending for participant");
 
+							MonitoringReplyRule monitoringReplyRule = null;
+							if (messageToSendTask
+									.getAbstractMonitoringRuleRequiredToPrepareMessage() != null) {
+								monitoringReplyRule = (MonitoringReplyRule) messageToSendTask
+										.getAbstractMonitoringRuleRequiredToPrepareMessage();
+							}
 							val monitoringMessage = messageToSendTask
 									.getMonitoringMessageToSend();
 							val messageTextToSend = messageToSendTask
@@ -714,9 +721,15 @@ public class InterventionExecutionManagerService {
 
 							// Prepare message for sending
 							dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
-									participant, messageTextToSend, false,
-									InternalDateTime.currentTimeMillis(), null,
-									monitoringMessage, false);
+									participant,
+									messageTextToSend,
+									false,
+									InternalDateTime.currentTimeMillis(),
+									null,
+									monitoringMessage,
+									monitoringReplyRule != null ? monitoringReplyRule
+											.isSendMessageToSupervisor()
+											: false, false);
 						}
 					}
 				}
@@ -787,8 +800,8 @@ public class InterventionExecutionManagerService {
 
 							log.debug("Preparing message for sending for participant");
 
-							val monitoringRule = messageToSendTask
-									.getMonitoringRuleThatCausedMessageSending();
+							val monitoringRule = (MonitoringRule) messageToSendTask
+									.getAbstractMonitoringRuleRequiredToPrepareMessage();
 							val monitoringMessage = messageToSendTask
 									.getMonitoringMessageToSend();
 							val monitoringMessageExpectsAnswer = messageToSendTask
@@ -811,10 +824,16 @@ public class InterventionExecutionManagerService {
 
 							// Prepare message for sending
 							dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
-									participant, messageTextToSend, false,
+									participant,
+									messageTextToSend,
+									false,
 									timeToSendMessage.getTimeInMillis(),
-									monitoringRule, monitoringMessage,
-									monitoringMessageExpectsAnswer);
+									monitoringRule,
+									monitoringMessage,
+									monitoringRule != null ? monitoringRule
+											.isSendMessageToSupervisor()
+											: false,
+											monitoringMessageExpectsAnswer);
 						}
 					}
 
@@ -953,19 +972,30 @@ public class InterventionExecutionManagerService {
 			final val dialogMessageToSend = dialogMessageWithPhoneNumberToSend
 					.getDialogMessage();
 			try {
-
-				val dialogOption = getDialogOptionByParticipantAndType(
-						dialogMessageToSend.getParticipant(),
-						communicationManagerService
-						.getSupportedDialogOptionType());
+				DialogOption dialogOption = null;
+				boolean sendToSupervisor = false;
+				if (dialogMessageWithPhoneNumberToSend.getDialogMessage()
+						.isSupervisorMessage()) {
+					sendToSupervisor = true;
+					dialogOption = getDialogOptionByParticipantAndType(
+							dialogMessageToSend.getParticipant(),
+							communicationManagerService
+									.getSupportedSupervisorDialogOptionType());
+				} else {
+					dialogOption = getDialogOptionByParticipantAndType(
+							dialogMessageToSend.getParticipant(),
+							communicationManagerService
+									.getSupportedDialogOptionType());
+				}
 
 				if (dialogOption != null) {
-					log.debug("Sending prepared message to {}",
+					log.debug("Sending prepared message to {} ({})",
+							sendToSupervisor ? "supervisor" : "participant",
 							dialogOption.getData());
 					communicationManagerService.sendMessage(dialogOption,
 							dialogMessageToSend.getId(),
 							dialogMessageWithPhoneNumberToSend
-							.getMessageSenderIdentification(),
+									.getMessageSenderIdentification(),
 							dialogMessageToSend.getMessage(),
 							dialogMessageToSend.isMessageExpectsAnswer());
 					sentMessages++;
@@ -1030,11 +1060,12 @@ public class InterventionExecutionManagerService {
 	 * Sends a manual message
 	 *
 	 * @param participant
+	 * @param advisorMessage
 	 * @param messageWithPlaceholders
 	 */
 	@Synchronized
 	public void sendManualMessage(final Participant participant,
-			final String messageWithPlaceholders) {
+			final boolean advisorMessage, final String messageWithPlaceholders) {
 		val variablesWithValues = variablesManagerService
 				.getAllVariablesWithValuesOfParticipantAndSystem(participant);
 
@@ -1044,7 +1075,7 @@ public class InterventionExecutionManagerService {
 						variablesWithValues.values(), "");
 		dialogMessageCreateManuallyOrByRulesIncludingMediaObject(participant,
 				messageToSend, true, InternalDateTime.currentTimeMillis(),
-				null, null, false);
+				null, null, advisorMessage, false);
 	}
 
 	/*
@@ -1321,10 +1352,11 @@ public class InterventionExecutionManagerService {
 			int mediaObjectsViewed = 0;
 
 			for (val participant : participants) {
-				val dialogMessages = databaseManagerService.findModelObjects(
-						DialogMessage.class,
-						Queries.DIALOG_MESSAGE__BY_PARTICIPANT,
-						participant.getId());
+				val dialogMessages = databaseManagerService
+						.findModelObjects(
+								DialogMessage.class,
+								Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_MESSAGE_TYPE,
+								participant.getId(), false);
 				for (val dialogMessage : dialogMessages) {
 					switch (dialogMessage.getStatus()) {
 						case IN_CREATION:
