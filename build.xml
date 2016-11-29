@@ -43,7 +43,7 @@ This can be set in the "JRE" tab when configuring an ANT task in the eclipse GUI
 		<!-- Compiling using eclipse -->
 		<basename property="project" file="${basedir}" />
 		<eclipse.refreshLocal resource="${project}" depth="infinite"/>
-		<!--<eclipse.incrementalBuild project="${project}" kind="full" />-->
+		<eclipse.incrementalBuild project="${project}" kind="full" />
 
 		<!-- Create .war file -->
 		<war destfile="out/MC.war" webxml="WebContent/WEB-INF/web.xml" update="true">
@@ -59,10 +59,10 @@ This can be set in the "JRE" tab when configuring an ANT task in the eclipse GUI
 
 		<!-- Compiling using eclipse -->
 		<eclipse.refreshLocal resource="${project}" depth="infinite" />
-		<!--<eclipse.incrementalBuild project="${project}" kind="full" />-->
+		<eclipse.incrementalBuild project="${project}" kind="full" />
 
 		<!-- Refresh -->
-		<!--<eclipse.incrementalBuild project="${project}" kind="full" />-->
+		<eclipse.incrementalBuild project="${project}" kind="full" />
 	</target>
 
 </project>
