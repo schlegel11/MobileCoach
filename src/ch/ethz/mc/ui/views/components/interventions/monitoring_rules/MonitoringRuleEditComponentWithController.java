@@ -95,6 +95,10 @@ MonitoringRuleEditComponent {
 					monitoringRule.getRelatedMonitoringMessageGroup())) {
 				monitoringMessageComboBox.select(uiMonitoringMessageGroup);
 				currentMonitoringMessageGroup = monitoringMessageGroup;
+
+				if (monitoringMessageGroup.isMessagesExpectAnswer()) {
+					getSendToSupervisorComboBox().setEnabled(false);
+				}
 			}
 		}
 		monitoringMessageComboBox
@@ -123,6 +127,18 @@ MonitoringRuleEditComponent {
 				.monitoringRuleChangeRelatedMonitoringMessageGroup(
 						monitoringRule,
 						newMonitoringMessageGroupId);
+
+				if (currentMonitoringMessageGroup != null
+								&& currentMonitoringMessageGroup
+										.isMessagesExpectAnswer()
+						&& getSendToSupervisorComboBox().isEnabled()) {
+					if (getSendToSupervisorComboBox().getValue()) {
+						getSendToSupervisorComboBox().setValue(false);
+					}
+					getSendToSupervisorComboBox().setEnabled(false);
+				} else if (!getSendToSupervisorComboBox().isEnabled()) {
+					getSendToSupervisorComboBox().setEnabled(true);
+				}
 
 				adjust();
 
@@ -154,9 +170,9 @@ MonitoringRuleEditComponent {
 				buttonClickListener);
 
 		// Add other listeners
-		getStopRuleExecutionIfTrueComboBox().setValue(
+		getSendMessageIfTrueComboBox().setValue(
 				monitoringRule.isSendMessageIfTrue());
-		getStopRuleExecutionIfTrueComboBox().addValueChangeListener(
+		getSendMessageIfTrueComboBox().addValueChangeListener(
 				new ValueChangeListener() {
 
 					@Override
@@ -173,6 +189,39 @@ MonitoringRuleEditComponent {
 								.getValue()) {
 							getStopRuleExecutionAndFinishInterventionIfTrueComboBox()
 							.setValue(false);
+						}
+						if (!newValue
+								&& getSendToSupervisorComboBox().getValue()) {
+							getSendToSupervisorComboBox().setValue(false);
+						}
+
+						adjust();
+					}
+				});
+
+		getSendToSupervisorComboBox().setValue(
+				monitoringRule.isSendMessageToSupervisor());
+		getSendToSupervisorComboBox().addValueChangeListener(
+				new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						log.debug("Adjust send message to supervisor");
+						val newValue = (boolean) event.getProperty().getValue();
+
+						getInterventionAdministrationManagerService()
+						.monitoringRuleChangeSendMessageToSupervisor(
+								monitoringRule, newValue);
+
+						if (newValue
+								&& getStopRuleExecutionAndFinishInterventionIfTrueComboBox()
+								.getValue()) {
+							getStopRuleExecutionAndFinishInterventionIfTrueComboBox()
+							.setValue(false);
+						}
+						if (newValue
+								&& !getSendMessageIfTrueComboBox().getValue()) {
+							getSendMessageIfTrueComboBox().setValue(true);
 						}
 
 						adjust();
@@ -193,11 +242,13 @@ MonitoringRuleEditComponent {
 				.monitoringRuleChangeStopInterventionIfTrue(
 						monitoringRule, newValue);
 
-				if (newValue
-						&& getStopRuleExecutionIfTrueComboBox()
-						.getValue()) {
-					getStopRuleExecutionIfTrueComboBox()
-					.setValue(false);
+				if (newValue) {
+					if (getSendMessageIfTrueComboBox().getValue()) {
+						getSendMessageIfTrueComboBox().setValue(false);
+					}
+					if (getSendToSupervisorComboBox().getValue()) {
+						getSendToSupervisorComboBox().setValue(false);
+					}
 				}
 
 				adjust();
