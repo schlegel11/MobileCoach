@@ -18,18 +18,24 @@ public class Post {
 	private String message;
 	
 	
-	@Getter
 	@Setter
 	private String postType;
+	
+	public String getPost_type(){
+		return postType;
+	}
 	
 	@Getter
 	@Setter
 	private List<Option> options = new LinkedList<Option>(); 
 	
 	
-	@Getter
 	@Setter
 	private String requestType;
+	
+	public String getRequest_type(){
+		return requestType;
+	}
 	
 	
 	@Getter
