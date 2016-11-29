@@ -86,7 +86,6 @@ public class CommunicationManagerService {
 	public void sendMessage(final DialogOption dialogOption,
 			final ObjectId dialogMessageId, final String message,
 			final String[] metaData, final boolean messageExpectsAnswer) {
-
 		for (final AbstractMessageSendingAdapter adapter : MC.getInstance()
 				.getModuleManagerService()
 				.getRegisteredAdapters(AbstractMessageSendingAdapter.class)) {

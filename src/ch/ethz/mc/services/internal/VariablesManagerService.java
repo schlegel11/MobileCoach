@@ -294,6 +294,24 @@ public class VariablesManagerService {
 					return dialogOptionToken.getData();
 				}
 				break;
+			case participantSupervisorDialogOptionEmailData:
+				val supervisorDialogOptionEmail = databaseManagerService
+				.findOneModelObject(DialogOption.class,
+						Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
+						participant.getId(), DialogOptionTypes.SUPERVISOR_EMAIL);
+				if (supervisorDialogOptionEmail != null) {
+					return supervisorDialogOptionEmail.getData();
+				}
+				break;
+			case participantSupervisorDialogOptionSMSData:
+				val supervisorDialogOptionSMS = databaseManagerService
+				.findOneModelObject(DialogOption.class,
+						Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
+						participant.getId(), DialogOptionTypes.SUPERVISOR_SMS);
+				if (supervisorDialogOptionSMS != null) {
+					return supervisorDialogOptionSMS.getData();
+				}
+				break;
 			case participantName:
 				return participant.getNickname();
 			case participantLanguage:
@@ -449,6 +467,18 @@ public class VariablesManagerService {
 					log.debug("Setting variable 'participantDialogOptionTokenData'");
 					participantSetDialogOption(participantId,
 							DialogOptionTypes.TOKEN, variableValue);
+					break;
+				case participantSupervisorDialogOptionEmailData:
+					log.debug("Setting variable 'participantSupervisorDialogOptionEmailData'");
+					participantSetDialogOption(participantId,
+							DialogOptionTypes.SUPERVISOR_EMAIL,
+							StringHelpers.cleanEmailAddress(variableValue));
+					break;
+				case participantSupervisorDialogOptionSMSData:
+					log.debug("Setting variable 'participantSupervisorDialogOptionSMSData'");
+					participantSetDialogOption(participantId,
+							DialogOptionTypes.SUPERVISOR_SMS,
+							StringHelpers.cleanPhoneNumber(variableValue));
 					break;
 				case participantName:
 					log.debug("Setting variable 'participantName'");
