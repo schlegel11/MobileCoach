@@ -17,6 +17,7 @@ package ch.ethz.mc;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
@@ -38,6 +39,7 @@ import ch.ethz.mc.services.internal.ModelObjectExchangeService;
 import ch.ethz.mc.services.internal.ReportGeneratorService;
 import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.tools.InternalDateTime;
+import ch.ethz.mobilecoach.services.*;
 
 /**
  * @author Andreas Filler
@@ -79,7 +81,18 @@ public class MC implements ServletContextListener {
 	SurveyExecutionManagerService				surveyExecutionManagerService;
 	@Getter
 	RESTManagerService							restManagerService;
-
+	
+	@Getter
+	MattermostMessagingService					mattermostMessagingService;
+	@Getter
+	MattermostManagementService					mattermostManagementService;
+	@Getter
+	RichConversationService						richConversationService;
+	@Getter
+	ResourceConversationManagementService resourceConversationManagementService;
+	@Getter
+	FileConversationManagementService fileConversationManagementService;
+	
 	@Override
 	public void contextInitialized(final ServletContextEvent event) {
 		boolean noErrorsOccurred = true;
@@ -95,9 +108,11 @@ public class MC implements ServletContextListener {
 		log.info("Media upload folder: {}", Constants.getMediaUploadFolder());
 		log.info("Media cache folder: {}", Constants.getMediaCacheFolder());
 		log.info("Templates folder: {}", Constants.getTemplatesFolder());
+		log.info("XML Scripts folder: {}", Constants.getXmlScriptsFolder());
 
 		log.info("Starting up services...");
 		try {
+			
 			// Internal services
 			databaseManagerService = DatabaseManagerService
 					.start(Constants.DATA_MODEL_VERSION);
@@ -107,7 +122,12 @@ public class MC implements ServletContextListener {
 					.start(fileStorageManagerService.getMediaCacheFolder());
 			variablesManagerService = VariablesManagerService
 					.start(databaseManagerService);
-			communicationManagerService = CommunicationManagerService.start();
+			mattermostManagementService = MattermostManagementService.start(databaseManagerService);
+			mattermostMessagingService = MattermostMessagingService.start(mattermostManagementService);
+			//resourceConversationManagementService = ResourceConversationManagementService.start(servletContext);
+			fileConversationManagementService = FileConversationManagementService.start(Constants.getXmlScriptsFolder());
+			richConversationService = RichConversationService.start(mattermostMessagingService, fileConversationManagementService);
+			communicationManagerService = CommunicationManagerService.start(richConversationService);
 			modelObjectExchangeService = ModelObjectExchangeService.start(
 					databaseManagerService, fileStorageManagerService);
 			reportGeneratorService = ReportGeneratorService
@@ -134,7 +154,9 @@ public class MC implements ServletContextListener {
 							surveyExecutionManagerService);
 			restManagerService = RESTManagerService.start(
 					databaseManagerService, fileStorageManagerService,
-					variablesManagerService);
+					variablesManagerService);			
+
+			
 		} catch (final Exception e) {
 			noErrorsOccurred = false;
 			log.error("Error at starting services: {}", e);

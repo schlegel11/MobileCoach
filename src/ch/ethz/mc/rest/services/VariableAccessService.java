@@ -40,7 +40,6 @@ import org.bson.types.ObjectId;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.rest.CollectionOfExtendedListVariables;
 import ch.ethz.mc.model.rest.CollectionOfExtendedVariables;
-import ch.ethz.mc.model.rest.OK;
 import ch.ethz.mc.model.rest.VariableAverage;
 import ch.ethz.mc.model.rest.Variable;
 import ch.ethz.mc.model.rest.CollectionOfVariables;
@@ -60,6 +59,7 @@ public class VariableAccessService extends AbstractService {
 		super(restManagerService);
 	}
 
+	
 	/*
 	 * Read functions
 	 */
@@ -377,7 +377,7 @@ public class VariableAccessService extends AbstractService {
 	@POST
 	@Path("/write/{variable}")
 	@Consumes("text/plain")
-	@Produces("application/json")
+	@Produces("text/plain")
 	public Response variableWrite(@HeaderParam("token") final String token,
 			@PathParam("variable") final String variable,
 			@Context final HttpServletRequest request, String content) {
@@ -405,6 +405,6 @@ public class VariableAccessService extends AbstractService {
 					.build());
 		}
 
-		return Response.ok(new OK()).build();
+		return Response.ok("OK").build();
 	}
 }

@@ -73,6 +73,7 @@ import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.tools.VariableStringReplacer;
 import ch.ethz.mc.ui.NotificationMessageException;
+import ch.ethz.mobilecoach.services.MattermostMessagingService;
 
 /**
  * Cares for the orchestration of the {@link Intervention}s as well as all
@@ -96,7 +97,7 @@ public class InterventionExecutionManagerService {
 
 	final InterventionAdministrationManagerService		interventionAdministrationManagerService;
 	final SurveyExecutionManagerService					surveyExecutionManagerService;
-
+	
 	private final IncomingMessageWorker					incomingMessageWorker;
 	private final OutgoingMessageWorker					outgoingMessageWorker;
 	private final MonitoringSchedulingWorker			monitoringSchedulingWorker;
@@ -750,15 +751,19 @@ public class InterventionExecutionManagerService {
 			// Check if participant has already been scheduled today
 			val dialogStatus = getDialogStatusByParticipant(participant.getId());
 
+			//TODO: switch back to monday-only start (make it configurable)
 			// Only start interventions on Monday
+			/*
 			if (dialogStatus != null
 					&& dialogStatus.getMonitoringDaysParticipated() == 0
-					&& todayDayIndex != 1) {
+					&& todayDayIndex != 1 
+					) {
 				log.debug(
 						"Participant {} has not been scheduled at all! Wait until next monday to start with scheduling...",
 						participant.getId());
 				continue;
 			}
+			*/
 
 			if (dialogStatus != null
 					&& !dialogStatus

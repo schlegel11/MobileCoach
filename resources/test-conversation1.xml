@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mobile-coach>
+
+    <variable name="$username" value="Tom" />
+
+    <conversation id="test-conversation1">
+        <message>Hi there!</message>
+        <message>This is a test...</message>
+        <question text="Are you ready for a challenge? :)">
+            <answer text="Yes!">
+                <call-conversation ref="challenge"/>
+            </answer>
+            <answer text="No.">
+                <call-conversation ref="cannot-perform-challenge"/>
+            </answer>
+        </question>
+        <message>OK done.</message>
+    </conversation>
+
+
+    <conversation id="challenge">
+        <message>Let's go.</message>
+        <question text="What's the capital of Switzerland?">
+            <answer text="Zürich">
+                <message>Wrong :(</message>
+            </answer>
+            <answer text="Bern">
+                <message>Correct! :)</message>
+            </answer>
+        </question>
+    </conversation>
+
+
+    <conversation id="cannot-perform-challenge">
+        <question text="Why not?">
+            <answer text="I'm sick.">
+                <message>Ok, get well!</message>
+            </answer>
+            <answer text="I don't have time.">
+                <message>Ok, maybe next time!</message>
+            </answer>
+        </question>
+    </conversation>
+
+
+    <!-- branching test -->
+
+    <variable name="$foo" value="1">some variable</variable>
+
+    <conversation id="test-branching1">
+        <if variable="$foo" equals="1">
+            <message>foo = $foo = 1</message>
+            <call-conversation ref="print-foo"/>
+        </if>
+        <set variable="$foo" value="2"/>
+        <if variable="$foo" greaterThan="1">
+            <message>foo = $foo = 2</message>
+            <call-conversation ref="print-foo"/>
+        </if>
+        <if variable="$foo" smallerThan="1">
+            <message>(error)</message>
+        </if>
+        <set variable="$foo" value="4"/>
+        <call-conversation ref="print-foo"/>
+    </conversation>
+
+    <conversation id="print-foo">
+        <select-case>
+            <case variable="$foo" equals="1">
+                <message>1</message>
+            </case>
+            <case variable="$foo" equals="2">
+                <message>2</message>
+            </case>
+            <case variable="$foo" equals="3">
+                <message>3</message>
+            </case>
+            <case-else>
+                <message>something else</message>
+            </case-else>
+        </select-case>
+    </conversation>
+
+
+    <!-- arousal test -->
+    <conversation id="test-arousal1">
+        <question text="How do you feel, $username?" type="arousal" variable="$foo"/>
+        <if variable="$foo" equals="1">
+            <message>done!</message>
+        </if>
+    </conversation>
+
+
+</mobile-coach>
