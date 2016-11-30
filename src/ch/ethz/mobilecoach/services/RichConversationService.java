@@ -139,7 +139,16 @@ public class RichConversationService {
 
 		@Override
 		public void delay(Runnable callback, Integer milliseconds) {
-			callback.run();
+			// TODO implement a better delay
+			new java.util.Timer().schedule( 
+			        new java.util.TimerTask() {
+			            @Override
+			            public void run() {
+			            	callback.run();
+			            }
+			        }, 
+			        milliseconds 
+			);
 		}
 
 		public void receivePost(Post post) {
