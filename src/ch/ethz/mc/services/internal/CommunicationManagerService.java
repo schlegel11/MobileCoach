@@ -2,15 +2,15 @@ package ch.ethz.mc.services.internal;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import javax.mail.Authenticator;
@@ -65,7 +66,7 @@ import ch.ethz.mc.tools.Simulator;
 import ch.ethz.mc.tools.StringHelpers;
 
 /**
- * Handles communication with SMS gateway
+ * Handles communication with the message gateways
  *
  * @author Andreas Filler
  */
@@ -192,9 +193,9 @@ public class CommunicationManagerService {
 				messageSender, message, messageExpectsAnswer);
 
 		interventionExecutionManagerService
-				.dialogMessageStatusChangesForSending(dialogMessageId,
-						DialogMessageStatusTypes.SENDING,
-						InternalDateTime.currentTimeMillis());
+		.dialogMessageStatusChangesForSending(dialogMessageId,
+				DialogMessageStatusTypes.SENDING,
+				InternalDateTime.currentTimeMillis());
 
 		synchronized (runningMailingThreads) {
 			runningMailingThreads.add(mailingThread);
@@ -215,9 +216,11 @@ public class CommunicationManagerService {
 		CollectionUtils.addAll(receivedMessages, Simulator.getInstance()
 				.getSimulatedReceivedMessages());
 
+		// Add SMS messages
 		Store store = null;
 		Folder folder = null;
 		try {
+			log.debug("Retrieving SMS messages...");
 			store = incomingMailSession.getStore(mailboxProtocol);
 			store.connect();
 			folder = store.getFolder(mailboxFolder);
@@ -231,6 +234,7 @@ public class CommunicationManagerService {
 						log.debug("Mail received with subject '{}'",
 								message.getSubject());
 						val receivedMessage = new ReceivedMessage();
+						receivedMessage.setType(DialogOptionTypes.SMS);
 
 						// Parse message content
 						val documentBuilder = documentBuilderFactory
@@ -264,7 +268,7 @@ public class CommunicationManagerService {
 								.evaluate("/aspsms/DateReceived",
 										document.getDocumentElement(),
 										XPathConstants.NODESET)).item(0)
-								.getTextContent();
+										.getTextContent();
 
 						val receivedTimestamp = receiverDateFormat.parse(
 								receivedTimestampString).getTime();
@@ -272,11 +276,11 @@ public class CommunicationManagerService {
 						// Abjust for simulated date and time
 						if (Constants.isSimulatedDateAndTime()) {
 							receivedMessage
-									.setReceivedTimestamp(InternalDateTime
-											.currentTimeMillis());
+							.setReceivedTimestamp(InternalDateTime
+									.currentTimeMillis());
 						} else {
 							receivedMessage
-									.setReceivedTimestamp(receivedTimestamp);
+							.setReceivedTimestamp(receivedTimestamp);
 						}
 
 						val messageStringEncoded = ((NodeList) xPath.evaluate(
@@ -304,7 +308,7 @@ public class CommunicationManagerService {
 				message.setFlag(Flags.Flag.DELETED, true);
 			}
 		} catch (final Exception e) {
-			log.error("Could not retrieve messages: {}", e.getMessage());
+			log.error("Could not retrieve SMS messages: {}", e.getMessage());
 		} finally {
 			try {
 				folder.close(true);
@@ -316,6 +320,20 @@ public class CommunicationManagerService {
 			} catch (final Exception e) {
 				// Do nothing
 			}
+		}
+
+		// Add Mattermost messages
+		try {
+			log.debug("Retrieving Mattermost messages...");
+			// TODO Dominik: Add Mattermost retrieval here
+			// val receivedMessage = new ReceivedMessage();
+			// receivedMessage.setType(DialogOptionTypes.EXTERNAL_ID
+		} catch (final Exception e) {
+			log.error("Could not retrieve Mattermost messages: {}",
+					e.getMessage());
+		} finally {
+			// TODO Dominik: Cleanup or remove finally block
+			// Do nothing (eventually clean up?)
 		}
 
 		return receivedMessages;
@@ -374,16 +392,16 @@ public class CommunicationManagerService {
 
 				if (messageExpectsAnswer) {
 					interventionExecutionManagerService
-							.dialogMessageStatusChangesForSending(
-									dialogMessageId,
-									DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
-									InternalDateTime.currentTimeMillis());
+					.dialogMessageStatusChangesForSending(
+							dialogMessageId,
+							DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
+							InternalDateTime.currentTimeMillis());
 				} else {
 					interventionExecutionManagerService
-							.dialogMessageStatusChangesForSending(
-									dialogMessageId,
-									DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
-									InternalDateTime.currentTimeMillis());
+					.dialogMessageStatusChangesForSending(
+							dialogMessageId,
+							DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
+							InternalDateTime.currentTimeMillis());
 				}
 
 				removeFromList();
@@ -400,16 +418,16 @@ public class CommunicationManagerService {
 			for (int i = 0; i < ImplementationConstants.MAILING_SEND_RETRIES; i++) {
 				try {
 					TimeUnit.SECONDS
-							.sleep(simulatorActive ? ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR
-									: ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR);
+					.sleep(simulatorActive ? ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR
+							: ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR);
 				} catch (final InterruptedException e) {
 					log.warn("Interrupted messaging sending approach {}", i);
 
 					interventionExecutionManagerService
-							.dialogMessageStatusChangesForSending(
-									dialogMessageId,
-									DialogMessageStatusTypes.PREPARED_FOR_SENDING,
-									InternalDateTime.currentTimeMillis());
+					.dialogMessageStatusChangesForSending(
+							dialogMessageId,
+							DialogMessageStatusTypes.PREPARED_FOR_SENDING,
+							InternalDateTime.currentTimeMillis());
 
 					return;
 				}
@@ -419,16 +437,16 @@ public class CommunicationManagerService {
 
 					if (messageExpectsAnswer) {
 						interventionExecutionManagerService
-								.dialogMessageStatusChangesForSending(
-										dialogMessageId,
-										DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
-										InternalDateTime.currentTimeMillis());
+						.dialogMessageStatusChangesForSending(
+								dialogMessageId,
+								DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
+								InternalDateTime.currentTimeMillis());
 					} else {
 						interventionExecutionManagerService
-								.dialogMessageStatusChangesForSending(
-										dialogMessageId,
-										DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
-										InternalDateTime.currentTimeMillis());
+						.dialogMessageStatusChangesForSending(
+								dialogMessageId,
+								DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
+								InternalDateTime.currentTimeMillis());
 					}
 
 					removeFromList();
@@ -444,9 +462,9 @@ public class CommunicationManagerService {
 					dialogOption.getData());
 
 			interventionExecutionManagerService
-					.dialogMessageStatusChangesForSending(dialogMessageId,
-							DialogMessageStatusTypes.PREPARED_FOR_SENDING,
-							InternalDateTime.currentTimeMillis());
+			.dialogMessageStatusChangesForSending(dialogMessageId,
+					DialogMessageStatusTypes.PREPARED_FOR_SENDING,
+					InternalDateTime.currentTimeMillis());
 
 			removeFromList();
 		}
@@ -458,7 +476,7 @@ public class CommunicationManagerService {
 		}
 
 		/**
-		 * Sends message using SMTP protocol
+		 * Sends message using appropriate service
 		 *
 		 * @param dialogOption
 		 * @param messageSender
@@ -468,39 +486,69 @@ public class CommunicationManagerService {
 		 */
 		private void sendMessage(final DialogOption dialogOption,
 				final String messageSender, final String message)
-				throws AddressException, MessagingException {
-			log.debug("Sending mail for outgoing SMS to {} with text {}",
-					dialogOption.getData(), message);
+						throws AddressException, MessagingException {
+			log.debug("Sending message with text {} to {}", message,
+					dialogOption.getData());
 
-			if (dialogOption.getData().equals(
-					Constants.getSmsSimulationNumber())) {
+			if (dialogOption.getType() == DialogOptionTypes.SMS
+					&& dialogOption.getData().equals(
+							Constants.getSmsSimulationNumber())) {
 				log.debug("IT'S ONLY SIMULATED");
 				Simulator.getInstance().simulateSMSBySystem(message);
 			} else {
-				val mailMessage = new MimeMessage(outgoingMailSession);
+				switch (dialogOption.getType()) {
+					case SMS:
+					case SUPERVISOR_SMS:
+						val SMSMailMessage = new MimeMessage(
+								outgoingMailSession);
 
-				mailMessage.setFrom(new InternetAddress(smsEmailFrom));
-				mailMessage.addRecipient(Message.RecipientType.TO,
-						new InternetAddress(smsEmailTo));
-				mailMessage.setSubject("UserKey=" + smsUserKey + ",Password="
-						+ smsUserPassword + ",Recipient="
-						+ dialogOption.getData() + ",Originator="
-						+ messageSender + ",Notify=none");
-				mailMessage.setText(message, "ISO-8859-1");
+						SMSMailMessage
+						.setFrom(new InternetAddress(smsEmailFrom));
+						SMSMailMessage.addRecipient(Message.RecipientType.TO,
+								new InternetAddress(smsEmailTo));
+						SMSMailMessage.setSubject("UserKey=" + smsUserKey
+								+ ",Password=" + smsUserPassword
+								+ ",Recipient=" + dialogOption.getData()
+								+ ",Originator=" + messageSender
+								+ ",Notify=none");
+						SMSMailMessage.setText(message, "ISO-8859-1");
 
-				Transport.send(mailMessage);
+						Transport.send(SMSMailMessage);
+						break;
+					case EMAIL:
+					case SUPERVISOR_EMAIL:
+						val EmailMessage = new MimeMessage(outgoingMailSession);
+
+						// TODO Andreas: Adjust accordingly
+						EmailMessage.setFrom(new InternetAddress(smsEmailFrom));
+						EmailMessage.addRecipient(Message.RecipientType.TO,
+								new InternetAddress(smsEmailTo));
+						EmailMessage.setSubject("UserKey=" + smsUserKey
+								+ ",Password=" + smsUserPassword
+								+ ",Recipient=" + dialogOption.getData()
+								+ ",Originator=" + messageSender
+								+ ",Notify=none");
+						EmailMessage.setText(message, "UTF-8");
+
+						Transport.send(EmailMessage);
+						break;
+					case EXTERNAL_ID:
+					case SUPERVISOR_EXTERNAL_ID:
+						final String recipient = dialogOption.getData();
+						try {
+							richConversationService.sendMessage(messageSender,
+									recipient, message);
+						} catch (final ExecutionException e) {
+							e.printStackTrace();
+							throw new MessagingException(
+									"Error executing rich conversation.", e);
+						}
+						break;
+				}
 			}
 
 			log.debug("Message sent to {}", dialogOption.getData());
 		}
-	}
-
-	public DialogOptionTypes getSupportedSupervisorDialogOptionType() {
-		return DialogOptionTypes.SUPERVISOR_SMS;
-	}
-
-	public DialogOptionTypes getSupportedDialogOptionType() {
-		return DialogOptionTypes.SMS;
 	}
 
 	public int getMessagingThreadCount() {
