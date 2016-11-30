@@ -90,7 +90,9 @@ public class MC implements ServletContextListener {
 	RichConversationService						richConversationService;
 	@Getter
 	ResourceConversationManagementService resourceConversationManagementService;
-
+	@Getter
+	FileConversationManagementService fileConversationManagementService;
+	
 	@Override
 	public void contextInitialized(final ServletContextEvent event) {
 		boolean noErrorsOccurred = true;
@@ -106,10 +108,10 @@ public class MC implements ServletContextListener {
 		log.info("Media upload folder: {}", Constants.getMediaUploadFolder());
 		log.info("Media cache folder: {}", Constants.getMediaCacheFolder());
 		log.info("Templates folder: {}", Constants.getTemplatesFolder());
+		log.info("XML Scripts folder: {}", Constants.getXmlScriptsFolder());
 
 		log.info("Starting up services...");
 		try {
-			ServletContext servletContext = event.getServletContext();
 			
 			// Internal services
 			databaseManagerService = DatabaseManagerService
@@ -122,8 +124,9 @@ public class MC implements ServletContextListener {
 					.start(databaseManagerService);
 			mattermostManagementService = MattermostManagementService.start(databaseManagerService);
 			mattermostMessagingService = MattermostMessagingService.start(mattermostManagementService);
-			resourceConversationManagementService = ResourceConversationManagementService.start(servletContext);
-			richConversationService = RichConversationService.start(mattermostMessagingService, resourceConversationManagementService);
+			//resourceConversationManagementService = ResourceConversationManagementService.start(servletContext);
+			fileConversationManagementService = FileConversationManagementService.start(Constants.getXmlScriptsFolder());
+			richConversationService = RichConversationService.start(mattermostMessagingService, fileConversationManagementService);
 			communicationManagerService = CommunicationManagerService.start(richConversationService);
 			modelObjectExchangeService = ModelObjectExchangeService.start(
 					databaseManagerService, fileStorageManagerService);

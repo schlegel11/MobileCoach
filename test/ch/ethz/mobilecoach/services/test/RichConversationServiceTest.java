@@ -46,7 +46,6 @@ public class RichConversationServiceTest {
 
 		@Override
 		public void sendMessage(String sender, String recipient, Post post) {
-			// TODO Auto-generated method stub
 			
 		}
     }

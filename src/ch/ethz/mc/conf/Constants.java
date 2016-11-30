@@ -227,6 +227,13 @@ public class Constants {
 	@Getter
 	private static String	smsUserPassword						= "xyz";
 	private static String	smsPhoneNumberAcceptedCountryCodes	= "41,43,49";
+	
+	
+	/**
+	 * XML script configuration
+	 */
+	@Getter
+	private static String xmlScriptsFolder						= "/mc_data/xml_scripts";
 
 	/**
 	 * Get all accepted country codes for SMS phone numbers

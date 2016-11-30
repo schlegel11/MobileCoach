@@ -9,8 +9,9 @@ import lombok.Setter;
 
 public class Post {
 	
-	public static final String POST_TYPE_SELECT_ONE = "select_one";
+	public static final String REQUEST_TYPE_SELECT_ONE = "select_one";
 	public static final String POST_TYPE_TEXT = "text";
+	public static final String POST_TYPE_REQUEST = "request";
 	
 	@Getter
 	@Setter
@@ -39,6 +40,7 @@ public class Post {
 	@Getter
 	@Setter
 	private String requestId;
+	
 	
 	@Getter
 	@Setter
