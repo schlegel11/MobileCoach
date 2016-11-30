@@ -6,3 +6,4 @@ out
 WebContent/VAADIN/themes/mc/styles.css
 FileServletWrapper.jar
 release
+MCM-ScriptEngine.jar

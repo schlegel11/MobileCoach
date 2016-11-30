@@ -1,5 +1,7 @@
 package ch.ethz.mobilecoach.services;
 
+import lombok.extern.log4j.Log4j2;
+
 import java.net.URI;
 import java.util.LinkedHashMap;
 
@@ -16,6 +18,7 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.json.JSONObject;
 
 import ch.ethz.mobilecoach.app.Post;
+import ch.ethz.mobilecoach.app.Results;
 import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
 import ch.ethz.mobilecoach.model.persistent.OneSignalUserConfiguration;
 
@@ -31,6 +34,8 @@ import ch.ethz.mobilecoach.model.persistent.OneSignalUserConfiguration;
  * - sending messages to Mattermost
  * - receiving messages from Mattermost
  */
+
+@Log4j2
 public class MattermostMessagingService implements MessagingService {
 	
 	private MattermostManagementService managementService;
@@ -58,7 +63,7 @@ public class MattermostMessagingService implements MessagingService {
 	
 	private void connectToWebSocket(){
 		final String authToken = mcUserToken;	
-		WebSocketConfigurator configurator = new WebSocketConfigurator(authToken);		
+		WebSocketConfigurator configurator = new WebSocketConfigurator(authToken);
 		ClientEndpointConfig clientConfig = ClientEndpointConfig.Builder.create().configurator(configurator).build();
 		
 		onCloseListener = new Runnable(){
@@ -191,11 +196,11 @@ public class MattermostMessagingService implements MessagingService {
 	}
 	
 	
-	private void receiveMessage(String senderId, String message){
+	private void receiveMessage(String senderId, Post post){
 		if (senderIdToRecipient.containsKey(senderId)){
 			String recipient = senderIdToRecipient.get(senderId);
 			if (listenerForRecipient.containsKey(recipient)){
-				listenerForRecipient.get(recipient).receiveMessage(message);
+				listenerForRecipient.get(recipient).receivePost(post);
 			}
 		}
 	}
@@ -207,26 +212,39 @@ public class MattermostMessagingService implements MessagingService {
 	 */
 	public class WebSocketEndpoint extends Endpoint {
 		
+		Session session;
 		
-		private void receiveMessageAtEndpoint(String senderId, String message){
-			receiveMessage(senderId,message);
+		
+		private void receiveMessageAtEndpoint(String senderId, Post post){
+			receiveMessage(senderId, post);
 		}
 		
 		
 		@Override
 		public void onClose(Session session, CloseReason closeReason){
+			log.error("WebSocket connection closed. Reason: " + closeReason.toString());
 			if (onCloseListener != null){
 				onCloseListener.run();
 			}
 		}
 		
+		@Override
 		public void onError(Session session, Throwable thr){
-			System.out.println(thr.getMessage());
+			log.error(thr.getMessage());
+		}
+		
+			
+		public void sendMessage(String message) {
+			session.getAsyncRemote().sendText(message);
 		}
 		
 		
 		@Override
 		public void onOpen(Session session, EndpointConfig config) {
+			
+			log.info("WebSocket connection opened.");
+			
+			this.session = session;
 
 			session.addMessageHandler(new MessageHandler.Whole<String>() {
 
@@ -235,18 +253,40 @@ public class MattermostMessagingService implements MessagingService {
 					
 					// parse message
 					
+					log.error("WebSocket message received: " + msg); // TODO (DR): don't log all messages that are received
+					
 					JSONObject message = new JSONObject(msg);
-					if ("posted".equals(message.getString("event"))){
-						try { 
+					String event = message.getString("event");
+					
+					/*
+					if ("ping".equals(event)){
+						sendMessage("{\"event\":\"pong\"}");
+					}
+					*/
+					
+					
+					if ("posted".equals(event)){
+						try { 							
 							JSONObject data = message.getJSONObject("data");
 							String postString = data.getString("post");
-							JSONObject post = new JSONObject(postString);
 							
+							JSONObject post = new JSONObject(postString);
 			
 							String userId = post.getString("user_id");
 							String messageText = post.getString("message");
 							
-							receiveMessageAtEndpoint(userId, messageText);	
+							JSONObject props = post.getJSONObject("props");
+							Results results = null;
+							
+							if (props.has("results")){
+								results = new Results(props.getJSONObject("results").getString("selected"));
+							}
+							
+							Post postObject = new Post();
+							postObject.setMessage(messageText);
+							postObject.setResults(results);
+							
+							receiveMessageAtEndpoint(userId, postObject);	
 						
 						} catch (Exception e){
 							e.printStackTrace();

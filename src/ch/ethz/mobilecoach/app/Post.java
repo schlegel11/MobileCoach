@@ -9,26 +9,33 @@ import lombok.Setter;
 
 public class Post {
 	
-	public static final String POST_TYPE_SELECT_ONE = "select_one";
+	public static final String REQUEST_TYPE_SELECT_ONE = "select_one";
 	public static final String POST_TYPE_TEXT = "text";
+	public static final String POST_TYPE_REQUEST = "request";
 	
 	@Getter
 	@Setter
 	private String message;
 	
 	
-	@Getter
 	@Setter
 	private String postType;
+	
+	public String getPost_type(){
+		return postType;
+	}
 	
 	@Getter
 	@Setter
 	private List<Option> options = new LinkedList<Option>(); 
 	
 	
-	@Getter
 	@Setter
 	private String requestType;
+	
+	public String getRequest_type(){
+		return requestType;
+	}
 	
 	
 	@Getter
@@ -39,6 +46,7 @@ public class Post {
 	@Getter
 	@Setter
 	private String requestId;
+	
 	
 	@Getter
 	@Setter

@@ -70,7 +70,7 @@ public class Constants {
 	 * 
 	 * CAUTION: Can NOT be defined in configuration file
 	 */
-	public static final int		DATA_MODEL_VERSION					= 6;
+	public static final int		DATA_MODEL_VERSION					= 7;
 	/**
 	 * Data model configuration collection
 	 * 
@@ -227,6 +227,13 @@ public class Constants {
 	@Getter
 	private static String	smsUserPassword						= "xyz";
 	private static String	smsPhoneNumberAcceptedCountryCodes	= "41,43,49";
+	
+	
+	/**
+	 * XML script configuration
+	 */
+	@Getter
+	private static String xmlScriptsFolder						= "/mc_data/xml_scripts";
 
 	/**
 	 * Get all accepted country codes for SMS phone numbers

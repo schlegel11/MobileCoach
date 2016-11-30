@@ -1093,6 +1093,14 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
+	public void monitoringRuleChangeSendMessageToSupervisor(
+			final MonitoringRule monitoringRule, final boolean newValue) {
+		monitoringRule.setSendMessageToSupervisor(newValue);
+
+		databaseManagerService.saveModelObject(monitoringRule);
+	}
+
+	@Synchronized
 	public void monitoringRuleChangeStopInterventionIfTrue(
 			final MonitoringRule monitoringRule, final boolean newValue) {
 		monitoringRule.setStopInterventionWhenTrue(newValue);
@@ -1326,6 +1334,15 @@ public class InterventionAdministrationManagerService {
 			final MonitoringReplyRule monitoringReplyRule,
 			final boolean newValue) {
 		monitoringReplyRule.setSendMessageIfTrue(newValue);
+
+		databaseManagerService.saveModelObject(monitoringReplyRule);
+	}
+
+	@Synchronized
+	public void monitoringReplyRuleChangeSendMessageToSupervisor(
+			final MonitoringReplyRule monitoringReplyRule,
+			final boolean newValue) {
+		monitoringReplyRule.setSendMessageToSupervisor(newValue);
 
 		databaseManagerService.saveModelObject(monitoringReplyRule);
 	}
@@ -2088,8 +2105,9 @@ public class InterventionAdministrationManagerService {
 		int mediaObjectsViewed = 0;
 
 		val dialogMessages = databaseManagerService.findModelObjects(
-				DialogMessage.class, Queries.DIALOG_MESSAGE__BY_PARTICIPANT,
-				participantId);
+				DialogMessage.class,
+				Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_MESSAGE_TYPE,
+				participantId, false);
 		for (val dialogMessage : dialogMessages) {
 			switch (dialogMessage.getStatus()) {
 				case IN_CREATION:

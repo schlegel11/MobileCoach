@@ -2,16 +2,16 @@
 
 *MobileCoach* is the Open Source Behavioral Intervention Platform designed by **ETH Zurich**, the **University of St. Gallen** and the **Swiss Research Institute for Public Health and Addiction**.
 
-© 2013-2016 [Health-IS Lab](http://www.health-is.ch) a joint initiative of the [Institute of Technology Management](http://www.item.unisg.ch) at [University of St. Gallen](http://www.unisg.ch) and the [Department of Management, Technology and Economics](http://mtec.ethz.ch) at [ETH Zurich](http://www.ethz.ch).   
+© 2013-2016 [Center for Digital Health Interventions, Health-IS Lab](http://www.c4dhi.org) a joint initiative of the [Institute of Technology Management](http://www.item.unisg.ch) at [University of St. Gallen](http://www.unisg.ch) and the [Department of Management, Technology and Economics](http://mtec.ethz.ch) at [ETH Zurich](http://www.ethz.ch).   
 
 For further information visit the *MobileCoach* Website at [https://www.mobile-coach.eu](https://www.mobile-coach.eu)!
 
 ## Team of the release version
 
-### Health-IS Lab
+### Center for Digital Health Interventions, Health-IS Lab
 
 * **Andreas Filler** - afiller (AT) ethz (DOT) ch
-* **Tobias Kowatsch** - tobias (DOT) kowatsch (AT) unisg (DOT) ch
+* **Dr. Tobias Kowatsch** - tobias (DOT) kowatsch (AT) unisg (DOT) ch
 * **Jost Schweinfurther** - jschweinfurther (AT) ethz (DOT) ch
 * **Prof. Dr. Elgar Fleisch** - efleisch (AT) ethz (DOT) ch
 

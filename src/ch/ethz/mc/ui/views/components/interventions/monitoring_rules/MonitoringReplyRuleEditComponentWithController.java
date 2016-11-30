@@ -120,19 +120,49 @@ MonitoringReplyRuleEditComponent {
 				buttonClickListener);
 
 		// Add other listeners
-		getStopRuleExecutionIfTrueComboBox().setValue(
+		getSendMessageIfTrueComboBox().setValue(
 				monitoringRule.isSendMessageIfTrue());
-		getStopRuleExecutionIfTrueComboBox().addValueChangeListener(
+		getSendMessageIfTrueComboBox().addValueChangeListener(
 				new ValueChangeListener() {
 
 					@Override
 					public void valueChange(final ValueChangeEvent event) {
 						log.debug("Adjust send message if true");
+						val newValue = (boolean) event.getProperty().getValue();
+
 						getInterventionAdministrationManagerService()
 						.monitoringReplyRuleChangeSendMessageIfTrue(
 								monitoringRule,
 								(boolean) event.getProperty()
 								.getValue());
+
+						if (!newValue
+								&& getSendToSupervisorComboBox().getValue()) {
+							getSendToSupervisorComboBox().setValue(false);
+						}
+
+						adjust();
+					}
+				});
+
+		getSendToSupervisorComboBox().setValue(
+				monitoringRule.isSendMessageToSupervisor());
+		getSendToSupervisorComboBox().addValueChangeListener(
+				new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						log.debug("Adjust send message to supervisor");
+						val newValue = (boolean) event.getProperty().getValue();
+
+						getInterventionAdministrationManagerService()
+						.monitoringReplyRuleChangeSendMessageToSupervisor(
+								monitoringRule, newValue);
+
+						if (newValue
+								&& !getSendMessageIfTrueComboBox().getValue()) {
+							getSendMessageIfTrueComboBox().setValue(true);
+						}
 
 						adjust();
 					}

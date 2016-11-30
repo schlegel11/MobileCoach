@@ -45,7 +45,7 @@ import ch.ethz.mc.tools.OnDemandFileDownloader.OnDemandStreamResource;
 import ch.ethz.mc.tools.StringValidator;
 import ch.ethz.mc.ui.views.components.basics.FileUploadComponentWithController;
 import ch.ethz.mc.ui.views.components.basics.FileUploadComponentWithController.UploadListener;
-import ch.ethz.mc.ui.views.components.basics.PlaceholderStringEditComponent;
+import ch.ethz.mc.ui.views.components.basics.PlaceholderStringEditWithCheckBoxComponent;
 import ch.ethz.mc.ui.views.components.basics.ShortStringEditComponent;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -452,10 +452,17 @@ InterventionParticipantsTabComponent {
 		val allPossibleMessageVariables = getInterventionAdministrationManagerService()
 				.getAllPossibleMonitoringRuleVariablesOfIntervention(
 						intervention.getId());
+
+		val placeholderStringEditWithCheckboxComponent = new PlaceholderStringEditWithCheckBoxComponent();
+		localize(
+				placeholderStringEditWithCheckboxComponent
+				.getUniversalCheckBox(),
+				AdminMessageStrings.MONITORING_RULE_EDITING__SEND_TO_SUPERVISOR);
+
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__SEND_MESSAGE_TO_ALL_SELECTED_PARTICIPANTS,
 				"", allPossibleMessageVariables,
-				new PlaceholderStringEditComponent(),
+				placeholderStringEditWithCheckboxComponent,
 				new ExtendableButtonClickListener() {
 
 					@Override
@@ -479,7 +486,10 @@ InterventionParticipantsTabComponent {
 							for (val participant : selectedParticipants) {
 								interventionExecutionManagerService
 								.sendManualMessage(participant,
-										getStringValue());
+												placeholderStringEditWithCheckboxComponent
+														.getUniversalCheckBox()
+														.getValue(),
+												getStringValue());
 							}
 						}
 

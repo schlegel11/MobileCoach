@@ -71,7 +71,8 @@ public class RichConversationService {
 					if (chatEngines.containsKey(participantId)){
 						engine.handleInput(message.answerOptionId);
 					} else {
-						// TODO (DR): store the message for the MC system to collect it
+						// TODO (DR): store the message for the MC system to collect it. 
+						//            This is not necessary for the PathMate2 intervention.
 					}
 				}
 			});
@@ -111,15 +112,20 @@ public class RichConversationService {
 				Post post = new Post();
 				post.setMessage(message.text);
 				
-				//if (Message.ANSWER_TYPE_MULTIPLE_CHOICE.equals(message.answerType)){
 				if (message.answerOptions.size() > 0){
-					
-					post.setPostType(Post.POST_TYPE_SELECT_ONE);
-					
+					post.setPostType(Post.POST_TYPE_REQUEST);
+					String requestType = message.answerType != null ? message.answerType : Post.REQUEST_TYPE_SELECT_ONE;
+					post.setRequestType(requestType);
 					for (AnswerOption answerOption: message.answerOptions){
 						Option option = new Option(answerOption.text, answerOption.value);
 						post.getOptions().add(option);
 					}
+				} else if (message.objectId != null){
+					post.setPostType(Post.POST_TYPE_REQUEST);
+					post.setRequestType(message.objectId);
+				} else if (message.answerType != null){
+					post.setPostType(Post.POST_TYPE_REQUEST);
+					post.setRequestType(message.answerType);
 				}
 				
 				messagingService.sendMessage(sender, recipient, post);
@@ -133,14 +139,24 @@ public class RichConversationService {
 
 		@Override
 		public void delay(Runnable callback, Integer milliseconds) {
-			// TODO Auto-generated method stub
-			callback.run();
+			// TODO implement a better delay
+			new java.util.Timer().schedule( 
+			        new java.util.TimerTask() {
+			            @Override
+			            public void run() {
+			            	callback.run();
+			            }
+			        }, 
+			        milliseconds 
+			);
 		}
 
-		public void receiveMessage(String message) {
+		public void receivePost(Post post) {
 			if (this.listener != null){
-				Message msg = new Message(message, Message.SENDER_USER);
-				msg.answerOptionId = message; // TODO (DR): pick the right option
+				Message msg = new Message(post.getMessage(), Message.SENDER_USER);
+				if (post.getResults() != null){
+					msg.answerOptionId = post.getResults().getSelected();
+				}
 				this.listener.userReplied(msg);
 			}
 		}

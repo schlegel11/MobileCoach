@@ -2,15 +2,15 @@ package ch.ethz.mc.model.persistent;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -94,6 +94,14 @@ public class DialogMessage extends ModelObject {
 	@Getter
 	@Setter
 	private long						sentTimestamp;
+
+	/**
+	 * Defines if the message has to be sent to the supervisor instead of the
+	 * {@link Participant} (type of message)
+	 */
+	@Getter
+	@Setter
+	private boolean						supervisorMessage;
 
 	/**
 	 * Defines if an answer to this message is expected
@@ -197,34 +205,38 @@ public class DialogMessage extends ModelObject {
 				group == null ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 						: group,
-				organization,
-				organizationUnit,
-				StringUtils.right("0000" + String.valueOf(order + 1), 5),
-				status.toString(),
-				message == null || message.equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: message,
-				StringHelpers.createStringTimeStamp(shouldBeSentTimestamp),
-				StringHelpers.createStringTimeStamp(sentTimestamp),
-				answerReceived == null || answerReceived.equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: answerReceived,
-				answerReceivedRaw == null || answerReceivedRaw.equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: answerReceivedRaw,
-				StringHelpers.createStringTimeStamp(answerReceivedTimestamp),
-				manuallySent ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-				containsMediaContent ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-				mediaContentViewed ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NO));
+						organization,
+						organizationUnit,
+						StringUtils.right("0000" + String.valueOf(order + 1), 5),
+						status.toString(),
+						supervisorMessage ? Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__SUPERVISOR_MESSAGE)
+								: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__PARTICIPANT_MESSAGE),
+								message == null || message.equals("") ? Messages
+										.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+										: message,
+										StringHelpers.createStringTimeStamp(shouldBeSentTimestamp),
+										StringHelpers.createStringTimeStamp(sentTimestamp),
+										answerReceived == null || answerReceived.equals("") ? Messages
+												.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+												: answerReceived,
+												answerReceivedRaw == null || answerReceivedRaw.equals("") ? Messages
+														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+														: answerReceivedRaw,
+														StringHelpers.createStringTimeStamp(answerReceivedTimestamp),
+														manuallySent ? Messages
+																.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+																: Messages
+																.getAdminString(AdminMessageStrings.UI_MODEL__NO),
+																containsMediaContent ? Messages
+																		.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+																		: Messages
+																		.getAdminString(AdminMessageStrings.UI_MODEL__NO),
+																		mediaContentViewed ? Messages
+																				.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+																				: Messages
+																				.getAdminString(AdminMessageStrings.UI_MODEL__NO));
 
 		dialogMessage.setRelatedModelObject(this);
 
@@ -255,36 +267,40 @@ public class DialogMessage extends ModelObject {
 				group == null ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 						: group,
-				organization,
-				organizationUnit,
-				order + 1,
-				status.toString(),
-				message == null || message.equals("") ? Messages
+						organization,
+						organizationUnit,
+						order + 1,
+						status.toString(),
+				supervisorMessage ? Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__SUPERVISOR_MESSAGE)
+								: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__PARTICIPANT_MESSAGE),
+								message == null || message.equals("") ? Messages
+										.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+										: message,
+				shouldBeSentTimestamp <= 0 ? null : new Date(
+						shouldBeSentTimestamp),
+				sentTimestamp <= 0 ? null : new Date(sentTimestamp),
+				answerReceived == null || answerReceived.equals("") ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: message,
-								shouldBeSentTimestamp <= 0 ? null : new Date(
-										shouldBeSentTimestamp),
-										sentTimestamp <= 0 ? null : new Date(sentTimestamp),
-												answerReceived == null || answerReceived.equals("") ? Messages
-														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-														: answerReceived,
-														answerReceivedRaw == null || answerReceivedRaw.equals("") ? Messages
-																.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-																: answerReceivedRaw,
-																answerReceivedTimestamp <= 0 ? null : new Date(
-																		answerReceivedTimestamp),
-																		manuallySent ? Messages
-																				.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-																				: Messages
-																				.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-																				containsMediaContent ? Messages
-																						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-																						: Messages
-																						.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-																						mediaContentViewed ? Messages
-																								.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-																								: Messages
-																								.getAdminString(AdminMessageStrings.UI_MODEL__NO));
+						: answerReceived,
+				answerReceivedRaw == null || answerReceivedRaw.equals("") ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+						: answerReceivedRaw,
+				answerReceivedTimestamp <= 0 ? null : new Date(
+						answerReceivedTimestamp),
+				manuallySent ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
+				containsMediaContent ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
+				mediaContentViewed ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NO));
 
 		dialogMessage.setRelatedModelObject(this);
 
@@ -314,18 +330,21 @@ public class DialogMessage extends ModelObject {
 				group == null ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 						: group,
-						organization,
-						organizationUnit,
-						message,
-						sentTimestamp <= 0 ? null : new Date(sentTimestamp),
-								answerReceived == null || answerReceived.equals("") ? Messages
-										.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-										: answerReceived,
-										answerReceivedRaw == null || answerReceivedRaw.equals("") ? Messages
-												.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-												: answerReceivedRaw,
-												answerReceivedTimestamp <= 0 ? null : new Date(
-														answerReceivedTimestamp));
+				organization,
+				organizationUnit,
+				supervisorMessage ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__SUPERVISOR_MESSAGE)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__PARTICIPANT_MESSAGE),
+				message, sentTimestamp <= 0 ? null : new Date(sentTimestamp),
+				answerReceived == null || answerReceived.equals("") ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+						: answerReceived, answerReceivedRaw == null
+						|| answerReceivedRaw.equals("") ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+						: answerReceivedRaw,
+				answerReceivedTimestamp <= 0 ? null : new Date(
+						answerReceivedTimestamp));
 
 		dialogMessage.setRelatedModelObject(this);
 
@@ -334,7 +353,7 @@ public class DialogMessage extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see ch.ethz.mc.model.ModelObject#performOnDelete()
 	 */
 	@Override

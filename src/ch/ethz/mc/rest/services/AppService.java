@@ -49,7 +49,9 @@ public class AppService {
 			throw new WebApplicationException(Response.serverError().entity("Invalid Credential Format").build());
 		}
 		
-		MattermostUserConfiguration userConfiguration = fetchUserConfiguration(authentication);
+		String userId = authentication.substring(CONST.length()+1).trim();
+		
+		MattermostUserConfiguration userConfiguration = fetchUserConfiguration(userId);
 		
 		return new Result(this.mattMgmtService.new UserConfigurationForAuthentication(userConfiguration));
 	}
