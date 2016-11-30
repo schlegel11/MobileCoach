@@ -123,28 +123,34 @@ public class MattermostMessagingService implements MessagingService {
 
 	
 	
-	private void sendPushNotification(String recipient, Post post) {
-		
+	public void sendPushNotification(String recipient, Post post) {
+
 		OneSignalUserConfiguration oneSignalUserConfiguration = managementService.findOneSignalObject(recipient);
-		String playerId = oneSignalUserConfiguration.getPlayerId();
+		String[] playerIds = new String[oneSignalUserConfiguration.getPlayerIds().size()];
 		
+		for(int ind = 0; ind < oneSignalUserConfiguration.getPlayerIds().size(); ind++){
+			playerIds[ind] = oneSignalUserConfiguration.getPlayerIds().get(ind);
+		}
+
 		LinkedHashMap<String, String> headers = new LinkedHashMap<>();
 		headers.put("Content-Type", "application/json");
 		headers.put("Authorization", "Basic ZjA3ZTkzNDEtYmRjMi00Y2M2LWEwOWItZTk2MzE2YTQ0NWQw");	
 		String url = "https://onesignal.com/api/v1/notifications";
-		
+
 		JSONObject json2 = new JSONObject()
 				.put("app_id", MattermostManagementService.appID)     
 				.put("contents", new JSONObject().put("en", post.getMessage()))
-				.put("include_player_ids", playerId);
+				.put("include_player_ids", playerIds);
 
 		new OneSignalTask<String>(url, json2, headers){
 			@Override
 			String handleResponse(PostMethod method) throws Exception {
 				return new JSONObject(method.getResponseBodyAsString()).getString("id");
 			}
-		}.run();
+		}.run();	
 	}
+	
+	
 	
 	// Login
 	

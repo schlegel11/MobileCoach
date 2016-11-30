@@ -19,10 +19,7 @@ import ch.ethz.mobilecoach.services.MattermostManagementService;
 public class OneSignalAppService {
 	
 	private final static String  USER_ID = "userid:";
-	private final static String DEVICE_ID = "deviceid";
-	private final static String DEVICE_TYPE ="device_type";
-	private final static int UPPER_RANGE_DEVICES = 9;
-	private final static int LOWER_RANGE_DEVICES = 0;
+	private final static String PLAYER_ID = "playerid";
 
 	private MattermostManagementService mattMgmtService;
 
@@ -34,7 +31,7 @@ public class OneSignalAppService {
 
 
 	@POST
-	@Path("/setdeviceid")
+	@Path("/setplayerid")
 	@Consumes("application/json")
 	public String setDeviceIdentifier(@Context final HttpServletRequest request, @HeaderParam("Authentication") final String authentication, String content) throws BadRequestException{
 
@@ -51,24 +48,17 @@ public class OneSignalAppService {
 		}
 		
 		JSONObject jsonObject = new JSONObject(content);
-		String deviceID = jsonObject.getString(DEVICE_ID);
-		String deviceType = jsonObject.getString(DEVICE_TYPE);
-		
-		if(Integer.valueOf(deviceType) < LOWER_RANGE_DEVICES &&  Integer.valueOf(deviceType) > UPPER_RANGE_DEVICES ){
-			throw new WebApplicationException(Response.status(400).entity("No Matching Device Found!").build());
-		}
-		
-		deviceID = deviceID.replaceAll(USER_ID, "");
+		String playerId = jsonObject.getString(PLAYER_ID);
+		String userId = authentication.replaceAll(USER_ID, "");
 		
 		OneSignalUserConfiguration tmp = mattMgmtService.findOneSignalObject(authentication);
 		
 		if(tmp != null){
 
-			mattMgmtService.addDeviceToOneSignal(tmp, authentication, deviceID, deviceType);
+			mattMgmtService.addDeviceToDatabase(tmp, userId, playerId);
 		}else{
-			mattMgmtService.creatOneSignalObject(authentication, deviceID, deviceType);
+			mattMgmtService.creatOneSignalObject(userId, playerId);
 		}
 		return "";
-
 	}
 }

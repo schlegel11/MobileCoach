@@ -14,13 +14,7 @@ public class OneSignalUserConfiguration extends ModelObject {
 	private String participantId;
 	@Getter
 	@Setter
-	private List<String> deviceIds;
-	@Getter
-	@Setter
-	private String playerId;
-	@Getter
-	@Setter
-	private String device_type;
+	private List<String> playerIds;
 	@Getter
 	private long createdTimestamp;
 }

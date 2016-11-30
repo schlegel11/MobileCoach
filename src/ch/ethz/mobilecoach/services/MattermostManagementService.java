@@ -2,7 +2,6 @@ package ch.ethz.mobilecoach.services;
 
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,7 +49,7 @@ public class MattermostManagementService {
 	private String adminUserLogin = "admin"; // will use name or email from configuration
 	private String adminUserToken = null;
 	private String locale = "de";
-	
+
 	public final static String appID = "325068aa-fc63-411c-a07e-b3e73c455e8e";
 
 	@Getter
@@ -103,51 +102,24 @@ public class MattermostManagementService {
 	}
 
 
-	public void addDeviceToOneSignal(OneSignalUserConfiguration oneSignalUserConfiguration, String authentication, String deviceID, String deviceType){
+	public void addDeviceToDatabase(OneSignalUserConfiguration oneSignalUserConfiguration, String authentication, String playerId){
 
-		if(!oneSignalUserConfiguration.getDeviceIds().contains(deviceID)) {
-			
-			String playerID = addDeviceToOneSignal(deviceID, deviceType);
-			
-			oneSignalUserConfiguration.setPlayerId(playerID);
-			oneSignalUserConfiguration.getDeviceIds().add(deviceID);
+		if(!oneSignalUserConfiguration.getPlayerIds().contains(playerId)) {
+
+			oneSignalUserConfiguration.getPlayerIds().add(playerId);
 			databaseManagerService.saveModelObject(oneSignalUserConfiguration);
 		}
 	}
 
-	private String addDeviceToOneSignal(String deviceID, String deviceType) {
-		LinkedHashMap<String, String> headers = new LinkedHashMap<>();
-		
-		headers.put("Content-Type", "application/json");
-		
-		String url = "https://onesignal.com/api/v1/players";
-		
-		JSONObject json = new JSONObject()
-				.put("app_id", appID)     
-				.put("identifier", deviceID)
-				.put("device_type", Integer.valueOf(deviceType));
-
-		
-		String playerID = new OneSignalTask<String>(url, json, headers){
-			@Override
-			String handleResponse(PostMethod method) throws Exception {
-				return new JSONObject(method.getResponseBodyAsString()).getString("id");
-			}
-		}.run();
 	
-		return playerID;
-	}
 
+	public void creatOneSignalObject(String participantId, String playerId){
 
-
-	public void creatOneSignalObject(String participantId, String deviceID, String deviceType){
-		
-		String playerID = addDeviceToOneSignal(deviceID, deviceType);
 		long timestamp = System.currentTimeMillis(); 
-		List<String> deviceIds = new ArrayList<>();
-		deviceIds.add(deviceID);
-		OneSignalUserConfiguration config = new OneSignalUserConfiguration(participantId, deviceIds, playerID, deviceType,timestamp);
-		
+		List<String> playerIds = new ArrayList<>();
+		playerIds.add(playerId);
+		OneSignalUserConfiguration config = new OneSignalUserConfiguration(participantId, playerIds, timestamp);
+
 		databaseManagerService.saveModelObject(config);	
 	}
 
