@@ -30,6 +30,7 @@ import org.bson.types.ObjectId;
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.Queries;
+import ch.ethz.mc.model.persistent.AppToken;
 import ch.ethz.mc.model.persistent.DialogStatus;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValuePrivacyTypes;
@@ -39,6 +40,7 @@ import ch.ethz.mc.model.rest.ExtendedListVariable;
 import ch.ethz.mc.model.rest.ExtendedVariable;
 import ch.ethz.mc.model.rest.Variable;
 import ch.ethz.mc.model.rest.VariableAverage;
+import ch.ethz.mc.services.internal.AppTokenPersistenceService;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService;
 import ch.ethz.mc.services.internal.VariablesManagerService;
@@ -60,6 +62,7 @@ public class RESTManagerService {
 	@Getter
 	private final FileStorageManagerService	fileStorageManagerService;
 	private final VariablesManagerService	variablesManagerService;
+	private final AppTokenPersistenceService appTokenPersistenceService;
 
 	private RESTManagerService(
 			final DatabaseManagerService databaseManagerService,
@@ -73,6 +76,7 @@ public class RESTManagerService {
 		this.databaseManagerService = databaseManagerService;
 		this.fileStorageManagerService = fileStorageManagerService;
 		this.variablesManagerService = variablesManagerService;
+		appTokenPersistenceService = new AppTokenPersistenceService(databaseManagerService);
 
 		log.info("Started.");
 	}
@@ -370,7 +374,29 @@ public class RESTManagerService {
 			throw e;
 		}
 	}
+	
+	/**
+	 * Finds a participant by an App-Token.<code>null</code> if the Token does not match to a participant
+	 * @param token AppToken to search
+	 * @return corrsponding participantId or <code>null</code>
+	 */
+	public ObjectId findParticipantIdForAppToken(String token) {
+		AppToken appToken = appTokenPersistenceService.findAppTokenByToken(token);
+		if (appToken == null) {
+			return null;
+		}
+		return appToken.getParticipantId();
+	}
 
+	/**
+	 * creates a new App-Token for the specified participant
+	 * @param participantId
+	 * @return The token to use for authentication
+	 */
+	public String createAppTokenForParticipant(ObjectId participantId) {
+		return appTokenPersistenceService.createTokenForParticipant(participantId).getToken();
+	}
+	
 	/*
 	 * Internal helpers
 	 */
@@ -716,4 +742,5 @@ public class RESTManagerService {
 				participantId, creditName,
 				ImplementationConstants.VARIABLE_PREFIX + variable);
 	}
+
 }

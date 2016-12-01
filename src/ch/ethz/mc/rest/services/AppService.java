@@ -10,6 +10,10 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
+import org.bson.types.ObjectId;
+
+import ch.ethz.mc.model.persistent.AppToken;
+import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
 import ch.ethz.mobilecoach.services.MattermostManagementService;
 import ch.ethz.mobilecoach.services.MattermostManagementService.UserConfigurationForAuthentication;
@@ -27,19 +31,20 @@ public class AppService {
 
 	private final static String  CONST = "userid";
 
+	private RESTManagerService restManagerService;
 	private MattermostManagementService mattMgmtService;
 
 
-	public AppService(MattermostManagementService mattMgmtService){
-
-		this.mattMgmtService = mattMgmtService;	
+	public AppService(RESTManagerService restManagerService, MattermostManagementService mattMgmtService) {
+		super();
+		this.restManagerService = restManagerService;
+		this.mattMgmtService = mattMgmtService;
 	}
-
 
 	@GET
 	@Path("/getconfig")
 	@Produces("application/json")
-	public Result variableRead(@Context final HttpServletRequest request, @HeaderParam("Authentication") final String authentication) throws BadRequestException{
+	public Result authenticateApp(@Context final HttpServletRequest request, @HeaderParam("Authentication") final String authentication) throws BadRequestException{
 		
 		if (authentication == null){
 			throw new WebApplicationException(Response.status(400).entity("Missing header 'Authenication'.").build());
@@ -51,9 +56,12 @@ public class AppService {
 		
 		String userId = authentication.substring(CONST.length()+1).trim();
 		
-		MattermostUserConfiguration userConfiguration = fetchUserConfiguration(userId);
+		// TODO replace the authentication token which contains the participantId with a temporary token (lookup in specific collection with temporary tokens)
 		
-		return new Result(this.mattMgmtService.new UserConfigurationForAuthentication(userConfiguration));
+		MattermostUserConfiguration userConfiguration = fetchUserConfiguration(userId);
+		String mctoken = restManagerService.createAppTokenForParticipant(new ObjectId(userId));
+		
+		return new Result(new MobileCoachAuthentication(userId, mctoken), new UserConfigurationForAuthentication(userConfiguration));
 	}
 
 
@@ -71,11 +79,22 @@ public class AppService {
 	}
 	
 	@AllArgsConstructor
-	class Result {
+	private static class Result {
 		
 		@Getter
-		@Setter
-		private UserConfigurationForAuthentication mattermost;
+		private final MobileCoachAuthentication mobilecoach;
+		
+		@Getter
+		private final UserConfigurationForAuthentication mattermost;
+		
+	}
+	
+	@AllArgsConstructor
+	private static class MobileCoachAuthentication {
+		@Getter
+		private final String participant_id;
+		@Getter
+		private final String token;
 		
 	}
 }

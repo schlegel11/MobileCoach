@@ -94,9 +94,9 @@ public class MattermostManagementService {
 	}
 
 
-	public OneSignalUserConfiguration findOneSignalObject(String authentication){
+	public OneSignalUserConfiguration findOneSignalObject(String participantId){
 
-		OneSignalUserConfiguration oneSignalUserConfiguration = databaseManagerService.findOneModelObject(OneSignalUserConfiguration.class, "{'participantId':#}", authentication);
+		OneSignalUserConfiguration oneSignalUserConfiguration = databaseManagerService.findOneModelObject(OneSignalUserConfiguration.class, "{'participantId':#}", participantId);
 
 		return oneSignalUserConfiguration;
 	}
@@ -301,7 +301,7 @@ public class MattermostManagementService {
 	 */
 
 
-	public class UserConfigurationForAuthentication {
+	public static class UserConfigurationForAuthentication {
 
 		private MattermostUserConfiguration userConfiguration;
 
