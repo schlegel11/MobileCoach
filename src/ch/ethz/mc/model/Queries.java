@@ -2,15 +2,15 @@ package ch.ethz.mc.model;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -141,6 +141,7 @@ public class Queries {
 	public static final String	PARTICIPANT__BY_INTERVENTION_AND_GROUP_AND_MONITORING_ACTIVE_TRUE																																				= "{'intervention':#,'group':#,'monitoringActive':true}";
 	public static final String	PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE																																							= "{'intervention':#,'monitoringActive':true}";
 
+	public static final String	DIALOG_OPTION__BY_PARTICIPANT																																													= "{'participant':#}";
 	public static final String	DIALOG_OPTION__FOR_PARTICIPANT_BY_PARTICIPANT																																									= "{'participant':#,$or:[{'type':'SMS'},{'type':'EMAIL'},{'type':'EXTERNAL_ID'}]}";
 	public static final String	DIALOG_OPTION__FOR_SUPERVISOR_BY_PARTICIPANT																																									= "{'participant':#,$or:[{'type':'SUPERVISOR_SMS'},{'type':'SUPERVISOR_EMAIL'},{'type':'SUPERVISOR_EXTERNAL_ID'}]}";
 	public static final String	DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE																																											= "{'participant':#,'type':#}";

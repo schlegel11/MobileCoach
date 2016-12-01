@@ -73,7 +73,6 @@ import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.tools.VariableStringReplacer;
 import ch.ethz.mc.ui.NotificationMessageException;
-import ch.ethz.mobilecoach.services.MattermostMessagingService;
 
 /**
  * Cares for the orchestration of the {@link Intervention}s as well as all
@@ -97,7 +96,7 @@ public class InterventionExecutionManagerService {
 
 	final InterventionAdministrationManagerService		interventionAdministrationManagerService;
 	final SurveyExecutionManagerService					surveyExecutionManagerService;
-	
+
 	private final IncomingMessageWorker					incomingMessageWorker;
 	private final OutgoingMessageWorker					outgoingMessageWorker;
 	private final MonitoringSchedulingWorker			monitoringSchedulingWorker;
@@ -751,19 +750,20 @@ public class InterventionExecutionManagerService {
 			// Check if participant has already been scheduled today
 			val dialogStatus = getDialogStatusByParticipant(participant.getId());
 
-			//TODO: switch back to monday-only start (make it configurable)
+			// TODO: switch back to monday-only start (make it configurable)
 			// Only start interventions on Monday
 			/*
-			if (dialogStatus != null
-					&& dialogStatus.getMonitoringDaysParticipated() == 0
-					&& todayDayIndex != 1 
-					) {
-				log.debug(
-						"Participant {} has not been scheduled at all! Wait until next monday to start with scheduling...",
-						participant.getId());
-				continue;
-			}
-			*/
+			 * if (dialogStatus != null
+			 * && dialogStatus.getMonitoringDaysParticipated() == 0
+			 * && todayDayIndex != 1
+			 * ) {
+			 * log.debug(
+			 * "Participant {} has not been scheduled at all! Wait until next monday to start with scheduling..."
+			 * ,
+			 * participant.getId());
+			 * continue;
+			 * }
+			 */
 
 			if (dialogStatus != null
 					&& !dialogStatus
@@ -847,8 +847,7 @@ public class InterventionExecutionManagerService {
 	@Synchronized
 	public void handleReceivedMessage(final ReceivedMessage receivedMessage) {
 		val dialogOption = getDialogOptionByTypeAndDataOfActiveInterventions(
-				communicationManagerService.getSupportedDialogOptionType(),
-				receivedMessage.getSender());
+				receivedMessage.getType(), receivedMessage.getSender());
 
 		if (dialogOption == null) {
 			log.warn(
@@ -966,26 +965,22 @@ public class InterventionExecutionManagerService {
 			return;
 		}
 
-		val dialogMessagesWithSenderToSend = getDialogMessagesWithSenderWaitingToBeSentOfActiveInterventions();
+		val dialogMessagesWithSenderIdentificationToSend = getDialogMessagesWithSenderWaitingToBeSentOfActiveInterventions();
 		int sentMessages = 0;
-		for (val dialogMessageWithPhoneNumberToSend : dialogMessagesWithSenderToSend) {
-			final val dialogMessageToSend = dialogMessageWithPhoneNumberToSend
+		for (val dialogMessageWithSenderIdentificationToSend : dialogMessagesWithSenderIdentificationToSend) {
+			final val dialogMessageToSend = dialogMessageWithSenderIdentificationToSend
 					.getDialogMessage();
 			try {
 				DialogOption dialogOption = null;
 				boolean sendToSupervisor = false;
-				if (dialogMessageWithPhoneNumberToSend.getDialogMessage()
-						.isSupervisorMessage()) {
+				if (dialogMessageWithSenderIdentificationToSend
+						.getDialogMessage().isSupervisorMessage()) {
 					sendToSupervisor = true;
-					dialogOption = getDialogOptionByParticipantAndType(
-							dialogMessageToSend.getParticipant(),
-							communicationManagerService
-									.getSupportedSupervisorDialogOptionType());
+					dialogOption = getDialogOptionByParticipantAndRecipientType(
+							dialogMessageToSend.getParticipant(), true);
 				} else {
-					dialogOption = getDialogOptionByParticipantAndType(
-							dialogMessageToSend.getParticipant(),
-							communicationManagerService
-									.getSupportedDialogOptionType());
+					dialogOption = getDialogOptionByParticipantAndRecipientType(
+							dialogMessageToSend.getParticipant(), false);
 				}
 
 				if (dialogOption != null) {
@@ -994,7 +989,7 @@ public class InterventionExecutionManagerService {
 							dialogOption.getData());
 					communicationManagerService.sendMessage(dialogOption,
 							dialogMessageToSend.getId(),
-							dialogMessageWithPhoneNumberToSend
+							dialogMessageWithSenderIdentificationToSend
 									.getMessageSenderIdentification(),
 							dialogMessageToSend.getMessage(),
 							dialogMessageToSend.isMessageExpectsAnswer());
@@ -1233,13 +1228,14 @@ public class InterventionExecutionManagerService {
 	}
 
 	@Synchronized
-	private DialogOption getDialogOptionByParticipantAndType(
-			final ObjectId participantId,
-			final DialogOptionTypes dialogOptionType) {
-		val dialogOption = databaseManagerService.findOneModelObject(
-				DialogOption.class,
-				Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE, participantId,
-				dialogOptionType);
+	private DialogOption getDialogOptionByParticipantAndRecipientType(
+			final ObjectId participantId, final boolean isSupervisorMessage) {
+		val dialogOption = databaseManagerService
+				.findOneModelObject(
+						DialogOption.class,
+						isSupervisorMessage ? Queries.DIALOG_OPTION__FOR_SUPERVISOR_BY_PARTICIPANT
+								: Queries.DIALOG_OPTION__FOR_PARTICIPANT_BY_PARTICIPANT,
+						participantId);
 
 		return dialogOption;
 	}
