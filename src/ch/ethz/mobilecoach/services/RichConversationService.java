@@ -2,9 +2,14 @@ package ch.ethz.mobilecoach.services;
 
 import java.util.LinkedHashMap;
 
+import org.bson.types.ObjectId;
 
-import ch.ethz.mobilecoach.app.Post;
+import ch.ethz.mc.model.persistent.Participant;
+import ch.ethz.mc.services.internal.DatabaseManagerService;
+import ch.ethz.mc.services.internal.InDataBaseVariableStore;
+import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mobilecoach.app.Option;
+import ch.ethz.mobilecoach.app.Post;
 import ch.ethz.mobilecoach.chatlib.engine.ChatEngine;
 import ch.ethz.mobilecoach.chatlib.engine.ConversationRepository;
 import ch.ethz.mobilecoach.chatlib.engine.ExecutionException;
@@ -12,7 +17,6 @@ import ch.ethz.mobilecoach.chatlib.engine.conversation.ConversationUI;
 import ch.ethz.mobilecoach.chatlib.engine.conversation.UserReplyListener;
 import ch.ethz.mobilecoach.chatlib.engine.model.AnswerOption;
 import ch.ethz.mobilecoach.chatlib.engine.model.Message;
-import ch.ethz.mobilecoach.chatlib.engine.variables.InMemoryVariableStore;
 import ch.ethz.mobilecoach.chatlib.engine.variables.VariableStore;
 import lombok.Getter;
 
@@ -20,12 +24,16 @@ public class RichConversationService {
 
 	private MessagingService messagingService;
 	private ConversationManagementService conversationManagementService;
+	private VariablesManagerService variablesManagerService;
 	private LinkedHashMap<String, VariableStore> variableStores = new LinkedHashMap<>();
 	private LinkedHashMap<String, ChatEngine> chatEngines = new LinkedHashMap<>();	
+	private DatabaseManagerService dBManagerService;
 
-	private RichConversationService(MessagingService mattermostMessagingService, ConversationManagementService conversationManagementService) throws Exception {
+	private RichConversationService(MessagingService mattermostMessagingService, ConversationManagementService conversationManagementService, VariablesManagerService variablesManagerService, DatabaseManagerService dBManagerService) throws Exception {
 		this.messagingService = mattermostMessagingService;
 		this.conversationManagementService = conversationManagementService;
+		this.variablesManagerService = variablesManagerService;
+		this.dBManagerService = dBManagerService;
 		
 		/*
 		 * TODO:
@@ -44,19 +52,21 @@ public class RichConversationService {
 	}
 
 	public static RichConversationService start(
-			MessagingService messagingService, ConversationManagementService conversationManagementService) throws Exception {
-		RichConversationService service = new RichConversationService(messagingService, conversationManagementService);
+			MessagingService messagingService, ConversationManagementService conversationManagementService, VariablesManagerService variablesManagerService, DatabaseManagerService dBManagerService) throws Exception {
+		RichConversationService service = new RichConversationService(messagingService, conversationManagementService, variablesManagerService, dBManagerService);
 		return service;
 	}
 
-	public void sendMessage(String sender, String recipient, String message) throws ExecutionException {
+	public void sendMessage(String sender, String recipient, String message, ObjectId participantId) throws ExecutionException {
 		final String START_CONVERSATION_PREFIX = "start-conversation:";
 		if (message.startsWith(START_CONVERSATION_PREFIX)){
 			ConversationRepository repository = conversationManagementService.getRepository(null); // TODO: use Intervention id to get the repository
 			
 			// start a conversation
 			// TODO (DR): make sure these objects get cleaned up when a new conversation starts
-			VariableStore variableStore = new InMemoryVariableStore();
+			//VariableStore variableStore = new InMemoryVariableStore();
+			Participant participant = dBManagerService.getModelObjectById(Participant.class, participantId);
+			VariableStore variableStore = new InDataBaseVariableStore(variablesManagerService, participantId, participant);
 			MattermostConnector ui = new MattermostConnector(sender, recipient);
 			ChatEngine engine = new ChatEngine(repository, ui, variableStore);
 			chatEngines.put(recipient, engine);

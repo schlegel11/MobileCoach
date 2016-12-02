@@ -488,8 +488,10 @@ public class CommunicationManagerService {
 				if (USE_RICH_CONVERSATION){
 					
 					String recipient  = dialogOption.getData();
-					try {
-						richConversationService.sendMessage(messageSender, recipient, message);
+					ObjectId participantId = dialogOption.getParticipant();
+							
+ 					try {
+						richConversationService.sendMessage(messageSender, recipient, message, participantId);
 					} catch (ExecutionException e) {
 						e.printStackTrace();
 						throw new MessagingException("Error executing rich conversation.", e);
