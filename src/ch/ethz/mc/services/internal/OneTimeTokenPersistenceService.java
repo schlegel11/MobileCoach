@@ -17,7 +17,6 @@ public class OneTimeTokenPersistenceService {
 	}
 	
 	public AppToken createTokenForParticipant(ObjectId participantId) {
-		// TODO guarantee uniqueness and consostent write (probably have to generate tokenId containing participantId to avoid clashes/wrong lookups)
 		AppToken token = AppToken.create(participantId);
 		dbService.saveModelObject(token);
 		return token;

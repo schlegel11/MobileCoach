@@ -40,7 +40,7 @@ import ch.ethz.mc.model.rest.ExtendedListVariable;
 import ch.ethz.mc.model.rest.ExtendedVariable;
 import ch.ethz.mc.model.rest.Variable;
 import ch.ethz.mc.model.rest.VariableAverage;
-import ch.ethz.mc.services.internal.AppTokenPersistenceService;
+import ch.ethz.mc.services.internal.TokenPersistenceService;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService;
 import ch.ethz.mc.services.internal.VariablesManagerService;
@@ -62,7 +62,7 @@ public class RESTManagerService {
 	@Getter
 	private final FileStorageManagerService	fileStorageManagerService;
 	private final VariablesManagerService	variablesManagerService;
-	private final AppTokenPersistenceService appTokenPersistenceService;
+	private final TokenPersistenceService tokenPersistenceService;
 
 	private RESTManagerService(
 			final DatabaseManagerService databaseManagerService,
@@ -76,7 +76,7 @@ public class RESTManagerService {
 		this.databaseManagerService = databaseManagerService;
 		this.fileStorageManagerService = fileStorageManagerService;
 		this.variablesManagerService = variablesManagerService;
-		appTokenPersistenceService = new AppTokenPersistenceService(databaseManagerService);
+		tokenPersistenceService = new TokenPersistenceService(databaseManagerService);
 
 		log.info("Started.");
 	}
@@ -381,7 +381,7 @@ public class RESTManagerService {
 	 * @return corrsponding participantId or <code>null</code>
 	 */
 	public ObjectId findParticipantIdForAppToken(String token) {
-		AppToken appToken = appTokenPersistenceService.findAppTokenByToken(token);
+		AppToken appToken = tokenPersistenceService.findAppTokenByToken(token);
 		if (appToken == null) {
 			return null;
 		}
@@ -394,9 +394,18 @@ public class RESTManagerService {
 	 * @return The token to use for authentication
 	 */
 	public String createAppTokenForParticipant(ObjectId participantId) {
-		return appTokenPersistenceService.createTokenForParticipant(participantId).getToken();
+		return tokenPersistenceService.createTokenForParticipant(participantId).getToken();
 	}
-	
+
+	/**
+	 * Searches the ParticipantId for a specified OneTimeToken
+	 * @param oneTimeToken
+	 * @return the ParticipantId if valid and not yet consumed, <code>null</code> otherwise.
+	 */
+	public ObjectId consumeOneTimeToken(String oneTimeToken) {
+		return tokenPersistenceService.consumeOneTimeToken(oneTimeToken);
+	}
+
 	/*
 	 * Internal helpers
 	 */
@@ -742,5 +751,6 @@ public class RESTManagerService {
 				participantId, creditName,
 				ImplementationConstants.VARIABLE_PREFIX + variable);
 	}
+
 
 }
