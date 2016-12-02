@@ -18,14 +18,17 @@ package ch.ethz.mc.services.internal;
  * limitations under the License.
  */
 import java.util.ArrayList;
-
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
+import java.util.Collection;
 
 import org.jongo.Jongo;
 
+import com.mongodb.MongoClient;
+import com.mongodb.MongoCredential;
+import com.mongodb.ServerAddress;
+
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.AbstractModelObjectAccessService;
+import ch.ethz.mc.model.IndexSpec;
 import ch.ethz.mc.model.Indices;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
@@ -33,10 +36,8 @@ import ch.ethz.mc.model.persistent.Author;
 import ch.ethz.mc.model.persistent.consistency.DataModelConfiguration;
 import ch.ethz.mc.tools.BCrypt;
 import ch.ethz.mc.tools.DataModelUpdateManager;
-
-import com.mongodb.MongoClient;
-import com.mongodb.MongoCredential;
-import com.mongodb.ServerAddress;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class DatabaseManagerService extends AbstractModelObjectAccessService {
@@ -77,12 +78,12 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 			val indicesHashtableKeys = indicesHashtable.keys();
 			while (indicesHashtableKeys.hasMoreElements()) {
 				val clazz = indicesHashtableKeys.nextElement();
-				final String[] indices = indicesHashtable.get(clazz);
+				final Collection<IndexSpec> indices = indicesHashtable.get(clazz);
 				val collection = jongo.getCollection(clazz.getSimpleName());
-				for (final String index : indices) {
+				for (final IndexSpec index : indices) {
 					log.debug("Creating/ensuring index {} on collection {}",
 							index, clazz.getSimpleName());
-					collection.ensureIndex(index);
+					index.ensureOn(collection);
 				}
 			}
 		} catch (final Exception e) {
