@@ -47,7 +47,7 @@ public class AppService {
 	public Result authenticateApp(@Context final HttpServletRequest request, @HeaderParam("Authentication") final String authentication) throws BadRequestException{
 		
 		if (authentication == null){
-			throw new WebApplicationException(Response.status(400).entity("Missing header 'Authenication'.").build());
+			throw new WebApplicationException(Response.status(400).entity("Missing header 'Authentication'.").build());
 		}
 
 		if(!authentication.startsWith(CONST)){
