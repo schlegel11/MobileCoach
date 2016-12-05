@@ -5,10 +5,13 @@ import static org.junit.Assert.assertEquals;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import org.bson.types.ObjectId;
 import org.junit.Test;
 
 import ch.ethz.mobilecoach.app.Post;
 import ch.ethz.mobilecoach.chatlib.engine.ConversationRepository;
+import ch.ethz.mobilecoach.chatlib.engine.ExecutionException;
+import ch.ethz.mobilecoach.chatlib.engine.variables.VariableStore;
 import ch.ethz.mobilecoach.chatlib.engine.xml.DomParser;
 import ch.ethz.mobilecoach.services.ConversationManagementService;
 import ch.ethz.mobilecoach.services.MessagingService;
@@ -23,9 +26,9 @@ public class RichConversationServiceTest {
     	MessagingServiceMock ms = new MessagingServiceMock();
     	
     	ConversationManagementServiceMock conversationManagementService = new ConversationManagementServiceMock();
-    	RichConversationService service = RichConversationService.start(ms, conversationManagementService);
+    	RichConversationService service = RichConversationService.start(ms, conversationManagementService, null, null);
     	
-    	service.sendMessage("dummy", "test-user-id1", "start-conversation:test-conversation1");
+    	service.sendMessage("dummy", "test-user-id1", "start-conversation:test-conversation1", null);
     	
     	assertEquals("Hi there!", ms.messages.get(0));
     	assertEquals("Are you ready for a challenge?", ms.messages.get(2));    	   	
@@ -65,6 +68,13 @@ public class RichConversationServiceTest {
 			return repository;
 		}
     }
-		
-
+    
+    
+    public interface RichConversationIfc{
+    	
+    	public VariableStore createVariableStore(ObjectId participantId);
+    	
+    	public void sendMessage(String sender, String recipient, String message, ObjectId participantId) throws ExecutionException;
+        	
+    }
 }

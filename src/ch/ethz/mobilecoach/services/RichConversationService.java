@@ -17,10 +17,11 @@ import ch.ethz.mobilecoach.chatlib.engine.conversation.ConversationUI;
 import ch.ethz.mobilecoach.chatlib.engine.conversation.UserReplyListener;
 import ch.ethz.mobilecoach.chatlib.engine.model.AnswerOption;
 import ch.ethz.mobilecoach.chatlib.engine.model.Message;
+import ch.ethz.mobilecoach.chatlib.engine.variables.InMemoryVariableStore;
 import ch.ethz.mobilecoach.chatlib.engine.variables.VariableStore;
 import lombok.Getter;
 
-public class RichConversationService {
+public class RichConversationService{
 
 	private MessagingService messagingService;
 	private ConversationManagementService conversationManagementService;
@@ -34,7 +35,7 @@ public class RichConversationService {
 		this.conversationManagementService = conversationManagementService;
 		this.variablesManagerService = variablesManagerService;
 		this.dBManagerService = dBManagerService;
-		
+
 		/*
 		 * TODO:
 		 * 
@@ -61,23 +62,22 @@ public class RichConversationService {
 		final String START_CONVERSATION_PREFIX = "start-conversation:";
 		if (message.startsWith(START_CONVERSATION_PREFIX)){
 			ConversationRepository repository = conversationManagementService.getRepository(null); // TODO: use Intervention id to get the repository
-			
+
 			// start a conversation
 			// TODO (DR): make sure these objects get cleaned up when a new conversation starts
 			//VariableStore variableStore = new InMemoryVariableStore();
-			Participant participant = dBManagerService.getModelObjectById(Participant.class, participantId);
-			VariableStore variableStore = new InDataBaseVariableStore(variablesManagerService, participantId, participant);
+			VariableStore variableStore = createVariableStore(participantId);
 			MattermostConnector ui = new MattermostConnector(sender, recipient);
 			ChatEngine engine = new ChatEngine(repository, ui, variableStore);
 			chatEngines.put(recipient, engine);
-			
+
 			messagingService.setListener(recipient, ui);
-			
+
 			ui.setUserReplyListener(new UserReplyListener(){
 				@Override
 				public void userReplied(Message message) {
 					String participantId = ui.getRecipient();
-					
+
 					if (chatEngines.containsKey(participantId)){
 						engine.handleInput(message.answerOptionId);
 					} else {
@@ -86,30 +86,43 @@ public class RichConversationService {
 					}
 				}
 			});
-			
+
 			String conversation = message.substring(START_CONVERSATION_PREFIX.length());
 			engine.startConversation(conversation);
-			
+
 		} else {
 			// stop conversation
 			if (chatEngines.containsKey(recipient)){
 				chatEngines.remove(recipient);
 			}
-			
+
 			// send a message
 			messagingService.sendMessage(sender, recipient, message);
 		}
 	}
+
 	
+	public VariableStore createVariableStore(ObjectId participantId) {
+		VariableStore variableStore;
+		// For testing purposes only. 
+		if(dBManagerService == null || variablesManagerService == null){
+			variableStore = new InMemoryVariableStore();
+		}else{
+			Participant participant = dBManagerService.getModelObjectById(Participant.class, participantId);
+			variableStore = new InDataBaseVariableStore(variablesManagerService, participantId, participant);
+		}
+		return variableStore;
+	}
+
 	private class MattermostConnector implements ConversationUI, MessagingService.MessageListener {
-		
+
 		private UserReplyListener listener;
-		
+
 		private String sender;
-		
+
 		@Getter
 		private String recipient;
-		
+
 		public MattermostConnector(String sender, String recipient){
 			this.sender = sender;
 			this.recipient = recipient;
@@ -118,10 +131,10 @@ public class RichConversationService {
 		@Override
 		public void showMessage(Message message) {
 			if (Message.SENDER_COACH.equals(message.sender)){
-				
+
 				Post post = new Post();
 				post.setMessage(message.text);
-				
+
 				if (message.answerOptions.size() > 0){
 					post.setPostType(Post.POST_TYPE_REQUEST);
 					String requestType = message.answerType != null ? message.answerType : Post.REQUEST_TYPE_SELECT_ONE;
@@ -137,7 +150,7 @@ public class RichConversationService {
 					post.setPostType(Post.POST_TYPE_REQUEST);
 					post.setRequestType(message.answerType);
 				}
-				
+
 				messagingService.sendMessage(sender, recipient, post);
 			}
 		}
@@ -151,14 +164,14 @@ public class RichConversationService {
 		public void delay(Runnable callback, Integer milliseconds) {
 			// TODO implement a better delay
 			new java.util.Timer().schedule( 
-			        new java.util.TimerTask() {
-			            @Override
-			            public void run() {
-			            	callback.run();
-			            }
-			        }, 
-			        milliseconds 
-			);
+					new java.util.TimerTask() {
+						@Override
+						public void run() {
+							callback.run();
+						}
+					}, 
+					milliseconds 
+					);
 		}
 
 		public void receivePost(Post post) {
@@ -170,7 +183,7 @@ public class RichConversationService {
 				this.listener.userReplied(msg);
 			}
 		}
-		
+
 	}
 
 }
