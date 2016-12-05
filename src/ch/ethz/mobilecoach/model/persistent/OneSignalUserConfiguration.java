@@ -11,7 +11,7 @@ import lombok.Setter;
 public class OneSignalUserConfiguration extends ModelObject {
 	@Getter
 	@Setter
-	private String participantId;
+	private String participantId; // TODO: use ObjectId
 	@Getter
 	@Setter
 	private List<String> playerIds;

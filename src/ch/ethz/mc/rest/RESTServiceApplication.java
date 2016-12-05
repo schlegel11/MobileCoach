@@ -58,7 +58,7 @@ public class RESTServiceApplication extends Application {
 		services.add(new VariableAccessService(restManagerService));
 		services.add(new VotingService(restManagerService));
 		services.add(new AppService(restManagerService, matterMostService));
-		services.add(new OneSignalAppService(matterMostService));
+		services.add(new OneSignalAppService(restManagerService, matterMostService));
 
 		log.info("Started.");
 	}

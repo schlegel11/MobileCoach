@@ -38,7 +38,7 @@ public class AppService {
 	@GET
 	@Path("/getconfig")
 	@Produces("application/json")
-	public Result authenticateApp(@Context final HttpServletRequest request,
+	public Result getConfig(@Context final HttpServletRequest request,
 			@HeaderParam("Authentication") final String oneTimeToken) throws BadRequestException {
 
 		if (oneTimeToken == null) {
@@ -59,11 +59,10 @@ public class AppService {
 
 	private MattermostUserConfiguration fetchUserConfiguration(final ObjectId participantId) {
 		MattermostUserConfiguration userConfig;
-		String participant = participantId.toHexString();
-		if (mattMgmtService.existsUserForParticipant(participant)) {
-			userConfig = mattMgmtService.getUserConfiguration(participant);
+		if (mattMgmtService.existsUserForParticipant(participantId)) {
+			userConfig = mattMgmtService.getUserConfiguration(participantId);
 		} else {
-			userConfig = mattMgmtService.createParticipantUser(participant);
+			userConfig = mattMgmtService.createParticipantUser(participantId);
 		}
 		return userConfig;
 	}

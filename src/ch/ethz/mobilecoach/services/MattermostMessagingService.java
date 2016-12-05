@@ -15,6 +15,7 @@ import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.bson.types.ObjectId;
 import org.json.JSONObject;
 
 import ch.ethz.mobilecoach.app.Post;
@@ -88,13 +89,13 @@ public class MattermostMessagingService implements MessagingService {
 	// Sending
 	
 	@Override
-	public void sendMessage(String sender, String recipient, String message){
+	public void sendMessage(String sender, ObjectId recipient, String message){
 		Post post = new Post();
 		post.setMessage(message);
 		sendMessage(sender, recipient, post);
 	}
 
-	public void sendMessage(String sender, String recipient, Post post){
+	public void sendMessage(String sender, ObjectId recipient, Post post){
 		ensureLoggedIn();
 		
 		if (!managementService.existsUserForParticipant(recipient)){
@@ -128,9 +129,15 @@ public class MattermostMessagingService implements MessagingService {
 
 	
 	
-	public void sendPushNotification(String recipient, Post post) {
+	public void sendPushNotification(ObjectId recipient, Post post) {
 
 		OneSignalUserConfiguration oneSignalUserConfiguration = managementService.findOneSignalObject(recipient);
+		
+		if (oneSignalUserConfiguration == null){
+			// TODO Dominik/Filipe: handle this case appropriately
+			return;
+		}
+		
 		String[] playerIds = new String[oneSignalUserConfiguration.getPlayerIds().size()];
 		
 		for(int ind = 0; ind < oneSignalUserConfiguration.getPlayerIds().size(); ind++){
@@ -185,20 +192,20 @@ public class MattermostMessagingService implements MessagingService {
 	 */
 	
 	// Mapping Mattermost userids to MobileCoach user ids
-	LinkedHashMap<String, String> senderIdToRecipient = new LinkedHashMap<>();
+	LinkedHashMap<String, ObjectId> senderIdToRecipient = new LinkedHashMap<>();
 	
 	
-	LinkedHashMap<String, MessageListener> listenerForRecipient = new LinkedHashMap<>();
+	LinkedHashMap<ObjectId, MessageListener> listenerForRecipient = new LinkedHashMap<>();
 	
 	
-	public void setListener(String recipient, MessageListener listener){
+	public void setListener(ObjectId recipient, MessageListener listener){
 		listenerForRecipient.put(recipient, listener);
 	}
 	
 	
 	private void receiveMessage(String senderId, Post post){
 		if (senderIdToRecipient.containsKey(senderId)){
-			String recipient = senderIdToRecipient.get(senderId);
+			ObjectId recipient = senderIdToRecipient.get(senderId);
 			if (listenerForRecipient.containsKey(recipient)){
 				listenerForRecipient.get(recipient).receivePost(post);
 			}

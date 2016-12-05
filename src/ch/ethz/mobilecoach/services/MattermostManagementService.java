@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.bson.types.ObjectId;
 import org.json.JSONObject;
 
 import ch.ethz.mc.services.internal.DatabaseManagerService;
@@ -94,7 +95,7 @@ public class MattermostManagementService {
 	}
 
 
-	public OneSignalUserConfiguration findOneSignalObject(String participantId){
+	public OneSignalUserConfiguration findOneSignalObject(ObjectId participantId){
 
 		OneSignalUserConfiguration oneSignalUserConfiguration = databaseManagerService.findOneModelObject(OneSignalUserConfiguration.class, "{'participantId':#}", participantId);
 
@@ -102,7 +103,7 @@ public class MattermostManagementService {
 	}
 
 
-	public void addDeviceToDatabase(OneSignalUserConfiguration oneSignalUserConfiguration, String authentication, String playerId){
+	public void addDeviceToDatabase(OneSignalUserConfiguration oneSignalUserConfiguration, ObjectId authentication, String playerId){
 
 		if(!oneSignalUserConfiguration.getPlayerIds().contains(playerId)) {
 
@@ -113,19 +114,19 @@ public class MattermostManagementService {
 
 	
 
-	public void creatOneSignalObject(String participantId, String playerId){
+	public void creatOneSignalObject(ObjectId participantId, String playerId){
 
 		long timestamp = System.currentTimeMillis(); 
 		List<String> playerIds = new ArrayList<>();
 		playerIds.add(playerId);
-		OneSignalUserConfiguration config = new OneSignalUserConfiguration(participantId, playerIds, timestamp);
+		OneSignalUserConfiguration config = new OneSignalUserConfiguration(participantId.toHexString(), playerIds, timestamp);
 
 		databaseManagerService.saveModelObject(config);	
 	}
 
 
 
-	public MattermostUserConfiguration createParticipantUser(String participantId){
+	public MattermostUserConfiguration createParticipantUser(ObjectId participantId){
 		ensureAuthentication();
 		MattermostUserConfiguration config = createMattermostUser();
 
@@ -229,16 +230,16 @@ public class MattermostManagementService {
 	 * 		Providing Information
 	 */
 
-	public String getTeamId(String participantId) {
+	public String getTeamId(ObjectId participantId) {
 		// TODO: return team id based on the intervention
 		return this.teamId;
 	}
 
-	public Boolean existsUserForParticipant(String participantId){
+	public Boolean existsUserForParticipant(ObjectId participantId){
 		return null != databaseManagerService.findOneModelObject(MattermostUserConfiguration.class, "{'participantId':#}", participantId);
 	}
 
-	public MattermostUserConfiguration getUserConfiguration(String participantId){
+	public MattermostUserConfiguration getUserConfiguration(ObjectId participantId){
 		MattermostUserConfiguration config =  databaseManagerService.findOneModelObject(MattermostUserConfiguration.class, "{'participantId':#}", participantId);
 
 		long tokenRenewalAfter = config.getTokenTimestamp() + 1000 * 24 * 3600 * TOKEN_RENEWAL_AFTER_DAYS;

@@ -486,8 +486,8 @@ public class CommunicationManagerService {
 			} else {
 				
 				if (USE_RICH_CONVERSATION){
-					
-					String recipient  = dialogOption.getData();
+								
+					ObjectId recipient  = dialogOption.getParticipant();
 					try {
 						richConversationService.sendMessage(messageSender, recipient, message);
 					} catch (ExecutionException e) {

@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import org.bson.types.ObjectId;
 import org.junit.Test;
 
 import ch.ethz.mobilecoach.app.Post;
@@ -25,7 +26,7 @@ public class RichConversationServiceTest {
     	ConversationManagementServiceMock conversationManagementService = new ConversationManagementServiceMock();
     	RichConversationService service = RichConversationService.start(ms, conversationManagementService);
     	
-    	service.sendMessage("dummy", "test-user-id1", "start-conversation:test-conversation1");
+    	service.sendMessage("dummy", new ObjectId("test-user-id1"), "start-conversation:test-conversation1");
     	
     	assertEquals("Hi there!", ms.messages.get(0));
     	assertEquals("Are you ready for a challenge?", ms.messages.get(2));    	   	
@@ -35,17 +36,17 @@ public class RichConversationServiceTest {
     	public final ArrayList<String> messages = new ArrayList<>();
 
 		@Override
-		public void sendMessage(String sender, String recipient, String message) {
+		public void sendMessage(String sender, ObjectId recipient, String message) {
 			messages.add(message);
 		}
 
 		@Override
-		public void setListener(String userId, MessageListener listener) {
+		public void setListener(ObjectId userId, MessageListener listener) {
 			// do nothing
 		}
 
 		@Override
-		public void sendMessage(String sender, String recipient, Post post) {
+		public void sendMessage(String sender, ObjectId recipient, Post post) {
 			
 		}
     }
