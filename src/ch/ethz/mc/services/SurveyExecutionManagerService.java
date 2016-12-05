@@ -28,10 +28,6 @@ import java.util.Locale;
 
 import javax.servlet.http.HttpSession;
 
-import lombok.Synchronized;
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 
@@ -69,6 +65,9 @@ import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mc.tools.RuleEvaluator;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.tools.VariableStringReplacer;
+import lombok.Synchronized;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Cares for the orchestration of {@link ScreeningSurveySlides} as
@@ -772,6 +771,11 @@ public class SurveyExecutionManagerService {
 				case TEXT_ONLY:
 					templateVariables.put(
 							SurveySlideTemplateLayoutTypes.TEXT_ONLY
+									.toVariable(), true);
+					break;
+				case HTML_ONLY:
+					templateVariables.put(
+							SurveySlideTemplateLayoutTypes.HTML_ONLY
 									.toVariable(), true);
 					break;
 				case MEDIA_ONLY:
