@@ -113,7 +113,7 @@ public class RichConversationService {
 				
 				if (message.answerOptions.size() > 0){
 					post.setPostType(Post.POST_TYPE_REQUEST);
-					String requestType = message.answerType != null ? message.answerType : Post.REQUEST_TYPE_SELECT_ONE;
+					String requestType = message.requestType != null ? message.requestType : Post.REQUEST_TYPE_SELECT_ONE;
 					post.setRequestType(requestType);
 					for (AnswerOption answerOption: message.answerOptions){
 						Option option = new Option(answerOption.text, answerOption.value);
@@ -122,9 +122,9 @@ public class RichConversationService {
 				} else if (message.objectId != null){
 					post.setPostType(Post.POST_TYPE_REQUEST);
 					post.setRequestType(message.objectId);
-				} else if (message.answerType != null){
+				} else if (message.requestType != null){
 					post.setPostType(Post.POST_TYPE_REQUEST);
-					post.setRequestType(message.answerType);
+					post.setRequestType(message.requestType);
 				}
 				
 				messagingService.sendMessage(sender, recipient, post);
