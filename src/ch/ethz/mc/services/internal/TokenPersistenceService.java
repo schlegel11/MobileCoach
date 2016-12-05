@@ -1,5 +1,7 @@
 package ch.ethz.mc.services.internal;
 
+import java.util.Date;
+
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.model.persistent.AppToken;
@@ -22,6 +24,23 @@ public class TokenPersistenceService {
 		AppToken token = AppToken.create(participantId);
 		dbService.saveModelObject(token);
 		return token;
+	}
+	
+	public String getOrCreateRecentOneTimeToken(ObjectId participantId) {
+		Iterable<OneTimeToken> tokens = dbService.findModelObjects(OneTimeToken.class, "{participantId:#}", participantId);
+		OneTimeToken newest = null;
+		for (OneTimeToken token : tokens) {
+			if (newest == null) {
+				newest = token;
+			} else if (newest.getCreatedAt().before(token.getCreatedAt())) {
+				newest = token;
+			}
+		}
+		if (newest == null || new Date().getTime()-newest.getCreatedAt().getTime()>24*3600*1000) {
+			
+			newest = createOneTimeTokenForParticipant(participantId);
+		}
+		return newest.getToken();
 	}
 	
 	public OneTimeToken createOneTimeTokenForParticipant(ObjectId participantId) {

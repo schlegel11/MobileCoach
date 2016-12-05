@@ -34,7 +34,7 @@ public class SystemVariables {
 	};
 
 	public enum READ_ONLY_PARTICIPANT_VARIABLES {
-		participantParticipationInWeeks, participantParticipationInDays, participantFeedbackURL;
+		participantParticipationInWeeks, participantParticipationInDays, participantFeedbackURL, participantOneTimeToken;
 
 		public String toVariableName() {
 			return ImplementationConstants.VARIABLE_PREFIX + toString();
