@@ -2,9 +2,8 @@ package ch.ethz.mobilecoach.services;
 
 import java.util.LinkedHashMap;
 
-
-import ch.ethz.mobilecoach.app.Post;
 import ch.ethz.mobilecoach.app.Option;
+import ch.ethz.mobilecoach.app.Post;
 import ch.ethz.mobilecoach.chatlib.engine.ChatEngine;
 import ch.ethz.mobilecoach.chatlib.engine.ConversationRepository;
 import ch.ethz.mobilecoach.chatlib.engine.ExecutionException;

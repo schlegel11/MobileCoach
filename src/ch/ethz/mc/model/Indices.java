@@ -1,5 +1,7 @@
 package ch.ethz.mc.model;
 
+import java.util.ArrayList;
+import java.util.Collection;
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
  *
@@ -18,8 +20,9 @@ package ch.ethz.mc.model;
  * limitations under the License.
  */
 import java.util.Hashtable;
+import java.util.List;
 
-import lombok.val;
+import ch.ethz.mc.model.persistent.AppToken;
 import ch.ethz.mc.model.persistent.Author;
 import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogOption;
@@ -31,10 +34,12 @@ import ch.ethz.mc.model.persistent.InterventionVariableWithValue;
 import ch.ethz.mc.model.persistent.MediaObjectParticipantShortURL;
 import ch.ethz.mc.model.persistent.MonitoringReplyRule;
 import ch.ethz.mc.model.persistent.MonitoringRule;
+import ch.ethz.mc.model.persistent.OneTimeToken;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.ParticipantVariableWithValue;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlideRule;
+import lombok.val;
 
 /**
  * Describes all indices that shall be created in the database
@@ -70,41 +75,61 @@ public class Indices {
 	private static final String[]	intermediateSurveyAndFeedbackParticipantShortURLIndices	= new String[] {
 		"{'shortId':1}", "{'participant':1,'survey':1}",
 	"{'participant':1,'feedback':1}"												};
+	private static final String[][]	appTokenIndices											= new String[][] {{"{'token':1}", "{unique: true}"}};
+	private static final String[][]	oneTimeTokenIndices										= new String[][] {{"{'token':1}", "{unique: true}"},{"{'createdAt':1}","{expireAfterSeconds:172800}"}};
 
 	/**
 	 * Creates a hashtable containing all indices for all {@link ModelObject}
 	 *
 	 * @return
 	 */
-	public static Hashtable<Class<? extends ModelObject>, String[]> getIndices() {
-		val indices = new Hashtable<Class<? extends ModelObject>, String[]>();
+	public static Hashtable<Class<? extends ModelObject>, Collection<IndexSpec>> getIndices() {
+		val indices = new Hashtable<Class<? extends ModelObject>, Collection<IndexSpec>>();
 
-		indices.put(Author.class, authorIndices);
-		indices.put(DialogMessage.class, dialogMessageIndices);
-		indices.put(DialogOption.class, dialogOptionIndices);
-		indices.put(DialogStatus.class, dialogStatusIndices);
-		indices.put(Participant.class, participantIndices);
+		indices.put(Author.class, convert(authorIndices));
+		indices.put(DialogMessage.class, convert(dialogMessageIndices));
+		indices.put(DialogOption.class, convert(dialogOptionIndices));
+		indices.put(DialogStatus.class, convert(dialogStatusIndices));
+		indices.put(Participant.class, convert(participantIndices));
 
 		indices.put(ParticipantVariableWithValue.class,
-				participantVariableWithValuesIndices);
+				convert(participantVariableWithValuesIndices));
 		indices.put(InterventionVariableWithValue.class,
-				interventionVariableWithValuesIndices);
+				convert(interventionVariableWithValuesIndices));
 
-		indices.put(MonitoringRule.class, monitoringRuleIndices);
-		indices.put(MonitoringReplyRule.class, monitoringReplyRuleIndices);
+		indices.put(MonitoringRule.class, convert(monitoringRuleIndices));
+		indices.put(MonitoringReplyRule.class, convert(monitoringReplyRuleIndices));
 
-		indices.put(ScreeningSurveySlide.class, screeningSurveySlideIndices);
+		indices.put(ScreeningSurveySlide.class, convert(screeningSurveySlideIndices));
 		indices.put(ScreeningSurveySlideRule.class,
-				screeningSurveySlideRuleIndices);
+				convert(screeningSurveySlideRuleIndices));
 
-		indices.put(FeedbackSlide.class, feedbackSlideIndices);
-		indices.put(FeedbackSlideRule.class, feedbackSlideRuleIndices);
+		indices.put(FeedbackSlide.class, convert(feedbackSlideIndices));
+		indices.put(FeedbackSlideRule.class, convert(feedbackSlideRuleIndices));
 
 		indices.put(MediaObjectParticipantShortURL.class,
-				mediaObjectParticipantShortURLIndices);
+				convert(mediaObjectParticipantShortURLIndices));
 		indices.put(IntermediateSurveyAndFeedbackParticipantShortURL.class,
-				intermediateSurveyAndFeedbackParticipantShortURLIndices);
+				convert(intermediateSurveyAndFeedbackParticipantShortURLIndices));
+		indices.put(AppToken.class,convert(appTokenIndices));
+		indices.put(OneTimeToken.class, convert(oneTimeTokenIndices));
 
 		return indices;
+	}
+	
+	private static Collection<IndexSpec> convert(String[] indices) {
+		List<IndexSpec> specs = new ArrayList<>();
+		for(String index : indices) {
+			specs.add(new IndexSpec(index));
+		}
+		return specs;
+	}
+	
+	private static Collection<IndexSpec> convert(String[][] indicesWithOptions) {
+		List<IndexSpec> specs = new ArrayList<>();
+		for(String[] index : indicesWithOptions) {
+			specs.add(IndexSpec.create(index));
+		}
+		return specs;
 	}
 }

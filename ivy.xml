@@ -133,6 +133,8 @@
 		
 		<!-- JUnit -->
 		<dependency org="junit" name="junit-dep" rev="4.8.2"/>
+		<!-- https://mvnrepository.com/artifact/org.mockito/mockito-all -->
+		<dependency org="org.mockito" name="mockito-all" rev="1.8.4"/>
 		
 		<!-- Tyrus (WebSocket API) -->
 		<dependency org="org.glassfish.tyrus" name="tyrus-client" rev="1.13"/>
