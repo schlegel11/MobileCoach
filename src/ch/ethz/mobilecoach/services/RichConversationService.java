@@ -53,8 +53,13 @@ public class RichConversationService {
 				public void userReplied(Message message) {
 					ObjectId participantId = ui.getRecipient();
 					
+					String input = message.answerOptionId;
+					if (input == null){
+						input = ""; // use empty string if no option is provided (works for requests that don't expect a value)
+					}
+					
 					if (chatEngines.containsKey(participantId)){
-						engine.handleInput(message.answerOptionId);
+						engine.handleInput(input);
 					} else {
 						// TODO (DR): store the message for the MC system to collect it. 
 						//            This is not necessary for the PathMate2 intervention.

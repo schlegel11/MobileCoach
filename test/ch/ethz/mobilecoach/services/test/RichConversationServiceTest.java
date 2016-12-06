@@ -26,7 +26,7 @@ public class RichConversationServiceTest {
     	ConversationManagementServiceMock conversationManagementService = new ConversationManagementServiceMock();
     	RichConversationService service = RichConversationService.start(ms, conversationManagementService);
     	
-    	service.sendMessage("dummy", new ObjectId("test-user-id1"), "start-conversation:test-conversation1");
+    	service.sendMessage("dummy", new ObjectId(), "start-conversation:test-conversation1");
     	
     	assertEquals("Hi there!", ms.messages.get(0));
     	assertEquals("Are you ready for a challenge?", ms.messages.get(2));    	   	
