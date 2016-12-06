@@ -2,15 +2,15 @@ package ch.ethz.mc.services.internal;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -83,9 +83,13 @@ public class CommunicationManagerService {
 
 	private final String						mailboxProtocol;
 	private final String						mailboxFolder;
-	private final String						mailSubjectStartsWith;
+
+	private final String						emailFrom;
+	private final String						emailSubjectForParticipant;
+	private final String						emailSubjectForSupervisor;
 
 	private final String						smsEmailFrom;
+	private final String						smsMailSubjectStartsWith;
 	private final String						smsEmailTo;
 	private final String						smsUserKey;
 	private final String						smsUserPassword;
@@ -97,7 +101,7 @@ public class CommunicationManagerService {
 
 	private CommunicationManagerService(
 			final RichConversationService richConversationService)
-			throws Exception {
+					throws Exception {
 		this.richConversationService = richConversationService;
 
 		log.info("Starting service...");
@@ -111,7 +115,7 @@ public class CommunicationManagerService {
 		val mailhostOutgoing = Constants.getMailhostOutgoing();
 		val mailUser = Constants.getMailUser();
 		val mailPassword = Constants.getMailPassword();
-		mailSubjectStartsWith = Constants.getMailSubjectStartsWith();
+
 		boolean useAuthentication;
 		if (mailUser != null && !mailUser.equals("")) {
 			log.debug("Using authentication for mail servers");
@@ -121,7 +125,13 @@ public class CommunicationManagerService {
 			useAuthentication = false;
 		}
 
+		// Email configuration
+		emailFrom = Constants.getEmailFrom();
+		emailSubjectForParticipant = Constants.getEmailSubjectForParticipant();
+		emailSubjectForSupervisor = Constants.getEmailSubjectForSupervisor();
+
 		// SMS configuration
+		smsMailSubjectStartsWith = Constants.getSmsMailSubjectStartsWith();
 		smsEmailFrom = Constants.getSmsEmailFrom();
 		smsEmailTo = Constants.getSmsEmailTo();
 		smsUserKey = Constants.getSmsUserKey();
@@ -158,7 +168,7 @@ public class CommunicationManagerService {
 
 	public static CommunicationManagerService start(
 			final RichConversationService richConversationService)
-			throws Exception {
+					throws Exception {
 		if (instance == null) {
 			instance = new CommunicationManagerService(richConversationService);
 		}
@@ -201,9 +211,9 @@ public class CommunicationManagerService {
 				messageSender, message, messageExpectsAnswer);
 
 		interventionExecutionManagerService
-				.dialogMessageStatusChangesForSending(dialogMessageId,
-						DialogMessageStatusTypes.SENDING,
-						InternalDateTime.currentTimeMillis());
+		.dialogMessageStatusChangesForSending(dialogMessageId,
+				DialogMessageStatusTypes.SENDING,
+				InternalDateTime.currentTimeMillis());
 
 		synchronized (runningMailingThreads) {
 			runningMailingThreads.add(mailingThread);
@@ -236,7 +246,7 @@ public class CommunicationManagerService {
 
 			for (val message : folder.getMessages()) {
 				// Only handle messages who match the subject pattern
-				if (message.getSubject().startsWith(mailSubjectStartsWith)) {
+				if (message.getSubject().startsWith(smsMailSubjectStartsWith)) {
 					try {
 
 						log.debug("Mail received with subject '{}'",
@@ -276,7 +286,7 @@ public class CommunicationManagerService {
 								.evaluate("/aspsms/DateReceived",
 										document.getDocumentElement(),
 										XPathConstants.NODESET)).item(0)
-								.getTextContent();
+										.getTextContent();
 
 						val receivedTimestamp = receiverDateFormat.parse(
 								receivedTimestampString).getTime();
@@ -284,11 +294,11 @@ public class CommunicationManagerService {
 						// Abjust for simulated date and time
 						if (Constants.isSimulatedDateAndTime()) {
 							receivedMessage
-									.setReceivedTimestamp(InternalDateTime
-											.currentTimeMillis());
+							.setReceivedTimestamp(InternalDateTime
+									.currentTimeMillis());
 						} else {
 							receivedMessage
-									.setReceivedTimestamp(receivedTimestamp);
+							.setReceivedTimestamp(receivedTimestamp);
 						}
 
 						val messageStringEncoded = ((NodeList) xPath.evaluate(
@@ -400,16 +410,16 @@ public class CommunicationManagerService {
 
 				if (messageExpectsAnswer) {
 					interventionExecutionManagerService
-							.dialogMessageStatusChangesForSending(
-									dialogMessageId,
-									DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
-									InternalDateTime.currentTimeMillis());
+					.dialogMessageStatusChangesForSending(
+							dialogMessageId,
+							DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
+							InternalDateTime.currentTimeMillis());
 				} else {
 					interventionExecutionManagerService
-							.dialogMessageStatusChangesForSending(
-									dialogMessageId,
-									DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
-									InternalDateTime.currentTimeMillis());
+					.dialogMessageStatusChangesForSending(
+							dialogMessageId,
+							DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
+							InternalDateTime.currentTimeMillis());
 				}
 
 				removeFromList();
@@ -426,16 +436,16 @@ public class CommunicationManagerService {
 			for (int i = 0; i < ImplementationConstants.MAILING_SEND_RETRIES; i++) {
 				try {
 					TimeUnit.SECONDS
-							.sleep(simulatorActive ? ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR
-									: ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR);
+					.sleep(simulatorActive ? ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR
+							: ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR);
 				} catch (final InterruptedException e) {
 					log.warn("Interrupted messaging sending approach {}", i);
 
 					interventionExecutionManagerService
-							.dialogMessageStatusChangesForSending(
-									dialogMessageId,
-									DialogMessageStatusTypes.PREPARED_FOR_SENDING,
-									InternalDateTime.currentTimeMillis());
+					.dialogMessageStatusChangesForSending(
+							dialogMessageId,
+							DialogMessageStatusTypes.PREPARED_FOR_SENDING,
+							InternalDateTime.currentTimeMillis());
 
 					return;
 				}
@@ -445,16 +455,16 @@ public class CommunicationManagerService {
 
 					if (messageExpectsAnswer) {
 						interventionExecutionManagerService
-								.dialogMessageStatusChangesForSending(
-										dialogMessageId,
-										DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
-										InternalDateTime.currentTimeMillis());
+						.dialogMessageStatusChangesForSending(
+								dialogMessageId,
+								DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
+								InternalDateTime.currentTimeMillis());
 					} else {
 						interventionExecutionManagerService
-								.dialogMessageStatusChangesForSending(
-										dialogMessageId,
-										DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
-										InternalDateTime.currentTimeMillis());
+						.dialogMessageStatusChangesForSending(
+								dialogMessageId,
+								DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
+								InternalDateTime.currentTimeMillis());
 					}
 
 					removeFromList();
@@ -470,9 +480,9 @@ public class CommunicationManagerService {
 					dialogOption.getData());
 
 			interventionExecutionManagerService
-					.dialogMessageStatusChangesForSending(dialogMessageId,
-							DialogMessageStatusTypes.PREPARED_FOR_SENDING,
-							InternalDateTime.currentTimeMillis());
+			.dialogMessageStatusChangesForSending(dialogMessageId,
+					DialogMessageStatusTypes.PREPARED_FOR_SENDING,
+					InternalDateTime.currentTimeMillis());
 
 			removeFromList();
 		}
@@ -494,7 +504,7 @@ public class CommunicationManagerService {
 		 */
 		private void sendMessage(final DialogOption dialogOption,
 				final String messageSender, final String message)
-				throws AddressException, MessagingException {
+						throws AddressException, MessagingException {
 			log.debug("Sending message with text {} to {}", message,
 					dialogOption.getData());
 
@@ -511,7 +521,7 @@ public class CommunicationManagerService {
 								outgoingMailSession);
 
 						SMSMailMessage
-								.setFrom(new InternetAddress(smsEmailFrom));
+						.setFrom(new InternetAddress(smsEmailFrom));
 						SMSMailMessage.addRecipient(Message.RecipientType.TO,
 								new InternetAddress(smsEmailTo));
 						SMSMailMessage.setSubject("UserKey=" + smsUserKey
@@ -527,15 +537,14 @@ public class CommunicationManagerService {
 					case SUPERVISOR_EMAIL:
 						val EmailMessage = new MimeMessage(outgoingMailSession);
 
-						// TODO Andreas: Adjust accordingly
-						EmailMessage.setFrom(new InternetAddress(smsEmailFrom));
+						EmailMessage.setFrom(new InternetAddress(emailFrom));
 						EmailMessage.addRecipient(Message.RecipientType.TO,
-								new InternetAddress(smsEmailTo));
-						EmailMessage.setSubject("UserKey=" + smsUserKey
-								+ ",Password=" + smsUserPassword
-								+ ",Recipient=" + dialogOption.getData()
-								+ ",Originator=" + messageSender
-								+ ",Notify=none");
+								new InternetAddress(dialogOption.getData()));
+						if (dialogOption.getType() == DialogOptionTypes.EMAIL) {
+							EmailMessage.setSubject(emailSubjectForParticipant);
+						} else {
+							EmailMessage.setSubject(emailSubjectForSupervisor);
+						}
 						EmailMessage.setText(message, "UTF-8");
 
 						Transport.send(EmailMessage);
