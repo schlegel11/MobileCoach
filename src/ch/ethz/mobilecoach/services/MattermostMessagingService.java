@@ -260,7 +260,7 @@ public class MattermostMessagingService implements MessagingService {
 					
 					// parse message
 					
-					log.error("WebSocket message received: " + msg); // TODO (DR): don't log all messages that are received
+					log.debug("WebSocket message received: " + msg); // TODO (DR): don't log all messages that are received
 					
 					JSONObject message = new JSONObject(msg);
 					String event = message.getString("event");
