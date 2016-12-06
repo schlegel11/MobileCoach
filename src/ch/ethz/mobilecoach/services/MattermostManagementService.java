@@ -119,7 +119,7 @@ public class MattermostManagementService {
 		long timestamp = System.currentTimeMillis(); 
 		List<String> playerIds = new ArrayList<>();
 		playerIds.add(playerId);
-		OneSignalUserConfiguration config = new OneSignalUserConfiguration(participantId.toHexString(), playerIds, timestamp);
+		OneSignalUserConfiguration config = new OneSignalUserConfiguration(participantId, playerIds, timestamp);
 
 		databaseManagerService.saveModelObject(config);	
 	}

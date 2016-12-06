@@ -120,7 +120,7 @@ public class MattermostMessagingService implements MessagingService {
 		new MattermostTask<Void>(managementService.host_url + "teams/" + teamId + "/channels/" + channelId + "/posts/create", json)
 			.setToken(mcUserToken).run();
 		
-		if(null != managementService.findOneSignalObject(recipient)){
+		if(null == managementService.findOneSignalObject(recipient)){
 			return;
 		}
 		
