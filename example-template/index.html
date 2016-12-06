@@ -79,7 +79,10 @@
                 <input type="hidden" name="{{hidden_check_variable}}" value="{{hidden_check_variable_value}}" /> {{/is_survey}} {{#text_only}}
                 <h3>Text only.</h3>
                 <p class="with-linebreaks">{{#questions}}{{question_text}}{{/questions}}</p>
-                {{/text_only}} {{#media_only}}
+                {{/text_only}} {{#html_only}}
+                <h3>HTML only.</h3>
+                <p class="with-linebreaks">{{#questions}}{{{question_text}}}{{/questions}}</p>
+                {{/html_only}} {{#media_only}}
                 <h3>Media only.</h3>
                 <p class="with-linebreaks">{{#questions}}{{question_text}}{{/questions}}</p>
                 {{/media_only}} {{#select_one}}

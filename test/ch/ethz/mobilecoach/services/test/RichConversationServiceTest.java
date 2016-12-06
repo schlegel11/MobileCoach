@@ -28,8 +28,8 @@ public class RichConversationServiceTest {
     	ConversationManagementServiceMock conversationManagementService = new ConversationManagementServiceMock();
     	RichConversationService service = RichConversationService.start(ms, conversationManagementService, null, null);
     	
-    	service.sendMessage("dummy", "test-user-id1", "start-conversation:test-conversation1", null);
-    	
+    	service.sendMessage("dummy", new ObjectId(), "start-conversation:test-conversation1");
+   	
     	assertEquals("Hi there!", ms.messages.get(0));
     	assertEquals("Are you ready for a challenge?", ms.messages.get(2));    	   	
     }
@@ -38,17 +38,17 @@ public class RichConversationServiceTest {
     	public final ArrayList<String> messages = new ArrayList<>();
 
 		@Override
-		public void sendMessage(String sender, String recipient, String message) {
+		public void sendMessage(String sender, ObjectId recipient, String message) {
 			messages.add(message);
 		}
 
 		@Override
-		public void setListener(String userId, MessageListener listener) {
+		public void setListener(ObjectId userId, MessageListener listener) {
 			// do nothing
 		}
 
 		@Override
-		public void sendMessage(String sender, String recipient, Post post) {
+		public void sendMessage(String sender, ObjectId recipient, Post post) {
 			
 		}
     }

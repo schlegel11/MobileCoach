@@ -8,6 +8,7 @@ import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.InDataBaseVariableStore;
 import ch.ethz.mc.services.internal.VariablesManagerService;
+
 import ch.ethz.mobilecoach.app.Option;
 import ch.ethz.mobilecoach.app.Post;
 import ch.ethz.mobilecoach.chatlib.engine.ChatEngine;
@@ -25,14 +26,17 @@ public class RichConversationService{
 
 	private MessagingService messagingService;
 	private ConversationManagementService conversationManagementService;
+
 	private VariablesManagerService variablesManagerService;
 	private LinkedHashMap<String, VariableStore> variableStores = new LinkedHashMap<>();
-	private LinkedHashMap<String, ChatEngine> chatEngines = new LinkedHashMap<>();	
 	private DatabaseManagerService dBManagerService;
+	private LinkedHashMap<ObjectId, ChatEngine> chatEngines = new LinkedHashMap<>();	
+
 
 	private RichConversationService(MessagingService mattermostMessagingService, ConversationManagementService conversationManagementService, VariablesManagerService variablesManagerService, DatabaseManagerService dBManagerService) throws Exception {
 		this.messagingService = mattermostMessagingService;
 		this.conversationManagementService = conversationManagementService;
+
 		this.variablesManagerService = variablesManagerService;
 		this.dBManagerService = dBManagerService;
 
@@ -58,7 +62,9 @@ public class RichConversationService{
 		return service;
 	}
 
-	public void sendMessage(String sender, String recipient, String message, ObjectId participantId) throws ExecutionException {
+
+	public void sendMessage(String sender, ObjectId recipient, String message) throws ExecutionException {
+
 		final String START_CONVERSATION_PREFIX = "start-conversation:";
 		if (message.startsWith(START_CONVERSATION_PREFIX)){
 			ConversationRepository repository = conversationManagementService.getRepository(null); // TODO: use Intervention id to get the repository
@@ -66,7 +72,7 @@ public class RichConversationService{
 			// start a conversation
 			// TODO (DR): make sure these objects get cleaned up when a new conversation starts
 			//VariableStore variableStore = new InMemoryVariableStore();
-			VariableStore variableStore = createVariableStore(participantId);
+			VariableStore variableStore = createVariableStore(recipient);
 			MattermostConnector ui = new MattermostConnector(sender, recipient);
 			ChatEngine engine = new ChatEngine(repository, ui, variableStore);
 			chatEngines.put(recipient, engine);
@@ -76,10 +82,16 @@ public class RichConversationService{
 			ui.setUserReplyListener(new UserReplyListener(){
 				@Override
 				public void userReplied(Message message) {
-					String participantId = ui.getRecipient();
+
+					ObjectId participantId = ui.getRecipient();
+					
+					String input = message.answerOptionId;
+					if (input == null){
+						input = ""; // use empty string if no option is provided (works for requests that don't expect a value)
+					}
 
 					if (chatEngines.containsKey(participantId)){
-						engine.handleInput(message.answerOptionId);
+						engine.handleInput(input);
 					} else {
 						// TODO (DR): store the message for the MC system to collect it. 
 						//            This is not necessary for the PathMate2 intervention.
@@ -121,9 +133,10 @@ public class RichConversationService{
 		private String sender;
 
 		@Getter
-		private String recipient;
+		private ObjectId recipient;
+		
+		public MattermostConnector(String sender, ObjectId recipient){
 
-		public MattermostConnector(String sender, String recipient){
 			this.sender = sender;
 			this.recipient = recipient;
 		}
@@ -137,7 +150,7 @@ public class RichConversationService{
 
 				if (message.answerOptions.size() > 0){
 					post.setPostType(Post.POST_TYPE_REQUEST);
-					String requestType = message.answerType != null ? message.answerType : Post.REQUEST_TYPE_SELECT_ONE;
+					String requestType = message.requestType != null ? message.requestType : Post.REQUEST_TYPE_SELECT_ONE;
 					post.setRequestType(requestType);
 					for (AnswerOption answerOption: message.answerOptions){
 						Option option = new Option(answerOption.text, answerOption.value);
@@ -146,9 +159,9 @@ public class RichConversationService{
 				} else if (message.objectId != null){
 					post.setPostType(Post.POST_TYPE_REQUEST);
 					post.setRequestType(message.objectId);
-				} else if (message.answerType != null){
+				} else if (message.requestType != null){
 					post.setPostType(Post.POST_TYPE_REQUEST);
-					post.setRequestType(message.answerType);
+					post.setRequestType(message.requestType);
 				}
 
 				messagingService.sendMessage(sender, recipient, post);

@@ -2,6 +2,8 @@ package ch.ethz.mobilecoach.model.persistent;
 
 import java.util.List;
 
+import org.bson.types.ObjectId;
+
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mobilecoach.model.persistent.subelements.MattermostChannel;
 import ch.ethz.mobilecoach.model.persistent.subelements.MattermostUser;
@@ -13,7 +15,7 @@ import lombok.Setter;
 public class MattermostUserConfiguration extends ModelObject {
 	@Getter
 	@Setter
-	private String participantId;
+	private ObjectId participantId;
 	@Getter
 	private String userId;
 	@Getter

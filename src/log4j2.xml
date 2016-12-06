@@ -29,6 +29,11 @@
 			<AppenderRef ref="File" />
 			<AppenderRef ref="RollingFile" />
 		</Root>
+		<Logger name="ch.ethz.mobilecoach" level="DEBUG" additivity="false">
+			<AppenderRef ref="Console" level="${sys:mc_logging_console_level}" />
+			<AppenderRef ref="File" level="WARN" />
+			<AppenderRef ref="RollingFile" level="${sys:mc_logging_rolling_file_level}" />
+		</Logger>
 		<Logger name="ch.ethz.mc" level="DEBUG" additivity="false">
 			<AppenderRef ref="Console" level="${sys:mc_logging_console_level}" />
 			<AppenderRef ref="File" level="WARN" />

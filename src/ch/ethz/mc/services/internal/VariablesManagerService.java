@@ -24,10 +24,6 @@ import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Set;
 
-import lombok.Synchronized;
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.Constants;
@@ -58,6 +54,9 @@ import ch.ethz.mc.services.types.SystemVariables.READ_WRITE_PARTICIPANT_VARIABLE
 import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.tools.StringValidator;
+import lombok.Synchronized;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Manages all variables for the system and a specific participant
@@ -386,6 +385,9 @@ public class VariablesManagerService {
 					}
 				}
 				return participantFeedbackURL;
+			case participantOneTimeToken:
+				String oneTimeToken = new TokenPersistenceService(databaseManagerService).getOrCreateRecentOneTimeToken(participant.getId());
+				return oneTimeToken;
 		}
 		return null;
 	}

@@ -21,13 +21,13 @@ import javax.servlet.http.HttpSession;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
-import lombok.Getter;
-import lombok.extern.log4j.Log4j2;
-
 import org.bson.types.ObjectId;
 
+import ch.ethz.mc.model.persistent.AppToken;
 import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mc.services.types.GeneralSessionAttributeTypes;
+import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Abstract class for all REST services
@@ -60,6 +60,18 @@ public abstract class AbstractService {
 			throw new WebApplicationException(Response.notAcceptable(null)
 					.entity("Access token missing").build());
 		}
+		if (AppToken.isAppToken(token)) {
+			ObjectId participantId = restManagerService.findParticipantIdForAppToken(token);
+			if (participantId == null) {
+				throw new WebApplicationException(Response.notAcceptable(null)
+						.entity("Wrong access token").build());
+			}
+			return participantId;
+		}
+		return checkSessionToken(token, session);
+	}
+
+	private ObjectId checkSessionToken(final String token, final HttpSession session) {
 		if (session.getAttribute(GeneralSessionAttributeTypes.VALIDATOR
 				.toString()) == null
 				|| (boolean) session

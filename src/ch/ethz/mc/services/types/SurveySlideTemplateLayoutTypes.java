@@ -32,7 +32,7 @@ public enum SurveySlideTemplateLayoutTypes {
 	 *
 	 * <code>{{#closed}}This text will only be displayed on the error slide{{/closed}}</code>
 	 */
-	CLOSED, PASSWORD_INPUT, TEXT_ONLY, MEDIA_ONLY, SELECT_ONE, SELECT_MANY, NUMBER_INPUT, TEXT_INPUT, MULTILINE_TEXT_INPUT, DISABLED, DONE;
+	CLOSED, PASSWORD_INPUT, TEXT_ONLY, MEDIA_ONLY, SELECT_ONE, SELECT_MANY, NUMBER_INPUT, TEXT_INPUT, MULTILINE_TEXT_INPUT, DISABLED, DONE, HTML_ONLY;
 
 	/**
 	 * Creates the appropriate variable name of the

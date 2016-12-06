@@ -10,8 +10,11 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
+import org.bson.types.ObjectId;
 import org.json.JSONObject;
 
+import ch.ethz.mc.model.persistent.AppToken;
+import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mobilecoach.model.persistent.OneSignalUserConfiguration;
 import ch.ethz.mobilecoach.services.MattermostManagementService;
 
@@ -21,13 +24,14 @@ public class OneSignalAppService {
 	private final static String  USER_ID = "userid:";
 	private final static String PLAYER_ID = "playerid";
 
+	private RESTManagerService restManagerService;
 	private MattermostManagementService mattMgmtService;
 
-
-	public OneSignalAppService(MattermostManagementService mattMgmtService){
-
-		this.mattMgmtService = mattMgmtService;	
+	public OneSignalAppService(RESTManagerService restManagerService, MattermostManagementService mattMgmtService) {
+		this.restManagerService = restManagerService;
+		this.mattMgmtService = mattMgmtService;
 	}
+
 
 
 	@POST
@@ -36,10 +40,10 @@ public class OneSignalAppService {
 	public String setDeviceIdentifier(@Context final HttpServletRequest request, @HeaderParam("Authentication") final String authentication, String content) throws BadRequestException{
 
 		if (authentication == null){
-			throw new WebApplicationException(Response.status(400).entity("Missing header 'Authenication'!").build());
+			throw new WebApplicationException(Response.status(400).entity("Missing header 'Authentication'!").build());
 		}
 		
-		if(!authentication.startsWith(USER_ID)){
+		if(!AppToken.isAppToken(authentication)){
 			throw new WebApplicationException(Response.status(400).entity("Invalid Credential Format!").build());
 		}
 		
@@ -49,9 +53,14 @@ public class OneSignalAppService {
 		
 		JSONObject jsonObject = new JSONObject(content);
 		String playerId = jsonObject.getString(PLAYER_ID);
-		String userId = authentication.replaceAll(USER_ID, "");
 		
-		OneSignalUserConfiguration tmp = mattMgmtService.findOneSignalObject(authentication);
+		
+		ObjectId userId = restManagerService.findParticipantIdForAppToken(authentication);
+		if (userId == null){
+			throw new WebApplicationException(Response.status(403).entity("Invalid Token!").build());
+		}
+		
+		OneSignalUserConfiguration tmp = mattMgmtService.findOneSignalObject(userId);
 		
 		if(tmp != null){
 

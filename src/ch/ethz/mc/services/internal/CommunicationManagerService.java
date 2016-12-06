@@ -74,7 +74,7 @@ import ch.ethz.mobilecoach.services.RichConversationService;
 @Log4j2
 public class CommunicationManagerService {
 	private final boolean 						USE_RICH_CONVERSATION = true;
-	
+
 	private static CommunicationManagerService	instance	= null;
 
 	private InterventionExecutionManagerService	interventionExecutionManagerService;
@@ -99,9 +99,9 @@ public class CommunicationManagerService {
 
 	private CommunicationManagerService(final RichConversationService richConversationService) throws Exception {
 		this.richConversationService = richConversationService;
-		
+
 		log.info("Starting service...");
-		
+
 		runningMailingThreads = new ArrayList<MailingThread>();
 
 		// Mailing configuration
@@ -199,9 +199,9 @@ public class CommunicationManagerService {
 				messageSender, message, messageExpectsAnswer);
 
 		interventionExecutionManagerService
-				.dialogMessageStatusChangesForSending(dialogMessageId,
-						DialogMessageStatusTypes.SENDING,
-						InternalDateTime.currentTimeMillis());
+		.dialogMessageStatusChangesForSending(dialogMessageId,
+				DialogMessageStatusTypes.SENDING,
+				InternalDateTime.currentTimeMillis());
 
 		synchronized (runningMailingThreads) {
 			runningMailingThreads.add(mailingThread);
@@ -279,11 +279,11 @@ public class CommunicationManagerService {
 						// Abjust for simulated date and time
 						if (Constants.isSimulatedDateAndTime()) {
 							receivedMessage
-									.setReceivedTimestamp(InternalDateTime
-											.currentTimeMillis());
+							.setReceivedTimestamp(InternalDateTime
+									.currentTimeMillis());
 						} else {
 							receivedMessage
-									.setReceivedTimestamp(receivedTimestamp);
+							.setReceivedTimestamp(receivedTimestamp);
 						}
 
 						val messageStringEncoded = ((NodeList) xPath.evaluate(
@@ -381,16 +381,16 @@ public class CommunicationManagerService {
 
 				if (messageExpectsAnswer) {
 					interventionExecutionManagerService
-							.dialogMessageStatusChangesForSending(
-									dialogMessageId,
-									DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
-									InternalDateTime.currentTimeMillis());
+					.dialogMessageStatusChangesForSending(
+							dialogMessageId,
+							DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
+							InternalDateTime.currentTimeMillis());
 				} else {
 					interventionExecutionManagerService
-							.dialogMessageStatusChangesForSending(
-									dialogMessageId,
-									DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
-									InternalDateTime.currentTimeMillis());
+					.dialogMessageStatusChangesForSending(
+							dialogMessageId,
+							DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
+							InternalDateTime.currentTimeMillis());
 				}
 
 				removeFromList();
@@ -407,16 +407,16 @@ public class CommunicationManagerService {
 			for (int i = 0; i < ImplementationConstants.MAILING_SEND_RETRIES; i++) {
 				try {
 					TimeUnit.SECONDS
-							.sleep(simulatorActive ? ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR
-									: ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR);
+					.sleep(simulatorActive ? ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR
+							: ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR);
 				} catch (final InterruptedException e) {
 					log.warn("Interrupted messaging sending approach {}", i);
 
 					interventionExecutionManagerService
-							.dialogMessageStatusChangesForSending(
-									dialogMessageId,
-									DialogMessageStatusTypes.PREPARED_FOR_SENDING,
-									InternalDateTime.currentTimeMillis());
+					.dialogMessageStatusChangesForSending(
+							dialogMessageId,
+							DialogMessageStatusTypes.PREPARED_FOR_SENDING,
+							InternalDateTime.currentTimeMillis());
 
 					return;
 				}
@@ -426,16 +426,16 @@ public class CommunicationManagerService {
 
 					if (messageExpectsAnswer) {
 						interventionExecutionManagerService
-								.dialogMessageStatusChangesForSending(
-										dialogMessageId,
-										DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
-										InternalDateTime.currentTimeMillis());
+						.dialogMessageStatusChangesForSending(
+								dialogMessageId,
+								DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
+								InternalDateTime.currentTimeMillis());
 					} else {
 						interventionExecutionManagerService
-								.dialogMessageStatusChangesForSending(
-										dialogMessageId,
-										DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
-										InternalDateTime.currentTimeMillis());
+						.dialogMessageStatusChangesForSending(
+								dialogMessageId,
+								DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
+								InternalDateTime.currentTimeMillis());
 					}
 
 					removeFromList();
@@ -451,9 +451,9 @@ public class CommunicationManagerService {
 					dialogOption.getData());
 
 			interventionExecutionManagerService
-					.dialogMessageStatusChangesForSending(dialogMessageId,
-							DialogMessageStatusTypes.PREPARED_FOR_SENDING,
-							InternalDateTime.currentTimeMillis());
+			.dialogMessageStatusChangesForSending(dialogMessageId,
+					DialogMessageStatusTypes.PREPARED_FOR_SENDING,
+					InternalDateTime.currentTimeMillis());
 
 			removeFromList();
 		}
@@ -475,7 +475,7 @@ public class CommunicationManagerService {
 		 */
 		private void sendMessage(final DialogOption dialogOption,
 				final String messageSender, final String message)
-				throws AddressException, MessagingException {
+						throws AddressException, MessagingException {
 			log.debug("Sending mail for outgoing SMS to {} with text {}",
 					dialogOption.getData(), message);
 
@@ -484,23 +484,22 @@ public class CommunicationManagerService {
 				log.debug("IT'S ONLY SIMULATED");
 				Simulator.getInstance().simulateSMSBySystem(message);
 			} else {
-				
+
 				if (USE_RICH_CONVERSATION){
-					
-					String recipient  = dialogOption.getData();
-					ObjectId participantId = dialogOption.getParticipant();
-							
- 					try {
-						richConversationService.sendMessage(messageSender, recipient, message, participantId);
+
+					ObjectId recipient  = dialogOption.getParticipant();
+					try {
+						richConversationService.sendMessage(messageSender, recipient, message);
+
 					} catch (ExecutionException e) {
 						e.printStackTrace();
 						throw new MessagingException("Error executing rich conversation.", e);
 					}
-					
+
 				} else {
-					
+
 					val mailMessage = new MimeMessage(outgoingMailSession);
-	
+
 					mailMessage.setFrom(new InternetAddress(smsEmailFrom));
 					mailMessage.addRecipient(Message.RecipientType.TO,
 							new InternetAddress(smsEmailTo));
@@ -509,7 +508,7 @@ public class CommunicationManagerService {
 							+ dialogOption.getData() + ",Originator="
 							+ messageSender + ",Notify=none");
 					mailMessage.setText(message, "ISO-8859-1");
-	
+
 					Transport.send(mailMessage);
 				}
 			}

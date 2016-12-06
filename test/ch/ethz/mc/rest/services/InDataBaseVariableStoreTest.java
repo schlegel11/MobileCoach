@@ -7,7 +7,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
-import org.apache.commons.lang3.ClassUtils;
 import org.bson.types.ObjectId;
 import org.junit.After;
 import org.junit.Before;
