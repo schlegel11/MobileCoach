@@ -39,21 +39,6 @@ public class RichConversationService{
 
 		this.variablesManagerService = variablesManagerService;
 		this.dBManagerService = dBManagerService;
-
-		/*
-		 * TODO:
-		 * 
-		 * [ ] Create a new VariableStore implementation, which uses
-		 *     MobileCoach's VariablesManagerService.
-		 * 
-		 * [ ] Create a new ChatEngine for a given user whenever a new
-		 *     conversation from an XML script is triggered from MobileCoach.
-		 * 
-		 * [ ] Put the conversation files in an appropriate place (as resources,
-		 *     and load them into a ConversationRepository (in future: one per
-		 *     intervention).
-		 */
-
 	}
 
 	public static RichConversationService start(
@@ -72,7 +57,8 @@ public class RichConversationService{
 			// start a conversation
 			// TODO (DR): make sure these objects get cleaned up when a new conversation starts
 			//VariableStore variableStore = new InMemoryVariableStore();
-			VariableStore variableStore = createVariableStore(recipient);
+			VariableStore variableStore = createVariableStore(recipient); // TODO: make the InDataBaseVariableStore work
+					
 			MattermostConnector ui = new MattermostConnector(sender, recipient);
 			ChatEngine engine = new ChatEngine(repository, ui, variableStore);
 			chatEngines.put(recipient, engine);

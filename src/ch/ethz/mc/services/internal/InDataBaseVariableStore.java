@@ -41,7 +41,7 @@ public class InDataBaseVariableStore implements VariableStore {
 					true, true);
 		} catch (WriteProtectedVariableException | InvalidVariableNameException e) {
 
-			throw new VariableException("variable writing failed: " + variableName);
+			throw new VariableException("variable writing failed: " + variableName, e);
 		} 
 	}
 
@@ -50,7 +50,7 @@ public class InDataBaseVariableStore implements VariableStore {
 
 		Hashtable<String, AbstractVariableWithValue> table = variableManagerService.getAllVariablesWithValuesOfParticipantAndSystem(participant);
 
-		if(!table.containsKey(variableName)) throw new VariableException("Variable has not been initilaized: " + variableName);
+		if(!table.containsKey(variableName)) throw new VariableException("Variable has not been initialized: " + variableName);
 
 		try{
 			variableManagerService.writeVariableValueOfParticipant(participantId,
@@ -58,7 +58,7 @@ public class InDataBaseVariableStore implements VariableStore {
 					true, true);
 
 		}catch(WriteProtectedVariableException | InvalidVariableNameException e){
-			throw new VariableException("variable writing failed: " + variableName);
+			throw new VariableException("variable writing failed: " + variableName, e);
 		}
 	}
 
