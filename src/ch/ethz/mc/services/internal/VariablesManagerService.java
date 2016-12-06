@@ -1440,7 +1440,7 @@ public class VariablesManagerService {
 	}
 
 	@SuppressWarnings("serial")
-	private class WriteProtectedVariableException extends Exception {
+	public class WriteProtectedVariableException extends Exception {
 		public WriteProtectedVariableException() {
 			super("This variable is write protected");
 		}
@@ -1458,7 +1458,7 @@ public class VariablesManagerService {
 	}
 
 	@SuppressWarnings("serial")
-	private class InvalidVariableNameException extends Exception {
+	public class InvalidVariableNameException extends Exception {
 		public InvalidVariableNameException() {
 			super("This variable name is not allowed");
 		}
