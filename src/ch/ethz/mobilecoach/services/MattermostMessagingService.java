@@ -124,7 +124,11 @@ public class MattermostMessagingService implements MessagingService {
 			return;
 		}
 		
-		sendPushNotification(recipient, post);	
+		try {
+			sendPushNotification(recipient, post);
+		} catch (Exception exception){
+			log.error("Error sending push notification: ", exception);
+		}
 	}
 
 	
@@ -148,10 +152,15 @@ public class MattermostMessagingService implements MessagingService {
 		headers.put("Content-Type", "application/json");
 		headers.put("Authorization", "Basic ZjA3ZTkzNDEtYmRjMi00Y2M2LWEwOWItZTk2MzE2YTQ0NWQw");	
 		String url = "https://onesignal.com/api/v1/notifications";
+		
+		String message = post.getMessage();
+		if (message == null || "".equals(message)){
+			message = "New message"; // TODO: translate
+		}
 
 		JSONObject json2 = new JSONObject()
 				.put("app_id", MattermostManagementService.appID)     
-				.put("contents", new JSONObject().put("en", post.getMessage()))
+				.put("contents", new JSONObject().put("en", message))
 				.put("include_player_ids", playerIds);
 
 		new OneSignalTask<String>(url, json2, headers){

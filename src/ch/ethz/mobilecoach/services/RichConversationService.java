@@ -15,7 +15,6 @@ import ch.ethz.mobilecoach.chatlib.engine.ChatEngine;
 import ch.ethz.mobilecoach.chatlib.engine.ConversationRepository;
 import ch.ethz.mobilecoach.chatlib.engine.ExecutionException;
 import ch.ethz.mobilecoach.chatlib.engine.HelpersRepository;
-import ch.ethz.mobilecoach.chatlib.engine.HelpersRepository.Helper;
 import ch.ethz.mobilecoach.chatlib.engine.conversation.ConversationUI;
 import ch.ethz.mobilecoach.chatlib.engine.conversation.UserReplyListener;
 import ch.ethz.mobilecoach.chatlib.engine.helpers.IncrementVariableHelper;
@@ -24,7 +23,9 @@ import ch.ethz.mobilecoach.chatlib.engine.model.Message;
 import ch.ethz.mobilecoach.chatlib.engine.variables.InMemoryVariableStore;
 import ch.ethz.mobilecoach.chatlib.engine.variables.VariableStore;
 import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public class RichConversationService{
 
 	private MessagingService messagingService;
@@ -169,6 +170,7 @@ public class RichConversationService{
 		@Override
 		public void delay(Runnable callback, Integer milliseconds) {
 			// TODO implement a better delay
+			log.debug("Starting timer with " + milliseconds + " msec.");
 			new java.util.Timer().schedule( 
 					new java.util.TimerTask() {
 						@Override
@@ -177,7 +179,7 @@ public class RichConversationService{
 						}
 					}, 
 					milliseconds 
-					);
+				);
 		}
 
 		public void receivePost(Post post) {
