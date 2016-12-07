@@ -14,8 +14,11 @@ import ch.ethz.mobilecoach.app.Post;
 import ch.ethz.mobilecoach.chatlib.engine.ChatEngine;
 import ch.ethz.mobilecoach.chatlib.engine.ConversationRepository;
 import ch.ethz.mobilecoach.chatlib.engine.ExecutionException;
+import ch.ethz.mobilecoach.chatlib.engine.HelpersRepository;
+import ch.ethz.mobilecoach.chatlib.engine.HelpersRepository.Helper;
 import ch.ethz.mobilecoach.chatlib.engine.conversation.ConversationUI;
 import ch.ethz.mobilecoach.chatlib.engine.conversation.UserReplyListener;
+import ch.ethz.mobilecoach.chatlib.engine.helpers.IncrementVariableHelper;
 import ch.ethz.mobilecoach.chatlib.engine.model.AnswerOption;
 import ch.ethz.mobilecoach.chatlib.engine.model.Message;
 import ch.ethz.mobilecoach.chatlib.engine.variables.InMemoryVariableStore;
@@ -60,8 +63,12 @@ public class RichConversationService{
 			VariableStore variableStore = createVariableStore(recipient); // TODO: make the InDataBaseVariableStore work
 					
 			MattermostConnector ui = new MattermostConnector(sender, recipient);
-			ChatEngine engine = new ChatEngine(repository, ui, variableStore);
+			HelpersRepository helpers = new HelpersRepository();
+			ChatEngine engine = new ChatEngine(repository, ui, variableStore, helpers);
 			chatEngines.put(recipient, engine);
+			
+			// add helpers for PathMate intervention
+			helpers.addHelper("PM-add-10-to-total_keys", new IncrementVariableHelper("$total_keys", 10));
 
 			messagingService.setListener(recipient, ui);
 
