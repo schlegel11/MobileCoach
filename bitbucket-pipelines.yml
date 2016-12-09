@@ -9,6 +9,6 @@ pipelines:
   default:
     - step:
         script: # Modify the commands below to build your repository.
-          - wget http://c4dhi-dev.ethz.ch
-          - # mvn clean install
-          - # ./deploy-to-artifactory.bash
+          - mvn install
+          - mvn deploy -Dusername=${ARTIFACTORY_USERNAME} -Dpassword=${ARTIFACTORY_PASSWORD} -Durl=${ARTIFACTORY_CONTEXT_URL}
+          # - ./deploy-to-artifactory.bash
