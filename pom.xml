@@ -30,8 +30,19 @@
 			<organizationUrl>http://www.c4dhi.org/</organizationUrl>
 		</developer>
 	</developers>
-	<!-- <issueManagement> <system>JIRA</system> <url></url> </issueManagement> -->
 
+	<distributionManagement>
+		<repository>
+			<id>releases</id>
+			<name>c4dhi-dev.ethz.ch-releases</name>
+			<url>http://c4dhi-dev.ethz.ch/artifactory/libs-release-local</url>
+		</repository>
+		<repository>
+			<id>snapshot</id>
+			<name>c4dhi-dev.ethz.ch-snapshot</name>
+			<url>http://c4dhi-dev.ethz.ch/artifactory/libs-snapshot-local</url>
+		</repository>
+	</distributionManagement>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
