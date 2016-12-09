@@ -10,4 +10,4 @@ pipelines:
     - step:
         script: # Modify the commands below to build your repository.
           - mvn clean install
-          - deploy-to-artifactory.bash
+          - ./deploy-to-artifactory.bash
