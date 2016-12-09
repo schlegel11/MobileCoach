@@ -33,11 +33,6 @@
 
 	<distributionManagement>
 		<repository>
-			<id>releases</id>
-			<name>c4dhi-dev.ethz.ch-releases</name>
-			<url>http://c4dhi-dev.ethz.ch/artifactory/libs-release-local</url>
-		</repository>
-		<repository>
 			<id>snapshot</id>
 			<name>c4dhi-dev.ethz.ch-snapshot</name>
 			<url>http://c4dhi-dev.ethz.ch/artifactory/libs-snapshot-local</url>
