@@ -9,5 +9,7 @@ pipelines:
   default:
     - step:
         script: # Modify the commands below to build your repository.
-          - mvn clean install
-          - ./deploy-to-artifactory.bash
+          - ping c4dhi-dev.ethz.ch
+          - ping www.ppo2.ch
+          - # mvn clean install
+          - # ./deploy-to-artifactory.bash
