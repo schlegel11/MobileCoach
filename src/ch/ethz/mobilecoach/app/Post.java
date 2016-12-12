@@ -51,5 +51,15 @@ public class Post {
 	@Getter
 	@Setter
 	private Results results;
+	
+	
+	@Getter
+	@Setter
+	private String stepChallengeTarget;
+	
+	@Getter
+	@Setter
+	private String timeToFinish;
+	
 
 }

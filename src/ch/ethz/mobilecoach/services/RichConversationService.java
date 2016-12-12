@@ -156,6 +156,9 @@ public class RichConversationService{
 				} else if (message.requestType != null){
 					post.setPostType(Post.POST_TYPE_REQUEST);
 					post.setRequestType(message.requestType);
+				}else if(message.numberOfSteps != null){
+					post.setTimeToFinish(message.timeToFinish);
+					post.setStepChallengeTarget(message.numberOfSteps);
 				}
 
 				messagingService.sendMessage(sender, recipient, post);
