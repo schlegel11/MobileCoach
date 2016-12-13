@@ -15,6 +15,7 @@ import ch.ethz.mobilecoach.chatlib.engine.ChatEngine;
 import ch.ethz.mobilecoach.chatlib.engine.ConversationRepository;
 import ch.ethz.mobilecoach.chatlib.engine.ExecutionException;
 import ch.ethz.mobilecoach.chatlib.engine.HelpersRepository;
+import ch.ethz.mobilecoach.chatlib.engine.Logger;
 import ch.ethz.mobilecoach.chatlib.engine.conversation.ConversationUI;
 import ch.ethz.mobilecoach.chatlib.engine.conversation.UserReplyListener;
 import ch.ethz.mobilecoach.chatlib.engine.helpers.IncrementVariableHelper;
@@ -58,6 +59,25 @@ public class RichConversationService{
 		if (message.startsWith(START_CONVERSATION_PREFIX)){
 			ConversationRepository repository = conversationManagementService.getRepository(null); // TODO: use Intervention id to get the repository
 
+			Logger logger = new Logger(){
+
+				@Override
+				public void logError(String message) {
+					log.error(message);
+				}
+
+				@Override
+				public void logDebug(String message) {
+					log.debug(message);
+				}
+
+				@Override
+				public void logInfo(String message) {
+					log.info(message);
+				}
+			};
+			
+			
 			// start a conversation
 			// TODO (DR): make sure these objects get cleaned up when a new conversation starts
 			//VariableStore variableStore = new InMemoryVariableStore();
@@ -66,6 +86,7 @@ public class RichConversationService{
 			MattermostConnector ui = new MattermostConnector(sender, recipient);
 			HelpersRepository helpers = new HelpersRepository();
 			ChatEngine engine = new ChatEngine(repository, ui, variableStore, helpers);
+			engine.setLogger(logger);
 			chatEngines.put(recipient, engine);
 			
 			// add helpers for PathMate intervention
