@@ -15,6 +15,7 @@ import ch.ethz.mobilecoach.chatlib.engine.ChatEngine;
 import ch.ethz.mobilecoach.chatlib.engine.ConversationRepository;
 import ch.ethz.mobilecoach.chatlib.engine.ExecutionException;
 import ch.ethz.mobilecoach.chatlib.engine.HelpersRepository;
+import ch.ethz.mobilecoach.chatlib.engine.Translator;
 import ch.ethz.mobilecoach.chatlib.engine.conversation.ConversationUI;
 import ch.ethz.mobilecoach.chatlib.engine.conversation.UserReplyListener;
 import ch.ethz.mobilecoach.chatlib.engine.helpers.IncrementVariableHelper;
@@ -62,10 +63,12 @@ public class RichConversationService{
 			// TODO (DR): make sure these objects get cleaned up when a new conversation starts
 			//VariableStore variableStore = new InMemoryVariableStore();
 			VariableStore variableStore = createVariableStore(recipient); // TODO: make the InDataBaseVariableStore work
-					
+			Participant participant = dBManagerService.getModelObjectById(Participant.class, recipient);
+			Translator translator = new Translator(participant.getLanguage());
+			
 			MattermostConnector ui = new MattermostConnector(sender, recipient);
 			HelpersRepository helpers = new HelpersRepository();
-			ChatEngine engine = new ChatEngine(repository, ui, variableStore, helpers);
+			ChatEngine engine = new ChatEngine(repository, ui, variableStore, helpers, translator);
 			chatEngines.put(recipient, engine);
 			
 			// add helpers for PathMate intervention
