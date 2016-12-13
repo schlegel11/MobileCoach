@@ -53,11 +53,11 @@ public class MattermostManagementService {
 	public final static String appID = "325068aa-fc63-411c-a07e-b3e73c455e8e";
 
 	@Getter
-	private String managerUserId = "95x5w43ywty4myq83pr9ri6dsy";
+	private String managerUserId = "qxfj43nuwifzzx3pzektk1ehwc";
 	@Getter
-	private String managerUserPassword = "mobile";	
+	private String managerUserPassword = "pathmate";
 	@Getter
-	private String managerUserLogin = "coach";	
+	private String managerUserLogin = "pathmate-team";
 
 
 	@Getter
