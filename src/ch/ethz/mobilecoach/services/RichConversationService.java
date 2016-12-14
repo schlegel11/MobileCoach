@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 
 import org.bson.types.ObjectId;
 
+import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.InDataBaseVariableStore;
@@ -84,7 +85,7 @@ public class RichConversationService {
 			//VariableStore variableStore = new InMemoryVariableStore();
 			VariableStore variableStore = createVariableStore(recipient); // TODO: make the InDataBaseVariableStore work
 			Participant participant = dBManagerService.getModelObjectById(Participant.class, recipient);
-			Translator translator = new Translator(participant.getLanguage());
+			Translator translator = new Translator(participant.getLanguage(), Constants.getXmlScriptsFolder() + "/pathmate2/translation_en_ch.csv");
 			
 			MattermostConnector ui = new MattermostConnector(sender, recipient);
 			HelpersRepository helpers = new HelpersRepository();
