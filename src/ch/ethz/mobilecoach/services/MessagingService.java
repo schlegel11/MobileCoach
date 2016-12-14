@@ -10,6 +10,8 @@ public interface MessagingService {
 	
 	public void sendMessage(String sender, ObjectId recipient, Post post);
 	
+	public void indicateTyping(String sender, ObjectId recipient);
+	
 	
 	public interface MessageListener {
 		public void receivePost(Post post);

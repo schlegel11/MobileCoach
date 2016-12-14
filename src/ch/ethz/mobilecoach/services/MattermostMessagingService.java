@@ -130,6 +130,29 @@ public class MattermostMessagingService implements MessagingService {
 			log.error("Error sending push notification: ", exception);
 		}
 	}
+	
+	private int seq = 0;	
+	
+	@Override
+	public void indicateTyping(String sender, ObjectId recipient) {
+		MattermostUserConfiguration config = managementService.getUserConfiguration(recipient);
+        String channelId = config.getChannels().get(0).getId();
+        
+        // example message:
+        // {"action":"user_typing","seq":1,"data":{"channel_id":"uk475zcxnibdxfh1r88r1x7d1w","parent_id":""}}
+        
+        JSONObject data = new JSONObject();
+        data.put("channel_id", channelId);
+        
+        JSONObject message = new JSONObject();
+        message.put("action", "user_typing");
+        message.put("seq", seq);
+        message.put("data", data);
+        
+        // seq++;
+		
+		webSocketEndpoint.sendMessage(message.toString());
+	}
 
 	
 	

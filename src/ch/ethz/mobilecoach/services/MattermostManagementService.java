@@ -181,7 +181,7 @@ public class MattermostManagementService {
 		new MattermostTask<Void>(host_url + "teams/"+teamId+"/channels/"+channelId+"/add", json){
 			@Override
 			Void handleResponse(PostMethod method) throws Exception {
-				log.error(method.getResponseBodyAsString());
+				log.debug(method.getResponseBodyAsString());
 				return null;
 			}
 		}.setToken(adminUserToken).run();

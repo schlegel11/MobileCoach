@@ -1,7 +1,9 @@
 package ch.ethz.mobilecoach.app;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -27,7 +29,12 @@ public class Post {
 	
 	@Getter
 	@Setter
-	private List<Option> options = new LinkedList<Option>(); 
+	private List<Option> options = new LinkedList<Option>();
+	
+	
+	@Getter
+	@Setter
+	private Map<String, String> parameters = new HashMap<String, String>(); 
 	
 	
 	@Setter
@@ -50,16 +57,6 @@ public class Post {
 	
 	@Getter
 	@Setter
-	private Results results;
-	
-	
-	@Getter
-	@Setter
-	private String stepChallengeTarget;
-	
-	@Getter
-	@Setter
-	private String timeToFinish;
-	
+	private Results results;	
 
 }

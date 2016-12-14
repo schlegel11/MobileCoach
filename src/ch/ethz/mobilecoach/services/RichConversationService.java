@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 
 import org.bson.types.ObjectId;
 
+import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.InDataBaseVariableStore;
@@ -15,6 +16,8 @@ import ch.ethz.mobilecoach.chatlib.engine.ChatEngine;
 import ch.ethz.mobilecoach.chatlib.engine.ConversationRepository;
 import ch.ethz.mobilecoach.chatlib.engine.ExecutionException;
 import ch.ethz.mobilecoach.chatlib.engine.HelpersRepository;
+import ch.ethz.mobilecoach.chatlib.engine.Logger;
+import ch.ethz.mobilecoach.chatlib.engine.Translator;
 import ch.ethz.mobilecoach.chatlib.engine.conversation.ConversationUI;
 import ch.ethz.mobilecoach.chatlib.engine.conversation.UserReplyListener;
 import ch.ethz.mobilecoach.chatlib.engine.helpers.IncrementVariableHelper;
@@ -26,7 +29,7 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class RichConversationService{
+public class RichConversationService {
 
 	private MessagingService messagingService;
 	private ConversationManagementService conversationManagementService;
@@ -58,14 +61,37 @@ public class RichConversationService{
 		if (message.startsWith(START_CONVERSATION_PREFIX)){
 			ConversationRepository repository = conversationManagementService.getRepository(null); // TODO: use Intervention id to get the repository
 
+			Logger logger = new Logger(){
+
+				@Override
+				public void logError(String message) {
+					log.error(message);
+				}
+
+				@Override
+				public void logDebug(String message) {
+					log.debug(message);
+				}
+
+				@Override
+				public void logInfo(String message) {
+					log.info(message);
+				}
+			};
+			
+			
 			// start a conversation
 			// TODO (DR): make sure these objects get cleaned up when a new conversation starts
 			//VariableStore variableStore = new InMemoryVariableStore();
 			VariableStore variableStore = createVariableStore(recipient); // TODO: make the InDataBaseVariableStore work
-					
+			Participant participant = dBManagerService.getModelObjectById(Participant.class, recipient);
+			Translator translator = new Translator(participant.getLanguage(), Constants.getXmlScriptsFolder() + "/pathmate2/translation_en_ch.csv");
+			
 			MattermostConnector ui = new MattermostConnector(sender, recipient);
 			HelpersRepository helpers = new HelpersRepository();
-			ChatEngine engine = new ChatEngine(repository, ui, variableStore, helpers);
+
+			ChatEngine engine = new ChatEngine(repository, ui, variableStore, helpers, translator);
+			engine.setLogger(logger);
 			chatEngines.put(recipient, engine);
 			
 			// add helpers for PathMate intervention
@@ -156,10 +182,9 @@ public class RichConversationService{
 				} else if (message.requestType != null){
 					post.setPostType(Post.POST_TYPE_REQUEST);
 					post.setRequestType(message.requestType);
-				}else if(message.numberOfSteps != null){
-					post.setTimeToFinish(message.timeToFinish);
-					post.setStepChallengeTarget(message.numberOfSteps);
 				}
+				
+				post.getParameters().putAll(message.parameters);
 
 				messagingService.sendMessage(sender, recipient, post);
 			}
@@ -192,6 +217,13 @@ public class RichConversationService{
 					msg.answerOptionId = post.getResults().getSelected();
 				}
 				this.listener.userReplied(msg);
+			}
+		}
+
+		@Override
+		public void showTyping(String sender) {
+			if (Message.SENDER_COACH.equals(sender)){
+				messagingService.indicateTyping(this.sender, recipient);
 			}
 		}
 
