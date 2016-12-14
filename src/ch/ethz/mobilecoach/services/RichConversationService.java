@@ -27,7 +27,7 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class RichConversationService{
+public class RichConversationService {
 
 	private MessagingService messagingService;
 	private ConversationManagementService conversationManagementService;
@@ -212,6 +212,13 @@ public class RichConversationService{
 					msg.answerOptionId = post.getResults().getSelected();
 				}
 				this.listener.userReplied(msg);
+			}
+		}
+
+		@Override
+		public void showTyping(String sender) {
+			if (Message.SENDER_COACH.equals(sender)){
+				messagingService.indicateTyping(this.sender, recipient);
 			}
 		}
 

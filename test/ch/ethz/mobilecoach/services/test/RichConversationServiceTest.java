@@ -51,6 +51,12 @@ public class RichConversationServiceTest {
 		public void sendMessage(String sender, ObjectId recipient, Post post) {
 			
 		}
+
+		@Override
+		public void indicateTyping(String sender, ObjectId recipient) {
+			// TODO Auto-generated method stub
+			
+		}
     }
     
     public class ConversationManagementServiceMock implements ConversationManagementService {
