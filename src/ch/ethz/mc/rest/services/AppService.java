@@ -12,6 +12,8 @@ import javax.ws.rs.core.Response;
 
 import org.bson.types.ObjectId;
 
+import ch.ethz.mc.model.persistent.AppToken;
+import ch.ethz.mc.model.persistent.OneTimeToken;
 import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
 import ch.ethz.mobilecoach.services.MattermostManagementService;
@@ -39,19 +41,29 @@ public class AppService {
 	@Path("/getconfig")
 	@Produces("application/json")
 	public Result getConfig(@Context final HttpServletRequest request,
-			@HeaderParam("Authentication") final String oneTimeToken) throws BadRequestException {
+			@HeaderParam("Authentication") final String token) throws BadRequestException {
 
-		if (oneTimeToken == null) {
+		if (token == null) {
 			throw new WebApplicationException(Response.status(400).entity("Missing header 'Authentication'.").build());
 		}
 
-		ObjectId userId = restManagerService.consumeOneTimeToken(oneTimeToken);
+		ObjectId userId = null;
+		String mctoken = null;
+		if (OneTimeToken.isOneTimeToken(token)){
+			// handle OneTimeToken: invalidate and create AppToken
+			userId = restManagerService.consumeOneTimeToken(token);
+			mctoken = restManagerService.createAppTokenForParticipant(userId);
+		} else if (AppToken.isAppToken(token)){
+			// handle AppToken: use the supplied token
+			userId = restManagerService.findParticipantIdForAppToken(token);
+			mctoken = token;
+		}
+		
 		if (userId == null) {
 			throw new WebApplicationException(Response.status(403).entity("Invalid Token supplied").build());
 		}
 
 		MattermostUserConfiguration userConfiguration = fetchUserConfiguration(userId);
-		String mctoken = restManagerService.createAppTokenForParticipant(userId);
 
 		return new Result(new MobileCoachAuthentication(userId.toHexString(), mctoken),
 				new UserConfigurationForAuthentication(userConfiguration));
