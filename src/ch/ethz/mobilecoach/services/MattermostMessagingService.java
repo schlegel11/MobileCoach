@@ -94,15 +94,17 @@ public class MattermostMessagingService implements MessagingService {
 		post.setMessage(message);
 		sendMessage(sender, recipient, post);
 	}
+	
+	public void ensureParticipantExists(ObjectId recipient){
+		if (!managementService.existsUserForParticipant(recipient)){
+			managementService.createParticipantUser(recipient);
+		}
+	}
+	
 
 	public void sendMessage(String sender, ObjectId recipient, Post post){
 		ensureLoggedIn();
-		
-		if (!managementService.existsUserForParticipant(recipient)){
-			// TODO: create the user before, when the user completed the sign up survey
-			managementService.createParticipantUser(recipient);
-		}
-	
+		ensureParticipantExists(recipient);	
 		
 		MattermostUserConfiguration config = managementService.getUserConfiguration(recipient);
         String channelId = config.getChannels().get(0).getId();
@@ -135,6 +137,9 @@ public class MattermostMessagingService implements MessagingService {
 	
 	@Override
 	public void indicateTyping(String sender, ObjectId recipient) {
+		ensureLoggedIn();
+		ensureParticipantExists(recipient);
+		
 		MattermostUserConfiguration config = managementService.getUserConfiguration(recipient);
         String channelId = config.getChannels().get(0).getId();
         
@@ -149,7 +154,7 @@ public class MattermostMessagingService implements MessagingService {
         message.put("seq", seq);
         message.put("data", data);
         
-        // seq++;
+        seq++;
 		
 		webSocketEndpoint.sendMessage(message.toString());
 	}
