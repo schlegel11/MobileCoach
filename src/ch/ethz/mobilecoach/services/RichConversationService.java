@@ -25,6 +25,7 @@ import ch.ethz.mobilecoach.chatlib.engine.model.AnswerOption;
 import ch.ethz.mobilecoach.chatlib.engine.model.Message;
 import ch.ethz.mobilecoach.chatlib.engine.variables.InMemoryVariableStore;
 import ch.ethz.mobilecoach.chatlib.engine.variables.VariableStore;
+
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 

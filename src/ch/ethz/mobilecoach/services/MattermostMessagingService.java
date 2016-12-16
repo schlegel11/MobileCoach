@@ -1,9 +1,12 @@
 package ch.ethz.mobilecoach.services;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 import java.net.URI;
 import java.util.LinkedHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.CloseReason;
@@ -56,7 +59,7 @@ public class MattermostMessagingService implements MessagingService {
 	public static MattermostMessagingService start(MattermostManagementService managementService){
 		MattermostMessagingService service = new MattermostMessagingService(managementService);
 		service.login();
-		service.connectToWebSocket();
+		service.reconnect();
 		
 		return service;
 	}
@@ -70,7 +73,7 @@ public class MattermostMessagingService implements MessagingService {
 		onCloseListener = new Runnable(){
 			@Override
 			public void run() {
-				connectToWebSocket();
+				reconnect();
 			}
 		};
 				
@@ -82,8 +85,6 @@ public class MattermostMessagingService implements MessagingService {
 			throw new RuntimeException(e);
 		} 
 	}
-	
-	
 
 	
 	// Sending
@@ -133,7 +134,7 @@ public class MattermostMessagingService implements MessagingService {
 		}
 	}
 	
-	private int seq = 0;	
+	private int seq = 0; // TODO: we might need to store this in the database
 	
 	@Override
 	public void indicateTyping(String sender, ObjectId recipient) {
@@ -250,6 +251,33 @@ public class MattermostMessagingService implements MessagingService {
 	}
 	
 	
+	// Reconnecting
+	
+	private void reconnect(){
+		
+		// open the WebSocket
+		
+		connectToWebSocket();
+		
+		// get missed messages
+		
+		// TODO
+		
+		
+		// handle messages from received from the WebSocket in the meantime and then start handling events directly
+		
+		webSocketEndpoint.startProcessing();
+	}
+	
+	@AllArgsConstructor
+	private class IncomingMessage {
+		@Getter
+		private String senderId;
+		
+		@Getter
+		private Post post;
+	}
+	
 	
 	/*
 	 *  Endpoint for the WebSocket
@@ -258,9 +286,43 @@ public class MattermostMessagingService implements MessagingService {
 		
 		Session session;
 		
+		public WebSocketEndpoint(){
+			isQueueing = true;
+		}
 		
+		
+		// Queueing
+		
+		public final LinkedBlockingQueue<IncomingMessage> queue = new LinkedBlockingQueue<>();
+		
+		private boolean isQueueing;
+		
+		
+		/**
+		 * Handle messages from received from the queue and then start handling events directly
+		 */
+		public void startProcessing(){
+			// TODO
+			
+			while ()
+			
+			
+			isQueueing = false;
+		}
+			
+		
+		/**
+		 * This function may be called by the websocket's thread
+		 * 
+		 * @param senderId
+		 * @param post
+		 */
 		private void receiveMessageAtEndpoint(String senderId, Post post){
-			receiveMessage(senderId, post);
+			if (!isQueueing){
+				receiveMessage(senderId, post);
+			} else {
+				queue.add(new IncomingMessage(senderId, post));
+			}
 		}
 		
 		
@@ -300,6 +362,7 @@ public class MattermostMessagingService implements MessagingService {
 					log.debug("WebSocket message received: " + msg); // TODO (DR): don't log all messages that are received
 					
 					JSONObject message = new JSONObject(msg);
+					
 					String event = message.getString("event");
 					
 					/*

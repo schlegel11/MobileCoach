@@ -141,5 +141,10 @@
 		
 		<!-- Tomcat Juli (logging) -->
 		<dependency org="org.apache.tomcat" name="tomcat-juli" rev="9.0.0.M11"/>
+		
+		
+		<!-- Akka Actor Library -->
+		<dependency org="com.typesafe.akka" name="akka-actor_2.11" rev="2.4.14"/>
+		
 	</dependencies>
 </ivy-module>
