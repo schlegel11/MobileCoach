@@ -300,7 +300,7 @@ public class MattermostMessagingService implements MessagingService {
 					log.debug("WebSocket message received: " + msg); // TODO (DR): don't log all messages that are received
 					
 					JSONObject message = new JSONObject(msg);
-					String event = message.getString("event");
+					String event = message.optString("event");
 					
 					/*
 					if ("ping".equals(event)){
