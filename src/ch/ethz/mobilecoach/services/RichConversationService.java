@@ -4,6 +4,9 @@ import java.util.LinkedHashMap;
 
 import org.bson.types.ObjectId;
 
+import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
+import akka.actor.Props;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
@@ -25,7 +28,7 @@ import ch.ethz.mobilecoach.chatlib.engine.model.AnswerOption;
 import ch.ethz.mobilecoach.chatlib.engine.model.Message;
 import ch.ethz.mobilecoach.chatlib.engine.variables.InMemoryVariableStore;
 import ch.ethz.mobilecoach.chatlib.engine.variables.VariableStore;
-
+import ch.ethz.mobilecoach.services.actor.UserActor;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
@@ -38,7 +41,10 @@ public class RichConversationService {
 	private VariablesManagerService variablesManagerService;
 	private LinkedHashMap<String, VariableStore> variableStores = new LinkedHashMap<>();
 	private DatabaseManagerService dBManagerService;
-	private LinkedHashMap<ObjectId, ChatEngine> chatEngines = new LinkedHashMap<>();	
+	private LinkedHashMap<ObjectId, ChatEngine> chatEngines = new LinkedHashMap<>();
+	private LinkedHashMap<ObjectId, ActorRef> actorRefs = new LinkedHashMap<>();
+	
+	private ActorSystem actorSystem;
 
 
 	private RichConversationService(MessagingService mattermostMessagingService, ConversationManagementService conversationManagementService, VariablesManagerService variablesManagerService, DatabaseManagerService dBManagerService) throws Exception {
@@ -47,6 +53,10 @@ public class RichConversationService {
 
 		this.variablesManagerService = variablesManagerService;
 		this.dBManagerService = dBManagerService;
+		
+		
+		this.actorSystem = ActorSystem.create("MySystem");	
+		
 	}
 
 	public static RichConversationService start(
@@ -119,6 +129,15 @@ public class RichConversationService {
 					}
 				}
 			});
+			
+			if (actorRefs.containsKey(recipient)){
+				// TODO: make sure actor is properly cleaned up
+				actorSystem.stop(actorRefs.get(recipient)); // stop old actor
+			} else {
+				ActorRef actorRef = actorSystem.actorOf(Props.create(UserActor.class), recipient.toString());
+				actorRefs.put(recipient, actorRef);
+				
+			}
 
 			String conversation = message.substring(START_CONVERSATION_PREFIX.length());
 			engine.startConversation(conversation);
@@ -146,6 +165,10 @@ public class RichConversationService {
 		}
 		return variableStore;
 	}
+	
+	
+	// WebSocket Listener
+	// ******************
 
 	private class MattermostConnector implements ConversationUI, MessagingService.MessageListener {
 

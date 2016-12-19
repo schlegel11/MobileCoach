@@ -4,8 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.websocket.ClientEndpointConfig;
@@ -20,6 +23,7 @@ import javax.websocket.WebSocketContainer;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.bson.types.ObjectId;
 import org.json.JSONObject;
+import org.json.JSONArray;
 
 import ch.ethz.mobilecoach.app.Post;
 import ch.ethz.mobilecoach.app.Results;
@@ -83,7 +87,7 @@ public class MattermostMessagingService implements MessagingService {
 			container.connectToServer(webSocketEndpoint, clientConfig, new URI(managementService.host_url.replaceFirst("http:", "ws:") + "users/websocket"));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
-		} 
+		}
 	}
 
 	
@@ -261,7 +265,46 @@ public class MattermostMessagingService implements MessagingService {
 		
 		// get missed messages
 		
-		// TODO
+        JSONObject json = new JSONObject();
+        json.put("login_id", managementService.getMcUserLogin());
+        json.put("password", managementService.getMcUserPassword());
+          
+		String channelResult = new MattermostTask<String>(managementService.host_url + "teams/" + managementService.teamId + "/channels/", json){
+
+			@Override
+			String handleResponse(PostMethod method){
+				try {
+					return method.getResponseBodyAsString();
+				} catch (IOException e) {
+					log.error(e);
+					return null;
+				}
+			}
+		}.run();
+		
+		JSONArray channels = new JSONArray(channelResult);
+		
+		
+		// TODO: find all the channels with updates that are not received yet
+		
+		List<String> channelsToUpdate = new LinkedList<>();
+		
+		for (Object o: channels){
+			if (o instanceof JSONObject){
+				JSONObject jo = ((JSONObject) o);
+				String id = jo.getString("id");
+				
+				channelsToUpdate.add(id);
+			}
+		}
+		
+		
+		// TODO: fetch the channels concurrently
+		
+		// TODO: after fetching a particular channel, start processing the queued messages for this channel
+		
+		
+		
 		
 		
 		// handle messages from received from the WebSocket in the meantime and then start handling events directly
@@ -302,10 +345,10 @@ public class MattermostMessagingService implements MessagingService {
 		 * Handle messages from received from the queue and then start handling events directly
 		 */
 		public void startProcessing(){
-			// TODO
-			
-			while ()
-			
+			while (!queue.isEmpty()){
+				IncomingMessage msg = queue.poll();
+				receiveMessage(msg.senderId, msg.post);
+			}
 			
 			isQueueing = false;
 		}
@@ -321,6 +364,7 @@ public class MattermostMessagingService implements MessagingService {
 			if (!isQueueing){
 				receiveMessage(senderId, post);
 			} else {
+				// TODO: process message directly if the sequence number is the expected next sequence number for a particular user
 				queue.add(new IncomingMessage(senderId, post));
 			}
 		}
@@ -363,7 +407,7 @@ public class MattermostMessagingService implements MessagingService {
 					
 					JSONObject message = new JSONObject(msg);
 					
-					String event = message.getString("event");
+					String event = message.optString("event");
 					
 					/*
 					if ("ping".equals(event)){
