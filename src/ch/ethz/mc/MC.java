@@ -108,7 +108,7 @@ public class MC implements ServletContextListener {
 					.start(fileStorageManagerService.getMediaCacheFolder());
 			variablesManagerService = VariablesManagerService
 					.start(databaseManagerService);
-			mattermostManagementService = MattermostManagementService.start(databaseManagerService);
+			mattermostManagementService = MattermostManagementService.start(databaseManagerService, variablesManagerService);
 			mattermostMessagingService = MattermostMessagingService.start(mattermostManagementService);
 			//resourceConversationManagementService = ResourceConversationManagementService.start(servletContext);
 			fileConversationManagementService = FileConversationManagementService.start(Constants.getXmlScriptsFolder());
