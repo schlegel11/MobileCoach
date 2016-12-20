@@ -9,7 +9,7 @@ import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.CountDownLatch;
 
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.CloseReason;
@@ -20,6 +20,17 @@ import javax.websocket.MessageHandler;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.concurrent.FutureCallback;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.http.impl.nio.client.HttpAsyncClients;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.bson.types.ObjectId;
 import org.json.JSONObject;
@@ -63,7 +74,8 @@ public class MattermostMessagingService implements MessagingService {
 	public static MattermostMessagingService start(MattermostManagementService managementService){
 		MattermostMessagingService service = new MattermostMessagingService(managementService);
 		service.login();
-		service.reconnect();
+		service.connectToWebSocket();
+		service.resync(); // TODO: remove this. instead, getUnreceivedMessages() should be called with the channelIds of ongoing conversations
 		
 		return service;
 	}
@@ -77,7 +89,8 @@ public class MattermostMessagingService implements MessagingService {
 		onCloseListener = new Runnable(){
 			@Override
 			public void run() {
-				reconnect();
+				connectToWebSocket();
+				resync(); // make sure we get messages that we missed while the WebSocket was closed
 			}
 		};
 				
@@ -244,7 +257,7 @@ public class MattermostMessagingService implements MessagingService {
 		listenerForRecipient.put(recipient, listener);
 	}
 	
-	
+
 	private void receiveMessage(String senderId, Post post){
 		if (senderIdToRecipient.containsKey(senderId)){
 			ObjectId recipient = senderIdToRecipient.get(senderId);
@@ -254,35 +267,117 @@ public class MattermostMessagingService implements MessagingService {
 		}
 	}
 	
-	
 	// Reconnecting
 	
-	private void reconnect(){
-		
-		// open the WebSocket
-		
-		connectToWebSocket();
+	public void resync(){
+		getUnreceivedMessages(getChannelsToUpdate());
+	}
+	
+	public void getUnreceivedMessages(List<String> channelIds){
 		
 		// get missed messages
 		
-        JSONObject json = new JSONObject();
-        json.put("login_id", managementService.getMcUserLogin());
-        json.put("password", managementService.getMcUserPassword());
-          
-		String channelResult = new MattermostTask<String>(managementService.host_url + "teams/" + managementService.teamId + "/channels/", json){
-
-			@Override
-			String handleResponse(PostMethod method){
-				try {
-					return method.getResponseBodyAsString();
-				} catch (IOException e) {
-					log.error(e);
-					return null;
-				}
-			}
-		}.run();
+		System.out.println("Getting messages from Mattermost (" + channelIds.size() + " channels) " + System.currentTimeMillis());
 		
-		JSONArray channels = new JSONArray(channelResult);
+		try {
+	        RequestConfig requestConfig = RequestConfig.custom()
+	                .setSocketTimeout(3000)
+	                .setConnectTimeout(3000).build();
+        
+            CloseableHttpAsyncClient httpclient = HttpAsyncClients.custom()
+                .setDefaultRequestConfig(requestConfig)
+                .build();
+            try {
+                httpclient.start();
+                final CountDownLatch latch = new CountDownLatch(channelIds.size());
+                for (final String channelId: channelIds) {
+                	String sinceTime = "0"; // TODO: use last received time
+                	//sinceTime = new Long(System.currentTimeMillis()).toString();
+                	
+                	//https://your-mattermost-url.com/api/v3/teams/{team_id}/channels/{channel_id}/posts/since/{time}
+                	HttpGet request = new HttpGet(
+                			managementService.host_url + "teams/" + managementService.teamId + "/channels/" + channelId + "/posts/since/" + sinceTime );
+          	
+                	request.addHeader("Authorization", "Bearer " + this.mcUserToken);
+                	
+                    httpclient.execute(request, new FutureCallback<HttpResponse>() {
+
+                        @Override
+                        public void completed(final HttpResponse response) {
+                        	String responseContent = "";
+                        	try {
+								responseContent = new BasicResponseHandler().handleResponse(response);
+							} catch (Exception e) {
+								log.error("Error getting messages from channel", e);
+							}
+                        	JSONObject result = new JSONObject(responseContent);
+                        	JSONArray order = result.getJSONArray("order");
+                        	JSONObject posts = result.getJSONObject("posts");
+                        	
+                        	if (order.length() > 0){
+                        		String lastPostId = order.getString(0);
+                        		JSONObject post = posts.getJSONObject(lastPostId);
+                        		
+    							String userId = post.getString("user_id");
+    							Post postObject = MattermostMessagingService.JSONtoPost(post);
+    							receiveMessage(userId, postObject);
+                        	}
+
+                            latch.countDown();
+                        }
+
+                        @Override
+                        public void failed(final Exception ex) {
+                            latch.countDown();
+                            log.error("Request failed.", ex);
+                        }
+
+                        @Override
+                        public void cancelled() {
+                            latch.countDown();
+                            log.debug(request.getRequestLine() + " cancelled");
+                        }
+
+                    });
+                }
+                latch.await();
+                System.out.println("Getting messages from Mattermost: done "  + System.currentTimeMillis());
+            } finally {
+                httpclient.close();
+            }
+
+            
+		} catch (Exception e){
+			log.error("Error getting messages from Mattermost channels.", e);
+		}
+	}
+	
+	/**
+	 * This method might not be needed as we can simply get the list of channels to update by taking the channels for the ongoing conversations.
+	 * @return
+	 */
+	
+	public List<String> getChannelsToUpdate(){
+		HttpClient client = new HttpClient();
+        
+        GetMethod request = new GetMethod(managementService.host_url + "teams/" + managementService.teamId + "/channels/");
+		request.setRequestHeader("Authorization", "Bearer " + mcUserToken);
+		
+		String channelsResponse = "[]";
+
+		try {
+			
+            int responseCode = client.executeMethod(request);
+            if (responseCode != HttpStatus.SC_OK) {
+            	throw new Exception("Status " + new Integer(responseCode) + ": " + request.getResponseBodyAsString());
+            }
+            channelsResponse = request.getResponseBodyAsString();
+		} catch (Exception e) {
+			log.error("Error getting channels", e);
+		}
+        
+		
+		JSONArray channels = new JSONArray(channelsResponse);
 		
 		
 		// TODO: find all the channels with updates that are not received yet
@@ -294,24 +389,14 @@ public class MattermostMessagingService implements MessagingService {
 				JSONObject jo = ((JSONObject) o);
 				String id = jo.getString("id");
 				
-				channelsToUpdate.add(id);
+ 				channelsToUpdate.add(id);
 			}
 		}
 		
-		
-		// TODO: fetch the channels concurrently
-		
-		// TODO: after fetching a particular channel, start processing the queued messages for this channel
-		
-		
-		
-		
-		
-		// handle messages from received from the WebSocket in the meantime and then start handling events directly
-		
-		webSocketEndpoint.startProcessing();
+		return channelsToUpdate;
 	}
 	
+		
 	@AllArgsConstructor
 	private class IncomingMessage {
 		@Getter
@@ -319,6 +404,22 @@ public class MattermostMessagingService implements MessagingService {
 		
 		@Getter
 		private Post post;
+	}
+	
+	public static Post JSONtoPost(JSONObject obj){
+		String messageText = obj.getString("message");
+		JSONObject props = obj.getJSONObject("props");
+		Results results = null;
+		
+		if (props.has("results")){
+			results = new Results(props.getJSONObject("results").getString("selected"));
+		}
+		
+		Post postObject = new Post();
+		postObject.setMessage(messageText);
+		postObject.setResults(results);
+		
+		return postObject;
 	}
 	
 	
@@ -329,30 +430,6 @@ public class MattermostMessagingService implements MessagingService {
 		
 		Session session;
 		
-		public WebSocketEndpoint(){
-			isQueueing = true;
-		}
-		
-		
-		// Queueing
-		
-		public final LinkedBlockingQueue<IncomingMessage> queue = new LinkedBlockingQueue<>();
-		
-		private boolean isQueueing;
-		
-		
-		/**
-		 * Handle messages from received from the queue and then start handling events directly
-		 */
-		public void startProcessing(){
-			while (!queue.isEmpty()){
-				IncomingMessage msg = queue.poll();
-				receiveMessage(msg.senderId, msg.post);
-			}
-			
-			isQueueing = false;
-		}
-			
 		
 		/**
 		 * This function may be called by the websocket's thread
@@ -361,12 +438,7 @@ public class MattermostMessagingService implements MessagingService {
 		 * @param post
 		 */
 		private void receiveMessageAtEndpoint(String senderId, Post post){
-			if (!isQueueing){
-				receiveMessage(senderId, post);
-			} else {
-				// TODO: process message directly if the sequence number is the expected next sequence number for a particular user
-				queue.add(new IncomingMessage(senderId, post));
-			}
+			receiveMessage(senderId, post);
 		}
 		
 		
@@ -423,20 +495,9 @@ public class MattermostMessagingService implements MessagingService {
 							
 							JSONObject post = new JSONObject(postString);
 			
+							Post postObject = MattermostMessagingService.JSONtoPost(post);
+							
 							String userId = post.getString("user_id");
-							String messageText = post.getString("message");
-							
-							JSONObject props = post.getJSONObject("props");
-							Results results = null;
-							
-							if (props.has("results")){
-								results = new Results(props.getJSONObject("results").getString("selected"));
-							}
-							
-							Post postObject = new Post();
-							postObject.setMessage(messageText);
-							postObject.setResults(results);
-							
 							receiveMessageAtEndpoint(userId, postObject);	
 						
 						} catch (Exception e){

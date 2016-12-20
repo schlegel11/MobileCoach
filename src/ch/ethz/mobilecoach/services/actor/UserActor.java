@@ -7,10 +7,10 @@ import ch.ethz.mobilecoach.chatlib.engine.model.Message;
 
 public class UserActor extends UntypedActor
 {
-	private enum 
+	//private enum 
 	
 	private ChatEngine chatEngine;
-	private boolean queueing
+	//private boolean queueing
 	
 	public UserActor(ChatEngine chatEngine){
 		this.chatEngine = chatEngine;

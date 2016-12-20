@@ -146,5 +146,8 @@
 		<!-- Akka Actor Library -->
 		<dependency org="com.typesafe.akka" name="akka-actor_2.11" rev="2.4.14"/>
 		
+		<!-- Apache HttpAsyncClient -->
+		<dependency org="org.apache.httpcomponents" name="httpasyncclient" rev="4.1.2"/>
+		
 	</dependencies>
 </ivy-module>
