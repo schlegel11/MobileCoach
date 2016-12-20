@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -21,7 +20,6 @@ import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.concurrent.FutureCallback;
@@ -36,10 +34,14 @@ import org.bson.types.ObjectId;
 import org.json.JSONObject;
 import org.json.JSONArray;
 
+import ch.ethz.mc.model.Queries;
+import ch.ethz.mc.model.persistent.Author;
+import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mobilecoach.app.Post;
 import ch.ethz.mobilecoach.app.Results;
 import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
 import ch.ethz.mobilecoach.model.persistent.OneSignalUserConfiguration;
+import ch.ethz.mobilecoach.model.persistent.UserLastMessage;
 
 /**
  * Sends and receives messages from a Mattermost instance.
@@ -57,7 +59,8 @@ import ch.ethz.mobilecoach.model.persistent.OneSignalUserConfiguration;
 @Log4j2
 public class MattermostMessagingService implements MessagingService {
 	
-	private MattermostManagementService managementService;
+	private final DatabaseManagerService databaseManagerService;
+	private final MattermostManagementService managementService;
 	private String mcUserToken;
 	
 	private WebSocketEndpoint webSocketEndpoint;
@@ -67,12 +70,13 @@ public class MattermostMessagingService implements MessagingService {
 
 	// Construction
 	
-	private MattermostMessagingService(MattermostManagementService managementService){
+	private MattermostMessagingService(MattermostManagementService managementService, DatabaseManagerService databaseManagerService){
 		this.managementService = managementService;
+		this.databaseManagerService = databaseManagerService;
 	}	
 	
-	public static MattermostMessagingService start(MattermostManagementService managementService){
-		MattermostMessagingService service = new MattermostMessagingService(managementService);
+	public static MattermostMessagingService start(MattermostManagementService managementService, DatabaseManagerService databaseManagerService){
+		MattermostMessagingService service = new MattermostMessagingService(managementService, databaseManagerService);
 		service.login();
 		service.connectToWebSocket();
 		service.resync(); // TODO: remove this. instead, getUnreceivedMessages() should be called with the channelIds of ongoing conversations
@@ -144,10 +148,13 @@ public class MattermostMessagingService implements MessagingService {
 			return;
 		}
 		
-		try {
-			sendPushNotification(recipient, post);
-		} catch (Exception exception){
-			log.error("Error sending push notification: ", exception);
+		if (wasLastMessageReceivedLongerAgoThan(channelId, 60 * 1000)){
+			// send push notifications only after 1 minute after the last message was received
+			try {
+				sendPushNotification(recipient, post);
+			} catch (Exception exception){
+				log.error("Error sending push notification: ", exception);
+			}
 		}
 	}
 	
@@ -262,7 +269,12 @@ public class MattermostMessagingService implements MessagingService {
 		if (senderIdToRecipient.containsKey(senderId)){
 			ObjectId recipient = senderIdToRecipient.get(senderId);
 			if (listenerForRecipient.containsKey(recipient)){
-				listenerForRecipient.get(recipient).receivePost(post);
+				if (this.wasMessageNotProcessedYet(recipient, post.getChannelId(), post.getId(), post.getCreateAt())){
+					listenerForRecipient.get(recipient).receivePost(post);
+					
+					// mark this message as processed
+					this.saveUserLastMessage(recipient, post.getChannelId(), post.getId(), post.getCreateAt());
+				}
 			}
 		}
 	}
@@ -379,17 +391,17 @@ public class MattermostMessagingService implements MessagingService {
 		
 		JSONArray channels = new JSONArray(channelsResponse);
 		
-		
-		// TODO: find all the channels with updates that are not received yet
-		
 		List<String> channelsToUpdate = new LinkedList<>();
 		
 		for (Object o: channels){
 			if (o instanceof JSONObject){
 				JSONObject jo = ((JSONObject) o);
 				String id = jo.getString("id");
+				long lastUpdateAt = jo.getLong("last_post_at");
 				
- 				channelsToUpdate.add(id);
+				if (this.mayChannelHaveNewMessages(id, lastUpdateAt)){
+					channelsToUpdate.add(id);
+				}
 			}
 		}
 		
@@ -409,6 +421,7 @@ public class MattermostMessagingService implements MessagingService {
 	public static Post JSONtoPost(JSONObject obj){
 		String messageText = obj.getString("message");
 		JSONObject props = obj.getJSONObject("props");
+		
 		Results results = null;
 		
 		if (props.has("results")){
@@ -418,6 +431,9 @@ public class MattermostMessagingService implements MessagingService {
 		Post postObject = new Post();
 		postObject.setMessage(messageText);
 		postObject.setResults(results);
+		postObject.setId(obj.getString("id"));
+		postObject.setCreateAt(obj.getLong("create_at"));
+		postObject.setChannelId(obj.getString("channel_id"));
 		
 		return postObject;
 	}
@@ -480,13 +496,7 @@ public class MattermostMessagingService implements MessagingService {
 					JSONObject message = new JSONObject(msg);
 					
 					String event = message.optString("event");
-					
-					/*
-					if ("ping".equals(event)){
-						sendMessage("{\"event\":\"pong\"}");
-					}
-					*/
-					
+									
 					
 					if ("posted".equals(event)){
 						try { 							
@@ -508,5 +518,50 @@ public class MattermostMessagingService implements MessagingService {
 
 			});
 		}
+	}
+	
+	// Database access
+	
+	private void saveUserLastMessage(ObjectId participantId, String channelId, String lastMessageId, long lastMessageTimestamp){
+		UserLastMessage record = this.databaseManagerService.findOneModelObject(UserLastMessage.class, "{participantId:#, channelId:#}", participantId, channelId);
+		
+		if (record == null){
+			record = new UserLastMessage(participantId, channelId, lastMessageId, lastMessageTimestamp);
+		} else {
+			record.setLastMessageId(lastMessageId);
+			record.setLastMessageTimestamp(lastMessageTimestamp);
+		}
+		
+		this.databaseManagerService.saveModelObject(record);
+	}
+	
+	private boolean wasMessageNotProcessedYet(ObjectId participantId, String channelId, String lastMessageId, long timestamp){
+		UserLastMessage record = this.databaseManagerService.findOneModelObject(UserLastMessage.class, "{participantId:#, channelId:#}", participantId, channelId);
+		
+		if (record == null){
+			return true;
+		}
+		
+		return record.getLastMessageTimestamp() < timestamp || 
+				(record.getLastMessageTimestamp() == timestamp && !record.getLastMessageId().equals(lastMessageId));
+	}
+	
+	private boolean mayChannelHaveNewMessages(String channelId, long lastUpdateAt){
+		// we know that each channelId is only used by one user
+		UserLastMessage record = this.databaseManagerService.findOneModelObject(UserLastMessage.class, "{channelId:#}", channelId);
+		if (record == null){
+			return true;
+		}
+		
+		return lastUpdateAt > record.getLastMessageTimestamp();
+	}
+	
+	private boolean wasLastMessageReceivedLongerAgoThan(String channelId, int milliseconds){
+		UserLastMessage record = this.databaseManagerService.findOneModelObject(UserLastMessage.class, "{channelId:#}", channelId);
+		if (record == null){
+			return true;
+		}
+		
+		return System.currentTimeMillis() > (record.getLastMessageTimestamp() + milliseconds);
 	}
 }

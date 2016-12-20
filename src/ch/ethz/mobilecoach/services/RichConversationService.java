@@ -6,7 +6,6 @@ import org.bson.types.ObjectId;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import akka.actor.Props;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
@@ -28,7 +27,6 @@ import ch.ethz.mobilecoach.chatlib.engine.model.AnswerOption;
 import ch.ethz.mobilecoach.chatlib.engine.model.Message;
 import ch.ethz.mobilecoach.chatlib.engine.variables.InMemoryVariableStore;
 import ch.ethz.mobilecoach.chatlib.engine.variables.VariableStore;
-import ch.ethz.mobilecoach.services.actor.UserActor;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
@@ -130,6 +128,8 @@ public class RichConversationService {
 				}
 			});
 			
+			/*
+			
 			if (actorRefs.containsKey(recipient)){
 				// TODO: make sure actor is properly cleaned up
 				actorSystem.stop(actorRefs.get(recipient)); // stop old actor
@@ -138,6 +138,8 @@ public class RichConversationService {
 				actorRefs.put(recipient, actorRef);
 				
 			}
+			
+			*/
 
 			String conversation = message.substring(START_CONVERSATION_PREFIX.length());
 			engine.startConversation(conversation);
