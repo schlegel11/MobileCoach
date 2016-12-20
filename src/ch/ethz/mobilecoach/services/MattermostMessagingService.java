@@ -11,6 +11,7 @@ import javax.websocket.ContainerProvider;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
 import javax.websocket.MessageHandler;
+import javax.websocket.RemoteEndpoint.Async;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
@@ -153,10 +154,14 @@ public class MattermostMessagingService implements MessagingService {
         message.put("action", "user_typing");
         message.put("seq", seq);
         message.put("data", data);
-        
-        seq++;
 		
-		webSocketEndpoint.sendMessage(message.toString());
+        try {
+			webSocketEndpoint.sendMessage(message.toString());
+			seq++; 
+		} catch (Exception e){
+			log.error("Error sending typing indicator.", e);
+		}
+        
 	}
 
 	
@@ -279,7 +284,12 @@ public class MattermostMessagingService implements MessagingService {
 		
 			
 		public void sendMessage(String message) {
-			session.getAsyncRemote().sendText(message);
+			if (session == null) throw new NullPointerException("Session is null.");
+			
+			Async async = session.getAsyncRemote();
+			if (async == null) throw new NullPointerException("Async is null.");
+			
+			async.sendText(message);
 		}
 		
 		
