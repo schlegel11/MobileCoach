@@ -199,7 +199,7 @@ public class RichConversationService {
 		}
 
 		@Override
-		public void delay(Runnable callback, Integer milliseconds) {
+		public void delay(Runnable callback, Long milliseconds) {
 			// TODO implement a better delay
 			log.debug("Starting timer with " + milliseconds + " msec.");
 			new java.util.Timer().schedule( 
