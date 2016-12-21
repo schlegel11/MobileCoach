@@ -4,8 +4,9 @@ import java.time.LocalDateTime;
 import java.util.Queue;
 import java.util.Stack;
 
+import org.bson.types.ObjectId;
+
 import ch.ethz.mc.model.ModelObject;
-import ch.ethz.mobilecoach.chatlib.engine.ConversationRepository;
 import ch.ethz.mobilecoach.chatlib.engine.actions.Action;
 import ch.ethz.mobilecoach.chatlib.engine.actions.operations.Operation;
 import ch.ethz.mobilecoach.chatlib.engine.stack.Context;
@@ -15,7 +16,7 @@ import ch.ethz.mobilecoach.chatlib.engine.stack.Context;
 public class ChatEngineState extends ModelObject{
 	
 
-	private ConversationRepository convRep;
+	private ObjectId participantId;
 	private Stack<Context> stack;
 	private long timerValue;
 	private Queue<Operation> operations;
@@ -25,10 +26,10 @@ public class ChatEngineState extends ModelObject{
 
 	
 	
-	public ChatEngineState(ConversationRepository convRep, Stack<Context> stack, long timerValue,
+	public ChatEngineState(ObjectId participantId, Stack<Context> stack, long timerValue,
 			Queue<Operation> operations, String userInput, Action currentAction, LocalDateTime ldt) {
 		super();
-		this.convRep = convRep;
+		this.participantId = participantId;
 		this.stack = stack;
 		this.timerValue = timerValue;
 		this.operations = operations;
@@ -47,13 +48,13 @@ public class ChatEngineState extends ModelObject{
 	}
 
 
-	public ConversationRepository getConvRep() {
-		return convRep;
+	public ObjectId getParticipantId() {
+		return participantId;
 	}
 
 
-	public void setConvRep(ConversationRepository convRep) {
-		this.convRep = convRep;
+	public void setParticipantId(ObjectId participantId) {
+		this.participantId = participantId;
 	}
 
 

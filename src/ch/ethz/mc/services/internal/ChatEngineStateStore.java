@@ -40,7 +40,8 @@ public class ChatEngineStateStore implements ChatEngineStateStoreIfc{
 	public void saveChatEngineState(ChatEngine chatEngine) {
 		deleteState();
 		LocalDateTime ldt = LocalDateTime.now();
-		chatEngineState = new ChatEngineState(chatEngine.getRepository(), chatEngine.getStack(), chatEngine.getTimerValue(), chatEngine.getOperations(), chatEngine.getUserInput(), chatEngine.getCurrentAction(), ldt);		
+		chatEngineState = new ChatEngineState(participantId, chatEngine.getStack(), chatEngine.getTimerValue(), chatEngine.getOperations(), chatEngine.getUserInput(), chatEngine.getCurrentAction(), ldt);		
+		deleteState();
 		this.dbMgmtService.saveModelObject(chatEngineState);		
 	}
 
@@ -77,6 +78,6 @@ public class ChatEngineStateStore implements ChatEngineStateStoreIfc{
 	
 	@Override
 	public void deleteState(){
-		this.dbMgmtService.deleteModelObject(chatEngineState);
+		this.dbMgmtService.deleteModelObject(ChatEngineState.class, participantId);
 	}
 }
