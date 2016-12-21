@@ -6,6 +6,7 @@ import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.persistent.Participant;
+import ch.ethz.mc.services.internal.ChatEngineStateStore;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.InDataBaseVariableStore;
 import ch.ethz.mc.services.internal.VariablesManagerService;
@@ -90,7 +91,9 @@ public class RichConversationService {
 			MattermostConnector ui = new MattermostConnector(sender, recipient);
 			HelpersRepository helpers = new HelpersRepository();
 
-			ChatEngine engine = new ChatEngine(repository, ui, variableStore, helpers, translator);
+			ChatEngineStateStore chatEngineStateStore = new ChatEngineStateStore(dBManagerService, recipient);
+			
+			ChatEngine engine = new ChatEngine(repository, ui, variableStore, helpers, translator, chatEngineStateStore);
 			engine.setLogger(logger);
 			chatEngines.put(recipient, engine);
 			
