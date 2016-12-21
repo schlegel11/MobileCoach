@@ -19,6 +19,7 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.bson.types.ObjectId;
 import org.json.JSONObject;
 
+import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mobilecoach.app.Post;
 import ch.ethz.mobilecoach.app.Results;
 import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
@@ -129,8 +130,8 @@ public class MattermostMessagingService implements MessagingService {
 		
 		try {
 			sendPushNotification(recipient, post);
-		} catch (Exception exception){
-			log.error("Error sending push notification: ", exception);
+		} catch (Exception e){
+			log.error("Error sending push notification: " + StringHelpers.getStackTraceAsLine(e), e);
 		}
 	}
 	
@@ -159,7 +160,7 @@ public class MattermostMessagingService implements MessagingService {
 			webSocketEndpoint.sendMessage(message.toString());
 			seq++; 
 		} catch (Exception e){
-			log.error("Error sending typing indicator.", e);
+			log.error("Error sending typing indicator: " + StringHelpers.getStackTraceAsLine(e), e);
 		}
         
 	}
@@ -311,13 +312,6 @@ public class MattermostMessagingService implements MessagingService {
 					
 					JSONObject message = new JSONObject(msg);
 					String event = message.optString("event");
-					
-					/*
-					if ("ping".equals(event)){
-						sendMessage("{\"event\":\"pong\"}");
-					}
-					*/
-					
 					
 					if ("posted".equals(event)){
 						try { 							
