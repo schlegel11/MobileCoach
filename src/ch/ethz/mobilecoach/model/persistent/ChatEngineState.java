@@ -1,5 +1,6 @@
 package ch.ethz.mobilecoach.model.persistent;
 
+import java.time.LocalDateTime;
 import java.util.Queue;
 import java.util.Stack;
 
@@ -16,15 +17,16 @@ public class ChatEngineState extends ModelObject{
 
 	private ConversationRepository convRep;
 	private Stack<Context> stack;
-	private int timerValue;
+	private long timerValue;
 	private Queue<Operation> operations;
 	private String userInput;
 	private Action currentAction;
+	private LocalDateTime ldt;
 
 	
 	
-	public ChatEngineState(ConversationRepository convRep, Stack<Context> stack, int timerValue,
-			Queue<Operation> operations, String userInput, Action currentAction) {
+	public ChatEngineState(ConversationRepository convRep, Stack<Context> stack, long timerValue,
+			Queue<Operation> operations, String userInput, Action currentAction, LocalDateTime ldt) {
 		super();
 		this.convRep = convRep;
 		this.stack = stack;
@@ -65,12 +67,12 @@ public class ChatEngineState extends ModelObject{
 	}
 
 
-	public int getTimerValue() {
+	public long getTimerValue() {
 		return timerValue;
 	}
 
 
-	public void setTimerValue(int timerValue) {
+	public void setTimerValue(long timerValue) {
 		this.timerValue = timerValue;
 	}
 
@@ -92,5 +94,15 @@ public class ChatEngineState extends ModelObject{
 
 	public void setUserInput(String userInput) {
 		this.userInput = userInput;
+	}
+
+
+	public LocalDateTime getLdt() {
+		return ldt;
+	}
+
+
+	public void setLdt(LocalDateTime ldt) {
+		this.ldt = ldt;
 	}
 }
