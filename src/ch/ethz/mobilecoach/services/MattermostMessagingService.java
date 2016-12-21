@@ -16,6 +16,7 @@ import javax.websocket.ContainerProvider;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
 import javax.websocket.MessageHandler;
+import javax.websocket.RemoteEndpoint.Async;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
@@ -34,9 +35,8 @@ import org.bson.types.ObjectId;
 import org.json.JSONObject;
 import org.json.JSONArray;
 
-import ch.ethz.mc.model.Queries;
-import ch.ethz.mc.model.persistent.Author;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
+import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mobilecoach.app.Post;
 import ch.ethz.mobilecoach.app.Results;
 import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
@@ -152,8 +152,8 @@ public class MattermostMessagingService implements MessagingService {
 			// send push notifications only after 1 minute after the last message was received
 			try {
 				sendPushNotification(recipient, post);
-			} catch (Exception exception){
-				log.error("Error sending push notification: ", exception);
+			} catch (Exception e){
+				log.error("Error sending push notification: " + StringHelpers.getStackTraceAsLine(e), e);
 			}
 		}
 	}
@@ -178,10 +178,14 @@ public class MattermostMessagingService implements MessagingService {
         message.put("action", "user_typing");
         message.put("seq", seq);
         message.put("data", data);
-        
-        seq++;
 		
-		webSocketEndpoint.sendMessage(message.toString());
+        try {
+			webSocketEndpoint.sendMessage(message.toString());
+			seq++; 
+		} catch (Exception e){
+			log.error("Error sending typing indicator: " + StringHelpers.getStackTraceAsLine(e), e);
+		}
+        
 	}
 
 	
@@ -473,7 +477,12 @@ public class MattermostMessagingService implements MessagingService {
 		
 			
 		public void sendMessage(String message) {
-			session.getAsyncRemote().sendText(message);
+			if (session == null) throw new NullPointerException("Session is null.");
+			
+			Async async = session.getAsyncRemote();
+			if (async == null) throw new NullPointerException("Async is null.");
+			
+			async.sendText(message);
 		}
 		
 		
@@ -494,9 +503,8 @@ public class MattermostMessagingService implements MessagingService {
 					log.debug("WebSocket message received: " + msg); // TODO (DR): don't log all messages that are received
 					
 					JSONObject message = new JSONObject(msg);
-					
 					String event = message.optString("event");
-									
+
 					
 					if ("posted".equals(event)){
 						try { 							

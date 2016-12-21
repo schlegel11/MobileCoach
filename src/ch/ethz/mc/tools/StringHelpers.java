@@ -1,5 +1,7 @@
 package ch.ethz.mc.tools;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
  * 
@@ -220,5 +222,12 @@ public class StringHelpers {
 		}
 
 		return text;
+ 	}
+	
+	public static String getStackTraceAsLine(Throwable exception){
+    	StringWriter sw = new StringWriter();
+    	PrintWriter pw = new PrintWriter(sw);
+    	exception.printStackTrace(pw);
+    	return sw.toString().replace("\n", " ").replace("\t", " ");
 	}
 }

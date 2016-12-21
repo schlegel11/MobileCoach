@@ -44,9 +44,15 @@ public class IncomingMessageWorker extends Thread {
 		this.interventionExecutionManagerService = interventionExecutionManagerService;
 		this.communicationManagerService = communicationManagerService;
 	}
-
+	
 	@Override
-	public void run() {
+	public void run() {	
+		// TODO: re-activate incoming message worker (not used in PathMate2 intervention)
+		//checkForIncomingMessages();
+	}
+
+	public void checkForIncomingMessages() {		
+		
 		val simulatorActive = Constants.isSimulatedDateAndTime();
 		try {
 			TimeUnit.SECONDS
