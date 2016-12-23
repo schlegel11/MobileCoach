@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ch.ethz.mc.conf.Constants;
+import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.services.internal.ChatEngineStateStore;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mobilecoach.chatlib.engine.ChatEngine;
@@ -24,6 +25,7 @@ import ch.ethz.mobilecoach.chatlib.engine.test.TestFramework;
 import ch.ethz.mobilecoach.chatlib.engine.test.mock.MockConversationUI;
 import ch.ethz.mobilecoach.chatlib.engine.test.mock.MockLogger;
 import ch.ethz.mobilecoach.chatlib.engine.variables.InMemoryVariableStore;
+import ch.ethz.mobilecoach.model.persistent.ChatEngineState;
 
 public class RestoreChatEngineStateTest extends TestFramework {
 
@@ -59,8 +61,8 @@ public class RestoreChatEngineStateTest extends TestFramework {
 		// set up the conversation repository
 		
 		ConversationRepository repository = new ConversationRepository();
-		LastAction lastAction = new LastAction(repository);
 		NonbranchingAction conversation = new MessageAction("Hi there!", repository);
+		LastAction lastAction = new LastAction(repository);
 		conversation.nextAction = lastAction;	
 		repository.addConversation("test-conversation", conversation);
 	
@@ -79,10 +81,24 @@ public class RestoreChatEngineStateTest extends TestFramework {
 		engine.startConversation("test-conversation");
 		engine = null;
 		
-		ChatEngineStateStore chatEngineStateStore2 = new ChatEngineStateStore(databaseManagerService, participantId);
-		engine = new ChatEngine(repository, conversationUI, new InMemoryVariableStore(), null, null, chatEngineStateStore2);
-		engine.startConversation("test-conversation");
-
+		
+		java.util.Iterator<ChatEngineState> iterator  = databaseManagerService.findModelObjects(ChatEngineState.class, Queries.ALL).iterator();
+		
+		while(iterator.hasNext()){
+			ChatEngineState ces = iterator.next();
+			if(ChatEngineStateStore.containsAValidChatEngineState(ces)){
+				ChatEngineStateStore chatEngineStateStore2 = new ChatEngineStateStore(databaseManagerService, ces.getParticipantId());
+				ChatEngine engine2 = new ChatEngine(repository, conversationUI, new InMemoryVariableStore(), null, null, chatEngineStateStore2);
+				chatEngineStateStore.restoreState(engine2);
+				try{
+					engine2.continueConversation(ces.getCurrentAction());;
+				}catch(ExecutionException ee){
+					ee.printStackTrace();
+				}
+			}
+		}
+		
+	
 		System.out.println(conversationUI.messages.get(0).text);
 
 		// check that the conversation was run successfully

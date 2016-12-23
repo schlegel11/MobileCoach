@@ -25,11 +25,17 @@ public class ChatEngineStateStore implements ChatEngineStateStoreIfc{
 	public ChatEngineStateStore(DatabaseManagerService dbMgmtService, ObjectId participantId){
 		this.dbMgmtService = dbMgmtService;
 		this.participantId = participantId;
-		this.chatEngineState = this.dbMgmtService.findOneModelObject(ChatEngineState.class,"{'participantId':#}", participantId);
+		//this.chatEngineState = this.dbMgmtService.findOneModelObject(ChatEngineState.class,"{'participantId':#}", participantId);
+	}
+	
+	public ChatEngineStateStore(DatabaseManagerService dbMgmtService, ChatEngineState chatEngineState){
+		this.dbMgmtService = dbMgmtService;
+		this.participantId = chatEngineState.getParticipantId();
+		this.chatEngineState = chatEngineState;
 	}
 
-	@Override
-	public boolean containsAValidChatEngineState(){
+	
+	public static boolean containsAValidChatEngineState(ChatEngineState chatEngineState){
 		boolean result = true;
 		LocalDateTime ldt = LocalDateTime.now();
 		
@@ -37,7 +43,6 @@ public class ChatEngineStateStore implements ChatEngineStateStoreIfc{
 			result = false;
 		}else if(chatEngineState != null && chatEngineState.getDayOfTheMonth() != ldt.getDayOfMonth() && chatEngineState.getMonthValue() != ldt.getMonthValue()){
 			result = false;
-			deleteState(chatEngineState);
 		}
 		return result;
 	}
