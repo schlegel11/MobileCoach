@@ -45,7 +45,6 @@ public class RichConversationService {
 
 		this.variablesManagerService = variablesManagerService;
 		this.dBManagerService = dBManagerService;
-		
 	}
 
 	public static RichConversationService start(

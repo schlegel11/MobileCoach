@@ -146,7 +146,7 @@ public class MattermostMessagingService implements MessagingService {
 		ensureLoggedIn();
 		ensureParticipantExists(recipient);	
 		
-		//TODO: REMOVE THIS TESTING CODE
+		//TODO Dominik: REMOVE THIS TESTING CODE
 		/*
 		if (!post.getOptions().isEmpty()){
 			test_closeWebsocketFor10Sec();
@@ -545,7 +545,6 @@ public class MattermostMessagingService implements MessagingService {
 					JSONObject message = new JSONObject(msg);
 					String event = message.optString("event");
 
-					
 					if ("posted".equals(event)){
 						try { 							
 							JSONObject data = message.getJSONObject("data");
