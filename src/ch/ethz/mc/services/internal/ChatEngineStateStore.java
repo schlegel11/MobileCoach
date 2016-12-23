@@ -3,10 +3,15 @@ package ch.ethz.mc.services.internal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Queue;
+import java.util.Stack;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.bson.types.ObjectId;
 
 import ch.ethz.mobilecoach.chatlib.engine.ChatEngine;
+import ch.ethz.mobilecoach.chatlib.engine.actions.operations.Operation;
+import ch.ethz.mobilecoach.chatlib.engine.stack.Context;
 import ch.ethz.mobilecoach.chatlib.engine.variables.ChatEngineStateStoreIfc;
 import ch.ethz.mobilecoach.model.persistent.ChatEngineState;
 
@@ -27,22 +32,47 @@ public class ChatEngineStateStore implements ChatEngineStateStoreIfc{
 	public boolean containsAValidChatEngineState(){
 		boolean result = true;
 		LocalDateTime ldt = LocalDateTime.now();
+		
 		if(chatEngineState == null){
 			result = false;
-		}else if(chatEngineState.getLdt().getDayOfMonth() != ldt.getDayOfMonth()){
+		}else if(chatEngineState != null && chatEngineState.getDayOfTheMonth() != ldt.getDayOfMonth() && chatEngineState.getMonthValue() != ldt.getMonthValue()){
 			result = false;
-			deleteState();
+			deleteState(chatEngineState);
 		}
 		return result;
 	}
 
 	@Override
 	public void saveChatEngineState(ChatEngine chatEngine) {
-		deleteState();
+
 		LocalDateTime ldt = LocalDateTime.now();
-		chatEngineState = new ChatEngineState(participantId, chatEngine.getStack(), chatEngine.getTimerValue(), chatEngine.getOperations(), chatEngine.getUserInput(), chatEngine.getCurrentAction(), ldt);		
-		deleteState();
-		this.dbMgmtService.saveModelObject(chatEngineState);		
+		ZonedDateTime zdt = ldt.atZone(ZoneId.of("Europe/Paris"));
+		long timeStamp = zdt.toInstant().toEpochMilli();
+
+		deleteState(chatEngineState);
+		
+		Queue<Integer> operations = convertOperationQueue(chatEngine.getOperations());	
+		Stack<Integer> stack = transformStackContextToStackInteger(chatEngine.getStack());
+		System.out.println(chatEngine.getCurrentAction());
+		
+		chatEngineState = new ChatEngineState(participantId, stack, chatEngine.getTimerValue(), operations, chatEngine.getUserInput(), chatEngine.getCurrentAction().getActionIdInConversation(), timeStamp, ldt.getDayOfMonth(), ldt.getMonthValue());		
+		this.dbMgmtService.saveModelObject(chatEngineState);
+	}
+
+	private Stack<Integer> transformStackContextToStackInteger(Stack<Context> stack) {
+		Stack<Integer> stack2 = new Stack<>();		
+		for(int j = 0; j < stack.size(); j++){			
+			stack2.add(stack.get(j).nextAction.getActionIdInConversation());
+		}
+		return stack2;
+	}
+
+	private Queue<Integer> convertOperationQueue(Queue<Operation> queueOperations) {
+		Queue<Integer> operations = new LinkedBlockingQueue<Integer>();
+		for(Operation operation : queueOperations){
+			operations.add(operation.getOperationInd());
+		}
+		return operations;
 	}
 
 	@Override
@@ -60,14 +90,13 @@ public class ChatEngineStateStore implements ChatEngineStateStoreIfc{
 
 	private long computeNewTimerValue() {
 		long newTimerValue;
-		
-		ZonedDateTime zdtOld = chatEngineState.getLdt().atZone(ZoneId.of("Europe/Paris"));
-		long millisOld = zdtOld.toInstant().toEpochMilli();
-		
+
+		long millisOld = chatEngineState.getTimeStamp();
+
 		LocalDateTime ldtNew = LocalDateTime.now();
 		ZonedDateTime zdtNew = ldtNew.atZone(ZoneId.of("Europe/Paris"));
 		long millisNew = zdtNew.toInstant().toEpochMilli();
-		
+
 		if(millisOld + chatEngineState.getTimerValue() - millisNew > 0L){
 			newTimerValue = millisOld + chatEngineState.getTimerValue() - millisNew;
 		}else{
@@ -75,9 +104,11 @@ public class ChatEngineStateStore implements ChatEngineStateStoreIfc{
 		}
 		return newTimerValue;
 	}
-	
+
+
 	@Override
-	public void deleteState(){
-		this.dbMgmtService.deleteModelObject(ChatEngineState.class, participantId);
+	public void deleteState(Object chatEngineState){
+
+		this.dbMgmtService.deleteModelObject((ChatEngineState) chatEngineState);
 	}
 }

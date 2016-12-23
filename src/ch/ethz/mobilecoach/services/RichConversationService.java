@@ -36,7 +36,6 @@ public class RichConversationService {
 	private ConversationManagementService conversationManagementService;
 
 	private VariablesManagerService variablesManagerService;
-	private LinkedHashMap<String, VariableStore> variableStores = new LinkedHashMap<>();
 	private DatabaseManagerService dBManagerService;
 	private LinkedHashMap<ObjectId, ChatEngine> chatEngines = new LinkedHashMap<>();	
 
@@ -52,6 +51,7 @@ public class RichConversationService {
 	public static RichConversationService start(
 			MessagingService messagingService, ConversationManagementService conversationManagementService, VariablesManagerService variablesManagerService, DatabaseManagerService dBManagerService) throws Exception {
 		RichConversationService service = new RichConversationService(messagingService, conversationManagementService, variablesManagerService, dBManagerService);
+		
 		return service;
 	}
 
@@ -81,10 +81,7 @@ public class RichConversationService {
 			};
 			
 			
-			// start a conversation
-			// TODO (DR): make sure these objects get cleaned up when a new conversation starts
-			//VariableStore variableStore = new InMemoryVariableStore();
-			VariableStore variableStore = createVariableStore(recipient); // TODO: make the InDataBaseVariableStore work
+			VariableStore variableStore = createVariableStore(recipient); 
 			Participant participant = dBManagerService.getModelObjectById(Participant.class, recipient);
 			Translator translator = new Translator(participant.getLanguage(), Constants.getXmlScriptsFolder() + "/pathmate2/translation_en_ch.csv");
 			
