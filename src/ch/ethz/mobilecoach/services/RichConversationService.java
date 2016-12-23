@@ -4,8 +4,6 @@ import java.util.LinkedHashMap;
 
 import org.bson.types.ObjectId;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
@@ -40,10 +38,6 @@ public class RichConversationService {
 	private LinkedHashMap<String, VariableStore> variableStores = new LinkedHashMap<>();
 	private DatabaseManagerService dBManagerService;
 	private LinkedHashMap<ObjectId, ChatEngine> chatEngines = new LinkedHashMap<>();
-	private LinkedHashMap<ObjectId, ActorRef> actorRefs = new LinkedHashMap<>();
-	
-	private ActorSystem actorSystem;
-
 
 	private RichConversationService(MessagingService mattermostMessagingService, ConversationManagementService conversationManagementService, VariablesManagerService variablesManagerService, DatabaseManagerService dBManagerService) throws Exception {
 		this.messagingService = mattermostMessagingService;
@@ -51,9 +45,6 @@ public class RichConversationService {
 
 		this.variablesManagerService = variablesManagerService;
 		this.dBManagerService = dBManagerService;
-		
-		
-		this.actorSystem = ActorSystem.create("MySystem");	
 		
 	}
 
@@ -128,19 +119,6 @@ public class RichConversationService {
 				}
 			});
 			
-			/*
-			
-			if (actorRefs.containsKey(recipient)){
-				// TODO: make sure actor is properly cleaned up
-				actorSystem.stop(actorRefs.get(recipient)); // stop old actor
-			} else {
-				ActorRef actorRef = actorSystem.actorOf(Props.create(UserActor.class), recipient.toString());
-				actorRefs.put(recipient, actorRef);
-				
-			}
-			
-			*/
-
 			String conversation = message.substring(START_CONVERSATION_PREFIX.length());
 			engine.startConversation(conversation);
 
