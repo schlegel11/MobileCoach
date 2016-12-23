@@ -37,8 +37,7 @@ public class RichConversationService {
 	private VariablesManagerService variablesManagerService;
 	private LinkedHashMap<String, VariableStore> variableStores = new LinkedHashMap<>();
 	private DatabaseManagerService dBManagerService;
-	private LinkedHashMap<ObjectId, ChatEngine> chatEngines = new LinkedHashMap<>();	
-
+	private LinkedHashMap<ObjectId, ChatEngine> chatEngines = new LinkedHashMap<>();
 
 	private RichConversationService(MessagingService mattermostMessagingService, ConversationManagementService conversationManagementService, VariablesManagerService variablesManagerService, DatabaseManagerService dBManagerService) throws Exception {
 		this.messagingService = mattermostMessagingService;
@@ -118,7 +117,7 @@ public class RichConversationService {
 					}
 				}
 			});
-
+			
 			String conversation = message.substring(START_CONVERSATION_PREFIX.length());
 			engine.startConversation(conversation);
 
@@ -145,6 +144,10 @@ public class RichConversationService {
 		}
 		return variableStore;
 	}
+	
+	
+	// WebSocket Listener
+	// ******************
 
 	private class MattermostConnector implements ConversationUI, MessagingService.MessageListener {
 

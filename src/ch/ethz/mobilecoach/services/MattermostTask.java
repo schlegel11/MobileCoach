@@ -39,7 +39,9 @@ public class MattermostTask<RESULT> {
 			}
 			
 			try {
-				post.setRequestEntity(new StringRequestEntity(this.payload.toString(), "application/json", "UTF-8"));
+				if (this.payload != null){
+					post.setRequestEntity(new StringRequestEntity(this.payload.toString(), "application/json", "UTF-8"));
+				}
 	            int responseCode = client.executeMethod(post);
 	            if (responseCode == HttpStatus.SC_OK) {
 	            	success = true;

@@ -398,7 +398,7 @@ public class CommunicationManagerService {
 				return;
 			} catch (final Exception e) {
 				log.warn(
-						"Could not send mail to {}, retrying later another {} times: ",
+						"Could not send mail to {}, retrying later another {} times: {}",
 						dialogOption.getData(),
 						ImplementationConstants.MAILING_SEND_RETRIES,
 						e.getMessage());
@@ -442,7 +442,7 @@ public class CommunicationManagerService {
 
 					return;
 				} catch (final Exception e) {
-					log.warn("Could not send mail to {} in approach {}: ",
+					log.warn("Could not send mail to {} in approach {}: {}",
 							dialogOption.getData(), i, e.getMessage());
 				}
 			}

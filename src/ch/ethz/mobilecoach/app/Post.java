@@ -57,6 +57,19 @@ public class Post {
 	
 	@Getter
 	@Setter
-	private Results results;	
-
+	private Results results;
+	
+	
+	@Getter
+	@Setter
+	private long createAt;
+	
+	@Getter
+	@Setter
+	private String id;
+	
+	
+	@Getter
+	@Setter
+	private String channelId;
 }
