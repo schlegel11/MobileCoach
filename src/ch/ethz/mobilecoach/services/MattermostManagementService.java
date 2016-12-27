@@ -8,7 +8,12 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.bson.types.ObjectId;
 import org.json.JSONObject;
 
+import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
+import ch.ethz.mc.services.internal.InDataBaseVariableStore;
+import ch.ethz.mc.services.internal.VariablesManagerService;
+import ch.ethz.mobilecoach.chatlib.engine.variables.VariableException;
+import ch.ethz.mobilecoach.interventions.PathMate;
 import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
 import ch.ethz.mobilecoach.model.persistent.OneSignalUserConfiguration;
 import ch.ethz.mobilecoach.model.persistent.subelements.MattermostChannel;
@@ -40,6 +45,7 @@ public class MattermostManagementService {
 	private final int TOKEN_RENEWAL_AFTER_DAYS = 10;
 
 	private final DatabaseManagerService databaseManagerService;
+	private final VariablesManagerService variablesManagerService;
 
 	public final String host_url = "http://dev.cdhi.ethz.ch/api/v3/";
 	public final String emailHost = "localhost";
@@ -69,12 +75,13 @@ public class MattermostManagementService {
 
 
 
-	public MattermostManagementService (DatabaseManagerService databaseManagerService){
+	public MattermostManagementService (DatabaseManagerService databaseManagerService, VariablesManagerService variablesManagerService){
 		this.databaseManagerService = databaseManagerService;
+		this.variablesManagerService = variablesManagerService;
 	}
 
-	public static MattermostManagementService start(DatabaseManagerService databaseManagerService){
-		MattermostManagementService service = new MattermostManagementService(databaseManagerService);
+	public static MattermostManagementService start(DatabaseManagerService databaseManagerService, VariablesManagerService variablesManagerService){
+		MattermostManagementService service = new MattermostManagementService(databaseManagerService, variablesManagerService);
 		service.loginAdmin();
 		//service.createMobileCoachUser(); // TODO: create a new Coach user if none exists or is configured
 		return service;
@@ -124,6 +131,20 @@ public class MattermostManagementService {
 		databaseManagerService.saveModelObject(config);	
 	}
 
+	
+	private String getInterventionCoachName(ObjectId participantId, String defaultName){
+		Participant participant = this.databaseManagerService.getModelObjectById(Participant.class, participantId);
+		InDataBaseVariableStore store = new InDataBaseVariableStore(this.variablesManagerService, participantId, participant);
+		
+		String botName;
+		try {
+			botName = store.get(PathMate.COACH_NAME_VARIABLE);
+		} catch (VariableException e) {
+			return defaultName;
+		}
+		
+		return botName;
+	}
 
 
 	public MattermostUserConfiguration createParticipantUser(ObjectId participantId){
@@ -133,8 +154,8 @@ public class MattermostManagementService {
 		addUserToTeam(config.getUserId(), teamId);
 
 		String userShortId = config.getUserId().substring(0, 5);
-		MattermostChannel coachingChannel = createPrivateChannel(userShortId + " Coaching", "BOT");
-		MattermostChannel managerChannel = createPrivateChannel(userShortId + " Support", "HUMAN");
+		MattermostChannel coachingChannel = createPrivateChannel(getInterventionCoachName(participantId, userShortId + " Coach"), "BOT");
+		MattermostChannel managerChannel = createPrivateChannel(PathMate.SUPPORT_NAME, "HUMAN");
 
 		List<MattermostChannel> channels = config.getChannels();
 		channels.add(coachingChannel);

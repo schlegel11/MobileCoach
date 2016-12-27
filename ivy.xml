@@ -141,5 +141,9 @@
 		
 		<!-- Tomcat Juli (logging) -->
 		<dependency org="org.apache.tomcat" name="tomcat-juli" rev="9.0.0.M11"/>
+		
+		<!-- Apache HttpAsyncClient -->
+		<dependency org="org.apache.httpcomponents" name="httpasyncclient" rev="4.1.2"/>
+		
 	</dependencies>
 </ivy-module>
