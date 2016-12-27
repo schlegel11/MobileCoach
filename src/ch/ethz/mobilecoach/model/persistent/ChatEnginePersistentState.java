@@ -1,8 +1,5 @@
 package ch.ethz.mobilecoach.model.persistent;
 
-import java.util.Queue;
-import java.util.Stack;
-
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.model.ModelObject;
@@ -12,26 +9,14 @@ import lombok.Setter;
 
 
 @AllArgsConstructor
-public class ChatEngineState extends ModelObject{
+public class ChatEnginePersistentState extends ModelObject{
 	
 	@Getter
 	@Setter
 	private ObjectId participantId;
 	@Getter
 	@Setter
-	private Stack<Integer> stack;
-	@Getter
-	@Setter
-	private long timerValue;
-	@Getter
-	@Setter
-	private Queue<Integer> operations;
-	@Getter
-	@Setter
-	private String userInput;
-	@Getter
-	@Setter
-	private int currentAction;
+	private String serializedState;
 	@Getter
 	@Setter
 	private long timeStamp;

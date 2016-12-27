@@ -18,14 +18,17 @@ import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mobilecoach.chatlib.engine.ChatEngine;
 import ch.ethz.mobilecoach.chatlib.engine.ConversationRepository;
 import ch.ethz.mobilecoach.chatlib.engine.ExecutionException;
+import ch.ethz.mobilecoach.chatlib.engine.Logger;
 import ch.ethz.mobilecoach.chatlib.engine.actions.LastAction;
 import ch.ethz.mobilecoach.chatlib.engine.actions.MessageAction;
 import ch.ethz.mobilecoach.chatlib.engine.actions.NonbranchingAction;
+import ch.ethz.mobilecoach.chatlib.engine.actions.Option;
+import ch.ethz.mobilecoach.chatlib.engine.actions.QuestionAction;
 import ch.ethz.mobilecoach.chatlib.engine.test.TestFramework;
 import ch.ethz.mobilecoach.chatlib.engine.test.mock.MockConversationUI;
 import ch.ethz.mobilecoach.chatlib.engine.test.mock.MockLogger;
 import ch.ethz.mobilecoach.chatlib.engine.variables.InMemoryVariableStore;
-import ch.ethz.mobilecoach.model.persistent.ChatEngineState;
+import ch.ethz.mobilecoach.model.persistent.ChatEnginePersistentState;
 
 public class RestoreChatEngineStateTest extends TestFramework {
 
@@ -62,8 +65,15 @@ public class RestoreChatEngineStateTest extends TestFramework {
 		
 		ConversationRepository repository = new ConversationRepository();
 		NonbranchingAction conversation = new MessageAction("Hi there!", repository);
+		QuestionAction question = new QuestionAction("How are you?", repository);
+		conversation.nextAction = question;	
+		MessageAction m1 = new MessageAction("That's nice.", repository);
+		MessageAction m2 = new MessageAction("You'll get better.", repository);
+		question.addUserOption(new Option("Well", "1", m1));
+		question.addUserOption(new Option("Not well", "2", m2));
 		LastAction lastAction = new LastAction(repository);
-		conversation.nextAction = lastAction;	
+		m1.nextAction = lastAction;
+		m2.nextAction = lastAction;
 		repository.addConversation("test-conversation", conversation);
 	
 
@@ -74,35 +84,36 @@ public class RestoreChatEngineStateTest extends TestFramework {
 		MockConversationUI conversationUI = new MockConversationUI();
 
 		ChatEngine engine = new ChatEngine(repository, conversationUI, new InMemoryVariableStore(), null, null, chatEngineStateStore);
-		engine.setLogger(new MockLogger());
+		Logger logger = new MockLogger();
+		engine.setLogger(logger);
+		engine.sendExceptionAsMessage =  false;
 
 
 		// run the conversation
 		engine.startConversation("test-conversation");
+		assertEquals("Hi there!", conversationUI.messages.get(0).text);
+		assertEquals("How are you?", conversationUI.messages.get(1).text);
+		
 		engine = null;
 		
-		
-		java.util.Iterator<ChatEngineState> iterator  = databaseManagerService.findModelObjects(ChatEngineState.class, Queries.ALL).iterator();
+		java.util.Iterator<ChatEnginePersistentState> iterator = 
+				databaseManagerService.findModelObjects(ChatEnginePersistentState.class, "{participantId: #}", participantId).iterator();
 		
 		while(iterator.hasNext()){
-			ChatEngineState ces = iterator.next();
+			ChatEnginePersistentState ces = iterator.next();
 			if(ChatEngineStateStore.containsAValidChatEngineState(ces)){
 				ChatEngineStateStore chatEngineStateStore2 = new ChatEngineStateStore(databaseManagerService, ces.getParticipantId());
 				ChatEngine engine2 = new ChatEngine(repository, conversationUI, new InMemoryVariableStore(), null, null, chatEngineStateStore2);
+				engine2.sendExceptionAsMessage =  false;
+				engine2.setLogger(logger);
 				chatEngineStateStore.restoreState(engine2);
-				try{
-					engine2.continueConversation(ces.getCurrentAction());;
-				}catch(ExecutionException ee){
-					ee.printStackTrace();
-				}
+				engine2.handleInput("1");
 			}
 		}
-		
-	
-		System.out.println(conversationUI.messages.get(0).text);
 
 		// check that the conversation was run successfully
-		assertEquals(conversationUI.messages.get(0).text, "Hi there!");
+		assertEquals("Well", conversationUI.messages.get(2).text);
+		assertEquals("That's nice.", conversationUI.messages.get(3).text);
 
 	}
 

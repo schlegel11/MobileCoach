@@ -26,7 +26,7 @@ import ch.ethz.mobilecoach.chatlib.engine.model.AnswerOption;
 import ch.ethz.mobilecoach.chatlib.engine.model.Message;
 import ch.ethz.mobilecoach.chatlib.engine.variables.InMemoryVariableStore;
 import ch.ethz.mobilecoach.chatlib.engine.variables.VariableStore;
-import ch.ethz.mobilecoach.model.persistent.ChatEngineState;
+import ch.ethz.mobilecoach.model.persistent.ChatEnginePersistentState;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
@@ -57,19 +57,15 @@ public class RichConversationService {
 	}
 
 	private void continueConversation() {
-		java.util.Iterator<ChatEngineState> iterator  = dBManagerService.findModelObjects(ChatEngineState.class, Queries.ALL).iterator();
+		java.util.Iterator<ChatEnginePersistentState> iterator  = dBManagerService.findModelObjects(ChatEnginePersistentState.class, Queries.ALL).iterator();
 		
 		while(iterator.hasNext()){
-			ChatEngineState ces = iterator.next();
+			ChatEnginePersistentState ces = iterator.next();
 			if(ChatEngineStateStore.containsAValidChatEngineState(ces)){
 				ChatEngineStateStore chatEngineStateStore = new ChatEngineStateStore(dBManagerService, ces.getParticipantId());
 				ChatEngine engine = prepareChatEngine(null, ces.getParticipantId(), chatEngineStateStore);
 				chatEngineStateStore.restoreState(engine);
-				try{
-					engine.continueConversation(ces.getCurrentAction());;
-				}catch(ExecutionException ee){
-					ee.printStackTrace();
-				}
+				engine.run();
 			}
 		}
 
