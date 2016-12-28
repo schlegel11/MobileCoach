@@ -49,6 +49,8 @@ public class FileConversationManagementService implements
 				loadResourceFile(f);
 			}
 		}
+		
+		repository.freeze(); // for now we assume that the repository should not change after loading from the folder
 	}
 	
 	
@@ -57,7 +59,5 @@ public class FileConversationManagementService implements
 		DomParser parser = new DomParser(repository, null);
 		parser.parse(stream);
 	}
-
-
 
 }

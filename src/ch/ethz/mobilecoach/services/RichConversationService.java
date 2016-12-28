@@ -5,11 +5,12 @@ import java.util.LinkedHashMap;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.Constants;
+import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.Participant;
+import ch.ethz.mc.services.internal.ChatEngineStateStore;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.InDataBaseVariableStore;
 import ch.ethz.mc.services.internal.VariablesManagerService;
-
 import ch.ethz.mobilecoach.app.Option;
 import ch.ethz.mobilecoach.app.Post;
 import ch.ethz.mobilecoach.chatlib.engine.ChatEngine;
@@ -23,8 +24,10 @@ import ch.ethz.mobilecoach.chatlib.engine.conversation.UserReplyListener;
 import ch.ethz.mobilecoach.chatlib.engine.helpers.IncrementVariableHelper;
 import ch.ethz.mobilecoach.chatlib.engine.model.AnswerOption;
 import ch.ethz.mobilecoach.chatlib.engine.model.Message;
+import ch.ethz.mobilecoach.chatlib.engine.serialization.RestoreException;
 import ch.ethz.mobilecoach.chatlib.engine.variables.InMemoryVariableStore;
 import ch.ethz.mobilecoach.chatlib.engine.variables.VariableStore;
+import ch.ethz.mobilecoach.model.persistent.ChatEnginePersistentState;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
@@ -35,7 +38,6 @@ public class RichConversationService {
 	private ConversationManagementService conversationManagementService;
 
 	private VariablesManagerService variablesManagerService;
-	private LinkedHashMap<String, VariableStore> variableStores = new LinkedHashMap<>();
 	private DatabaseManagerService dBManagerService;
 	private LinkedHashMap<ObjectId, ChatEngine> chatEngines = new LinkedHashMap<>();
 
@@ -45,6 +47,7 @@ public class RichConversationService {
 
 		this.variablesManagerService = variablesManagerService;
 		this.dBManagerService = dBManagerService;
+		continueConversation();
 	}
 
 	public static RichConversationService start(
@@ -53,70 +56,41 @@ public class RichConversationService {
 		return service;
 	}
 
+	private void continueConversation() {
+		java.util.Iterator<ChatEnginePersistentState> iterator  = dBManagerService.findModelObjects(ChatEnginePersistentState.class, Queries.ALL).iterator();
+		
+		while(iterator.hasNext()){
+			ChatEnginePersistentState ces = iterator.next();
+			
+			if(ChatEngineStateStore.containsAValidChatEngineState(ces)){
+				
+				log.debug("Restoring chat engine state: " + ces.getSerializedState());
+				
+				ChatEngineStateStore chatEngineStateStore = new ChatEngineStateStore(dBManagerService, ces.getParticipantId());
+				Participant participant = dBManagerService.getModelObjectById(Participant.class, ces.getParticipantId());
+				if (participant != null) {
+					ChatEngine engine = prepareChatEngine(null, participant, chatEngineStateStore);
+					try {
+						chatEngineStateStore.restoreState(engine);
+						engine.run();
+					} catch (RestoreException e) {
+						e.printStackTrace();
+						//TODO: should we delete the state if we cannot restore it?
+					}
+				}
+			}
+		}
+
+	}
 
 	public void sendMessage(String sender, ObjectId recipient, String message) throws ExecutionException {
 
 		final String START_CONVERSATION_PREFIX = "start-conversation:";
 		if (message.startsWith(START_CONVERSATION_PREFIX)){
-			ConversationRepository repository = conversationManagementService.getRepository(null); // TODO: use Intervention id to get the repository
-
-			Logger logger = new Logger(){
-
-				@Override
-				public void logError(String message) {
-					log.error(message);
-				}
-
-				@Override
-				public void logDebug(String message) {
-					log.debug(message);
-				}
-
-				@Override
-				public void logInfo(String message) {
-					log.info(message);
-				}
-			};
 			
-			
-			// start a conversation
-			// TODO (DR): make sure these objects get cleaned up when a new conversation starts
-			//VariableStore variableStore = new InMemoryVariableStore();
-			VariableStore variableStore = createVariableStore(recipient); // TODO: make the InDataBaseVariableStore work
+			ChatEngineStateStore chatEngineStateStore = new ChatEngineStateStore(dBManagerService, recipient);
 			Participant participant = dBManagerService.getModelObjectById(Participant.class, recipient);
-			Translator translator = new Translator(participant.getLanguage(), Constants.getXmlScriptsFolder() + "/pathmate2/translation_en_ch.csv");
-			
-			MattermostConnector ui = new MattermostConnector(sender, recipient);
-			HelpersRepository helpers = new HelpersRepository();
-
-			ChatEngine engine = new ChatEngine(repository, ui, variableStore, helpers, translator);
-			engine.setLogger(logger);
-			chatEngines.put(recipient, engine);
-			
-			// add helpers for PathMate intervention
-			helpers.addHelper("PM-add-10-to-total_keys", new IncrementVariableHelper("$total_keys", 10));
-
-			messagingService.setListener(recipient, ui);
-
-			ui.setUserReplyListener(new UserReplyListener(){
-				@Override
-				public void userReplied(Message message) {
-
-					ObjectId participantId = ui.getRecipient();
-					
-					String input = message.answerOptionId;
-					if (input == null){
-						input = ""; // use empty string if no option is provided (works for requests that don't expect a value)
-					}
-
-					if (chatEngines.containsKey(participantId)){
-						engine.handleInput(input);
-					} else {
-						// TODO (DR): store the message for the MC system to collect it. 
-						//            This is not necessary for the PathMate2 intervention.
-					}
-				}
-			});
+			ChatEngine engine = prepareChatEngine(sender, participant, chatEngineStateStore);
 			
 			String conversation = message.substring(START_CONVERSATION_PREFIX.length());
 			engine.startConversation(conversation);
@@ -132,7 +106,69 @@ public class RichConversationService {
 		}
 	}
 
-	
+	private ChatEngine prepareChatEngine(String sender, Participant participant, ChatEngineStateStore chatEngineStateStore) {
+		ConversationRepository repository = conversationManagementService.getRepository(null); // TODO: use Intervention id to get the repository
+
+		Logger logger = new Logger(){
+
+			@Override
+			public void logError(String message) {
+				log.error(message);
+			}
+
+			@Override
+			public void logDebug(String message) {
+				log.debug(message);
+			}
+
+			@Override
+			public void logInfo(String message) {
+				log.info(message);
+			}
+		};
+
+
+		VariableStore variableStore = createVariableStore(participant.getId());
+		Translator translator = new Translator(participant.getLanguage(), Constants.getXmlScriptsFolder() + "/pathmate2/translation_en_ch.csv");
+
+		MattermostConnector ui = new MattermostConnector(sender, participant.getId());
+		HelpersRepository helpers = new HelpersRepository();
+
+
+
+		ChatEngine engine = new ChatEngine(repository, ui, variableStore, helpers, translator, chatEngineStateStore);
+		engine.setLogger(logger);
+		chatEngines.put(participant.getId(), engine);
+
+		// add helpers for PathMate intervention
+		helpers.addHelper("PM-add-10-to-total_keys", new IncrementVariableHelper("$total_keys", 10));
+
+		messagingService.setListener(participant.getId(), ui);
+
+		ui.setUserReplyListener(new UserReplyListener(){
+			@Override
+			public void userReplied(Message message) {
+
+				ObjectId participantId = ui.getRecipient();
+
+				String input = message.answerOptionId;
+				if (input == null){
+					input = ""; // use empty string if no option is provided (works for requests that don't expect a value)
+				}
+
+				if (chatEngines.containsKey(participantId)){
+					engine.handleInput(input);
+				} else {
+					// TODO (DR): store the message for the MC system to collect it. 
+					//            This is not necessary for the PathMate2 intervention.
+				}
+			}
+		});
+		
+		return engine;
+	}
+
+
 	public VariableStore createVariableStore(ObjectId participantId) {
 		VariableStore variableStore;
 		// For testing purposes only. 
@@ -157,7 +193,7 @@ public class RichConversationService {
 
 		@Getter
 		private ObjectId recipient;
-		
+
 		public MattermostConnector(String sender, ObjectId recipient){
 
 			this.sender = sender;
@@ -186,7 +222,7 @@ public class RichConversationService {
 					post.setPostType(Post.POST_TYPE_REQUEST);
 					post.setRequestType(message.requestType);
 				}
-				
+
 				post.getParameters().putAll(message.parameters);
 
 				messagingService.sendMessage(sender, recipient, post);
@@ -199,7 +235,7 @@ public class RichConversationService {
 		}
 
 		@Override
-		public void delay(Runnable callback, Integer milliseconds) {
+		public void delay(Runnable callback, Long milliseconds) {
 			// TODO implement a better delay
 			log.debug("Starting timer with " + milliseconds + " msec.");
 			new java.util.Timer().schedule( 
@@ -210,7 +246,7 @@ public class RichConversationService {
 						}
 					}, 
 					milliseconds 
-				);
+					);
 		}
 
 		public void receivePost(Post post) {

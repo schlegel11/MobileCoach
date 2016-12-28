@@ -1,1 +1,1 @@
-/Users/Health-IS/Documents/workspace/mobilecoach-config/configuration.properties
+/Users/rudomini/Documents/workspace/mobilecoach-config/configuration.properties
