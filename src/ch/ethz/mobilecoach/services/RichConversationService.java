@@ -24,6 +24,7 @@ import ch.ethz.mobilecoach.chatlib.engine.conversation.UserReplyListener;
 import ch.ethz.mobilecoach.chatlib.engine.helpers.IncrementVariableHelper;
 import ch.ethz.mobilecoach.chatlib.engine.model.AnswerOption;
 import ch.ethz.mobilecoach.chatlib.engine.model.Message;
+import ch.ethz.mobilecoach.chatlib.engine.serialization.RestoreException;
 import ch.ethz.mobilecoach.chatlib.engine.variables.InMemoryVariableStore;
 import ch.ethz.mobilecoach.chatlib.engine.variables.VariableStore;
 import ch.ethz.mobilecoach.model.persistent.ChatEnginePersistentState;
@@ -60,11 +61,23 @@ public class RichConversationService {
 		
 		while(iterator.hasNext()){
 			ChatEnginePersistentState ces = iterator.next();
+			
 			if(ChatEngineStateStore.containsAValidChatEngineState(ces)){
+				
+				log.debug("Restoring chat engine state: " + ces.getSerializedState());
+				
 				ChatEngineStateStore chatEngineStateStore = new ChatEngineStateStore(dBManagerService, ces.getParticipantId());
-				ChatEngine engine = prepareChatEngine(null, ces.getParticipantId(), chatEngineStateStore);
-				chatEngineStateStore.restoreState(engine);
-				engine.run();
+				Participant participant = dBManagerService.getModelObjectById(Participant.class, ces.getParticipantId());
+				if (participant != null) {
+					ChatEngine engine = prepareChatEngine(null, participant, chatEngineStateStore);
+					try {
+						chatEngineStateStore.restoreState(engine);
+						engine.run();
+					} catch (RestoreException e) {
+						e.printStackTrace();
+						//TODO: should we delete the state if we cannot restore it?
+					}
+				}
 			}
 		}
 
@@ -76,9 +89,9 @@ public class RichConversationService {
 		if (message.startsWith(START_CONVERSATION_PREFIX)){
 			
 			ChatEngineStateStore chatEngineStateStore = new ChatEngineStateStore(dBManagerService, recipient);
-			ChatEngine engine = prepareChatEngine(sender, recipient, chatEngineStateStore);
-
-
+			Participant participant = dBManagerService.getModelObjectById(Participant.class, recipient);
+			ChatEngine engine = prepareChatEngine(sender, participant, chatEngineStateStore);
+			
 			String conversation = message.substring(START_CONVERSATION_PREFIX.length());
 			engine.startConversation(conversation);
 
@@ -93,7 +106,7 @@ public class RichConversationService {
 		}
 	}
 
-	private ChatEngine prepareChatEngine(String sender, ObjectId recipient, ChatEngineStateStore chatEngineStateStore) {
+	private ChatEngine prepareChatEngine(String sender, Participant participant, ChatEngineStateStore chatEngineStateStore) {
 		ConversationRepository repository = conversationManagementService.getRepository(null); // TODO: use Intervention id to get the repository
 
 		Logger logger = new Logger(){
@@ -115,23 +128,22 @@ public class RichConversationService {
 		};
 
 
-		VariableStore variableStore = createVariableStore(recipient); 
-		Participant participant = dBManagerService.getModelObjectById(Participant.class, recipient);
+		VariableStore variableStore = createVariableStore(participant.getId());
 		Translator translator = new Translator(participant.getLanguage(), Constants.getXmlScriptsFolder() + "/pathmate2/translation_en_ch.csv");
 
-		MattermostConnector ui = new MattermostConnector(sender, recipient);
+		MattermostConnector ui = new MattermostConnector(sender, participant.getId());
 		HelpersRepository helpers = new HelpersRepository();
 
 
 
 		ChatEngine engine = new ChatEngine(repository, ui, variableStore, helpers, translator, chatEngineStateStore);
 		engine.setLogger(logger);
-		chatEngines.put(recipient, engine);
+		chatEngines.put(participant.getId(), engine);
 
 		// add helpers for PathMate intervention
 		helpers.addHelper("PM-add-10-to-total_keys", new IncrementVariableHelper("$total_keys", 10));
 
-		messagingService.setListener(recipient, ui);
+		messagingService.setListener(participant.getId(), ui);
 
 		ui.setUserReplyListener(new UserReplyListener(){
 			@Override

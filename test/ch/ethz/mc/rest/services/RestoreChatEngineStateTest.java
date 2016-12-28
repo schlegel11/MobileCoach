@@ -24,6 +24,7 @@ import ch.ethz.mobilecoach.chatlib.engine.actions.MessageAction;
 import ch.ethz.mobilecoach.chatlib.engine.actions.NonbranchingAction;
 import ch.ethz.mobilecoach.chatlib.engine.actions.Option;
 import ch.ethz.mobilecoach.chatlib.engine.actions.QuestionAction;
+import ch.ethz.mobilecoach.chatlib.engine.serialization.RestoreException;
 import ch.ethz.mobilecoach.chatlib.engine.test.TestFramework;
 import ch.ethz.mobilecoach.chatlib.engine.test.mock.MockConversationUI;
 import ch.ethz.mobilecoach.chatlib.engine.test.mock.MockLogger;
@@ -60,7 +61,7 @@ public class RestoreChatEngineStateTest extends TestFramework {
 	}
 
 	@Test
-	public void testRestoreState() throws ExecutionException {
+	public void testRestoreState() throws ExecutionException, RestoreException {
 		// set up the conversation repository
 		
 		ConversationRepository repository = new ConversationRepository();

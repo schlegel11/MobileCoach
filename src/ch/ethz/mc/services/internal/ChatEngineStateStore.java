@@ -13,10 +13,13 @@ import org.bson.types.ObjectId;
 import ch.ethz.mobilecoach.chatlib.engine.ChatEngine;
 import ch.ethz.mobilecoach.chatlib.engine.ChatEngineState;
 import ch.ethz.mobilecoach.chatlib.engine.actions.operations.Operation;
+import ch.ethz.mobilecoach.chatlib.engine.serialization.ChatEngineStateStoreIfc;
+import ch.ethz.mobilecoach.chatlib.engine.serialization.RestoreException;
 import ch.ethz.mobilecoach.chatlib.engine.stack.Context;
-import ch.ethz.mobilecoach.chatlib.engine.variables.ChatEngineStateStoreIfc;
 import ch.ethz.mobilecoach.model.persistent.ChatEnginePersistentState;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public class ChatEngineStateStore implements ChatEngineStateStoreIfc {
 
 
@@ -65,7 +68,7 @@ public class ChatEngineStateStore implements ChatEngineStateStoreIfc {
 	}
 
 	@Override
-	public void restoreState(ChatEngine chatEngine) {
+	public void restoreState(ChatEngine chatEngine) throws RestoreException {
 
 		ChatEnginePersistentState persistentState = this.dbMgmtService.findOneModelObject(ChatEnginePersistentState.class,"{'participantId':#}", participantId);
 		
@@ -80,8 +83,8 @@ public class ChatEngineStateStore implements ChatEngineStateStoreIfc {
 					restoredState.getUserInput(), newTimerValue));
 		
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Error deserializing state: " + persistentState.getSerializedState(), e);
+			throw new RestoreException(e);
 		}
 	}
 
