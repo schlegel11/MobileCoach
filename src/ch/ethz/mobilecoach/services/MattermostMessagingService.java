@@ -6,9 +6,13 @@ import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 import javax.websocket.ClientEndpointConfig;
@@ -35,9 +39,11 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.bson.types.ObjectId;
+import org.jongo.query.Query;
 import org.json.JSONObject;
 import org.json.JSONArray;
 
+import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mobilecoach.app.Post;
@@ -69,7 +75,6 @@ public class MattermostMessagingService implements MessagingService {
 	private WebSocketEndpoint webSocketEndpoint;
 	
 	private Runnable onCloseListener;
-	
 
 	// Construction
 	
@@ -80,11 +85,13 @@ public class MattermostMessagingService implements MessagingService {
 	
 	public static MattermostMessagingService start(MattermostManagementService managementService, DatabaseManagerService databaseManagerService){
 		MattermostMessagingService service = new MattermostMessagingService(managementService, databaseManagerService);
-		service.login();
-		service.connectToWebSocket();
-		service.resync(); // TODO: remove this. instead, getUnreceivedMessages() should be called with the channelIds of ongoing conversations
-		
+		service.login();		
 		return service;
+	}
+	
+	public void startReceiving(){
+		connectToWebSocket();
+		resync(); // TODO: remove this. instead, getUnreceivedMessages() should be called with the channelIds of ongoing conversations
 	}
 	
 	
@@ -328,7 +335,20 @@ public class MattermostMessagingService implements MessagingService {
 		
 		// get missed messages
 		
-		System.out.println("Getting messages from Mattermost (" + channelIds.size() + " channels) " + System.currentTimeMillis());
+		long timingStart = System.currentTimeMillis();
+		log.debug("Getting messages from Mattermost (" + channelIds.size() + " channels) ");
+		
+		Map<String, Long> channelLastMessage = new HashMap<>();
+    	for (UserLastMessage ulm: this.databaseManagerService.findModelObjects(UserLastMessage.class, Queries.ALL)){
+
+    		String channelId = ulm.getChannelId();
+    		
+    		if (!channelLastMessage.containsKey(channelId) || channelLastMessage.get(channelId) > ulm.getLastMessageTimestamp()){
+    			// put if no value exists or new value is smaller
+    			channelLastMessage.put(channelId, ulm.getLastMessageTimestamp());
+    		}
+    	};
+		
 		
 		try {
 	        RequestConfig requestConfig = RequestConfig.custom()
@@ -342,12 +362,16 @@ public class MattermostMessagingService implements MessagingService {
                 httpclient.start();
                 final CountDownLatch latch = new CountDownLatch(channelIds.size());
                 for (final String channelId: channelIds) {
-                	String sinceTime = "0"; // TODO: use last received time
-                	//sinceTime = new Long(System.currentTimeMillis()).toString();
+                	long sinceTime = 0L;
+                	
+                	if (channelLastMessage.containsKey(channelId)){
+                		sinceTime = channelLastMessage.get(channelId);
+                	}
                 	
                 	//https://your-mattermost-url.com/api/v3/teams/{team_id}/channels/{channel_id}/posts/since/{time}
-                	HttpGet request = new HttpGet(
-                			managementService.host_url + "teams/" + managementService.teamId + "/channels/" + channelId + "/posts/since/" + sinceTime );
+                	String url = managementService.host_url + "teams/" + managementService.teamId + "/channels/" + channelId + "/posts/since/" + sinceTime;
+                	
+                	HttpGet request = new HttpGet( url );
           	
                 	request.addHeader("Authorization", "Bearer " + this.mcUserToken);
                 	
@@ -366,7 +390,7 @@ public class MattermostMessagingService implements MessagingService {
                         	JSONObject result = new JSONObject(responseContent);
                         	JSONArray order = result.getJSONArray("order");
                         	JSONObject posts = result.getJSONObject("posts");
-                        	
+                        	                        	
                         	if (order.length() > 0){
                         		String lastPostId = order.getString(0);
                         		JSONObject post = posts.getJSONObject(lastPostId);
@@ -396,7 +420,7 @@ public class MattermostMessagingService implements MessagingService {
                     });
                 }
                 latch.await();
-                System.out.println("Getting messages from Mattermost: done "  + System.currentTimeMillis());
+                log.debug("Getting messages from Mattermost: done in " + (System.currentTimeMillis() - timingStart)/1000.0 + " sec");
             } finally {
                 httpclient.close();
             }

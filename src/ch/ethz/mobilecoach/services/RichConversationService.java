@@ -82,7 +82,8 @@ public class RichConversationService {
 				}
 			}
 		}
-
+		
+		this.messagingService.startReceiving(); // now that all the listeners have been set, we can start receiving
 	}
 
 	public void sendMessage(String sender, ObjectId recipient, String message) throws ExecutionException {

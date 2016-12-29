@@ -12,6 +12,7 @@ public interface MessagingService {
 	
 	public void indicateTyping(String sender, ObjectId recipient);
 	
+	public void startReceiving(); // this should be called after all the listeners have been set
 	
 	public interface MessageListener {
 		public void receivePost(Post post);
