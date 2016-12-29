@@ -41,6 +41,7 @@ import ch.ethz.mc.ui.NotificationMessageException;
 import ch.ethz.mc.ui.UISession;
 import ch.ethz.mc.ui.views.components.basics.ConfirmationComponent;
 import ch.ethz.mc.ui.views.helper.CaseInsensitiveItemSorter;
+import ch.ethz.mobilecoach.services.RichConversationService;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -88,6 +89,10 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 
 	protected AdminNavigatorUI getAdminUI() {
 		return (AdminNavigatorUI) UI.getCurrent();
+	}
+	
+	protected RichConversationService getRichConversationService() {
+		return MC.getInstance().getRichConversationService();
 	}
 
 	/**

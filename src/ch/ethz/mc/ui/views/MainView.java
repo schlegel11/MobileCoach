@@ -25,6 +25,7 @@ import ch.ethz.mc.ui.AdminNavigatorUI;
 import ch.ethz.mc.ui.views.components.access_control.AccessControlTabComponentWithController;
 import ch.ethz.mc.ui.views.components.account.AccountTabComponentWithController;
 import ch.ethz.mc.ui.views.components.basics.MenuButtonComponent;
+import ch.ethz.mc.ui.views.components.conversations.ConversationsTabComponentWithController;
 import ch.ethz.mc.ui.views.components.interventions.AllInterventionsTabComponentWithController;
 import ch.ethz.mc.ui.views.components.views.MainViewComponent;
 import ch.ethz.mc.ui.views.components.welcome.WelcomeTabComponentWithController;
@@ -122,6 +123,16 @@ public class MainView extends AbstractView implements View, LayoutClickListener 
 					switchToAccessControlView();
 				}
 				break componentLoop;
+			} else if (clickedComponent == mainViewComponent
+					.getConversationsButton()) {
+				log.debug("CONVERSATIONS button clicked");
+				if (clickedComponent != currentMenuButton) {
+					currentMenuButton.removeStyleName("active");
+					currentMenuButton = (MenuButtonComponent) clickedComponent;
+					currentMenuButton.addStyleName("active");
+					switchToConversationsView();
+				}
+				break componentLoop;
 			} else if (clickedComponent == mainViewComponent.getAccountButton()) {
 				log.debug("ACCOUNT button clicked");
 				if (clickedComponent != currentMenuButton) {
@@ -189,5 +200,17 @@ public class MainView extends AbstractView implements View, LayoutClickListener 
 						.getCurrentAuthorId()),
 						AdminMessageStrings.MAIN_VIEW__ACCOUNT_TAB,
 						ThemeImageStrings.ACCOUNT_ICON);
+	}
+	
+	@Synchronized
+	private void switchToConversationsView() {
+		getAdminUI().getLockingService().releaseLockOfUISession(getUISession());
+
+		removeAllTabs();
+
+		addTab(mainViewComponent.getContentAccordion(),
+				new ConversationsTabComponentWithController(),
+						AdminMessageStrings.MAIN_VIEW__CONVERSATIONS_TAB,
+						ThemeImageStrings.CONVERSATIONS_ICON);
 	}
 }

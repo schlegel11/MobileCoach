@@ -6,6 +6,7 @@ import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.Queries;
+import ch.ethz.mc.model.persistent.Author;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.services.internal.ChatEngineStateStore;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
@@ -29,6 +30,7 @@ import ch.ethz.mobilecoach.chatlib.engine.variables.InMemoryVariableStore;
 import ch.ethz.mobilecoach.chatlib.engine.variables.VariableStore;
 import ch.ethz.mobilecoach.model.persistent.ChatEnginePersistentState;
 import lombok.Getter;
+import lombok.Synchronized;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -266,6 +268,17 @@ public class RichConversationService {
 			}
 		}
 
+	}
+	
+	// for admin UI
+	
+	@Synchronized
+	public Iterable<ChatEnginePersistentState> getAllConversations() {
+		return dBManagerService.findModelObjects(ChatEnginePersistentState.class, Queries.ALL);
+	}
+	
+	public void deleteChatEnginePersistentState(ObjectId stateId){
+		dBManagerService.deleteModelObject(ChatEnginePersistentState.class, stateId);
 	}
 
 }
