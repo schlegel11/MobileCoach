@@ -492,7 +492,7 @@ public class CommunicationManagerService {
 						richConversationService.sendMessage(messageSender, recipient, message);
 
 					} catch (ExecutionException e) {
-						e.printStackTrace();
+						log.error(e);
 						throw new MessagingException("Error executing rich conversation.", e);
 					}
 

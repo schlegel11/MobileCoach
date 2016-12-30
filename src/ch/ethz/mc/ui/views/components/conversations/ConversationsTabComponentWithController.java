@@ -87,6 +87,8 @@ public class ConversationsTabComponentWithController extends
 
 		// handle buttons
 		val buttonClickListener = new ButtonClickListener();
+		conversationsEditComponent.getDeleteAllButton().addClickListener(
+				buttonClickListener);
 		conversationsEditComponent.getDeleteButton().addClickListener(
 				buttonClickListener);
 		conversationsEditComponent.getRefreshButton().addClickListener(
@@ -103,6 +105,8 @@ public class ConversationsTabComponentWithController extends
 				refresh();
 			} else if (event.getButton() == conversationsEditComponent.getDeleteButton()) {
 				deleteConversation();
+			} else if (event.getButton() == conversationsEditComponent.getDeleteAllButton()) {
+				deleteAllConversations();
 			}
 		}
 	}
@@ -136,6 +140,25 @@ public class ConversationsTabComponentWithController extends
 				getAdminUI().showInformationNotification(
 						AdminMessageStrings.NOTIFICATION__ACCOUNT_DELETED); // TID
 
+				closeWindow();
+			}
+		}, null);
+	}
+	
+	public void deleteAllConversations() {
+		log.debug("Delete all conversations");
+		showConfirmationWindow(new ExtendableButtonClickListener() {
+
+			@Override
+			public void buttonClick(final ClickEvent event) {
+				try {
+					getRichConversationService().deleteAllChatEnginePersistentStates();
+
+				} catch (final Exception e) {
+					closeWindow();
+					handleException(e);
+					return;
+				}
 				closeWindow();
 			}
 		}, null);

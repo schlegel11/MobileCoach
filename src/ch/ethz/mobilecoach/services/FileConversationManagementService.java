@@ -11,12 +11,14 @@ import java.util.stream.Collectors;
 
 import ch.ethz.mobilecoach.chatlib.engine.ConversationRepository;
 import ch.ethz.mobilecoach.chatlib.engine.xml.DomParser;
+import lombok.extern.log4j.Log4j2;
 
 
 /*
  *  ConversationManagementService implementation that loads conversations from resource files.
  */
 
+@Log4j2
 public class FileConversationManagementService implements
 		ConversationManagementService {
 	
@@ -46,6 +48,7 @@ public class FileConversationManagementService implements
 		for (Path p : paths){
 			File f = p.toFile();
 			if (f.getName().endsWith(".xml")){
+				log.debug("Loading " + f.getName());
 				loadResourceFile(f);
 			}
 		}

@@ -91,8 +91,15 @@ public class RichConversationService {
 		final String START_CONVERSATION_PREFIX = "start-conversation:";
 		if (message.startsWith(START_CONVERSATION_PREFIX)){
 			
+			
 			ChatEngineStateStore chatEngineStateStore = new ChatEngineStateStore(dBManagerService, recipient);
 			Participant participant = dBManagerService.getModelObjectById(Participant.class, recipient);
+			
+			if (chatEngines.containsKey(participant.getId())){
+				// there's already a conversation going on for this participants... stop it
+				// TODO Dominik: make sure ongoing conversation is stopped
+			}
+			
 			ChatEngine engine = prepareChatEngine(sender, participant, chatEngineStateStore);
 			
 			String conversation = message.substring(START_CONVERSATION_PREFIX.length());
@@ -148,7 +155,7 @@ public class RichConversationService {
 		helpers.addHelper("PM-add-1-to-breathing_collected_keys", new IncrementVariableHelper("$breathing_collected_keys", 1));
 		helpers.addHelper("PM-add-1-to-steps_collected_keys", new IncrementVariableHelper("$steps_collected_keys", 1));
 		helpers.addHelper("PM-add-1-to-photo_collected_keys", new IncrementVariableHelper("$photo_collected_keys", 1));
-		helpers.addHelper("PM-add-1-to-quiz_collected_keys ", new IncrementVariableHelper("$quiz_collected_keys ", 1));
+		helpers.addHelper("PM-add-1-to-quiz_collected_keys", new IncrementVariableHelper("$quiz_collected_keys ", 1));
 		
 		new TestHelpersFactory(engine, ui).addHelpers(helpers);
 
@@ -295,6 +302,12 @@ public class RichConversationService {
 	
 	public void deleteChatEnginePersistentState(ObjectId stateId){
 		dBManagerService.deleteModelObject(ChatEnginePersistentState.class, stateId);
+	}
+	
+	public void deleteAllChatEnginePersistentStates(){
+		for (ObjectId stateId: dBManagerService.findModelObjectIds(ChatEnginePersistentState.class, Queries.ALL)){
+			dBManagerService.deleteModelObject(ChatEnginePersistentState.class, stateId);
+		}
 	}
 
 }
