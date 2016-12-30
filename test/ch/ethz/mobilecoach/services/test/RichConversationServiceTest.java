@@ -57,6 +57,12 @@ public class RichConversationServiceTest {
 			// TODO Auto-generated method stub
 			
 		}
+
+		@Override
+		public void startReceiving() {
+			// TODO Auto-generated method stub
+			
+		}
     }
     
     public class ConversationManagementServiceMock implements ConversationManagementService {

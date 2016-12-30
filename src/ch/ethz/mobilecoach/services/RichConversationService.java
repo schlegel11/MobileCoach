@@ -6,7 +6,6 @@ import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.Queries;
-import ch.ethz.mc.model.persistent.Author;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.services.internal.ChatEngineStateStore;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
@@ -29,6 +28,7 @@ import ch.ethz.mobilecoach.chatlib.engine.serialization.RestoreException;
 import ch.ethz.mobilecoach.chatlib.engine.variables.InMemoryVariableStore;
 import ch.ethz.mobilecoach.chatlib.engine.variables.VariableStore;
 import ch.ethz.mobilecoach.model.persistent.ChatEnginePersistentState;
+import ch.ethz.mobilecoach.test.helpers.TestHelpersFactory;
 import lombok.Getter;
 import lombok.Synchronized;
 import lombok.extern.log4j.Log4j2;
@@ -145,6 +145,7 @@ public class RichConversationService {
 
 		// add helpers for PathMate intervention
 		helpers.addHelper("PM-add-10-to-total_keys", new IncrementVariableHelper("$total_keys", 10));
+		new TestHelpersFactory(engine, ui).addHelpers(helpers);
 
 		messagingService.setListener(participant.getId(), ui);
 
@@ -191,8 +192,8 @@ public class RichConversationService {
 	private class MattermostConnector implements ConversationUI, MessagingService.MessageListener {
 
 		private UserReplyListener listener;
-
 		private String sender;
+		private boolean delayEnabled = true;
 
 		@Getter
 		private ObjectId recipient;
@@ -240,6 +241,10 @@ public class RichConversationService {
 		@Override
 		public void delay(Runnable callback, Long milliseconds) {
 			// TODO implement a better delay
+			if (!delayEnabled){
+				milliseconds = 1L;
+			}
+				
 			log.debug("Starting timer with " + milliseconds + " msec.");
 			new java.util.Timer().schedule( 
 					new java.util.TimerTask() {
@@ -267,6 +272,11 @@ public class RichConversationService {
 			if (Message.SENDER_COACH.equals(sender)){
 				messagingService.indicateTyping(this.sender, recipient);
 			}
+		}
+
+		@Override
+		public void setDelayEnabled(boolean enabled) {
+			delayEnabled = enabled;
 		}
 
 	}

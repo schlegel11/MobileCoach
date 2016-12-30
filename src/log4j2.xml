@@ -44,6 +44,13 @@
 			<AppenderRef ref="File" level="WARN" />
 			<AppenderRef ref="RollingFile" level="${sys:mc_logging_rolling_file_level}" />
 		</Logger>
+		
+		<!-- ERROR only: -->
+		<Logger name="ch.ethz.mc.tools.StringValidator" level="ERROR" additivity="false">
+			<AppenderRef ref="Console" level="${sys:mc_logging_console_level}" />
+			<AppenderRef ref="File" level="WARN" />
+			<AppenderRef ref="RollingFile" level="${sys:mc_logging_rolling_file_level}" />
+		</Logger>
 		<Logger name="ch.ethz.mc.model.ModelObject" level="ERROR" additivity="false">
 			<AppenderRef ref="Console" level="${sys:mc_logging_console_level}" />
 			<AppenderRef ref="File" level="WARN" />
