@@ -144,7 +144,12 @@ public class RichConversationService {
 		chatEngines.put(participant.getId(), engine);
 
 		// add helpers for PathMate intervention
-		helpers.addHelper("PM-add-10-to-total_keys", new IncrementVariableHelper("$total_keys", 10));
+		helpers.addHelper("PM-add-1-to-total_keys", new IncrementVariableHelper("$total_keys", 1));
+		helpers.addHelper("PM-add-1-to-breathing_collected_keys", new IncrementVariableHelper("$breathing_collected_keys", 1));
+		helpers.addHelper("PM-add-1-to-steps_collected_keys", new IncrementVariableHelper("$steps_collected_keys", 1));
+		helpers.addHelper("PM-add-1-to-photo_collected_keys", new IncrementVariableHelper("$photo_collected_keys", 1));
+		helpers.addHelper("PM-add-1-to-quiz_collected_keys ", new IncrementVariableHelper("$quiz_collected_keys ", 1));
+		
 		new TestHelpersFactory(engine, ui).addHelpers(helpers);
 
 		messagingService.setListener(participant.getId(), ui);
