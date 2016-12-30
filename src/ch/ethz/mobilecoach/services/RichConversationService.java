@@ -155,7 +155,7 @@ public class RichConversationService {
 		helpers.addHelper("PM-add-1-to-breathing_collected_keys", new IncrementVariableHelper("$breathing_collected_keys", 1));
 		helpers.addHelper("PM-add-1-to-steps_collected_keys", new IncrementVariableHelper("$steps_collected_keys", 1));
 		helpers.addHelper("PM-add-1-to-photo_collected_keys", new IncrementVariableHelper("$photo_collected_keys", 1));
-		helpers.addHelper("PM-add-1-to-quiz_collected_keys", new IncrementVariableHelper("$quiz_collected_keys ", 1));
+		helpers.addHelper("PM-add-1-to-quiz_collected_keys", new IncrementVariableHelper("$quiz_collected_keys", 1));
 		
 		new TestHelpersFactory(engine, ui).addHelpers(helpers);
 
