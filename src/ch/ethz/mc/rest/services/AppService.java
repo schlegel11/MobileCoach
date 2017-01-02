@@ -52,7 +52,7 @@ public class AppService {
 		if (OneTimeToken.isOneTimeToken(token)){
 			// handle OneTimeToken: invalidate and create AppToken
 			userId = restManagerService.consumeOneTimeToken(token);
-			mctoken = restManagerService.createAppTokenForParticipant(userId);
+			if (userId != null) mctoken = restManagerService.createAppTokenForParticipant(userId);
 		} else if (AppToken.isAppToken(token)){
 			// handle AppToken: use the supplied token
 			userId = restManagerService.findParticipantIdForAppToken(token);

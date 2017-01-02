@@ -8,6 +8,7 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.bson.types.ObjectId;
 import org.json.JSONObject;
 
+import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.InDataBaseVariableStore;
@@ -47,31 +48,30 @@ public class MattermostManagementService {
 	private final DatabaseManagerService databaseManagerService;
 	private final VariablesManagerService variablesManagerService;
 
-	public final String host_url = "http://dev.cdhi.ethz.ch/api/v3/";
-	public final String emailHost = "localhost";
-	public final String teamId = "zx19spwe9py78noo7qyxyyj8yy"; // TODO: map the intervention to a team
+	public final String api_url = Constants.getMattermostApiUrl();
+	private final String emailHost = "localhost";
+	public final String teamId = Constants.getMattermostTeamId();
 
-	private String adminUserPassword = "c4dhimatrchtr";
-	private String adminUserLogin = "admin"; // will use name or email from configuration
+	private final String adminUserPassword = Constants.getMattermostAdminUserPassword();
+	private final String adminUserName = Constants.getMattermostAdminUserName();
 	private String adminUserToken = null;
 	private String locale = "de";
 
 	public final static String appID = "325068aa-fc63-411c-a07e-b3e73c455e8e";
 
 	@Getter
-	private String managerUserId = "qxfj43nuwifzzx3pzektk1ehwc";
+	private final String managerUserId = Constants.getMattermostManagerUserId();
 	@Getter
-	private String managerUserPassword = "pathmate";
+	private String managerUserName = Constants.getMattermostManagerUserName();
 	@Getter
-	private String managerUserLogin = "pathmate-team";
+	private String managerUserPassword = Constants.getMattermostManagerUserPassword();
 
-
 	@Getter
-	private String mcUserId = "rhwwrccsgjgwfjj8jwroxpcroc";
+	private String coachUserId = Constants.getMattermostCoachUserId();
 	@Getter
-	private String mcUserPassword = "165dba95-5ed3-4642-aeba-ccbc5de9cf67";	
+	private String coachUserName = Constants.getMattermostCoachUserName();
 	@Getter
-	private String mcUserLogin = "49b9c6c2-3a1d-4633-b44a-ebb2a3e70e57@localhost";	
+	private String coachUserPassword = Constants.getMattermostCoachUserPassword();		
 
 
 
@@ -94,11 +94,11 @@ public class MattermostManagementService {
 	public void createMobileCoachUser(){
 		ensureAuthentication();
 		
-		MattermostUserConfiguration credentials = createMattermostUser();
+		MattermostUserConfiguration credentials = createMattermostUser("MobileCoach", "");
 		addUserToTeam(credentials.getUserId(), teamId);
-		mcUserId = credentials.getUserId();
-		mcUserLogin = credentials.getEmail();
-		mcUserPassword = credentials.getPassword();
+		coachUserId = credentials.getUserId();
+		coachUserName = credentials.getEmail();
+		coachUserPassword = credentials.getPassword();
 	}
 
 
@@ -149,25 +149,37 @@ public class MattermostManagementService {
 
 	public MattermostUserConfiguration createParticipantUser(ObjectId participantId){
 		ensureAuthentication();
-		MattermostUserConfiguration config = createMattermostUser();
-
+		
+		String userName = variablesManagerService.getVariableValue(participantId, "$username");
+		String userId = variablesManagerService.getVariableValue(participantId, "$participantID");
+		String userCoachName = variablesManagerService.getVariableValue(participantId, "$participantCoach");
+		
+		// For testing. TODO: remove
+		if (userName == null || userName.equals("")){
+			userName = "Tester";
+			userId = "000";
+			userCoachName = "Lukas";
+		}
+		
+		String participantIdentifier = userName + " ("+userId+")";
+		
+		MattermostUserConfiguration config = createMattermostUser(userName, userId);
 		addUserToTeam(config.getUserId(), teamId);
-
-		String userShortId = config.getUserId().substring(0, 5);
-		MattermostChannel coachingChannel = createPrivateChannel(getInterventionCoachName(participantId, userShortId + " Coach"), "BOT");
-		MattermostChannel managerChannel = createPrivateChannel(PathMate.SUPPORT_NAME, "HUMAN");
+		
+		MattermostChannel coachingChannel = createPrivateChannel(userCoachName, participantIdentifier + " MobileCoach", "BOT");
+		MattermostChannel managerChannel = createPrivateChannel(PathMate.SUPPORT_NAME, participantIdentifier + " Team", "HUMAN");
 
 		List<MattermostChannel> channels = config.getChannels();
 		channels.add(coachingChannel);
 		channels.add(managerChannel);
 
 		List<MattermostUser> users = config.getUsers();
-		users.add(new MattermostUser(this.mcUserId, "Coach"));
-		users.add(new MattermostUser(config.getUserId(), "You"));
-		users.add(new MattermostUser(managerUserId, "Manager"));		
+		users.add(new MattermostUser(this.coachUserId, userCoachName));
+		users.add(new MattermostUser(config.getUserId(), userName));
+		users.add(new MattermostUser(managerUserId, PathMate.SUPPORT_NAME));	
 
 		addUserToChannel(config.getUserId(), coachingChannel.getId());
-		addUserToChannel(mcUserId, coachingChannel.getId());
+		addUserToChannel(coachUserId, coachingChannel.getId());
 		addUserToChannel(managerUserId, coachingChannel.getId());
 
 		addUserToChannel(config.getUserId(), managerChannel.getId());
@@ -179,19 +191,19 @@ public class MattermostManagementService {
 		return config;
 	}
 
-	private MattermostChannel createPrivateChannel(String name, String type){
+	private MattermostChannel createPrivateChannel(String nameForUser, String nameForManager, String type){
 		JSONObject json = new JSONObject()
 				.put("name", UUID.randomUUID().toString())
-				.put("display_name", name)
+				.put("display_name", nameForManager)
 				.put("type", "P"); // private channel
 
-		String channelId = new MattermostTask<String>(host_url + "teams/"+teamId+"/channels/create", json){
+		String channelId = new MattermostTask<String>(api_url + "teams/"+teamId+"/channels/create", json){
 			@Override
 			String handleResponse(PostMethod method) throws Exception {
 				return new JSONObject(method.getResponseBodyAsString()).getString("id");
 			}
 		}.setToken(adminUserToken).run();
-		return new MattermostChannel(name, type, channelId);
+		return new MattermostChannel(nameForUser, type, channelId);
 	}
 
 	private void addUserToChannel(String userId, String channelId){
@@ -199,7 +211,7 @@ public class MattermostManagementService {
 		JSONObject json = new JSONObject()
 				.put("user_id", userId);
 
-		new MattermostTask<Void>(host_url + "teams/"+teamId+"/channels/"+channelId+"/add", json){
+		new MattermostTask<Void>(api_url + "teams/"+teamId+"/channels/"+channelId+"/add", json){
 			@Override
 			Void handleResponse(PostMethod method) throws Exception {
 				log.debug(method.getResponseBodyAsString());
@@ -208,19 +220,28 @@ public class MattermostManagementService {
 		}.setToken(adminUserToken).run();
 	}
 
-	private MattermostUserConfiguration createMattermostUser(){
+	private MattermostUserConfiguration createMattermostUser(String firstName, String lastName){
 		String username = UUID.randomUUID().toString();
 		String password = UUID.randomUUID().toString(); // TODO: use a cryptographically secure random generator
 		String email = username + "@" + emailHost;
 
 		JSONObject json = new JSONObject()
-				.put("email", email)     
-				.put("username", username)
+				.put("email", email)
 				.put("password", password);
+		
+		if (firstName != null){
+			json.put("first_name", firstName);
+			username = firstName.toLowerCase() + "-" + username;
+		}
+		if (lastName != null){
+			json.put("last_name", lastName);
+		}
+		
+		json.put("username", username);
 
 		log.info("Created Mattermost User: "+ username + " : " + password);
 
-		String userId = new MattermostTask<String>(host_url + "users/create", json){
+		String userId = new MattermostTask<String>(api_url + "users/create", json){
 			@Override
 			String handleResponse(PostMethod method) throws Exception {
 				return new JSONObject(method.getResponseBodyAsString()).getString("id");
@@ -238,13 +259,13 @@ public class MattermostManagementService {
 
 		return new MattermostUserConfiguration(
 				null, userId, email, password, token, 
-				this.locale, channels, users, this.teamId, this.host_url,
+				this.locale, channels, users, this.teamId, this.api_url,
 				timestamp, timestamp);
 	}
 
 	private void addUserToTeam(String userId, String teamId){
 		JSONObject json = new JSONObject().put("user_id", userId);
-		new MattermostTask<Void>(host_url + "teams/" + teamId + "/add_user_to_team", json).setToken(adminUserToken).run();
+		new MattermostTask<Void>(api_url + "teams/" + teamId + "/add_user_to_team", json).setToken(adminUserToken).run();
 	}
 
 	/*
@@ -289,11 +310,11 @@ public class MattermostManagementService {
 	private void loginAdmin(){        
 		this.adminUserToken = null;        
 		JSONObject json = new JSONObject()
-				.put("login_id", adminUserLogin)
+				.put("login_id", adminUserName)
 				.put("password", adminUserPassword);
 
 		final MattermostManagementService self = this;
-		new MattermostTask<Void>(host_url + "users/login", json){
+		new MattermostTask<Void>(api_url + "users/login", json){
 			@Override
 			Void handleResponse(PostMethod method){
 				self.adminUserToken = method.getResponseHeader("Token").getValue();
@@ -309,7 +330,7 @@ public class MattermostManagementService {
 				.put("login_id", userId)
 				.put("password", password);
 
-		String token = new MattermostTask<String>(host_url + "users/login", json){
+		String token = new MattermostTask<String>(api_url + "users/login", json){
 			@Override
 			String handleResponse(PostMethod method){
 				return method.getResponseHeader("Token").getValue();

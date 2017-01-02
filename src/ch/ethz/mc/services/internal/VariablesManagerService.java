@@ -1426,6 +1426,19 @@ public class VariablesManagerService {
 			return true;
 		}
 	}
+	
+	public String getVariableValue(ObjectId participant, String variableName){
+		Participant participantObject = databaseManagerService.getModelObjectById(Participant.class, participant);
+		return getVariableValue(participantObject, variableName);
+	}
+	
+	public String getVariableValue(Participant participant, String variableName){
+		Hashtable<String, AbstractVariableWithValue> table = getAllVariablesWithValuesOfParticipantAndSystem(participant);
+		if (table.contains(variableName)){
+			return table.get(variableName).getValue();
+		}
+		return null;
+	}
 
 	/*
 	 * Exceptions

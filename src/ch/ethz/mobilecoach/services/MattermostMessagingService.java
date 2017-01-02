@@ -45,6 +45,7 @@ import org.json.JSONArray;
 
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
+import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mobilecoach.app.Post;
 import ch.ethz.mobilecoach.app.Results;
@@ -70,6 +71,8 @@ public class MattermostMessagingService implements MessagingService {
 	
 	private final DatabaseManagerService databaseManagerService;
 	private final MattermostManagementService managementService;
+	private final VariablesManagerService variablesManagerService;
+	
 	private String mcUserToken;
 	
 	private WebSocketEndpoint webSocketEndpoint;
@@ -78,13 +81,18 @@ public class MattermostMessagingService implements MessagingService {
 
 	// Construction
 	
-	private MattermostMessagingService(MattermostManagementService managementService, DatabaseManagerService databaseManagerService){
+	private MattermostMessagingService(MattermostManagementService managementService, 
+									   DatabaseManagerService databaseManagerService, 
+									   VariablesManagerService variablesManagerService){
 		this.managementService = managementService;
 		this.databaseManagerService = databaseManagerService;
+		this.variablesManagerService = variablesManagerService;
 	}	
 	
-	public static MattermostMessagingService start(MattermostManagementService managementService, DatabaseManagerService databaseManagerService){
-		MattermostMessagingService service = new MattermostMessagingService(managementService, databaseManagerService);
+	public static MattermostMessagingService start(MattermostManagementService managementService, 
+			                                       DatabaseManagerService databaseManagerService,
+			                                       VariablesManagerService variablesManagerService){
+		MattermostMessagingService service = new MattermostMessagingService(managementService, databaseManagerService, variablesManagerService);
 		service.login();		
 		return service;
 	}
@@ -117,7 +125,7 @@ public class MattermostMessagingService implements MessagingService {
         
         while(!connected){
             try {
-    			container.connectToServer(webSocketEndpoint, clientConfig, new URI(managementService.host_url.replaceFirst("http:", "ws:") + "users/websocket"));
+    			container.connectToServer(webSocketEndpoint, clientConfig, new URI(managementService.api_url.replaceFirst("http:", "ws:") + "users/websocket"));
     			return;
     		} catch (Exception e) {
     			log.error(e);
@@ -173,7 +181,7 @@ public class MattermostMessagingService implements MessagingService {
         json.put("user_id", userId);
         json.put("channel_id", channelId);
         
-		new MattermostTask<Void>(managementService.host_url + "teams/" + teamId + "/channels/" + channelId + "/posts/create", json)
+		new MattermostTask<Void>(managementService.api_url + "teams/" + teamId + "/channels/" + channelId + "/posts/create", json)
 			.setToken(mcUserToken).run();
 		
 		if(null == managementService.findOneSignalObject(recipient)){
@@ -267,10 +275,10 @@ public class MattermostMessagingService implements MessagingService {
 	private void login(){        
         mcUserToken = null;        
         JSONObject json = new JSONObject();
-        json.put("login_id", managementService.getMcUserLogin());
-        json.put("password", managementService.getMcUserPassword());
+        json.put("login_id", managementService.getCoachUserName());
+        json.put("password", managementService.getCoachUserPassword());
           
-		this.mcUserToken = new MattermostTask<String>(managementService.host_url + "users/login", json){
+		this.mcUserToken = new MattermostTask<String>(managementService.api_url + "users/login", json){
 
 			@Override
 			String handleResponse(PostMethod method){
@@ -369,7 +377,7 @@ public class MattermostMessagingService implements MessagingService {
                 	}
                 	
                 	//https://your-mattermost-url.com/api/v3/teams/{team_id}/channels/{channel_id}/posts/since/{time}
-                	String url = managementService.host_url + "teams/" + managementService.teamId + "/channels/" + channelId + "/posts/since/" + sinceTime;
+                	String url = managementService.api_url + "teams/" + managementService.teamId + "/channels/" + channelId + "/posts/since/" + sinceTime;
                 	
                 	HttpGet request = new HttpGet( url );
           	
@@ -439,7 +447,7 @@ public class MattermostMessagingService implements MessagingService {
 	public List<String> getChannelsToUpdate(){
 		HttpClient client = new HttpClient();
         
-        GetMethod request = new GetMethod(managementService.host_url + "teams/" + managementService.teamId + "/channels/");
+        GetMethod request = new GetMethod(managementService.api_url + "teams/" + managementService.teamId + "/channels/");
 		request.setRequestHeader("Authorization", "Bearer " + mcUserToken);
 		
 		String channelsResponse = "[]";

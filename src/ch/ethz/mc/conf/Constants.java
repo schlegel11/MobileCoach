@@ -196,7 +196,33 @@ public class Constants {
 	private static String	databasePassword					= "mc";
 	@Getter
 	private static String	databaseName						= "mc";
-
+	
+	
+	/**
+	 * Mattermost configuration
+	 */
+	@Getter
+	private static String	mattermostApiUrl					= "http://localhost/api/v3/";
+	@Getter
+	private static String	mattermostTeamId					= "";
+	@Getter
+	private static String	mattermostAdminUserName		    	= "admin";
+	@Getter
+	private static String	mattermostAdminUserPassword			= "";
+	@Getter
+	private static String	mattermostManagerUserId				= "";
+	@Getter
+	private static String	mattermostManagerUserName			= "support-team";
+	@Getter
+	private static String	mattermostManagerUserPassword		= "";
+	@Getter
+	private static String	mattermostCoachUserId				= "";
+	@Getter
+	private static String	mattermostCoachUserName				= "";
+	@Getter
+	private static String	mattermostCoachUserPassword			= "";
+	
+	
 	/**
 	 * Mailing configuration
 	 */
