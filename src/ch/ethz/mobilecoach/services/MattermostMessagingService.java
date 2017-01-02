@@ -391,20 +391,26 @@ public class MattermostMessagingService implements MessagingService {
 							} catch (Exception e) {
 								log.error("Error getting messages from channel", e);
 							}
-                        	JSONObject result = new JSONObject(responseContent);
-                        	JSONArray order = result.getJSONArray("order");
-                        	JSONObject posts = result.getJSONObject("posts");
-                        	                        	
-                        	if (order.length() > 0){
-                        		String lastPostId = order.getString(0);
-                        		JSONObject post = posts.getJSONObject(lastPostId);
-                        		
-                        		if (post.optString("type").equals("")){ // for normal posts, type should be empty
-	    							String userId = post.getString("user_id");
-	    							Post postObject = MattermostMessagingService.JSONtoPost(post);
-	    							receiveMessage(userId, postObject);
-                        		}
-                        	}
+                        	
+                        	try {
+	                        	JSONObject result = new JSONObject(responseContent);
+	                        	JSONArray order = result.getJSONArray("order");
+	                        	JSONObject posts = result.getJSONObject("posts");
+	                        	                        	
+	                        	if (order.length() > 0){
+	                        		String lastPostId = order.getString(0);
+	                        		JSONObject post = posts.getJSONObject(lastPostId);
+	                        		
+	                        		if (post.optString("type").equals("")){ // for normal posts, type should be empty
+		    							String userId = post.getString("user_id");
+		    							Post postObject = MattermostMessagingService.JSONtoPost(post);
+		    							receiveMessage(userId, postObject);
+	                        		}
+	                        	}
+                        	} catch (Exception e) {
+								log.error("Error parsing response: " + e.getMessage(), e);
+								log.error("Error parsing: " + responseContent);
+							}
 
                             latch.countDown();
                         }
@@ -412,7 +418,7 @@ public class MattermostMessagingService implements MessagingService {
                         @Override
                         public void failed(final Exception ex) {
                             latch.countDown();
-                            log.error("Request failed.", ex);
+                            log.error("Request failed: " + ex.getMessage(), ex);
                         }
 
                         @Override
