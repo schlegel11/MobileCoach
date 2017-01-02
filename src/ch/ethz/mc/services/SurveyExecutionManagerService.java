@@ -2,15 +2,15 @@ package ch.ethz.mc.services;
 
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -96,7 +96,7 @@ public class SurveyExecutionManagerService {
 			final FileStorageManagerService fileStorageManagerService,
 			final VariablesManagerService variablesManagerService,
 			final InterventionAdministrationManagerService interventionAdministrationManagerService)
-					throws Exception {
+			throws Exception {
 		$lock = MC.getInstance();
 
 		log.info("Starting service...");
@@ -115,7 +115,7 @@ public class SurveyExecutionManagerService {
 			final FileStorageManagerService fileStorageManagerService,
 			final VariablesManagerService variablesManagerService,
 			final InterventionAdministrationManagerService interventionAdministrationManagerService)
-					throws Exception {
+			throws Exception {
 		if (instance == null) {
 			instance = new SurveyExecutionManagerService(
 					databaseManagerService, fileStorageManagerService,
@@ -252,7 +252,7 @@ public class SurveyExecutionManagerService {
 
 			if (dialogStatus.isDataForMonitoringParticipationAvailable() != dataForMonitoringParticipationAvailable) {
 				dialogStatus
-				.setDataForMonitoringParticipationAvailable(dataForMonitoringParticipationAvailable);
+						.setDataForMonitoringParticipationAvailable(dataForMonitoringParticipationAvailable);
 
 				databaseManagerService.saveModelObject(dialogStatus);
 			}
@@ -261,14 +261,14 @@ public class SurveyExecutionManagerService {
 		// Remember former slide and timestamp
 		if (formerSlide != null) {
 			dialogStatus
-			.setLastVisitedScreeningSurveySlide(formerSlide.getId());
+					.setLastVisitedScreeningSurveySlide(formerSlide.getId());
 			dialogStatus
-			.setLastVisitedScreeningSurveySlideGlobalUniqueId(formerSlide
-					.getGlobalUniqueId());
+					.setLastVisitedScreeningSurveySlideGlobalUniqueId(formerSlide
+							.getGlobalUniqueId());
 			if (adjustTime) {
 				dialogStatus
-				.setLastVisitedScreeningSurveySlideTimestamp(InternalDateTime
-						.currentTimeMillis());
+						.setLastVisitedScreeningSurveySlideTimestamp(InternalDateTime
+								.currentTimeMillis());
 			}
 
 			databaseManagerService.saveModelObject(dialogStatus);
@@ -295,7 +295,7 @@ public class SurveyExecutionManagerService {
 				participantId);
 
 		if (dialogOptions != null && dialogOptions.iterator().hasNext()) {
-			return false;
+			return true;
 		} else {
 			return false;
 		}
@@ -454,8 +454,8 @@ public class SurveyExecutionManagerService {
 			return templateVariables;
 		} else {
 			templateVariables
-			.put(GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER
-					.toVariable(), screeningSurvey.getTemplatePath());
+					.put(GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER
+							.toVariable(), screeningSurvey.getTemplatePath());
 		}
 
 		// Set name
@@ -493,23 +493,23 @@ public class SurveyExecutionManagerService {
 			if (resultValues != null
 					&& resultValues.size() > 0
 					&& resultValues.get(0)
-					.equals(screeningSurvey.getPassword())) {
+							.equals(screeningSurvey.getPassword())) {
 				log.debug("Access granted");
 				// Remember that user authenticated
 				session.setAttribute(
 						SurveySessionAttributeTypes.SURVEY_PARTICIPANT_ACCESS_GRANTED
-						.toString(), true);
+								.toString(), true);
 			} else {
 				// Redirect to password page
 				log.debug("Access not granted - show password page (again)");
 				templateVariables.put(
 						SurveySlideTemplateLayoutTypes.PASSWORD_INPUT
-						.toVariable(), true);
+								.toVariable(), true);
 
 				templateVariables
-				.put(SurveySlideTemplateFieldTypes.RESULT_VARIABLE
-						.toVariable(),
-						ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLES + 0);
+						.put(SurveySlideTemplateFieldTypes.RESULT_VARIABLE
+								.toVariable(),
+								ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLES + 0);
 
 				return templateVariables;
 			}
@@ -530,7 +530,7 @@ public class SurveyExecutionManagerService {
 			if (session
 					.getAttribute(ImplementationConstants.PARTICIPANT_SESSION_ATTRIBUTE_EXPECTED) != null
 					&& (boolean) session
-					.getAttribute(ImplementationConstants.PARTICIPANT_SESSION_ATTRIBUTE_EXPECTED)) {
+							.getAttribute(ImplementationConstants.PARTICIPANT_SESSION_ATTRIBUTE_EXPECTED)) {
 				session.setAttribute(
 						ImplementationConstants.PARTICIPANT_SESSION_ATTRIBUTE_EXPECTED,
 						false);
@@ -551,10 +551,10 @@ public class SurveyExecutionManagerService {
 							Messages.getAdminString(
 									AdminMessageStrings.DEBUG__PARTICIPANT_ORGANIZATION,
 									(String) session
-									.getAttribute(ImplementationConstants.PARTICIPANT_SESSION_ATTRIBUTE_DESCRIPTION)),
-									Messages.getAdminString(
-											AdminMessageStrings.DEBUG__PARTICIPANT_ORGANIZATION_UNIT,
-											date));
+											.getAttribute(ImplementationConstants.PARTICIPANT_SESSION_ATTRIBUTE_DESCRIPTION)),
+							Messages.getAdminString(
+									AdminMessageStrings.DEBUG__PARTICIPANT_ORGANIZATION_UNIT,
+									date));
 				}
 			}
 		} else {
@@ -612,9 +612,9 @@ public class SurveyExecutionManagerService {
 
 		if (formerSlideId != null
 				&& !session
-				.getAttribute(
-						SurveySessionAttributeTypes.SURVEY_CONSISTENCY_CHECK_VALUE
-						.toString()).equals(checkValue)) {
+						.getAttribute(
+								SurveySessionAttributeTypes.SURVEY_CONSISTENCY_CHECK_VALUE
+										.toString()).equals(checkValue)) {
 			log.debug("Consistency check failed; show same page again");
 
 			// Next slide is former slide
@@ -630,9 +630,9 @@ public class SurveyExecutionManagerService {
 
 					if (questions.size() > i
 							&& (question = questions.get(i))
-							.getStoreValueToVariableWithName() != null
+									.getStoreValueToVariableWithName() != null
 							&& !question.getStoreValueToVariableWithName()
-							.equals("")) {
+									.equals("")) {
 
 						final val resultValue = resultValues.get(i);
 						final val variableName = question
@@ -644,9 +644,9 @@ public class SurveyExecutionManagerService {
 								formerSlideId, variableName, resultValue);
 						try {
 							variablesManagerService
-							.writeVariableValueOfParticipant(
-									participant.getId(), variableName,
-									resultValue);
+									.writeVariableValueOfParticipant(
+											participant.getId(), variableName,
+											resultValue);
 							participant = databaseManagerService
 									.getModelObjectById(Participant.class,
 											participant.getId());
@@ -697,8 +697,8 @@ public class SurveyExecutionManagerService {
 							nextSlide.getHandsOverToFeedback());
 					session.setAttribute(
 							SurveySessionAttributeTypes.SURVEY_PARTICIPANT_FEEDBACK_URL
-							.toString(), feedbackShortURL
-							.calculateURL());
+									.toString(), feedbackShortURL
+									.calculateURL());
 				}
 
 				dialogStatusSetScreeningSurveyFinished(participantId);
@@ -709,21 +709,21 @@ public class SurveyExecutionManagerService {
 				if (feedbackURL != null) {
 					templateVariables.put(
 							GeneralSlideTemplateFieldTypes.FEEDBACK_URL
-							.toString(), feedbackURL.calculateURL());
+									.toString(), feedbackURL.calculateURL());
 				}
 			}
 
 			// Remember next slide as former slide
 			session.setAttribute(
 					SurveySessionAttributeTypes.SURVEY_FORMER_SLIDE_ID
-					.toString(), nextSlide.getId());
+							.toString(), nextSlide.getId());
 
 			// Remember check variable
 			final val newCheckValue = GlobalUniqueIdGenerator
 					.createGlobalUniqueId();
 			session.setAttribute(
 					SurveySessionAttributeTypes.SURVEY_CONSISTENCY_CHECK_VALUE
-					.toString(), newCheckValue);
+							.toString(), newCheckValue);
 
 			// Fill next screening survey slide
 			log.debug("Filling next slide '{}' with contents",
@@ -734,37 +734,37 @@ public class SurveyExecutionManagerService {
 				case MULTILINE_TEXT_INPUT:
 					templateVariables.put(
 							SurveySlideTemplateLayoutTypes.MULTILINE_TEXT_INPUT
-							.toVariable(), true);
+									.toVariable(), true);
 					break;
 				case NUMBER_INPUT:
 					templateVariables.put(
 							SurveySlideTemplateLayoutTypes.NUMBER_INPUT
-							.toVariable(), true);
+									.toVariable(), true);
 					break;
 				case SELECT_MANY:
 					templateVariables.put(
 							SurveySlideTemplateLayoutTypes.SELECT_MANY
-							.toVariable(), true);
+									.toVariable(), true);
 					break;
 				case SELECT_ONE:
 					templateVariables.put(
 							SurveySlideTemplateLayoutTypes.SELECT_ONE
-							.toVariable(), true);
+									.toVariable(), true);
 					break;
 				case TEXT_INPUT:
 					templateVariables.put(
 							SurveySlideTemplateLayoutTypes.TEXT_INPUT
-							.toVariable(), true);
+									.toVariable(), true);
 					break;
 				case TEXT_ONLY:
 					templateVariables.put(
 							SurveySlideTemplateLayoutTypes.TEXT_ONLY
-							.toVariable(), true);
+									.toVariable(), true);
 					break;
 				case MEDIA_ONLY:
 					templateVariables.put(
 							SurveySlideTemplateLayoutTypes.MEDIA_ONLY
-							.toVariable(), true);
+									.toVariable(), true);
 					break;
 			}
 
@@ -774,12 +774,12 @@ public class SurveyExecutionManagerService {
 
 			// Check variable
 			templateVariables
-			.put(GeneralSlideTemplateFieldTypes.HIDDEN_CHECK_VARIABLE
-					.toVariable(),
-					ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE);
+					.put(GeneralSlideTemplateFieldTypes.HIDDEN_CHECK_VARIABLE
+							.toVariable(),
+							ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE);
 			templateVariables.put(
 					GeneralSlideTemplateFieldTypes.HIDDEN_CHECK_VARIABLE_VALUE
-					.toVariable(), newCheckValue);
+							.toVariable(), newCheckValue);
 
 			// Optional layout attribute
 			final val optionalLayoutAttribute = VariableStringReplacer
@@ -789,7 +789,7 @@ public class SurveyExecutionManagerService {
 							variablesWithValues.values(), "");
 			templateVariables.put(
 					GeneralSlideTemplateFieldTypes.OPTIONAL_LAYOUT_ATTRIBUTE
-					.toVariable(), optionalLayoutAttribute);
+							.toVariable(), optionalLayoutAttribute);
 
 			// Language
 			templateVariables.put(
@@ -820,7 +820,7 @@ public class SurveyExecutionManagerService {
 								variablesWithValues.values(), "");
 				templateVariables.put(
 						SurveySlideTemplateFieldTypes.VALIDATION_ERROR_MESSAGE
-						.toVariable(), validationErrorMessage);
+								.toVariable(), validationErrorMessage);
 			}
 
 			// Media object URL and type
@@ -832,44 +832,44 @@ public class SurveyExecutionManagerService {
 				if (mediaObject.getFileReference() != null) {
 					templateVariables.put(
 							GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL
-							.toVariable(),
+									.toVariable(),
 							mediaObject.getId()
-							+ "/"
-							+ StringHelpers
-							.cleanFilenameString(mediaObject
-									.getName()));
+									+ "/"
+									+ StringHelpers
+											.cleanFilenameString(mediaObject
+													.getName()));
 				} else if (mediaObject.getUrlReference() != null) {
 					templateVariables.put(
 							GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL
-							.toVariable(), mediaObject
-							.getUrlReference());
+									.toVariable(), mediaObject
+									.getUrlReference());
 				}
 
 				switch (mediaObject.getType()) {
 					case HTML_TEXT:
 						templateVariables
-						.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_HTML_TEXT
-								.toVariable(), true);
+								.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_HTML_TEXT
+										.toVariable(), true);
 						break;
 					case URL:
 						templateVariables
-						.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_URL
-								.toVariable(), true);
+								.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_URL
+										.toVariable(), true);
 						break;
 					case AUDIO:
 						templateVariables
-						.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_AUDIO
-								.toVariable(), true);
+								.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_AUDIO
+										.toVariable(), true);
 						break;
 					case IMAGE:
 						templateVariables
-						.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_IMAGE
-								.toVariable(), true);
+								.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_IMAGE
+										.toVariable(), true);
 						break;
 					case VIDEO:
 						templateVariables
-						.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_VIDEO
-								.toVariable(), true);
+								.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_VIDEO
+										.toVariable(), true);
 						break;
 				}
 			}
@@ -893,14 +893,14 @@ public class SurveyExecutionManagerService {
 						.toVariable(), questionText);
 				questionObject.put(
 						SurveySlideTemplateFieldTypes.QUESTION_POSITION
-						.toVariable(), i + 1);
+								.toVariable(), i + 1);
 
 				// Result variable
 				questionObject
-				.put(SurveySlideTemplateFieldTypes.RESULT_VARIABLE
-						.toVariable(),
-						ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLES
-						+ i);
+						.put(SurveySlideTemplateFieldTypes.RESULT_VARIABLE
+								.toVariable(),
+								ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLES
+										+ i);
 
 				// Answers (text, value, preselected)
 				final val answersWithPlaceholders = question
@@ -922,26 +922,26 @@ public class SurveyExecutionManagerService {
 
 					answerObjects.put(
 							SurveySlideTemplateFieldTypes.ANSWER_POSITION
-							.toVariable(), j + 1);
+									.toVariable(), j + 1);
 					answerObjects.put(SurveySlideTemplateFieldTypes.ANSWER_TEXT
 							.toVariable(), finalAnswerText);
 					answerObjects.put(
 							SurveySlideTemplateFieldTypes.ANSWER_VALUE
-							.toVariable(), answerValue);
+									.toVariable(), answerValue);
 					if (j == 0) {
 						answerObjects.put(
 								SurveySlideTemplateFieldTypes.IS_FIRST_ANSWER
-								.toVariable(), true);
+										.toVariable(), true);
 					}
 					if (j == answersWithPlaceholders.length - 1) {
 						answerObjects.put(
 								SurveySlideTemplateFieldTypes.IS_LAST_ANSWER
-								.toVariable(), true);
+										.toVariable(), true);
 					}
 					if (question.getPreSelectedAnswer() == j) {
 						answerObjects
-						.put(SurveySlideTemplateFieldTypes.PRESELECTED_ANSWER
-								.toVariable(), true);
+								.put(SurveySlideTemplateFieldTypes.PRESELECTED_ANSWER
+										.toVariable(), true);
 					}
 
 					answersObjects.add(answerObjects);
@@ -974,15 +974,15 @@ public class SurveyExecutionManagerService {
 						nextSlide.getLinkedIntermediateSurvey());
 				templateVariables.put(
 						SurveySlideTemplateFieldTypes.INTERMEDIATE_SURVEY_URL
-						.toVariable(), linkedIntermediateSurveyShortURL
-						.calculateURL());
+								.toVariable(), linkedIntermediateSurveyShortURL
+								.calculateURL());
 			}
 
 			// Is last slide
 			if (nextSlide.isLastSlide()) {
 				templateVariables.put(
 						SurveySlideTemplateFieldTypes.IS_LAST_SLIDE
-						.toVariable(), true);
+								.toVariable(), true);
 			}
 		}
 
@@ -1017,8 +1017,8 @@ public class SurveyExecutionManagerService {
 									Queries.DIALOG_STATUS__BY_PARTICIPANT_AND_LAST_VISITED_SCREENING_SURVEY_SLIDE_TIMESTAMP_LOWER_AND_DATA_FOR_MONITORING_PARTICIPATION_AVAILABLE_TRUE_AND_SCREENING_SURVEY_PERFORMED_FALSE_AND_MONITORING_PERFORMED_FALSE,
 									participant.getId(),
 									InternalDateTime.currentTimeMillis()
-									- ImplementationConstants.HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR
-									* 2)) {
+											- ImplementationConstants.HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR
+											* 2)) {
 						if (dialogStatus != null) {
 
 							log.debug("Trying to finish the screening survey for a participant who did not finish the screening survey");
@@ -1106,7 +1106,7 @@ public class SurveyExecutionManagerService {
 							&& !question.getDefaultValue().equals("")
 							&& question.getStoreValueToVariableWithName() != null
 							&& !question.getStoreValueToVariableWithName()
-							.equals("")) {
+									.equals("")) {
 						final val variableName = question
 								.getStoreValueToVariableWithName();
 
@@ -1117,9 +1117,9 @@ public class SurveyExecutionManagerService {
 								question.getDefaultValue());
 						try {
 							variablesManagerService
-							.writeVariableValueOfParticipant(
-									participant.getId(), variableName,
-									question.getDefaultValue());
+									.writeVariableValueOfParticipant(
+											participant.getId(), variableName,
+											question.getDefaultValue());
 							participant = databaseManagerService
 									.getModelObjectById(Participant.class,
 											participant.getId());
@@ -1293,19 +1293,19 @@ public class SurveyExecutionManagerService {
 
 					if (formerSlideRule.getValueToStoreToVariable() == null
 							|| formerSlideRule.getValueToStoreToVariable()
-							.equals("")) {
+									.equals("")) {
 						// Store rule result
 						try {
 							variablesManagerService
-							.writeVariableValueOfParticipant(
-									participant.getId(),
-									formerSlideRule
-									.getStoreValueToVariableWithName(),
-									ruleResult.isCalculatedRule() ? StringHelpers
-											.cleanDoubleValue(ruleResult
-													.getCalculatedRuleValue())
+									.writeVariableValueOfParticipant(
+											participant.getId(),
+											formerSlideRule
+													.getStoreValueToVariableWithName(),
+											ruleResult.isCalculatedRule() ? StringHelpers
+													.cleanDoubleValue(ruleResult
+															.getCalculatedRuleValue())
 													: ruleResult
-													.getTextRuleValue());
+															.getTextRuleValue());
 							participant = databaseManagerService
 									.getModelObjectById(Participant.class,
 											participant.getId());
@@ -1313,7 +1313,7 @@ public class SurveyExecutionManagerService {
 							log.warn(
 									"The variable {} could not be written: {}",
 									formerSlideRule
-									.getStoreValueToVariableWithName(),
+											.getStoreValueToVariableWithName(),
 									e.getMessage());
 						}
 					} else {
@@ -1339,11 +1339,11 @@ public class SurveyExecutionManagerService {
 						}
 						try {
 							variablesManagerService
-							.writeVariableValueOfParticipant(
-									participant.getId(),
-									formerSlideRule
-									.getStoreValueToVariableWithName(),
-									valueToStore);
+									.writeVariableValueOfParticipant(
+											participant.getId(),
+											formerSlideRule
+													.getStoreValueToVariableWithName(),
+											valueToStore);
 							participant = databaseManagerService
 									.getModelObjectById(Participant.class,
 											participant.getId());
@@ -1351,7 +1351,7 @@ public class SurveyExecutionManagerService {
 							log.warn(
 									"The variable {} could not be written: {}",
 									formerSlideRule
-									.getStoreValueToVariableWithName(),
+											.getStoreValueToVariableWithName(),
 									e.getMessage());
 						}
 					}
@@ -1364,12 +1364,12 @@ public class SurveyExecutionManagerService {
 				// Check if true rule matches
 				if (ruleResult.isRuleMatchesEquationSign()
 						&& formerSlideRule
-						.getNextScreeningSurveySlideWhenTrue() != null) {
+								.getNextScreeningSurveySlideWhenTrue() != null) {
 					final val fetchedNextSlide = databaseManagerService
 							.getModelObjectById(
 									ScreeningSurveySlide.class,
 									formerSlideRule
-									.getNextScreeningSurveySlideWhenTrue());
+											.getNextScreeningSurveySlideWhenTrue());
 					if (fetchedNextSlide != null) {
 						log.debug("Rule matches (TRUE), next slide is '{}'",
 								fetchedNextSlide.getTitleWithPlaceholders());
@@ -1379,19 +1379,19 @@ public class SurveyExecutionManagerService {
 						log.warn(
 								"Rule matched (TRUE), but slide {} could not be found",
 								formerSlideRule
-								.getNextScreeningSurveySlideWhenTrue());
+										.getNextScreeningSurveySlideWhenTrue());
 					}
 				}
 
 				// Check if false rule matches
 				if (!ruleResult.isRuleMatchesEquationSign()
 						&& formerSlideRule
-						.getNextScreeningSurveySlideWhenFalse() != null) {
+								.getNextScreeningSurveySlideWhenFalse() != null) {
 					final val fetchedNextSlide = databaseManagerService
 							.getModelObjectById(
 									ScreeningSurveySlide.class,
 									formerSlideRule
-									.getNextScreeningSurveySlideWhenFalse());
+											.getNextScreeningSurveySlideWhenFalse());
 					if (fetchedNextSlide != null) {
 						log.debug("Rule matches (FALSE), next slide is '{}'",
 								fetchedNextSlide.getTitleWithPlaceholders());
@@ -1401,14 +1401,14 @@ public class SurveyExecutionManagerService {
 						log.warn(
 								"Rule matched (FALSE), but slide {} could not be found",
 								formerSlideRule
-								.getNextScreeningSurveySlideWhenFalse());
+										.getNextScreeningSurveySlideWhenFalse());
 					}
 				}
 
 				// Check if validation rule matches
 				if (ruleResult.isRuleMatchesEquationSign()
 						&& formerSlideRule
-						.isShowSameSlideBecauseValueNotValidWhenTrue()) {
+								.isShowSameSlideBecauseValueNotValidWhenTrue()) {
 
 					log.debug("Rule matches (VALIDATION), next slide is '{}'",
 							formerSlide);
@@ -1499,15 +1499,15 @@ public class SurveyExecutionManagerService {
 			return templateVariables;
 		} else {
 			templateVariables
-			.put(GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER
-					.toVariable(), feedback.getTemplatePath());
+					.put(GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER
+							.toVariable(), feedback.getTemplatePath());
 		}
 
 		// Determine if former or next slide should be shown
 		boolean showNextSlide = true;
 		if (navigationValue != null
 				&& navigationValue
-				.equals(ImplementationConstants.FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE_VALUE_PREVIOUS)) {
+						.equals(ImplementationConstants.FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE_VALUE_PREVIOUS)) {
 			showNextSlide = false;
 		}
 
@@ -1532,14 +1532,14 @@ public class SurveyExecutionManagerService {
 			// Remember next slide as former slide
 			session.setAttribute(
 					FeedbackSessionAttributeTypes.FEEDBACK_FORMER_SLIDE_ID
-					.toString(), nextSlide.getId());
+							.toString(), nextSlide.getId());
 
 			// Remember check variable
 			final val newCheckValue = GlobalUniqueIdGenerator
 					.createGlobalUniqueId();
 			session.setAttribute(
 					FeedbackSessionAttributeTypes.FEEDBACK_CONSISTENCY_CHECK_VALUE
-					.toString(), newCheckValue);
+							.toString(), newCheckValue);
 
 			// Check if slide is first or last slide
 			final val priorAppropriateSlide = getNextFeedbackSlide(
@@ -1549,7 +1549,7 @@ public class SurveyExecutionManagerService {
 			if (priorAppropriateSlide == null) {
 				templateVariables.put(
 						FeedbackSlideTemplateFieldTypes.IS_FIRST_SLIDE
-						.toVariable(), true);
+								.toVariable(), true);
 			}
 			final val nextAppropriateSlide = getNextFeedbackSlide(
 					participant.getLanguage(), nextSlide,
@@ -1558,7 +1558,7 @@ public class SurveyExecutionManagerService {
 			if (nextAppropriateSlide == null) {
 				templateVariables.put(
 						FeedbackSlideTemplateFieldTypes.IS_LAST_SLIDE
-						.toVariable(), true);
+								.toVariable(), true);
 			}
 
 			// Fill next feedback slide
@@ -1567,26 +1567,26 @@ public class SurveyExecutionManagerService {
 
 			// Navigation parameters
 			templateVariables
-			.put(FeedbackSlideTemplateFieldTypes.HIDDEN_NAVIGATION_VARIABLE
-					.toVariable(),
-					ImplementationConstants.FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE);
+					.put(FeedbackSlideTemplateFieldTypes.HIDDEN_NAVIGATION_VARIABLE
+							.toVariable(),
+							ImplementationConstants.FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE);
 			templateVariables
-			.put(FeedbackSlideTemplateFieldTypes.HIDDEN_NAVIGATION_VARIABLE_NAVIGATE_NEXT
-					.toVariable(),
-					ImplementationConstants.FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE_VALUE_NEXT);
+					.put(FeedbackSlideTemplateFieldTypes.HIDDEN_NAVIGATION_VARIABLE_NAVIGATE_NEXT
+							.toVariable(),
+							ImplementationConstants.FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE_VALUE_NEXT);
 			templateVariables
-			.put(FeedbackSlideTemplateFieldTypes.HIDDEN_NAVIGATION_VARIABLE_NAVIGATE_PREVIOUS
-					.toVariable(),
-					ImplementationConstants.FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE_VALUE_PREVIOUS);
+					.put(FeedbackSlideTemplateFieldTypes.HIDDEN_NAVIGATION_VARIABLE_NAVIGATE_PREVIOUS
+							.toVariable(),
+							ImplementationConstants.FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE_VALUE_PREVIOUS);
 
 			// Check variable
 			templateVariables
-			.put(GeneralSlideTemplateFieldTypes.HIDDEN_CHECK_VARIABLE
-					.toVariable(),
-					ImplementationConstants.FEEDBACK_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE);
+					.put(GeneralSlideTemplateFieldTypes.HIDDEN_CHECK_VARIABLE
+							.toVariable(),
+							ImplementationConstants.FEEDBACK_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE);
 			templateVariables.put(
 					GeneralSlideTemplateFieldTypes.HIDDEN_CHECK_VARIABLE_VALUE
-					.toVariable(), newCheckValue);
+							.toVariable(), newCheckValue);
 
 			// Optional layout attribute
 			final val optionalLayoutAttribute = VariableStringReplacer
@@ -1596,18 +1596,18 @@ public class SurveyExecutionManagerService {
 							variablesWithValues.values(), "");
 			templateVariables.put(
 					GeneralSlideTemplateFieldTypes.OPTIONAL_LAYOUT_ATTRIBUTE
-					.toVariable(), optionalLayoutAttribute);
+							.toVariable(), optionalLayoutAttribute);
 			final val optionalLayoutAttributeObjects = new HashMap<String, Object>();
 			for (final val item : optionalLayoutAttribute.split(",")) {
 				if (!item.equals("")) {
 					optionalLayoutAttributeObjects
-					.put(GeneralSlideTemplateFieldTypes.OPTIONAL_LAYOUT_ATTRIBUTE_ITEM
-							.toVariable(), item);
+							.put(GeneralSlideTemplateFieldTypes.OPTIONAL_LAYOUT_ATTRIBUTE_ITEM
+									.toVariable(), item);
 				}
 			}
 			templateVariables
-			.put(GeneralSlideTemplateFieldTypes.OPTIONAL_LAYOUT_ATTRIBUTE_LIST
-					.toVariable(), optionalLayoutAttributeObjects);
+					.put(GeneralSlideTemplateFieldTypes.OPTIONAL_LAYOUT_ATTRIBUTE_LIST
+							.toVariable(), optionalLayoutAttributeObjects);
 
 			// Language
 			templateVariables.put(
@@ -1637,44 +1637,44 @@ public class SurveyExecutionManagerService {
 				if (mediaObject.getFileReference() != null) {
 					templateVariables.put(
 							GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL
-							.toVariable(),
+									.toVariable(),
 							mediaObject.getId()
-							+ "/"
-							+ StringHelpers
-							.cleanFilenameString(mediaObject
-									.getName()));
+									+ "/"
+									+ StringHelpers
+											.cleanFilenameString(mediaObject
+													.getName()));
 				} else if (mediaObject.getUrlReference() != null) {
 					templateVariables.put(
 							GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL
-							.toVariable(), mediaObject
-							.getUrlReference());
+									.toVariable(), mediaObject
+									.getUrlReference());
 				}
 
 				switch (mediaObject.getType()) {
 					case HTML_TEXT:
 						templateVariables
-						.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_HTML_TEXT
-								.toVariable(), true);
+								.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_HTML_TEXT
+										.toVariable(), true);
 						break;
 					case URL:
 						templateVariables
-						.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_URL
-								.toVariable(), true);
+								.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_URL
+										.toVariable(), true);
 						break;
 					case AUDIO:
 						templateVariables
-						.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_AUDIO
-								.toVariable(), true);
+								.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_AUDIO
+										.toVariable(), true);
 						break;
 					case IMAGE:
 						templateVariables
-						.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_IMAGE
-								.toVariable(), true);
+								.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_IMAGE
+										.toVariable(), true);
 						break;
 					case VIDEO:
 						templateVariables
-						.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_VIDEO
-								.toVariable(), true);
+								.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_VIDEO
+										.toVariable(), true);
 						break;
 				}
 			}
@@ -1825,12 +1825,12 @@ public class SurveyExecutionManagerService {
 
 		for (final val intervention : activeInterventions) {
 			CollectionUtils
-			.addAll(activeNonIntermediateScreeningSurveys,
-					databaseManagerService
-					.findModelObjects(
-							ScreeningSurvey.class,
-							Queries.SCREENING_SURVEY__BY_INTERVENTION_AND_ACTIVE_TRUE_AND_INTERMEDIATE_SURVEY_FALSE,
-							intervention.getId()).iterator());
+					.addAll(activeNonIntermediateScreeningSurveys,
+							databaseManagerService
+									.findModelObjects(
+											ScreeningSurvey.class,
+											Queries.SCREENING_SURVEY__BY_INTERVENTION_AND_ACTIVE_TRUE_AND_INTERMEDIATE_SURVEY_FALSE,
+											intervention.getId()).iterator());
 		}
 
 		return activeNonIntermediateScreeningSurveys;
