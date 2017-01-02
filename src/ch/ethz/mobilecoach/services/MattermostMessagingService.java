@@ -395,9 +395,9 @@ public class MattermostMessagingService implements MessagingService {
                         	try {
 	                        	JSONObject result = new JSONObject(responseContent);
 	                        	JSONArray order = result.getJSONArray("order");
-	                        	JSONObject posts = result.getJSONObject("posts");
 	                        	                        	
 	                        	if (order.length() > 0){
+	                        		JSONObject posts = result.getJSONObject("posts");
 	                        		String lastPostId = order.getString(0);
 	                        		JSONObject post = posts.getJSONObject(lastPostId);
 	                        		

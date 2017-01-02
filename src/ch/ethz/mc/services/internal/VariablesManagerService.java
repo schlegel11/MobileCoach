@@ -1434,7 +1434,7 @@ public class VariablesManagerService {
 	
 	public String getVariableValue(Participant participant, String variableName){
 		Hashtable<String, AbstractVariableWithValue> table = getAllVariablesWithValuesOfParticipantAndSystem(participant);
-		if (table.contains(variableName)){
+		if (table.containsKey(variableName)){
 			return table.get(variableName).getValue();
 		}
 		return null;
