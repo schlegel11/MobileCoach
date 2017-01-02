@@ -1,5 +1,7 @@
 package ch.ethz.mc.tools;
 
+import java.util.HashSet;
+import java.util.Set;
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
  *
@@ -38,6 +40,8 @@ public class InternalDateTime {
 
 	private final static long				hourOffset				= ImplementationConstants.HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR;
 
+	private final static Set<Runnable> listeners = new HashSet<>();
+	
 	/**
 	 * Returns the current simulated time
 	 *
@@ -53,6 +57,7 @@ public class InternalDateTime {
 	public static void nextHour() {
 		synchronized (MC.getInstance()) {
 			hourOffsetCount++;
+			notifyJump();
 		}
 	}
 
@@ -62,6 +67,14 @@ public class InternalDateTime {
 	public static void nextDay() {
 		synchronized (MC.getInstance()) {
 			hourOffsetCount += 24;
+			notifyJump();
+		}
+	}
+	
+	
+	private static void notifyJump(){
+		for (Runnable l: listeners){
+			l.run();
 		}
 	}
 
@@ -121,5 +134,13 @@ public class InternalDateTime {
 
 			log.debug("Fast forward thread stopped.");
 		}
+	}
+	
+	public static void addJumpListener(Runnable listener){
+		listeners.add(listener);
+	}
+	
+	public static boolean removeJumpListener(Runnable listener){
+		return listeners.remove(listener);
 	}
 }

@@ -1,6 +1,8 @@
 package ch.ethz.mobilecoach.services;
 
 import java.util.LinkedHashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.bson.types.ObjectId;
 
@@ -11,6 +13,8 @@ import ch.ethz.mc.services.internal.ChatEngineStateStore;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.InDataBaseVariableStore;
 import ch.ethz.mc.services.internal.VariablesManagerService;
+import ch.ethz.mc.tools.InternalDateTime;
+import ch.ethz.mc.tools.InternalTimer;
 import ch.ethz.mobilecoach.app.Option;
 import ch.ethz.mobilecoach.app.Post;
 import ch.ethz.mobilecoach.chatlib.engine.ChatEngine;
@@ -42,7 +46,7 @@ public class RichConversationService {
 	private VariablesManagerService variablesManagerService;
 	private DatabaseManagerService dBManagerService;
 	private LinkedHashMap<ObjectId, ChatEngine> chatEngines = new LinkedHashMap<>();
-
+	
 	private RichConversationService(MessagingService mattermostMessagingService, ConversationManagementService conversationManagementService, VariablesManagerService variablesManagerService, DatabaseManagerService dBManagerService) throws Exception {
 		this.messagingService = mattermostMessagingService;
 		this.conversationManagementService = conversationManagementService;
@@ -206,6 +210,7 @@ public class RichConversationService {
 		private UserReplyListener listener;
 		private String sender;
 		private boolean delayEnabled = true;
+		private InternalTimer timer = new InternalTimer();  // Timer thread for this user
 
 		@Getter
 		private ObjectId recipient;
@@ -258,15 +263,7 @@ public class RichConversationService {
 			}
 				
 			log.debug("Starting timer with " + milliseconds + " msec.");
-			new java.util.Timer().schedule( 
-					new java.util.TimerTask() {
-						@Override
-						public void run() {
-							callback.run();
-						}
-					}, 
-					milliseconds 
-					);
+			timer.schedule(callback, milliseconds);
 		}
 
 		public void receivePost(Post post) {
