@@ -131,21 +131,6 @@ public class MattermostManagementService {
 		databaseManagerService.saveModelObject(config);	
 	}
 
-	
-	private String getInterventionCoachName(ObjectId participantId, String defaultName){
-		Participant participant = this.databaseManagerService.getModelObjectById(Participant.class, participantId);
-		InDataBaseVariableStore store = new InDataBaseVariableStore(this.variablesManagerService, participantId, participant);
-		
-		String botName;
-		try {
-			botName = store.get(PathMate.COACH_NAME_VARIABLE);
-		} catch (VariableException e) {
-			return defaultName;
-		}
-		
-		return botName;
-	}
-
 
 	public MattermostUserConfiguration createParticipantUser(ObjectId participantId){
 		ensureAuthentication();
