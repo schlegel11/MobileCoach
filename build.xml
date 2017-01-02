@@ -37,9 +37,6 @@ This can be set in the "JRE" tab when configuring an ANT task in the eclipse GUI
 		<mkdir dir="WebContent/WEB-INF/lib" />
 		<get src="https://bitbucket.org/mobilecoach/mobilecoach-fileservletwrapper/raw/eebf577521bfb782458b3db1911cfb031e786ebe/out/FileServletWrapper.jar" dest="WebContent/WEB-INF/lib/" verbose="true" usetimestamp="true" />
 
-		<!-- Retrieve MCM-ScriptEngine -->
-		<copy file="../MCM-ScriptEngine/build/libs/MCM-ScriptEngine.jar" todir="WebContent/WEB-INF/lib" />
-
 		<!-- Compiling using eclipse -->
 		<basename property="project" file="${basedir}" />
 		<eclipse.refreshLocal resource="${project}" depth="infinite" />

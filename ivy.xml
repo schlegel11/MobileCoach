@@ -53,8 +53,6 @@
 		<dependency org="commons-collections" name="commons-collections"
 			rev="&commons-collection.version;" />
 		<dependency org="commons-io" name="commons-io" rev="&commons-io.version;" />
-		<dependency org="commons-httpclient" name="commons-httpclient" rev="3.1"/>
-		
 
 		<!-- Apache Bean validation -->
 		<!-- currently not required <dependency org="org.apache.geronimo.specs" 
@@ -126,18 +124,5 @@
 
 		<!-- jcsv -->
 		<dependency org="com.googlecode.jcsv" name="jcsv" rev="&jcsv.version;" />
-		
-		<!-- JSON -->
-		<dependency org="org.json" name="json" rev="20160810"/>
-		
-		
-		<!-- JUnit -->
-		<dependency org="junit" name="junit-dep" rev="4.8.2"/>
-		
-		<!-- Tyrus (WebSocket API) -->
-		<dependency org="org.glassfish.tyrus" name="tyrus-client" rev="1.13"/>
-		
-		<!-- Tomcat Juli (logging) -->
-		<dependency org="org.apache.tomcat" name="tomcat-juli" rev="9.0.0.M11"/>
 	</dependencies>
 </ivy-module>

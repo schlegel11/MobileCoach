@@ -38,11 +38,6 @@ import ch.ethz.mc.services.internal.ModelObjectExchangeService;
 import ch.ethz.mc.services.internal.ReportGeneratorService;
 import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.tools.InternalDateTime;
-import ch.ethz.mobilecoach.services.FileConversationManagementService;
-import ch.ethz.mobilecoach.services.MattermostManagementService;
-import ch.ethz.mobilecoach.services.MattermostMessagingService;
-import ch.ethz.mobilecoach.services.ResourceConversationManagementService;
-import ch.ethz.mobilecoach.services.RichConversationService;
 
 /**
  * @author Andreas Filler
@@ -85,17 +80,6 @@ public class MC implements ServletContextListener {
 	@Getter
 	RESTManagerService							restManagerService;
 
-	@Getter
-	MattermostMessagingService					mattermostMessagingService;
-	@Getter
-	MattermostManagementService					mattermostManagementService;
-	@Getter
-	RichConversationService						richConversationService;
-	@Getter
-	ResourceConversationManagementService		resourceConversationManagementService;
-	@Getter
-	FileConversationManagementService			fileConversationManagementService;
-
 	@Override
 	public void contextInitialized(final ServletContextEvent event) {
 		boolean noErrorsOccurred = true;
@@ -111,7 +95,6 @@ public class MC implements ServletContextListener {
 		log.info("Media upload folder: {}", Constants.getMediaUploadFolder());
 		log.info("Media cache folder: {}", Constants.getMediaCacheFolder());
 		log.info("Templates folder: {}", Constants.getTemplatesFolder());
-		log.info("XML Scripts folder: {}", Constants.getXmlScriptsFolder());
 
 		log.info("Starting up services...");
 		try {
@@ -125,19 +108,7 @@ public class MC implements ServletContextListener {
 					.start(fileStorageManagerService.getMediaCacheFolder());
 			variablesManagerService = VariablesManagerService
 					.start(databaseManagerService);
-			mattermostManagementService = MattermostManagementService
-					.start(databaseManagerService);
-			mattermostMessagingService = MattermostMessagingService
-					.start(mattermostManagementService);
-			// resourceConversationManagementService =
-			// ResourceConversationManagementService.start(servletContext);
-			fileConversationManagementService = FileConversationManagementService
-					.start(Constants.getXmlScriptsFolder());
-			richConversationService = RichConversationService.start(
-					mattermostMessagingService,
-					fileConversationManagementService);
-			communicationManagerService = CommunicationManagerService
-					.start(richConversationService);
+			communicationManagerService = CommunicationManagerService.start();
 			modelObjectExchangeService = ModelObjectExchangeService.start(
 					databaseManagerService, fileStorageManagerService);
 			reportGeneratorService = ReportGeneratorService

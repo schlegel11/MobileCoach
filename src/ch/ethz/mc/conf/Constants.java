@@ -239,12 +239,6 @@ public class Constants {
 	private static String	smsPhoneNumberAcceptedCountryCodes	= "41,43,49";
 
 	/**
-	 * XML script configuration
-	 */
-	@Getter
-	private static String	xmlScriptsFolder					= "/mc_data/xml_scripts";
-
-	/**
 	 * Get all accepted country codes for SMS phone numbers
 	 * 
 	 * @return List of accepted country codes
