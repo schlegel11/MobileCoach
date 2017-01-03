@@ -26,7 +26,7 @@ public class InternalTimer {
 		timer = new Timer();
 	}
 	
-	public void schedule(Runnable task, long milliseconds){
+	public synchronized void schedule(Runnable task, long milliseconds){
 		final ScheduledTask scheduledTask = new ScheduledTask();
 		TimerTask timerTask = new java.util.TimerTask() {
 			@Override
@@ -45,11 +45,15 @@ public class InternalTimer {
 		scheduledTasks.add(scheduledTask);
 	}
 
-	private void jumpAhead() {
-		for (ScheduledTask t: scheduledTasks){
+	private synchronized void jumpAhead() {
+		Set<ScheduledTask> currentTaskset = scheduledTasks;
+		
+		// create a new task set
+		scheduledTasks = new HashSet<>();
+		
+		for (ScheduledTask t: currentTaskset){
 			if (t.scheduledTask.cancel()){
 				// we successfully canceled the task: re-schedule
-				scheduledTasks.remove(t);
 				long now = InternalDateTime.currentTimeMillis();
 				schedule(t.task, Math.max(0, t.milliseconds - (now - t.scheduledAt)));
 			}

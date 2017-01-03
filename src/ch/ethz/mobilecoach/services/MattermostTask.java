@@ -50,7 +50,7 @@ public class MattermostTask<RESULT> {
 	            	throw new Exception("Status " + new Integer(responseCode) + ": " + post.getResponseBodyAsString());
 	            }
 			} catch (Exception e) {
-				log.error("Error completing Mattermost task", e);
+				log.error("Error completing Mattermost task: " + url + " " + payload.toString(), e);
 				numberOfTriesCompleted++;
 				if (MAX_TRIES <= numberOfTriesCompleted){
 					throw new RuntimeException(e);
