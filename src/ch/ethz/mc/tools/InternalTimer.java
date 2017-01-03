@@ -21,6 +21,11 @@ public class InternalTimer {
 		});
 	}
 	
+	public void cancelAll(){
+		timer.cancel();
+		timer = new Timer();
+	}
+	
 	public void schedule(Runnable task, long milliseconds){
 		final ScheduledTask scheduledTask = new ScheduledTask();
 		TimerTask timerTask = new java.util.TimerTask() {

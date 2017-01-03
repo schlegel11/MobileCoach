@@ -15,6 +15,7 @@ import ch.ethz.mc.services.internal.InDataBaseVariableStore;
 import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mc.tools.InternalTimer;
+import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mobilecoach.app.Option;
 import ch.ethz.mobilecoach.app.Post;
 import ch.ethz.mobilecoach.chatlib.engine.ChatEngine;
@@ -79,9 +80,9 @@ public class RichConversationService {
 					try {
 						chatEngineStateStore.restoreState(engine);
 						engine.run();
-					} catch (RestoreException e) {
-						e.printStackTrace();
+					} catch (Exception e) {
 						//TODO: should we delete the state if we cannot restore it?
+						log.error("Error restoring chat engine: " + StringHelpers.getStackTraceAsLine(e), e);
 					}
 				}
 			}
@@ -99,12 +100,16 @@ public class RichConversationService {
 			ChatEngineStateStore chatEngineStateStore = new ChatEngineStateStore(dBManagerService, recipient);
 			Participant participant = dBManagerService.getModelObjectById(Participant.class, recipient);
 			
-			if (chatEngines.containsKey(participant.getId())){
-				// there's already a conversation going on for this participants... stop it
-				// TODO Dominik: make sure ongoing conversation is stopped
-			}
+			ChatEngine engine = null;
 			
-			ChatEngine engine = prepareChatEngine(sender, participant, chatEngineStateStore);
+			if (chatEngines.containsKey(participant.getId())){
+				// there's already a conversation going on for this participants... re-set it
+				engine = chatEngines.get(participant.getId());
+			    
+				
+			} else {
+				engine = prepareChatEngine(sender, participant, chatEngineStateStore);
+			}
 			
 			String conversation = message.substring(START_CONVERSATION_PREFIX.length());
 			engine.startConversation(conversation);
@@ -183,6 +188,16 @@ public class RichConversationService {
 					//            This is not necessary for the PathMate2 intervention.
 				}
 			}
+		});
+		
+		engine.setOnTerminated(new Runnable(){
+
+			@Override
+			public void run() {
+				// TODO: clean up the engine
+				//   - unregister listeners (web socket and timer) to release the engine for garbage collection
+			}
+			
 		});
 		
 		return engine;
@@ -286,6 +301,11 @@ public class RichConversationService {
 		@Override
 		public void setDelayEnabled(boolean enabled) {
 			delayEnabled = enabled;
+		}
+
+		@Override
+		public void cancelDelay() {
+			timer.cancelAll();
 		}
 
 	}

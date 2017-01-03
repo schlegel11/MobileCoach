@@ -4,18 +4,13 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Queue;
-import java.util.Stack;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import org.bson.types.ObjectId;
 
 import ch.ethz.mobilecoach.chatlib.engine.ChatEngine;
 import ch.ethz.mobilecoach.chatlib.engine.ChatEngineState;
-import ch.ethz.mobilecoach.chatlib.engine.actions.operations.Operation;
 import ch.ethz.mobilecoach.chatlib.engine.serialization.ChatEngineStateStoreIfc;
 import ch.ethz.mobilecoach.chatlib.engine.serialization.RestoreException;
-import ch.ethz.mobilecoach.chatlib.engine.stack.Context;
 import ch.ethz.mobilecoach.model.persistent.ChatEnginePersistentState;
 import lombok.extern.log4j.Log4j2;
 
@@ -108,5 +103,10 @@ public class ChatEngineStateStore implements ChatEngineStateStoreIfc {
 	public void deleteState(Object chatEngineState){
 
 		this.dbMgmtService.deleteModelObject((ChatEnginePersistentState) chatEngineState);
+	}
+
+	@Override
+	public void deleteState() {
+		deleteState(chatEngineState);
 	}
 }
