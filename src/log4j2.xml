@@ -56,5 +56,10 @@
 			<AppenderRef ref="File" level="WARN" />
 			<AppenderRef ref="RollingFile" level="${sys:mc_logging_rolling_file_level}" />
 		</Logger>
+				<Logger name="ch.ethz.mc.services.internal.FileStorageManager" level="ERROR" additivity="false">
+			<AppenderRef ref="Console" level="${sys:mc_logging_console_level}" />
+			<AppenderRef ref="File" level="WARN" />
+			<AppenderRef ref="RollingFile" level="${sys:mc_logging_rolling_file_level}" />
+		</Logger>
 	</Loggers>
 </Configuration>

@@ -100,7 +100,7 @@ public class MattermostMessagingService implements MessagingService {
 	
 	
 	private void connectToWebSocket(){
-		final String authToken = mcUserToken;	
+		final String authToken = mcUserToken;
 		WebSocketConfigurator configurator = new WebSocketConfigurator(authToken);
 		ClientEndpointConfig clientConfig = ClientEndpointConfig.Builder.create().configurator(configurator).build();
 		
@@ -121,7 +121,8 @@ public class MattermostMessagingService implements MessagingService {
         
         while(!connected){
             try {
-    			container.connectToServer(webSocketEndpoint, clientConfig, new URI(managementService.api_url.replaceFirst("http:", "ws:") + "users/websocket"));
+            	String wsUrl = managementService.api_url.replaceFirst("http:", "ws:").replaceFirst("https:", "wss:");
+    			container.connectToServer(webSocketEndpoint, clientConfig, new URI(wsUrl + "users/websocket"));
     			return;
     		} catch (Exception e) {
     			log.error(e);
@@ -170,6 +171,13 @@ public class MattermostMessagingService implements MessagingService {
         String channelId = config.getChannels().get(0).getId();
         String teamId = config.getTeamId();
         String userId = config.getUserId();
+        
+        if (!managementService.teamId.equals(teamId)){
+        	// This caused sending requests to fail with error 403: Forbidden
+        	// We abort and accept that after changing the teamId, conversations on the older team cannot continue.
+        	log.error("Could not send message to conversation using another teamId: " + teamId);
+        	return;
+        }
         
         senderIdToRecipient.put(userId, recipient);
         
