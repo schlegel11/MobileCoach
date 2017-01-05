@@ -170,7 +170,7 @@ public class MattermostMessagingService implements MessagingService {
         String userId = config.getUserId();
         
         senderIdToRecipient.put(userId, recipient);
-		
+        
         JSONObject json = new JSONObject();
         json.put("props", new JSONObject(post));
         json.put("message", post.getMessage());
@@ -187,7 +187,7 @@ public class MattermostMessagingService implements MessagingService {
 		if (wasLastMessageReceivedLongerAgoThan(channelId, 60 * 1000)){
 			// send push notifications only after 1 minute after the last message was received
 			try {
-				sendPushNotification(recipient, post);
+				sendPushNotification(recipient, post, channelId, userId);
 			} catch (Exception e){
 				log.error("Error sending push notification: " + StringHelpers.getStackTraceAsLine(e), e);
 			}
@@ -226,7 +226,7 @@ public class MattermostMessagingService implements MessagingService {
 
 	
 	
-	public void sendPushNotification(ObjectId recipient, Post post) {
+	public void sendPushNotification(ObjectId recipient, Post post, String channelId, String userId) {
 
 		OneSignalUserConfiguration oneSignalUserConfiguration = managementService.findOneSignalObject(recipient);
 		
@@ -254,7 +254,9 @@ public class MattermostMessagingService implements MessagingService {
 		JSONObject json2 = new JSONObject()
 				.put("app_id", MattermostManagementService.appID)     
 				.put("contents", new JSONObject().put("en", message))
-				.put("include_player_ids", playerIds);
+				.put("include_player_ids", playerIds)
+				.put("data", new JSONObject().put("channel_id", channelId).put("message_id", post.getId()))
+				.put("collapse_id", userId);
 
 		new OneSignalTask<String>(url, json2, headers){
 			@Override
