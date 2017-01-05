@@ -341,6 +341,7 @@ public class MattermostMessagingService implements MessagingService {
 						
 						// mark this message as processed
 						this.saveUserLastMessage(recipient, post.getChannelId(), post.getId(), post.getCreateAt());
+						log.debug("Marked message as processed: '" + post.getMessage() + "' "+ post.getId());
 					}
 				}
 			}
@@ -620,7 +621,7 @@ public class MattermostMessagingService implements MessagingService {
 							receiveMessageAtEndpoint(userId, postObject);	
 						
 						} catch (Exception e){
-							e.printStackTrace();
+							log.error(StringHelpers.getStackTraceAsLine(e), e);
 						}											
 					}
 				}

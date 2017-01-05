@@ -8,7 +8,7 @@ import java.util.TimerTask;
 
 public class InternalTimer {
 	
-	private Timer timer = new Timer();
+	private Timer timer = null;
 	private Set<ScheduledTask> scheduledTasks = new HashSet<>();
 	
 	public InternalTimer(){
@@ -22,11 +22,17 @@ public class InternalTimer {
 	}
 	
 	public void cancelAll(){
-		timer.cancel();
-		timer = new Timer();
+		if (timer != null){
+			timer.cancel();
+			timer = null;
+		}
 	}
 	
 	public synchronized void schedule(Runnable task, long milliseconds){
+		if (timer == null){
+			timer = new Timer();
+		}
+		
 		final ScheduledTask scheduledTask = new ScheduledTask();
 		TimerTask timerTask = new java.util.TimerTask() {
 			@Override
