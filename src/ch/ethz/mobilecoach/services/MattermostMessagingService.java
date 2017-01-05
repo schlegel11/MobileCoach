@@ -1,9 +1,5 @@
 package ch.ethz.mobilecoach.services;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.extern.log4j.Log4j2;
-
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
@@ -11,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 import javax.websocket.ClientEndpointConfig;
@@ -23,6 +20,10 @@ import javax.websocket.RemoteEndpoint.Async;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
@@ -31,13 +32,9 @@ import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.util.EntityUtils;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
 import org.bson.types.ObjectId;
-import org.json.JSONObject;
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
@@ -48,6 +45,9 @@ import ch.ethz.mobilecoach.app.Results;
 import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
 import ch.ethz.mobilecoach.model.persistent.OneSignalUserConfiguration;
 import ch.ethz.mobilecoach.model.persistent.UserLastMessage;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Sends and receives messages from a Mattermost instance.
@@ -141,7 +141,9 @@ public class MattermostMessagingService implements MessagingService {
 	
 	@Override
 	public void sendMessage(String sender, ObjectId recipient, String message){
+		
 		Post post = new Post();
+		post.setId(UUID.randomUUID().toString());
 		post.setMessage(message);
 		sendMessage(sender, recipient, post);
 	}
@@ -251,15 +253,20 @@ public class MattermostMessagingService implements MessagingService {
 			message = "New message"; // TODO: translate
 		}
 
+		JSONObject data = new JSONObject();
+		data.put("channel_id", channelId);
+		data.put("message_id", post.getId());
+		
 		JSONObject json2 = new JSONObject()
 				.put("app_id", MattermostManagementService.appID)     
 				.put("contents", new JSONObject().put("en", message))
 				.put("include_player_ids", playerIds)
-				.put("data", new JSONObject().put("channel_id", channelId).put("message_id", post.getId()))
+				.put("data", data)
 				.put("collapse_id", userId);
 
 		new OneSignalTask<String>(url, json2, headers){
 			@Override
+			protected
 			String handleResponse(PostMethod method) throws Exception {
 				return new JSONObject(method.getResponseBodyAsString()).getString("id");
 			}
