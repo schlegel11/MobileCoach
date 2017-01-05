@@ -151,8 +151,8 @@ public class MattermostManagementService {
 		MattermostUserConfiguration config = createMattermostUser(userName, userId);
 		addUserToTeam(config.getUserId(), teamId);
 		
-		MattermostChannel coachingChannel = createPrivateChannel(userCoachName, participantIdentifier + " MobileCoach", "BOT");
-		MattermostChannel managerChannel = createPrivateChannel(PathMate.SUPPORT_NAME, participantIdentifier + " Team", "HUMAN");
+		MattermostChannel coachingChannel = createPrivateChannel(userCoachName, participantIdentifier + " " + userCoachName, "BOT");
+		MattermostChannel managerChannel = createPrivateChannel(PathMate.SUPPORT_NAME, participantIdentifier + " " + PathMate.SUPPORT_NAME, "HUMAN");
 
 		List<MattermostChannel> channels = config.getChannels();
 		channels.add(coachingChannel);
