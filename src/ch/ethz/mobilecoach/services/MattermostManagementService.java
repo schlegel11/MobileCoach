@@ -216,7 +216,6 @@ public class MattermostManagementService {
 		
 		if (firstName != null){
 			json.put("first_name", firstName);
-			username = firstName.toLowerCase() + "-" + username;
 		}
 		if (lastName != null){
 			json.put("last_name", lastName);

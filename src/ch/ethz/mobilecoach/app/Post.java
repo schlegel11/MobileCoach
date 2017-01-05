@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import ch.ethz.mobilecoach.chatlib.engine.Input;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,6 +20,14 @@ public class Post {
 	@Setter
 	private String message;
 	
+	@Getter
+	@Setter
+	private Input input;
+	
+	@Getter
+	@Setter
+	private Boolean hidden = false;
+	
 	
 	@Setter
 	private String postType;
@@ -30,11 +39,11 @@ public class Post {
 	@Getter
 	@Setter
 	private List<Option> options = new LinkedList<Option>();
-	
+		
 	
 	@Getter
 	@Setter
-	private Map<String, String> parameters = new HashMap<String, String>(); 
+	private Map<String, Object> parameters = new HashMap<String, Object>(); 
 	
 	
 	@Setter

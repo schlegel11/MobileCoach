@@ -45,6 +45,7 @@ import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mobilecoach.app.Post;
 import ch.ethz.mobilecoach.app.Results;
+import ch.ethz.mobilecoach.chatlib.engine.Input;
 import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
 import ch.ethz.mobilecoach.model.persistent.OneSignalUserConfiguration;
 import ch.ethz.mobilecoach.model.persistent.UserLastMessage;
@@ -192,7 +193,7 @@ public class MattermostMessagingService implements MessagingService {
 			return;
 		}
 		
-		if (wasLastMessageReceivedLongerAgoThan(channelId, 60 * 1000)){
+		if (post.getHidden() != true && wasLastMessageReceivedLongerAgoThan(channelId, 60 * 1000)){
 			// send push notifications only after 1 minute after the last message was received
 			try {
 				sendPushNotification(recipient, post);
@@ -506,19 +507,23 @@ public class MattermostMessagingService implements MessagingService {
 	public static Post JSONtoPost(JSONObject obj){
 		String messageText = obj.getString("message");
 		JSONObject props = obj.getJSONObject("props");
-		
-		Results results = null;
-		
-		if (props.has("results")){
-			results = new Results(props.getJSONObject("results").getString("selected"));
-		}
-		
+			
 		Post postObject = new Post();
+		
 		postObject.setMessage(messageText);
-		postObject.setResults(results);
 		postObject.setId(obj.getString("id"));
 		postObject.setCreateAt(obj.getLong("create_at"));
 		postObject.setChannelId(obj.getString("channel_id"));
+		
+		JSONObject results = props.optJSONObject("results");
+		if (results != null){
+			Map<String, Object> data = results.toMap();
+			String resultValue = messageText;
+			if (data.containsKey("selected")){
+				resultValue = data.get("selected").toString();
+			}
+			postObject.setInput(new Input(resultValue, data));
+		}
 		
 		return postObject;
 	}

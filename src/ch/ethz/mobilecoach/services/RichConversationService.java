@@ -22,6 +22,7 @@ import ch.ethz.mobilecoach.chatlib.engine.ChatEngine;
 import ch.ethz.mobilecoach.chatlib.engine.ConversationRepository;
 import ch.ethz.mobilecoach.chatlib.engine.ExecutionException;
 import ch.ethz.mobilecoach.chatlib.engine.HelpersRepository;
+import ch.ethz.mobilecoach.chatlib.engine.Input;
 import ch.ethz.mobilecoach.chatlib.engine.Logger;
 import ch.ethz.mobilecoach.chatlib.engine.Translator;
 import ch.ethz.mobilecoach.chatlib.engine.conversation.ConversationUI;
@@ -76,12 +77,12 @@ public class RichConversationService {
 				ChatEngineStateStore chatEngineStateStore = new ChatEngineStateStore(dBManagerService, ces.getParticipantId());
 				Participant participant = dBManagerService.getModelObjectById(Participant.class, ces.getParticipantId());
 				if (participant != null) {
-					ChatEngine engine = prepareChatEngine(null, participant, chatEngineStateStore);
 					try {
+						ChatEngine engine = prepareChatEngine(null, participant, chatEngineStateStore);
 						chatEngineStateStore.restoreState(engine);
 						engine.run();
 					} catch (Exception e) {
-						//TODO: should we delete the state if we cannot restore it?
+						//TODO: should we delete the state if we cannot restore it, maybe after 2 days?
 						log.error("Error restoring chat engine: " + StringHelpers.getStackTraceAsLine(e), e);
 					}
 				}
@@ -172,14 +173,9 @@ public class RichConversationService {
 
 		ui.setUserReplyListener(new UserReplyListener(){
 			@Override
-			public void userReplied(Message message) {
+			public void userReplied(Input input) {
 
 				ObjectId participantId = ui.getRecipient();
-
-				String input = message.answerOptionId;
-				if (input == null){
-					input = ""; // use empty string if no option is provided (works for requests that don't expect a value)
-				}
 
 				if (chatEngines.containsKey(participantId)){
 					engine.handleInput(input);
@@ -260,6 +256,7 @@ public class RichConversationService {
 				}
 
 				post.getParameters().putAll(message.parameters);
+				post.setHidden(message.hidden);
 
 				messagingService.sendMessage(sender, recipient, post);
 			}
@@ -283,11 +280,7 @@ public class RichConversationService {
 
 		public void receivePost(Post post) {
 			if (this.listener != null){
-				Message msg = new Message(post.getMessage(), Message.SENDER_USER);
-				if (post.getResults() != null){
-					msg.answerOptionId = post.getResults().getSelected();
-				}
-				this.listener.userReplied(msg);
+				this.listener.userReplied(post.getInput());
 			}
 		}
 
