@@ -87,6 +87,9 @@ public class Constants {
 	 */
 	@Getter
 	public static boolean		cachingActive						= true;
+	
+	@Getter
+	public static boolean		startOnlyOnMonday					= true;
 
 	@Getter
 	private static boolean		listOpenScreenSurveysOnBaseURL		= false;
