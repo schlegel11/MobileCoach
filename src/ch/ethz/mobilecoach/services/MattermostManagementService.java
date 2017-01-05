@@ -268,12 +268,14 @@ public class MattermostManagementService {
 	public MattermostUserConfiguration getUserConfiguration(ObjectId participantId){
 		MattermostUserConfiguration config =  databaseManagerService.findOneModelObject(MattermostUserConfiguration.class, "{'participantId':#}", participantId);
 
-		long tokenRenewalAfter = config.getTokenTimestamp() + 1000 * 24 * 3600 * TOKEN_RENEWAL_AFTER_DAYS;
-		if (config != null && (System.currentTimeMillis() > tokenRenewalAfter)){
-			String token = createATokenForUser(config.getEmail(), config.getPassword());
-			config.setToken(token);
-			config.setTokenTimestamp(System.currentTimeMillis());
-			databaseManagerService.saveModelObject(config);
+		if (config != null) {
+			long tokenRenewalAfter = config.getTokenTimestamp() + 1000 * 24 * 3600 * TOKEN_RENEWAL_AFTER_DAYS;
+			if (System.currentTimeMillis() > tokenRenewalAfter){
+				String token = createATokenForUser(config.getEmail(), config.getPassword());
+				config.setToken(token);
+				config.setTokenTimestamp(System.currentTimeMillis());
+				databaseManagerService.saveModelObject(config);
+			}
 		}
 
 		return config;

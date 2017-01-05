@@ -321,7 +321,7 @@ public class MattermostMessagingService implements MessagingService {
 	public void setListener(ObjectId recipient, MessageListener listener){
 		listenerForRecipient.put(recipient, listener);
 		
-		// find the Mattermost user id, if it exists, so that we can forward the incoming messages to the listener
+		// for continuing persisted conversations: find the Mattermost user id, if it exists, so that we can forward the incoming messages to the listener
 		MattermostUserConfiguration config = managementService.getUserConfiguration(recipient);
 		if (config != null){
 			senderIdToRecipient.put(config.getUserId(), recipient);

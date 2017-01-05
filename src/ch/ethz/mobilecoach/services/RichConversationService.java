@@ -109,7 +109,12 @@ public class RichConversationService {
 			    
 				
 			} else {
-				engine = prepareChatEngine(sender, participant, chatEngineStateStore);
+				try {
+					engine = prepareChatEngine(sender, participant, chatEngineStateStore);
+				} catch (Exception e){
+					log.error(e.getMessage() + " " + StringHelpers.getStackTraceAsLine(e), e);
+					throw e;
+				}
 			}
 			
 			String conversation = message.substring(START_CONVERSATION_PREFIX.length());
@@ -180,6 +185,8 @@ public class RichConversationService {
 				if (chatEngines.containsKey(participantId)){
 					engine.handleInput(input);
 				} else {
+					
+					log.warn("Message received, but no conversation running for participant: " + participantId);
 					// TODO (DR): store the message for the MC system to collect it. 
 					//            This is not necessary for the PathMate2 intervention.
 				}
@@ -281,6 +288,8 @@ public class RichConversationService {
 		public void receivePost(Post post) {
 			if (this.listener != null){
 				this.listener.userReplied(post.getInput());
+			} else {
+				log.warn("post received but no listener registered.");
 			}
 		}
 
