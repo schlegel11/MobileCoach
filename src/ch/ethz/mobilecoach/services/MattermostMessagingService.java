@@ -192,6 +192,7 @@ public class MattermostMessagingService implements MessagingService {
 			.setToken(mcUserToken).run();
 		
 		if(null == managementService.findOneSignalObject(recipient)){
+			log.error("Could not send push since OnSignal config missing: " + recipient);
 			return;
 		}
 		
