@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import ch.ethz.mobilecoach.chatlib.engine.ConversationRepository;
+import ch.ethz.mobilecoach.chatlib.engine.checking.ReferenceChecker;
 import ch.ethz.mobilecoach.chatlib.engine.xml.DomParser;
 import lombok.extern.log4j.Log4j2;
 
@@ -23,6 +24,7 @@ public class FileConversationManagementService implements
 		ConversationManagementService {
 	
 	ConversationRepository repository = new ConversationRepository();
+	ReferenceChecker referenceChecker = new ReferenceChecker();
 	
 	private FileConversationManagementService(){
 	}
@@ -54,13 +56,18 @@ public class FileConversationManagementService implements
 		}
 		
 		repository.freeze(); // for now we assume that the repository should not change after loading from the folder
+		
+		// checks
+		
+		for (String error: referenceChecker.check()){
+			log.error(error);
+		}
 	}
 	
 	
 	public void loadResourceFile(File file) throws Exception {
 		InputStream stream = new FileInputStream(file);
-		DomParser parser = new DomParser(repository, null);
+		DomParser parser = new DomParser(repository, null, referenceChecker);
 		parser.parse(stream);
 	}
-
 }
