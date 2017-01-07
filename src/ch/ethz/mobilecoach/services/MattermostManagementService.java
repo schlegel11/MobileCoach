@@ -146,13 +146,14 @@ public class MattermostManagementService {
 			userCoachName = "Lukas";
 		}
 		
-		String participantIdentifier = userName + " ("+userId+")";
-		
 		MattermostUserConfiguration config = createMattermostUser(userName, userId);
 		addUserToTeam(config.getUserId(), teamId);
 		
-		MattermostChannel coachingChannel = createPrivateChannel(userCoachName, participantIdentifier + " " + userCoachName, "BOT");
-		MattermostChannel managerChannel = createPrivateChannel(PathMate.SUPPORT_NAME, participantIdentifier + " " + PathMate.SUPPORT_NAME, "HUMAN");
+		String coachingChannelName = userName + " (" + userCoachName + ") " + userId;
+		String managerChannelName = userName + " (" + PathMate.SUPPORT_NAME + ") " + userId;
+		
+		MattermostChannel coachingChannel = createPrivateChannel(userCoachName, coachingChannelName, "BOT");
+		MattermostChannel managerChannel = createPrivateChannel(PathMate.SUPPORT_NAME, managerChannelName, "HUMAN");
 
 		List<MattermostChannel> channels = config.getChannels();
 		channels.add(coachingChannel);
