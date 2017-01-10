@@ -1,5 +1,8 @@
 package ch.ethz.mobilecoach.services;
 
+import java.time.LocalTime;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -375,6 +378,24 @@ public class RichConversationService {
 		@Override
 		public void cancelDelay() {
 			timer.cancelAll();
+		}
+
+		/**
+		 * Note: this assumes that the local time refers to the same day.
+		 */
+		@Override
+		public long getMillisecondsUntil(LocalTime time) {
+			Date now = new Date(InternalDateTime.currentTimeMillis());
+			Date localTimeDate = (Date) now.clone();		
+			
+			Calendar calendar=Calendar.getInstance();
+			calendar.setTime(localTimeDate);
+			calendar.set(Calendar.HOUR_OF_DAY, time.getHour());
+			calendar.set(Calendar.MINUTE, time.getMinute());
+			calendar.set(Calendar.SECOND, time.getSecond());
+			localTimeDate = calendar.getTime();
+			
+			return now.getTime() - localTimeDate.getTime();
 		}
 
 	}
