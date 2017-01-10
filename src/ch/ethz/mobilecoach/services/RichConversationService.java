@@ -385,17 +385,7 @@ public class RichConversationService {
 		 */
 		@Override
 		public long getMillisecondsUntil(LocalTime time) {
-			Date now = new Date(InternalDateTime.currentTimeMillis());
-			Date localTimeDate = (Date) now.clone();		
-			
-			Calendar calendar=Calendar.getInstance();
-			calendar.setTime(localTimeDate);
-			calendar.set(Calendar.HOUR_OF_DAY, time.getHour());
-			calendar.set(Calendar.MINUTE, time.getMinute());
-			calendar.set(Calendar.SECOND, time.getSecond());
-			localTimeDate = calendar.getTime();
-			
-			return now.getTime() - localTimeDate.getTime();
+			return InternalDateTime.getMillisecondsUntil(time);
 		}
 
 	}

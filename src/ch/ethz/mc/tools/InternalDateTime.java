@@ -1,5 +1,8 @@
 package ch.ethz.mc.tools;
 
+import java.time.LocalTime;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 /*
@@ -135,6 +138,21 @@ public class InternalDateTime {
 			log.debug("Fast forward thread stopped.");
 		}
 	}
+	
+	public static long getMillisecondsUntil(LocalTime time){
+		Date now = new Date(InternalDateTime.currentTimeMillis());
+		Date localTimeDate = (Date) now.clone();		
+		
+		Calendar calendar=Calendar.getInstance();
+		calendar.setTime(localTimeDate);
+		calendar.set(Calendar.HOUR_OF_DAY, time.getHour());
+		calendar.set(Calendar.MINUTE, time.getMinute());
+		calendar.set(Calendar.SECOND, time.getSecond());
+		localTimeDate = calendar.getTime();
+		
+		return localTimeDate.getTime() - now.getTime();
+	}
+	
 	
 	public static void addJumpListener(Runnable listener){
 		listeners.add(listener);
