@@ -1,16 +1,16 @@
 package ch.ethz.mc.ui.views.components.interventions;
 
 /*
- * Copyright (C) 2013-2017 MobileCoach Team at the Health-IS Lab
- *
+ * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -65,7 +65,9 @@ import com.vaadin.ui.Button.ClickEvent;
 @SuppressWarnings("serial")
 @Log4j2
 public class InterventionResultsComponentWithController extends
-InterventionResultsComponent {
+		InterventionResultsComponent {
+
+	private final int																maximumItemsForInstantUIUpdate		= 250;
 
 	private final Intervention														intervention;
 
@@ -108,14 +110,14 @@ InterventionResultsComponent {
 		participantsTable.setColumnHeaders(UIParticipant.getColumnHeaders());
 		participantsTable.setConverter(UIParticipant.CREATED,
 				new StringToDateConverter() {
-			@Override
-			protected DateFormat getFormat(final Locale locale) {
-				val dateFormat = DateFormat.getDateTimeInstance(
-						DateFormat.MEDIUM, DateFormat.MEDIUM,
-						Constants.getAdminLocale());
-				return dateFormat;
-			}
-		});
+					@Override
+					protected DateFormat getFormat(final Locale locale) {
+						val dateFormat = DateFormat.getDateTimeInstance(
+								DateFormat.MEDIUM, DateFormat.MEDIUM,
+								Constants.getAdminLocale());
+						return dateFormat;
+					}
+				});
 
 		variablesBeanContainer = new BeanContainer<Integer, UIVariableWithParticipantForResults>(
 				UIVariableWithParticipantForResults.class);
@@ -123,8 +125,8 @@ InterventionResultsComponent {
 
 		variablesTable.setContainerDataSource(variablesBeanContainer);
 		variablesTable
-		.setSortContainerPropertyId(UIVariableWithParticipantForResults
-				.getSortColumn());
+				.setSortContainerPropertyId(UIVariableWithParticipantForResults
+						.getSortColumn());
 		variablesTable.setVisibleColumns(UIVariableWithParticipantForResults
 				.getVisibleColumns());
 		variablesTable.setColumnHeaders(UIVariableWithParticipantForResults
@@ -137,26 +139,21 @@ InterventionResultsComponent {
 
 		messageDialogTable.setContainerDataSource(messageDialogBeanContainer);
 		messageDialogTable
-		.setSortContainerPropertyId(UIDialogMessageWithParticipantForResults
-				.getSortColumn());
+				.setSortContainerPropertyId(UIDialogMessageWithParticipantForResults
+						.getSortColumn());
 		messageDialogTable
-		.setVisibleColumns(UIDialogMessageWithParticipantForResults
-				.getVisibleColumns());
+				.setVisibleColumns(UIDialogMessageWithParticipantForResults
+						.getVisibleColumns());
 		messageDialogTable
-		.setColumnHeaders(UIDialogMessageWithParticipantForResults
-				.getColumnHeaders());
+				.setColumnHeaders(UIDialogMessageWithParticipantForResults
+						.getColumnHeaders());
 
 		// handle selection change
 		participantsTable.addValueChangeListener(new ValueChangeListener() {
 
-			@SuppressWarnings("unchecked")
 			@Override
 			public void valueChange(final ValueChangeEvent event) {
-				selectedUIParticipantsIds = (Collection<ObjectId>) participantsTable
-						.getValue();
-				updateButtonStatus(selectedUIParticipantsIds,
-						intervention.isMonitoringActive());
-				updateTables();
+				adjust(false);
 			}
 		});
 
@@ -191,6 +188,7 @@ InterventionResultsComponent {
 					public InputStream getStream() {
 						final DataTable dataTable = new DataTable();
 
+						int i = 0;
 						for (val participantId : selectedUIParticipantsIds) {
 							val participant = getInterventionAdministrationManagerService()
 									.getParticipant(participantId);
@@ -204,9 +202,16 @@ InterventionResultsComponent {
 							dataTable.addEntry(participantId, participant,
 									statisticValuesOfParticipant,
 									variablesWithValuesOfParticipant);
+
+							i++;
+							if (i % 100 == 0) {
+								log.info("Exporting entry {} of {}", i,
+										selectedUIParticipantsIds.size());
+							}
 						}
 
 						try {
+							log.info("Converting table to CSV...");
 							return CSVExporter.convertDataTableToCSV(dataTable);
 						} catch (final IOException e) {
 							log.error("Error at creating CSV: {}",
@@ -220,10 +225,6 @@ InterventionResultsComponent {
 
 					@Override
 					public String getFilename() {
-						log.error("Intervention_"
-								+ intervention.getName().replaceAll(
-										"[^A-Za-z0-9_. ]+", "_")
-										+ "_Participant_All_Data.csv");
 						return "Intervention_"
 								+ intervention.getName().replaceAll(
 										"[^A-Za-z0-9_. ]+", "_")
@@ -263,11 +264,11 @@ InterventionResultsComponent {
 						return "Intervention_"
 								+ intervention.getName().replaceAll(
 										"[^A-Za-z0-9_. ]+", "_")
-										+ "_Participant_Variable_Results.csv";
+								+ "_Participant_Variable_Results.csv";
 					}
 				});
 		variablesExportOnDemandFileDownloader
-		.extend(getVariablesExportButton());
+				.extend(getVariablesExportButton());
 		getVariablesExportButton().setDisableOnClick(true);
 
 		val messageDialogExportOnDemandFileDownloader = new OnDemandFileDownloader(
@@ -301,31 +302,55 @@ InterventionResultsComponent {
 						return "Intervention_"
 								+ intervention.getName().replaceAll(
 										"[^A-Za-z0-9_. ]+", "_")
-										+ "_Participant_Message_Dialog_Results.csv";
+								+ "_Participant_Message_Dialog_Results.csv";
 					}
 				});
 		messageDialogExportOnDemandFileDownloader
-		.extend(getMessageDialogExportButton());
+				.extend(getMessageDialogExportButton());
 		getMessageDialogExportButton().setDisableOnClick(true);
 
-		adjust();
+		adjust(true);
 	}
 
-	private void adjust() {
-		updateButtonStatus(selectedUIParticipantsIds,
-				intervention.isMonitoringActive());
-
+	@SuppressWarnings("unchecked")
+	private void adjust(final boolean refreshAlsoParticipants) {
 		val participantsTable = getParticipantsTable();
 
-		log.debug("Update participants");
-		refreshBeanContainer(beanContainer, UIParticipant.class,
-				getInterventionAdministrationManagerService()
-				.getAllParticipantsOfIntervention(intervention.getId()));
+		if (refreshAlsoParticipants) {
+			log.debug("Update participants");
+			refreshBeanContainer(
+					beanContainer,
+					UIParticipant.class,
+					getInterventionAdministrationManagerService()
+							.getAllParticipantsOfIntervention(
+									intervention.getId()));
 
-		participantsTable.sort();
+			participantsTable.sort();
+		}
 
-		if (selectedUIParticipantsIds != null) {
-			updateTables();
+		log.debug("Update tables");
+		selectedUIParticipantsIds = (Collection<ObjectId>) participantsTable
+				.getValue();
+
+		if (selectedUIParticipantsIds == null) {
+			updateButtonStatus(null, false, intervention.isMonitoringActive());
+
+			updateTables(true);
+		} else if (selectedUIParticipantsIds.size() > maximumItemsForInstantUIUpdate) {
+			getAdminUI()
+					.showWarningNotification(
+							AdminMessageStrings.NOTIFICATION__TOO_MANY_PARTICIPANTS_SELECTED,
+							maximumItemsForInstantUIUpdate);
+
+			updateButtonStatus(selectedUIParticipantsIds, false,
+					intervention.isMonitoringActive());
+
+			updateTables(true);
+		} else {
+			updateButtonStatus(selectedUIParticipantsIds, true,
+					intervention.isMonitoringActive());
+
+			updateTables(false);
 		}
 	}
 
@@ -335,7 +360,7 @@ InterventionResultsComponent {
 		public void buttonClick(final ClickEvent event) {
 
 			if (event.getButton() == getRefreshButton()) {
-				adjust();
+				adjust(true);
 			} else if (event.getButton() == getSendMessageButton()) {
 				sendMessage();
 			} else if (event.getButton() == getEditButton()) {
@@ -344,7 +369,7 @@ InterventionResultsComponent {
 		}
 	}
 
-	private void updateTables() {
+	private void updateTables(final boolean clearOnly) {
 		log.debug("Update variables of participant");
 
 		getVariablesTable().select(null);
@@ -352,97 +377,108 @@ InterventionResultsComponent {
 		variablesBeanContainer.removeAllItems();
 
 		int i = 0;
-		for (val participantId : selectedUIParticipantsIds) {
-			val participant = getInterventionAdministrationManagerService()
-					.getParticipant(participantId);
+		if (!clearOnly) {
+			for (val participantId : selectedUIParticipantsIds) {
+				val participant = getInterventionAdministrationManagerService()
+						.getParticipant(participantId);
 
-			val variablesOfParticipant = getInterventionAdministrationManagerService()
-					.getAllVariablesWithValuesOfParticipantAndSystem(
-							participantId);
+				val variablesOfParticipant = getInterventionAdministrationManagerService()
+						.getAllVariablesWithValuesOfParticipantAndSystem(
+								participantId);
 
-			for (val variableOfParticipant : variablesOfParticipant.values()) {
-				variablesBeanContainer
-				.addItem(
-						i++,
-						variableOfParticipant
-						.toUIVariableWithParticipantForResults(
-								participant.getId().toString(),
-								participant.getNickname()
-								.equals("") ? Messages
-										.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-										: participant
-										.getNickname()));
+				for (val variableOfParticipant : variablesOfParticipant
+						.values()) {
+					variablesBeanContainer
+							.addItem(
+									i++,
+									variableOfParticipant
+											.toUIVariableWithParticipantForResults(
+													participant.getId()
+															.toString(),
+													participant.getNickname()
+															.equals("") ? Messages
+															.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+															: participant
+																	.getNickname()));
+				}
 			}
-		}
 
-		getVariablesTable().sort();
+			getVariablesTable().sort();
+		}
 
 		log.debug("Update message dialog of participant");
 		messageDialogBeanContainer.removeAllItems();
 
 		i = 0;
-		for (val participantId : selectedUIParticipantsIds) {
-			val participant = getInterventionAdministrationManagerService()
-					.getParticipant(participantId);
+		if (!clearOnly) {
+			for (val participantId : selectedUIParticipantsIds) {
+				val participant = getInterventionAdministrationManagerService()
+						.getParticipant(participantId);
 
-			val dialogMessagesOfParticipant = getInterventionAdministrationManagerService()
-					.getAllDialogMessagesOfParticipant(participantId);
+				val dialogMessagesOfParticipant = getInterventionAdministrationManagerService()
+						.getAllDialogMessagesOfParticipant(participantId);
 
-			for (val dialogMessageOfParticipant : dialogMessagesOfParticipant) {
-				boolean containsMediaContentInMessage = false;
-				val relatedMonitoringMessageId = dialogMessageOfParticipant
-						.getRelatedMonitoringMessage();
+				for (val dialogMessageOfParticipant : dialogMessagesOfParticipant) {
+					boolean containsMediaContentInMessage = false;
+					val relatedMonitoringMessageId = dialogMessageOfParticipant
+							.getRelatedMonitoringMessage();
 
-				if (relatedMonitoringMessageId != null) {
-					val relatedMonitoringMessage = getInterventionAdministrationManagerService()
-							.getMonitoringMessage(relatedMonitoringMessageId);
+					if (relatedMonitoringMessageId != null) {
+						val relatedMonitoringMessage = getInterventionAdministrationManagerService()
+								.getMonitoringMessage(
+										relatedMonitoringMessageId);
 
-					if (relatedMonitoringMessage != null
-							&& relatedMonitoringMessage.getLinkedMediaObject() != null) {
-						val linkedMediaObject = getInterventionAdministrationManagerService()
-								.getMediaObject(
-										relatedMonitoringMessage
-										.getLinkedMediaObject());
+						if (relatedMonitoringMessage != null
+								&& relatedMonitoringMessage
+										.getLinkedMediaObject() != null) {
+							val linkedMediaObject = getInterventionAdministrationManagerService()
+									.getMediaObject(
+											relatedMonitoringMessage
+													.getLinkedMediaObject());
 
-						if (linkedMediaObject != null) {
-							containsMediaContentInMessage = true;
+							if (linkedMediaObject != null) {
+								containsMediaContentInMessage = true;
+							}
 						}
 					}
+
+					messageDialogBeanContainer
+							.addItem(
+									i++,
+									dialogMessageOfParticipant
+											.toUIDialogMessageWithParticipantForResults(
+													participant.getId()
+															.toString(),
+													participant.getNickname()
+															.equals("") ? Messages
+															.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+															: participant
+																	.getNickname(),
+													participant
+															.getLanguage()
+															.getDisplayLanguage(),
+													participant.getGroup() == null ? Messages
+															.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+															: participant
+																	.getGroup(),
+													participant
+															.getOrganization()
+															.equals("") ? Messages
+															.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+															: participant
+																	.getOrganization(),
+													participant
+															.getOrganizationUnit()
+															.equals("") ? Messages
+															.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+															: participant
+																	.getOrganizationUnit(),
+													containsMediaContentInMessage));
 				}
-
-				messageDialogBeanContainer
-				.addItem(
-						i++,
-						dialogMessageOfParticipant
-						.toUIDialogMessageWithParticipantForResults(
-								participant.getId().toString(),
-								participant.getNickname()
-								.equals("") ? Messages
-										.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-										: participant
-										.getNickname(),
-										participant.getLanguage()
-										.getDisplayLanguage(),
-										participant.getGroup() == null ? Messages
-												.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-												: participant
-												.getGroup(),
-												participant.getOrganization()
-												.equals("") ? Messages
-														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-														: participant
-														.getOrganization(),
-												participant
-														.getOrganizationUnit()
-														.equals("") ? Messages
-														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-														: participant
-																.getOrganizationUnit(),
-												containsMediaContentInMessage));
 			}
-		}
 
-		getMessageDialogTable().sort();
+			getMessageDialogTable().sort();
+		}
 	}
 
 	public void sendMessage() {
@@ -454,7 +490,7 @@ InterventionResultsComponent {
 		val placeholderStringEditWithCheckboxComponent = new PlaceholderStringEditWithCheckBoxComponent();
 		localize(
 				placeholderStringEditWithCheckboxComponent
-						.getUniversalCheckBox(),
+				.getUniversalCheckBox(),
 				AdminMessageStrings.MONITORING_RULE_EDITING__SEND_TO_SUPERVISOR);
 
 		showModalStringValueEditWindow(
@@ -470,8 +506,8 @@ InterventionResultsComponent {
 								getStringValue(), allPossibleMessageVariables)) {
 
 							getAdminUI()
-							.showWarningNotification(
-									AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
+									.showWarningNotification(
+											AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
 
 							return;
 						} else {
@@ -483,19 +519,19 @@ InterventionResultsComponent {
 
 							for (val participant : selectedParticipants) {
 								interventionExecutionManagerService
-								.sendManualMessage(participant,
-												placeholderStringEditWithCheckboxComponent
-														.getUniversalCheckBox()
-														.getValue(),
-										getStringValue());
+										.sendManualMessage(participant,
+										placeholderStringEditWithCheckboxComponent
+										.getUniversalCheckBox()
+										.getValue(),
+												getStringValue());
 							}
 						}
 
 						getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__THE_MESSAGES_WILL_BE_SENT_IN_THE_NEXT_MINUTES);
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__THE_MESSAGES_WILL_BE_SENT_IN_THE_NEXT_MINUTES);
 
-						adjust();
+						adjust(false);
 
 						closeWindow();
 					}
@@ -521,20 +557,20 @@ InterventionResultsComponent {
 								.participantAdjustVariableValue(
 										new ObjectId(
 												selectedUIVariableWithParticipant
-												.getParticipantId()),
-												abstractVariableWithValue.getName(),
-												getStringValue());
+														.getParticipantId()),
+										abstractVariableWithValue.getName(),
+										getStringValue());
 
 						if (changeSuceeded) {
-							updateTables();
+							adjust(false);
 
 							getAdminUI()
-							.showInformationNotification(
-									AdminMessageStrings.NOTIFICATION__VARIABLE_VALUE_CHANGED);
+									.showInformationNotification(
+											AdminMessageStrings.NOTIFICATION__VARIABLE_VALUE_CHANGED);
 						} else {
 							getAdminUI()
-							.showWarningNotification(
-									AdminMessageStrings.NOTIFICATION__SYSTEM_RESERVED_VARIABLE);
+									.showWarningNotification(
+											AdminMessageStrings.NOTIFICATION__SYSTEM_RESERVED_VARIABLE);
 						}
 						closeWindow();
 					}
