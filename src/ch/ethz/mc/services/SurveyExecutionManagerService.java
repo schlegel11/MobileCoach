@@ -287,6 +287,10 @@ public class SurveyExecutionManagerService {
 	@Synchronized
 	private boolean checkForDataForMonitoringParticipation(
 			final ObjectId participantId) {
+		
+		return true; // TODO Andreas Filler: We assume that APP is available as a type, so data for monitoring is always available
+		
+		/*
 
 		final val dialogOptions = databaseManagerService.findModelObjects(
 				DialogOption.class, Queries.DIALOG_OPTION__BY_PARTICIPANT,
@@ -311,6 +315,7 @@ public class SurveyExecutionManagerService {
 		} else {
 			return false;
 		}
+		*/
 	}
 
 	/**

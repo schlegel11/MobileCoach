@@ -522,7 +522,7 @@ public class CommunicationManagerService {
 	}
 
 	public DialogOptionTypes getSupportedDialogOptionType() {
-		return DialogOptionTypes.SMS;
+		return DialogOptionTypes.APP;
 	}
 
 	public int getMessagingThreadCount() {

@@ -1,11 +1,7 @@
 package ch.ethz.mobilecoach.services;
 
 import java.time.LocalTime;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import org.bson.types.ObjectId;
 
@@ -33,7 +29,6 @@ import ch.ethz.mobilecoach.chatlib.engine.conversation.UserReplyListener;
 import ch.ethz.mobilecoach.chatlib.engine.helpers.IncrementVariableHelper;
 import ch.ethz.mobilecoach.chatlib.engine.model.AnswerOption;
 import ch.ethz.mobilecoach.chatlib.engine.model.Message;
-import ch.ethz.mobilecoach.chatlib.engine.serialization.RestoreException;
 import ch.ethz.mobilecoach.chatlib.engine.variables.InMemoryVariableStore;
 import ch.ethz.mobilecoach.chatlib.engine.variables.VariableStore;
 import ch.ethz.mobilecoach.model.persistent.ChatEnginePersistentState;
@@ -94,8 +89,7 @@ public class RichConversationService {
 						Participant.class, ces.getParticipantId());
 				if (participant != null) {
 					try {
-						ChatEngine engine = prepareChatEngine(null, participant,
-								chatEngineStateStore);
+						ChatEngine engine = prepareChatEngine(participant, chatEngineStateStore);
 						chatEngineStateStore.restoreState(engine);
 						engine.run();
 					} catch (Exception e) {
@@ -135,8 +129,7 @@ public class RichConversationService {
 
 			} else {
 				try {
-					engine = prepareChatEngine(sender, participant,
-							chatEngineStateStore);
+					engine = prepareChatEngine(participant, chatEngineStateStore);
 				} catch (Exception e) {
 					log.error(e.getMessage() + " "
 							+ StringHelpers.getStackTraceAsLine(e), e);
@@ -159,7 +152,7 @@ public class RichConversationService {
 		}
 	}
 
-	private ChatEngine prepareChatEngine(String sender, Participant participant,
+	private ChatEngine prepareChatEngine(Participant participant,
 			ChatEngineStateStore chatEngineStateStore) {
 		ConversationRepository repository = conversationManagementService
 				.getRepository(null); // TODO: use Intervention id to get the
@@ -188,8 +181,7 @@ public class RichConversationService {
 				Constants.getXmlScriptsFolder()
 						+ "/pathmate2/translation_en_ch.csv");
 
-		MattermostConnector ui = new MattermostConnector(sender,
-				participant.getId());
+		MattermostConnector ui = new MattermostConnector(participant.getId());
 		HelpersRepository helpers = new HelpersRepository();
 
 		ChatEngine engine = new ChatEngine(repository, ui, variableStore,
@@ -300,9 +292,7 @@ public class RichConversationService {
 		@Getter
 		private ObjectId			recipient;
 
-		public MattermostConnector(String sender, ObjectId recipient) {
-
-			this.sender = sender;
+		public MattermostConnector(ObjectId recipient) {
 			this.recipient = recipient;
 		}
 

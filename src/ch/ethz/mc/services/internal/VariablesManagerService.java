@@ -1,5 +1,7 @@
 package ch.ethz.mc.services.internal;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
  * 
@@ -341,6 +343,12 @@ public class VariablesManagerService {
 					return ImplementationConstants.PLACEHOLDER_LINKED_MEDIA_OBJECT;
 				} else {
 					return "";
+				}
+			case systemIPAddress:
+				try {
+					return InetAddress.getLocalHost().getHostAddress();
+				} catch (UnknownHostException e) {
+					return "[ip address not available]";
 				}
 		}
 		return null;

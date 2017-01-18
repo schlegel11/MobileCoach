@@ -526,6 +526,10 @@ public class MattermostMessagingService implements MessagingService {
 		postObject.setCreateAt(obj.getLong("create_at"));
 		postObject.setChannelId(obj.getString("channel_id"));
 		
+		if ("result_keyboard".equals(props.optString(("post_type")))){
+			postObject.setInput(new Input(messageText, null));
+		}
+		
 		JSONObject results = props.optJSONObject("results");
 		if (results != null){
 			Map<String, Object> data = results.toMap();
@@ -533,6 +537,7 @@ public class MattermostMessagingService implements MessagingService {
 			if (data.containsKey("selected")){
 				resultValue = data.get("selected").toString();
 			}
+
 			postObject.setInput(new Input(resultValue, data));
 		}
 		

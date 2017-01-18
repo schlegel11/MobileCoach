@@ -985,6 +985,14 @@ public class InterventionExecutionManagerService {
 							dialogMessageToSend.getParticipant(),
 							communicationManagerService
 									.getSupportedDialogOptionType());
+					
+					if (dialogOption == null && communicationManagerService
+							.getSupportedDialogOptionType() == DialogOptionTypes.APP){
+						// always offer dialog option APP
+						dialogOption = new DialogOption(
+								dialogMessageToSend.getParticipant(), 
+								DialogOptionTypes.APP, "");
+					}
 				}
 
 				if (dialogOption != null) {
