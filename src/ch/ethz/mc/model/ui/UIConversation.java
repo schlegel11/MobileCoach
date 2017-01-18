@@ -31,9 +31,17 @@ public class UIConversation extends UIModelObject {
 	// NOTE: The String values have to fit the name of the variables	
 	public static final String	PARTICIPANT_ID					= "participantId";
 	public static final String	ENGINE_STATE					= "engineState";
+	public static final String	STATUS					        = "status";
+	public static final String	HASH					        = "hash";
 
 	@PropertyId(PARTICIPANT_ID)
 	private String				participantId;
+	
+	@PropertyId(STATUS)
+	private String				status;
+	
+	@PropertyId(HASH)
+	private String				hash;
 	
 	@PropertyId(ENGINE_STATE)
 	private String				engineState;
@@ -41,12 +49,14 @@ public class UIConversation extends UIModelObject {
 
 
 	public static Object[] getVisibleColumns() {
-		return new Object[] { PARTICIPANT_ID, ENGINE_STATE };
+		return new Object[] { PARTICIPANT_ID, STATUS, HASH, ENGINE_STATE };
 	}
 
 	public static String[] getColumnHeaders() {
 		return new String[] {
 				"Participant ID",
+				"Status",
+				"Hash",
 				"Engine State"
 				};
 	}

@@ -102,7 +102,7 @@ public class RestoreChatEngineStateTest extends TestFramework {
 		
 		while(iterator.hasNext()){
 			ChatEnginePersistentState ces = iterator.next();
-			if(ChatEngineStateStore.containsAValidChatEngineState(ces)){
+			if(ChatEngineStateStore.containsARecentChatEngineState(ces)){
 				ChatEngineStateStore chatEngineStateStore2 = new ChatEngineStateStore(databaseManagerService, ces.getParticipantId());
 				ChatEngine engine2 = new ChatEngine(repository, conversationUI, new InMemoryVariableStore(), null, null, chatEngineStateStore2);
 				engine2.sendExceptionAsMessage =  false;

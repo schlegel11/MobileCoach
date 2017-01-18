@@ -35,7 +35,7 @@ public class ChatEngineStateStore implements ChatEngineStateStoreIfc {
 	}
 
 	
-	public static boolean containsAValidChatEngineState(ChatEnginePersistentState chatEngineState){
+	public static boolean containsARecentChatEngineState(ChatEnginePersistentState chatEngineState){
 		boolean result = true;
 		LocalDateTime ldt = LocalDateTime.now();
 		
@@ -58,7 +58,7 @@ public class ChatEngineStateStore implements ChatEngineStateStoreIfc {
 				
 		String serializedState = chatEngine.getSerializer().serialize(chatEngine.getState());
 		
-		chatEngineState = new ChatEnginePersistentState(participantId, serializedState, timeStamp, ldt.getDayOfMonth(), ldt.getMonthValue());		
+		chatEngineState = new ChatEnginePersistentState(participantId, serializedState, timeStamp, ldt.getDayOfMonth(), ldt.getMonthValue(), "Saved", chatEngine.getConversationsHash());		
 		this.dbMgmtService.saveModelObject(chatEngineState);
 	}
 
@@ -78,6 +78,9 @@ public class ChatEngineStateStore implements ChatEngineStateStoreIfc {
 					restoredState.getUserInput(), newTimerValue));
 		
 		} catch (IOException e) {
+			persistentState.setStatus("Error");
+			this.dbMgmtService.saveModelObject(persistentState);
+			
 			log.error("Error deserializing state: " + persistentState.getSerializedState(), e);
 			throw new RestoreException(e);
 		}

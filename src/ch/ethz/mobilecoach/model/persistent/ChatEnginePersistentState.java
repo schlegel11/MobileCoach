@@ -29,6 +29,12 @@ public class ChatEnginePersistentState extends ModelObject {
 	@Getter
 	@Setter
 	private int monthValue;
+	@Getter
+	@Setter
+	private String status;
+	@Getter
+	@Setter
+	private String conversationsHash;
 	
 	/*
 	 * (non-Javadoc)
@@ -37,7 +43,9 @@ public class ChatEnginePersistentState extends ModelObject {
 	 */
 	@Override
 	public UIModelObject toUIModelObject() {
-		final val conversation = new UIConversation(participantId.toString(), serializedState);
+		String hash = this.conversationsHash + "        ";
+		
+		final val conversation = new UIConversation(participantId.toString(), status, hash.substring(0, 7), serializedState);
 
 		conversation.setRelatedModelObject(this);
 

@@ -78,7 +78,7 @@ public class RichConversationService {
 		while (iterator.hasNext()) {
 			ChatEnginePersistentState ces = iterator.next();
 
-			if (ChatEngineStateStore.containsAValidChatEngineState(ces)) {
+			if (ChatEngineStateStore.containsARecentChatEngineState(ces)) {
 
 				log.debug("Restoring chat engine state: "
 						+ ces.getSerializedState());
@@ -92,6 +92,8 @@ public class RichConversationService {
 						ChatEngine engine = prepareChatEngine(participant, chatEngineStateStore);
 						chatEngineStateStore.restoreState(engine);
 						engine.run();
+						ces.setStatus("Loaded");
+						
 					} catch (Exception e) {
 						// TODO: should we delete the state if we cannot restore
 						// it, maybe after 2 days?
@@ -99,9 +101,16 @@ public class RichConversationService {
 								"Error restoring chat engine: "
 										+ StringHelpers.getStackTraceAsLine(e),
 								e);
+						
+						ces.setStatus("Error");
 					}
 				}
+			} else {
+				ces.setStatus("Outdated");
 			}
+			
+			// update status
+			dBManagerService.saveModelObject(ces);
 		}
 
 		this.messagingService.startReceiving(); // now that all the listeners
