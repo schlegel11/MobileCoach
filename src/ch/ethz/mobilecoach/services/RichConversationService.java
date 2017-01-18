@@ -104,6 +104,8 @@ public class RichConversationService {
 						
 						ces.setStatus("Error");
 					}
+				} else {
+					ces.setStatus("Not Found");
 				}
 			} else {
 				ces.setStatus("Outdated");
