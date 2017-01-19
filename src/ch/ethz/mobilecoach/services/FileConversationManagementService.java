@@ -6,7 +6,9 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import ch.ethz.mobilecoach.chatlib.engine.ConversationRepository;
@@ -23,8 +25,11 @@ import lombok.extern.log4j.Log4j2;
 public class FileConversationManagementService implements
 		ConversationManagementService {
 	
-	ConversationRepository repository = new ConversationRepository();
+	Map<String, ConversationRepository> repositoryByName = new HashMap<>();
+	Map<String, ConversationRepository> repositoryByHash = new HashMap<>();
 	ReferenceChecker referenceChecker = new ReferenceChecker();
+	
+	private final String DEFAULT_REPOSITORY_NAME = "pathmate2";
 	
 	private FileConversationManagementService(){
 	}
@@ -41,17 +46,46 @@ public class FileConversationManagementService implements
 	
 	@Override
 	public ConversationRepository getRepository(String interventionId) {
-		return repository;
+		if (repositoryByName.containsKey(interventionId)){
+			return repositoryByName.get(interventionId);
+		}
+		if (repositoryByHash.containsKey(interventionId)){
+			return repositoryByHash.get(interventionId);
+		}
+		if (interventionId == null){
+			return repositoryByName.get(DEFAULT_REPOSITORY_NAME);
+		}
+		return null;
 	}
 	
-	public void loadFromFolder(String path) throws Exception{
-		List<java.nio.file.Path> paths = Files.walk(Paths.get(path)).filter(Files::isRegularFile).collect(Collectors.toList());
+	
+	
+	public void loadFromFolder(String path) throws Exception {
+		// List all folders
+		List<Path> paths = Files.list(Paths.get(path)).filter(Files::isDirectory).collect(Collectors.toList());
+		for (Path p : paths){
+			String dirName = p.getFileName().toString();
+			String interventionId = dirName;
+			
+			ConversationRepository repository = new ConversationRepository();
+			repository.path = p.toString();
+			
+			loadRepositoryFromFolder(p, repository);
+			
+			repositoryByName.put(interventionId, repository);
+			repositoryByHash.put(repository.getHash(), repository);
+		}
+		
+	}
+	
+	public void loadRepositoryFromFolder(Path path, ConversationRepository repository) throws Exception{
+		List<Path> paths = Files.walk(path).filter(Files::isRegularFile).collect(Collectors.toList());
 		
 		for (Path p : paths){
 			File f = p.toFile();
 			if (f.getName().endsWith(".xml")){
 				log.debug("Loading " + f.getName());
-				loadResourceFile(f);
+				loadResourceFile(f, repository);
 			}
 		}
 		
@@ -65,7 +99,7 @@ public class FileConversationManagementService implements
 	}
 	
 	
-	public void loadResourceFile(File file) throws Exception {
+	public void loadResourceFile(File file, ConversationRepository repository) throws Exception {
 		InputStream stream = new FileInputStream(file);
 		DomParser parser = new DomParser(repository, null, referenceChecker);
 		parser.parse(stream);

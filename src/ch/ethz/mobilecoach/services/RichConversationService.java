@@ -1,11 +1,11 @@
 package ch.ethz.mobilecoach.services;
 
+import java.io.IOException;
 import java.time.LocalTime;
 import java.util.LinkedHashMap;
 
 import org.bson.types.ObjectId;
 
-import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.services.internal.ChatEngineStateStore;
@@ -89,7 +89,7 @@ public class RichConversationService {
 						Participant.class, ces.getParticipantId());
 				if (participant != null) {
 					try {
-						ChatEngine engine = prepareChatEngine(participant, chatEngineStateStore);
+						ChatEngine engine = prepareChatEngine(participant, chatEngineStateStore, ces.getConversationsHash());
 						chatEngineStateStore.restoreState(engine);
 						engine.run();
 						ces.setStatus("Loaded");
@@ -120,11 +120,21 @@ public class RichConversationService {
 												// receiving
 	}
 
-	public void sendMessage(String sender, ObjectId recipient, String message)
-			throws ExecutionException {
+	public void sendMessage(String sender, ObjectId recipient, String message) throws ExecutionException {
 
 		final String START_CONVERSATION_PREFIX = "start-conversation:";
 		if (message.startsWith(START_CONVERSATION_PREFIX)) {
+			
+			String interventionId = null;
+			String conversation;
+			String restString = message.substring(START_CONVERSATION_PREFIX.length());
+			int slashIndex = restString.indexOf("/");
+			if (slashIndex > -1){
+				interventionId = restString.substring(0, slashIndex);
+				conversation = restString.substring(slashIndex + 1);
+			} else {
+				conversation = restString;
+			}
 
 			ChatEngineStateStore chatEngineStateStore = new ChatEngineStateStore(
 					dBManagerService, recipient);
@@ -140,17 +150,18 @@ public class RichConversationService {
 
 			} else {
 				try {
-					engine = prepareChatEngine(participant, chatEngineStateStore);
+					engine = prepareChatEngine(participant, chatEngineStateStore, interventionId);
 				} catch (Exception e) {
 					log.error(e.getMessage() + " "
 							+ StringHelpers.getStackTraceAsLine(e), e);
-					throw e;
 				}
 			}
 
-			String conversation = message
-					.substring(START_CONVERSATION_PREFIX.length());
-			engine.startConversation(conversation);
+			if (engine != null){
+				engine.startConversation(conversation);
+			} else {
+				log.error("Could not start conversation: " + restString);
+			}
 
 		} else {
 			// stop conversation
@@ -164,11 +175,13 @@ public class RichConversationService {
 	}
 
 	private ChatEngine prepareChatEngine(Participant participant,
-			ChatEngineStateStore chatEngineStateStore) {
-		ConversationRepository repository = conversationManagementService
-				.getRepository(null); // TODO: use Intervention id to get the
-										// repository
-
+			ChatEngineStateStore chatEngineStateStore, String interventionId) throws IOException {
+		ConversationRepository repository = conversationManagementService.getRepository(interventionId);
+		
+		if (repository == null){
+			throw new IOException("Repository not found: " + interventionId);
+		}
+		
 		Logger logger = new Logger() {
 
 			@Override
@@ -189,8 +202,7 @@ public class RichConversationService {
 
 		VariableStore variableStore = createVariableStore(participant.getId());
 		Translator translator = new Translator(participant.getLanguage(),
-				Constants.getXmlScriptsFolder()
-						+ "/pathmate2/translation_en_ch.csv");
+				repository.path + "/translation_en_ch.csv");
 
 		MattermostConnector ui = new MattermostConnector(participant.getId());
 		HelpersRepository helpers = new HelpersRepository();
