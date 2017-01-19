@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,6 +81,13 @@ public class FileConversationManagementService implements
 	
 	public void loadRepositoryFromFolder(Path path, ConversationRepository repository) throws Exception{
 		List<Path> paths = Files.walk(path).filter(Files::isRegularFile).collect(Collectors.toList());
+		
+		paths.sort(new Comparator<Path>(){
+			@Override
+			public int compare(Path o1, Path o2) {
+				return o1.toString().compareTo(o2.toString());
+			}
+		});
 		
 		for (Path p : paths){
 			File f = p.toFile();
