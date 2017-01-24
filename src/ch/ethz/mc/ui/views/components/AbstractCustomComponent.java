@@ -36,6 +36,7 @@ import ch.ethz.mc.services.InterventionAdministrationManagerService;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
 import ch.ethz.mc.services.SurveyAdministrationManagerService;
 import ch.ethz.mc.services.SurveyExecutionManagerService;
+import ch.ethz.mc.services.internal.TokenPersistenceService;
 import ch.ethz.mc.ui.AdminNavigatorUI;
 import ch.ethz.mc.ui.NotificationMessageException;
 import ch.ethz.mc.ui.UISession;
@@ -94,6 +95,11 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	protected RichConversationService getRichConversationService() {
 		return MC.getInstance().getRichConversationService();
 	}
+	
+	protected TokenPersistenceService getTokenPersistenceService() {
+		return MC.getInstance().getTokenPersistenceService();
+	}
+
 
 	/**
 	 * Provides a {@link ClickListener} which can also close the belonging

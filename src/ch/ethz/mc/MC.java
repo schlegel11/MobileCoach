@@ -17,6 +17,7 @@ import ch.ethz.mc.services.internal.ImageCachingService;
 import ch.ethz.mc.services.internal.LockingService;
 import ch.ethz.mc.services.internal.ModelObjectExchangeService;
 import ch.ethz.mc.services.internal.ReportGeneratorService;
+import ch.ethz.mc.services.internal.TokenPersistenceService;
 import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mobilecoach.services.FileConversationManagementService;
@@ -78,6 +79,8 @@ public class MC implements ServletContextListener {
 	ResourceConversationManagementService resourceConversationManagementService;
 	@Getter
 	FileConversationManagementService fileConversationManagementService;
+	@Getter
+	TokenPersistenceService tokenPersistenceService;
 	
 	@Override
 	public void contextInitialized(final ServletContextEvent event) {
@@ -111,10 +114,13 @@ public class MC implements ServletContextListener {
 			
 			mattermostManagementService = MattermostManagementService.start(databaseManagerService, variablesManagerService);
 			mattermostMessagingService = MattermostMessagingService.start(mattermostManagementService, databaseManagerService, variablesManagerService);
+			
+			tokenPersistenceService = new TokenPersistenceService(databaseManagerService);
 
 			//resourceConversationManagementService = ResourceConversationManagementService.start(servletContext);
 			fileConversationManagementService = FileConversationManagementService.start(Constants.getXmlScriptsFolder());
 			richConversationService = RichConversationService.start(mattermostMessagingService, fileConversationManagementService, variablesManagerService, databaseManagerService);
+
 			communicationManagerService = CommunicationManagerService.start(richConversationService);
 			modelObjectExchangeService = ModelObjectExchangeService.start(
 					databaseManagerService, fileStorageManagerService);

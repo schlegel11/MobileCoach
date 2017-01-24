@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
@@ -38,6 +39,7 @@ import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.persistent.Intervention;
+import ch.ethz.mc.model.persistent.OneTimeToken;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.ui.UIParticipant;
 import ch.ethz.mc.tools.OnDemandFileDownloader;
@@ -138,6 +140,8 @@ InterventionParticipantsTabComponent {
 				buttonClickListener);
 		participantsEditComponent.getRefreshButton().addClickListener(
 				buttonClickListener);
+		participantsEditComponent.getRegenerateOneTimeTokenButton().addClickListener(
+				buttonClickListener);
 
 		// Special handle for export button
 		val onDemandFileDownloader = new OnDemandFileDownloader(
@@ -226,6 +230,8 @@ InterventionParticipantsTabComponent {
 			} else if (event.getButton() == interventionScreeningSurveyEditComponent
 					.getRefreshButton()) {
 				adjust();
+			} else if (event.getButton() == interventionScreeningSurveyEditComponent.getRegenerateOneTimeTokenButton()){
+				regenerateOneTimeToken();
 			}
 		}
 	}
@@ -529,6 +535,28 @@ InterventionParticipantsTabComponent {
 				getAdminUI().showInformationNotification(
 						AdminMessageStrings.NOTIFICATION__PARTICIPANTS_DELETED);
 
+				closeWindow();
+			}
+		}, null);
+	}
+	
+	public void regenerateOneTimeToken() {
+		
+		log.debug("regenerating one time tokens for participants");
+		
+		showConfirmationWindow(new ExtendableButtonClickListener() {
+
+			@Override
+			public void buttonClick(final ClickEvent event) {
+				List<OneTimeToken> tokenList = new LinkedList<>();
+				for (val selectedParticipant : convertSelectedToParticipantsList()) {
+					tokenList.add(getTokenPersistenceService().createOneTimeTokenForParticipant(selectedParticipant.getId()));
+				}
+
+				getAdminUI()
+				.showInformationNotification(
+						AdminMessageStrings.NOTIFICATION__PARTICIPANTS_ONETIME_TOKEN_REGENERATED);
+				
 				closeWindow();
 			}
 		}, null);
