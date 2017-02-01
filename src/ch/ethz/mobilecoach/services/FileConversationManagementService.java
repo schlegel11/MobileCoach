@@ -40,7 +40,7 @@ public class FileConversationManagementService implements
 		try {
 			result.loadFromFolder(interventionPath);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 		return result;
 	}
@@ -82,6 +82,8 @@ public class FileConversationManagementService implements
 	public void loadRepositoryFromFolder(Path path, ConversationRepository repository) throws Exception{
 		List<Path> paths = Files.walk(path).filter(Files::isRegularFile).collect(Collectors.toList());
 		
+		boolean hasErrors = false;
+		
 		paths.sort(new Comparator<Path>(){
 			@Override
 			public int compare(Path o1, Path o2) {
@@ -93,7 +95,12 @@ public class FileConversationManagementService implements
 			File f = p.toFile();
 			if (f.getName().endsWith(".xml")){
 				log.debug("Loading " + f.getName());
-				loadResourceFile(f, repository);
+				try {
+					loadResourceFile(f, repository);
+				} catch (Exception e){
+					log.error(f.getName() + " : " + e.getMessage(), e);
+					hasErrors = true;
+				}
 			}
 		}
 		
@@ -103,6 +110,11 @@ public class FileConversationManagementService implements
 		
 		for (String error: referenceChecker.check()){
 			log.error(error);
+			hasErrors = true;
+		}
+		
+		if (hasErrors){
+			throw new Exception("Error loading conversations from " + path.toString());
 		}
 	}
 	
