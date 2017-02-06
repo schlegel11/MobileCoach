@@ -142,24 +142,25 @@ public class RichConversationService {
 					.getModelObjectById(Participant.class, recipient);
 
 			ChatEngine engine = null;
-
-			if (chatEngines.containsKey(participant.getId())) {
-				// there's already a conversation going on for this
-				// participants... re-set it
-				engine = chatEngines.get(participant.getId());
-
-			} else {
-				try {
+			
+			/*
+			 * Find or create the chat engine
+			 */
+			
+			try {
+				if (chatEngines.containsKey(participant.getId())) {
+					// there's already a conversation going on for this
+					// participants... re-set it
+					engine = chatEngines.get(participant.getId());
+					
+					// get the newest conversation repository and start
+					engine.startConversation(conversation, conversationManagementService.getRepository(interventionId));
+				} else {
 					engine = prepareChatEngine(participant, chatEngineStateStore, interventionId);
-				} catch (Exception e) {
-					log.error(e.getMessage() + " "
-							+ StringHelpers.getStackTraceAsLine(e), e);
+					engine.startConversation(conversation);
 				}
-			}
-
-			if (engine != null){
-				engine.startConversation(conversation);
-			} else {
+			} catch (Exception e) {
+				log.error(e.getMessage() + " " + StringHelpers.getStackTraceAsLine(e), e);
 				log.error("Could not start conversation: " + restString);
 			}
 
