@@ -18,7 +18,10 @@ package ch.ethz.mc.services;
  * limitations under the License.
  */
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import lombok.Getter;
 import lombok.Synchronized;
@@ -33,6 +36,7 @@ import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.AppToken;
 import ch.ethz.mc.model.persistent.DialogStatus;
 import ch.ethz.mc.model.persistent.Participant;
+import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValuePrivacyTypes;
 import ch.ethz.mc.model.rest.CollectionOfExtendedListVariables;
 import ch.ethz.mc.model.rest.CollectionOfExtendedVariables;
@@ -404,6 +408,17 @@ public class RESTManagerService {
 	 */
 	public ObjectId consumeOneTimeToken(String oneTimeToken) {
 		return tokenPersistenceService.consumeOneTimeToken(oneTimeToken);
+	}
+	
+	
+	public Map<String, String> getExternallyReadableVariableValues(final ObjectId participantId){
+		val participant = databaseManagerService.getModelObjectById(Participant.class, participantId);
+		Hashtable<String, AbstractVariableWithValue> variables = variablesManagerService.getExternallyReadableVariablesWithValuesOfParticipantAndSystem(participant);
+		HashMap<String, String> result = new HashMap<>();
+		for (AbstractVariableWithValue v: variables.values()){
+			result.put(v.getName(), v.getValue());
+		}
+		return result;
 	}
 
 	/*

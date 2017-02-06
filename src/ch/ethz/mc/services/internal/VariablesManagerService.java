@@ -161,6 +161,26 @@ public class VariablesManagerService {
 	/*
 	 * Methods for execution
 	 */
+	
+	public Hashtable<String, AbstractVariableWithValue> getExternallyReadableVariablesWithValuesOfParticipantAndSystem(
+			final Participant participant) {
+		Hashtable<String, AbstractVariableWithValue> allVariables =  getAllVariablesWithValuesOfParticipantAndSystem(participant);
+		Hashtable<String, AbstractVariableWithValue> result = new Hashtable<>();
+		
+		for (AbstractVariableWithValue var: allVariables.values()){
+			if (externallyReadableParticipantVariableNames.contains(var.getName()) || externallyReadableSystemVariableNames.contains(var.getName())){
+				result.put(var.getName(), var);
+			} else try {
+				getDefaultValueAndCheckAccess(participant, var.getName(), false, null);
+				result.put(var.getName(), var);
+			} catch (ExternallyReadProtectedVariableException e){
+				// do nothing
+			}
+		}
+		
+		return result;
+	}
+	
 	public Hashtable<String, AbstractVariableWithValue> getAllVariablesWithValuesOfParticipantAndSystem(
 			final Participant participant) {
 		return getAllVariablesWithValuesOfParticipantAndSystem(participant,
@@ -885,44 +905,8 @@ public class VariablesManagerService {
 				throw new ExternallyReadProtectedVariableException(
 						"The given participant does not exist anymore, so the variable cannot be read");
 			}
-
-			// Check rights of intervention variable
-			val interventionVariable = databaseManagerService
-					.findOneModelObject(
-							InterventionVariableWithValue.class,
-							Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME,
-							participant.getIntervention(), variable);
-
-			if (interventionVariable == null) {
-				throw new ExternallyReadProtectedVariableException(
-						"The variable " + variable + " does not exist");
-			}
-
-			// Check access
-			if (isService) {
-				if (!interventionVariable
-						.getAccessType()
-						.isAllowedAtGivenOrLessRestrictiveAccessType(
-								InterventionVariableWithValueAccessTypes.MANAGEABLE_BY_SERVICE)) {
-					throw new ExternallyReadProtectedVariableException();
-				}
-			} else {
-				if (!interventionVariable
-						.getAccessType()
-						.isAllowedAtGivenOrLessRestrictiveAccessType(
-								InterventionVariableWithValueAccessTypes.EXTERNALLY_READABLE)) {
-					throw new ExternallyReadProtectedVariableException();
-				}
-			}
-			// Check privacy
-			if (!interventionVariable.getPrivacyType()
-					.isAllowedAtGivenOrLessRestrictivePrivacyType(
-							requestPrivacyType)) {
-				throw new ExternallyReadProtectedVariableException(
-						"The variable " + variable
-								+ " cannot be requested for "
-								+ requestPrivacyType.toString());
-			}
+			
+			String defaultValue = getDefaultValueAndCheckAccess(participant, variable, isService, requestPrivacyType);
 
 			// Find variable value for participant
 			val participantVariableWithValue = databaseManagerService
@@ -937,8 +921,53 @@ public class VariablesManagerService {
 			}
 
 			// Return default value if not set for participant
-			return interventionVariable.getValue();
+			return defaultValue;
 		}
+	}
+	
+	private String getDefaultValueAndCheckAccess(Participant participant, String variable, boolean isService, 
+			InterventionVariableWithValuePrivacyTypes requestPrivacyType) throws ExternallyReadProtectedVariableException{
+		
+		// Check rights of intervention variable
+		val interventionVariable = databaseManagerService
+				.findOneModelObject(
+						InterventionVariableWithValue.class,
+						Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME,
+						participant.getIntervention(), variable);
+
+		if (interventionVariable == null) {
+			throw new ExternallyReadProtectedVariableException(
+					"The variable " + variable + " does not exist");
+		}
+
+		// Check access
+		if (isService) {
+			if (!interventionVariable
+					.getAccessType()
+					.isAllowedAtGivenOrLessRestrictiveAccessType(
+							InterventionVariableWithValueAccessTypes.MANAGEABLE_BY_SERVICE)) {
+				throw new ExternallyReadProtectedVariableException();
+			}
+		} else {
+			if (!interventionVariable
+					.getAccessType()
+					.isAllowedAtGivenOrLessRestrictiveAccessType(
+							InterventionVariableWithValueAccessTypes.EXTERNALLY_READABLE)) {
+				throw new ExternallyReadProtectedVariableException();
+			}
+		}
+		// Check privacy
+		// TODO: Andreas check if requestPrivacyType is used correctly here
+		if (requestPrivacyType != null && !interventionVariable.getPrivacyType()
+				.isAllowedAtGivenOrLessRestrictivePrivacyType(
+						requestPrivacyType)) {
+			throw new ExternallyReadProtectedVariableException(
+					"The variable " + variable
+							+ " cannot be requested for "
+							+ requestPrivacyType.toString());
+		}
+		
+		return interventionVariable.getValue();
 	}
 
 	/**

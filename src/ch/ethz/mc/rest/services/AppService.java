@@ -1,5 +1,7 @@
 package ch.ethz.mc.rest.services;
 
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.GET;
@@ -66,7 +68,8 @@ public class AppService {
 		MattermostUserConfiguration userConfiguration = fetchUserConfiguration(userId);
 
 		return new Result(new MobileCoachAuthentication(userId.toHexString(), mctoken),
-				new UserConfigurationForAuthentication(userConfiguration));
+				new UserConfigurationForAuthentication(userConfiguration),
+				getVariables(userId));
 	}
 
 	private MattermostUserConfiguration fetchUserConfiguration(final ObjectId participantId) {
@@ -78,6 +81,10 @@ public class AppService {
 		}
 		return userConfig;
 	}
+	
+	private Map<String, String> getVariables(final ObjectId participantId) {
+		return restManagerService.getExternallyReadableVariableValues(participantId);
+	}
 
 	@AllArgsConstructor
 	private static class Result {
@@ -87,6 +94,9 @@ public class AppService {
 
 		@Getter
 		private final UserConfigurationForAuthentication mattermost;
+		
+		@Getter
+		private final Map<String, String> variables;
 
 	}
 
