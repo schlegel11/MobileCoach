@@ -233,6 +233,8 @@ public class RichConversationService {
 				new IncrementVariableHelper("$quiz_keys", 1));
 		helpers.addHelper("PM-add-1-to-total_collected_keys",
 				new IncrementVariableHelper("$total_collected_keys", 1));
+		helpers.addHelper("PM-add-1-to-bonus_keys",
+				new IncrementVariableHelper("$bonus_keys", 1));
 		
 		new TestHelpersFactory(engine, ui).addHelpers(helpers);
 
