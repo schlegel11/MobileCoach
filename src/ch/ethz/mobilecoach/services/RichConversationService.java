@@ -202,14 +202,11 @@ public class RichConversationService {
 		};
 
 		VariableStore variableStore = createVariableStore(participant.getId());
-		Translator translator = new Translator(participant.getLanguage(),
-				repository.path + "/translation_en_ch.csv");
 
 		MattermostConnector ui = new MattermostConnector(participant.getId());
 		HelpersRepository helpers = new HelpersRepository();
 
-		ChatEngine engine = new ChatEngine(repository, ui, variableStore,
-				helpers, translator, chatEngineStateStore);
+		ChatEngine engine = new ChatEngine(repository, ui, variableStore, helpers, participant.getLanguage(), chatEngineStateStore);
 		engine.sendExceptionAsMessage = false;
 		
 		engine.setLogger(logger);
