@@ -27,6 +27,7 @@ import ch.ethz.mobilecoach.chatlib.engine.Translator;
 import ch.ethz.mobilecoach.chatlib.engine.conversation.ConversationUI;
 import ch.ethz.mobilecoach.chatlib.engine.conversation.UserReplyListener;
 import ch.ethz.mobilecoach.chatlib.engine.helpers.IncrementVariableHelper;
+import ch.ethz.mobilecoach.chatlib.engine.helpers.MinusVariableHelper;
 import ch.ethz.mobilecoach.chatlib.engine.model.AnswerOption;
 import ch.ethz.mobilecoach.chatlib.engine.model.Message;
 import ch.ethz.mobilecoach.chatlib.engine.variables.InMemoryVariableStore;
@@ -235,6 +236,8 @@ public class RichConversationService {
 				new IncrementVariableHelper("$total_collected_keys", 1));
 		helpers.addHelper("PM-add-1-to-bonus_keys",
 				new IncrementVariableHelper("$bonus_keys", 1));
+		helpers.addHelper("PM-get-12mins-walking-steps", 
+				new MinusVariableHelper("$12mins_walking_steps", "$12mins_walking_steps_after"));
 		
 		new TestHelpersFactory(engine, ui).addHelpers(helpers);
 
