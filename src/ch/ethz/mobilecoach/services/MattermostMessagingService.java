@@ -75,6 +75,13 @@ public class MattermostMessagingService implements MessagingService {
 	private WebSocketEndpoint webSocketEndpoint;
 	
 	private Runnable onCloseListener;
+	
+	@AllArgsConstructor
+	public class Channel {
+		
+		public final String channelId;
+		public final String teamId;
+	}
 
 	// Construction
 	
@@ -173,10 +180,11 @@ public class MattermostMessagingService implements MessagingService {
         String teamId = config.getTeamId();
         String userId = config.getUserId();
         
-        if (!managementService.teamId.equals(teamId)){
+               
+        if (!managementService.isValidTeamId(teamId)){
         	// This caused sending requests to fail with error 403: Forbidden
         	// We abort and accept that after changing the teamId, conversations on the older team cannot continue.
-        	log.error("Could not send message to conversation using another teamId: " + teamId);
+        	log.error("Could not send message to conversation using unused teamId: " + teamId);
         	return;
         }
         
@@ -355,7 +363,7 @@ public class MattermostMessagingService implements MessagingService {
 		getUnreceivedMessages(getChannelsToUpdate());
 	}
 	
-	public void getUnreceivedMessages(List<String> channelIds){
+	public void getUnreceivedMessages(List<Channel> channelIds){
 		
 		// get missed messages
 		
@@ -385,15 +393,15 @@ public class MattermostMessagingService implements MessagingService {
             try {
                 httpclient.start();
                 final CountDownLatch latch = new CountDownLatch(channelIds.size());
-                for (final String channelId: channelIds) {
+                for (final Channel channel: channelIds) {
                 	long sinceTime = 0L;
                 	
-                	if (channelLastMessage.containsKey(channelId)){
-                		sinceTime = channelLastMessage.get(channelId);
+                	if (channelLastMessage.containsKey(channel)){
+                		sinceTime = channelLastMessage.get(channel);
                 	}
                 	
                 	//https://your-mattermost-url.com/api/v3/teams/{team_id}/channels/{channel_id}/posts/since/{time}
-                	String url = managementService.api_url + "teams/" + managementService.teamId + "/channels/" + channelId + "/posts/since/" + sinceTime;
+                	String url = managementService.api_url + "teams/" + channel.teamId + "/channels/" + channel.channelId + "/posts/since/" + sinceTime;
                 	
                 	HttpGet request = new HttpGet( url );
           	
@@ -466,38 +474,43 @@ public class MattermostMessagingService implements MessagingService {
 	 * @return
 	 */
 	
-	public List<String> getChannelsToUpdate(){
+	public List<Channel> getChannelsToUpdate(){
 		HttpClient client = new HttpClient();
-        
-        GetMethod request = new GetMethod(managementService.api_url + "teams/" + managementService.teamId + "/channels/");
-		request.setRequestHeader("Authorization", "Bearer " + mcUserToken);
 		
-		String channelsResponse = "[]";
-
-		try {
+		List<Channel> channelsToUpdate = new LinkedList<>();
+		
+		for (MattermostManagementService.TeamConfiguration tc: managementService.getTeamConfigurations()){
+        
+	        GetMethod request = new GetMethod(managementService.api_url + "teams/" + tc.teamId + "/channels/");
+			request.setRequestHeader("Authorization", "Bearer " + mcUserToken);
 			
-            int responseCode = client.executeMethod(request);
-            if (responseCode != HttpStatus.SC_OK) {
-            	throw new Exception("Status " + new Integer(responseCode) + ": " + request.getResponseBodyAsString());
-            }
-            channelsResponse = request.getResponseBodyAsString();
-		} catch (Exception e) {
-			log.error("Error getting channels", e);
-		}
-        
-		
-		JSONArray channels = new JSONArray(channelsResponse);
-		
-		List<String> channelsToUpdate = new LinkedList<>();
-		
-		for (Object o: channels){
-			if (o instanceof JSONObject){
-				JSONObject jo = ((JSONObject) o);
-				String id = jo.getString("id");
-				long lastUpdateAt = jo.getLong("last_post_at");
+			String channelsResponse = "[]";
+	
+			try {
 				
-				if (this.mayChannelHaveNewMessages(id, lastUpdateAt)){
-					channelsToUpdate.add(id);
+	            int responseCode = client.executeMethod(request);
+	            if (responseCode != HttpStatus.SC_OK) {
+	            	throw new Exception("Status " + new Integer(responseCode) + ": " + request.getResponseBodyAsString());
+	            }
+	            channelsResponse = request.getResponseBodyAsString();
+			} catch (Exception e) {
+				log.error("Error getting channels", e);
+			}
+	        
+			
+			JSONArray channels = new JSONArray(channelsResponse);
+			
+			
+			
+			for (Object o: channels){
+				if (o instanceof JSONObject){
+					JSONObject jo = ((JSONObject) o);
+					String id = jo.getString("id");
+					long lastUpdateAt = jo.getLong("last_post_at");
+					
+					if (this.mayChannelHaveNewMessages(id, lastUpdateAt)){
+						channelsToUpdate.add(new Channel(id, tc.teamId));
+					}
 				}
 			}
 		}

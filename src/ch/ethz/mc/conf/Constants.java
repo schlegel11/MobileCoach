@@ -226,6 +226,17 @@ public class Constants {
 	private static String	mattermostCoachUserPassword			= "";
 	
 	
+	// french configuration
+	@Getter
+	private static String	mattermostTeamId_fr					= "";
+	@Getter
+	private static String	mattermostManagerUserId_fr			= "";
+	@Getter
+	private static String	mattermostManagerUserName_fr		= "support-team-fr";
+	@Getter
+	private static String	mattermostManagerUserPassword_fr	= "";
+	
+	
 	/**
 	 * Mailing configuration
 	 */
