@@ -1,7 +1,9 @@
 package ch.ethz.mobilecoach.services;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -13,12 +15,14 @@ import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.InDataBaseVariableStore;
 import ch.ethz.mc.services.internal.VariablesManagerService;
+import ch.ethz.mobilecoach.chatlib.engine.Translator;
 import ch.ethz.mobilecoach.chatlib.engine.variables.VariableException;
 import ch.ethz.mobilecoach.interventions.PathMate;
 import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
 import ch.ethz.mobilecoach.model.persistent.OneSignalUserConfiguration;
 import ch.ethz.mobilecoach.model.persistent.subelements.MattermostChannel;
 import ch.ethz.mobilecoach.model.persistent.subelements.MattermostUser;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j;
 
@@ -50,7 +54,6 @@ public class MattermostManagementService {
 
 	public final String api_url = Constants.getMattermostApiUrl();
 	private final String emailHost = "localhost";
-	public final String teamId = Constants.getMattermostTeamId();
 
 	private final String adminUserPassword = Constants.getMattermostAdminUserPassword();
 	private final String adminUserName = Constants.getMattermostAdminUserName();
@@ -60,47 +63,55 @@ public class MattermostManagementService {
 	public final static String appID = "325068aa-fc63-411c-a07e-b3e73c455e8e";
 
 	@Getter
-	private final String managerUserId = Constants.getMattermostManagerUserId();
-	@Getter
-	private String managerUserName = Constants.getMattermostManagerUserName();
-	@Getter
-	private String managerUserPassword = Constants.getMattermostManagerUserPassword();
-
-	@Getter
 	private String coachUserId = Constants.getMattermostCoachUserId();
 	@Getter
 	private String coachUserName = Constants.getMattermostCoachUserName();
 	@Getter
-	private String coachUserPassword = Constants.getMattermostCoachUserPassword();		
+	private String coachUserPassword = Constants.getMattermostCoachUserPassword();
+	
+	@Getter
+	private final List<TeamConfiguration> teamConfigurations = new LinkedList<TeamConfiguration>();
+	
+	@AllArgsConstructor
+	public class TeamConfiguration {
+		
+		public final Locale language;
+		
+		public final String teamId;
+		
+		public final String managerUserId;
+		
+		public final String managerUserName;
+		
+		public final String managerUserPassword;
+	}
 
 
 
 	public MattermostManagementService (DatabaseManagerService databaseManagerService, VariablesManagerService variablesManagerService){
 		this.databaseManagerService = databaseManagerService;
 		this.variablesManagerService = variablesManagerService;
+		
+		// add default configuration
+		this.teamConfigurations.add(new TeamConfiguration (null, Constants.getMattermostTeamId(), Constants.getMattermostManagerUserId(),
+						Constants.getMattermostManagerUserName(), Constants.getMattermostManagerUserPassword()));
+		
+		if (!"".equals(Constants.getMattermostTeamId_fr())){
+			this.teamConfigurations.add(new TeamConfiguration (Locale.forLanguageTag(Translator.FRENCH_CH), 
+					Constants.getMattermostTeamId_fr(), Constants.getMattermostManagerUserId_fr(),
+					Constants.getMattermostManagerUserName_fr(), Constants.getMattermostManagerUserPassword_fr()));
+		}
 	}
 
 	public static MattermostManagementService start(DatabaseManagerService databaseManagerService, VariablesManagerService variablesManagerService){
 		MattermostManagementService service = new MattermostManagementService(databaseManagerService, variablesManagerService);
 		service.loginAdmin();
-		//service.createMobileCoachUser(); // TODO: create a new Coach user if none exists or is configured
 		return service;
 	}
 
 	/*
 	 * 		Creation of Objects
 	 */
-
-	public void createMobileCoachUser(){
-		ensureAuthentication();
-		
-		MattermostUserConfiguration credentials = createMattermostUser("MobileCoach", "");
-		addUserToTeam(credentials.getUserId(), teamId);
-		coachUserId = credentials.getUserId();
-		coachUserName = credentials.getEmail();
-		coachUserPassword = credentials.getPassword();
-	}
-
 
 	public OneSignalUserConfiguration findOneSignalObject(ObjectId participantId){
 
@@ -135,6 +146,9 @@ public class MattermostManagementService {
 	public MattermostUserConfiguration createParticipantUser(ObjectId participantId){
 		ensureAuthentication();
 		
+		Participant participant = databaseManagerService
+				.getModelObjectById(Participant.class, participantId);
+		
 		String userName = variablesManagerService.getVariableValue(participantId, "$username");
 		String userId = variablesManagerService.getVariableValue(participantId, "$participantID");
 		String userCoachName = variablesManagerService.getVariableValue(participantId, "$participantCoach");
@@ -146,14 +160,16 @@ public class MattermostManagementService {
 			userCoachName = "Lukas";
 		}
 		
-		MattermostUserConfiguration config = createMattermostUser(userName, userId);
-		addUserToTeam(config.getUserId(), teamId);
+		TeamConfiguration team = this.getTeamConfiguration(participant.getLanguage());
+		
+		MattermostUserConfiguration config = createMattermostUser(userName, userId, team.teamId);
+		addUserToTeam(config.getUserId(), team.teamId);
 		
 		String coachingChannelName = userName + " (" + userCoachName + ") " + userId;
 		String managerChannelName = userName + " (" + PathMate.SUPPORT_NAME + ") " + userId;
 		
-		MattermostChannel coachingChannel = createPrivateChannel(userCoachName, coachingChannelName, "BOT");
-		MattermostChannel managerChannel = createPrivateChannel(PathMate.SUPPORT_NAME, managerChannelName, "HUMAN");
+		MattermostChannel coachingChannel = createPrivateChannel(userCoachName, coachingChannelName, "BOT", team.teamId);
+		MattermostChannel managerChannel = createPrivateChannel(PathMate.SUPPORT_NAME, managerChannelName, "HUMAN", team.teamId);
 
 		List<MattermostChannel> channels = config.getChannels();
 		channels.add(coachingChannel);
@@ -162,14 +178,14 @@ public class MattermostManagementService {
 		List<MattermostUser> users = config.getUsers();
 		users.add(new MattermostUser(this.coachUserId, userCoachName));
 		users.add(new MattermostUser(config.getUserId(), userName));
-		users.add(new MattermostUser(managerUserId, PathMate.SUPPORT_NAME));	
+		users.add(new MattermostUser(team.managerUserId, PathMate.SUPPORT_NAME));	
 
-		addUserToChannel(config.getUserId(), coachingChannel.getId());
-		addUserToChannel(coachUserId, coachingChannel.getId());
-		addUserToChannel(managerUserId, coachingChannel.getId());
+		addUserToChannel(config.getUserId(), coachingChannel.getId(), team.teamId);
+		addUserToChannel(coachUserId, coachingChannel.getId(), team.teamId);
+		addUserToChannel(team.managerUserId, coachingChannel.getId(), team.teamId);
 
-		addUserToChannel(config.getUserId(), managerChannel.getId());
-		addUserToChannel(managerUserId, managerChannel.getId());
+		addUserToChannel(config.getUserId(), managerChannel.getId(), team.teamId);
+		addUserToChannel(team.managerUserId, managerChannel.getId(), team.teamId);
 
 		config.setParticipantId(participantId);
 		databaseManagerService.saveModelObject(config);
@@ -177,7 +193,19 @@ public class MattermostManagementService {
 		return config;
 	}
 
-	private MattermostChannel createPrivateChannel(String nameForUser, String nameForManager, String type){
+	private TeamConfiguration getTeamConfiguration(Locale language) {
+		for (TeamConfiguration tc: teamConfigurations){
+			if (tc.language != null && language.toLanguageTag().equals(tc.language.toLanguageTag())){
+				return tc;
+			}
+		}
+		
+		return teamConfigurations.get(0); // return default
+	}
+	
+	
+
+	private MattermostChannel createPrivateChannel(String nameForUser, String nameForManager, String type, String teamId){
 		JSONObject json = new JSONObject()
 				.put("name", UUID.randomUUID().toString())
 				.put("display_name", nameForManager)
@@ -192,21 +220,27 @@ public class MattermostManagementService {
 		return new MattermostChannel(nameForUser, type, channelId);
 	}
 
-	private void addUserToChannel(String userId, String channelId){
+	private void addUserToChannel(String userId, String channelId, String teamId){
 
 		JSONObject json = new JSONObject()
 				.put("user_id", userId);
+		
+		try {
 
-		new MattermostTask<Void>(api_url + "teams/"+teamId+"/channels/"+channelId+"/add", json){
-			@Override
-			Void handleResponse(PostMethod method) throws Exception {
-				log.debug(method.getResponseBodyAsString());
-				return null;
-			}
-		}.setToken(adminUserToken).run();
+			new MattermostTask<Void>(api_url + "teams/"+teamId+"/channels/"+channelId+"/add", json){
+				@Override
+				Void handleResponse(PostMethod method) throws Exception {
+					log.debug(method.getResponseBodyAsString());
+					return null;
+				}
+			}.setToken(adminUserToken).run();
+		
+		} catch (Exception e){
+			log.error(e.getMessage(), e);
+		}
 	}
 
-	private MattermostUserConfiguration createMattermostUser(String firstName, String lastName){
+	private MattermostUserConfiguration createMattermostUser(String firstName, String lastName, String teamId){
 		String username = UUID.randomUUID().toString();
 		String password = UUID.randomUUID().toString(); // TODO: use a cryptographically secure random generator
 		String email = username + "@" + emailHost;
@@ -244,7 +278,7 @@ public class MattermostManagementService {
 
 		return new MattermostUserConfiguration(
 				null, userId, email, password, token, 
-				this.locale, channels, users, this.teamId, this.api_url,
+				this.locale, channels, users, teamId, this.api_url,
 				timestamp, timestamp);
 	}
 
@@ -256,13 +290,17 @@ public class MattermostManagementService {
 	/*
 	 * 		Providing Information
 	 */
-
-	public String getTeamId(ObjectId participantId) {
-		// TODO: return team id based on the intervention
-		return this.teamId;
+	
+	public boolean isValidTeamId(String teamId){
+		for (TeamConfiguration tc: teamConfigurations){
+			if (tc.teamId.equals(teamId)){
+				return true;
+			}
+		}
+		return false;
 	}
 
-	public Boolean existsUserForParticipant(ObjectId participantId){
+	public boolean existsUserForParticipant(ObjectId participantId){
 		return null != databaseManagerService.findOneModelObject(MattermostUserConfiguration.class, "{'participantId':#}", participantId);
 	}
 
