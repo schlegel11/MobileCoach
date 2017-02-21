@@ -1,5 +1,25 @@
 package ch.ethz.mc;
 
+<<<<<<< HEAD
+=======
+/*
+ * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
+ *
+ * For details see README.md file in the root folder of this project.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+>>>>>>> origin/sms_email_mattermost_token_coexistence
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
@@ -25,8 +45,11 @@ import ch.ethz.mobilecoach.services.MattermostManagementService;
 import ch.ethz.mobilecoach.services.MattermostMessagingService;
 import ch.ethz.mobilecoach.services.ResourceConversationManagementService;
 import ch.ethz.mobilecoach.services.RichConversationService;
+<<<<<<< HEAD
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
+=======
+>>>>>>> origin/sms_email_mattermost_token_coexistence
 
 /**
  * @author Andreas Filler
@@ -68,7 +91,7 @@ public class MC implements ServletContextListener {
 	SurveyExecutionManagerService				surveyExecutionManagerService;
 	@Getter
 	RESTManagerService							restManagerService;
-	
+
 	@Getter
 	MattermostMessagingService					mattermostMessagingService;
 	@Getter
@@ -76,12 +99,17 @@ public class MC implements ServletContextListener {
 	@Getter
 	RichConversationService						richConversationService;
 	@Getter
-	ResourceConversationManagementService resourceConversationManagementService;
+	ResourceConversationManagementService		resourceConversationManagementService;
 	@Getter
+<<<<<<< HEAD
 	FileConversationManagementService fileConversationManagementService;
 	@Getter
 	TokenPersistenceService tokenPersistenceService;
 	
+=======
+	FileConversationManagementService			fileConversationManagementService;
+
+>>>>>>> origin/sms_email_mattermost_token_coexistence
 	@Override
 	public void contextInitialized(final ServletContextEvent event) {
 		boolean noErrorsOccurred = true;
@@ -101,7 +129,7 @@ public class MC implements ServletContextListener {
 
 		log.info("Starting up services...");
 		try {
-			
+
 			// Internal services
 			databaseManagerService = DatabaseManagerService
 					.start(Constants.DATA_MODEL_VERSION);
@@ -111,6 +139,7 @@ public class MC implements ServletContextListener {
 					.start(fileStorageManagerService.getMediaCacheFolder());
 			variablesManagerService = VariablesManagerService
 					.start(databaseManagerService);
+<<<<<<< HEAD
 			
 			mattermostManagementService = MattermostManagementService.start(databaseManagerService, variablesManagerService);
 			mattermostMessagingService = MattermostMessagingService.start(mattermostManagementService, databaseManagerService, variablesManagerService);
@@ -122,6 +151,21 @@ public class MC implements ServletContextListener {
 			richConversationService = RichConversationService.start(mattermostMessagingService, fileConversationManagementService, variablesManagerService, databaseManagerService);
 
 			communicationManagerService = CommunicationManagerService.start(richConversationService);
+=======
+			mattermostManagementService = MattermostManagementService
+					.start(databaseManagerService);
+			mattermostMessagingService = MattermostMessagingService
+					.start(mattermostManagementService);
+			// resourceConversationManagementService =
+			// ResourceConversationManagementService.start(servletContext);
+			fileConversationManagementService = FileConversationManagementService
+					.start(Constants.getXmlScriptsFolder());
+			richConversationService = RichConversationService.start(
+					mattermostMessagingService,
+					fileConversationManagementService);
+			communicationManagerService = CommunicationManagerService
+					.start(richConversationService);
+>>>>>>> origin/sms_email_mattermost_token_coexistence
 			modelObjectExchangeService = ModelObjectExchangeService.start(
 					databaseManagerService, fileStorageManagerService);
 			reportGeneratorService = ReportGeneratorService
@@ -148,9 +192,8 @@ public class MC implements ServletContextListener {
 							surveyExecutionManagerService);
 			restManagerService = RESTManagerService.start(
 					databaseManagerService, fileStorageManagerService,
-					variablesManagerService);			
+					variablesManagerService);
 
-			
 		} catch (final Exception e) {
 			noErrorsOccurred = false;
 			log.error("Error at starting services: {}", e);

@@ -227,7 +227,7 @@ public class Constants {
 	
 	
 	/**
-	 * Mailing configuration
+	 * General Mailing configuration
 	 */
 	@Getter
 	private static String	mailhostIncoming					= "localhost";
@@ -241,8 +241,16 @@ public class Constants {
 	private static String	mailUser							= "---";
 	@Getter
 	private static String	mailPassword						= "---";
+
+	/**
+	 * Email configuration
+	 */
 	@Getter
-	private static String	mailSubjectStartsWith				= "SMS received on";
+	private static String	emailFrom							= "a@b.eu";
+	@Getter
+	private static String	emailSubjectForParticipant			= "MobileCoach Message";
+	@Getter
+	private static String	emailSubjectForSupervisor			= "MobileCoach Supervisor Notification";
 
 	/**
 	 * SMS configuration
@@ -252,17 +260,18 @@ public class Constants {
 	@Getter
 	private static String	smsEmailTo							= "c@d.eu";
 	@Getter
+	private static String	smsMailSubjectStartsWith			= "SMS received on";
+	@Getter
 	private static String	smsUserKey							= "abc";
 	@Getter
 	private static String	smsUserPassword						= "xyz";
 	private static String	smsPhoneNumberAcceptedCountryCodes	= "41,43,49";
-	
-	
+
 	/**
 	 * XML script configuration
 	 */
 	@Getter
-	private static String xmlScriptsFolder						= "/mc_data/xml_scripts";
+	private static String	xmlScriptsFolder					= "/mc_data/xml_scripts";
 
 	/**
 	 * Get all accepted country codes for SMS phone numbers
