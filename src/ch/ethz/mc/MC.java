@@ -1,7 +1,5 @@
 package ch.ethz.mc;
 
-<<<<<<< HEAD
-=======
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
  *
@@ -19,7 +17,7 @@ package ch.ethz.mc;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
->>>>>>> origin/sms_email_mattermost_token_coexistence
+
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
@@ -43,13 +41,11 @@ import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mobilecoach.services.FileConversationManagementService;
 import ch.ethz.mobilecoach.services.MattermostManagementService;
 import ch.ethz.mobilecoach.services.MattermostMessagingService;
-import ch.ethz.mobilecoach.services.ResourceConversationManagementService;
 import ch.ethz.mobilecoach.services.RichConversationService;
-<<<<<<< HEAD
+
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
-=======
->>>>>>> origin/sms_email_mattermost_token_coexistence
+
 
 /**
  * @author Andreas Filler
@@ -99,17 +95,11 @@ public class MC implements ServletContextListener {
 	@Getter
 	RichConversationService						richConversationService;
 	@Getter
-	ResourceConversationManagementService		resourceConversationManagementService;
-	@Getter
-<<<<<<< HEAD
 	FileConversationManagementService fileConversationManagementService;
 	@Getter
 	TokenPersistenceService tokenPersistenceService;
 	
-=======
-	FileConversationManagementService			fileConversationManagementService;
 
->>>>>>> origin/sms_email_mattermost_token_coexistence
 	@Override
 	public void contextInitialized(final ServletContextEvent event) {
 		boolean noErrorsOccurred = true;
@@ -139,33 +129,18 @@ public class MC implements ServletContextListener {
 					.start(fileStorageManagerService.getMediaCacheFolder());
 			variablesManagerService = VariablesManagerService
 					.start(databaseManagerService);
-<<<<<<< HEAD
+
 			
 			mattermostManagementService = MattermostManagementService.start(databaseManagerService, variablesManagerService);
 			mattermostMessagingService = MattermostMessagingService.start(mattermostManagementService, databaseManagerService, variablesManagerService);
 			
 			tokenPersistenceService = new TokenPersistenceService(databaseManagerService);
 
-			//resourceConversationManagementService = ResourceConversationManagementService.start(servletContext);
 			fileConversationManagementService = FileConversationManagementService.start(Constants.getXmlScriptsFolder());
 			richConversationService = RichConversationService.start(mattermostMessagingService, fileConversationManagementService, variablesManagerService, databaseManagerService);
 
 			communicationManagerService = CommunicationManagerService.start(richConversationService);
-=======
-			mattermostManagementService = MattermostManagementService
-					.start(databaseManagerService);
-			mattermostMessagingService = MattermostMessagingService
-					.start(mattermostManagementService);
-			// resourceConversationManagementService =
-			// ResourceConversationManagementService.start(servletContext);
-			fileConversationManagementService = FileConversationManagementService
-					.start(Constants.getXmlScriptsFolder());
-			richConversationService = RichConversationService.start(
-					mattermostMessagingService,
-					fileConversationManagementService);
-			communicationManagerService = CommunicationManagerService
-					.start(richConversationService);
->>>>>>> origin/sms_email_mattermost_token_coexistence
+
 			modelObjectExchangeService = ModelObjectExchangeService.start(
 					databaseManagerService, fileStorageManagerService);
 			reportGeneratorService = ReportGeneratorService
