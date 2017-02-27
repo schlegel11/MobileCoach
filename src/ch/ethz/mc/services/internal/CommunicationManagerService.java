@@ -73,7 +73,6 @@ import ch.ethz.mobilecoach.services.RichConversationService;
  */
 @Log4j2
 public class CommunicationManagerService {
-	private final boolean						USE_RICH_CONVERSATION	= true;
 
 	private static CommunicationManagerService	instance				= null;
 
@@ -516,71 +515,64 @@ public class CommunicationManagerService {
 				log.debug("IT'S ONLY SIMULATED");
 				Simulator.getInstance().simulateSMSBySystem(message);
 			} else {
-				// TODO Supervisor things? ;-)
-				if (USE_RICH_CONVERSATION) {
-					final ObjectId recipient = dialogOption.getParticipant();
-					try {
-						richConversationService.sendMessage(messageSender,
-								recipient, message);
-					} catch (final ExecutionException e) {
-						e.printStackTrace();
-						throw new MessagingException(
-								"Error executing rich conversation.", e);
-					}
-				} else {
-					switch (dialogOption.getType()) {
-						case SMS:
-						case SUPERVISOR_SMS:
-							val SMSMailMessage = new MimeMessage(
-									outgoingMailSession);
+				switch (dialogOption.getType()) {
+					case APP:
+						final ObjectId recipient = dialogOption.getParticipant();
+						try {
+							richConversationService.sendMessage(messageSender, recipient, message);
+						} catch (final ExecutionException e) {
+							e.printStackTrace();
+							throw new MessagingException("Error executing rich conversation.", e);
+						}
+					case SMS:
+					case SUPERVISOR_SMS:
+						val SMSMailMessage = new MimeMessage(
+								outgoingMailSession);
 
-							SMSMailMessage.setFrom(new InternetAddress(
-									smsEmailFrom));
-							SMSMailMessage.addRecipient(
-									Message.RecipientType.TO,
-									new InternetAddress(smsEmailTo));
-							SMSMailMessage.setSubject("UserKey=" + smsUserKey
-									+ ",Password=" + smsUserPassword
-									+ ",Recipient=" + dialogOption.getData()
-									+ ",Originator=" + messageSender
-									+ ",Notify=none");
-							SMSMailMessage.setText(message, "ISO-8859-1");
+						SMSMailMessage.setFrom(new InternetAddress(
+								smsEmailFrom));
+						SMSMailMessage.addRecipient(
+								Message.RecipientType.TO,
+								new InternetAddress(smsEmailTo));
+						SMSMailMessage.setSubject("UserKey=" + smsUserKey
+								+ ",Password=" + smsUserPassword
+								+ ",Recipient=" + dialogOption.getData()
+								+ ",Originator=" + messageSender
+								+ ",Notify=none");
+						SMSMailMessage.setText(message, "ISO-8859-1");
 
-							Transport.send(SMSMailMessage);
-							break;
-						case EMAIL:
-						case SUPERVISOR_EMAIL:
-							val EmailMessage = new MimeMessage(
-									outgoingMailSession);
+						Transport.send(SMSMailMessage);
+						break;
+					case EMAIL:
+					case SUPERVISOR_EMAIL:
+						val EmailMessage = new MimeMessage(
+								outgoingMailSession);
 
+						EmailMessage
+								.setFrom(new InternetAddress(emailFrom));
+						EmailMessage
+								.addRecipient(
+										Message.RecipientType.TO,
+										new InternetAddress(dialogOption
+												.getData()));
+						if (dialogOption.getType() == DialogOptionTypes.EMAIL) {
 							EmailMessage
-									.setFrom(new InternetAddress(emailFrom));
+									.setSubject(emailSubjectForParticipant);
+						} else {
 							EmailMessage
-									.addRecipient(
-											Message.RecipientType.TO,
-											new InternetAddress(dialogOption
-													.getData()));
-							if (dialogOption.getType() == DialogOptionTypes.EMAIL) {
-								EmailMessage
-										.setSubject(emailSubjectForParticipant);
-							} else {
-								EmailMessage
-										.setSubject(emailSubjectForSupervisor);
-							}
-							EmailMessage.setText(message, "UTF-8");
+									.setSubject(emailSubjectForSupervisor);
+						}
+						EmailMessage.setText(message, "UTF-8");
 
-							Transport.send(EmailMessage);
-							break;
-					}
+						Transport.send(EmailMessage);
+						break;
+					case SUPERVISOR_APP:
+						throw new AddressException("SUPERVISOR_APP is not supported for now.");
 				}
 			}
 
 			log.debug("Message sent to {}", dialogOption.getData());
 		}
-	}
-
-	public DialogOptionTypes getSupportedDialogOptionType() {
-		return DialogOptionTypes.APP;
 	}
 
 	public int getMessagingThreadCount() {

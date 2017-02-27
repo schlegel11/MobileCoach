@@ -972,17 +972,16 @@ public class InterventionExecutionManagerService {
 				boolean sendToSupervisor = false;
 				if (dialogMessageWithSenderIdentificationToSend
 						.getDialogMessage().isSupervisorMessage()) {
+					// to supervisor
 					sendToSupervisor = true;
 					dialogOption = getDialogOptionByParticipantAndRecipientType(
 							dialogMessageToSend.getParticipant(), true);
 				} else {
+					// to participant
 					dialogOption = getDialogOptionByParticipantAndRecipientType(
 							dialogMessageToSend.getParticipant(), false);
-
-					if (dialogOption == null
-							&& communicationManagerService
-							.getSupportedDialogOptionType() == DialogOptionTypes.APP) {
-						// always offer dialog option APP
+					
+					if (dialogOption == null || Constants.preferAppDialogForParticipant) {
 						dialogOption = new DialogOption(
 								dialogMessageToSend.getParticipant(),
 								DialogOptionTypes.APP, "");

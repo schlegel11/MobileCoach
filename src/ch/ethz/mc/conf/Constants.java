@@ -90,6 +90,9 @@ public class Constants {
 	
 	@Getter
 	public static boolean		startOnlyOnMonday					= true;
+	
+	@Getter
+	public static boolean		preferAppDialogForParticipant       = false;
 
 	@Getter
 	private static boolean		listOpenScreenSurveysOnBaseURL		= false;
