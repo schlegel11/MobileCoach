@@ -569,7 +569,6 @@ public class CommunicationManagerService {
 						break;
 					case SUPERVISOR_APP:
 						throw new AddressException("SUPERVISOR_APP is not supported for now.");
-						break;
 				}
 			}
 
