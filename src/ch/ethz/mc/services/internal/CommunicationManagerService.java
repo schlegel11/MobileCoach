@@ -524,6 +524,7 @@ public class CommunicationManagerService {
 							e.printStackTrace();
 							throw new MessagingException("Error executing rich conversation.", e);
 						}
+						break;
 					case SMS:
 					case SUPERVISOR_SMS:
 						val SMSMailMessage = new MimeMessage(
@@ -568,6 +569,7 @@ public class CommunicationManagerService {
 						break;
 					case SUPERVISOR_APP:
 						throw new AddressException("SUPERVISOR_APP is not supported for now.");
+						break;
 				}
 			}
 
