@@ -1005,14 +1005,17 @@ public class InterventionExecutionManagerService {
 						break;
 					}
 				} else {
+					
 					log.error("Could not send prepared message, because there was no valid dialog option to send message to participant; solution: deactive messaging for participant and removing current dialog message");
 
-					try {
-						deactivateMessagingForParticipantAndDeleteDialogMessages(dialogMessageToSend
-								.getParticipant());
-						log.debug("Cleanup sucessful");
-					} catch (final Exception e) {
-						log.error("Cleanup not sucessful: {}", e.getMessage());
+					if (!sendToSupervisor) {
+						try {
+							deactivateMessagingForParticipantAndDeleteDialogMessages(dialogMessageToSend
+									.getParticipant());
+							log.debug("Cleanup sucessful");
+						} catch (final Exception e) {
+							log.error("Cleanup not sucessful: {}", e.getMessage());
+						}
 					}
 				}
 			} catch (final Exception e) {
