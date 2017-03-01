@@ -396,8 +396,8 @@ public class MattermostMessagingService implements MessagingService {
                 for (final Channel channel: channelIds) {
                 	long sinceTime = 0L;
                 	
-                	if (channelLastMessage.containsKey(channel)){
-                		sinceTime = channelLastMessage.get(channel);
+                	if (channelLastMessage.containsKey(channel.channelId)){
+                		sinceTime = channelLastMessage.get(channel.channelId);
                 	}
                 	
                 	//https://your-mattermost-url.com/api/v3/teams/{team_id}/channels/{channel_id}/posts/since/{time}
