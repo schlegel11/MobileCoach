@@ -25,12 +25,6 @@ public class ChatEnginePersistentState extends ModelObject {
 	private long timeStamp;
 	@Getter
 	@Setter
-	private int dayOfTheMonth;
-	@Getter
-	@Setter
-	private int monthValue;
-	@Getter
-	@Setter
 	private String status;
 	@Getter
 	@Setter

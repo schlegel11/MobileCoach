@@ -2,6 +2,7 @@ package ch.ethz.mobilecoach.services;
 
 import java.io.IOException;
 import java.time.LocalTime;
+import java.util.Date;
 import java.util.LinkedHashMap;
 
 import org.bson.types.ObjectId;
@@ -81,8 +82,8 @@ public class RichConversationService {
 
 			if (ChatEngineStateStore.containsARecentChatEngineState(ces)) {
 
-				log.debug("Restoring chat engine state: "
-						+ ces.getSerializedState());
+				log.debug("Restoring chat engine state: " + new Date(ces.getTimeStamp()) + " " 
+						+ ces.getConversationsHash().substring(0, 7) + " "+ ces.getSerializedState());
 
 				ChatEngineStateStore chatEngineStateStore = new ChatEngineStateStore(
 						dBManagerService, ces.getParticipantId());

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Date;
 
 import org.bson.types.ObjectId;
 
@@ -36,29 +37,23 @@ public class ChatEngineStateStore implements ChatEngineStateStoreIfc {
 
 	
 	public static boolean containsARecentChatEngineState(ChatEnginePersistentState chatEngineState){
-		boolean result = true;
-		LocalDateTime ldt = LocalDateTime.now();
 		
 		if(chatEngineState == null){
-			result = false;
-		}else if(chatEngineState != null && chatEngineState.getDayOfTheMonth() != ldt.getDayOfMonth() && chatEngineState.getMonthValue() != ldt.getMonthValue()){
-			result = false;
-		}
-		return result;
+			return false;
+		} 
+		
+		// we consider it recent if it is newer than 24 hours
+		return System.currentTimeMillis() - chatEngineState.getTimeStamp() < 1000 * 3600 * 24;
 	}
 
 	@Override
 	public void saveChatEngineState(ChatEngine chatEngine) {
 
-		LocalDateTime ldt = LocalDateTime.now();
-		ZonedDateTime zdt = ldt.atZone(ZoneId.of("Europe/Paris"));
-		long timeStamp = zdt.toInstant().toEpochMilli();
-
 		deleteState(chatEngineState);
 				
 		String serializedState = chatEngine.getSerializer().serialize(chatEngine.getState());
 		
-		chatEngineState = new ChatEnginePersistentState(participantId, serializedState, timeStamp, ldt.getDayOfMonth(), ldt.getMonthValue(), "Saved", chatEngine.getConversationsHash());		
+		chatEngineState = new ChatEnginePersistentState(participantId, serializedState, System.currentTimeMillis(), "Saved", chatEngine.getConversationsHash());		
 		this.dbMgmtService.saveModelObject(chatEngineState);
 	}
 
