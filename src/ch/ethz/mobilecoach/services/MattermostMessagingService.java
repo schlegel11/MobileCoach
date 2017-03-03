@@ -494,7 +494,9 @@ public class MattermostMessagingService implements MessagingService {
 	            }
 	            channelsResponse = request.getResponseBodyAsString();
 			} catch (Exception e) {
-				log.error("Error getting channels", e);
+				log.error("Error getting channels: " + e.getMessage(), e);
+				
+				continue;
 			}
 	        
 			
