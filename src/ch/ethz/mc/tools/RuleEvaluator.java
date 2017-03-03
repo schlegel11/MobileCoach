@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -223,6 +222,10 @@ public class RuleEvaluator {
 					break;
 				case DATE_DIFFERENCE_VALUE_EQUALS:
 					val calendarDiff = Calendar.getInstance();
+
+					// Prevent problems with daylight saving time
+					calendarDiff.set(Calendar.HOUR_OF_DAY, 12);
+
 					val dateParts = ruleEvaluationResult.getTextRuleValue()
 							.trim().split("\\.");
 					val calendar2 = Calendar.getInstance();
@@ -251,12 +254,12 @@ public class RuleEvaluator {
 					calendar2.set(Calendar.MILLISECOND,
 							calendarDiff.get(Calendar.MILLISECOND));
 
-					final long equalDiff = calendar2.getTimeInMillis()
-							- calendarDiff.getTimeInMillis();
+					final int equalDiff = calculateDaysBetweenDates(
+							calendarDiff, calendar2);
+					log.debug("Difference is {}", equalDiff);
 
-					if (TimeUnit.MILLISECONDS.toDays(equalDiff) == Long
-							.parseLong(ruleEvaluationResult
-									.getTextRuleComparisonTermValue())) {
+					if (equalDiff == Integer.parseInt(ruleEvaluationResult
+							.getTextRuleComparisonTermValue())) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
@@ -265,11 +268,16 @@ public class RuleEvaluator {
 					val calendarNow = Calendar.getInstance();
 					val calendarDiff1 = Calendar.getInstance();
 					val calendarDiff2 = Calendar.getInstance();
+
+					// Prevent problems with daylight saving time
+					calendarDiff1.set(Calendar.HOUR_OF_DAY, 12);
+
 					val dateParts1 = ruleEvaluationResult.getTextRuleValue()
 							.trim().split("\\.");
 					val dateParts2 = ruleEvaluationResult
 							.getTextRuleComparisonTermValue().trim()
 							.split("\\.");
+
 					if (dateParts1.length > 2 && dateParts1[2].length() > 2) {
 						calendarDiff1.set(Integer.parseInt(dateParts1[2]),
 								Integer.parseInt(dateParts1[1]) - 1,
@@ -308,12 +316,12 @@ public class RuleEvaluator {
 							calendarDiff1.get(Calendar.SECOND));
 					calendarDiff2.set(Calendar.MILLISECOND,
 							calendarDiff1.get(Calendar.MILLISECOND));
+					calendarDiff2.setTimeZone(calendarDiff1.getTimeZone());
 
-					final long calcDiff = calendarDiff2.getTimeInMillis()
-							- calendarDiff1.getTimeInMillis();
+					final int calcDaysDiff = calculateDaysBetweenDates(
+							calendarDiff1, calendarDiff2);
+					log.debug("Difference is {}", calcDaysDiff);
 
-					final int calcDaysDiff = (int) TimeUnit.MILLISECONDS
-							.toDays(calcDiff);
 					if (calcDaysDiff == 0) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					} else if (rule.getRuleEquationSign() == RuleEquationSignTypes.CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_ALWAYS_TRUE) {
@@ -338,6 +346,50 @@ public class RuleEvaluator {
 		}
 
 		return ruleEvaluationResult;
+	}
+
+	/**
+	 * Calculate date difference in days between two dates
+	 *
+	 * @param date1
+	 * @param date2
+	 * @return
+	 */
+	private static int calculateDaysBetweenDates(final Calendar date1,
+			final Calendar date2) {
+		Calendar calendar1 = (Calendar) date1.clone();
+		Calendar calendar2 = (Calendar) date2.clone();
+
+		if (calendar1.get(Calendar.YEAR) == calendar2.get(Calendar.YEAR)) {
+			return calendar2.get(Calendar.DAY_OF_YEAR)
+					- calendar1.get(Calendar.DAY_OF_YEAR);
+		} else {
+			boolean swapped = false;
+			if (calendar2.get(Calendar.YEAR) > calendar1.get(Calendar.YEAR)) {
+				final Calendar temp = calendar1;
+				calendar1 = calendar2;
+				calendar2 = temp;
+				swapped = true;
+			}
+			int additonalDays = 0;
+
+			final int dayOfYear1 = calendar1.get(Calendar.DAY_OF_YEAR);
+
+			while (calendar1.get(Calendar.YEAR) > calendar2.get(Calendar.YEAR)) {
+				calendar1.add(Calendar.YEAR, -1);
+
+				additonalDays += calendar1
+						.getActualMaximum(Calendar.DAY_OF_YEAR);
+			}
+
+			if (!swapped) {
+				return -1
+						* (additonalDays - calendar2.get(Calendar.DAY_OF_YEAR) + dayOfYear1);
+			} else {
+				return additonalDays - calendar2.get(Calendar.DAY_OF_YEAR)
+						+ dayOfYear1;
+			}
+		}
 	}
 
 	/**
