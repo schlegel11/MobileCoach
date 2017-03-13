@@ -160,9 +160,14 @@ public class MattermostManagementService {
 			userCoachName = "Lukas";
 		}
 		
+		String language = variablesManagerService.getVariableValue(participantId, "$participantLanguage");
+		if (language == null || language.equals("")){
+			language = "de"; // use German as default
+		}
+		
 		TeamConfiguration team = this.getTeamConfiguration(participant.getLanguage());
 		
-		MattermostUserConfiguration config = createMattermostUser(userName, userId, team.teamId);
+		MattermostUserConfiguration config = createMattermostUser(userName, userId, team.teamId, language.substring(0, 2));
 		addUserToTeam(config.getUserId(), team.teamId);
 		
 		String coachingChannelName = userName + " (" + userCoachName + ") " + userId;
@@ -240,7 +245,7 @@ public class MattermostManagementService {
 		}
 	}
 
-	private MattermostUserConfiguration createMattermostUser(String firstName, String lastName, String teamId){
+	private MattermostUserConfiguration createMattermostUser(String firstName, String lastName, String teamId, String locale){
 		String username = UUID.randomUUID().toString();
 		String password = UUID.randomUUID().toString(); // TODO: use a cryptographically secure random generator
 		String email = username + "@" + emailHost;
@@ -278,7 +283,7 @@ public class MattermostManagementService {
 
 		return new MattermostUserConfiguration(
 				null, userId, email, password, token, 
-				this.locale, channels, users, teamId, this.api_url,
+				locale, channels, users, teamId, this.api_url,
 				timestamp, timestamp);
 	}
 
