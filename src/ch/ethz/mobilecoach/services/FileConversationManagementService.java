@@ -6,10 +6,14 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import ch.ethz.mobilecoach.chatlib.engine.ConversationRepository;
@@ -59,7 +63,20 @@ public class FileConversationManagementService implements
 		return null;
 	}
 	
-	
+	public Collection<ConversationRepository> getAllRepositories(){
+		Set<ConversationRepository> allRepositories = new HashSet<ConversationRepository>();
+		allRepositories.addAll(repositoryByName.values());
+		allRepositories.addAll(repositoryByHash.values());		
+		ArrayList<ConversationRepository> result = new ArrayList<ConversationRepository>(allRepositories);
+		result.sort(new Comparator<ConversationRepository>(){
+			@Override
+			public int compare(ConversationRepository o1,
+					ConversationRepository o2) {
+				return o1.getPath().compareTo(o2.getPath());
+			}
+		});
+		return result;
+	}
 	
 	public void loadFromFolder(String path) throws Exception {
 		// List all folders
@@ -68,9 +85,7 @@ public class FileConversationManagementService implements
 			String dirName = p.getFileName().toString();
 			String interventionId = dirName;
 			
-			ConversationRepository repository = new ConversationRepository();
-			repository.path = p.toString();
-			
+			ConversationRepository repository = new ConversationRepository(p.toString());			
 			loadRepositoryFromFolder(p, repository);
 			
 			repositoryByName.put(interventionId, repository);

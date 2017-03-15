@@ -22,9 +22,11 @@ import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 
+import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.model.ui.UIConversation;
 import ch.ethz.mc.model.ui.UIParticipant;
+import ch.ethz.mobilecoach.chatlib.engine.ConversationRepository;
 import ch.ethz.mobilecoach.model.persistent.ChatEnginePersistentState;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -56,7 +58,7 @@ public class ConversationsTabComponentWithController extends
 		val conversationsEditComponent = getConversationsEditComponent();
 		val conversationsTable = conversationsEditComponent.getConversationsTable();
 
-		// table content
+		// conversations table content
 		beanContainer = createBeanContainerForModelObjects(UIConversation.class,
 				getRichConversationService().getAllConversations());
 
@@ -64,6 +66,15 @@ public class ConversationsTabComponentWithController extends
 		conversationsTable.setSortContainerPropertyId(UIConversation.getSortColumn());
 		conversationsTable.setVisibleColumns(UIConversation.getVisibleColumns());
 		conversationsTable.setColumnHeaders(UIConversation.getColumnHeaders());
+		
+		// intervention scripts table content
+		BeanContainer<String, ConversationRepository> repositories = new BeanContainer<String, ConversationRepository>(ConversationRepository.class);
+		val conversationRepositoriesTable = getConversationRepositoriesComponent().getConversationRepositoriesTable();
+		conversationRepositoriesTable.setContainerDataSource(repositories);
+		conversationRepositoriesTable.setVisibleColumns(new Object[] {"shortHash", "path", "numberOfConversations", "numberOfActions"});
+		conversationRepositoriesTable.setColumnHeaders(new String[] {"Hash", "Path", "Number Of Conversations", "Number Of Actions"});
+		repositories.setBeanIdProperty("path");
+		repositories.addAll(MC.getInstance().getFileConversationManagementService().getAllRepositories());
 
 		// handle selection change
 		conversationsTable.addValueChangeListener(new ValueChangeListener() {
