@@ -152,6 +152,25 @@ An extended backend user guide will be published in the following months.
 
 ## Release notes
 
+### 1.5.0
+
+**Enhancements**
+
+* Supervisors can now be set for participants as alternative message recipients
+* Supervisors can be used in rules to receive messages under specific conditions
+
+**Changes**
+
+* The following configuration parameter have been added or replaced by more generic onces - You should adjust your configuration files accordingly:
+	* mailSubjectStartsWith --> now smsMailSubjectStartsWith
+	* emailSubjectForParticipant (new) 
+	* emailSubjectForSupervisor (new)
+	* emailFrom (new)
+
+**Bugfixes**
+
+* Bugfix for problems with daylight saving time
+
 ### 1.4.3
 
 **Enhancements**

@@ -1,7 +1,8 @@
 package ch.ethz.mc.conf;
 
 /*
- * Copyright (C) 2013-2017 MobileCoach Team at the Health-IS Lab at the Health-IS Lab
+ * Copyright (C) 2013-2017 MobileCoach Team at the Health-IS Lab at the
+ * Health-IS Lab
  * 
  * For details see README.md file in the root folder of this project.
  * 
@@ -212,8 +213,16 @@ public class Constants {
 	private static String	mailUser							= "---";
 	@Getter
 	private static String	mailPassword						= "---";
+
+	/**
+	 * Email configuration
+	 */
 	@Getter
-	private static String	mailSubjectStartsWith				= "SMS received on";
+	private static String	emailFrom							= "a@b.eu";
+	@Getter
+	private static String	emailSubjectForParticipant			= "MobileCoach Message";
+	@Getter
+	private static String	emailSubjectForSupervisor			= "MobileCoach Supervisor Notification";
 
 	/**
 	 * SMS configuration
@@ -222,6 +231,8 @@ public class Constants {
 	private static String	smsEmailFrom						= "a@b.eu";
 	@Getter
 	private static String	smsEmailTo							= "c@d.eu";
+	@Getter
+	private static String	smsMailSubjectStartsWith			= "SMS received on";
 	@Getter
 	private static String	smsUserKey							= "abc";
 	@Getter

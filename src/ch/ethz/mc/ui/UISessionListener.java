@@ -2,7 +2,7 @@ package ch.ethz.mc.ui;
 
 import javax.servlet.http.HttpSessionEvent;
 /*
- * Copyright (C) 2013-2017 MobileCoach Team at the Health-IS Lab at the Health-IS Lab
+ * Copyright (C) 2013-2017 MobileCoach Team at the Health-IS Lab
  * 
  * For details see README.md file in the root folder of this project.
  * 
