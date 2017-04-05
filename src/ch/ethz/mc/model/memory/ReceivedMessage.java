@@ -20,28 +20,33 @@ package ch.ethz.mc.model.memory;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.services.internal.CommunicationManagerService;
 
 /**
  * Contains a message as received by the {@link CommunicationManagerService}
- * 
+ *
  * @author Andreas Filler
  */
 @ToString
 public class ReceivedMessage {
 	@Getter
 	@Setter
-	private String	recipient;
+	private DialogOptionTypes	type;
 
 	@Getter
 	@Setter
-	private String	sender;
+	private String				recipient;
 
 	@Getter
 	@Setter
-	private String	message;
+	private String				sender;
 
 	@Getter
 	@Setter
-	private long	receivedTimestamp;
+	private String				message;
+
+	@Getter
+	@Setter
+	private long				receivedTimestamp;
 }

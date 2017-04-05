@@ -24,6 +24,7 @@ import lombok.Synchronized;
 import lombok.val;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.memory.ReceivedMessage;
+import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 
 public class Simulator {
 	private static Simulator				instance;
@@ -83,6 +84,7 @@ public class Simulator {
 	public void simulateSMSReplyByParticipant(
 			final String senderIdentification, final String message) {
 		val simulatedReceivedMessage = new ReceivedMessage();
+		simulatedReceivedMessage.setType(DialogOptionTypes.SMS);
 		simulatedReceivedMessage.setMessage(message);
 		simulatedReceivedMessage.setReceivedTimestamp(InternalDateTime
 				.currentTimeMillis());

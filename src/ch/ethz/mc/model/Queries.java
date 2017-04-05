@@ -142,6 +142,8 @@ public class Queries {
 	public static final String	PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE																																							= "{'intervention':#,'monitoringActive':true}";
 
 	public static final String	DIALOG_OPTION__BY_PARTICIPANT																																													= "{'participant':#}";
+	public static final String	DIALOG_OPTION__FOR_PARTICIPANT_BY_PARTICIPANT																																									= "{'participant':#,$or:[{'type':'SMS'},{'type':'EMAIL'},{'type':'EXTERNAL_ID'}]}";
+	public static final String	DIALOG_OPTION__FOR_SUPERVISOR_BY_PARTICIPANT																																									= "{'participant':#,$or:[{'type':'SUPERVISOR_SMS'},{'type':'SUPERVISOR_EMAIL'},{'type':'SUPERVISOR_EXTERNAL_ID'}]}";
 	public static final String	DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE																																											= "{'participant':#,'type':#}";
 	public static final String	DIALOG_OPTION__BY_TYPE_AND_DATA																																													= "{'type':#,'data':#}";
 

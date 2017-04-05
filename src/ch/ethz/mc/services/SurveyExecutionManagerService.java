@@ -290,25 +290,12 @@ public class SurveyExecutionManagerService {
 			final ObjectId participantId) {
 
 		final val dialogOptions = databaseManagerService.findModelObjects(
-				DialogOption.class, Queries.DIALOG_OPTION__BY_PARTICIPANT,
+				DialogOption.class,
+				Queries.DIALOG_OPTION__FOR_PARTICIPANT_BY_PARTICIPANT,
 				participantId);
 
-		if (dialogOptions != null) {
-			val iterator = dialogOptions.iterator();
-
-			while (iterator.hasNext()) {
-				val dialogOption = iterator.next();
-
-				switch (dialogOption.getType()) {
-					case EMAIL:
-					case SMS:
-						return true;
-					default:
-						break;
-				}
-			}
-
-			return false;
+		if (dialogOptions != null && dialogOptions.iterator().hasNext()) {
+			return true;
 		} else {
 			return false;
 		}

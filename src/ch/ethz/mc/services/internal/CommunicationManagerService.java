@@ -65,7 +65,7 @@ import ch.ethz.mc.tools.Simulator;
 import ch.ethz.mc.tools.StringHelpers;
 
 /**
- * Handles communication with SMS gateway
+ * Handles communication with the message gateways
  *
  * @author Andreas Filler
  */
@@ -74,15 +74,18 @@ public class CommunicationManagerService {
 	private static CommunicationManagerService	instance	= null;
 
 	private InterventionExecutionManagerService	interventionExecutionManagerService;
-
 	private final Session						incomingMailSession;
 	private final Session						outgoingMailSession;
 
 	private final String						mailboxProtocol;
 	private final String						mailboxFolder;
-	private final String						mailSubjectStartsWith;
+
+	private final String						emailFrom;
+	private final String						emailSubjectForParticipant;
+	private final String						emailSubjectForSupervisor;
 
 	private final String						smsEmailFrom;
+	private final String						smsMailSubjectStartsWith;
 	private final String						smsEmailTo;
 	private final String						smsUserKey;
 	private final String						smsUserPassword;
@@ -93,6 +96,7 @@ public class CommunicationManagerService {
 	private final List<MailingThread>			runningMailingThreads;
 
 	private CommunicationManagerService() throws Exception {
+
 		log.info("Starting service...");
 
 		runningMailingThreads = new ArrayList<MailingThread>();
@@ -104,7 +108,7 @@ public class CommunicationManagerService {
 		val mailhostOutgoing = Constants.getMailhostOutgoing();
 		val mailUser = Constants.getMailUser();
 		val mailPassword = Constants.getMailPassword();
-		mailSubjectStartsWith = Constants.getMailSubjectStartsWith();
+
 		boolean useAuthentication;
 		if (mailUser != null && !mailUser.equals("")) {
 			log.debug("Using authentication for mail servers");
@@ -114,7 +118,13 @@ public class CommunicationManagerService {
 			useAuthentication = false;
 		}
 
+		// Email configuration
+		emailFrom = Constants.getEmailFrom();
+		emailSubjectForParticipant = Constants.getEmailSubjectForParticipant();
+		emailSubjectForSupervisor = Constants.getEmailSubjectForSupervisor();
+
 		// SMS configuration
+		smsMailSubjectStartsWith = Constants.getSmsMailSubjectStartsWith();
 		smsEmailFrom = Constants.getSmsEmailFrom();
 		smsEmailTo = Constants.getSmsEmailTo();
 		smsUserKey = Constants.getSmsUserKey();
@@ -215,9 +225,11 @@ public class CommunicationManagerService {
 		CollectionUtils.addAll(receivedMessages, Simulator.getInstance()
 				.getSimulatedReceivedMessages());
 
+		// Add SMS messages
 		Store store = null;
 		Folder folder = null;
 		try {
+			log.debug("Retrieving SMS messages...");
 			store = incomingMailSession.getStore(mailboxProtocol);
 			store.connect();
 			folder = store.getFolder(mailboxFolder);
@@ -225,12 +237,13 @@ public class CommunicationManagerService {
 
 			for (val message : folder.getMessages()) {
 				// Only handle messages who match the subject pattern
-				if (message.getSubject().startsWith(mailSubjectStartsWith)) {
+				if (message.getSubject().startsWith(smsMailSubjectStartsWith)) {
 					try {
 
 						log.debug("Mail received with subject '{}'",
 								message.getSubject());
 						val receivedMessage = new ReceivedMessage();
+						receivedMessage.setType(DialogOptionTypes.SMS);
 
 						// Parse message content
 						val documentBuilder = documentBuilderFactory
@@ -304,7 +317,7 @@ public class CommunicationManagerService {
 				message.setFlag(Flags.Flag.DELETED, true);
 			}
 		} catch (final Exception e) {
-			log.error("Could not retrieve messages: {}", e.getMessage());
+			log.error("Could not retrieve SMS messages: {}", e.getMessage());
 		} finally {
 			try {
 				folder.close(true);
@@ -317,6 +330,10 @@ public class CommunicationManagerService {
 				// Do nothing
 			}
 		}
+
+		/*
+		 * Messages from other services could be retrieved here
+		 */
 
 		return receivedMessages;
 	}
@@ -458,7 +475,7 @@ public class CommunicationManagerService {
 		}
 
 		/**
-		 * Sends message using SMTP protocol
+		 * Sends message using appropriate service
 		 *
 		 * @param dialogOption
 		 * @param messageSender
@@ -469,38 +486,61 @@ public class CommunicationManagerService {
 		private void sendMessage(final DialogOption dialogOption,
 				final String messageSender, final String message)
 				throws AddressException, MessagingException {
-			log.debug("Sending mail for outgoing SMS to {} with text {}",
-					dialogOption.getData(), message);
+			log.debug("Sending message with text {} to {}", message,
+					dialogOption.getData());
 
-			if (dialogOption.getData().equals(
-					Constants.getSmsSimulationNumber())) {
+			if (dialogOption.getType() == DialogOptionTypes.SMS
+					&& dialogOption.getData().equals(
+							Constants.getSmsSimulationNumber())) {
 				log.debug("IT'S ONLY SIMULATED");
 				Simulator.getInstance().simulateSMSBySystem(message);
 			} else {
-				val mailMessage = new MimeMessage(outgoingMailSession);
+				switch (dialogOption.getType()) {
+					case SMS:
+					case SUPERVISOR_SMS:
+						val SMSMailMessage = new MimeMessage(
+								outgoingMailSession);
 
-				mailMessage.setFrom(new InternetAddress(smsEmailFrom));
-				mailMessage.addRecipient(Message.RecipientType.TO,
-						new InternetAddress(smsEmailTo));
-				mailMessage.setSubject("UserKey=" + smsUserKey + ",Password="
-						+ smsUserPassword + ",Recipient="
-						+ dialogOption.getData() + ",Originator="
-						+ messageSender + ",Notify=none");
-				mailMessage.setText(message, "ISO-8859-1");
+						SMSMailMessage
+								.setFrom(new InternetAddress(smsEmailFrom));
+						SMSMailMessage.addRecipient(Message.RecipientType.TO,
+								new InternetAddress(smsEmailTo));
+						SMSMailMessage.setSubject("UserKey=" + smsUserKey
+								+ ",Password=" + smsUserPassword
+								+ ",Recipient=" + dialogOption.getData()
+								+ ",Originator=" + messageSender
+								+ ",Notify=none");
+						SMSMailMessage.setText(message, "ISO-8859-1");
 
-				Transport.send(mailMessage);
+						Transport.send(SMSMailMessage);
+						break;
+					case EMAIL:
+					case SUPERVISOR_EMAIL:
+						val EmailMessage = new MimeMessage(outgoingMailSession);
+
+						EmailMessage.setFrom(new InternetAddress(emailFrom));
+						EmailMessage.addRecipient(Message.RecipientType.TO,
+								new InternetAddress(dialogOption.getData()));
+						if (dialogOption.getType() == DialogOptionTypes.EMAIL) {
+							EmailMessage.setSubject(emailSubjectForParticipant);
+						} else {
+							EmailMessage.setSubject(emailSubjectForSupervisor);
+						}
+						EmailMessage.setText(message, "UTF-8");
+
+						Transport.send(EmailMessage);
+						break;
+					case EXTERNAL_ID:
+					case SUPERVISOR_EXTERNAL_ID:
+						/*
+						 * Messages to other services could be sent here
+						 */
+						break;
+				}
 			}
 
 			log.debug("Message sent to {}", dialogOption.getData());
 		}
-	}
-
-	public DialogOptionTypes getSupportedSupervisorDialogOptionType() {
-		return DialogOptionTypes.SUPERVISOR_SMS;
-	}
-
-	public DialogOptionTypes getSupportedDialogOptionType() {
-		return DialogOptionTypes.SMS;
 	}
 
 	public int getMessagingThreadCount() {

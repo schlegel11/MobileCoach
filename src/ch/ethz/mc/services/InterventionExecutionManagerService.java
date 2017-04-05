@@ -842,8 +842,7 @@ public class InterventionExecutionManagerService {
 	@Synchronized
 	public void handleReceivedMessage(final ReceivedMessage receivedMessage) {
 		val dialogOption = getDialogOptionByTypeAndDataOfActiveInterventions(
-				communicationManagerService.getSupportedDialogOptionType(),
-				receivedMessage.getSender());
+				receivedMessage.getType(), receivedMessage.getSender());
 
 		if (dialogOption == null) {
 			log.warn(
@@ -961,36 +960,32 @@ public class InterventionExecutionManagerService {
 			return;
 		}
 
-		val dialogMessagesWithSenderToSend = getDialogMessagesWithSenderWaitingToBeSentOfActiveInterventions();
+		val dialogMessagesWithSenderIdentificationToSend = getDialogMessagesWithSenderWaitingToBeSentOfActiveInterventions();
 		int sentMessages = 0;
-		for (val dialogMessageWithPhoneNumberToSend : dialogMessagesWithSenderToSend) {
-			final val dialogMessageToSend = dialogMessageWithPhoneNumberToSend
+		for (val dialogMessageWithSenderIdentificationToSend : dialogMessagesWithSenderIdentificationToSend) {
+			final val dialogMessageToSend = dialogMessageWithSenderIdentificationToSend
 					.getDialogMessage();
 			try {
 				DialogOption dialogOption = null;
 				boolean sendToSupervisor = false;
-				if (dialogMessageWithPhoneNumberToSend.getDialogMessage()
-						.isSupervisorMessage()) {
+				if (dialogMessageWithSenderIdentificationToSend
+						.getDialogMessage().isSupervisorMessage()) {
 					sendToSupervisor = true;
-					dialogOption = getDialogOptionByParticipantAndType(
-							dialogMessageToSend.getParticipant(),
-							communicationManagerService
-									.getSupportedSupervisorDialogOptionType());
+					dialogOption = getDialogOptionByParticipantAndRecipientType(
+							dialogMessageToSend.getParticipant(), true);
 				} else {
-					dialogOption = getDialogOptionByParticipantAndType(
-							dialogMessageToSend.getParticipant(),
-							communicationManagerService
-									.getSupportedDialogOptionType());
+					dialogOption = getDialogOptionByParticipantAndRecipientType(
+							dialogMessageToSend.getParticipant(), false);
 				}
 
 				if (dialogOption != null) {
 					log.debug("Sending prepared message to {} ({})",
 							sendToSupervisor ? "supervisor" : "participant",
-							dialogOption.getData());
+									dialogOption.getData());
 					communicationManagerService.sendMessage(dialogOption,
 							dialogMessageToSend.getId(),
-							dialogMessageWithPhoneNumberToSend
-									.getMessageSenderIdentification(),
+							dialogMessageWithSenderIdentificationToSend
+							.getMessageSenderIdentification(),
 							dialogMessageToSend.getMessage(),
 							dialogMessageToSend.isMessageExpectsAnswer());
 					sentMessages++;
@@ -1228,13 +1223,14 @@ public class InterventionExecutionManagerService {
 	}
 
 	@Synchronized
-	private DialogOption getDialogOptionByParticipantAndType(
-			final ObjectId participantId,
-			final DialogOptionTypes dialogOptionType) {
-		val dialogOption = databaseManagerService.findOneModelObject(
-				DialogOption.class,
-				Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE, participantId,
-				dialogOptionType);
+	private DialogOption getDialogOptionByParticipantAndRecipientType(
+			final ObjectId participantId, final boolean isSupervisorMessage) {
+		val dialogOption = databaseManagerService
+				.findOneModelObject(
+						DialogOption.class,
+						isSupervisorMessage ? Queries.DIALOG_OPTION__FOR_SUPERVISOR_BY_PARTICIPANT
+								: Queries.DIALOG_OPTION__FOR_PARTICIPANT_BY_PARTICIPANT,
+								participantId);
 
 		return dialogOption;
 	}

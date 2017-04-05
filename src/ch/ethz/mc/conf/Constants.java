@@ -199,7 +199,7 @@ public class Constants {
 	private static String	databaseName						= "mc";
 
 	/**
-	 * Mailing configuration
+	 * General Mailing configuration
 	 */
 	@Getter
 	private static String	mailhostIncoming					= "localhost";

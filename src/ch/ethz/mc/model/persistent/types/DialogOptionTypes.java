@@ -23,5 +23,6 @@ package ch.ethz.mc.model.persistent.types;
  * @author Andreas Filler
  */
 public enum DialogOptionTypes {
-	SMS, EMAIL, SUPERVISOR_SMS, SUPERVISOR_EMAIL
+	SMS, EMAIL, EXTERNAL_ID, SUPERVISOR_SMS, SUPERVISOR_EMAIL, SUPERVISOR_EXTERNAL_ID
+
 }
