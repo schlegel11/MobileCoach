@@ -25,6 +25,7 @@ import javax.ws.rs.core.Application;
 
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.rest.services.AppAuthenticationService;
 import ch.ethz.mc.rest.services.AppService;
 import ch.ethz.mc.rest.services.CreditsService;
 import ch.ethz.mc.rest.services.ImageUploadService;
@@ -59,6 +60,7 @@ public class RESTServiceApplication extends Application {
 		services.add(new VotingService(restManagerService));
 		services.add(new AppService(restManagerService, matterMostService));
 		services.add(new OneSignalAppService(restManagerService, matterMostService));
+		services.add(new AppAuthenticationService(restManagerService));
 
 		log.info("Started.");
 	}
