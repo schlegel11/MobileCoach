@@ -1,11 +1,17 @@
 package ch.ethz.mobilecoach.services;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalTime;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.Properties;
 
 import org.bson.types.ObjectId;
+import org.mockito.exceptions.verification.NeverWantedButInvoked;
 
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.Participant;
@@ -24,14 +30,17 @@ import ch.ethz.mobilecoach.chatlib.engine.ExecutionException;
 import ch.ethz.mobilecoach.chatlib.engine.HelpersRepository;
 import ch.ethz.mobilecoach.chatlib.engine.Input;
 import ch.ethz.mobilecoach.chatlib.engine.Logger;
-import ch.ethz.mobilecoach.chatlib.engine.Translator;
 import ch.ethz.mobilecoach.chatlib.engine.conversation.ConversationUI;
 import ch.ethz.mobilecoach.chatlib.engine.conversation.UserReplyListener;
 import ch.ethz.mobilecoach.chatlib.engine.helpers.IncrementVariableHelper;
 import ch.ethz.mobilecoach.chatlib.engine.helpers.MinusVariableHelper;
 import ch.ethz.mobilecoach.chatlib.engine.model.AnswerOption;
 import ch.ethz.mobilecoach.chatlib.engine.model.Message;
+import ch.ethz.mobilecoach.chatlib.engine.translation.SimpleTranslator;
+import ch.ethz.mobilecoach.chatlib.engine.translation.Translator;
+import ch.ethz.mobilecoach.chatlib.engine.translation.VariantSelector;
 import ch.ethz.mobilecoach.chatlib.engine.variables.InMemoryVariableStore;
+import ch.ethz.mobilecoach.chatlib.engine.variables.VariableException;
 import ch.ethz.mobilecoach.chatlib.engine.variables.VariableStore;
 import ch.ethz.mobilecoach.model.persistent.ChatEnginePersistentState;
 import ch.ethz.mobilecoach.test.helpers.TestHelpersFactory;
@@ -207,8 +216,10 @@ public class RichConversationService {
 
 		MattermostConnector ui = new MattermostConnector(participant.getId());
 		HelpersRepository helpers = new HelpersRepository();
-
-		ChatEngine engine = new ChatEngine(repository, ui, variableStore, helpers, participant.getLanguage(), chatEngineStateStore);
+		
+		
+		Translator translator = prepareTranslator(participant.getLanguage(), repository, variableStore);
+		ChatEngine engine = new ChatEngine(repository, ui, variableStore, helpers, translator, chatEngineStateStore);
 		engine.sendExceptionAsMessage = false;
 		
 		engine.setLogger(logger);
@@ -286,6 +297,53 @@ public class RichConversationService {
 
 		return engine;
 	}
+	
+	public Translator prepareTranslator(Locale language, ConversationRepository repository, VariableStore variables){
+		
+		// Try to use variant selection
+			
+		Properties properties = getRepositoryProperties(repository);
+		
+		if (properties != null){
+			String variantFile = properties.getProperty("variantFile");
+			//String variantMapping = properties.getProperty("variantMapping");
+			
+			if (variantFile != null){// && variantMapping != null){
+				try {
+					return new VariantSelector(repository.getPath() + "/" + variantFile, null, variables);
+				} catch (IOException e) {
+					log.error(e);
+				}
+			}
+		}
+
+		// Translation for PathMate
+
+		String gender = null;	
+		try {
+			gender = variables.get("$participantGender");
+		} catch (VariableException ve){
+		}
+		
+		return new SimpleTranslator(language, repository.getPath() + "/translation_en_ch_fr.csv", gender);
+	}
+	
+	public Properties getRepositoryProperties(ConversationRepository repository){
+		
+		String filePath = repository.getPath() + "/config.properties";
+		try (InputStream inputStream = new FileInputStream(filePath)){
+			
+			Properties prop = new Properties();
+			prop.load(inputStream);
+			return prop;
+			
+		} catch (Exception e) {
+			log.error(e);
+		}
+		
+		return null;
+	}
+	
 
 	public VariableStore createVariableStore(ObjectId participantId) {
 		VariableStore variableStore;

@@ -15,7 +15,7 @@ import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.InDataBaseVariableStore;
 import ch.ethz.mc.services.internal.VariablesManagerService;
-import ch.ethz.mobilecoach.chatlib.engine.Translator;
+import ch.ethz.mobilecoach.chatlib.engine.translation.SimpleTranslator;
 import ch.ethz.mobilecoach.chatlib.engine.variables.VariableException;
 import ch.ethz.mobilecoach.interventions.PathMate;
 import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
@@ -97,7 +97,7 @@ public class MattermostManagementService {
 						Constants.getMattermostManagerUserName(), Constants.getMattermostManagerUserPassword()));
 		
 		if (!"".equals(Constants.getMattermostTeamId_fr())){
-			this.teamConfigurations.add(new TeamConfiguration (Locale.forLanguageTag(Translator.FRENCH_CH), 
+			this.teamConfigurations.add(new TeamConfiguration (Locale.forLanguageTag(SimpleTranslator.FRENCH_CH), 
 					Constants.getMattermostTeamId_fr(), Constants.getMattermostManagerUserId_fr(),
 					Constants.getMattermostManagerUserName_fr(), Constants.getMattermostManagerUserPassword_fr()));
 		}
