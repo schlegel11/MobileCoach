@@ -416,6 +416,9 @@ public class VariablesManagerService {
 			case participantOneTimeToken:
 				String oneTimeToken = new TokenPersistenceService(databaseManagerService).getOrCreateRecentOneTimeToken(participant.getId());
 				return oneTimeToken;
+			case participantAppToken:
+				String appToken = new TokenPersistenceService(databaseManagerService).getOrCreateAppToken(participant.getId());
+				return appToken;
 		}
 		return null;
 	}

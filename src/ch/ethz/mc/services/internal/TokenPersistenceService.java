@@ -27,7 +27,22 @@ public class TokenPersistenceService {
 		dbService.saveModelObject(token);
 		return token;
 	}
+	
+	/**
+	 * Finds or creates a MobileCoach App Token
+	 * 
+	 * @param participantId
+	 * @return the token String
+	 */
+	public String getOrCreateAppToken(ObjectId participantId) {
+		Iterable<AppToken> tokens = dbService.findModelObjects(AppToken.class, "{participantId:#}", participantId);
+		if (tokens.iterator().hasNext()){
+			return tokens.iterator().next().getToken();
+		}
+		return createTokenForParticipant(participantId).getToken();
+	}
 
+	
 	/**
 	 * Finds the most recent OneTimeToken for a participant. If the most recent
 	 * token is about to expire in the next 24 hours then a new token will be
