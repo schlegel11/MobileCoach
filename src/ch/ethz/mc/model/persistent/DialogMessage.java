@@ -2,15 +2,15 @@ package ch.ethz.mc.model.persistent;
 
 /*
  * Copyright (C) 2013-2017 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -186,7 +186,8 @@ public class DialogMessage extends ModelObject {
 	 *
 	 * @param participantId
 	 * @param participantName
-	 * @param participantLanguage
+	 * @param language
+	 * @param group
 	 * @param organization
 	 * @param organizationUnit
 	 * @param containsMediaContent
@@ -194,7 +195,7 @@ public class DialogMessage extends ModelObject {
 	 */
 	public UIDialogMessageWithParticipantForResults toUIDialogMessageWithParticipantForResults(
 			final String participantId, final String participantName,
-			final String group, final String language,
+			final String language, final String group,
 			final String organization, final String organizationUnit,
 			final boolean containsMediaContent) {
 
@@ -271,36 +272,36 @@ public class DialogMessage extends ModelObject {
 						organizationUnit,
 						order + 1,
 						status.toString(),
-				supervisorMessage ? Messages
+						supervisorMessage ? Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__SUPERVISOR_MESSAGE)
 								: Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__PARTICIPANT_MESSAGE),
 								message == null || message.equals("") ? Messages
 										.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 										: message,
-				shouldBeSentTimestamp <= 0 ? null : new Date(
-						shouldBeSentTimestamp),
-				sentTimestamp <= 0 ? null : new Date(sentTimestamp),
-				answerReceived == null || answerReceived.equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: answerReceived,
-				answerReceivedRaw == null || answerReceivedRaw.equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: answerReceivedRaw,
-				answerReceivedTimestamp <= 0 ? null : new Date(
-						answerReceivedTimestamp),
-				manuallySent ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-				containsMediaContent ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-				mediaContentViewed ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NO));
+										shouldBeSentTimestamp <= 0 ? null : new Date(
+												shouldBeSentTimestamp),
+												sentTimestamp <= 0 ? null : new Date(sentTimestamp),
+														answerReceived == null || answerReceived.equals("") ? Messages
+																.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+																: answerReceived,
+																answerReceivedRaw == null || answerReceivedRaw.equals("") ? Messages
+																		.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+																		: answerReceivedRaw,
+																		answerReceivedTimestamp <= 0 ? null : new Date(
+																				answerReceivedTimestamp),
+																				manuallySent ? Messages
+																						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+																						: Messages
+																						.getAdminString(AdminMessageStrings.UI_MODEL__NO),
+																						containsMediaContent ? Messages
+																								.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+																								: Messages
+																								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
+																								mediaContentViewed ? Messages
+																										.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+																										: Messages
+																										.getAdminString(AdminMessageStrings.UI_MODEL__NO));
 
 		dialogMessage.setRelatedModelObject(this);
 
@@ -330,21 +331,21 @@ public class DialogMessage extends ModelObject {
 				group == null ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 						: group,
-				organization,
-				organizationUnit,
-				supervisorMessage ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__SUPERVISOR_MESSAGE)
-						: Messages
+						organization,
+						organizationUnit,
+						supervisorMessage ? Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__SUPERVISOR_MESSAGE)
+								: Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__PARTICIPANT_MESSAGE),
-				message, sentTimestamp <= 0 ? null : new Date(sentTimestamp),
-				answerReceived == null || answerReceived.equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: answerReceived, answerReceivedRaw == null
-						|| answerReceivedRaw.equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: answerReceivedRaw,
-				answerReceivedTimestamp <= 0 ? null : new Date(
-						answerReceivedTimestamp));
+								message, sentTimestamp <= 0 ? null : new Date(sentTimestamp),
+										answerReceived == null || answerReceived.equals("") ? Messages
+												.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+												: answerReceived, answerReceivedRaw == null
+												|| answerReceivedRaw.equals("") ? Messages
+														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+														: answerReceivedRaw,
+														answerReceivedTimestamp <= 0 ? null : new Date(
+																answerReceivedTimestamp));
 
 		dialogMessage.setRelatedModelObject(this);
 
@@ -353,7 +354,7 @@ public class DialogMessage extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ch.ethz.mc.model.ModelObject#performOnDelete()
 	 */
 	@Override
