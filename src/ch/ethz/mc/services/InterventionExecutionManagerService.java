@@ -858,10 +858,25 @@ public class InterventionExecutionManagerService {
 				log.debug("Received stop message by participant {}",
 						dialogOption.getParticipant());
 
-				dialogMessageCreateAsUnexpectedReceived(
-						dialogOption.getParticipant(), receivedMessage);
-
-				dialogStatusSetMonitoringFinished(dialogOption.getParticipant());
+				// FIXME Special solution for MCAT
+				try {
+					variablesManagerService
+					.writeVariableValueOfParticipant(
+							dialogOption.getParticipant(),
+							ImplementationConstants.VARIABLE_DEFINING_PARTICIPATION_IN_MOBILE_COACH_EXTRA,
+							"0");
+				} catch (final Exception e) {
+					log.warn(
+							"Caution: Error when performing MobileCoach+ fix: {}",
+							e.getMessage());
+				}
+				/*
+				 * dialogMessageCreateAsUnexpectedReceived(
+				 * dialogOption.getParticipant(), receivedMessage);
+				 *
+				 * dialogStatusSetMonitoringFinished(dialogOption.getParticipant(
+				 * ));
+				 */
 
 				return;
 			}
@@ -1305,6 +1320,30 @@ public class InterventionExecutionManagerService {
 
 		return true;
 	}
+
+	// FIXME Special (ugly) solution for MCAT
+	@Synchronized
+	public void rememberMediaObjectForDialogMessage(
+			final ObjectId dialogMessageId, final MediaObject mediaObject) {
+		val dialogMessage = databaseManagerService.getModelObjectById(
+				DialogMessage.class, dialogMessageId);
+
+		if (dialogMessage == null) {
+			return;
+		}
+
+		val participant = databaseManagerService.getModelObjectById(
+				Participant.class, dialogMessage.getParticipant());
+
+		if (participant == null) {
+			return;
+		}
+
+		variablesManagerService.rememberMediaObjectForParticipant(participant,
+				mediaObject);
+	}
+
+	// End of solution
 
 	@Synchronized
 	public void createStatistics(final File statisticsFile) throws IOException {

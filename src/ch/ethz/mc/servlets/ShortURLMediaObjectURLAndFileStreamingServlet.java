@@ -124,6 +124,13 @@ public class ShortURLMediaObjectURLAndFileStreamingServlet extends HttpServlet {
 			return;
 		}
 
+		// FIXME Special (ugly) solution for MCAT
+		interventionExecutionManagerService
+				.rememberMediaObjectForDialogMessage(
+						mediaObjectParticipantShortURL.getDialogMessage(),
+						mediaObject);
+		// End of solution
+
 		// Mark media object as seen
 		interventionExecutionManagerService
 				.dialogMessageSetMediaContentViewed(mediaObjectParticipantShortURL
