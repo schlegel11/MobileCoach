@@ -30,7 +30,9 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.collections.IteratorUtils;
+import org.apache.commons.lang3.StringUtils;
 
+import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.memory.RuleEvaluationResult;
 import ch.ethz.mc.model.persistent.concepts.AbstractRule;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
@@ -172,6 +174,26 @@ public class RuleEvaluator {
 				case CREATE_TEXT_BUT_RESULT_IS_ALWAYS_FALSE:
 					ruleEvaluationResult.setRuleMatchesEquationSign(false);
 					break;
+				case CALCULATE_AMOUNT_OF_SELECT_MANY_VALUES:
+					if (!ruleEvaluationResult.getTextRuleValue().contains(
+							ImplementationConstants.SELECT_MANY_SEPARATOR)) {
+						ruleEvaluationResult.setRuleMatchesEquationSign(false);
+
+						ruleEvaluationResult.setCalculatedRuleValue(0);
+						ruleEvaluationResult.setTextRuleValue("0");
+					} else {
+						ruleEvaluationResult.setRuleMatchesEquationSign(true);
+
+						val parts = ruleEvaluationResult
+								.getTextRuleValue()
+								.split(ImplementationConstants.SELECT_MANY_SEPARATOR);
+
+						ruleEvaluationResult
+								.setCalculatedRuleValue(parts.length);
+						ruleEvaluationResult.setTextRuleValue(String
+								.valueOf(parts.length));
+					}
+					break;
 				case TEXT_VALUE_EQUALS:
 					if (ruleEvaluationResult
 							.getTextRuleValue()
@@ -202,8 +224,8 @@ public class RuleEvaluator {
 							.matches(
 									"^"
 											+ ruleEvaluationResult
-											.getTextRuleComparisonTermValue()
-											.trim() + "$")) {
+													.getTextRuleComparisonTermValue()
+													.trim() + "$")) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
@@ -215,9 +237,39 @@ public class RuleEvaluator {
 							.matches(
 									"^"
 											+ ruleEvaluationResult
-											.getTextRuleComparisonTermValue()
-											.trim() + "$")) {
+													.getTextRuleComparisonTermValue()
+													.trim() + "$")) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
+					}
+					break;
+				case TEXT_VALUE_FROM_SELECT_MANY_AT_POSITION:
+					if (!ruleEvaluationResult.getTextRuleValue().contains(
+							ImplementationConstants.SELECT_MANY_SEPARATOR)
+							|| !StringUtils.isNumeric(ruleEvaluationResult
+									.getTextRuleComparisonTermValue())) {
+						ruleEvaluationResult.setRuleMatchesEquationSign(false);
+
+						ruleEvaluationResult.setTextRuleValue("");
+					} else {
+						val parts = ruleEvaluationResult
+								.getTextRuleValue()
+								.split(ImplementationConstants.SELECT_MANY_SEPARATOR);
+
+						val position = Integer.parseInt(ruleEvaluationResult
+								.getTextRuleComparisonTermValue()) - 1;
+
+						if (position >= 0 && position < parts.length) {
+							ruleEvaluationResult
+							.setRuleMatchesEquationSign(true);
+
+							ruleEvaluationResult
+							.setTextRuleValue(parts[position]);
+						} else {
+							ruleEvaluationResult
+							.setRuleMatchesEquationSign(false);
+
+							ruleEvaluationResult.setTextRuleValue("");
+						}
 					}
 					break;
 				case DATE_DIFFERENCE_VALUE_EQUALS:

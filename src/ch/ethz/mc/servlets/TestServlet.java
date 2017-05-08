@@ -2,15 +2,15 @@ package ch.ethz.mc.servlets;
 
 /*
  * Copyright (C) 2013-2017 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -225,6 +225,9 @@ public class TestServlet extends HttpServlet {
 		variables.add(new InterventionVariableWithValue(null, "$alterkDigit",
 				"3", InterventionVariableWithValuePrivacyTypes.PRIVATE,
 				InterventionVariableWithValueAccessTypes.INTERNAL));
+		variables.add(new InterventionVariableWithValue(null, "$impins", "7,3",
+				InterventionVariableWithValuePrivacyTypes.PRIVATE,
+				InterventionVariableWithValueAccessTypes.INTERNAL));
 
 		val rule1 = new MonitoringMessageRule(
 				null,
@@ -263,8 +266,8 @@ public class TestServlet extends HttpServlet {
 				"third(5,3,2,7,2,4,3,5)",
 				RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
 				"", "");
-		final val result7 = RuleEvaluator.evaluateRule(null, rule5, variables);
-		log.debug(">> " + result7.getCalculatedRuleValue());
+		final val result6 = RuleEvaluator.evaluateRule(null, rule5, variables);
+		log.debug(">> " + result6.getCalculatedRuleValue());
 
 		val rule4 = new MonitoringMessageRule(
 				null,
@@ -272,7 +275,19 @@ public class TestServlet extends HttpServlet {
 				"position(4,5,3,2,7,2,4,3,5)",
 				RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
 				"", "");
-		final val result6 = RuleEvaluator.evaluateRule(null, rule4, variables);
-		log.debug(">> " + result6.getCalculatedRuleValue());
+		final val result7 = RuleEvaluator.evaluateRule(null, rule4, variables);
+		log.debug(">> " + result7.getCalculatedRuleValue());
+
+		val rule7 = new MonitoringMessageRule(null, 0, "7,3",
+				RuleEquationSignTypes.CALCULATE_AMOUNT_OF_SELECT_MANY_VALUES,
+				"", "");
+		final val result8 = RuleEvaluator.evaluateRule(null, rule7, variables);
+		log.debug(">> " + result8.getTextRuleValue());
+
+		val rule8 = new MonitoringMessageRule(null, 0, "$impins",
+				RuleEquationSignTypes.TEXT_VALUE_FROM_SELECT_MANY_AT_POSITION,
+				"2", "");
+		final val result9 = RuleEvaluator.evaluateRule(null, rule8, variables);
+		log.debug(">> " + result9.getTextRuleValue());
 	}
 }
