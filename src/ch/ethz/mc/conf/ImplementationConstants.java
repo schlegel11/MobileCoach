@@ -4,15 +4,15 @@ import java.awt.RenderingHints;
 
 /*
  * Copyright (C) 2013-2017 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -53,6 +53,14 @@ public class ImplementationConstants {
 
 	// FIXME Special solution for MCAT
 	public static String		VARIABLE_DEFINING_PARTICIPATION_IN_MOBILE_COACH_EXTRA								= "$participation_extra";
+	// FIXME Special solution for MCAT
+	public static String		VARIABLE_DEFINING_MRCT_STATUS_IN_MCAT												= "$mrctStatus";
+	// FIXME Special solution for MCAT
+	public static String		MESSAGE_GROUP_NAME_START_DEFINING_MRCT_TRIGGER_IN_MCAT								= "mrct";
+	// FIXME Special solution for MCAT
+	public static String		MESSAGE_GROUP_NAME_SUBSTRING_DEFINING_MRCT_YES_TRIGGER_IN_MCAT						= "yes";
+	// FIXME Special solution for MCAT
+	public static String		MESSAGE_GROUP_NAME_SUBSTRING_DEFINING_MRCT_NO_TRIGGER_IN_MCAT						= "no";
 
 	public static final long	MAILING_SEND_RETRIES																= 2;
 	public static final long	MAILING_SEND_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS								= 5 * 60;
@@ -116,16 +124,16 @@ public class ImplementationConstants {
 	public static final int		OBJECT_ID_LENGTH													= 24;
 
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_ONE_OBJECT_ID							= "[a-f0-9]{"
-			+ OBJECT_ID_LENGTH
-			+ "}";
+																											+ OBJECT_ID_LENGTH
+																											+ "}";
 	public static final String	REGULAR_EXPRESSION_TO_VALIDATE_CALCULATED_RULE						= "^[\\$a-zA-Z0-9_\\+\\-%*/^().,]*$";
 	public static final String	REGULAR_EXPRESSION_TO_VALIDATE_VARIABLE_NAME						= "^\\$[a-zA-Z0-9_]*$";
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_VARIABLES_IN_STRING						= "\\$[a-zA-Z0-9_]+";
 	public static final String	SELECT_MANY_SEPARATOR												= ",";
 	public static final String	VARIABLE_MATCH_MODIFIER												= "#";
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_MODIFIED_VARIABLES_IN_STRING			= VARIABLE_MATCH_MODIFIER
-			+ "[a-zA-Z0-9_]+"
-			+ VARIABLE_MATCH_MODIFIER;
+																											+ "[a-zA-Z0-9_]+"
+																											+ VARIABLE_MATCH_MODIFIER;
 	public static final String	VARIABLE_VALUE_MODIFIER_START										= "{";
 	public static final String	VARIABLE_VALUE_MODIFIER_END											= "}";
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_VALUE_MODIFIER							= "\\{[^\\}]+\\}";

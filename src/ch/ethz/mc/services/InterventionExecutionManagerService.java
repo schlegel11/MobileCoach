@@ -2,15 +2,15 @@ package ch.ethz.mc.services;
 
 /*
  * Copyright (C) 2013-2017 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -58,6 +58,7 @@ import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
 import ch.ethz.mc.model.persistent.MonitoringReplyRule;
 import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.Participant;
+import ch.ethz.mc.model.persistent.ParticipantVariableWithValue;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
@@ -87,7 +88,7 @@ public class InterventionExecutionManagerService {
 	private static InterventionExecutionManagerService	instance			= null;
 
 	private static SimpleDateFormat						dayInWeekFormatter	= new SimpleDateFormat(
-			"u");
+																					"u");
 	private final String[]								acceptedStopWords;
 
 	private final DatabaseManagerService				databaseManagerService;
@@ -107,7 +108,7 @@ public class InterventionExecutionManagerService {
 			final CommunicationManagerService communicationManagerService,
 			final InterventionAdministrationManagerService interventionAdministrationManagerService,
 			final SurveyExecutionManagerService surveyExecutionManagerService)
-					throws Exception {
+			throws Exception {
 		$lock = MC.getInstance();
 
 		log.info("Starting service...");
@@ -142,7 +143,7 @@ public class InterventionExecutionManagerService {
 			final CommunicationManagerService communicationManagerService,
 			final InterventionAdministrationManagerService interventionAdministrationManagerService,
 			final SurveyExecutionManagerService screeningSurveyExecutionManagerService)
-					throws Exception {
+			throws Exception {
 		if (instance == null) {
 			instance = new InterventionExecutionManagerService(
 					databaseManagerService, variablesManagerService,
@@ -218,7 +219,7 @@ public class InterventionExecutionManagerService {
 
 				if (dialogStatus != null
 						&& dialogStatus
-						.isDataForMonitoringParticipationAvailable()) {
+								.isDataForMonitoringParticipationAvailable()) {
 					participant.setMonitoringActive(true);
 				}
 			}
@@ -243,8 +244,8 @@ public class InterventionExecutionManagerService {
 				timestampToSendMessage, -1, supervisorMessage, answerExpected,
 				-1, -1, null, null, false, relatedMonitoringRule == null ? null
 						: relatedMonitoringRule.getId(),
-						relatedMonitoringMessage == null ? null
-								: relatedMonitoringMessage.getId(), false, manuallySent);
+				relatedMonitoringMessage == null ? null
+						: relatedMonitoringMessage.getId(), false, manuallySent);
 
 		// Check linked media object
 		MediaObject linkedMediaObject = null;
@@ -340,7 +341,7 @@ public class InterventionExecutionManagerService {
 
 			dialogMessage.setMessage(message + URLsToAdd);
 			dialogMessage
-			.setStatus(DialogMessageStatusTypes.PREPARED_FOR_SENDING);
+					.setStatus(DialogMessageStatusTypes.PREPARED_FOR_SENDING);
 		}
 
 		databaseManagerService.saveModelObject(dialogMessage);
@@ -360,7 +361,7 @@ public class InterventionExecutionManagerService {
 	@Synchronized
 	public void dialogMessageSetProblemSolved(final ObjectId dialogMessageId,
 			final String newUncleanedButCorrectedResult)
-					throws NotificationMessageException {
+			throws NotificationMessageException {
 		log.debug("Marking dialog message {} as problem solved");
 
 		val dialogMessage = databaseManagerService.getModelObjectById(
@@ -372,7 +373,7 @@ public class InterventionExecutionManagerService {
 					DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
 					dialogMessage.getAnswerReceivedTimestamp(),
 					StringHelpers
-					.cleanReceivedMessageString(newUncleanedButCorrectedResult),
+							.cleanReceivedMessageString(newUncleanedButCorrectedResult),
 					dialogMessage.getAnswerReceivedRaw());
 		} else if (dialogMessage.getStatus() == DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY) {
 			dialogMessage.setAnswerNotAutomaticallyProcessable(false);
@@ -411,11 +412,11 @@ public class InterventionExecutionManagerService {
 				if (monitoringRule != null) {
 					final long isUnansweredAfterTimestamp = timeStampOfEvent
 							+ monitoringRule
-							.getHoursUntilMessageIsHandledAsUnanswered()
+									.getHoursUntilMessageIsHandledAsUnanswered()
 							* ImplementationConstants.HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR;
 
 					dialogMessage
-					.setIsUnansweredAfterTimestamp(isUnansweredAfterTimestamp);
+							.setIsUnansweredAfterTimestamp(isUnansweredAfterTimestamp);
 				}
 			}
 			dialogMessage.setSentTimestamp(timeStampOfEvent);
@@ -497,7 +498,7 @@ public class InterventionExecutionManagerService {
 
 		for (val pendingDialogMessage : pendingDialogMessages) {
 			pendingDialogMessage
-			.setStatus(DialogMessageStatusTypes.PREPARED_FOR_SENDING);
+					.setStatus(DialogMessageStatusTypes.PREPARED_FOR_SENDING);
 
 			databaseManagerService.saveModelObject(pendingDialogMessage);
 		}
@@ -582,7 +583,7 @@ public class InterventionExecutionManagerService {
 
 	/*
 	 * MAIN methods -
-	 *
+	 * 
 	 * (the following two methods contain the elemental parts of
 	 * the monitoring process)
 	 */
@@ -631,33 +632,33 @@ public class InterventionExecutionManagerService {
 								"Store value '{}' (cleaned: '{}') of message to '{}' for participant {}",
 								dialogMessage.getAnswerReceived(),
 								cleanedMessageValue, relatedMonitoringMessage
-								.getStoreValueToVariableWithName(),
+										.getStoreValueToVariableWithName(),
 								participant.getId());
 						try {
 							if (relatedMonitoringMessage
 									.getStoreValueToVariableWithName() != null
 									&& !relatedMonitoringMessage
-									.getStoreValueToVariableWithName()
-									.equals("")) {
+											.getStoreValueToVariableWithName()
+											.equals("")) {
 								variablesManagerService
-								.writeVariableValueOfParticipant(
-										participant.getId(),
-										relatedMonitoringMessage
-										.getStoreValueToVariableWithName(),
-										cleanedMessageValue);
+										.writeVariableValueOfParticipant(
+												participant.getId(),
+												relatedMonitoringMessage
+														.getStoreValueToVariableWithName(),
+												cleanedMessageValue);
 							}
 							variablesManagerService
-							.writeVariableValueOfParticipant(
-									participant.getId(),
-									SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantMessageReply
-									.toVariableName(),
-									cleanedMessageValue, true, false);
+									.writeVariableValueOfParticipant(
+											participant.getId(),
+											SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantMessageReply
+													.toVariableName(),
+											cleanedMessageValue, true, false);
 						} catch (final Exception e) {
 							log.error(
 									"Could not store value '{}' of message to '{}' for participant {}: {}",
 									dialogMessage.getAnswerReceived(),
 									relatedMonitoringMessage
-									.getStoreValueToVariableWithName(),
+											.getStoreValueToVariableWithName(),
 									participant.getId(), e.getMessage());
 						}
 					}
@@ -691,7 +692,7 @@ public class InterventionExecutionManagerService {
 								false,
 								dialogMessage.getRelatedMonitoringMessage(),
 								dialogMessage
-								.getRelatedMonitoringRuleForReplyRules(),
+										.getRelatedMonitoringRuleForReplyRules(),
 								reactOnAnsweredMessages);
 
 						recursiveRuleResolver.resolve();
@@ -762,8 +763,8 @@ public class InterventionExecutionManagerService {
 
 			if (dialogStatus != null
 					&& !dialogStatus
-					.getDateIndexOfLastDailyMonitoringProcessing()
-					.equals(dateIndex)) {
+							.getDateIndexOfLastDailyMonitoringProcessing()
+							.equals(dateIndex)) {
 				log.debug(
 						"Participant {} has not been scheduled today! Start scheduling...",
 						participant.getId());
@@ -828,7 +829,7 @@ public class InterventionExecutionManagerService {
 									monitoringRule != null ? monitoringRule
 											.isSendMessageToSupervisor()
 											: false,
-											monitoringMessageExpectsAnswer);
+									monitoringMessageExpectsAnswer);
 						}
 					}
 
@@ -861,10 +862,10 @@ public class InterventionExecutionManagerService {
 				// FIXME Special solution for MCAT
 				try {
 					variablesManagerService
-					.writeVariableValueOfParticipant(
-							dialogOption.getParticipant(),
-							ImplementationConstants.VARIABLE_DEFINING_PARTICIPATION_IN_MOBILE_COACH_EXTRA,
-							"0");
+							.writeVariableValueOfParticipant(
+									dialogOption.getParticipant(),
+									ImplementationConstants.VARIABLE_DEFINING_PARTICIPATION_IN_MOBILE_COACH_EXTRA,
+									"0");
 				} catch (final Exception e) {
 					log.warn(
 							"Caution: Error when performing MobileCoach+ fix: {}",
@@ -873,7 +874,7 @@ public class InterventionExecutionManagerService {
 				/*
 				 * dialogMessageCreateAsUnexpectedReceived(
 				 * dialogOption.getParticipant(), receivedMessage);
-				 *
+				 * 
 				 * dialogStatusSetMonitoringFinished(dialogOption.getParticipant(
 				 * ));
 				 */
@@ -907,12 +908,12 @@ public class InterventionExecutionManagerService {
 			val relatedMonitoringMessageGroup = databaseManagerService
 					.getModelObjectById(MonitoringMessageGroup.class,
 							relatedMonitoringMessage
-							.getMonitoringMessageGroup());
+									.getMonitoringMessageGroup());
 
 			if (relatedMonitoringMessageGroup.getValidationExpression() != null
 					&& !cleanedMessageValue
-					.matches(relatedMonitoringMessageGroup
-							.getValidationExpression())) {
+							.matches(relatedMonitoringMessageGroup
+									.getValidationExpression())) {
 				// Has validation expression, but does not match
 
 				dialogMessageStatusChangesAfterSending(dialogMessage.getId(),
@@ -923,15 +924,15 @@ public class InterventionExecutionManagerService {
 				return;
 			} else if (relatedMonitoringMessageGroup.getValidationExpression() != null
 					&& cleanedMessageValue
-					.matches(relatedMonitoringMessageGroup
-							.getValidationExpression())) {
+							.matches(relatedMonitoringMessageGroup
+									.getValidationExpression())) {
 				// Has validation expression and matches
 
 				val matcher = Pattern
 						.compile(
 								relatedMonitoringMessageGroup
-								.getValidationExpression()).matcher(
-										cleanedMessageValue);
+										.getValidationExpression()).matcher(
+								cleanedMessageValue);
 
 				if (matcher.groupCount() > 0) {
 					// Pattern has a group
@@ -994,13 +995,86 @@ public class InterventionExecutionManagerService {
 				}
 
 				if (dialogOption != null) {
+					// FIXME Special solution for MCAT
+					log.debug("Checking messages for special mRCT case in MCAT");
+					if (dialogMessageToSend.getRelatedMonitoringMessage() != null) {
+						val relatedMonitoringMessage = databaseManagerService
+								.getModelObjectById(MonitoringMessage.class,
+										dialogMessageToSend
+												.getRelatedMonitoringMessage());
+						val relatedMonitoringMessageGroup = databaseManagerService
+								.getModelObjectById(
+										MonitoringMessageGroup.class,
+										relatedMonitoringMessage
+												.getMonitoringMessageGroup());
+
+						val messageGroupName = relatedMonitoringMessageGroup
+								.getName().toLowerCase();
+						if (messageGroupName
+								.startsWith(ImplementationConstants.MESSAGE_GROUP_NAME_START_DEFINING_MRCT_TRIGGER_IN_MCAT)
+								&& (messageGroupName
+										.contains(ImplementationConstants.MESSAGE_GROUP_NAME_SUBSTRING_DEFINING_MRCT_YES_TRIGGER_IN_MCAT) || messageGroupName
+										.contains(ImplementationConstants.MESSAGE_GROUP_NAME_SUBSTRING_DEFINING_MRCT_NO_TRIGGER_IN_MCAT))) {
+							log.debug("Message found from mRCT case in MCAT - checking status variable for further proceeding");
+
+							// Status: 0 = still waiting/initial status, 1 =
+							// yes, 2 = no, 3 =
+							// no reply
+							val participantVariableWithValue = databaseManagerService
+									.findOneSortedModelObject(
+											ParticipantVariableWithValue.class,
+											Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME,
+											Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
+											dialogMessageToSend
+													.getParticipant(),
+											ImplementationConstants.VARIABLE_DEFINING_MRCT_STATUS_IN_MCAT);
+
+							if (participantVariableWithValue != null) {
+								if (participantVariableWithValue.getValue()
+										.equals("0")) {
+									log.debug("There was no mRCT reply, YET -> simply wait");
+									continue;
+								} else if (participantVariableWithValue
+										.getValue().equals("1")
+										&& messageGroupName
+												.contains(ImplementationConstants.MESSAGE_GROUP_NAME_SUBSTRING_DEFINING_MRCT_NO_TRIGGER_IN_MCAT)) {
+									log.debug("mRCT reply was yes -> delete if no message");
+
+									databaseManagerService
+											.deleteModelObject(dialogMessageToSend);
+
+									continue;
+								} else if (participantVariableWithValue
+										.getValue().equals("2")
+										&& messageGroupName
+												.contains(ImplementationConstants.MESSAGE_GROUP_NAME_SUBSTRING_DEFINING_MRCT_YES_TRIGGER_IN_MCAT)) {
+									log.debug("mRCT reply was no -> delete if yes message");
+
+									databaseManagerService
+											.deleteModelObject(dialogMessageToSend);
+
+									continue;
+								} else if (participantVariableWithValue
+										.getValue().equals("3")) {
+									log.debug("There was no mRCT reply -> delete yes or no message");
+
+									databaseManagerService
+											.deleteModelObject(dialogMessageToSend);
+
+									continue;
+								}
+							}
+						}
+					}
+					// End of solution
+
 					log.debug("Sending prepared message to {} ({})",
 							sendToSupervisor ? "supervisor" : "participant",
-									dialogOption.getData());
+							dialogOption.getData());
 					communicationManagerService.sendMessage(dialogOption,
 							dialogMessageToSend.getId(),
 							dialogMessageWithSenderIdentificationToSend
-							.getMessageSenderIdentification(),
+									.getMessageSenderIdentification(),
 							dialogMessageToSend.getMessage(),
 							dialogMessageToSend.isMessageExpectsAnswer());
 					sentMessages++;
@@ -1130,14 +1204,14 @@ public class InterventionExecutionManagerService {
 												participantId,
 												DialogMessageStatusTypes.PREPARED_FOR_SENDING,
 												InternalDateTime
-												.currentTimeMillis());
+														.currentTimeMillis());
 
 								for (val dialogMessageWaitingToBeSendOfParticipant : dialogMessagesWaitingToBeSendOfParticipant) {
 									dialogMessagesWaitingToBeSend
-									.add(new DialogMessageWithSenderIdentification(
-											dialogMessageWaitingToBeSendOfParticipant,
-											intervention
-											.getAssignedSenderIdentification()));
+											.add(new DialogMessageWithSenderIdentification(
+													dialogMessageWaitingToBeSendOfParticipant,
+													intervention
+															.getAssignedSenderIdentification()));
 								}
 							}
 						}
@@ -1245,7 +1319,7 @@ public class InterventionExecutionManagerService {
 						DialogOption.class,
 						isSupervisorMessage ? Queries.DIALOG_OPTION__FOR_SUPERVISOR_BY_PARTICIPANT
 								: Queries.DIALOG_OPTION__FOR_PARTICIPANT_BY_PARTICIPANT,
-								participantId);
+						participantId);
 
 		return dialogOption;
 	}
@@ -1456,14 +1530,14 @@ public class InterventionExecutionManagerService {
 		val fileWriter = new FileWriter(statisticsFile);
 		statistics.store(fileWriter,
 				ImplementationConstants.LOGGING_APPLICATION_NAME
-				+ " Statistics File");
+						+ " Statistics File");
 		fileWriter.flush();
 
 		@Cleanup
 		val stringWriter = new StringWriter();
 		statistics.store(stringWriter,
 				ImplementationConstants.LOGGING_APPLICATION_NAME
-				+ " Statistics File");
+						+ " Statistics File");
 		stringWriter.flush();
 		log.debug(stringWriter.toString());
 	}
