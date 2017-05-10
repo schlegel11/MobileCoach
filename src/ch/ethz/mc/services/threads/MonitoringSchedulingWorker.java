@@ -2,15 +2,15 @@ package ch.ethz.mc.services.threads;
 
 /*
  * Copyright (C) 2013-2017 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,13 +36,13 @@ import ch.ethz.mc.tools.StringHelpers;
  */
 @Log4j2
 public class MonitoringSchedulingWorker extends Thread {
-	private final SurveyExecutionManagerService	screeningSurveyExecutionManagerService;
-	private final InterventionExecutionManagerService		interventionExecutionManagerService;
+	private final SurveyExecutionManagerService			screeningSurveyExecutionManagerService;
+	private final InterventionExecutionManagerService	interventionExecutionManagerService;
 
-	private final boolean									statisticsEnabled;
-	private String											lastStatisticsCreation	= "";
+	private final boolean								statisticsEnabled;
+	private String										lastStatisticsCreation	= "";
 
-	private static File										statisticsFile			= null;
+	private static File									statisticsFile			= null;
 
 	public MonitoringSchedulingWorker(
 			final InterventionExecutionManagerService interventionExecutionManagerService,
@@ -63,8 +63,8 @@ public class MonitoringSchedulingWorker extends Thread {
 		val simulatorActive = Constants.isSimulatedDateAndTime();
 		try {
 			TimeUnit.SECONDS
-					.sleep(simulatorActive ? ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITH_SIMULATOR
-							: ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITHOUT_SIMULATOR);
+			.sleep(simulatorActive ? ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITH_SIMULATOR
+					: ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITHOUT_SIMULATOR);
 		} catch (final InterruptedException e) {
 			interrupt();
 			log.debug("Monitoring scheduling worker received signal to stop (before first run)");
@@ -83,7 +83,7 @@ public class MonitoringSchedulingWorker extends Thread {
 							log.debug("It's a new day so create statistics");
 							lastStatisticsCreation = dailyUniqueIndex;
 							interventionExecutionManagerService
-									.createStatistics(statisticsFile);
+							.createStatistics(statisticsFile);
 						}
 					} catch (final Exception e) {
 						log.error("Could not create statistics file: {}",
@@ -97,8 +97,9 @@ public class MonitoringSchedulingWorker extends Thread {
 				 */
 				try {
 					log.debug("Finishing unfinished screening surveys");
-					screeningSurveyExecutionManagerService
-							.finishUnfinishedScreeningSurveys();
+					// FIXME Special solution for MCAT
+					// screeningSurveyExecutionManagerService
+					// .finishUnfinishedScreeningSurveys();
 				} catch (final Exception e) {
 					log.error(
 							"Could not finish unfinished screening surveys: {}",
@@ -107,7 +108,7 @@ public class MonitoringSchedulingWorker extends Thread {
 				try {
 					log.debug("React on unanswered messages");
 					interventionExecutionManagerService
-							.reactOnAnsweredAndUnansweredMessages(false);
+					.reactOnAnsweredAndUnansweredMessages(false);
 				} catch (final Exception e) {
 					log.error("Could not react on unanswered messages: {}",
 							e.getMessage());
@@ -115,7 +116,7 @@ public class MonitoringSchedulingWorker extends Thread {
 				try {
 					log.debug("React on answered messages");
 					interventionExecutionManagerService
-							.reactOnAnsweredAndUnansweredMessages(true);
+					.reactOnAnsweredAndUnansweredMessages(true);
 				} catch (final Exception e) {
 					log.error("Could not react on answered messages: {}",
 							e.getMessage());
@@ -123,7 +124,7 @@ public class MonitoringSchedulingWorker extends Thread {
 				try {
 					log.debug("Scheduling new messages");
 					interventionExecutionManagerService
-							.scheduleMessagesForSending();
+					.scheduleMessagesForSending();
 				} catch (final Exception e) {
 					log.error("Could not schedule new monitoring messages: {}",
 							e.getMessage());
@@ -140,8 +141,8 @@ public class MonitoringSchedulingWorker extends Thread {
 
 			try {
 				TimeUnit.SECONDS
-						.sleep(simulatorActive ? ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITH_SIMULATOR
-								: ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITHOUT_SIMULATOR);
+				.sleep(simulatorActive ? ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITH_SIMULATOR
+						: ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITHOUT_SIMULATOR);
 			} catch (final InterruptedException e) {
 				interrupt();
 				log.debug("Monitoring scheduling worker received signal to stop");
