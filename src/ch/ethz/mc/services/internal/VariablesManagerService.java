@@ -1396,7 +1396,7 @@ public class VariablesManagerService {
 
 			if (nameParts.length > 0 && StringUtils.isNumeric(nameParts[0])) {
 				val id = Integer.parseInt(nameParts[0]);
-				if (id > 0 && id < 23) {
+				if (id > 0 && id < 50) {
 					String variableName = String.valueOf(id);
 					if (variableName.length() == 1) {
 						variableName = "0" + variableName;
