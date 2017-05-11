@@ -1011,15 +1011,11 @@ public class InterventionExecutionManagerService {
 						val messageGroupName = relatedMonitoringMessageGroup
 								.getName().toLowerCase();
 						if (messageGroupName
-								.startsWith(ImplementationConstants.MESSAGE_GROUP_NAME_START_DEFINING_MRCT_TRIGGER_IN_MCAT)
-								&& (messageGroupName
-										.contains(ImplementationConstants.MESSAGE_GROUP_NAME_SUBSTRING_DEFINING_MRCT_YES_TRIGGER_IN_MCAT) || messageGroupName
-										.contains(ImplementationConstants.MESSAGE_GROUP_NAME_SUBSTRING_DEFINING_MRCT_NO_TRIGGER_IN_MCAT))) {
+								.startsWith(ImplementationConstants.MESSAGE_GROUP_NAME_SUBSTRING_DEFINING_MRCT_YES_TRIGGER_IN_MCAT)) {
 							log.debug("Message found from mRCT case in MCAT - checking status variable for further proceeding");
 
-							// Status: 0 = still waiting/initial status, 1 =
-							// yes, 2 = no, 3 =
-							// no reply
+							// Status: 0 = inactive, 1 = sent, no reply yet, 2 =
+							// answered and yes, 3 = not answered or no
 							val participantVariableWithValue = databaseManagerService
 									.findOneSortedModelObject(
 											ParticipantVariableWithValue.class,
@@ -1032,31 +1028,20 @@ public class InterventionExecutionManagerService {
 							if (participantVariableWithValue != null) {
 								if (participantVariableWithValue.getValue()
 										.equals("0")) {
-									log.debug("There was no mRCT reply, YET -> simply wait");
-									continue;
-								} else if (participantVariableWithValue
-										.getValue().equals("1")
-										&& messageGroupName
-												.contains(ImplementationConstants.MESSAGE_GROUP_NAME_SUBSTRING_DEFINING_MRCT_NO_TRIGGER_IN_MCAT)) {
-									log.debug("mRCT reply was yes -> delete if no message");
-
-									databaseManagerService
-											.deleteModelObject(dialogMessageToSend);
+									log.debug("mRCT currently inactive (should not happen) - simply ignore message for a while");
 
 									continue;
 								} else if (participantVariableWithValue
-										.getValue().equals("2")
-										&& messageGroupName
-												.contains(ImplementationConstants.MESSAGE_GROUP_NAME_SUBSTRING_DEFINING_MRCT_YES_TRIGGER_IN_MCAT)) {
-									log.debug("mRCT reply was no -> delete if yes message");
-
-									databaseManagerService
-											.deleteModelObject(dialogMessageToSend);
+										.getValue().equals("1")) {
+									log.debug("mRCT sent - delay messsage and wait for reply");
 
 									continue;
+								} else if (participantVariableWithValue
+										.getValue().equals("2")) {
+									log.debug("mRCT was answered and yes -> send message now");
 								} else if (participantVariableWithValue
 										.getValue().equals("3")) {
-									log.debug("There was no mRCT reply -> delete yes or no message");
+									log.debug("mRCT was not answered or no -> delete message");
 
 									databaseManagerService
 											.deleteModelObject(dialogMessageToSend);

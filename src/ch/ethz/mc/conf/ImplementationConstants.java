@@ -56,11 +56,7 @@ public class ImplementationConstants {
 	// FIXME Special solution for MCAT
 	public static String		VARIABLE_DEFINING_MRCT_STATUS_IN_MCAT												= "$mrctStatus";
 	// FIXME Special solution for MCAT
-	public static String		MESSAGE_GROUP_NAME_START_DEFINING_MRCT_TRIGGER_IN_MCAT								= "mrct";
-	// FIXME Special solution for MCAT
-	public static String		MESSAGE_GROUP_NAME_SUBSTRING_DEFINING_MRCT_YES_TRIGGER_IN_MCAT						= "yes";
-	// FIXME Special solution for MCAT
-	public static String		MESSAGE_GROUP_NAME_SUBSTRING_DEFINING_MRCT_NO_TRIGGER_IN_MCAT						= "no";
+	public static String		MESSAGE_GROUP_NAME_SUBSTRING_DEFINING_MRCT_YES_TRIGGER_IN_MCAT						= "mrct yes";
 
 	public static final long	MAILING_SEND_RETRIES																= 2;
 	public static final long	MAILING_SEND_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS								= 5 * 60;

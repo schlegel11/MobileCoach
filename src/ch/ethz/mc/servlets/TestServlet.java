@@ -136,7 +136,7 @@ public class TestServlet extends HttpServlet {
 
 		// dateCalculationTests();
 		// languageStringSerializationTest();
-		// ruleTests();
+		ruleTests();
 	}
 
 	@SuppressWarnings("unused")
@@ -289,5 +289,14 @@ public class TestServlet extends HttpServlet {
 				"2", "");
 		final val result9 = RuleEvaluator.evaluateRule(null, rule8, variables);
 		log.debug(">> " + result9.getTextRuleValue());
+
+		val rule9 = new MonitoringMessageRule(
+				null,
+				0,
+				"round(random())",
+				RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
+				"", "");
+		final val result10 = RuleEvaluator.evaluateRule(null, rule9, variables);
+		log.debug(">> " + result10.getTextRuleValue());
 	}
 }
