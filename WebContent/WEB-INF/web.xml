@@ -74,6 +74,18 @@
 		<url-pattern>/api/*</url-pattern>
 	</servlet-mapping>
 
+	<!-- Proprietary Solution for MCAT START -->
+	<servlet>
+		<servlet-name>MCA Admin</servlet-name>
+		<jsp-file>/mca-admin.jsp</jsp-file>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>MCA Admin</servlet-name>
+		<url-pattern>/mca-admin</url-pattern>
+	</servlet-mapping>
+	<!-- Proprietary Solution for MCAT END -->
+
 	<mime-mapping>
 		<extension>md</extension>
 		<mime-type>text/plain</mime-type>
