@@ -60,34 +60,34 @@
 
 	// Configuration
 	Hashtable<String, String> groups = new Hashtable<String, String>();
-	groups.put("1", "Teilnehmer ab 06/2017");
-	groups.put("2", "Teilnehmer ab 07/2017");
-	groups.put("3", "Teilnehmer ab 08/2017");
-	groups.put("4", "Teilnehmer ab 09/2017");
-	groups.put("5", "Teilnehmer ab 10/2017");
-	groups.put("6", "Teilnehmer ab 11/2017");
-	groups.put("7", "Teilnehmer ab 12/2017");
-	groups.put("8", "Teilnehmer ab 01/2018");
-	groups.put("9", "Teilnehmer ab 02/2018");
-	groups.put("10", "Teilnehmer ab 03/2018");
-	groups.put("11", "Teilnehmer ab 04/2018");
-	groups.put("12", "Teilnehmer ab 05/2018");
-	groups.put("13", "Teilnehmer ab 06/2018");
-	groups.put("14", "Teilnehmer ab 07/2018");
-	groups.put("101", "Interne Testteilnehmer ab 06/2017");
-	groups.put("102", "Interne Testteilnehmer ab 07/2017");
-	groups.put("103", "Interne Testteilnehmer ab 08/2017");
-	groups.put("104", "Interne Testteilnehmer ab 09/2017");
-	groups.put("105", "Interne Testteilnehmer ab 10/2017");
-	groups.put("106", "Interne Testteilnehmer ab 11/2017");
-	groups.put("107", "Interne Testteilnehmer ab 12/2017");
-	groups.put("108", "Interne Testteilnehmer ab 01/2018");
-	groups.put("109", "Interne Testteilnehmer ab 02/2018");
-	groups.put("110", "Interne Testteilnehmer ab 03/2018");
-	groups.put("111", "Interne Testteilnehmer ab 04/2018");
-	groups.put("112", "Interne Testteilnehmer ab 05/2018");
-	groups.put("113", "Interne Testteilnehmer ab 06/2018");
-	groups.put("114", "Interne Testteilnehmer ab 07/2018");
+	groups.put("1", "01) Teilnehmer ab 06/2017");
+	groups.put("2", "02) Teilnehmer ab 07/2017");
+	groups.put("3", "03) Teilnehmer ab 08/2017");
+	groups.put("4", "04) Teilnehmer ab 09/2017");
+	groups.put("5", "05) Teilnehmer ab 10/2017");
+	groups.put("6", "06) Teilnehmer ab 11/2017");
+	groups.put("7", "07) Teilnehmer ab 12/2017");
+	groups.put("8", "08) Teilnehmer ab 01/2018");
+	groups.put("9", "09) Teilnehmer ab 02/2018");
+	groups.put("10", "10) Teilnehmer ab 03/2018");
+	groups.put("11", "11) Teilnehmer ab 04/2018");
+	groups.put("12", "12) Teilnehmer ab 05/2018");
+	groups.put("13", "13) Teilnehmer ab 06/2018");
+	groups.put("14", "14) Teilnehmer ab 07/2018");
+	groups.put("101", "15) Interne Testteilnehmer ab 06/2017");
+	groups.put("102", "16) Interne Testteilnehmer ab 07/2017");
+	groups.put("103", "17) Interne Testteilnehmer ab 08/2017");
+	groups.put("104", "18) Interne Testteilnehmer ab 09/2017");
+	groups.put("105", "19) Interne Testteilnehmer ab 10/2017");
+	groups.put("106", "20) Interne Testteilnehmer ab 11/2017");
+	groups.put("107", "21) Interne Testteilnehmer ab 12/2017");
+	groups.put("108", "22) Interne Testteilnehmer ab 01/2018");
+	groups.put("109", "23) Interne Testteilnehmer ab 02/2018");
+	groups.put("110", "24) Interne Testteilnehmer ab 03/2018");
+	groups.put("111", "25) Interne Testteilnehmer ab 04/2018");
+	groups.put("112", "26) Interne Testteilnehmer ab 05/2018");
+	groups.put("113", "27) Interne Testteilnehmer ab 06/2018");
+	groups.put("114", "28) Interne Testteilnehmer ab 07/2018");
 
 	Hashtable<String, String> challenges = new Hashtable<String, String>();
 	challenges.put("challenge#01", "1. Challenge: Message Contest");
@@ -109,7 +109,7 @@
 
 	for (Intervention interventionInLoop : interventions) {
 		if (interventionInLoop.getName().toLowerCase()
-		.startsWith("MCA 2")
+		.startsWith("mca 2")
 		&& interventionInLoop.isActive()) {
 	intervention = interventionInLoop;
 	break;
