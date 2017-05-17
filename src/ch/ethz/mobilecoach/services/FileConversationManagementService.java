@@ -85,8 +85,13 @@ public class FileConversationManagementService implements
 			String dirName = p.getFileName().toString();
 			String interventionId = dirName;
 			
-			ConversationRepository repository = new ConversationRepository(p.toString());			
-			loadRepositoryFromFolder(p, repository);
+			ConversationRepository repository = new ConversationRepository(p.toString());
+
+			try {
+				loadRepositoryFromFolder(p, repository);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
 			
 			repositoryByName.put(interventionId, repository);
 			repositoryByHash.put(repository.getHash(), repository);

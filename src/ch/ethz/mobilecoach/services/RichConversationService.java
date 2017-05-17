@@ -34,8 +34,10 @@ import ch.ethz.mobilecoach.chatlib.engine.conversation.ConversationUI;
 import ch.ethz.mobilecoach.chatlib.engine.conversation.UserReplyListener;
 import ch.ethz.mobilecoach.chatlib.engine.helpers.IncrementVariableHelper;
 import ch.ethz.mobilecoach.chatlib.engine.helpers.MinusVariableHelper;
+import ch.ethz.mobilecoach.chatlib.engine.helpers.SumVariablesHelper;
 import ch.ethz.mobilecoach.chatlib.engine.model.AnswerOption;
 import ch.ethz.mobilecoach.chatlib.engine.model.Message;
+import ch.ethz.mobilecoach.chatlib.engine.timing.TimingCalculatorAdvanced;
 import ch.ethz.mobilecoach.chatlib.engine.translation.SimpleTranslator;
 import ch.ethz.mobilecoach.chatlib.engine.translation.Translator;
 import ch.ethz.mobilecoach.chatlib.engine.translation.VariantSelector;
@@ -219,7 +221,8 @@ public class RichConversationService {
 		
 		
 		Translator translator = prepareTranslator(participant.getLanguage(), repository, variableStore);
-		ChatEngine engine = new ChatEngine(repository, ui, variableStore, helpers, translator, chatEngineStateStore);
+		ChatEngine engine = new ChatEngine(repository, ui, variableStore, 
+				helpers, translator, chatEngineStateStore, new TimingCalculatorAdvanced());
 		engine.sendExceptionAsMessage = false;
 		
 		engine.setLogger(logger);
@@ -250,6 +253,9 @@ public class RichConversationService {
 				new IncrementVariableHelper("$bonus_keys", 1));
 		helpers.addHelper("PM-get-12mins-walking-steps", 
 				new MinusVariableHelper("$12mins_walking_steps", "$12mins_walking_steps_after"));
+		
+		helpers.addHelper("ASTHMA1-sum", 
+				new SumVariablesHelper("$act_sum", new String[]{"$act1", "$act2", "$act3", "$act4", "$act5"}));
 		
 		new TestHelpersFactory(engine, ui).addHelpers(helpers);
 
