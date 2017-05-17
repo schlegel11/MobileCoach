@@ -89,12 +89,13 @@ public class FileConversationManagementService implements
 
 			try {
 				loadRepositoryFromFolder(p, repository);
+				
+				repositoryByName.put(interventionId, repository);
+				repositoryByHash.put(repository.getHash(), repository);
+				
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);
 			}
-			
-			repositoryByName.put(interventionId, repository);
-			repositoryByHash.put(repository.getHash(), repository);
 		}
 		
 	}
