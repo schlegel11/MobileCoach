@@ -32,7 +32,6 @@ public class FileConversationManagementService implements
 	
 	Map<String, ConversationRepository> repositoryByName = new HashMap<>();
 	Map<String, ConversationRepository> repositoryByHash = new HashMap<>();
-	ReferenceChecker referenceChecker = new ReferenceChecker();
 	
 	private final String DEFAULT_REPOSITORY_NAME = "pathmate2";
 	
@@ -102,6 +101,7 @@ public class FileConversationManagementService implements
 	
 	public void loadRepositoryFromFolder(Path path, ConversationRepository repository) throws Exception{
 		List<Path> paths = Files.walk(path).filter(Files::isRegularFile).collect(Collectors.toList());
+		ReferenceChecker referenceChecker = new ReferenceChecker();
 		
 		boolean hasErrors = false;
 		
@@ -117,7 +117,7 @@ public class FileConversationManagementService implements
 			if (f.getName().endsWith(".xml")){
 				log.debug("Loading " + f.getName());
 				try {
-					loadResourceFile(f, repository);
+					loadResourceFile(f, repository, referenceChecker);
 				} catch (Exception e){
 					log.error(f.getName() + " : " + e.getMessage(), e);
 					hasErrors = true;
@@ -128,7 +128,6 @@ public class FileConversationManagementService implements
 		repository.freeze(); // for now we assume that the repository should not change after loading from the folder
 		
 		// checks
-		
 		for (String error: referenceChecker.check()){
 			log.error(error);
 			hasErrors = true;
@@ -140,7 +139,7 @@ public class FileConversationManagementService implements
 	}
 	
 	
-	public void loadResourceFile(File file, ConversationRepository repository) throws Exception {
+	public void loadResourceFile(File file, ConversationRepository repository, ReferenceChecker referenceChecker) throws Exception {
 		InputStream stream = new FileInputStream(file);
 		DomParser parser = new DomParser(repository, null, referenceChecker);
 		parser.parse(stream);
