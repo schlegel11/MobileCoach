@@ -469,6 +469,11 @@ public class RichConversationService {
 			return InternalDateTime.getMillisecondsUntil(time);
 		}
 
+		@Override
+		public boolean supportsReminders() {
+			return true;
+		}
+
 	}
 
 	// for admin UI

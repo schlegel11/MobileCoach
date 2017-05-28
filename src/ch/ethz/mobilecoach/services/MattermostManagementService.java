@@ -124,15 +124,38 @@ public class MattermostManagementService {
 	public void addDeviceToDatabase(OneSignalUserConfiguration oneSignalUserConfiguration, ObjectId authentication, String playerId){
 
 		if(!oneSignalUserConfiguration.getPlayerIds().contains(playerId)) {
-
+			removePlayerId(playerId);
 			oneSignalUserConfiguration.getPlayerIds().add(playerId);
 			databaseManagerService.saveModelObject(oneSignalUserConfiguration);
+		}
+	}
+	
+	
+	/**
+	 * Remove a given playerId from all OneSignalUserConfiguration objects.
+	 * This is done to ensure that the user only gets push notifications for his most recent sign-up.
+	 */
+	public void removePlayerId(String playerId){
+		// with large numbers of users, this may turn out to be too slow. Then, this should instead be done asynchronously.
+		try {
+		
+			for (OneSignalUserConfiguration config: 
+				databaseManagerService.findModelObjects(OneSignalUserConfiguration.class, "{'playerIds':#}", playerId)){
+				
+				config.getPlayerIds().remove(playerId);
+				databaseManagerService.saveModelObject(config);
+			}
+		
+		} catch (Exception e){
+			log.error("Error removing playerId.", e);
 		}
 	}
 
 	
 
 	public void creatOneSignalObject(ObjectId participantId, String playerId){
+		
+		removePlayerId(playerId);
 
 		long timestamp = System.currentTimeMillis(); 
 		List<String> playerIds = new ArrayList<>();
