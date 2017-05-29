@@ -2,15 +2,15 @@ package ch.ethz.mc.servlets;
 
 /*
  * Copyright (C) 2013-2017 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -43,6 +43,7 @@ import ch.ethz.mc.model.persistent.types.InterventionVariableWithValueAccessType
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValuePrivacyTypes;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import ch.ethz.mc.tools.RuleEvaluator;
+import ch.ethz.mc.tools.StringHelpers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -134,9 +135,16 @@ public class TestServlet extends HttpServlet {
 	private void runTestcases() {
 		// TODO for TESTING (OPTIONAL): Test cases can be defined here
 
+		stringTests();
 		// dateCalculationTests();
 		// languageStringSerializationTest();
-		ruleTests();
+		// ruleTests();
+	}
+
+	@SuppressWarnings("unused")
+	private void stringTests() {
+		val s = "Hallo Welt :-) 12,3 11.2";
+		log.debug(">>" + StringHelpers.cleanReceivedMessageString(s));
 	}
 
 	@SuppressWarnings("unused")
@@ -298,5 +306,11 @@ public class TestServlet extends HttpServlet {
 				"", "");
 		final val result10 = RuleEvaluator.evaluateRule(null, rule9, variables);
 		log.debug(">> " + result10.getTextRuleValue());
+
+		val rule10 = new MonitoringMessageRule(null, 0, "3.5",
+				RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "3,5", "");
+		final val result11 = RuleEvaluator
+				.evaluateRule(null, rule10, variables);
+		log.debug(">> " + result11.getTextRuleValue());
 	}
 }
