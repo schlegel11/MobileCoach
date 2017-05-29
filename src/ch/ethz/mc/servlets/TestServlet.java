@@ -43,6 +43,7 @@ import ch.ethz.mc.model.persistent.types.InterventionVariableWithValueAccessType
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValuePrivacyTypes;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import ch.ethz.mc.tools.RuleEvaluator;
+import ch.ethz.mc.tools.StringHelpers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -134,9 +135,16 @@ public class TestServlet extends HttpServlet {
 	private void runTestcases() {
 		// TODO for TESTING (OPTIONAL): Test cases can be defined here
 
+		stringTests();
 		// dateCalculationTests();
 		// languageStringSerializationTest();
 		// ruleTests();
+	}
+
+	@SuppressWarnings("unused")
+	private void stringTests() {
+		val s = "Hallo Welt :-) 12,3 11.2";
+		log.debug(">>" + StringHelpers.cleanReceivedMessageString(s));
 	}
 
 	@SuppressWarnings("unused")
@@ -289,5 +297,20 @@ public class TestServlet extends HttpServlet {
 				"2", "");
 		final val result9 = RuleEvaluator.evaluateRule(null, rule8, variables);
 		log.debug(">> " + result9.getTextRuleValue());
+
+		val rule9 = new MonitoringMessageRule(
+				null,
+				0,
+				"round(random())",
+				RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
+				"", "");
+		final val result10 = RuleEvaluator.evaluateRule(null, rule9, variables);
+		log.debug(">> " + result10.getTextRuleValue());
+
+		val rule10 = new MonitoringMessageRule(null, 0, "3.5",
+				RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "3,5", "");
+		final val result11 = RuleEvaluator
+				.evaluateRule(null, rule10, variables);
+		log.debug(">> " + result11.getTextRuleValue());
 	}
 }
