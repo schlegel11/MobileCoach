@@ -2,15 +2,15 @@ package ch.ethz.mc.services;
 
 /*
  * Copyright (C) 2013-2017 MobileCoach Team at the Health-IS Lab
- * 
+ *
  * For details see README.md file in the root folder of this project.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,6 +27,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
@@ -37,6 +38,8 @@ import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.IteratorUtils;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.MC;
@@ -55,10 +58,12 @@ import ch.ethz.mc.model.persistent.MediaObject;
 import ch.ethz.mc.model.persistent.MediaObjectParticipantShortURL;
 import ch.ethz.mc.model.persistent.MonitoringMessage;
 import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
+import ch.ethz.mc.model.persistent.MonitoringMessageRule;
 import ch.ethz.mc.model.persistent.MonitoringReplyRule;
 import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
+import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.services.internal.CommunicationManagerService;
@@ -70,6 +75,7 @@ import ch.ethz.mc.services.threads.MonitoringSchedulingWorker;
 import ch.ethz.mc.services.threads.OutgoingMessageWorker;
 import ch.ethz.mc.services.types.SystemVariables;
 import ch.ethz.mc.tools.InternalDateTime;
+import ch.ethz.mc.tools.RuleEvaluator;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.tools.VariableStringReplacer;
 import ch.ethz.mc.ui.NotificationMessageException;
@@ -236,7 +242,8 @@ public class InterventionExecutionManagerService {
 			final boolean manuallySent, final long timestampToSendMessage,
 			final MonitoringRule relatedMonitoringRule,
 			final MonitoringMessage relatedMonitoringMessage,
-			final boolean supervisorMessage, final boolean answerExpected) {
+			final boolean supervisorMessage, final boolean answerExpected,
+			final int hoursUntilHandledAsNotAnswered) {
 		log.debug("Create message and prepare for sending");
 		val dialogMessage = new DialogMessage(participant.getId(), 0,
 				DialogMessageStatusTypes.PREPARED_FOR_SENDING, message,
@@ -285,6 +292,16 @@ public class InterventionExecutionManagerService {
 
 		if (highestOrderMessage != null) {
 			dialogMessage.setOrder(highestOrderMessage.getOrder() + 1);
+		}
+
+		// Remember accepted reply time for manual message
+		if (manuallySent && answerExpected) {
+			final long isUnansweredAfterTimestamp = timestampToSendMessage
+					+ hoursUntilHandledAsNotAnswered
+					* ImplementationConstants.HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR;
+
+			dialogMessage
+					.setIsUnansweredAfterTimestamp(isUnansweredAfterTimestamp);
 		}
 
 		// Special saving case for linked media object or intermediate survey
@@ -418,7 +435,17 @@ public class InterventionExecutionManagerService {
 							.setIsUnansweredAfterTimestamp(isUnansweredAfterTimestamp);
 				}
 			}
+
 			dialogMessage.setSentTimestamp(timeStampOfEvent);
+
+			if (dialogMessage.isManuallySent()) {
+				final long appropriateReplyTimeframe = dialogMessage
+						.getIsUnansweredAfterTimestamp()
+						- dialogMessage.getShouldBeSentTimestamp();
+
+				dialogMessage.setIsUnansweredAfterTimestamp(timeStampOfEvent
+						+ appropriateReplyTimeframe);
+			}
 		} else if (newStatus == DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER) {
 			dialogMessage.setSentTimestamp(timeStampOfEvent);
 		}
@@ -582,7 +609,7 @@ public class InterventionExecutionManagerService {
 
 	/*
 	 * MAIN methods -
-	 * 
+	 *
 	 * (the following two methods contain the elemental parts of
 	 * the monitoring process)
 	 */
@@ -685,6 +712,7 @@ public class InterventionExecutionManagerService {
 					RecursiveAbstractMonitoringRulesResolver recursiveRuleResolver;
 					try {
 						recursiveRuleResolver = new RecursiveAbstractMonitoringRulesResolver(
+								this,
 								databaseManagerService,
 								variablesManagerService,
 								participant,
@@ -728,7 +756,7 @@ public class InterventionExecutionManagerService {
 									monitoringMessage,
 									monitoringReplyRule != null ? monitoringReplyRule
 											.isSendMessageToSupervisor()
-											: false, false);
+											: false, false, 0);
 						}
 					}
 				}
@@ -772,8 +800,9 @@ public class InterventionExecutionManagerService {
 				RecursiveAbstractMonitoringRulesResolver recursiveRuleResolver;
 				try {
 					recursiveRuleResolver = new RecursiveAbstractMonitoringRulesResolver(
-							databaseManagerService, variablesManagerService,
-							participant, true, null, null, false);
+							this, databaseManagerService,
+							variablesManagerService, participant, true, null,
+							null, false);
 
 					recursiveRuleResolver.resolve();
 				} catch (final Exception e) {
@@ -828,7 +857,7 @@ public class InterventionExecutionManagerService {
 									monitoringRule != null ? monitoringRule
 											.isSendMessageToSupervisor()
 											: false,
-									monitoringMessageExpectsAnswer);
+									monitoringMessageExpectsAnswer, 0);
 						}
 					}
 
@@ -1047,6 +1076,177 @@ public class InterventionExecutionManagerService {
 	}
 
 	/**
+	 * Checks message groups which groups and messages are (1) already used //
+	 * (2) used less // (3) simply fit and
+	 * returns the {@link MonitoringMessage} to send or null if there are no
+	 * messages in the group
+	 * left
+	 *
+	 * @return
+	 */
+	@Synchronized
+	public MonitoringMessage determineMessageOfMessageGroupToSend(
+			final Participant participant,
+			final MonitoringMessageGroup messageGroup,
+			final MonitoringMessage relatedMonitoringMessageForReplyRuleCase,
+			final boolean isMonitoringRule) {
+		val iterableMessages = databaseManagerService.findSortedModelObjects(
+				MonitoringMessage.class,
+				Queries.MONITORING_MESSAGE__BY_MONITORING_MESSAGE_GROUP,
+				Queries.MONITORING_MESSAGE__SORT_BY_ORDER_ASC,
+				messageGroup.getId());
+
+		@SuppressWarnings("unchecked")
+		final List<MonitoringMessage> messages = IteratorUtils
+				.toList(iterableMessages.iterator());
+
+		if (!isMonitoringRule
+				&& messageGroup.isSendSamePositionIfSendingAsReply()) {
+			// Send in same position if sending as reply
+			log.debug("Searching message on same position as former message in other message group...");
+			val originalMessageGroupId = relatedMonitoringMessageForReplyRuleCase
+					.getMonitoringMessageGroup();
+			val originalIterableMessages = databaseManagerService
+					.findSortedModelObjects(
+							MonitoringMessage.class,
+							Queries.MONITORING_MESSAGE__BY_MONITORING_MESSAGE_GROUP,
+							Queries.MONITORING_MESSAGE__SORT_BY_ORDER_ASC,
+							originalMessageGroupId);
+
+			@SuppressWarnings("unchecked")
+			final List<MonitoringMessage> originalMessages = IteratorUtils
+					.toList(originalIterableMessages.iterator());
+
+			for (int i = 0; i < originalMessages.size(); i++) {
+				if (originalMessages
+						.get(i)
+						.getId()
+						.equals(relatedMonitoringMessageForReplyRuleCase
+								.getId())
+						&& i < messages.size()) {
+					val message = messages.get(i);
+					log.debug(
+							"Monitoring message {} is at the same position as monitoring message {} and will thereofore be used as reply on answer",
+							message.getId(),
+							relatedMonitoringMessageForReplyRuleCase.getId());
+					return message;
+				}
+			}
+		} else {
+			// Send in random order?
+			if (messageGroup.isSendInRandomOrder()) {
+				log.debug("Searching random message...");
+				Collections.shuffle(messages);
+			} else {
+				log.debug("Searching appropriate message...");
+			}
+
+			Hashtable<String, AbstractVariableWithValue> variablesWithValues = null;
+
+			// Loop over all messages until an appropriate message has been
+			// found
+			MonitoringMessage messageToStartWithInFallbackCase = null;
+			int timesMessageAlreadyUsed = Integer.MAX_VALUE;
+
+			for (int i = 0; i < 3; i++) {
+				messageLoop: for (val message : messages) {
+					// Fallback solution 1: Start with less used message (case
+					// i==1)
+					if (i == 1 && message != messageToStartWithInFallbackCase) {
+						// Skip messages until you reach less used message
+						continue messageLoop;
+					}
+
+					// Try to find next message (case i==0)
+					val dialogMessages = new ArrayList<DialogMessage>();
+					if (i == 0) {
+						// Determine how often the message has already been used
+						val dialogMessagesIterator = databaseManagerService
+								.findModelObjects(
+										DialogMessage.class,
+										Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_RELATED_MONITORING_MESSAGE,
+										participant.getId(), message.getId())
+								.iterator();
+
+						CollectionUtils.addAll(dialogMessages,
+								dialogMessagesIterator);
+
+						if (dialogMessages.size() < timesMessageAlreadyUsed) {
+							// Remember this message as least used message
+							messageToStartWithInFallbackCase = message;
+							timesMessageAlreadyUsed = dialogMessages.size();
+						}
+					}
+
+					// In case of fallback 1 or 2, or if the message has never
+					// been used
+					if (i >= 1 || dialogMessages.size() == 0) {
+						if (i == 0) {
+							log.debug(
+									"Monitoring message {} was not used for participant, yet",
+									message.getId());
+						} else if (i == 1) {
+							log.debug(
+									"Monitoring message {} was LESS used for participant",
+									message.getId());
+						} else if (i == 2) {
+							log.debug(
+									"Monitoring message {} could be used for participant as last option",
+									message.getId());
+						}
+
+						// Check rules of message for execution
+						val rules = databaseManagerService
+								.findSortedModelObjects(
+										MonitoringMessageRule.class,
+										Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE,
+										Queries.MONITORING_MESSAGE_RULE__SORT_BY_ORDER_ASC,
+										message.getId());
+
+						for (val rule : rules) {
+							if (variablesWithValues == null) {
+								variablesWithValues = variablesManagerService
+										.getAllVariablesWithValuesOfParticipantAndSystem(participant);
+							}
+
+							val ruleResult = RuleEvaluator.evaluateRule(
+									participant.getLanguage(), rule,
+									variablesWithValues.values());
+
+							if (!ruleResult.isEvaluatedSuccessful()) {
+								log.error("Error when validating rule: "
+										+ ruleResult.getErrorMessage());
+								continue;
+							}
+
+							// Check if true rule matches
+							if (!ruleResult.isRuleMatchesEquationSign()) {
+								log.debug("Rule does not match, so skip this message");
+								continue messageLoop;
+							}
+						}
+
+						return message;
+					}
+				}
+
+				if (i == 0) {
+					log.debug("All message in this group were already used for the participant...so start over and use least used message");
+				} else if (i == 1) {
+					log.debug("All messages were already used for the participant and no least used message could be determined...so start over and use ANY message that fits the rules");
+				} else if (i == 2) {
+					log.warn(
+							"No message fits the rules! Message group {} ({}) should be checked for participant {}",
+							messageGroup.getId(), messageGroup.getName(),
+							participant.getId());
+				}
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * Sends a manual message
 	 *
 	 * @param participant
@@ -1059,13 +1259,16 @@ public class InterventionExecutionManagerService {
 		val variablesWithValues = variablesManagerService
 				.getAllVariablesWithValuesOfParticipantAndSystem(participant);
 
-		val messageToSend = VariableStringReplacer
+		// Determine message text to send
+		val messageTextToSend = VariableStringReplacer
 				.findVariablesAndReplaceWithTextValues(
 						participant.getLanguage(), messageWithPlaceholders,
 						variablesWithValues.values(), "");
+
+		// Create dialog message
 		dialogMessageCreateManuallyOrByRulesIncludingMediaObject(participant,
-				messageToSend, true, InternalDateTime.currentTimeMillis(),
-				null, null, advisorMessage, false);
+				messageTextToSend, true, InternalDateTime.currentTimeMillis(),
+				null, null, advisorMessage, false, 0);
 	}
 
 	/**
@@ -1081,18 +1284,34 @@ public class InterventionExecutionManagerService {
 			final boolean advisorMessage,
 			final MonitoringMessageGroup monitoringMessageGroup,
 			final int hoursUntilHandledAsNotAnswered) {
-		// val variablesWithValues = variablesManagerService
-		// .getAllVariablesWithValuesOfParticipantAndSystem(participant);
-		//
-		// val messageToSend = VariableStringReplacer
-		// .findVariablesAndReplaceWithTextValues(
-		// participant.getLanguage(), messageWithPlaceholders,
-		// variablesWithValues.values(), "");
-		// dialogMessageCreateManuallyOrByRulesIncludingMediaObject(participant,
-		// messageToSend, true, InternalDateTime.currentTimeMillis(),
-		// null, null, advisorMessage, false);
 
-		// TODO implement
+		val determinedMonitoringMessageToSend = determineMessageOfMessageGroupToSend(
+				participant, monitoringMessageGroup, null, true);
+
+		if (determinedMonitoringMessageToSend == null) {
+			log.warn(
+					"There are no more messages left in message group {} to send a message to participant {}",
+					monitoringMessageGroup, participant.getId());
+
+			return;
+		}
+
+		// Determine message text to send
+		val variablesWithValues = variablesManagerService
+				.getAllVariablesWithValuesOfParticipantAndSystem(participant,
+						determinedMonitoringMessageToSend);
+		val messageTextToSend = VariableStringReplacer
+				.findVariablesAndReplaceWithTextValues(participant
+						.getLanguage(), determinedMonitoringMessageToSend
+						.getTextWithPlaceholders().get(participant),
+						variablesWithValues.values(), "");
+
+		// Create dialog message
+		dialogMessageCreateManuallyOrByRulesIncludingMediaObject(participant,
+				messageTextToSend, true, InternalDateTime.currentTimeMillis(),
+				null, determinedMonitoringMessageToSend, advisorMessage,
+				monitoringMessageGroup.isMessagesExpectAnswer(),
+				hoursUntilHandledAsNotAnswered);
 	}
 
 	/*

@@ -18,8 +18,6 @@ package ch.ethz.mc.services.internal;
  * limitations under the License.
  */
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Hashtable;
 import java.util.List;
 
 import lombok.Getter;
@@ -27,21 +25,17 @@ import lombok.Setter;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.IteratorUtils;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.model.Queries;
-import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.MonitoringMessage;
 import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
-import ch.ethz.mc.model.persistent.MonitoringMessageRule;
 import ch.ethz.mc.model.persistent.MonitoringReplyRule;
 import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.concepts.AbstractMonitoringRule;
-import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
+import ch.ethz.mc.services.InterventionExecutionManagerService;
 import ch.ethz.mc.tools.RuleEvaluator;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.tools.VariableStringReplacer;
@@ -56,33 +50,34 @@ import ch.ethz.mc.tools.VariableStringReplacer;
 @Log4j2
 public class RecursiveAbstractMonitoringRulesResolver {
 	// General objects
-	private final DatabaseManagerService	databaseManagerService;
-	private final VariablesManagerService	variablesManagerService;
+	private final InterventionExecutionManagerService	interventionExecutionManagerService;
+	private final DatabaseManagerService				databaseManagerService;
+	private final VariablesManagerService				variablesManagerService;
 
 	// Internal objects
-	private boolean							completelyStop											= false;
+	private boolean										completelyStop											= false;
 
 	// Relevant for both cases
-	private final Participant				participant;
+	private final Participant							participant;
 
 	// Gives information if the whole class should handle MonitoringRules or
 	// MonitoringReplyRules
-	private final boolean					isMonitoringRule;
+	private final boolean								isMonitoringRule;
 
 	// Only relevant for MonitoringRules
-	private final Intervention				intervention;
+	private final Intervention							intervention;
 
 	// Only relevant for MonitoringReplyRules
-	private MonitoringMessage				relatedMonitoringMessageForReplyRuleCase				= null;
-	private MonitoringRule					relatedMonitoringRuleForReplyRuleCase					= null;
-	private final boolean					monitoringReplyRuleCaseIsTrue;
+	private MonitoringMessage							relatedMonitoringMessageForReplyRuleCase				= null;
+	private MonitoringRule								relatedMonitoringRuleForReplyRuleCase					= null;
+	private final boolean								monitoringReplyRuleCaseIsTrue;
 
 	/*
 	 * Values to resolve related to intervention process
 	 */
 
 	// Only relevant for MonitoringRules
-	private boolean							interventionIsFinishedForParticipantAfterThisResolving	= false;
+	private boolean										interventionIsFinishedForParticipantAfterThisResolving	= false;
 
 	/*
 	 * Helper classes containing resolved values about messages to send
@@ -123,12 +118,14 @@ public class RecursiveAbstractMonitoringRulesResolver {
 	private final List<MessageSendingResultForMonitoringReplyRule>	messageSendingResultForMonitoringReplyRules	= new ArrayList<RecursiveAbstractMonitoringRulesResolver.MessageSendingResultForMonitoringReplyRule>();
 
 	public RecursiveAbstractMonitoringRulesResolver(
+			final InterventionExecutionManagerService interventionExecutionManagerService,
 			final DatabaseManagerService databaseManagerService,
 			final VariablesManagerService variablesManagerService,
 			final Participant participant, final boolean isMonitoringRule,
 			final ObjectId relatedMonitoringMessageForReplyRuleCase,
 			final ObjectId relatedMonitoringRuleForReplyRuleCase,
 			final boolean monitoringReplyRuleCase) {
+		this.interventionExecutionManagerService = interventionExecutionManagerService;
 		this.databaseManagerService = databaseManagerService;
 		this.variablesManagerService = variablesManagerService;
 
@@ -200,7 +197,11 @@ public class RecursiveAbstractMonitoringRulesResolver {
 					.setMonitoringRuleExpectsAnswer(monitoringMessageGroup
 							.isMessagesExpectAnswer());
 
-			val determinedMonitoringMessageToSend = determineMessageToSend(monitoringMessageGroup);
+			val determinedMonitoringMessageToSend = interventionExecutionManagerService
+					.determineMessageOfMessageGroupToSend(participant,
+							monitoringMessageGroup,
+							relatedMonitoringMessageForReplyRuleCase,
+							isMonitoringRule);
 			if (determinedMonitoringMessageToSend == null) {
 				log.warn(
 						"There are no more messages left in message group {} to send a message to participant {}",
@@ -397,173 +398,6 @@ public class RecursiveAbstractMonitoringRulesResolver {
 		}
 
 		return ruleResult.isRuleMatchesEquationSign();
-	}
-
-	/**
-	 * Checks message groups which groups and messages are (1) already used //
-	 * (2) used less // (3) simply fit and
-	 * returns the {@link MonitoringMessage} to send or null if there are no
-	 * messages in the group
-	 * left
-	 *
-	 * @return
-	 */
-	private MonitoringMessage determineMessageToSend(
-			final MonitoringMessageGroup messageGroup) {
-		val iterableMessages = databaseManagerService.findSortedModelObjects(
-				MonitoringMessage.class,
-				Queries.MONITORING_MESSAGE__BY_MONITORING_MESSAGE_GROUP,
-				Queries.MONITORING_MESSAGE__SORT_BY_ORDER_ASC,
-				messageGroup.getId());
-
-		@SuppressWarnings("unchecked")
-		final List<MonitoringMessage> messages = IteratorUtils
-				.toList(iterableMessages.iterator());
-
-		if (!isMonitoringRule
-				&& messageGroup.isSendSamePositionIfSendingAsReply()) {
-			// Send in same position if sending as reply
-			log.debug("Searching message on same position as former message in other message group...");
-			val originalMessageGroupId = relatedMonitoringMessageForReplyRuleCase
-					.getMonitoringMessageGroup();
-			val originalIterableMessages = databaseManagerService
-					.findSortedModelObjects(
-							MonitoringMessage.class,
-							Queries.MONITORING_MESSAGE__BY_MONITORING_MESSAGE_GROUP,
-							Queries.MONITORING_MESSAGE__SORT_BY_ORDER_ASC,
-							originalMessageGroupId);
-
-			@SuppressWarnings("unchecked")
-			final List<MonitoringMessage> originalMessages = IteratorUtils
-					.toList(originalIterableMessages.iterator());
-
-			for (int i = 0; i < originalMessages.size(); i++) {
-				if (originalMessages
-						.get(i)
-						.getId()
-						.equals(relatedMonitoringMessageForReplyRuleCase
-								.getId())
-						&& i < messages.size()) {
-					val message = messages.get(i);
-					log.debug(
-							"Monitoring message {} is at the same position as monitoring message {} and will thereofore be used as reply on answer",
-							message.getId(),
-							relatedMonitoringMessageForReplyRuleCase.getId());
-					return message;
-				}
-			}
-		} else {
-			// Send in random order?
-			if (messageGroup.isSendInRandomOrder()) {
-				log.debug("Searching random message...");
-				Collections.shuffle(messages);
-			} else {
-				log.debug("Searching appropriate message...");
-			}
-
-			Hashtable<String, AbstractVariableWithValue> variablesWithValues = null;
-
-			// Loop over all messages until an appropriate message has been
-			// found
-			MonitoringMessage messageToStartWithInFallbackCase = null;
-			int timesMessageAlreadyUsed = Integer.MAX_VALUE;
-
-			for (int i = 0; i < 3; i++) {
-				messageLoop: for (val message : messages) {
-					// Fallback solution 1: Start with less used message (case
-					// i==1)
-					if (i == 1 && message != messageToStartWithInFallbackCase) {
-						// Skip messages until you reach less used message
-						continue messageLoop;
-					}
-
-					// Try to find next message (case i==0)
-					val dialogMessages = new ArrayList<DialogMessage>();
-					if (i == 0) {
-						// Determine how often the message has already been used
-						val dialogMessagesIterator = databaseManagerService
-								.findModelObjects(
-										DialogMessage.class,
-										Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_RELATED_MONITORING_MESSAGE,
-										participant.getId(), message.getId())
-								.iterator();
-
-						CollectionUtils.addAll(dialogMessages,
-								dialogMessagesIterator);
-
-						if (dialogMessages.size() < timesMessageAlreadyUsed) {
-							// Remember this message as least used message
-							messageToStartWithInFallbackCase = message;
-							timesMessageAlreadyUsed = dialogMessages.size();
-						}
-					}
-
-					// In case of fallback 1 or 2, or if the message has never
-					// been used
-					if (i >= 1 || dialogMessages.size() == 0) {
-						if (i == 0) {
-							log.debug(
-									"Monitoring message {} was not used for participant, yet",
-									message.getId());
-						} else if (i == 1) {
-							log.debug(
-									"Monitoring message {} was LESS used for participant",
-									message.getId());
-						} else if (i == 2) {
-							log.debug(
-									"Monitoring message {} could be used for participant as last option",
-									message.getId());
-						}
-
-						// Check rules of message for execution
-						val rules = databaseManagerService
-								.findSortedModelObjects(
-										MonitoringMessageRule.class,
-										Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE,
-										Queries.MONITORING_MESSAGE_RULE__SORT_BY_ORDER_ASC,
-										message.getId());
-
-						for (val rule : rules) {
-							if (variablesWithValues == null) {
-								variablesWithValues = variablesManagerService
-										.getAllVariablesWithValuesOfParticipantAndSystem(participant);
-							}
-
-							val ruleResult = RuleEvaluator.evaluateRule(
-									participant.getLanguage(), rule,
-									variablesWithValues.values());
-
-							if (!ruleResult.isEvaluatedSuccessful()) {
-								log.error("Error when validating rule: "
-										+ ruleResult.getErrorMessage());
-								continue;
-							}
-
-							// Check if true rule matches
-							if (!ruleResult.isRuleMatchesEquationSign()) {
-								log.debug("Rule does not match, so skip this message");
-								continue messageLoop;
-							}
-						}
-
-						return message;
-					}
-				}
-
-				if (i == 0) {
-					log.debug("All message in this group were already used for the participant...so start over and use least used message");
-				} else if (i == 1) {
-					log.debug("All messages were already used for the participant and no least used message could be determined...so start over and use ANY message that fits the rules");
-				} else if (i == 2) {
-					log.warn(
-							"No message fits the rules! Message group {} ({}) should be checked for participant {}",
-							messageGroup.getId(), messageGroup.getName(),
-							participant.getId());
-				}
-			}
-		}
-
-		return null;
 	}
 
 	/*
