@@ -553,7 +553,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		templateVariables.put(
 				SurveySlideTemplateFieldTypes.IS_SURVEY.toVariable(), true);
 		templateVariables.put(
-				SurveySlideTemplateFieldTypes.IS_INTERMEDIATE_SURVEY.toVariable(), false);
+				SurveySlideTemplateFieldTypes.IS_INTERMEDIATE_SURVEY
+						.toVariable(), false);
 
 		// Adjust feedback URL
 		if (session

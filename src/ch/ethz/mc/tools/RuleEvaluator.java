@@ -2,15 +2,15 @@ package ch.ethz.mc.tools;
 
 /*
  * Copyright (C) 2013-2017 MobileCoach Team at the Health-IS Lab
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -93,7 +93,7 @@ public class RuleEvaluator {
 							rule.getRuleComparisonTermWithPlaceholders(),
 							variablesWithValues);
 					ruleEvaluationResult
-					.setCalculatedRuleComparisonTermValue(ruleComparisonTermResult);
+							.setCalculatedRuleComparisonTermValue(ruleComparisonTermResult);
 				} catch (final Exception e) {
 					throw new Exception(
 							"Could not parse rule comparision term: "
@@ -121,7 +121,7 @@ public class RuleEvaluator {
 							rule.getRuleComparisonTermWithPlaceholders(),
 							variablesWithValues);
 					ruleEvaluationResult
-					.setTextRuleComparisonTermValue(ruleComparisonTermResult);
+							.setTextRuleComparisonTermValue(ruleComparisonTermResult);
 				} catch (final Exception e) {
 					throw new Exception(
 							"Could not parse rule comparision term: "
@@ -146,19 +146,19 @@ public class RuleEvaluator {
 					break;
 				case CALCULATED_VALUE_IS_SMALLER_OR_EQUAL_THAN:
 					if (ruleEvaluationResult.getCalculatedRuleValue() <= ruleEvaluationResult
-					.getCalculatedRuleComparisonTermValue()) {
+							.getCalculatedRuleComparisonTermValue()) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
 				case CALCULATED_VALUE_EQUALS:
 					if (ruleEvaluationResult.getCalculatedRuleValue() == ruleEvaluationResult
-					.getCalculatedRuleComparisonTermValue()) {
+							.getCalculatedRuleComparisonTermValue()) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
 				case CALCULATED_VALUE_IS_BIGGER_OR_EQUAL_THAN:
 					if (ruleEvaluationResult.getCalculatedRuleValue() >= ruleEvaluationResult
-					.getCalculatedRuleComparisonTermValue()) {
+							.getCalculatedRuleComparisonTermValue()) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
@@ -260,13 +260,13 @@ public class RuleEvaluator {
 
 						if (position >= 0 && position < parts.length) {
 							ruleEvaluationResult
-							.setRuleMatchesEquationSign(true);
+									.setRuleMatchesEquationSign(true);
 
 							ruleEvaluationResult
-							.setTextRuleValue(parts[position]);
+									.setTextRuleValue(parts[position]);
 						} else {
 							ruleEvaluationResult
-							.setRuleMatchesEquationSign(false);
+									.setRuleMatchesEquationSign(false);
 
 							ruleEvaluationResult.setTextRuleValue("");
 						}
@@ -457,7 +457,7 @@ public class RuleEvaluator {
 	private static double evaluateCalculatedRuleTerm(
 			final String ruleWithPlaceholders,
 			final Collection<AbstractVariableWithValue> variablesWithValues)
-					throws Exception {
+			throws Exception {
 		String rule = ruleWithPlaceholders;
 
 		// Prevent null pointer exceptions
@@ -686,7 +686,7 @@ public class RuleEvaluator {
 	private static String evaluateTextRuleTerm(final Locale locale,
 			final String ruleWithPlaceholders,
 			final Collection<AbstractVariableWithValue> variablesWithValues)
-					throws Exception {
+			throws Exception {
 		final String rule = ruleWithPlaceholders;
 
 		// Prevent null pointer exceptions

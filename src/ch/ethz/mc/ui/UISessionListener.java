@@ -48,7 +48,7 @@ public class UISessionListener implements HttpSessionListener {
 		if (session
 				.getAttribute(ImplementationConstants.UI_SESSION_ATTRIBUTE_DETECTOR) != null
 				&& (boolean) session
-				.getAttribute(ImplementationConstants.UI_SESSION_ATTRIBUTE_DETECTOR) == true) {
+						.getAttribute(ImplementationConstants.UI_SESSION_ATTRIBUTE_DETECTOR) == true) {
 			log.debug("Admin UI Session {} destroyed", session.getId());
 
 			MC.getInstance().getLockingService()

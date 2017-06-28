@@ -559,7 +559,8 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 			templateVariables.put(
 					SurveySlideTemplateFieldTypes.IS_SURVEY.toVariable(), true);
 			templateVariables.put(
-					SurveySlideTemplateFieldTypes.IS_INTERMEDIATE_SURVEY.toVariable(), true);
+					SurveySlideTemplateFieldTypes.IS_INTERMEDIATE_SURVEY
+							.toVariable(), true);
 		} else {
 			templateVariables.put(
 					FeedbackSlideTemplateFieldTypes.IS_FEEDBACK.toVariable(),
@@ -594,9 +595,10 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 		// Adjust media object URL for real media objects
 		if (templateVariables
 				.get(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL
-						.toVariable()) != null && templateVariables
-								.get(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_URL
-										.toVariable()) == null) {
+						.toVariable()) != null
+				&& templateVariables
+						.get(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_URL
+								.toVariable()) == null) {
 			templateVariables
 					.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL
 							.toVariable(),

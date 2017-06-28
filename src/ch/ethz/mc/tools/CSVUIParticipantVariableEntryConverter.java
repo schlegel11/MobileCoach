@@ -45,7 +45,8 @@ public class CSVUIParticipantVariableEntryConverter implements
 	}
 
 	public static UIVariableWithParticipantForResults getHeaders() {
-		val columnHeaders = UIParticipantVariableWithParticipant.getColumnHeaders();
+		val columnHeaders = UIParticipantVariableWithParticipant
+				.getColumnHeaders();
 		return new UIVariableWithParticipantForResults(columnHeaders[0],
 				columnHeaders[1], columnHeaders[2], columnHeaders[3]);
 	}

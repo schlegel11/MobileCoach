@@ -450,10 +450,10 @@ public class CreationRobotServlet extends HttpServlet {
 							.setRuleWithPlaceholders("$participationWeek");
 					if (week.equals("8")) {
 						monitoringMessageRule
-						.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+								.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
 					} else {
 						monitoringMessageRule
-						.setRuleEquationSign(RuleEquationSignTypes.TEXT_VALUE_MATCHES_REGULAR_EXPRESSION);
+								.setRuleEquationSign(RuleEquationSignTypes.TEXT_VALUE_MATCHES_REGULAR_EXPRESSION);
 					}
 					monitoringMessageRule
 							.setRuleComparisonTermWithPlaceholders(week);
@@ -484,8 +484,8 @@ public class CreationRobotServlet extends HttpServlet {
 							+ impinName[impin] + " value is "
 							+ impinValueCounter);
 					monitoringMessageRule
-					.setRuleWithPlaceholders("$impin_stress"
-							+ impinName[impin] + "T0");
+							.setRuleWithPlaceholders("$impin_stress"
+									+ impinName[impin] + "T0");
 					monitoringMessageRule
 							.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
 					monitoringMessageRule
@@ -808,7 +808,7 @@ public class CreationRobotServlet extends HttpServlet {
 
 		val fields = new String[] { "de", "fr" };
 		val files = new String[] { "import_impin_soz_reply_DE.txt",
-		"import_impin_soz_reply_FR.txt" };
+				"import_impin_soz_reply_FR.txt" };
 
 		for (int i = 0; i < fields.length; i++) {
 			fillValuesTable(values, PATH, files[i], fields[i]);
@@ -843,10 +843,10 @@ public class CreationRobotServlet extends HttpServlet {
 				monitoringMessageRule.setComment("Top is $sozz" + impin + "T0");
 				monitoringMessageRule.setRuleWithPlaceholders("$sozzTop");
 				monitoringMessageRule
-				.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+						.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
 				monitoringMessageRule
-				.setRuleComparisonTermWithPlaceholders("$sozz" + impin
-						+ "T0");
+						.setRuleComparisonTermWithPlaceholders("$sozz" + impin
+								+ "T0");
 
 				db.saveModelObject(monitoringMessageRule);
 
@@ -856,12 +856,12 @@ public class CreationRobotServlet extends HttpServlet {
 				monitoringMessageRule.setComment("$replyImpinSozz is "
 						+ (ruleReplyCounter == 1 ? "yes" : "no"));
 				monitoringMessageRule
-				.setRuleWithPlaceholders("$replyImpinSozz");
+						.setRuleWithPlaceholders("$replyImpinSozz");
 				monitoringMessageRule
-				.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+						.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
 				monitoringMessageRule
-				.setRuleComparisonTermWithPlaceholders(String
-						.valueOf(ruleReplyCounter));
+						.setRuleComparisonTermWithPlaceholders(String
+								.valueOf(ruleReplyCounter));
 
 				db.saveModelObject(monitoringMessageRule);
 			}
@@ -953,7 +953,7 @@ public class CreationRobotServlet extends HttpServlet {
 		val fields = new String[] { "de", "fr", "week" };
 		val files = new String[] { "import_baseline_behealthy_DE.txt",
 				"import_baseline_behealthy_FR.txt",
-		"import_baseline_behealthy_week.txt" };
+				"import_baseline_behealthy_week.txt" };
 
 		for (int i = 0; i < fields.length; i++) {
 			fillValuesTable(values, PATH, files[i], fields[i]);
@@ -986,12 +986,12 @@ public class CreationRobotServlet extends HttpServlet {
 				monitoringMessageRule.setComment("Be You only in week "
 						+ values.get(fields[2]).get(i));
 				monitoringMessageRule
-				.setRuleWithPlaceholders("$participationWeek");
+						.setRuleWithPlaceholders("$participationWeek");
 				monitoringMessageRule
-				.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+						.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
 				monitoringMessageRule
-				.setRuleComparisonTermWithPlaceholders(values.get(
-						fields[2]).get(i));
+						.setRuleComparisonTermWithPlaceholders(values.get(
+								fields[2]).get(i));
 
 				db.saveModelObject(monitoringMessageRule);
 			}
