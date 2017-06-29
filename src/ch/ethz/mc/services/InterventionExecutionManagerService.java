@@ -1027,43 +1027,20 @@ public class InterventionExecutionManagerService {
 						break;
 					}
 				} else {
-					log.error("Could not send prepared message, because there was no valid dialog option to send message to participant; solution: deactive messaging for participant and removing current dialog message");
+					log.error("Could not send prepared message, because there was no valid dialog option to send message to participantor supervisor; solution: remove current dialog message");
 
 					try {
-						deactivateMessagingForParticipantAndDeleteDialogMessages(dialogMessageToSend
-								.getParticipant());
-						log.debug("Cleanup sucessful");
+						databaseManagerService
+								.deleteModelObject(dialogMessageToSend);
+						log.debug("Cleanup successful");
 					} catch (final Exception e) {
-						log.error("Cleanup not sucessful: {}", e.getMessage());
+						log.error("Cleanup not successful: {}", e.getMessage());
 					}
 				}
 			} catch (final Exception e) {
 				log.error("Could not send prepared message: {}", e.getMessage());
 			}
 		}
-	}
-
-	/**
-	 * Cleanup method for the case of problems when trying to send to a
-	 * participant
-	 *
-	 * @param participantId
-	 */
-	@Synchronized
-	private void deactivateMessagingForParticipantAndDeleteDialogMessages(
-			final ObjectId participantId) {
-		val dialogMessagesToDelete = databaseManagerService.findModelObjects(
-				DialogMessage.class, Queries.DIALOG_MESSAGE__BY_PARTICIPANT,
-				participantId);
-
-		for (val dialogMessageToDelete : dialogMessagesToDelete) {
-			databaseManagerService.deleteModelObject(dialogMessageToDelete);
-		}
-
-		val participant = databaseManagerService.getModelObjectById(
-				Participant.class, participantId);
-
-		databaseManagerService.deleteModelObject(participant);
 	}
 
 	/*
