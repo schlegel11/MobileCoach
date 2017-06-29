@@ -5,15 +5,15 @@ package ch.ethz.mc.ui.views.components.interventions.monitoring_rules;
  * initiative of the Institute of Technology Management at University of St.
  * Gallen and the Department of Management, Technology and Economics at ETH
  * Zurich
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -47,7 +47,7 @@ import com.vaadin.ui.Button.ClickEvent;
 @SuppressWarnings("serial")
 @Log4j2
 public class MonitoringReplyRuleEditComponentWithController extends
-MonitoringReplyRuleEditComponent {
+		MonitoringReplyRuleEditComponent {
 	private final ObjectId									interventionId;
 
 	private final AbstractRuleEditComponentWithController	ruleEditComponent;
@@ -87,35 +87,35 @@ MonitoringReplyRuleEditComponent {
 			}
 		}
 		monitoringMessageComboBox
-		.addValueChangeListener(new ValueChangeListener() {
+				.addValueChangeListener(new ValueChangeListener() {
 
-			@Override
-			public void valueChange(final ValueChangeEvent event) {
-				final UIMonitoringMessageGroup uiMonitoringMessageGroup = (UIMonitoringMessageGroup) event
-						.getProperty().getValue();
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						final UIMonitoringMessageGroup uiMonitoringMessageGroup = (UIMonitoringMessageGroup) event
+								.getProperty().getValue();
 
-				ObjectId newMonitoringMessageGroupId;
-				if (uiMonitoringMessageGroup == null) {
-					newMonitoringMessageGroupId = null;
-				} else {
-					newMonitoringMessageGroupId = uiMonitoringMessageGroup
-							.getRelatedModelObject(
-									MonitoringMessageGroup.class)
+						ObjectId newMonitoringMessageGroupId;
+						if (uiMonitoringMessageGroup == null) {
+							newMonitoringMessageGroupId = null;
+						} else {
+							newMonitoringMessageGroupId = uiMonitoringMessageGroup
+									.getRelatedModelObject(
+											MonitoringMessageGroup.class)
 									.getId();
-				}
+						}
 
-				log.debug(
-						"Adjust related monitoring message group to {}",
-						newMonitoringMessageGroupId);
-				getInterventionAdministrationManagerService()
-				.monitoringReplyRuleChangeRelatedMonitoringMessageGroup(
-						monitoringRule,
-						newMonitoringMessageGroupId);
+						log.debug(
+								"Adjust related monitoring message group to {}",
+								newMonitoringMessageGroupId);
+						getInterventionAdministrationManagerService()
+								.monitoringReplyRuleChangeRelatedMonitoringMessageGroup(
+										monitoringRule,
+										newMonitoringMessageGroupId);
 
-				adjust();
+						adjust();
 
-			}
-		});
+					}
+				});
 
 		// Add button listeners
 		val buttonClickListener = new ButtonClickListener();
@@ -134,10 +134,10 @@ MonitoringReplyRuleEditComponent {
 						val newValue = (boolean) event.getProperty().getValue();
 
 						getInterventionAdministrationManagerService()
-						.monitoringReplyRuleChangeSendMessageIfTrue(
-								monitoringRule,
-								(boolean) event.getProperty()
-								.getValue());
+								.monitoringReplyRuleChangeSendMessageIfTrue(
+										monitoringRule,
+										(boolean) event.getProperty()
+												.getValue());
 
 						if (!newValue
 								&& getSendToSupervisorComboBox().getValue()) {
@@ -159,8 +159,8 @@ MonitoringReplyRuleEditComponent {
 						val newValue = (boolean) event.getProperty().getValue();
 
 						getInterventionAdministrationManagerService()
-						.monitoringReplyRuleChangeSendMessageToSupervisor(
-								monitoringRule, newValue);
+								.monitoringReplyRuleChangeSendMessageToSupervisor(
+										monitoringRule, newValue);
 
 						if (newValue
 								&& !getSendMessageIfTrueComboBox().getValue()) {
@@ -218,8 +218,8 @@ MonitoringReplyRuleEditComponent {
 						try {
 							// Change name
 							getInterventionAdministrationManagerService()
-							.monitoringReplyRuleSetStoreResultToVariable(
-									monitoringRule, getStringValue());
+									.monitoringReplyRuleSetStoreResultToVariable(
+											monitoringRule, getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;

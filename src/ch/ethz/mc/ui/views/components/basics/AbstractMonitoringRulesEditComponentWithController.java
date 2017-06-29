@@ -299,14 +299,14 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 			if (selectedMonitoringRule.isSendMessageIfTrue()) {
 				val recipient = selectedMonitoringRule
 						.isSendMessageToSupervisor() ? Messages
-								.getAdminString(AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__TO_SUPERVISOR)
-								: Messages
+						.getAdminString(AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__TO_SUPERVISOR)
+						: Messages
 								.getAdminString(AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__TO_PARTICIPANT);
 				if (selectedMonitoringRule.getRelatedMonitoringMessageGroup() == null) {
 					sendMessage = Messages
 							.getAdminString(
-													AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_MESSAGE_BUT_NO_GROUP_SELECTED,
-													recipient);
+									AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_MESSAGE_BUT_NO_GROUP_SELECTED,
+									recipient);
 				} else {
 					final MonitoringMessageGroup monitoringMessageGroup = getInterventionAdministrationManagerService()
 							.getMonitoringMessageGroup(
@@ -315,13 +315,13 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 					if (monitoringMessageGroup == null) {
 						sendMessage = Messages
 								.getAdminString(
-														AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_MESSAGE_FROM_ALREADY_DELETED_GROUP,
-														recipient);
+										AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_MESSAGE_FROM_ALREADY_DELETED_GROUP,
+										recipient);
 					} else {
 						sendMessage = Messages
 								.getAdminString(
 										AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_MESSAGE_FROM_GROUP,
-														recipient,
+										recipient,
 										monitoringMessageGroup.getName());
 					}
 				}

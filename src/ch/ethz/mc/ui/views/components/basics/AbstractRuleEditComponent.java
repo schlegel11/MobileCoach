@@ -178,7 +178,7 @@ public class AbstractRuleEditComponent extends AbstractCustomComponent {
 		// ruleComparisonTermTextFieldComponent
 		ruleComparisonTermTextFieldComponent = new VariableTextFieldComponent();
 		ruleComparisonTermTextFieldComponent
-		.setCaption("!!! Comparison term (with placeholders):");
+				.setCaption("!!! Comparison term (with placeholders):");
 		ruleComparisonTermTextFieldComponent.setImmediate(false);
 		ruleComparisonTermTextFieldComponent.setWidth("100.0%");
 		ruleComparisonTermTextFieldComponent.setHeight("-1px");

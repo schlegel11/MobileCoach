@@ -66,8 +66,8 @@ public abstract class AbstractService {
 		if (session.getAttribute(GeneralSessionAttributeTypes.VALIDATOR
 				.toString()) == null
 				|| (boolean) session
-				.getAttribute(GeneralSessionAttributeTypes.VALIDATOR
-						.toString()) == false) {
+						.getAttribute(GeneralSessionAttributeTypes.VALIDATOR
+								.toString()) == false) {
 			log.debug("REST access denied: Session timed out or is no survey/feedback");
 			throw new WebApplicationException(Response.notAcceptable(null)
 					.entity("Session timed out").build());
@@ -98,8 +98,8 @@ public abstract class AbstractService {
 		} else {
 			throw new WebApplicationException(
 					Response.notAcceptable(null)
-					.entity("The current session is not yet bound to a participant")
-					.build());
+							.entity("The current session is not yet bound to a participant")
+							.build());
 		}
 	}
 }

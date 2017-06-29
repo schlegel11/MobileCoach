@@ -208,7 +208,7 @@ public class ScreeningSurveyEditComponent extends AbstractClosableEditComponent 
 		// switchScreeningSurveyButton
 		switchScreeningSurveyButton = new Button();
 		switchScreeningSurveyButton
-		.setCaption("!!! Activate/deactivate Screening Survey");
+				.setCaption("!!! Activate/deactivate Screening Survey");
 		switchScreeningSurveyButton.setImmediate(true);
 		switchScreeningSurveyButton.setWidth("100.0%");
 		switchScreeningSurveyButton.setHeight("-1px");
@@ -301,7 +301,7 @@ public class ScreeningSurveyEditComponent extends AbstractClosableEditComponent 
 		passwordLabel.setWidth("-1px");
 		passwordLabel.setHeight("-1px");
 		passwordLabel
-		.setValue("!!! Password required to participate (optional)");
+				.setValue("!!! Password required to participate (optional)");
 		switchesLayoutGroup.addComponent(passwordLabel, 0, 0);
 
 		// passwordTextFieldComponent
@@ -431,7 +431,7 @@ public class ScreeningSurveyEditComponent extends AbstractClosableEditComponent 
 		editFeedbackButton = new Button();
 		editFeedbackButton.setCaption("!!! Edit");
 		editFeedbackButton
-		.setIcon(new ThemeResource("img/edit-icon-small.png"));
+				.setIcon(new ThemeResource("img/edit-icon-small.png"));
 		editFeedbackButton.setImmediate(true);
 		editFeedbackButton.setWidth("100px");
 		editFeedbackButton.setHeight("-1px");
@@ -451,7 +451,7 @@ public class ScreeningSurveyEditComponent extends AbstractClosableEditComponent 
 		showFeedbackButton = new Button();
 		showFeedbackButton.setCaption("!!! Show");
 		showFeedbackButton
-		.setIcon(new ThemeResource("img/play-icon-small.png"));
+				.setIcon(new ThemeResource("img/play-icon-small.png"));
 		showFeedbackButton.setImmediate(true);
 		showFeedbackButton.setWidth("100px");
 		showFeedbackButton.setHeight("-1px");

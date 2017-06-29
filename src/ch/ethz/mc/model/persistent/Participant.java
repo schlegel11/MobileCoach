@@ -5,15 +5,15 @@ package ch.ethz.mc.model.persistent;
  * initiative of the Institute of Technology Management at University of St.
  * Gallen and the Department of Management, Technology and Economics at ETH
  * Zurich
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -157,7 +157,7 @@ public class Participant extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see ch.ethz.mc.model.ModelObject#toUIModelObject()
 	 */
 	@Override
@@ -199,35 +199,35 @@ public class Participant extends ModelObject {
 				nickname.equals("") ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 						: nickname,
-						language.getDisplayLanguage() + " (" + language.toLanguageTag()
+				language.getDisplayLanguage() + " (" + language.toLanguageTag()
 						+ ")",
 				group == null ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-								: group,
-								organization,
-								organizationUnit,
-								new Date(createdTimestamp),
-								screeningSurveyName,
-								screeningSurveyStatus ? Messages
-										.getAdminString(AdminMessageStrings.UI_MODEL__FINISHED)
-										: Messages
-										.getAdminString(AdminMessageStrings.UI_MODEL__NOT_FINISHED),
-										screeningSurveyStatus,
-										dataForMonitoringAvailable ? Messages
-												.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-												: Messages
-												.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-												dataForMonitoringAvailable,
-												monitoringStatus ? Messages
-														.getAdminString(AdminMessageStrings.UI_MODEL__FINISHED)
-														: Messages
-														.getAdminString(AdminMessageStrings.UI_MODEL__NOT_FINISHED),
-														monitoringStatus,
-														monitoringActive ? Messages
-																.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
-																: Messages
-																.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE),
-																monitoringActive);
+						: group,
+				organization,
+				organizationUnit,
+				new Date(createdTimestamp),
+				screeningSurveyName,
+				screeningSurveyStatus ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__FINISHED)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_FINISHED),
+				screeningSurveyStatus,
+				dataForMonitoringAvailable ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
+				dataForMonitoringAvailable,
+				monitoringStatus ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__FINISHED)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_FINISHED),
+				monitoringStatus,
+				monitoringActive ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE),
+				monitoringActive);
 
 		participant.setRelatedModelObject(this);
 
@@ -236,7 +236,7 @@ public class Participant extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see
 	 * ch.ethz.mc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
 	 * (java.util.List)
@@ -252,7 +252,7 @@ public class Participant extends ModelObject {
 				Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT,
 				getId())) {
 			participantVariableWithValue
-			.collectThisAndRelatedModelObjectsForExport(exportList);
+					.collectThisAndRelatedModelObjectsForExport(exportList);
 		}
 
 		// Add dialog option
@@ -275,7 +275,7 @@ public class Participant extends ModelObject {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see ch.ethz.mc.model.ModelObject#performOnDelete()
 	 */
 	@Override

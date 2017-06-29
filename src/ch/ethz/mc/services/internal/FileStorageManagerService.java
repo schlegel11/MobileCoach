@@ -118,7 +118,7 @@ public class FileStorageManagerService {
 			if (file.isDirectory()
 					&& file.getName().startsWith(
 							ImplementationConstants.FILE_STORAGE_PREFIX)
-							&& !requiredFileReferences.contains(file.getName())) {
+					&& !requiredFileReferences.contains(file.getName())) {
 				log.debug("Deleting unused resource {}", file.getAbsolutePath());
 				for (val nestedFile : file.listFiles()) {
 					nestedFile.delete();

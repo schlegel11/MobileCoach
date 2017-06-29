@@ -125,7 +125,7 @@ public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see ch.ethz.mc.model.ModelObject#performOnDelete()
 	 */
 	@Override

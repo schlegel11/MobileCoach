@@ -5,15 +5,15 @@ package ch.ethz.mc.ui.views.components.interventions;
  * initiative of the Institute of Technology Management at University of St.
  * Gallen and the Department of Management, Technology and Economics at ETH
  * Zurich
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -61,7 +61,7 @@ import com.vaadin.ui.Button.ClickEvent;
 @SuppressWarnings("serial")
 @Log4j2
 public class AllInterventionsTabComponentWithController extends
-AllInterventionsTabComponent {
+		AllInterventionsTabComponent {
 
 	private final MainView													mainView;
 
@@ -344,11 +344,11 @@ AllInterventionsTabComponent {
 								.getId(), UIIntervention.class
 								.cast(newIntervention.toUIModelObject()));
 						getAllInterventionsEditComponent()
-						.getAllInterventionsTable().select(
-								newIntervention.getId());
+								.getAllInterventionsTable().select(
+										newIntervention.getId());
 						getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__INTERVENTION_CREATED);
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__INTERVENTION_CREATED);
 
 						closeWindow();
 					}
@@ -364,7 +364,7 @@ AllInterventionsTabComponent {
 				final File temporaryBackupFile = getInterventionAdministrationManagerService()
 						.interventionExport(
 								selectedUIIntervention
-								.getRelatedModelObject(Intervention.class));
+										.getRelatedModelObject(Intervention.class));
 
 				try {
 					final Intervention importedIntervention = getInterventionAdministrationManagerService()
@@ -380,18 +380,18 @@ AllInterventionsTabComponent {
 							.getId(), UIIntervention.class
 							.cast(importedIntervention.toUIModelObject()));
 					getAllInterventionsEditComponent()
-					.getAllInterventionsTable().select(
-							importedIntervention.getId());
+							.getAllInterventionsTable().select(
+									importedIntervention.getId());
 					getAllInterventionsEditComponent()
-					.getAllInterventionsTable().sort();
+							.getAllInterventionsTable().sort();
 
 					getAdminUI()
-					.showInformationNotification(
-							AdminMessageStrings.NOTIFICATION__INTERVENTION_DUPLICATED);
+							.showInformationNotification(
+									AdminMessageStrings.NOTIFICATION__INTERVENTION_DUPLICATED);
 				} catch (final Exception e) {
 					getAdminUI()
-					.showWarningNotification(
-							AdminMessageStrings.NOTIFICATION__INTERVENTION_DUPLICATION_FAILED);
+							.showWarningNotification(
+									AdminMessageStrings.NOTIFICATION__INTERVENTION_DUPLICATION_FAILED);
 				}
 
 				try {
@@ -428,18 +428,18 @@ AllInterventionsTabComponent {
 							.getId(), UIIntervention.class
 							.cast(importedIntervention.toUIModelObject()));
 					getAllInterventionsEditComponent()
-					.getAllInterventionsTable().select(
-							importedIntervention.getId());
+							.getAllInterventionsTable().select(
+									importedIntervention.getId());
 					getAllInterventionsEditComponent()
-					.getAllInterventionsTable().sort();
+							.getAllInterventionsTable().sort();
 
 					getAdminUI()
-					.showInformationNotification(
-							AdminMessageStrings.NOTIFICATION__INTERVENTION_IMPORTED);
+							.showInformationNotification(
+									AdminMessageStrings.NOTIFICATION__INTERVENTION_IMPORTED);
 				} catch (final Exception e) {
 					getAdminUI()
-					.showWarningNotification(
-							AdminMessageStrings.NOTIFICATION__INTERVENTION_IMPORT_FAILED);
+							.showWarningNotification(
+									AdminMessageStrings.NOTIFICATION__INTERVENTION_IMPORT_FAILED);
 				} finally {
 					try {
 						file.delete();
@@ -460,7 +460,7 @@ AllInterventionsTabComponent {
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_NAME_FOR_INTERVENTION,
 				selectedUIIntervention
-				.getRelatedModelObject(Intervention.class).getName(),
+						.getRelatedModelObject(Intervention.class).getName(),
 				null, new ShortStringEditComponent(),
 				new ExtendableButtonClickListener() {
 					@Override
@@ -471,9 +471,9 @@ AllInterventionsTabComponent {
 
 							// Change name
 							getInterventionAdministrationManagerService()
-							.interventionChangeName(
-									selectedIntervention,
-									getStringValue());
+									.interventionChangeName(
+											selectedIntervention,
+											getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -482,12 +482,12 @@ AllInterventionsTabComponent {
 						// Adapt UI
 						getStringItemProperty(selectedUIInterventionBeanItem,
 								UIIntervention.INTERVENTION_NAME).setValue(
-										selectedUIIntervention.getRelatedModelObject(
-												Intervention.class).getName());
+								selectedUIIntervention.getRelatedModelObject(
+										Intervention.class).getName());
 
 						getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__INTERVENTION_RENAMED);
+								.showInformationNotification(
+										AdminMessageStrings.NOTIFICATION__INTERVENTION_RENAMED);
 						closeWindow();
 					}
 				}, null);
@@ -547,7 +547,7 @@ AllInterventionsTabComponent {
 
 					// Delete intervention
 					getInterventionAdministrationManagerService()
-					.interventionDelete(selectedIntervention);
+							.interventionDelete(selectedIntervention);
 				} catch (final Exception e) {
 					closeWindow();
 					handleException(e);
@@ -556,9 +556,9 @@ AllInterventionsTabComponent {
 
 				// Adapt UI
 				getAllInterventionsEditComponent().getAllInterventionsTable()
-				.removeItem(
-						selectedUIIntervention.getRelatedModelObject(
-								Intervention.class).getId());
+						.removeItem(
+								selectedUIIntervention.getRelatedModelObject(
+										Intervention.class).getId());
 				getAdminUI().showInformationNotification(
 						AdminMessageStrings.NOTIFICATION__INTERVENTION_DELETED);
 

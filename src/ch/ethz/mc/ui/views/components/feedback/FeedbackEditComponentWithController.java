@@ -213,8 +213,7 @@ public class FeedbackEditComponentWithController extends FeedbackEditComponent {
 					.feedbackSlideImport(temporaryBackupFile, true);
 
 			if (importedFeedbackSlide == null) {
-				throw new Exception(
-						"Imported slide not found in import");
+				throw new Exception("Imported slide not found in import");
 			}
 
 			// Adapt UI

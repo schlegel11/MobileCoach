@@ -290,18 +290,20 @@ public class VariablesManagerService {
 				break;
 			case participantSupervisorDialogOptionEmailData:
 				val supervisorDialogOptionEmail = databaseManagerService
-				.findOneModelObject(DialogOption.class,
-						Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
-						participant.getId(), DialogOptionTypes.SUPERVISOR_EMAIL);
+						.findOneModelObject(DialogOption.class,
+								Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
+								participant.getId(),
+								DialogOptionTypes.SUPERVISOR_EMAIL);
 				if (supervisorDialogOptionEmail != null) {
 					return supervisorDialogOptionEmail.getData();
 				}
 				break;
 			case participantSupervisorDialogOptionSMSData:
 				val supervisorDialogOptionSMS = databaseManagerService
-				.findOneModelObject(DialogOption.class,
-						Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
-						participant.getId(), DialogOptionTypes.SUPERVISOR_SMS);
+						.findOneModelObject(DialogOption.class,
+								Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
+								participant.getId(),
+								DialogOptionTypes.SUPERVISOR_SMS);
 				if (supervisorDialogOptionSMS != null) {
 					return supervisorDialogOptionSMS.getData();
 				}

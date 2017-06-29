@@ -84,8 +84,8 @@ public class ImageUploadService extends AbstractFileUploadService {
 		if (request.getContentLength() > ImplementationConstants.MAX_UPLOAD_SIZE_IN_BYTE) {
 			throw new WebApplicationException(
 					Response.status(Status.BAD_REQUEST)
-					.entity("Could not upload image: The image file is too big")
-					.build());
+							.entity("Could not upload image: The image file is too big")
+							.build());
 		}
 
 		if (!StringValidator
@@ -93,8 +93,8 @@ public class ImageUploadService extends AbstractFileUploadService {
 						+ variable.trim())) {
 			throw new WebApplicationException(
 					Response.serverError()
-					.entity("Could not upload image: The variable name is not valid")
-					.build());
+							.entity("Could not upload image: The variable name is not valid")
+							.build());
 		}
 
 		val uploadToVariableAllowed = restManagerService

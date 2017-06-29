@@ -302,7 +302,8 @@ public class ScreeningSurveyEditComponentWithController extends
 
 		showModalClosableEditWindow(
 				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__CREATE_SCREENING_SURVEY_SLIDE,
-				new ScreeningSurveySlideEditComponentWithController(screeningSurvey.getIntervention(),
+				new ScreeningSurveySlideEditComponentWithController(
+						screeningSurvey.getIntervention(),
 						newScreeningSurveySlide),
 				new ExtendableButtonClickListener() {
 					@Override
@@ -328,9 +329,8 @@ public class ScreeningSurveyEditComponentWithController extends
 
 		try {
 			// Change type
-			getSurveyAdministrationManagerService()
-					.screeningSurveySetActive(screeningSurvey,
-							!screeningSurvey.isActive());
+			getSurveyAdministrationManagerService().screeningSurveySetActive(
+					screeningSurvey, !screeningSurvey.isActive());
 		} catch (final Exception e) {
 			handleException(e);
 			return;
@@ -351,7 +351,8 @@ public class ScreeningSurveyEditComponentWithController extends
 
 		showModalClosableEditWindow(
 				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_SCREENING_SURVEY_SLIDE,
-				new ScreeningSurveySlideEditComponentWithController(screeningSurvey.getIntervention(),
+				new ScreeningSurveySlideEditComponentWithController(
+						screeningSurvey.getIntervention(),
 						selectedScreeningSurveySlide),
 				new ExtendableButtonClickListener() {
 					@Override
@@ -384,8 +385,7 @@ public class ScreeningSurveyEditComponentWithController extends
 					.screeningSurveySlideImport(temporaryBackupFile, true);
 
 			if (importedScreeningSurveySlide == null) {
-				throw new Exception(
-						"Imported slide not found in import");
+				throw new Exception("Imported slide not found in import");
 			}
 
 			// Adapt UI
@@ -617,7 +617,7 @@ public class ScreeningSurveyEditComponentWithController extends
 						getAdminUI().getPage().getLocation().toString()
 								.lastIndexOf("/") + 1)
 				+ ImplementationConstants.SHORT_ID_SCREEN_SURVEY_AND_FEEDBACK_SERVLET_PATH
-				+ "/" + shortURL.calculateIdPartOfURL()+"/";
+				+ "/" + shortURL.calculateIdPartOfURL() + "/";
 
 		getAdminUI().getPage().open(url, "_blank");
 	}
@@ -631,8 +631,8 @@ public class ScreeningSurveyEditComponentWithController extends
 					val selectedFeedback = selectedUIFeedback.getRelatedModelObject(Feedback.class);
 
 					// Delete variable
-					getSurveyAdministrationManagerService()
-							.feedbackDelete(selectedFeedback);
+					getSurveyAdministrationManagerService().feedbackDelete(
+							selectedFeedback);
 				} catch (final Exception e) {
 					closeWindow();
 					handleException(e);

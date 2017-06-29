@@ -5,15 +5,15 @@ package ch.ethz.mc.ui.views.components.screening_survey;
  * initiative of the Institute of Technology Management at University of St.
  * Gallen and the Department of Management, Technology and Economics at ETH
  * Zurich
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -47,7 +47,7 @@ import com.vaadin.ui.Button.ClickEvent;
 @SuppressWarnings("serial")
 @Log4j2
 public class ScreeningSurveySlideRuleEditComponentWithController extends
-ScreeningSurveySlideRuleEditComponent {
+		ScreeningSurveySlideRuleEditComponent {
 
 	private final AbstractRuleEditComponentWithController	ruleEditComponent;
 
@@ -56,7 +56,7 @@ ScreeningSurveySlideRuleEditComponent {
 	private final ObjectId									screeningSurveyId;
 
 	private class JumpIfTrueFalseValueChangeListener implements
-	ValueChangeListener {
+			ValueChangeListener {
 		private boolean	isTrueCase	= false;
 
 		public void setCase(final boolean isTrueCase) {
@@ -69,15 +69,15 @@ ScreeningSurveySlideRuleEditComponent {
 			if (event.getProperty().getValue() != null) {
 				selectedScreeningSurveySlide = ((UIScreeningSurveySlide) event
 						.getProperty().getValue()).getRelatedModelObject(
-								ScreeningSurveySlide.class).getId();
+						ScreeningSurveySlide.class).getId();
 			}
 
 			log.debug("Adjust case {} to screening survey slide {}",
 					isTrueCase ? "true" : "false", selectedScreeningSurveySlide);
 			getSurveyAdministrationManagerService()
-			.screeningSurveySlideRuleSetJumpToSlide(
-					screeningSurveySlideRule, isTrueCase,
-					selectedScreeningSurveySlide);
+					.screeningSurveySlideRuleSetJumpToSlide(
+							screeningSurveySlideRule, isTrueCase,
+							selectedScreeningSurveySlide);
 		}
 	}
 
@@ -114,12 +114,12 @@ ScreeningSurveySlideRuleEditComponent {
 				jumpIfFalseComboBox.addItem(uiScreeningSurveySlide);
 				if (screeningSurveySlide.getId().equals(
 						screeningSurveySlideRule
-						.getNextScreeningSurveySlideWhenTrue())) {
+								.getNextScreeningSurveySlideWhenTrue())) {
 					jumpIfTrueComboBox.select(uiScreeningSurveySlide);
 				}
 				if (screeningSurveySlide.getId().equals(
 						screeningSurveySlideRule
-						.getNextScreeningSurveySlideWhenFalse())) {
+								.getNextScreeningSurveySlideWhenFalse())) {
 					jumpIfFalseComboBox.select(uiScreeningSurveySlide);
 				}
 			}
@@ -134,8 +134,8 @@ ScreeningSurveySlideRuleEditComponent {
 						val newValue = (Boolean) event.getProperty().getValue();
 
 						getSurveyAdministrationManagerService()
-						.screeningSurveySlideRuleChangeShowSameSlideBecauseValueNotValidWhenTrue(
-								screeningSurveySlideRule, newValue);
+								.screeningSurveySlideRuleChangeShowSameSlideBecauseValueNotValidWhenTrue(
+										screeningSurveySlideRule, newValue);
 
 						adjust();
 					}
@@ -154,9 +154,9 @@ ScreeningSurveySlideRuleEditComponent {
 		val jumpIfFalseValueChangeListener = new JumpIfTrueFalseValueChangeListener();
 		jumpIfFalseValueChangeListener.setCase(false);
 		jumpIfTrueComboBox
-		.addValueChangeListener(jumpIfTrueValueChangeListener);
+				.addValueChangeListener(jumpIfTrueValueChangeListener);
 		jumpIfFalseComboBox
-		.addValueChangeListener(jumpIfFalseValueChangeListener);
+				.addValueChangeListener(jumpIfFalseValueChangeListener);
 
 		adjust();
 	}
@@ -171,7 +171,7 @@ ScreeningSurveySlideRuleEditComponent {
 		// Adjust checkbox
 		getInvalidWhenTrueCheckbox().setValue(
 				screeningSurveySlideRule
-				.isShowSameSlideBecauseValueNotValidWhenTrue());
+						.isShowSameSlideBecauseValueNotValidWhenTrue());
 
 		// Adjust jump to slide combo boxes
 		if (screeningSurveySlideRule
@@ -217,9 +217,9 @@ ScreeningSurveySlideRuleEditComponent {
 						try {
 							// Change variable to store value to
 							getSurveyAdministrationManagerService()
-							.screeningSurveySlideRuleChangeVariableToStoreValueTo(
-									screeningSurveySlideRule,
-									getStringValue());
+									.screeningSurveySlideRuleChangeVariableToStoreValueTo(
+											screeningSurveySlideRule,
+											getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -246,9 +246,9 @@ ScreeningSurveySlideRuleEditComponent {
 						try {
 							// Change value to store to variable
 							getSurveyAdministrationManagerService()
-							.screeningSurveySlideRuleChangeValueToStoreToVariable(
-									screeningSurveySlideRule,
-									getStringValue());
+									.screeningSurveySlideRuleChangeValueToStoreToVariable(
+											screeningSurveySlideRule,
+											getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;

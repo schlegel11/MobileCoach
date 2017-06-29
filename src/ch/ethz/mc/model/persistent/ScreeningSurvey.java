@@ -214,8 +214,7 @@ public class ScreeningSurvey extends ModelObject {
 
 		// Slides
 		StringBuffer buffer = new StringBuffer();
-		val slides = ModelObject.findSorted(
-				ScreeningSurveySlide.class,
+		val slides = ModelObject.findSorted(ScreeningSurveySlide.class,
 				Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY,
 				Queries.SCREENING_SURVEY_SLIDE__SORT_BY_ORDER_ASC, getId());
 

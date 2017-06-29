@@ -219,8 +219,8 @@ public class FeedbackSlideEditComponentWithController extends
 						try {
 							// Change comment
 							getSurveyAdministrationManagerService()
-							.feedbackSlideChangeComment(feedbackSlide,
-									getStringValue());
+									.feedbackSlideChangeComment(feedbackSlide,
+											getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;

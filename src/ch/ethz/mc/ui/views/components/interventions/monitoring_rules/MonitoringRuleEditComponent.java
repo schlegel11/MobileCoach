@@ -5,15 +5,15 @@ package ch.ethz.mc.ui.views.components.interventions.monitoring_rules;
  * initiative of the Institute of Technology Management at University of St.
  * Gallen and the Department of Management, Technology and Economics at ETH
  * Zurich
- *
+ * 
  * For details see README.md file in the root folder of this project.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -184,13 +184,13 @@ public class MonitoringRuleEditComponent extends AbstractClosableEditComponent {
 		localize(closeButton, AdminMessageStrings.GENERAL__CLOSE);
 
 		replyRulesTabSheet
-		.getTab(0)
-		.setCaption(
-				Messages.getAdminString(AdminMessageStrings.MONITORING_RULE_EDITING__EXECUTE_RULES_IF_ANSWER_SHORT));
+				.getTab(0)
+				.setCaption(
+						Messages.getAdminString(AdminMessageStrings.MONITORING_RULE_EDITING__EXECUTE_RULES_IF_ANSWER_SHORT));
 		replyRulesTabSheet
-		.getTab(1)
-		.setCaption(
-				Messages.getAdminString(AdminMessageStrings.MONITORING_RULE_EDITING__EXECUTE_RULES_IF_NO_ANSWER_SHORT));
+				.getTab(1)
+				.setCaption(
+						Messages.getAdminString(AdminMessageStrings.MONITORING_RULE_EDITING__EXECUTE_RULES_IF_NO_ANSWER_SHORT));
 
 		sendMessageIfTrueComboBox.setImmediate(true);
 		sendToSupervisorComboBox.setImmediate(true);
@@ -270,7 +270,7 @@ public class MonitoringRuleEditComponent extends AbstractClosableEditComponent {
 		sendMessageIfTrueComboBox = new CheckBox();
 		sendMessageIfTrueComboBox.setStyleName("bold");
 		sendMessageIfTrueComboBox
-		.setCaption("!!! Send send message if rule result is TRUE");
+				.setCaption("!!! Send send message if rule result is TRUE");
 		sendMessageIfTrueComboBox.setImmediate(false);
 		sendMessageIfTrueComboBox.setWidth("100.0%");
 		sendMessageIfTrueComboBox.setHeight("-1px");
@@ -280,7 +280,7 @@ public class MonitoringRuleEditComponent extends AbstractClosableEditComponent {
 		sendToSupervisorComboBox = new CheckBox();
 		sendToSupervisorComboBox.setStyleName("bold");
 		sendToSupervisorComboBox
-		.setCaption("!!! Send message to supervisor (NOT to participant)");
+				.setCaption("!!! Send message to supervisor (NOT to participant)");
 		sendToSupervisorComboBox.setImmediate(false);
 		sendToSupervisorComboBox.setWidth("100.0%");
 		sendToSupervisorComboBox.setHeight("-1px");
@@ -289,15 +289,15 @@ public class MonitoringRuleEditComponent extends AbstractClosableEditComponent {
 		// stopRuleExecutionAndFinishInterventionIfTrueComboBox
 		stopRuleExecutionAndFinishInterventionIfTrueComboBox = new CheckBox();
 		stopRuleExecutionAndFinishInterventionIfTrueComboBox
-		.setStyleName("bold");
+				.setStyleName("bold");
 		stopRuleExecutionAndFinishInterventionIfTrueComboBox
-		.setCaption("!!! Stop rule execution and finish intervention for this participant if rule result is TRUE");
+				.setCaption("!!! Stop rule execution and finish intervention for this participant if rule result is TRUE");
 		stopRuleExecutionAndFinishInterventionIfTrueComboBox
-		.setImmediate(false);
+				.setImmediate(false);
 		stopRuleExecutionAndFinishInterventionIfTrueComboBox.setWidth("100.0%");
 		stopRuleExecutionAndFinishInterventionIfTrueComboBox.setHeight("-1px");
 		switchesGroupLayout
-		.addComponent(stopRuleExecutionAndFinishInterventionIfTrueComboBox);
+				.addComponent(stopRuleExecutionAndFinishInterventionIfTrueComboBox);
 
 		// gridLayout2
 		gridLayout2 = buildGridLayout2();
@@ -323,7 +323,7 @@ public class MonitoringRuleEditComponent extends AbstractClosableEditComponent {
 		storeVariableLabel.setWidth("-1px");
 		storeVariableLabel.setHeight("-1px");
 		storeVariableLabel
-		.setValue("!!! Store result to variable (if required):");
+				.setValue("!!! Store result to variable (if required):");
 		gridLayout1.addComponent(storeVariableLabel, 0, 0);
 
 		// storeVariableTextFieldComponent
@@ -390,7 +390,7 @@ public class MonitoringRuleEditComponent extends AbstractClosableEditComponent {
 		hoursUntilHandledAsNotAnsweredLabel.setWidth("-1px");
 		hoursUntilHandledAsNotAnsweredLabel.setHeight("-1px");
 		hoursUntilHandledAsNotAnsweredLabel
-		.setValue("!!! Hours until handled as not answered:");
+				.setValue("!!! Hours until handled as not answered:");
 		gridLayout2.addComponent(hoursUntilHandledAsNotAnsweredLabel, 0, 2);
 
 		// hoursUntilHandledAsNotAnsweredSlider
@@ -442,19 +442,19 @@ public class MonitoringRuleEditComponent extends AbstractClosableEditComponent {
 		replyRulesIfAnswerLabel.setWidth("-1px");
 		replyRulesIfAnswerLabel.setHeight("-1px");
 		replyRulesIfAnswerLabel
-		.setValue("!!! Execute these rules if participant does answer:");
+				.setValue("!!! Execute these rules if participant does answer:");
 		replyRulesIfAnswerLayout.addComponent(replyRulesIfAnswerLabel);
 
 		// monitoringReplyRulesEditComponentWithControllerIfAnswer
 		monitoringReplyRulesEditComponentWithControllerIfAnswer = new MonitoringReplyRulesEditComponentWithController();
 		monitoringReplyRulesEditComponentWithControllerIfAnswer
-		.setImmediate(false);
+				.setImmediate(false);
 		monitoringReplyRulesEditComponentWithControllerIfAnswer
-		.setWidth("100.0%");
+				.setWidth("100.0%");
 		monitoringReplyRulesEditComponentWithControllerIfAnswer
-		.setHeight("-1px");
+				.setHeight("-1px");
 		replyRulesIfAnswerLayout
-		.addComponent(monitoringReplyRulesEditComponentWithControllerIfAnswer);
+				.addComponent(monitoringReplyRulesEditComponentWithControllerIfAnswer);
 
 		return replyRulesIfAnswerLayout;
 	}
@@ -475,19 +475,19 @@ public class MonitoringRuleEditComponent extends AbstractClosableEditComponent {
 		replyRulesIfNoAnswerLabel.setWidth("-1px");
 		replyRulesIfNoAnswerLabel.setHeight("-1px");
 		replyRulesIfNoAnswerLabel
-		.setValue("!!! Execute these rules if participant does NOT answer:");
+				.setValue("!!! Execute these rules if participant does NOT answer:");
 		replyRulesIfNoAnswerLayout.addComponent(replyRulesIfNoAnswerLabel);
 
 		// monitoringReplyRulesEditComponentWithControllerIfNoAnswer
 		monitoringReplyRulesEditComponentWithControllerIfNoAnswer = new MonitoringReplyRulesEditComponentWithController();
 		monitoringReplyRulesEditComponentWithControllerIfNoAnswer
-		.setImmediate(false);
+				.setImmediate(false);
 		monitoringReplyRulesEditComponentWithControllerIfNoAnswer
-		.setWidth("100.0%");
+				.setWidth("100.0%");
 		monitoringReplyRulesEditComponentWithControllerIfNoAnswer
-		.setHeight("-1px");
+				.setHeight("-1px");
 		replyRulesIfNoAnswerLayout
-		.addComponent(monitoringReplyRulesEditComponentWithControllerIfNoAnswer);
+				.addComponent(monitoringReplyRulesEditComponentWithControllerIfNoAnswer);
 
 		return replyRulesIfNoAnswerLayout;
 	}

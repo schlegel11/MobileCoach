@@ -39,13 +39,13 @@ import ch.ethz.mc.tools.StringHelpers;
  */
 @Log4j2
 public class MonitoringSchedulingWorker extends Thread {
-	private final SurveyExecutionManagerService	screeningSurveyExecutionManagerService;
-	private final InterventionExecutionManagerService		interventionExecutionManagerService;
+	private final SurveyExecutionManagerService			screeningSurveyExecutionManagerService;
+	private final InterventionExecutionManagerService	interventionExecutionManagerService;
 
-	private final boolean									statisticsEnabled;
-	private String											lastStatisticsCreation	= "";
+	private final boolean								statisticsEnabled;
+	private String										lastStatisticsCreation	= "";
 
-	private static File										statisticsFile			= null;
+	private static File									statisticsFile			= null;
 
 	public MonitoringSchedulingWorker(
 			final InterventionExecutionManagerService interventionExecutionManagerService,

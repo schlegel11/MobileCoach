@@ -297,7 +297,7 @@ public class InterventionVariablesTabComponentWithController extends
 					selectedUIVariable
 							.getRelatedModelObject(
 									InterventionVariableWithValue.class)
-									.getAccessType().toString());
+							.getAccessType().toString());
 
 			getAdminUI().showInformationNotification(
 					AdminMessageStrings.NOTIFICATION__VARIABLE_SETTING_CHANGED);

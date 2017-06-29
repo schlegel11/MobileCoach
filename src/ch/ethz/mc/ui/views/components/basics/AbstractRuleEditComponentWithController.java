@@ -169,7 +169,7 @@ public class AbstractRuleEditComponentWithController extends
 						try {
 							// Change comment
 							getInterventionAdministrationManagerService()
-							.abstractRuleChangeComment(rule,
+									.abstractRuleChangeComment(rule,
 											getStringValue());
 						} catch (final Exception e) {
 							handleException(e);

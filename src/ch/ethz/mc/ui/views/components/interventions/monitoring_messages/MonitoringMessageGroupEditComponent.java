@@ -154,7 +154,7 @@ public class MonitoringMessageGroupEditComponent extends
 		// messagesExpectAnswerCheckBox
 		messagesExpectAnswerCheckBox = new CheckBox();
 		messagesExpectAnswerCheckBox
-		.setCaption("!!! The messages in this group expect to be answered by the participant");
+				.setCaption("!!! The messages in this group expect to be answered by the participant");
 		messagesExpectAnswerCheckBox.setImmediate(false);
 		messagesExpectAnswerCheckBox.setWidth("100.0%");
 		messagesExpectAnswerCheckBox.setHeight("-1px");
@@ -171,7 +171,7 @@ public class MonitoringMessageGroupEditComponent extends
 		// sendSamePositionIfSendingAsReplyCheckBox
 		sendSamePositionIfSendingAsReplyCheckBox = new CheckBox();
 		sendSamePositionIfSendingAsReplyCheckBox
-		.setCaption("!!! Send message from same position if sending as reply to former message and answer");
+				.setCaption("!!! Send message from same position if sending as reply to former message and answer");
 		sendSamePositionIfSendingAsReplyCheckBox.setImmediate(false);
 		sendSamePositionIfSendingAsReplyCheckBox.setWidth("100.0%");
 		sendSamePositionIfSendingAsReplyCheckBox.setHeight("-1px");
@@ -210,7 +210,7 @@ public class MonitoringMessageGroupEditComponent extends
 		validationExpressionLabel.setWidth("-1px");
 		validationExpressionLabel.setHeight("-1px");
 		validationExpressionLabel
-		.setValue("!!! Expression to validate result as correct (optional):");
+				.setValue("!!! Expression to validate result as correct (optional):");
 		validationExpresionLayout.addComponent(validationExpressionLabel);
 
 		// validationExpressionTextFieldComponent
@@ -219,7 +219,7 @@ public class MonitoringMessageGroupEditComponent extends
 		validationExpressionTextFieldComponent.setWidth("400px");
 		validationExpressionTextFieldComponent.setHeight("-1px");
 		validationExpresionLayout
-		.addComponent(validationExpressionTextFieldComponent);
+				.addComponent(validationExpressionTextFieldComponent);
 		validationExpresionLayout.setComponentAlignment(
 				validationExpressionTextFieldComponent, new Alignment(6));
 
