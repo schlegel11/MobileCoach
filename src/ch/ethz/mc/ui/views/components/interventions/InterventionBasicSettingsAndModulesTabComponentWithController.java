@@ -20,20 +20,28 @@ package ch.ethz.mc.ui.views.components.interventions;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import java.util.Set;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
-import ch.ethz.mc.MC;
+
+import org.apache.commons.lang3.ArrayUtils;
+
 import ch.ethz.mc.conf.Constants;
+import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.persistent.Intervention;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.ListSelect;
 
 /**
  * Extends the all interventions tab component with a controller
- * 
+ *
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
@@ -46,6 +54,22 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 	private final InterventionEditingContainerComponentWithController	interventionEditingContainerComponentWithController;
 
 	private boolean														lastInterventionMonitoringState	= false;
+
+	@Data
+	@AllArgsConstructor
+	private class InterventionWrapper {
+		String	name;
+		String	objectId;
+
+		@Override
+		public String toString() {
+			if (name.equals("")) {
+				return ImplementationConstants.DEFAULT_OBJECT_NAME;
+			} else {
+				return name;
+			}
+		}
+	}
 
 	public InterventionBasicSettingsAndModulesTabComponentWithController(
 			final Intervention intervention,
@@ -103,6 +127,162 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 		interventionBasicSettingsComponent.getSwitchMessagingButton()
 				.addClickListener(buttonClickListener);
 
+		// Handle checkboxes
+		val finishScreeningSurveyCheckbox = getInterventionBasicSettingsAndModulesComponent()
+				.getFinishScreeningSurveysCheckbox();
+		finishScreeningSurveyCheckbox.setValue(intervention
+				.isAutomaticallyFinishScreeningSurveys());
+
+		finishScreeningSurveyCheckbox
+				.addValueChangeListener(new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						getInterventionExecutionManagerService()
+								.interventionSetAutomaticallyFinishScreeningSurveys(
+										intervention,
+										(boolean) event.getProperty()
+												.getValue());
+					}
+				});
+
+		for (val startingDay : intervention.getMonitoringStartingDays()) {
+			switch (startingDay) {
+				case 1:
+					getInterventionBasicSettingsAndModulesComponent()
+							.getMondayCheckbox().setValue(true);
+					break;
+				case 2:
+					getInterventionBasicSettingsAndModulesComponent()
+							.getTuesdayCheckbox().setValue(true);
+					break;
+				case 3:
+					getInterventionBasicSettingsAndModulesComponent()
+							.getWednesdayCheckbox().setValue(true);
+					break;
+				case 4:
+					getInterventionBasicSettingsAndModulesComponent()
+							.getThursdayCheckbox().setValue(true);
+					break;
+				case 5:
+					getInterventionBasicSettingsAndModulesComponent()
+							.getFridayCheckbox().setValue(true);
+					break;
+				case 6:
+					getInterventionBasicSettingsAndModulesComponent()
+							.getSaturdayCheckbox().setValue(true);
+					break;
+				case 7:
+					getInterventionBasicSettingsAndModulesComponent()
+							.getSundayCheckbox().setValue(true);
+					break;
+			}
+		}
+
+		final ValueChangeListener startingDayValueChangeListener = new ValueChangeListener() {
+
+			@Override
+			public void valueChange(final ValueChangeEvent event) {
+				if (event.getProperty() == getInterventionBasicSettingsAndModulesComponent()
+						.getMondayCheckbox()) {
+					getInterventionExecutionManagerService()
+							.interventionSetStartingDay(intervention, 1,
+									(boolean) event.getProperty().getValue());
+				} else if (event.getProperty() == getInterventionBasicSettingsAndModulesComponent()
+						.getTuesdayCheckbox()) {
+					getInterventionExecutionManagerService()
+							.interventionSetStartingDay(intervention, 2,
+									(boolean) event.getProperty().getValue());
+				} else if (event.getProperty() == getInterventionBasicSettingsAndModulesComponent()
+						.getWednesdayCheckbox()) {
+					getInterventionExecutionManagerService()
+							.interventionSetStartingDay(intervention, 3,
+									(boolean) event.getProperty().getValue());
+				} else if (event.getProperty() == getInterventionBasicSettingsAndModulesComponent()
+						.getThursdayCheckbox()) {
+					getInterventionExecutionManagerService()
+							.interventionSetStartingDay(intervention, 4,
+									(boolean) event.getProperty().getValue());
+				} else if (event.getProperty() == getInterventionBasicSettingsAndModulesComponent()
+						.getFridayCheckbox()) {
+					getInterventionExecutionManagerService()
+							.interventionSetStartingDay(intervention, 5,
+									(boolean) event.getProperty().getValue());
+				} else if (event.getProperty() == getInterventionBasicSettingsAndModulesComponent()
+						.getSaturdayCheckbox()) {
+					getInterventionExecutionManagerService()
+							.interventionSetStartingDay(intervention, 6,
+									(boolean) event.getProperty().getValue());
+				} else if (event.getProperty() == getInterventionBasicSettingsAndModulesComponent()
+						.getSundayCheckbox()) {
+					getInterventionExecutionManagerService()
+							.interventionSetStartingDay(intervention, 7,
+									(boolean) event.getProperty().getValue());
+				}
+			}
+		};
+
+		getInterventionBasicSettingsAndModulesComponent().getMondayCheckbox()
+				.addValueChangeListener(startingDayValueChangeListener);
+		getInterventionBasicSettingsAndModulesComponent().getTuesdayCheckbox()
+				.addValueChangeListener(startingDayValueChangeListener);
+		getInterventionBasicSettingsAndModulesComponent()
+				.getWednesdayCheckbox().addValueChangeListener(
+						startingDayValueChangeListener);
+		getInterventionBasicSettingsAndModulesComponent().getThursdayCheckbox()
+				.addValueChangeListener(startingDayValueChangeListener);
+		getInterventionBasicSettingsAndModulesComponent().getFridayCheckbox()
+				.addValueChangeListener(startingDayValueChangeListener);
+		getInterventionBasicSettingsAndModulesComponent().getSaturdayCheckbox()
+				.addValueChangeListener(startingDayValueChangeListener);
+		getInterventionBasicSettingsAndModulesComponent().getSundayCheckbox()
+				.addValueChangeListener(startingDayValueChangeListener);
+
+		// Handle list
+		val uniquenessList = getInterventionBasicSettingsAndModulesComponent()
+				.getUniquenessList();
+		val otherInterventions = getInterventionAdministrationManagerService()
+				.getAllInterventions();
+
+		for (val otherIntervention : otherInterventions) {
+			if (!intervention.getId().equals(otherIntervention.getId())) {
+				val interventionWrapper = new InterventionWrapper(
+						otherIntervention.getName(), otherIntervention.getId()
+								.toHexString());
+				uniquenessList.addItem(interventionWrapper);
+
+				if (ArrayUtils.contains(intervention
+						.getInterventionsToCheckForParticipantUniqueness(),
+						otherIntervention.getId().toHexString())) {
+					uniquenessList.select(interventionWrapper);
+				}
+			}
+		}
+
+		uniquenessList.addValueChangeListener(new ValueChangeListener() {
+
+			@Override
+			public void valueChange(final ValueChangeEvent event) {
+				val newSelection = (Set<?>) ((ListSelect) event.getProperty())
+						.getValue();
+
+				val interventionsToCheckForParticipantUniqueness = new String[newSelection
+						.size()];
+				val iterator = newSelection.iterator();
+				int i = 0;
+				while (iterator.hasNext()) {
+					interventionsToCheckForParticipantUniqueness[i] = ((InterventionWrapper) iterator
+							.next()).getObjectId();
+					i++;
+				}
+
+				getInterventionExecutionManagerService()
+						.interventionSetInterventionsToCheckForParticipantUniqueness(
+								intervention,
+								interventionsToCheckForParticipantUniqueness);
+			}
+		});
+
 		// Set start state
 		adjust();
 	}
@@ -149,8 +329,7 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 			@Override
 			public void buttonClick(final ClickEvent event) {
 				try {
-					MC.getInstance()
-							.getInterventionExecutionManagerService()
+					getInterventionExecutionManagerService()
 							.interventionSetStatus(intervention,
 									!intervention.isActive());
 				} catch (final Exception e) {
@@ -172,8 +351,7 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 			@Override
 			public void buttonClick(final ClickEvent event) {
 				try {
-					MC.getInstance()
-							.getInterventionExecutionManagerService()
+					getInterventionExecutionManagerService()
 							.interventionSetMonitoring(intervention,
 									!intervention.isMonitoringActive());
 				} catch (final Exception e) {

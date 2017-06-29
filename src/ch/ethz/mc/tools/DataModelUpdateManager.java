@@ -97,6 +97,9 @@ public class DataModelUpdateManager {
 				case 7:
 					updateToVersion7();
 					break;
+				case 9:
+					updateToVersion9();
+					break;
 			}
 
 			log.info("Update to version {} done", updateToVersionInThisStep);
@@ -528,5 +531,16 @@ public class DataModelUpdateManager {
 		val dialogMessageCollection = jongo.getCollection("DialogMessage");
 		dialogMessageCollection.update(Queries.EVERYTHING).multi()
 				.with(Queries.UPDATE_VERSION_7__DIALOG_MESSAGE__CHANGE_1);
+	}
+
+	/**
+	 * Changes for version 9:
+	 */
+	private static void updateToVersion9() {
+		val interventionCollection = jongo.getCollection("Intervention");
+		interventionCollection.update(Queries.EVERYTHING).multi()
+				.with(Queries.UPDATE_VERSION_9__INTERVENTION__CHANGE_1);
+		interventionCollection.update(Queries.EVERYTHING).multi()
+				.with(Queries.UPDATE_VERSION_9__INTERVENTION__CHANGE_2);
 	}
 }

@@ -43,6 +43,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.IteratorUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.MC;
@@ -200,6 +201,42 @@ public class InterventionExecutionManagerService {
 	public void interventionSetMonitoring(final Intervention intervention,
 			final boolean value) {
 		intervention.setMonitoringActive(value);
+
+		databaseManagerService.saveModelObject(intervention);
+	}
+
+	@Synchronized
+	public void interventionSetAutomaticallyFinishScreeningSurveys(
+			final Intervention intervention, final boolean value) {
+		intervention.setAutomaticallyFinishScreeningSurveys(value);
+
+		databaseManagerService.saveModelObject(intervention);
+	}
+
+	@Synchronized
+	public void interventionSetStartingDay(final Intervention intervention,
+			final int day, final boolean value) {
+		if (value
+				&& !ArrayUtils.contains(
+						intervention.getMonitoringStartingDays(), day)) {
+			intervention.setMonitoringStartingDays(ArrayUtils.add(
+					intervention.getMonitoringStartingDays(), day));
+		} else if (!value
+				&& ArrayUtils.contains(
+						intervention.getMonitoringStartingDays(), day)) {
+			intervention.setMonitoringStartingDays(ArrayUtils.removeElement(
+					intervention.getMonitoringStartingDays(), day));
+		}
+
+		databaseManagerService.saveModelObject(intervention);
+	}
+
+	@Synchronized
+	public void interventionSetInterventionsToCheckForParticipantUniqueness(
+			final Intervention intervention,
+			final String[] interventionsToCheckForParticipantUniqueness) {
+		intervention
+				.setInterventionsToCheckForParticipantUniqueness(interventionsToCheckForParticipantUniqueness);
 
 		databaseManagerService.saveModelObject(intervention);
 	}
@@ -776,19 +813,36 @@ public class InterventionExecutionManagerService {
 		val dateToday = new Date(InternalDateTime.currentTimeMillis());
 		val todayDayIndex = Integer.parseInt(dayInWeekFormatter
 				.format(dateToday));
+
 		for (val participant : participants) {
 
 			// Check if participant has already been scheduled today
 			val dialogStatus = getDialogStatusByParticipant(participant.getId());
 
-			// Only start interventions on Monday
+			// Only start interventions on assigned intervention monitoring
+			// starting days
 			if (dialogStatus != null
-					&& dialogStatus.getMonitoringDaysParticipated() == 0
-					&& todayDayIndex != 1) {
-				log.debug(
-						"Participant {} has not been scheduled at all! Wait until next monday to start with scheduling...",
-						participant.getId());
-				continue;
+					&& dialogStatus.getMonitoringDaysParticipated() == 0) {
+				// Check starting day based on intervention
+				val intervention = databaseManagerService.getModelObjectById(
+						Intervention.class, participant.getIntervention());
+
+				boolean todayIsAStartingDay = false;
+
+				for (val startingDay : intervention.getMonitoringStartingDays()) {
+					if (startingDay == todayDayIndex) {
+						todayIsAStartingDay = true;
+						break;
+					}
+				}
+
+				if (!todayIsAStartingDay) {
+					log.debug(
+							"Participant {} has not been scheduled at all! Wait until next monitoring starting day to start with scheduling...",
+							participant.getId());
+
+					continue;
+				}
 			}
 
 			if (dialogStatus != null

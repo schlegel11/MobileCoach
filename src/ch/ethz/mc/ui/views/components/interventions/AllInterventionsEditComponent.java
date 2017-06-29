@@ -266,7 +266,7 @@ public class AllInterventionsEditComponent extends AbstractCustomComponent {
 		// reportButton
 		reportButton = new Button();
 		reportButton.setCaption("!!! Report");
-		reportButton.setIcon(new ThemeResource("img/results-icon-small.png"));
+		reportButton.setIcon(new ThemeResource("img/ok-icon-small.png"));
 		reportButton.setImmediate(true);
 		reportButton.setWidth("100px");
 		reportButton.setHeight("-1px");

@@ -199,4 +199,6 @@ public class Queries {
 	public static final String	UPDATE_VERSION_7__MONITORING_RULE__CHANGE_1																																										= "{$set:{'sendMessageToSupervisor':false}}";
 	public static final String	UPDATE_VERSION_7__MONITORING_REPLY_RULE__CHANGE_1																																								= "{$set:{'sendMessageToSupervisor':false}}";
 	public static final String	UPDATE_VERSION_7__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'supervisorMessage':false}}";
+	public static final String	UPDATE_VERSION_9__INTERVENTION__CHANGE_1																																										= "{$set:{'interventionsToCheckForParticipantUniqueness':[]}}";
+	public static final String	UPDATE_VERSION_9__INTERVENTION__CHANGE_2																																										= "{$set:{'monitoringStartingDays':[1]}}";
 }

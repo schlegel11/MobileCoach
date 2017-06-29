@@ -28,6 +28,9 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.val;
+
+import org.apache.commons.lang3.StringUtils;
+
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.ModelObject;
@@ -59,14 +62,14 @@ public class Intervention extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String	name;
+	private String		name;
 
 	/**
 	 * Timestamp when the {@link Intervention} has been created
 	 */
 	@Getter
 	@Setter
-	private long	created;
+	private long		created;
 
 	/**
 	 * Defines if the whole intervention is active. If this value is false, also
@@ -75,7 +78,7 @@ public class Intervention extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private boolean	active;
+	private boolean		active;
 
 	/**
 	 * Defines if the monitoring in this {@link Intervention} is active. If not
@@ -84,7 +87,7 @@ public class Intervention extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private boolean	monitoringActive;
+	private boolean		monitoringActive;
 
 	/**
 	 * Defines if {@link ScreeningSurvey}s of participants where all relevant
@@ -92,7 +95,23 @@ public class Intervention extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private boolean	automaticallyFinishScreeningSurveys;
+	private boolean		automaticallyFinishScreeningSurveys;
+
+	/**
+	 * Defines which other interventions on a specific instance should be
+	 * checked for uniqueness of participants regarding their
+	 * {@link DialogOption}s
+	 */
+	@Getter
+	@Setter
+	private String[]	interventionsToCheckForParticipantUniqueness;
+
+	/**
+	 * Defines the monitoring starting days of the intervention
+	 */
+	@Getter
+	@Setter
+	private int[]		monitoringStartingDays;
 
 	/**
 	 * The sender identification used to send messages to the
@@ -100,7 +119,7 @@ public class Intervention extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private String	assignedSenderIdentification;
+	private String		assignedSenderIdentification;
 
 	/*
 	 * (non-Javadoc)
@@ -231,10 +250,12 @@ public class Intervention extends ModelObject {
 				+ wrapField(formatStatus(active)));
 		table += wrapRow(wrapHeader("Monitoring Status:")
 				+ wrapField(formatStatus(monitoringActive)));
-		table += wrapRow(wrapHeader("Screening Surveys shall automatically be finished:")
-				+ wrapField(formatYesNo(automaticallyFinishScreeningSurveys)));
 		table += wrapRow(wrapHeader("Assigned Sender Identification:")
 				+ wrapField(assignedSenderIdentification));
+		table += wrapRow(wrapHeader("Screening Surveys shall automatically be finished:")
+				+ wrapField(formatYesNo(automaticallyFinishScreeningSurveys)));
+		table += wrapRow(wrapHeader("Monitoring Starting Days:")
+				+ wrapField(StringUtils.join(monitoringStartingDays, ',')));
 		return wrapTable(table);
 	}
 }

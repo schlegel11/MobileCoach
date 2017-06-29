@@ -294,7 +294,8 @@ public class InterventionAdministrationManagerService {
 	@Synchronized
 	public Intervention interventionCreate(final String name) {
 		val intervention = new Intervention(name,
-				InternalDateTime.currentTimeMillis(), false, false, false, null);
+				InternalDateTime.currentTimeMillis(), false, false, false,
+				new String[] {}, new int[] { 1 }, null);
 
 		if (name.equals("")) {
 			intervention.setName(ImplementationConstants.DEFAULT_OBJECT_NAME);
