@@ -1,9 +1,10 @@
 package ch.ethz.mc.model.persistent.types;
 
-import lombok.Getter;
-
 /*
- * Copyright (C) 2013-2017 MobileCoach Team at the Health-IS Lab
+ * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
+ * initiative of the Institute of Technology Management at University of St.
+ * Gallen and the Department of Management, Technology and Economics at ETH
+ * Zurich
  *
  * For details see README.md file in the root folder of this project.
  *
@@ -19,6 +20,8 @@ import lombok.Getter;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import lombok.Getter;
+
 /**
  * Supported privacy types for intervention variable with value
  *
