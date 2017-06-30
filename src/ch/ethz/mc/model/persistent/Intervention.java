@@ -98,13 +98,12 @@ public class Intervention extends ModelObject {
 	private boolean		automaticallyFinishScreeningSurveys;
 
 	/**
-	 * Defines which other interventions on a specific instance should be
-	 * checked for uniqueness of participants regarding their
-	 * {@link DialogOption}s
+	 * Defines which other interventions on a specific server instance should be
+	 * checked for uniqueness regarding sepcific variable values
 	 */
 	@Getter
 	@Setter
-	private String[]	interventionsToCheckForParticipantUniqueness;
+	private String[]	interventionsToCheckForUniqueness;
 
 	/**
 	 * Defines the monitoring starting days of the intervention

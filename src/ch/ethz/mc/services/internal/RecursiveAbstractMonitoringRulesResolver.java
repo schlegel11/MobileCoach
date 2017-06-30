@@ -340,8 +340,8 @@ public class RecursiveAbstractMonitoringRulesResolver {
 		val variablesWithValues = variablesManagerService
 				.getAllVariablesWithValuesOfParticipantAndSystem(participant);
 
-		val ruleResult = RuleEvaluator.evaluateRule(participant.getLanguage(),
-				rule, variablesWithValues.values());
+		val ruleResult = RuleEvaluator.evaluateRule(participant.getId(),
+				participant.getLanguage(), rule, variablesWithValues.values());
 
 		if (!ruleResult.isEvaluatedSuccessful()) {
 			log.error("Error when validating rule {} of participant {}: {}",

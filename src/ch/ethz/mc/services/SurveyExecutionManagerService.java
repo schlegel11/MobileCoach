@@ -1272,8 +1272,8 @@ public class SurveyExecutionManagerService {
 
 				// Evaluate rule
 				final val ruleResult = RuleEvaluator.evaluateRule(
-						participant.getLanguage(), formerSlideRule,
-						variablesWithValues.values());
+						participant.getId(), participant.getLanguage(),
+						formerSlideRule, variablesWithValues.values());
 
 				if (!ruleResult.isEvaluatedSuccessful()) {
 					log.error(
@@ -1522,9 +1522,10 @@ public class SurveyExecutionManagerService {
 		final val variablesWithValues = variablesManagerService
 				.getAllVariablesWithValuesOfParticipantAndSystem(participant);
 
-		final val nextSlide = getNextFeedbackSlide(participant.getLanguage(),
-				formerSlide, participant.getAssignedFeedback(),
-				variablesWithValues, showNextSlide);
+		final val nextSlide = getNextFeedbackSlide(participant.getId(),
+				participant.getLanguage(), formerSlide,
+				participant.getAssignedFeedback(), variablesWithValues,
+				showNextSlide);
 
 		if (nextSlide == null) {
 			// Feedback done
@@ -1546,18 +1547,18 @@ public class SurveyExecutionManagerService {
 
 			// Check if slide is first or last slide
 			final val priorAppropriateSlide = getNextFeedbackSlide(
-					participant.getLanguage(), nextSlide,
-					participant.getAssignedFeedback(), variablesWithValues,
-					false);
+					participant.getIntervention(), participant.getLanguage(),
+					nextSlide, participant.getAssignedFeedback(),
+					variablesWithValues, false);
 			if (priorAppropriateSlide == null) {
 				templateVariables.put(
 						FeedbackSlideTemplateFieldTypes.IS_FIRST_SLIDE
 								.toVariable(), true);
 			}
 			final val nextAppropriateSlide = getNextFeedbackSlide(
-					participant.getLanguage(), nextSlide,
-					participant.getAssignedFeedback(), variablesWithValues,
-					true);
+					participant.getIntervention(), participant.getLanguage(),
+					nextSlide, participant.getAssignedFeedback(),
+					variablesWithValues, true);
 			if (nextAppropriateSlide == null) {
 				templateVariables.put(
 						FeedbackSlideTemplateFieldTypes.IS_LAST_SLIDE
@@ -1698,6 +1699,7 @@ public class SurveyExecutionManagerService {
 	 * Determines which {@link FeedbackSlide} is the next slide to present to
 	 * the user
 	 *
+	 * @param intervetionId
 	 * @param locale
 	 * @param formerSlide
 	 * @param feedbackId
@@ -1707,6 +1709,7 @@ public class SurveyExecutionManagerService {
 	 */
 	@Synchronized
 	private FeedbackSlide getNextFeedbackSlide(
+			final ObjectId participantId,
 			final Locale locale,
 			final FeedbackSlide formerSlide,
 			final ObjectId feedbackId,
@@ -1744,8 +1747,9 @@ public class SurveyExecutionManagerService {
 			log.debug("Executing slide rules");
 			boolean allRulesAreTrue = true;
 			for (final val slideRule : slideRules) {
-				final val ruleResult = RuleEvaluator.evaluateRule(locale,
-						slideRule, variablesWithValues.values());
+				final val ruleResult = RuleEvaluator.evaluateRule(
+						participantId, locale, slideRule,
+						variablesWithValues.values());
 
 				if (!ruleResult.isEvaluatedSuccessful()) {
 					log.error("Error when validating rule: "

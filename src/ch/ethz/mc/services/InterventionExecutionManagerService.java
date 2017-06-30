@@ -232,11 +232,11 @@ public class InterventionExecutionManagerService {
 	}
 
 	@Synchronized
-	public void interventionSetInterventionsToCheckForParticipantUniqueness(
+	public void interventionSetInterventionsToCheckForUniqueness(
 			final Intervention intervention,
-			final String[] interventionsToCheckForParticipantUniqueness) {
+			final String[] interventionsToCheckForUniqueness) {
 		intervention
-				.setInterventionsToCheckForParticipantUniqueness(interventionsToCheckForParticipantUniqueness);
+				.setInterventionsToCheckForUniqueness(interventionsToCheckForUniqueness);
 
 		databaseManagerService.saveModelObject(intervention);
 	}
@@ -1244,6 +1244,7 @@ public class InterventionExecutionManagerService {
 							}
 
 							val ruleResult = RuleEvaluator.evaluateRule(
+									participant.getId(),
 									participant.getLanguage(), rule,
 									variablesWithValues.values());
 

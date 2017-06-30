@@ -144,7 +144,7 @@ public class InterventionBasicSettingsAndModulesComponent extends
 				AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__SUNDAY_CHECKBOX);
 		localize(
 				uniquenessLabel,
-				AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__PARTICIPANT_UNIQUENESS_LABEL);
+				AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__UNIQUENESS_LABEL);
 
 		// Adjust combo boxes
 		senderIdentificationSelectionComboBox.setImmediate(true);
@@ -439,7 +439,7 @@ public class InterventionBasicSettingsAndModulesComponent extends
 		uniquenessLabel.setWidth("-1px");
 		uniquenessLabel.setHeight("-1px");
 		uniquenessLabel
-				.setValue("!! Interventions to check for participant uniqueness:");
+				.setValue("!! Interventions to involve in uniqueness checks:");
 		gridLayout_2.addComponent(uniquenessLabel, 0, 0);
 
 		// uniquenessList

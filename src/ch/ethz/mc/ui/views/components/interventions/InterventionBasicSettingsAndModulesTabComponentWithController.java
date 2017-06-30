@@ -251,8 +251,8 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 								.toHexString());
 				uniquenessList.addItem(interventionWrapper);
 
-				if (ArrayUtils.contains(intervention
-						.getInterventionsToCheckForParticipantUniqueness(),
+				if (ArrayUtils.contains(
+						intervention.getInterventionsToCheckForUniqueness(),
 						otherIntervention.getId().toHexString())) {
 					uniquenessList.select(interventionWrapper);
 				}
@@ -277,7 +277,7 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 				}
 
 				getInterventionExecutionManagerService()
-						.interventionSetInterventionsToCheckForParticipantUniqueness(
+						.interventionSetInterventionsToCheckForUniqueness(
 								intervention,
 								interventionsToCheckForParticipantUniqueness);
 			}

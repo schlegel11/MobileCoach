@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Locale;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
@@ -34,12 +35,15 @@ import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.memory.RuleEvaluationResult;
+import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.concepts.AbstractRule;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
+import ch.ethz.mc.services.internal.VariablesManagerService;
 
 import com.fathzer.soft.javaluator.AbstractEvaluator;
 import com.fathzer.soft.javaluator.DoubleEvaluator;
@@ -52,10 +56,18 @@ import com.fathzer.soft.javaluator.Function;
  */
 @Log4j2
 public class RuleEvaluator {
+	@Setter
+	@Getter(value = AccessLevel.PRIVATE)
+	private static VariablesManagerService	variablesManagerService;
+
 	/**
 	 * Evaluates an {@link AbstractRule} including the given
 	 * {@link AbstractVariableWithValue}s
 	 *
+	 * @param participantId
+	 *            The {@link ObjectId} of the {@link Participant} the rule
+	 *            resolution
+	 *            refers to
 	 * @param locale
 	 *            Locale used for rule resolution, esp. for number formatting of
 	 *            double values
@@ -67,7 +79,8 @@ public class RuleEvaluator {
 	 * @return {@link RuleEvaluationResult} contains several information about
 	 *         the rule evaluation
 	 */
-	public static RuleEvaluationResult evaluateRule(final Locale locale,
+	public static RuleEvaluationResult evaluateRule(
+			final ObjectId participantId, final Locale locale,
 			final AbstractRule rule,
 			final Collection<AbstractVariableWithValue> variablesWithValues) {
 		val ruleEvaluationResult = new RuleEvaluationResult();
@@ -101,6 +114,34 @@ public class RuleEvaluator {
 					throw new Exception(
 							"Could not parse rule comparision term: "
 									+ e.getMessage());
+				}
+			} else if (rule
+					.getRuleEquationSign()
+					.isACrossInterventionVariableComparisionBasedEquationSignType()) {
+				log.debug("It's a cross intervention variable comparision based rule");
+				ruleEvaluationResult.setCalculatedRule(false);
+
+				// Evaluate rule
+				final String ruleResult;
+				try {
+					ruleResult = evaluateTextRuleTerm(locale,
+							rule.getRuleWithPlaceholders(), variablesWithValues);
+					ruleEvaluationResult.setTextRuleValue(ruleResult);
+				} catch (final Exception e) {
+					throw new Exception("Could not parse rule: "
+							+ e.getMessage());
+				}
+
+				// Clean and evaluate rule comparison term
+				val ruleComparisonTermResult = rule
+						.getRuleComparisonTermWithPlaceholders().trim();
+				if (StringValidator
+						.isValidVariableName(ruleComparisonTermResult)) {
+					ruleEvaluationResult
+							.setTextRuleComparisonTermValue(ruleComparisonTermResult);
+				} else {
+					throw new Exception(
+							"Could not parse rule comparision term: It's not a valid variable name");
 				}
 			} else {
 				log.debug("It's a text based rule");
@@ -387,7 +428,16 @@ public class RuleEvaluator {
 					ruleEvaluationResult.setTextRuleValue(String
 							.valueOf(calcDaysDiff));
 					break;
-				default:
+				case CHECK_VALUE_IN_VARIABLE_ACROSS_INVTERVENTIONS_AND_TRUE_IF_DUPLICATE_FOUND:
+					val duplicateFound = checkValueInVariableForDuplicates(
+							participantId,
+							ruleEvaluationResult.getTextRuleValue(),
+							ruleEvaluationResult
+									.getTextRuleComparisonTermValue());
+
+					ruleEvaluationResult
+							.setRuleMatchesEquationSign(duplicateFound);
+
 					break;
 			}
 
@@ -445,6 +495,38 @@ public class RuleEvaluator {
 						+ dayOfYear1;
 			}
 		}
+	}
+
+	/**
+	 * Checks if the variable value already exists for the given variable in
+	 * other interventions mentioned in the list of interventions for uniqueness
+	 * checks
+	 * 
+	 * @param participantId
+	 *            The {@link ObjectId} of the {@link Participant} defining the
+	 *            search
+	 *            scope
+	 * @param value
+	 *            The value to use for the check
+	 * @param variableName
+	 *            The variable to check regarding the value
+	 * @return
+	 */
+	private static boolean checkValueInVariableForDuplicates(
+			final ObjectId participantId, final String value,
+			final String variableName) {
+
+		final boolean duplicatesAvailable = variablesManagerService
+				.checkValueInVariableForDuplicates(participantId, value,
+						variableName);
+
+		if (duplicatesAvailable) {
+			log.debug("At least one dupliacte hast been found in the mentioend interventions");
+		} else {
+			log.debug("No duplicates have been found in the mentioned interventions");
+		}
+
+		return duplicatesAvailable;
 	}
 
 	/**

@@ -21,9 +21,11 @@ package ch.ethz.mc.services.internal;
  * limitations under the License.
  */
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -40,6 +42,7 @@ import ch.ethz.mc.model.memory.MemoryVariable;
 import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.DialogStatus;
 import ch.ethz.mc.model.persistent.IntermediateSurveyAndFeedbackParticipantShortURL;
+import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.InterventionVariableWithValue;
 import ch.ethz.mc.model.persistent.MonitoringMessage;
 import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
@@ -59,6 +62,7 @@ import ch.ethz.mc.services.types.SystemVariables.READ_ONLY_PARTICIPANT_VARIABLES
 import ch.ethz.mc.services.types.SystemVariables.READ_ONLY_SYSTEM_VARIABLES;
 import ch.ethz.mc.services.types.SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES;
 import ch.ethz.mc.tools.InternalDateTime;
+import ch.ethz.mc.tools.RuleEvaluator;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.tools.StringValidator;
 
@@ -69,26 +73,28 @@ import ch.ethz.mc.tools.StringValidator;
  */
 @Log4j2
 public class VariablesManagerService {
-	private static VariablesManagerService	instance			= null;
+	private static VariablesManagerService												instance			= null;
 
-	private final DatabaseManagerService	databaseManagerService;
+	private final DatabaseManagerService												databaseManagerService;
 
-	private final HashSet<String>			allSystemReservedVariableNames;
-	private final HashSet<String>			allSystemReservedVariableNamesRelevantForSlides;
-	private final HashSet<String>			writableReservedVariableNames;
-	private final HashSet<String>			writeProtectedReservedVariableNames;
+	private final HashSet<String>														allSystemReservedVariableNames;
+	private final HashSet<String>														allSystemReservedVariableNamesRelevantForSlides;
+	private final HashSet<String>														writableReservedVariableNames;
+	private final HashSet<String>														writeProtectedReservedVariableNames;
 
-	private final HashSet<String>			externallyReadableSystemVariableNames;
-	private final HashSet<String>			externallyReadableParticipantVariableNames;
+	private final HashSet<String>														externallyReadableSystemVariableNames;
+	private final HashSet<String>														externallyReadableParticipantVariableNames;
 
-	private static SimpleDateFormat			dayInWeekFormatter	= new SimpleDateFormat(
-																		"u");
-	private static SimpleDateFormat			dayOfMonthFormatter	= new SimpleDateFormat(
-																		"d");
-	private static SimpleDateFormat			monthFormatter		= new SimpleDateFormat(
-																		"M");
-	private static SimpleDateFormat			yearFormatter		= new SimpleDateFormat(
-																		"yyyy");
+	private final Hashtable<String, Hashtable<String, ParticipantVariableWithValue>>	participantsVariablesCache;
+
+	private static SimpleDateFormat														dayInWeekFormatter	= new SimpleDateFormat(
+																													"u");
+	private static SimpleDateFormat														dayOfMonthFormatter	= new SimpleDateFormat(
+																													"d");
+	private static SimpleDateFormat														monthFormatter		= new SimpleDateFormat(
+																													"M");
+	private static SimpleDateFormat														yearFormatter		= new SimpleDateFormat(
+																													"yyyy");
 
 	private VariablesManagerService(
 			final DatabaseManagerService databaseManagerService)
@@ -142,6 +148,8 @@ public class VariablesManagerService {
 			externallyReadableParticipantVariableNames.add(variable);
 		}
 
+		participantsVariablesCache = new Hashtable<String, Hashtable<String, ParticipantVariableWithValue>>();
+
 		log.info("Started.");
 	}
 
@@ -151,11 +159,16 @@ public class VariablesManagerService {
 		if (instance == null) {
 			instance = new VariablesManagerService(databaseManagerService);
 		}
+
+		RuleEvaluator.setVariablesManagerService(instance);
+
 		return instance;
 	}
 
 	public void stop() throws Exception {
 		log.info("Stopping service...");
+
+		RuleEvaluator.setVariablesManagerService(null);
 
 		log.info("Stopped.");
 	}
@@ -186,30 +199,52 @@ public class VariablesManagerService {
 			}
 		}
 
-		// Retrieve all stored variables
-		val participantVariablesWithValues = databaseManagerService
-				.findSortedModelObjects(
-						ParticipantVariableWithValue.class,
-						Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT,
-						Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
-						participant.getId());
+		// Retrieve all stored participant variables and add them
+		synchronized (participantsVariablesCache) {
+			if (participantsVariablesCache.containsKey(participant.getId()
+					.toHexString())) {
+				// Use cache
+				val participantVariablesCache = participantsVariablesCache
+						.get(participant.getId().toHexString());
+
+				variablesWithValues.putAll(participantVariablesCache);
+			} else {
+				// Create cache
+				log.debug("Creating cache for participant {} ", participant
+						.getId().toHexString());
+
+				val participantVariablesWithValues = databaseManagerService
+						.findSortedModelObjects(
+								ParticipantVariableWithValue.class,
+								Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT,
+								Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
+								participant.getId());
+
+				val participantVariablesCache = new Hashtable<String, ParticipantVariableWithValue>();
+				for (val participantVariableWithValue : participantVariablesWithValues) {
+					if (!participantVariablesCache
+							.containsKey(participantVariableWithValue.getName())) {
+						participantVariablesCache.put(
+								participantVariableWithValue.getName(),
+								participantVariableWithValue);
+					}
+				}
+
+				participantsVariablesCache.put(participant.getId()
+						.toHexString(), participantVariablesCache);
+
+				variablesWithValues.putAll(participantVariablesCache);
+			}
+		}
+
+		// Add also variables of intervention, but only if not overwritten for
+		// participant
 		val interventionVariablesWithValues = databaseManagerService
 				.findModelObjects(
 						InterventionVariableWithValue.class,
 						Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION,
 						participant.getIntervention());
 
-		// Add all variables of participant
-		for (val participantVariableWithValue : participantVariablesWithValues) {
-			if (!variablesWithValues.containsKey(participantVariableWithValue
-					.getName())) {
-				variablesWithValues.put(participantVariableWithValue.getName(),
-						participantVariableWithValue);
-			}
-		}
-
-		// Add also variables of intervention, but only if not overwritten for
-		// participant
 		for (val interventionVariableWithValue : interventionVariablesWithValues) {
 			if (!variablesWithValues.containsKey(interventionVariableWithValue
 					.getName())) {
@@ -261,6 +296,79 @@ public class VariablesManagerService {
 		}
 
 		return variablesWithValues;
+	}
+
+	/**
+	 * Checks if the variable value already exists for the given variable in
+	 * other interventions mentioned in the list of interventions for uniqueness
+	 * checks
+	 * 
+	 * @param participantId
+	 *            The {@link ObjectId} of the {@link Participant} defining the
+	 *            search
+	 *            scope
+	 * @param value
+	 *            The value to use for the check
+	 * @param variableName
+	 *            The variable to check regarding the value
+	 * @return
+	 */
+	public boolean checkValueInVariableForDuplicates(
+			final ObjectId participantId, final String value,
+			final String variableName) {
+
+		// Get relevant interventions
+		List<ObjectId> interventionsToCheck = new ArrayList<ObjectId>();
+
+		val participant = databaseManagerService.getModelObjectById(
+				Participant.class, participantId);
+
+		interventionsToCheck.add(participant.getIntervention());
+
+		val intervention = databaseManagerService.getModelObjectById(
+				Intervention.class, participant.getIntervention());
+
+		for (val otherInterventionId : intervention
+				.getInterventionsToCheckForUniqueness()) {
+			if (ObjectId.isValid(otherInterventionId)) {
+				interventionsToCheck.add(new ObjectId(otherInterventionId));
+			}
+		}
+
+		// Check participants of relevant interventions
+		for (val interventionToCheckId : interventionsToCheck) {
+			val participantsToCheck = databaseManagerService
+					.findModelObjectIds(Participant.class,
+							Queries.PARTICIPANT__BY_INTERVENTION,
+							interventionToCheckId);
+
+			for (val participantToCheckId : participantsToCheck) {
+				if (!participantToCheckId.equals(participantId)) {
+					Participant participantToCheck;
+					if (participantToCheckId != null
+							&& (participantToCheck = databaseManagerService
+									.getModelObjectById(Participant.class,
+											participantToCheckId)) != null) {
+						val variablesOfParticipantToCheck = getAllVariablesWithValuesOfParticipantAndSystem(participantToCheck);
+						if (variablesOfParticipantToCheck
+								.containsKey(variableName)
+								&& variablesOfParticipantToCheck
+										.get(variableName).getValue()
+										.equals(value)) {
+							log.debug(
+									"Duplicate of variable {} with value \"{}\" found at participant {} in intervention {}",
+									variableName, value, participantToCheckId,
+									intervention);
+							return true;
+						}
+					}
+				}
+			}
+		}
+
+		log.debug("No duplicate of variable {} found in given interventions",
+				variableName);
+		return false;
 	}
 
 	/*
@@ -493,8 +601,9 @@ public class VariablesManagerService {
 							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
 							participantId, variableName);
 
+			ParticipantVariableWithValue newParticipantVariableWithValue;
 			if (participantVariableWithValue == null) {
-				val newParticipantVariableWithValue = new ParticipantVariableWithValue(
+				newParticipantVariableWithValue = new ParticipantVariableWithValue(
 						participantId, InternalDateTime.currentTimeMillis(),
 						variableName, variableValue == null ? ""
 								: variableValue);
@@ -516,7 +625,7 @@ public class VariablesManagerService {
 							.getTimestamp() + 1;
 				}
 
-				val newParticipantVariableWithValue = new ParticipantVariableWithValue(
+				newParticipantVariableWithValue = new ParticipantVariableWithValue(
 						participantId, creationTimestamp, variableName,
 						variableValue == null ? "" : variableValue);
 				if (describesMediaUpload) {
@@ -526,6 +635,15 @@ public class VariablesManagerService {
 
 				databaseManagerService
 						.saveModelObject(newParticipantVariableWithValue);
+			}
+
+			// Cache new value
+			synchronized (participantsVariablesCache) {
+				if (participantsVariablesCache.containsKey(participantId
+						.toHexString())) {
+					participantsVariablesCache.get(participantId.toHexString())
+							.put(variableName, newParticipantVariableWithValue);
+				}
 			}
 		}
 	}
