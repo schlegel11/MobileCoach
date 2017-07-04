@@ -28,6 +28,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.Synchronized;
 import lombok.val;
@@ -85,7 +86,7 @@ public class VariablesManagerService {
 	private final HashSet<String>														externallyReadableSystemVariableNames;
 	private final HashSet<String>														externallyReadableParticipantVariableNames;
 
-	private final Hashtable<String, Hashtable<String, ParticipantVariableWithValue>>	participantsVariablesCache;
+	private final ConcurrentHashMap<String, Hashtable<String, ParticipantVariableWithValue>>	participantsVariablesCache;
 
 	private static SimpleDateFormat														dayInWeekFormatter	= new SimpleDateFormat(
 																													"u");
@@ -148,7 +149,7 @@ public class VariablesManagerService {
 			externallyReadableParticipantVariableNames.add(variable);
 		}
 
-		participantsVariablesCache = new Hashtable<String, Hashtable<String, ParticipantVariableWithValue>>();
+		participantsVariablesCache = new ConcurrentHashMap<String, Hashtable<String, ParticipantVariableWithValue>>();
 
 		log.info("Started.");
 	}
