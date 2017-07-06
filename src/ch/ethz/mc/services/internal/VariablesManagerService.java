@@ -419,6 +419,8 @@ public class VariablesManagerService {
 			case participantAppToken:
 				String appToken = new TokenPersistenceService(databaseManagerService).getOrCreateAppToken(participant.getId());
 				return appToken;
+			case participantId:
+				return participant.getId().toHexString();
 		}
 		return null;
 	}
