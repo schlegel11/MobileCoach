@@ -139,12 +139,14 @@ public class FileStorageManagerService {
 		for (val mediaUploadVariable : mediaUploadVariables) {
 			if (mediaUploadVariable.getValue() != null) {
 				final String fileReference = mediaUploadVariable.getValue();
-				requiredFileReferences.add(fileReference.split("-")[0]);
-				if (getFileByReference(fileReference, FILE_STORES.MEDIA_UPLOAD) == null) {
-					log.warn(
-							"Media upload variable {} contains missing file reference {}",
-							mediaUploadVariable.getId(),
-							mediaUploadVariable.getValue());
+				if (fileReference.split("-").length > 0){
+					requiredFileReferences.add(fileReference.split("-")[0]);
+					if (getFileByReference(fileReference, FILE_STORES.MEDIA_UPLOAD) == null) {
+						log.warn(
+								"Media upload variable {} contains missing file reference {}",
+								mediaUploadVariable.getId(),
+								mediaUploadVariable.getValue());
+					}
 				}
 			}
 		}
