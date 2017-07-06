@@ -189,7 +189,8 @@ public class RESTManagerService {
 	}
 
 	/**
-	 * Reads variable for all participants of the given group/intervention
+	 * Reads variable for dashboard for all participants of the given
+	 * group/intervention
 	 *
 	 * @param interventionId
 	 * @param variable
@@ -198,7 +199,7 @@ public class RESTManagerService {
 	 * @return
 	 * @throws ExternallyReadProtectedVariableException
 	 */
-	public CollectionOfExtendedVariables readVariableArrayOfGroupOrIntervention(
+	public CollectionOfExtendedVariables readVariableArrayForDashboardOfGroupOrIntervention(
 			final ObjectId interventionId, final String variable,
 			final String group, final boolean isService)
 			throws ExternallyReadProtectedVariableException {
@@ -207,7 +208,7 @@ public class RESTManagerService {
 						: "group " + group);
 
 		try {
-			val collecionOfExtendedVariables = getVariableValueOfParticipantsOfGroupOrIntervention(
+			val collecionOfExtendedVariables = getVariableValueForDashboardOfParticipantsOfGroupOrIntervention(
 					interventionId, variable, group, isService);
 
 			log.debug(
@@ -324,7 +325,8 @@ public class RESTManagerService {
 	}
 
 	/**
-	 * Calculate average of variable for all participants of the given
+	 * Calculate average of variable for dashboard for all participants of the
+	 * given
 	 * group/intervention
 	 *
 	 * @param interventionId
@@ -334,7 +336,7 @@ public class RESTManagerService {
 	 * @return
 	 * @throws ExternallyReadProtectedVariableException
 	 */
-	public VariableAverage calculateAverageOfVariableArrayOfGroupOrIntervention(
+	public VariableAverage calculateAverageOfVariableArrayForDashboardOfGroupOrIntervention(
 			final ObjectId interventionId, final String variable,
 			final String group, final boolean isService)
 			throws ExternallyReadProtectedVariableException {
@@ -347,7 +349,7 @@ public class RESTManagerService {
 			val variableAverage = new VariableAverage();
 			variableAverage.setVariable(variable);
 
-			val resultVariables = readVariableArrayOfGroupOrIntervention(
+			val resultVariables = readVariableArrayForDashboardOfGroupOrIntervention(
 					interventionId, variable, group, isService);
 
 			try {
@@ -568,6 +570,7 @@ public class RESTManagerService {
 				}
 				break;
 			case SHARED_WITH_INTERVENTION:
+			case SHARED_WITH_INTERVENTION_AND_DASHBOARD:
 				relevantParticipants = databaseManagerService
 						.findModelObjects(
 								Participant.class,
@@ -610,7 +613,8 @@ public class RESTManagerService {
 	}
 
 	/**
-	 * Reads variable for all participants of the given group/intervention
+	 * Reads variable for dashboard for all participants of the given
+	 * group/intervention
 	 *
 	 * @param interventionId
 	 * @param variable
@@ -620,7 +624,7 @@ public class RESTManagerService {
 	 * @throws ExternallyReadProtectedVariableException
 	 */
 	@Synchronized
-	private CollectionOfExtendedVariables getVariableValueOfParticipantsOfGroupOrIntervention(
+	private CollectionOfExtendedVariables getVariableValueForDashboardOfParticipantsOfGroupOrIntervention(
 			final ObjectId interventionId, final String variable,
 			final String group, final boolean isService)
 			throws ExternallyReadProtectedVariableException {
@@ -659,7 +663,7 @@ public class RESTManagerService {
 									relevantParticipant.getId(),
 									ImplementationConstants.VARIABLE_PREFIX
 											+ variable,
-									InterventionVariableWithValuePrivacyTypes.SHARED_WITH_GROUP,
+									InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION_AND_DASHBOARD,
 									isService), relevantParticipant.getId()
 									.toHexString(), null, null);
 
@@ -689,7 +693,7 @@ public class RESTManagerService {
 									relevantParticipant.getId(),
 									ImplementationConstants.VARIABLE_PREFIX
 											+ variable,
-									InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION,
+									InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION_AND_DASHBOARD,
 									isService), relevantParticipant.getId()
 									.toHexString(), null, null);
 
@@ -798,6 +802,7 @@ public class RESTManagerService {
 				}
 				break;
 			case SHARED_WITH_INTERVENTION:
+			case SHARED_WITH_INTERVENTION_AND_DASHBOARD:
 				relevantParticipants = databaseManagerService
 						.findModelObjects(
 								Participant.class,

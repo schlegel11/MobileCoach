@@ -28,7 +28,8 @@ import lombok.Getter;
  * @author Andreas Filler
  */
 public enum InterventionVariableWithValuePrivacyTypes {
-	PRIVATE(0), SHARED_WITH_GROUP(1), SHARED_WITH_INTERVENTION(2);
+	PRIVATE(0), SHARED_WITH_GROUP(1), SHARED_WITH_INTERVENTION(2), SHARED_WITH_INTERVENTION_AND_DASHBOARD(
+			3);
 
 	@Getter
 	private int	intValue;

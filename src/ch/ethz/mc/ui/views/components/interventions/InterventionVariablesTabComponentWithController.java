@@ -238,6 +238,9 @@ public class InterventionVariablesTabComponentWithController extends
 				newTypeValue = InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION;
 				break;
 			case SHARED_WITH_INTERVENTION:
+				newTypeValue = InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION_AND_DASHBOARD;
+				break;
+			case SHARED_WITH_INTERVENTION_AND_DASHBOARD:
 				newTypeValue = InterventionVariableWithValuePrivacyTypes.PRIVATE;
 				break;
 		}

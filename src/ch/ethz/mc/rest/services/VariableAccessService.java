@@ -363,7 +363,7 @@ public class VariableAccessService extends AbstractService {
 			}
 
 			val variableAverage = restManagerService
-					.calculateAverageOfVariableArrayOfGroupOrIntervention(
+					.calculateAverageOfVariableArrayForDashboardOfGroupOrIntervention(
 							interventionId, variable.trim(), group, false);
 
 			return variableAverage;
@@ -438,7 +438,7 @@ public class VariableAccessService extends AbstractService {
 			}
 
 			val variableAverage = restManagerService
-					.calculateAverageOfVariableArrayOfGroupOrIntervention(
+					.calculateAverageOfVariableArrayForDashboardOfGroupOrIntervention(
 							interventionId, variable.trim(), null, false);
 
 			return variableAverage;
