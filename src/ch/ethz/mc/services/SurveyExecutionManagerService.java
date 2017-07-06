@@ -305,6 +305,31 @@ public class SurveyExecutionManagerService {
 	}
 
 	/**
+	 * Returns if the requested dashboard is currently accessible
+	 * (means the the {@link Intervention} is active and the dashboard is
+	 * activated
+	 * active)
+	 *
+	 * @param screeningSurveyId
+	 * @return
+	 */
+	@Synchronized
+	public boolean dashboardCheckIfActive(final ObjectId interventionId) {
+		final val intervention = databaseManagerService.getModelObjectById(
+				Intervention.class, interventionId);
+		log.debug(intervention);
+
+		if (intervention == null || !intervention.isActive()
+				|| !intervention.isDashboardEnabled()
+				|| intervention.getDashboardTemplatePath() == null
+				|| intervention.getDashboardTemplatePath().equals("")) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Returns if the requested {@link ScreeningSurvey} is currently accessible
 	 * (means the the {@link Intervention} and {@link ScreeningSurvey} are both
 	 * active)
@@ -313,7 +338,7 @@ public class SurveyExecutionManagerService {
 	 * @return
 	 */
 	@Synchronized
-	public boolean screeningSurveyCheckIfActive(final ObjectId screeningSurveyId) {
+	public boolean surveyCheckIfActive(final ObjectId screeningSurveyId) {
 		final val screeningSurvey = databaseManagerService.getModelObjectById(
 				ScreeningSurvey.class, screeningSurveyId);
 
@@ -340,7 +365,7 @@ public class SurveyExecutionManagerService {
 	 * @return
 	 */
 	@Synchronized
-	public boolean screeningSurveyCheckIfActiveAndOfGivenType(
+	public boolean surveyCheckIfActiveAndOfGivenType(
 			final ObjectId screeningSurveyId, final boolean isIntermediateSurvey) {
 		final val screeningSurvey = databaseManagerService.getModelObjectById(
 				ScreeningSurvey.class, screeningSurveyId);
@@ -442,7 +467,7 @@ public class SurveyExecutionManagerService {
 
 		// Check if screening survey is active
 		log.debug("Check if screening survey is active");
-		if (!screeningSurveyCheckIfActive(screeningSurveyId)) {
+		if (!surveyCheckIfActive(screeningSurveyId)) {
 			templateVariables.put(
 					SurveySlideTemplateLayoutTypes.CLOSED.toVariable(), true);
 			return templateVariables;
@@ -1774,6 +1799,18 @@ public class SurveyExecutionManagerService {
 	/*
 	 * Getter
 	 */
+	/**
+	 * Get a specific {@link Intervention} by {@link ObjectId}
+	 *
+	 * @param interventionId
+	 * @return
+	 */
+	@Synchronized
+	public Intervention getInterventionById(final ObjectId interventionId) {
+		return databaseManagerService.getModelObjectById(Intervention.class,
+				interventionId);
+	}
+
 	/**
 	 * Get a specific {@link ScreeningSurvey} by {@link ObjectId}
 	 *

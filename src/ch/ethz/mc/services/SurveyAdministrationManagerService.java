@@ -1250,7 +1250,7 @@ public class SurveyAdministrationManagerService {
 
 					@Override
 					public boolean accept(final File pathname) {
-						if (pathname.isDirectory()) {
+						if (pathname.isDirectory() && !pathname.isHidden()) {
 							return true;
 						} else {
 							return false;

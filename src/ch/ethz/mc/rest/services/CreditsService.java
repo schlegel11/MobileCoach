@@ -67,8 +67,8 @@ public class CreditsService extends AbstractService {
 				variable);
 		ObjectId participantId;
 		try {
-			participantId = checkAccessAndReturnParticipantId(token,
-					request.getSession());
+			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
+					token, request.getSession());
 		} catch (final Exception e) {
 			throw e;
 		}

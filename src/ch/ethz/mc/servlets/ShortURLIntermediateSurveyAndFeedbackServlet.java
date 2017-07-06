@@ -55,6 +55,7 @@ import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.services.SurveyExecutionManagerService;
 import ch.ethz.mc.services.types.FeedbackSlideTemplateFieldTypes;
 import ch.ethz.mc.services.types.GeneralSessionAttributeTypes;
+import ch.ethz.mc.services.types.GeneralSessionAttributeValidatorTypes;
 import ch.ethz.mc.services.types.GeneralSlideTemplateFieldTypes;
 import ch.ethz.mc.services.types.SurveySessionAttributeTypes;
 import ch.ethz.mc.services.types.SurveySlideTemplateFieldTypes;
@@ -150,7 +151,7 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 					// feedbacks surveys are accepted
 					if (shortId.getSurvey() != null
 							&& surveyExecutionManagerService
-									.screeningSurveyCheckIfActiveAndOfGivenType(
+									.surveyCheckIfActiveAndOfGivenType(
 											shortId.getSurvey(), true)) {
 						handleTemplateRequest(request, response,
 								shortId.getParticipant(), shortId.getSurvey(),
@@ -166,7 +167,8 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 								shortId.getFeedback());
 						return;
 					}
-					throw new Exception("Invalid id");
+					throw new Exception(
+							"Invalid id or intervention/survey not active");
 				default:
 					// Object id and file request
 					handleFileRequest(request, response, shortId.getSurvey(),
@@ -377,7 +379,8 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 
 		// Create token
 		session.setAttribute(GeneralSessionAttributeTypes.VALIDATOR.toString(),
-				true);
+				GeneralSessionAttributeValidatorTypes.PARTICIPANT_RELATED
+						.toString());
 		if (session.getAttribute(GeneralSessionAttributeTypes.TOKEN.toString()) == null) {
 			session.setAttribute(GeneralSessionAttributeTypes.TOKEN.toString(),
 					StringHelpers.createRandomString(40));

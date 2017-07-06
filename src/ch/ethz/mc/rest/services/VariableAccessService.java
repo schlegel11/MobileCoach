@@ -45,6 +45,7 @@ import ch.ethz.mc.model.rest.CollectionOfExtendedListVariables;
 import ch.ethz.mc.model.rest.CollectionOfExtendedVariables;
 import ch.ethz.mc.model.rest.OK;
 import ch.ethz.mc.model.rest.VariableAverage;
+import ch.ethz.mc.model.rest.VariableAverageWithParticipant;
 import ch.ethz.mc.model.rest.Variable;
 import ch.ethz.mc.model.rest.CollectionOfVariables;
 import ch.ethz.mc.services.RESTManagerService;
@@ -75,8 +76,8 @@ public class VariableAccessService extends AbstractService {
 		log.debug("Token {}: Read variable {}", token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkAccessAndReturnParticipantId(token,
-					request.getSession());
+			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
+					token, request.getSession());
 		} catch (final Exception e) {
 			throw e;
 		}
@@ -107,8 +108,8 @@ public class VariableAccessService extends AbstractService {
 		log.debug("Token {}: Read variables {}", token, variables);
 		ObjectId participantId;
 		try {
-			participantId = checkAccessAndReturnParticipantId(token,
-					request.getSession());
+			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
+					token, request.getSession());
 		} catch (final Exception e) {
 			throw e;
 		}
@@ -152,8 +153,8 @@ public class VariableAccessService extends AbstractService {
 				token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkAccessAndReturnParticipantId(token,
-					request.getSession());
+			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
+					token, request.getSession());
 		} catch (final Exception e) {
 			throw e;
 		}
@@ -189,8 +190,8 @@ public class VariableAccessService extends AbstractService {
 				token, variables);
 		ObjectId participantId;
 		try {
-			participantId = checkAccessAndReturnParticipantId(token,
-					request.getSession());
+			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
+					token, request.getSession());
 		} catch (final Exception e) {
 			throw e;
 		}
@@ -231,8 +232,8 @@ public class VariableAccessService extends AbstractService {
 				token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkAccessAndReturnParticipantId(token,
-					request.getSession());
+			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
+					token, request.getSession());
 		} catch (final Exception e) {
 			throw e;
 		}
@@ -268,8 +269,8 @@ public class VariableAccessService extends AbstractService {
 				token, variables);
 		ObjectId participantId;
 		try {
-			participantId = checkAccessAndReturnParticipantId(token,
-					request.getSession());
+			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
+					token, request.getSession());
 		} catch (final Exception e) {
 			throw e;
 		}
@@ -301,7 +302,7 @@ public class VariableAccessService extends AbstractService {
 	@GET
 	@Path("/calculateGroupAverage/{variable}")
 	@Produces("application/json")
-	public VariableAverage variableCalculateGroupAverage(
+	public VariableAverageWithParticipant variableCalculateGroupAverage(
 			@HeaderParam("token") final String token,
 			@PathParam("variable") final String variable,
 			@Context final HttpServletRequest request) {
@@ -310,8 +311,8 @@ public class VariableAccessService extends AbstractService {
 				token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkAccessAndReturnParticipantId(token,
-					request.getSession());
+			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
+					token, request.getSession());
 		} catch (final Exception e) {
 			throw e;
 		}
@@ -337,9 +338,47 @@ public class VariableAccessService extends AbstractService {
 	}
 
 	@GET
+	@Path("/calculateDashboardGroupAverage/{group}/{variable}")
+	@Produces("application/json")
+	public VariableAverage variableCalculateDashboardGroupAverage(
+			@HeaderParam("token") final String token,
+			@PathParam("group") final String group,
+			@PathParam("variable") final String variable,
+			@Context final HttpServletRequest request) {
+		log.debug(
+				"Token {}: Calculate variable average of variable {} of group {} of intervention",
+				token, variable, group);
+		ObjectId interventionId;
+		try {
+			interventionId = checkDashboardAccess(token, request.getSession());
+		} catch (final Exception e) {
+			throw e;
+		}
+
+		try {
+			if (!StringValidator
+					.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
+							+ variable.trim())) {
+				throw new Exception("The variable name is not valid");
+			}
+
+			val variableAverage = restManagerService
+					.calculateAverageOfVariableArrayOfGroupOrIntervention(
+							interventionId, variable.trim(), group, false);
+
+			return variableAverage;
+		} catch (final Exception e) {
+			throw new WebApplicationException(Response
+					.status(Status.FORBIDDEN)
+					.entity("Could not calculate average of variable: "
+							+ e.getMessage()).build());
+		}
+	}
+
+	@GET
 	@Path("/calculateInterventionAverage/{variable}")
 	@Produces("application/json")
-	public VariableAverage variableCalculateInterventionAverage(
+	public VariableAverageWithParticipant variableCalculateInterventionAverage(
 			@HeaderParam("token") final String token,
 			@PathParam("variable") final String variable,
 			@Context final HttpServletRequest request) {
@@ -348,8 +387,8 @@ public class VariableAccessService extends AbstractService {
 				token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkAccessAndReturnParticipantId(token,
-					request.getSession());
+			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
+					token, request.getSession());
 		} catch (final Exception e) {
 			throw e;
 		}
@@ -374,6 +413,43 @@ public class VariableAccessService extends AbstractService {
 		}
 	}
 
+	@GET
+	@Path("/calculateDashboardInterventionAverage/{variable}")
+	@Produces("application/json")
+	public VariableAverage variableCalculateDashboardInterventionAverage(
+			@HeaderParam("token") final String token,
+			@PathParam("variable") final String variable,
+			@Context final HttpServletRequest request) {
+		log.debug(
+				"Token {}: Calculate variable average of variable {} of intervention",
+				token, variable);
+		ObjectId interventionId;
+		try {
+			interventionId = checkDashboardAccess(token, request.getSession());
+		} catch (final Exception e) {
+			throw e;
+		}
+
+		try {
+			if (!StringValidator
+					.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
+							+ variable.trim())) {
+				throw new Exception("The variable name is not valid");
+			}
+
+			val variableAverage = restManagerService
+					.calculateAverageOfVariableArrayOfGroupOrIntervention(
+							interventionId, variable.trim(), null, false);
+
+			return variableAverage;
+		} catch (final Exception e) {
+			throw new WebApplicationException(Response
+					.status(Status.FORBIDDEN)
+					.entity("Could not calculate average of variable: "
+							+ e.getMessage()).build());
+		}
+	}
+
 	/*
 	 * Write functions
 	 */
@@ -387,8 +463,8 @@ public class VariableAccessService extends AbstractService {
 		log.debug("Token {}: Write variable {}", token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkAccessAndReturnParticipantId(token,
-					request.getSession());
+			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
+					token, request.getSession());
 		} catch (final Exception e) {
 			throw e;
 		}

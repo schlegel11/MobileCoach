@@ -69,8 +69,8 @@ public class VotingService extends AbstractService {
 		log.debug("Token {}: Read voting {}", token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkAccessAndReturnParticipantId(token,
-					request.getSession());
+			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
+					token, request.getSession());
 		} catch (final Exception e) {
 			throw e;
 		}
@@ -113,8 +113,8 @@ public class VotingService extends AbstractService {
 				token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkAccessAndReturnParticipantId(token,
-					request.getSession());
+			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
+					token, request.getSession());
 		} catch (final Exception e) {
 			throw e;
 		}
@@ -170,8 +170,8 @@ public class VotingService extends AbstractService {
 				token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkAccessAndReturnParticipantId(token,
-					request.getSession());
+			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
+					token, request.getSession());
 		} catch (final Exception e) {
 			throw e;
 		}
@@ -230,8 +230,8 @@ public class VotingService extends AbstractService {
 				receivingParticipantIdString);
 		ObjectId participantId;
 		try {
-			participantId = checkAccessAndReturnParticipantId(token,
-					request.getSession());
+			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
+					token, request.getSession());
 		} catch (final Exception e) {
 			throw e;
 		}
@@ -276,8 +276,8 @@ public class VotingService extends AbstractService {
 				receivingParticipantIdString);
 		ObjectId participantId;
 		try {
-			participantId = checkAccessAndReturnParticipantId(token,
-					request.getSession());
+			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
+					token, request.getSession());
 		} catch (final Exception e) {
 			throw e;
 		}

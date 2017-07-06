@@ -29,9 +29,11 @@ import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.persistent.Intervention;
+import ch.ethz.mc.ui.views.components.basics.ShortStringEditComponent;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -120,14 +122,61 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 					}
 				});
 
+		val templatePaths = getSurveyAdministrationManagerService()
+				.getAllTemplatePaths();
+
+		val templatePathComboBox = interventionBasicSettingsComponent
+				.getDashboardTemplatePathComboBox();
+		for (val templatePath : templatePaths) {
+			templatePathComboBox.addItem(templatePath);
+			if (intervention.getDashboardTemplatePath().equals(templatePath)) {
+				templatePathComboBox.select(templatePath);
+			}
+		}
+		templatePathComboBox.addValueChangeListener(new ValueChangeListener() {
+
+			@Override
+			public void valueChange(final ValueChangeEvent event) {
+				final String templatePath = (String) event.getProperty()
+						.getValue();
+
+				log.debug("Adjust dashboard template path to {}", templatePath);
+				getInterventionAdministrationManagerService()
+						.interventionChangeDashboardTemplatePath(intervention,
+								templatePath);
+
+				adjust();
+
+			}
+		});
+
 		// Handle buttons
 		val buttonClickListener = new ButtonClickListener();
 		interventionBasicSettingsComponent.getSwitchInterventionButton()
 				.addClickListener(buttonClickListener);
 		interventionBasicSettingsComponent.getSwitchMessagingButton()
 				.addClickListener(buttonClickListener);
+		interventionBasicSettingsComponent.getPasswordTextFieldComponent()
+				.getButton().addClickListener(buttonClickListener);
 
 		// Handle checkboxes
+		val dashboardEnabledCheckbox = getInterventionBasicSettingsAndModulesComponent()
+				.getDashboardEnabledCheckbox();
+		dashboardEnabledCheckbox.setValue(intervention.isDashboardEnabled());
+
+		dashboardEnabledCheckbox
+				.addValueChangeListener(new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						getInterventionAdministrationManagerService()
+								.interventionSetDashboardEnabled(
+										intervention,
+										(boolean) event.getProperty()
+												.getValue());
+					}
+				});
+
 		val finishScreeningSurveyCheckbox = getInterventionBasicSettingsAndModulesComponent()
 				.getFinishScreeningSurveysCheckbox();
 		finishScreeningSurveyCheckbox.setValue(intervention
@@ -138,7 +187,7 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 
 					@Override
 					public void valueChange(final ValueChangeEvent event) {
-						getInterventionExecutionManagerService()
+						getInterventionAdministrationManagerService()
 								.interventionSetAutomaticallyFinishScreeningSurveys(
 										intervention,
 										(boolean) event.getProperty()
@@ -185,37 +234,37 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 			public void valueChange(final ValueChangeEvent event) {
 				if (event.getProperty() == getInterventionBasicSettingsAndModulesComponent()
 						.getMondayCheckbox()) {
-					getInterventionExecutionManagerService()
+					getInterventionAdministrationManagerService()
 							.interventionSetStartingDay(intervention, 1,
 									(boolean) event.getProperty().getValue());
 				} else if (event.getProperty() == getInterventionBasicSettingsAndModulesComponent()
 						.getTuesdayCheckbox()) {
-					getInterventionExecutionManagerService()
+					getInterventionAdministrationManagerService()
 							.interventionSetStartingDay(intervention, 2,
 									(boolean) event.getProperty().getValue());
 				} else if (event.getProperty() == getInterventionBasicSettingsAndModulesComponent()
 						.getWednesdayCheckbox()) {
-					getInterventionExecutionManagerService()
+					getInterventionAdministrationManagerService()
 							.interventionSetStartingDay(intervention, 3,
 									(boolean) event.getProperty().getValue());
 				} else if (event.getProperty() == getInterventionBasicSettingsAndModulesComponent()
 						.getThursdayCheckbox()) {
-					getInterventionExecutionManagerService()
+					getInterventionAdministrationManagerService()
 							.interventionSetStartingDay(intervention, 4,
 									(boolean) event.getProperty().getValue());
 				} else if (event.getProperty() == getInterventionBasicSettingsAndModulesComponent()
 						.getFridayCheckbox()) {
-					getInterventionExecutionManagerService()
+					getInterventionAdministrationManagerService()
 							.interventionSetStartingDay(intervention, 5,
 									(boolean) event.getProperty().getValue());
 				} else if (event.getProperty() == getInterventionBasicSettingsAndModulesComponent()
 						.getSaturdayCheckbox()) {
-					getInterventionExecutionManagerService()
+					getInterventionAdministrationManagerService()
 							.interventionSetStartingDay(intervention, 6,
 									(boolean) event.getProperty().getValue());
 				} else if (event.getProperty() == getInterventionBasicSettingsAndModulesComponent()
 						.getSundayCheckbox()) {
-					getInterventionExecutionManagerService()
+					getInterventionAdministrationManagerService()
 							.interventionSetStartingDay(intervention, 7,
 									(boolean) event.getProperty().getValue());
 				}
@@ -276,7 +325,7 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 					i++;
 				}
 
-				getInterventionExecutionManagerService()
+				getInterventionAdministrationManagerService()
 						.interventionSetInterventionsToCheckForUniqueness(
 								intervention,
 								interventionsToCheckForParticipantUniqueness);
@@ -288,8 +337,11 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 	}
 
 	private void adjust() {
+
 		getInterventionBasicSettingsAndModulesComponent().adjust(
 				intervention.isActive(), intervention.isMonitoringActive());
+
+		val interventionBasicSettingsComponent = getInterventionBasicSettingsAndModulesComponent();
 
 		if (lastInterventionMonitoringState != intervention
 				.isMonitoringActive()) {
@@ -299,9 +351,13 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 							.isMonitoringActive());
 		}
 
-		getInterventionBasicSettingsAndModulesComponent()
-				.getSimulatorComponent().setSenderIdentification(
+		interventionBasicSettingsComponent.getSimulatorComponent()
+				.setSenderIdentification(
 						intervention.getAssignedSenderIdentification());
+
+		// Adjust password text field
+		interventionBasicSettingsComponent.getPasswordTextFieldComponent()
+				.setValue(intervention.getDashboardPasswordPattern());
 
 		lastInterventionMonitoringState = intervention.isMonitoringActive();
 	}
@@ -318,7 +374,11 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 			} else if (event.getButton() == interventionBasicSettingsComponent
 					.getSwitchMessagingButton()) {
 				switchMessaging();
+			} else if (event.getButton() == interventionBasicSettingsComponent
+					.getPasswordTextFieldComponent().getButton()) {
+				editPassword();
 			}
+			event.getButton().setEnabled(true);
 		}
 	}
 
@@ -367,5 +427,32 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 				closeWindow();
 			}
 		}, null);
+	}
+
+	public void editPassword() {
+		log.debug("Edit password");
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_PASSWORD_PATTERN,
+				intervention.getDashboardPasswordPattern(), null,
+				new ShortStringEditComponent(),
+				new ExtendableButtonClickListener() {
+
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Change password
+							getInterventionAdministrationManagerService()
+									.interventionChangeDashboardPasswordPattern(
+											intervention, getStringValue());
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						adjust();
+
+						closeWindow();
+					}
+				}, null);
 	}
 }

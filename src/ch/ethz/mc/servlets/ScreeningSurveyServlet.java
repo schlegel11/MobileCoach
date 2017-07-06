@@ -52,6 +52,7 @@ import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.services.SurveyExecutionManagerService;
 import ch.ethz.mc.services.types.GeneralSessionAttributeTypes;
+import ch.ethz.mc.services.types.GeneralSessionAttributeValidatorTypes;
 import ch.ethz.mc.services.types.GeneralSlideTemplateFieldTypes;
 import ch.ethz.mc.services.types.SurveySessionAttributeTypes;
 import ch.ethz.mc.services.types.SurveySlideTemplateFieldTypes;
@@ -129,13 +130,14 @@ public class ScreeningSurveyServlet extends HttpServlet {
 					// intermediate) surveys are accepted
 					if (ObjectId.isValid(pathParts[0])) {
 						if (surveyExecutionManagerService
-								.screeningSurveyCheckIfActiveAndOfGivenType(
+								.surveyCheckIfActiveAndOfGivenType(
 										new ObjectId(pathParts[0]), false)) {
 							handleTemplateRequest(request, response,
 									new ObjectId(pathParts[0]));
 							return;
 						}
-						throw new Exception("Invalid id");
+						throw new Exception(
+								"Invalid id or intervention/survey not active");
 					} else {
 						throw new Exception("Invalid id");
 					}
@@ -415,7 +417,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 
 		// Create token
 		session.setAttribute(GeneralSessionAttributeTypes.VALIDATOR.toString(),
-				true);
+				GeneralSessionAttributeValidatorTypes.PARTICIPANT_RELATED
+						.toString());
 		if (session.getAttribute(GeneralSessionAttributeTypes.TOKEN.toString()) == null) {
 			session.setAttribute(GeneralSessionAttributeTypes.TOKEN.toString(),
 					StringHelpers.createRandomString(40));

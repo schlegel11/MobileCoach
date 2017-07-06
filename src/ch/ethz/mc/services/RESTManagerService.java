@@ -34,6 +34,7 @@ import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.DialogStatus;
+import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValuePrivacyTypes;
 import ch.ethz.mc.model.rest.CollectionOfExtendedListVariables;
@@ -42,6 +43,7 @@ import ch.ethz.mc.model.rest.ExtendedListVariable;
 import ch.ethz.mc.model.rest.ExtendedVariable;
 import ch.ethz.mc.model.rest.Variable;
 import ch.ethz.mc.model.rest.VariableAverage;
+import ch.ethz.mc.model.rest.VariableAverageWithParticipant;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService;
 import ch.ethz.mc.services.internal.VariablesManagerService;
@@ -187,6 +189,43 @@ public class RESTManagerService {
 	}
 
 	/**
+	 * Reads variable for all participants of the given group/intervention
+	 *
+	 * @param interventionId
+	 * @param variable
+	 * @param group
+	 * @param isService
+	 * @return
+	 * @throws ExternallyReadProtectedVariableException
+	 */
+	public CollectionOfExtendedVariables readVariableArrayOfGroupOrIntervention(
+			final ObjectId interventionId, final String variable,
+			final String group, final boolean isService)
+			throws ExternallyReadProtectedVariableException {
+		log.debug("Try to read variable array {} of participants from {}",
+				variable, group == null ? "intervention " + interventionId
+						: "group " + group);
+
+		try {
+			val collecionOfExtendedVariables = getVariableValueOfParticipantsOfGroupOrIntervention(
+					interventionId, variable, group, isService);
+
+			log.debug(
+					"Returing variables with values {} of participants from {}",
+					collecionOfExtendedVariables,
+					group == null ? "intervention " + interventionId : "group "
+							+ group);
+
+			return collecionOfExtendedVariables;
+		} catch (final Exception e) {
+			log.debug("Could not read variable {} of participants from {}: {}",
+					variable, group == null ? "intervention " + interventionId
+							: "group " + group, e.getMessage());
+			throw e;
+		}
+	}
+
+	/**
 	 * Reads variable for all participants of the same group/intervention as the
 	 * given participant
 	 *
@@ -239,7 +278,7 @@ public class RESTManagerService {
 	 * @return
 	 * @throws ExternallyReadProtectedVariableException
 	 */
-	public VariableAverage calculateAverageOfVariableArrayOfGroupOrIntervention(
+	public VariableAverageWithParticipant calculateAverageOfVariableArrayOfGroupOrIntervention(
 			final ObjectId participantId, final String variable,
 			final boolean sameGroup, final boolean isService)
 			throws ExternallyReadProtectedVariableException {
@@ -248,7 +287,7 @@ public class RESTManagerService {
 				variable, sameGroup ? "group" : "intervention", participantId);
 
 		try {
-			val variableAverage = new VariableAverage();
+			val variableAverage = new VariableAverageWithParticipant();
 			variableAverage.setVariable(variable);
 
 			val resultVariables = readVariableArrayOfGroupOrIntervention(
@@ -277,9 +316,61 @@ public class RESTManagerService {
 			return variableAverage;
 		} catch (final Exception e) {
 			log.debug(
-					"Could not calculate averagte of variable {} of participants from the same {} as participant {}: {}",
+					"Could not calculate average of variable {} of participants from the same {} as participant {}: {}",
 					variable, sameGroup ? "group" : "intervention",
 					participantId, variable, participantId, e.getMessage());
+			throw e;
+		}
+	}
+
+	/**
+	 * Calculate average of variable for all participants of the given
+	 * group/intervention
+	 *
+	 * @param interventionId
+	 * @param variable
+	 * @param group
+	 * @param isService
+	 * @return
+	 * @throws ExternallyReadProtectedVariableException
+	 */
+	public VariableAverage calculateAverageOfVariableArrayOfGroupOrIntervention(
+			final ObjectId interventionId, final String variable,
+			final String group, final boolean isService)
+			throws ExternallyReadProtectedVariableException {
+		log.debug(
+				"Try to calculate average of variable array {} of participants from {}",
+				variable, group == null ? "intervention " + interventionId
+						: "group " + group);
+
+		try {
+			val variableAverage = new VariableAverage();
+			variableAverage.setVariable(variable);
+
+			val resultVariables = readVariableArrayOfGroupOrIntervention(
+					interventionId, variable, group, isService);
+
+			try {
+				int i = 0;
+				double average = 0d;
+				for (val resultVariable : resultVariables.getVariables()) {
+					i++;
+					average += Double.parseDouble(resultVariable.getValue());
+				}
+				variableAverage.setAverage(average / i);
+				variableAverage.setSize(i);
+			} catch (final Exception e) {
+				throw variablesManagerService.new ExternallyReadProtectedVariableException(
+						"Variable value can not be interpreted as calculateable value: "
+								+ e.getMessage());
+			}
+
+			return variableAverage;
+		} catch (final Exception e) {
+			log.debug(
+					"Could not calculate average of variable {} of participants from {}: {}",
+					variable, group == null ? "intervention " + interventionId
+							: "group " + group, e.getMessage());
 			throw e;
 		}
 	}
@@ -398,7 +489,7 @@ public class RESTManagerService {
 	}
 
 	/**
-	 * Reads variable for all participants of the same group/intervetion as the
+	 * Reads variable for all participants of the same group/intervention as the
 	 * given
 	 * participant
 	 *
@@ -510,6 +601,101 @@ public class RESTManagerService {
 					}
 				}
 				break;
+		}
+
+		collectionOfExtendedResultVariables.setSize(resultVariables.size());
+		Collections.shuffle(resultVariables);
+
+		return collectionOfExtendedResultVariables;
+	}
+
+	/**
+	 * Reads variable for all participants of the given group/intervention
+	 *
+	 * @param interventionId
+	 * @param variable
+	 * @param group
+	 * @param isService
+	 * @return
+	 * @throws ExternallyReadProtectedVariableException
+	 */
+	@Synchronized
+	private CollectionOfExtendedVariables getVariableValueOfParticipantsOfGroupOrIntervention(
+			final ObjectId interventionId, final String variable,
+			final String group, final boolean isService)
+			throws ExternallyReadProtectedVariableException {
+		val intervention = databaseManagerService.getModelObjectById(
+				Intervention.class, interventionId);
+
+		if (intervention == null) {
+			throw variablesManagerService.new ExternallyReadProtectedVariableException(
+					"The given intervention does not exist anymore, so the variables cannot be read");
+		}
+
+		val collectionOfExtendedResultVariables = new CollectionOfExtendedVariables();
+		val resultVariables = collectionOfExtendedResultVariables
+				.getVariables();
+
+		if (group != null) {
+			final Iterable<Participant> relevantParticipants = databaseManagerService
+					.findModelObjects(
+							Participant.class,
+							Queries.PARTICIPANT__BY_INTERVENTION_AND_GROUP_AND_MONITORING_ACTIVE_TRUE,
+							interventionId, group);
+
+			for (val relevantParticipant : relevantParticipants) {
+				val dialogStatus = databaseManagerService.findOneModelObject(
+						DialogStatus.class,
+						Queries.DIALOG_STATUS__BY_PARTICIPANT,
+						relevantParticipant.getId());
+
+				if (dialogStatus != null
+						&& dialogStatus.isScreeningSurveyPerformed()
+						&& dialogStatus
+								.isDataForMonitoringParticipationAvailable()) {
+					final ExtendedVariable variableWithValue = new ExtendedVariable(
+							variable,
+							variablesManagerService.externallyReadVariableValueForParticipant(
+									relevantParticipant.getId(),
+									ImplementationConstants.VARIABLE_PREFIX
+											+ variable,
+									InterventionVariableWithValuePrivacyTypes.SHARED_WITH_GROUP,
+									isService), relevantParticipant.getId()
+									.toHexString(), null, null);
+
+					resultVariables.add(variableWithValue);
+				}
+			}
+		} else {
+			final Iterable<Participant> relevantParticipants = databaseManagerService
+					.findModelObjects(
+							Participant.class,
+							Queries.PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE,
+							interventionId);
+
+			for (val relevantParticipant : relevantParticipants) {
+				val dialogStatus = databaseManagerService.findOneModelObject(
+						DialogStatus.class,
+						Queries.DIALOG_STATUS__BY_PARTICIPANT,
+						relevantParticipant.getId());
+
+				if (dialogStatus != null
+						&& dialogStatus.isScreeningSurveyPerformed()
+						&& dialogStatus
+								.isDataForMonitoringParticipationAvailable()) {
+					final ExtendedVariable variableWithValue = new ExtendedVariable(
+							variable,
+							variablesManagerService.externallyReadVariableValueForParticipant(
+									relevantParticipant.getId(),
+									ImplementationConstants.VARIABLE_PREFIX
+											+ variable,
+									InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION,
+									isService), relevantParticipant.getId()
+									.toHexString(), null, null);
+
+					resultVariables.add(variableWithValue);
+				}
+			}
 		}
 
 		collectionOfExtendedResultVariables.setSize(resultVariables.size());

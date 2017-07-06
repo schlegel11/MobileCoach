@@ -74,8 +74,8 @@ public class ImageUploadService extends AbstractFileUploadService {
 		log.debug("Token {}: Upload image to variable {}", token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkAccessAndReturnParticipantId(token,
-					request.getSession());
+			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
+					token, request.getSession());
 		} catch (final Exception e) {
 			throw e;
 		}

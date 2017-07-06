@@ -74,28 +74,28 @@ import ch.ethz.mc.tools.StringValidator;
  */
 @Log4j2
 public class VariablesManagerService {
-	private static VariablesManagerService												instance			= null;
+	private static VariablesManagerService														instance			= null;
 
-	private final DatabaseManagerService												databaseManagerService;
+	private final DatabaseManagerService														databaseManagerService;
 
-	private final HashSet<String>														allSystemReservedVariableNames;
-	private final HashSet<String>														allSystemReservedVariableNamesRelevantForSlides;
-	private final HashSet<String>														writableReservedVariableNames;
-	private final HashSet<String>														writeProtectedReservedVariableNames;
+	private final HashSet<String>																allSystemReservedVariableNames;
+	private final HashSet<String>																allSystemReservedVariableNamesRelevantForSlides;
+	private final HashSet<String>																writableReservedVariableNames;
+	private final HashSet<String>																writeProtectedReservedVariableNames;
 
-	private final HashSet<String>														externallyReadableSystemVariableNames;
-	private final HashSet<String>														externallyReadableParticipantVariableNames;
+	private final HashSet<String>																externallyReadableSystemVariableNames;
+	private final HashSet<String>																externallyReadableParticipantVariableNames;
 
 	private final ConcurrentHashMap<String, Hashtable<String, ParticipantVariableWithValue>>	participantsVariablesCache;
 
-	private static SimpleDateFormat														dayInWeekFormatter	= new SimpleDateFormat(
-																													"u");
-	private static SimpleDateFormat														dayOfMonthFormatter	= new SimpleDateFormat(
-																													"d");
-	private static SimpleDateFormat														monthFormatter		= new SimpleDateFormat(
-																													"M");
-	private static SimpleDateFormat														yearFormatter		= new SimpleDateFormat(
-																													"yyyy");
+	private static SimpleDateFormat																dayInWeekFormatter	= new SimpleDateFormat(
+																															"u");
+	private static SimpleDateFormat																dayOfMonthFormatter	= new SimpleDateFormat(
+																															"d");
+	private static SimpleDateFormat																monthFormatter		= new SimpleDateFormat(
+																															"M");
+	private static SimpleDateFormat																yearFormatter		= new SimpleDateFormat(
+																															"yyyy");
 
 	private VariablesManagerService(
 			final DatabaseManagerService databaseManagerService)

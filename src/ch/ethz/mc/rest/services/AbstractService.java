@@ -31,6 +31,7 @@ import org.bson.types.ObjectId;
 
 import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mc.services.types.GeneralSessionAttributeTypes;
+import ch.ethz.mc.services.types.GeneralSessionAttributeValidatorTypes;
 
 /**
  * Abstract class for all REST services
@@ -48,14 +49,16 @@ public abstract class AbstractService {
 	}
 
 	/**
-	 * Checks if the given session is valid and if the token fits to the given
-	 * session. Then return appropriate participant id
+	 * Checks if the given session is valid for a specific participant and if
+	 * the token fits to the given session; returns appropriate participant id
+	 * afterwards
 	 *
 	 * @param token
 	 * @param session
+	 * @return
 	 */
-	protected ObjectId checkAccessAndReturnParticipantId(final String token,
-			final HttpSession session) {
+	protected ObjectId checkParticipantRelatedAccessAndReturnParticipantId(
+			final String token, final HttpSession session) {
 		log.debug("Checking if token {} fits to session {}", token,
 				session.getId());
 		if (token == null) {
@@ -65,10 +68,14 @@ public abstract class AbstractService {
 		}
 		if (session.getAttribute(GeneralSessionAttributeTypes.VALIDATOR
 				.toString()) == null
-				|| (boolean) session
-						.getAttribute(GeneralSessionAttributeTypes.VALIDATOR
-								.toString()) == false) {
-			log.debug("REST access denied: Session timed out or is no survey/feedback");
+				|| !session
+						.getAttribute(
+								GeneralSessionAttributeTypes.VALIDATOR
+										.toString())
+						.toString()
+						.equals(GeneralSessionAttributeValidatorTypes.PARTICIPANT_RELATED
+								.toString())) {
+			log.debug("REST access denied: Session timed out or is no survey/feedback session");
 			throw new WebApplicationException(Response.notAcceptable(null)
 					.entity("Session timed out").build());
 		}
@@ -99,6 +106,68 @@ public abstract class AbstractService {
 			throw new WebApplicationException(
 					Response.notAcceptable(null)
 							.entity("The current session is not yet bound to a participant")
+							.build());
+		}
+	}
+
+	/**
+	 * Checks if the given session is valid for dashboard access and if
+	 * the token fits to the given session; returns appropriate intervention id
+	 * afterwards
+	 *
+	 * @param token
+	 * @param session
+	 * @return
+	 */
+	protected ObjectId checkDashboardAccess(final String token,
+			final HttpSession session) {
+		log.debug("Checking if token {} fits to session {}", token,
+				session.getId());
+		if (token == null) {
+			log.debug("REST access denied: Given token is null");
+			throw new WebApplicationException(Response.notAcceptable(null)
+					.entity("Access token missing").build());
+		}
+		if (session.getAttribute(GeneralSessionAttributeTypes.VALIDATOR
+				.toString()) == null
+				|| !session
+						.getAttribute(
+								GeneralSessionAttributeTypes.VALIDATOR
+										.toString())
+						.toString()
+						.equals(GeneralSessionAttributeValidatorTypes.DASHBOARD_ACCESS
+								.toString())) {
+			log.debug("REST access denied: Session timed out or is no dashboard session");
+			throw new WebApplicationException(Response.notAcceptable(null)
+					.entity("Session timed out").build());
+		}
+		if (session.getAttribute(GeneralSessionAttributeTypes.TOKEN.toString()) == null
+				|| !token.equals(session
+						.getAttribute(GeneralSessionAttributeTypes.TOKEN
+								.toString()))) {
+			log.debug("REST access denied: Given token does not match token in session");
+			throw new WebApplicationException(Response.notAcceptable(null)
+					.entity("Wrong access token").build());
+		}
+
+		log.debug("Given token matches token in session");
+
+		ObjectId interventionId;
+		try {
+			interventionId = (ObjectId) session
+					.getAttribute(GeneralSessionAttributeTypes.CURRENT_SESSION
+							.toString());
+		} catch (final Exception e) {
+			interventionId = null;
+		}
+
+		if (interventionId != null) {
+			log.debug("Intervention {} fits to token {}", interventionId, token);
+			return interventionId;
+		} else {
+			throw new WebApplicationException(
+					Response.notAcceptable(null)
+							.entity("The current session is not bound to an intervention")
 							.build());
 		}
 	}

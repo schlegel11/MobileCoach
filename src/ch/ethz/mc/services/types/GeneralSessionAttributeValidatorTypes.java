@@ -1,4 +1,4 @@
-package ch.ethz.mc.model.rest;
+package ch.ethz.mc.services.types;
 
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
@@ -20,22 +20,20 @@ package ch.ethz.mc.model.rest;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import lombok.Getter;
-import lombok.Setter;
 
 /**
- * Wrapper for the average of variables with REST
- *
  * @author Andreas Filler
  */
-public class VariableAverage {
-	@Getter
-	@Setter
-	private String	variable;
-	@Getter
-	@Setter
-	private double	average;
-	@Getter
-	@Setter
-	private int		size;
+public enum GeneralSessionAttributeValidatorTypes {
+	PARTICIPANT_RELATED, DASHBOARD_ACCESS;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Enum#toString()
+	 */
+	@Override
+	public String toString() {
+		return super.toString().toLowerCase();
+	}
 }

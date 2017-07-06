@@ -303,6 +303,8 @@ public class ScreeningSurveyEditComponent extends AbstractClosableEditComponent 
 		passwordLabel
 				.setValue("!!! Password required to participate (optional)");
 		switchesLayoutGroup.addComponent(passwordLabel, 0, 0);
+		switchesLayoutGroup.setComponentAlignment(passwordLabel, new Alignment(
+				33));
 
 		// passwordTextFieldComponent
 		passwordTextFieldComponent = new VariableTextFieldComponent();
@@ -320,6 +322,8 @@ public class ScreeningSurveyEditComponent extends AbstractClosableEditComponent 
 		templatePathLabel.setHeight("-1px");
 		templatePathLabel.setValue("!!! Template path:");
 		switchesLayoutGroup.addComponent(templatePathLabel, 0, 1);
+		switchesLayoutGroup.setComponentAlignment(templatePathLabel,
+				new Alignment(33));
 
 		// templatePathComboBox
 		templatePathComboBox = new ComboBox();

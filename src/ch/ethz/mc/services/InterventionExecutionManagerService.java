@@ -43,7 +43,6 @@ import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.IteratorUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.MC;
@@ -201,42 +200,6 @@ public class InterventionExecutionManagerService {
 	public void interventionSetMonitoring(final Intervention intervention,
 			final boolean value) {
 		intervention.setMonitoringActive(value);
-
-		databaseManagerService.saveModelObject(intervention);
-	}
-
-	@Synchronized
-	public void interventionSetAutomaticallyFinishScreeningSurveys(
-			final Intervention intervention, final boolean value) {
-		intervention.setAutomaticallyFinishScreeningSurveys(value);
-
-		databaseManagerService.saveModelObject(intervention);
-	}
-
-	@Synchronized
-	public void interventionSetStartingDay(final Intervention intervention,
-			final int day, final boolean value) {
-		if (value
-				&& !ArrayUtils.contains(
-						intervention.getMonitoringStartingDays(), day)) {
-			intervention.setMonitoringStartingDays(ArrayUtils.add(
-					intervention.getMonitoringStartingDays(), day));
-		} else if (!value
-				&& ArrayUtils.contains(
-						intervention.getMonitoringStartingDays(), day)) {
-			intervention.setMonitoringStartingDays(ArrayUtils.removeElement(
-					intervention.getMonitoringStartingDays(), day));
-		}
-
-		databaseManagerService.saveModelObject(intervention);
-	}
-
-	@Synchronized
-	public void interventionSetInterventionsToCheckForUniqueness(
-			final Intervention intervention,
-			final String[] interventionsToCheckForUniqueness) {
-		intervention
-				.setInterventionsToCheckForUniqueness(interventionsToCheckForUniqueness);
 
 		databaseManagerService.saveModelObject(intervention);
 	}

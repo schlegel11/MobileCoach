@@ -61,6 +61,7 @@ public class ImplementationConstants {
 	public static final long	SIMULATOR_TIME_UPDATE_INTERVAL_IN_SECONDS											= 5;
 
 	public static final int		SURVEY_FILE_CACHE_IN_MINUTES														= 3600;
+	public static final int		DASHBOARD_FILE_CACHE_IN_MINUTES														= 3600;
 
 	public static final int		UI_SESSION_TIMEOUT_IN_SECONDS														= 900;
 	public static final String	UI_SESSION_ATTRIBUTE_DETECTOR														= "mc.vaadin.is_vaadin_session";
@@ -87,6 +88,7 @@ public class ImplementationConstants {
 	public static final String	FILE_STREAMING_SERVLET_PATH											= "files";
 	public static final String	SHORT_ID_FILE_STREAMING_SERVLET_PATH								= "files-short";
 	public static final String	SHORT_ID_SCREEN_SURVEY_AND_FEEDBACK_SERVLET_PATH					= "surveys-short";
+	public static final String	DASHBOARD_SERVLET_PATH												= "dashboard";
 
 	public static final String	REST_API_VERSION													= "v01";
 	public static final String	REST_API_CREDITS_CHECK_VARIABLE_POSTFIX								= "Check";

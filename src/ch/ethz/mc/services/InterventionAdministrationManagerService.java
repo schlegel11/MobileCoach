@@ -37,6 +37,7 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.bson.types.ObjectId;
 
@@ -294,8 +295,8 @@ public class InterventionAdministrationManagerService {
 	@Synchronized
 	public Intervention interventionCreate(final String name) {
 		val intervention = new Intervention(name,
-				InternalDateTime.currentTimeMillis(), false, false, false,
-				new String[] {}, new int[] { 1 }, null);
+				InternalDateTime.currentTimeMillis(), false, false, false, "",
+				null, false, new String[] {}, new int[] { 1 }, null);
 
 		if (name.equals("")) {
 			intervention.setName(ImplementationConstants.DEFAULT_OBJECT_NAME);
@@ -339,6 +340,66 @@ public class InterventionAdministrationManagerService {
 			final Intervention intervention,
 			final String newSenderIdentification) {
 		intervention.setAssignedSenderIdentification(newSenderIdentification);
+
+		databaseManagerService.saveModelObject(intervention);
+	}
+
+	@Synchronized
+	public void interventionSetDashboardEnabled(
+			final Intervention intervention, final boolean newValue) {
+		intervention.setDashboardEnabled(newValue);
+
+		databaseManagerService.saveModelObject(intervention);
+	}
+
+	@Synchronized
+	public void interventionChangeDashboardTemplatePath(
+			final Intervention intervention, final String newTemplatePath) {
+		intervention.setDashboardTemplatePath(newTemplatePath);
+
+		databaseManagerService.saveModelObject(intervention);
+	}
+
+	@Synchronized
+	public void interventionChangeDashboardPasswordPattern(
+			final Intervention intervention, final String newPasswordPattern) {
+		intervention.setDashboardPasswordPattern(newPasswordPattern);
+
+		databaseManagerService.saveModelObject(intervention);
+	}
+
+	@Synchronized
+	public void interventionSetAutomaticallyFinishScreeningSurveys(
+			final Intervention intervention, final boolean value) {
+		intervention.setAutomaticallyFinishScreeningSurveys(value);
+
+		databaseManagerService.saveModelObject(intervention);
+	}
+
+	@Synchronized
+	public void interventionSetStartingDay(final Intervention intervention,
+			final int day, final boolean value) {
+		if (value
+				&& !ArrayUtils.contains(
+						intervention.getMonitoringStartingDays(), day)) {
+			intervention.setMonitoringStartingDays(ArrayUtils.add(
+					intervention.getMonitoringStartingDays(), day));
+		} else if (!value
+				&& ArrayUtils.contains(
+						intervention.getMonitoringStartingDays(), day)) {
+			intervention.setMonitoringStartingDays(ArrayUtils.removeElement(
+					intervention.getMonitoringStartingDays(), day));
+		}
+
+		databaseManagerService.saveModelObject(intervention);
+	}
+
+	@Synchronized
+	public void interventionSetInterventionsToCheckForUniqueness(
+			final Intervention intervention,
+			final String[] interventionsToCheckForUniqueness) {
+		intervention
+				.setInterventionsToCheckForUniqueness(interventionsToCheckForUniqueness);
 
 		databaseManagerService.saveModelObject(intervention);
 	}

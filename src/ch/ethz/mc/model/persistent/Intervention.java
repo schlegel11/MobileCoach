@@ -90,6 +90,29 @@ public class Intervention extends ModelObject {
 	private boolean		monitoringActive;
 
 	/**
+	 * Defines if the dashboard of the intervention can be accessed.
+	 */
+	@Getter
+	@Setter
+	private boolean		dashboardEnabled;
+
+	/**
+	 * The path of the template for the dashboard
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private String		dashboardTemplatePath;
+
+	/**
+	 * <strong>OPTIONAL:</strong> The password pattern (containing regular
+	 * expressions) required to access the dashboard
+	 */
+	@Getter
+	@Setter
+	private String		dashboardPasswordPattern;
+
+	/**
 	 * Defines if {@link ScreeningSurvey}s of participants where all relevant
 	 * monitoring data is available will automatically be finished by the system
 	 */

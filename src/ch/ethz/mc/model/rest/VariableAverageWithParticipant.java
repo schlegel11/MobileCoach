@@ -28,7 +28,7 @@ import lombok.Setter;
  *
  * @author Andreas Filler
  */
-public class VariableAverage {
+public class VariableAverageWithParticipant {
 	@Getter
 	@Setter
 	private String	variable;
@@ -38,4 +38,7 @@ public class VariableAverage {
 	@Getter
 	@Setter
 	private int		size;
+	@Getter
+	@Setter
+	private double	valueOfParticipant;
 }

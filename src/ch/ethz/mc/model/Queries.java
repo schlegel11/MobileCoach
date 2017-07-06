@@ -201,4 +201,7 @@ public class Queries {
 	public static final String	UPDATE_VERSION_7__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'supervisorMessage':false}}";
 	public static final String	UPDATE_VERSION_9__INTERVENTION__CHANGE_1																																										= "{$set:{'interventionsToCheckForUniqueness':[]}}";
 	public static final String	UPDATE_VERSION_9__INTERVENTION__CHANGE_2																																										= "{$set:{'monitoringStartingDays':[1]}}";
+	public static final String	UPDATE_VERSION_10__INTERVENTION__CHANGE_1																																										= "{$set:{'dashboardEnabled':false}}";
+	public static final String	UPDATE_VERSION_10__INTERVENTION__CHANGE_2																																										= "{$set:{'dashboardTemplatePath':''}}";
+	public static final String	UPDATE_VERSION_10__INTERVENTION__CHANGE_3																																										= "{$set:{'dashboardPasswordPattern':null}}";
 }
