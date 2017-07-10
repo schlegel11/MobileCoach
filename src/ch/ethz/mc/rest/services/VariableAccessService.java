@@ -21,6 +21,8 @@ package ch.ethz.mc.rest.services;
  * limitations under the License.
  */
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Hashtable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -41,6 +43,7 @@ import lombok.extern.log4j.Log4j2;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.model.rest.ClusterValue;
 import ch.ethz.mc.model.rest.CollectionOfExtendedListVariables;
 import ch.ethz.mc.model.rest.CollectionOfExtendedVariables;
 import ch.ethz.mc.model.rest.OK;
@@ -48,6 +51,7 @@ import ch.ethz.mc.model.rest.VariableAverage;
 import ch.ethz.mc.model.rest.VariableAverageWithParticipant;
 import ch.ethz.mc.model.rest.Variable;
 import ch.ethz.mc.model.rest.CollectionOfVariables;
+import ch.ethz.mc.model.rest.VariableCluster;
 import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mc.tools.StringValidator;
 
@@ -296,6 +300,133 @@ public class VariableAccessService extends AbstractService {
 			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
 					.entity("Could not retrieve variable: " + e.getMessage())
 					.build());
+		}
+	}
+
+	@GET
+	@Path("/readDashboardGroupCluster/{group}/{variable}")
+	@Produces("application/json")
+	public VariableCluster variableReadDashboardGroupCluster(
+			@HeaderParam("token") final String token,
+			@PathParam("group") final String group,
+			@PathParam("variable") final String variable,
+			@Context final HttpServletRequest request) {
+		log.debug(
+				"Token {}: Read variable cluster of variable {} of group {} of intervention",
+				token, variable, group);
+		ObjectId interventionId;
+		try {
+			interventionId = checkDashboardAccess(token, request.getSession());
+		} catch (final Exception e) {
+			throw e;
+		}
+
+		try {
+			if (!StringValidator
+					.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
+							+ variable.trim())) {
+				throw new Exception("The variable name is not valid");
+			}
+
+			val collectionOfExtendedVariables = restManagerService
+					.readVariableArrayForDashboardOfGroupOrIntervention(
+							interventionId, variable, group, false);
+
+			val clusterHashtable = new Hashtable<String, Integer>();
+
+			for (val resultVariable : collectionOfExtendedVariables
+					.getVariables()) {
+				val value = resultVariable.getValue();
+				if (clusterHashtable.containsKey(value)) {
+					clusterHashtable
+							.put(value, clusterHashtable.get(value) + 1);
+				} else {
+					clusterHashtable.put(value, 1);
+				}
+			}
+
+			val variableCluster = new VariableCluster();
+			variableCluster.setVariable(variable);
+			val clusterValues = variableCluster.getClusteredValues();
+
+			for (val key : clusterHashtable.keySet()) {
+				val clusterValue = new ClusterValue(key,
+						clusterHashtable.get(key));
+				clusterValues.add(clusterValue);
+			}
+
+			Collections.sort(clusterValues, (a, b) -> a.getValue()
+					.compareToIgnoreCase(b.getValue()));
+
+			return variableCluster;
+		} catch (final Exception e) {
+			throw new WebApplicationException(Response
+					.status(Status.FORBIDDEN)
+					.entity("Could not read cluster of variable: "
+							+ e.getMessage()).build());
+		}
+	}
+
+	@GET
+	@Path("/readDashboardInterventionCluster/{variable}")
+	@Produces("application/json")
+	public VariableCluster variableReadDashboardInterventionCluster(
+			@HeaderParam("token") final String token,
+			@PathParam("variable") final String variable,
+			@Context final HttpServletRequest request) {
+		log.debug(
+				"Token {}: Read variable cluster of variable {} of intervention",
+				token, variable);
+		ObjectId interventionId;
+		try {
+			interventionId = checkDashboardAccess(token, request.getSession());
+		} catch (final Exception e) {
+			throw e;
+		}
+
+		try {
+			if (!StringValidator
+					.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
+							+ variable.trim())) {
+				throw new Exception("The variable name is not valid");
+			}
+
+			val collectionOfExtendedVariables = restManagerService
+					.readVariableArrayForDashboardOfGroupOrIntervention(
+							interventionId, variable, null, false);
+
+			val clusterHashtable = new Hashtable<String, Integer>();
+
+			for (val resultVariable : collectionOfExtendedVariables
+					.getVariables()) {
+				val value = resultVariable.getValue();
+				if (clusterHashtable.containsKey(value)) {
+					clusterHashtable
+							.put(value, clusterHashtable.get(value) + 1);
+				} else {
+					clusterHashtable.put(value, 1);
+				}
+			}
+
+			val variableCluster = new VariableCluster();
+			variableCluster.setVariable(variable);
+			val clusterValues = variableCluster.getClusteredValues();
+
+			for (val key : clusterHashtable.keySet()) {
+				val clusterValue = new ClusterValue(key,
+						clusterHashtable.get(key));
+				clusterValues.add(clusterValue);
+			}
+
+			Collections.sort(clusterValues, (a, b) -> a.getValue()
+					.compareToIgnoreCase(b.getValue()));
+
+			return variableCluster;
+		} catch (final Exception e) {
+			throw new WebApplicationException(Response
+					.status(Status.FORBIDDEN)
+					.entity("Could not read cluster of variable: "
+							+ e.getMessage()).build());
 		}
 	}
 
