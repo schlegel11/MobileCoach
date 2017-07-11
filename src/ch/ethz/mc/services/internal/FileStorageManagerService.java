@@ -217,23 +217,19 @@ public class FileStorageManagerService {
 			final FILE_STORES fileStore) {
 
 		File responsibleFolder = null;
+		String[] fileReferenceParts = null;
 		switch (fileStore) {
 			case MEDIA_UPLOAD:
 				responsibleFolder = mediaUploadFolder;
+				fileReferenceParts = fileReference.split("-");
 				break;
 			case STORAGE:
 				responsibleFolder = storageFolder;
+				fileReferenceParts = fileReference.split("/");
 				break;
 		}
 
-		log.debug("Returning file with reference {}", fileReference);
-
-		String[] fileReferenceParts;
-		if (fileReference.contains("/")) {
-			fileReferenceParts = fileReference.split("/");
-		} else {
-			fileReferenceParts = fileReference.split("-");
-		}
+		log.debug("Checking for file with reference {}", fileReference);
 
 		if (fileReferenceParts.length != 2) {
 			log.warn("Preventing security lack by not accepting different file names as regularly expected");
