@@ -151,6 +151,24 @@ An extended backend user guide will be published in the following months.
 ### Version @@VERSION@@
 
 ## Release notes
+### 1.5.1
+
+**Enhancements**
+
+* Dashboards provide a way to give teachers, caretakers, service personal etc. (non-participants) a way to have look at the current status of participants within an intervention
+* The variable uniqueness check allows to check variables across interventions for uniqueness
+* Intervention starting days can now be definied dynamically
+* New rules comparators to better work with "select many" variables
+
+**Changes**
+
+* Decimal based user inputs are now handled the same way independent of the usage of "," or "." as decimal separator
+* Participant variables are now cached in memory to improve read access performance
+
+**Bugfixes**
+
+* Several minor bugfixes in the backend and UI
+
 
 ### 1.5.0
 
