@@ -38,7 +38,7 @@ public class InDataBaseVariableStore implements VariableStore {
 		try {
 			variableManagerService.writeVariableValueOfParticipant(participantId,
 					variableName, value,
-					true, true);
+					true, false);
 		} catch (WriteProtectedVariableException | InvalidVariableNameException e) {
 
 			throw new VariableException("variable writing failed: " + variableName, e);
@@ -55,7 +55,7 @@ public class InDataBaseVariableStore implements VariableStore {
 		try{
 			variableManagerService.writeVariableValueOfParticipant(participantId,
 					variableName, value,
-					true, true);
+					true, false);
 
 		}catch(WriteProtectedVariableException | InvalidVariableNameException e){
 			throw new VariableException("variable writing failed: " + variableName, e);
