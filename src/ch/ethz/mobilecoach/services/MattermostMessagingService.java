@@ -21,6 +21,7 @@ import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -304,7 +305,7 @@ public class MattermostMessagingService implements MessagingService {
 		this.mcUserToken = new MattermostTask<String>(managementService.api_url + "users/login", json){
 
 			@Override
-			String handleResponse(PostMethod method){
+			String handleResponse(HttpMethodBase method){
 				return method.getResponseHeader("Token").getValue();
 			}
 		}.run();

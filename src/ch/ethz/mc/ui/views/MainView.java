@@ -26,6 +26,7 @@ import ch.ethz.mc.ui.views.components.access_control.AccessControlTabComponentWi
 import ch.ethz.mc.ui.views.components.account.AccountTabComponentWithController;
 import ch.ethz.mc.ui.views.components.basics.MenuButtonComponent;
 import ch.ethz.mc.ui.views.components.conversations.ConversationsTabComponentWithController;
+import ch.ethz.mc.ui.views.components.integrations.IntegrationsTabComponentWithController;
 import ch.ethz.mc.ui.views.components.interventions.AllInterventionsTabComponentWithController;
 import ch.ethz.mc.ui.views.components.views.MainViewComponent;
 import ch.ethz.mc.ui.views.components.welcome.WelcomeTabComponentWithController;
@@ -133,6 +134,16 @@ public class MainView extends AbstractView implements View, LayoutClickListener 
 					switchToConversationsView();
 				}
 				break componentLoop;
+			} else if (clickedComponent == mainViewComponent
+					.getIntegrationsButton()) {
+				log.debug("INTEGRATIONS button clicked");
+				if (clickedComponent != currentMenuButton) {
+					currentMenuButton.removeStyleName("active");
+					currentMenuButton = (MenuButtonComponent) clickedComponent;
+					currentMenuButton.addStyleName("active");
+					switchToIntegrationsView();
+				}
+				break componentLoop;
 			} else if (clickedComponent == mainViewComponent.getAccountButton()) {
 				log.debug("ACCOUNT button clicked");
 				if (clickedComponent != currentMenuButton) {
@@ -212,5 +223,17 @@ public class MainView extends AbstractView implements View, LayoutClickListener 
 				new ConversationsTabComponentWithController(),
 						AdminMessageStrings.MAIN_VIEW__CONVERSATIONS_TAB,
 						ThemeImageStrings.CONVERSATIONS_ICON);
+	}
+	
+	@Synchronized
+	private void switchToIntegrationsView() {
+		getAdminUI().getLockingService().releaseLockOfUISession(getUISession());
+
+		removeAllTabs();
+
+		addTab(mainViewComponent.getContentAccordion(),
+				new IntegrationsTabComponentWithController(),
+						AdminMessageStrings.MAIN_VIEW__INTEGRATIONS_TAB,
+						ThemeImageStrings.INTEGRATIONS_ICON);
 	}
 }

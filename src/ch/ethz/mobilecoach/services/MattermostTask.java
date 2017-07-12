@@ -3,7 +3,9 @@ package ch.ethz.mobilecoach.services;
 import lombok.extern.log4j.Log4j;
 
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.json.JSONObject;
@@ -19,6 +21,11 @@ public class MattermostTask<RESULT> {
 		this.payload = payload;
 	}
 	
+	public MattermostTask(String url){
+		this.url = url;
+		this.payload = null;
+	}
+	
 	public MattermostTask<RESULT> setToken(String token){
 		this.token = token;
 		return this;
@@ -32,25 +39,33 @@ public class MattermostTask<RESULT> {
 		final int MAX_TRIES = 3;
 		
 		while (!success && numberOfTriesCompleted < MAX_TRIES){
-			PostMethod post = new PostMethod(this.url);
+			HttpMethodBase method;
 			
+			
+			if (payload != null){
+				method = new PostMethod(this.url);
+			} else {
+				method = new GetMethod(this.url);
+			}
+			
+						
 			if (this.token != null){
-				post.setRequestHeader("Authorization", "Bearer " + this.token);
+				method.setRequestHeader("Authorization", "Bearer " + this.token);
 			}
 			
 			try {
 				if (this.payload != null){
-					post.setRequestEntity(new StringRequestEntity(this.payload.toString(), "application/json", "UTF-8"));
+					((PostMethod) method).setRequestEntity(new StringRequestEntity(this.payload.toString(), "application/json", "UTF-8"));
 				}
-	            int responseCode = client.executeMethod(post);
+	            int responseCode = client.executeMethod(method);
 	            if (responseCode == HttpStatus.SC_OK) {
 	            	success = true;
-	                return handleResponse(post);
+	                return handleResponse(method);
 	            } else {
-	            	throw new Exception("Status " + new Integer(responseCode) + ": " + post.getResponseBodyAsString());
+	            	throw new Exception("Status " + new Integer(responseCode) + ": " + method.getResponseBodyAsString());
 	            }
 			} catch (Exception e) {
-				log.error("Error completing Mattermost task: " + url + " " + payload.toString(), e);
+				log.error("Error completing Mattermost task: " + url + " " + payload, e);
 				numberOfTriesCompleted++;
 				if (MAX_TRIES <= numberOfTriesCompleted){
 					throw new RuntimeException(e);
@@ -61,7 +76,9 @@ public class MattermostTask<RESULT> {
 		return null;
 	}
 	
-	RESULT handleResponse(PostMethod method) throws Exception {
+	RESULT handleResponse(HttpMethodBase method) throws Exception {
 		return null;
 	};
+	
+	
 }

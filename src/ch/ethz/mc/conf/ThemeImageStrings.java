@@ -34,6 +34,8 @@ public class ThemeImageStrings {
 																+ "access-control-icon.png";
 	public static final String	CONVERSATIONS_ICON		= IMAGE_PATH
 																+ "loading-icon.png";
+	public static final String	INTEGRATIONS_ICON		= IMAGE_PATH
+																+ "interventions-icon.png";
 	public static final String	ACCOUNT_ICON			= IMAGE_PATH
 																+ "account-icon.png";
 	public static final String	COMPONENT_ICON			= IMAGE_PATH

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.HttpMethodBase;
 import org.bson.types.ObjectId;
 import org.json.JSONObject;
 
@@ -84,6 +84,11 @@ public class MattermostManagementService {
 		public final String managerUserName;
 		
 		public final String managerUserPassword;
+		
+		public String toString(){
+			String languageString = language != null ? language.toLanguageTag() : "(any)";
+			return languageString + ": " + managerUserName;
+		}
 	}
 
 
@@ -241,7 +246,7 @@ public class MattermostManagementService {
 
 		String channelId = new MattermostTask<String>(api_url + "teams/"+teamId+"/channels/create", json){
 			@Override
-			String handleResponse(PostMethod method) throws Exception {
+			String handleResponse(HttpMethodBase method) throws Exception {
 				return new JSONObject(method.getResponseBodyAsString()).getString("id");
 			}
 		}.setToken(adminUserToken).run();
@@ -257,7 +262,7 @@ public class MattermostManagementService {
 
 			new MattermostTask<Void>(api_url + "teams/"+teamId+"/channels/"+channelId+"/add", json){
 				@Override
-				Void handleResponse(PostMethod method) throws Exception {
+				Void handleResponse(HttpMethodBase method) throws Exception {
 					log.debug(method.getResponseBodyAsString());
 					return null;
 				}
@@ -290,7 +295,7 @@ public class MattermostManagementService {
 
 		String userId = new MattermostTask<String>(api_url + "users/create", json){
 			@Override
-			String handleResponse(PostMethod method) throws Exception {
+			String handleResponse(HttpMethodBase method) throws Exception {
 				return new JSONObject(method.getResponseBodyAsString()).getString("id");
 			}
 		}.setToken(adminUserToken).run();
@@ -369,7 +374,7 @@ public class MattermostManagementService {
 		final MattermostManagementService self = this;
 		new MattermostTask<Void>(api_url + "users/login", json){
 			@Override
-			Void handleResponse(PostMethod method){
+			Void handleResponse(HttpMethodBase method){
 				self.adminUserToken = method.getResponseHeader("Token").getValue();
 				return null;
 			}
@@ -385,12 +390,35 @@ public class MattermostManagementService {
 
 		String token = new MattermostTask<String>(api_url + "users/login", json){
 			@Override
-			String handleResponse(PostMethod method){
+			String handleResponse(HttpMethodBase method){
 				return method.getResponseHeader("Token").getValue();
 			}
 		}.run();
 		return token;
 	}
+	
+	/*
+	 * 		Getting Information from Mattermost
+	 */
+	
+	public String getTeamName(String teamId){
+		try {
+			
+			String teamName = new MattermostTask<String>(api_url + "teams/"+teamId+"/me"){
+				@Override
+				String handleResponse(HttpMethodBase method) throws Exception {
+					return new JSONObject(method.getResponseBodyAsString()).getString("name");
+				}
+			}.setToken(adminUserToken).run();
+			return teamName;
+			
+		} catch (Exception e){
+			e.printStackTrace();
+			return "";
+		}
+	}
+	
+	
 
 	/*
 	 * 		Utility Classes
