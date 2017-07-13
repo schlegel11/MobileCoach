@@ -54,6 +54,9 @@ public class ImplementationConstants {
 	public static final long	MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR						= 60;
 	public static final long	MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR							= 7;
 
+	// FIXME Special solution for MC tobacco & ready4life
+	public static String		VARIABLE_DEFINING_PARTICIPATION_IN_MOBILE_COACH_EXTRA								= "$participation_extra";
+
 	public static final long	MAILING_SEND_RETRIES																= 2;
 	public static final long	MAILING_SEND_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS								= 5 * 60;
 	public static final int		MAILING_MAXIMUM_THREAD_COUNT														= 25;
