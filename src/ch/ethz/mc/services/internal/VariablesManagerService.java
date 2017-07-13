@@ -149,6 +149,7 @@ public class VariablesManagerService {
 			externallyReadableParticipantVariableNames.add(variable);
 		}
 
+		// Init cache
 		participantsVariablesCache = new ConcurrentHashMap<String, Hashtable<String, ParticipantVariableWithValue>>();
 
 		log.info("Started.");

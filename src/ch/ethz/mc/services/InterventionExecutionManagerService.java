@@ -616,15 +616,49 @@ public class InterventionExecutionManagerService {
 	 * (the following two methods contain the elemental parts of
 	 * the monitoring process)
 	 */
+	/**
+	 * Cares for the execution of the following two main methods in the
+	 * appropriate order. Caution: The same should alwasy be performed in this
+	 * order to retain data consistency
+	 */
 	@Synchronized
-	public void reactOnAnsweredAndUnansweredMessages(
-			final boolean reactOnAnsweredMessages) {
-		log.debug(
-				"Create a list of all relevant participants for handling {} messages",
-				reactOnAnsweredMessages ? "answered" : "unanswered");
-		val participants = getAllParticipantsRelevantForAnsweredInTimeChecksAndMonitoringSheduling();
+	public void performMessaging() throws Exception {
+		log.debug("Create a list of all relevant participants to perfom messaging");
+		val participantsWithDialogStatus = getAllParticipantsRelevantForAnsweredInTimeChecksAndMonitoringScheduling();
 
-		for (val participant : participants) {
+		try {
+			log.debug("React on unanswered messages");
+			reactOnAnsweredAndUnansweredMessages(participantsWithDialogStatus,
+					false);
+		} catch (final Exception e) {
+			log.error("Could not react on unanswered messages: {}",
+					e.getMessage());
+		}
+		try {
+			log.debug("React on answered messages");
+			reactOnAnsweredAndUnansweredMessages(participantsWithDialogStatus,
+					true);
+		} catch (final Exception e) {
+			log.error("Could not react on answered messages: {}",
+					e.getMessage());
+		}
+		try {
+			log.debug("Scheduling new messages");
+			scheduleMessagesForSending(participantsWithDialogStatus);
+		} catch (final Exception e) {
+			log.error("Could not schedule new monitoring messages: {}",
+					e.getMessage());
+		}
+	}
+
+	@Synchronized
+	private void reactOnAnsweredAndUnansweredMessages(
+			final Hashtable<Participant, DialogStatus> participantsWithDialogStatus,
+			final boolean reactOnAnsweredMessages) {
+		log.debug("Handling {} messages", reactOnAnsweredMessages ? "answered"
+				: "unanswered");
+
+		for (val participant : participantsWithDialogStatus.keySet()) {
 
 			// Get relevant messages of participant
 			Iterable<DialogMessage> dialogMessages;
@@ -768,19 +802,18 @@ public class InterventionExecutionManagerService {
 	}
 
 	@Synchronized
-	public void scheduleMessagesForSending() {
-		log.debug("Create a list of all relevant participants for scheduling of monitoring messages");
-		val participants = getAllParticipantsRelevantForAnsweredInTimeChecksAndMonitoringSheduling();
+	private void scheduleMessagesForSending(
+			final Hashtable<Participant, DialogStatus> participantsWithDialogStatus) {
+		log.debug("Scheduling monitoring messages");
 
 		val dateIndex = StringHelpers.createDailyUniqueIndex();
 		val dateToday = new Date(InternalDateTime.currentTimeMillis());
 		val todayDayIndex = Integer.parseInt(dayInWeekFormatter
 				.format(dateToday));
 
-		for (val participant : participants) {
-
+		for (val participant : participantsWithDialogStatus.keySet()) {
 			// Check if participant has already been scheduled today
-			val dialogStatus = getDialogStatusByParticipant(participant.getId());
+			val dialogStatus = participantsWithDialogStatus.get(participant);
 
 			// Only start interventions on assigned intervention monitoring
 			// starting days
@@ -1345,29 +1378,28 @@ public class InterventionExecutionManagerService {
 								Queries.PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE,
 								intervention.getId())) {
 					if (participantId != null) {
-						for (val dialogStatus : databaseManagerService
-								.findModelObjects(
+						val dialogStatus = databaseManagerService
+								.findOneModelObject(
 										DialogStatus.class,
 										Queries.DIALOG_STATUS__BY_PARTICIPANT_AND_DATA_FOR_MONITORING_PARTICIPATION_AVAILABLE_TRUE_AND_SCREENING_SURVEY_PERFORMED_TRUE_AND_MONITORING_PERFORMED_FALSE,
-										participantId)) {
-							if (dialogStatus != null) {
+										participantId);
 
-								val dialogMessagesWaitingToBeSendOfParticipant = databaseManagerService
-										.findModelObjects(
-												DialogMessage.class,
-												Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_SHOULD_BE_SENT_TIMESTAMP_LOWER,
-												participantId,
-												DialogMessageStatusTypes.PREPARED_FOR_SENDING,
-												InternalDateTime
-														.currentTimeMillis());
+						if (dialogStatus != null) {
+							val dialogMessagesWaitingToBeSendOfParticipant = databaseManagerService
+									.findModelObjects(
+											DialogMessage.class,
+											Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_SHOULD_BE_SENT_TIMESTAMP_LOWER,
+											participantId,
+											DialogMessageStatusTypes.PREPARED_FOR_SENDING,
+											InternalDateTime
+													.currentTimeMillis());
 
-								for (val dialogMessageWaitingToBeSendOfParticipant : dialogMessagesWaitingToBeSendOfParticipant) {
-									dialogMessagesWaitingToBeSend
-											.add(new DialogMessageWithSenderIdentification(
-													dialogMessageWaitingToBeSendOfParticipant,
-													intervention
-															.getAssignedSenderIdentification()));
-								}
+							for (val dialogMessageWaitingToBeSendOfParticipant : dialogMessagesWaitingToBeSendOfParticipant) {
+								dialogMessagesWaitingToBeSend
+										.add(new DialogMessageWithSenderIdentification(
+												dialogMessageWaitingToBeSendOfParticipant,
+												intervention
+														.getAssignedSenderIdentification()));
 							}
 						}
 					}
@@ -1479,16 +1511,6 @@ public class InterventionExecutionManagerService {
 		return dialogOption;
 	}
 
-	@Synchronized
-	private DialogStatus getDialogStatusByParticipant(
-			final ObjectId participantId) {
-		val dialogStatus = databaseManagerService.findOneModelObject(
-				DialogStatus.class, Queries.DIALOG_STATUS__BY_PARTICIPANT,
-				participantId);
-
-		return dialogStatus;
-	}
-
 	/**
 	 * Returns a list of {@link Participant}s that are relevant for monitoring;
 	 * Parameters therefore are:
@@ -1504,8 +1526,8 @@ public class InterventionExecutionManagerService {
 	 * @return
 	 */
 	@Synchronized
-	private List<Participant> getAllParticipantsRelevantForAnsweredInTimeChecksAndMonitoringSheduling() {
-		val relevantParticipants = new ArrayList<Participant>();
+	private Hashtable<Participant, DialogStatus> getAllParticipantsRelevantForAnsweredInTimeChecksAndMonitoringScheduling() {
+		val relevantParticipants = new Hashtable<Participant, DialogStatus>();
 
 		for (val intervention : databaseManagerService.findModelObjects(
 				Intervention.class,
@@ -1517,14 +1539,14 @@ public class InterventionExecutionManagerService {
 								Queries.PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE,
 								intervention.getId())) {
 					if (participant != null) {
-						for (val dialogStatus : databaseManagerService
-								.findModelObjects(
+						val dialogStatus = databaseManagerService
+								.findOneModelObject(
 										DialogStatus.class,
 										Queries.DIALOG_STATUS__BY_PARTICIPANT_AND_DATA_FOR_MONITORING_PARTICIPATION_AVAILABLE_TRUE_AND_SCREENING_SURVEY_PERFORMED_TRUE_AND_MONITORING_PERFORMED_FALSE,
-										participant.getId())) {
-							if (dialogStatus != null) {
-								relevantParticipants.add(participant);
-							}
+										participant.getId());
+
+						if (dialogStatus != null) {
+							relevantParticipants.put(participant, dialogStatus);
 						}
 					}
 				}
