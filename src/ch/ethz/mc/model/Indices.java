@@ -46,7 +46,10 @@ import ch.ethz.mc.model.persistent.ScreeningSurveySlideRule;
  */
 public class Indices {
 	private static final String[]	authorIndices											= new String[] { "{'username':1}" };
-	private static final String[]	dialogMessageIndices									= new String[] { "{'participant':1,'status':1,'shouldBeSentTimestamp':1}" };
+	private static final String[]	dialogMessageIndices									= new String[] {
+			"{'participant':1,'status':1}",
+			"{'participant':1,'status':1,'shouldBeSentTimestamp':1}",
+			"{'participant':1,'status':1,'isUnansweredAfterTimestamp':1}"					};
 	private static final String[]	dialogOptionIndices										= new String[] { "{'participant':1,'type':1}" };
 	private static final String[]	dialogStatusIndices										= new String[] {
 			"{'participant':1,'dataForMonitoringParticipationAvailable':1,'screeningSurveyPerformed':1,'monitoringPerformed':1}",

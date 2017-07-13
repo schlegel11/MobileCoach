@@ -50,8 +50,8 @@ public class MonitoringSchedulingWorker extends Thread {
 	public MonitoringSchedulingWorker(
 			final InterventionExecutionManagerService interventionExecutionManagerService,
 			final SurveyExecutionManagerService screeningSurveyExecutionManagerService) {
-		setName("Monitoring Sheduling Worker");
-		setPriority(NORM_PRIORITY - 2);
+		setName("Monitoring Scheduling Worker");
+		setPriority(NORM_PRIORITY - 1);
 
 		this.screeningSurveyExecutionManagerService = screeningSurveyExecutionManagerService;
 		this.interventionExecutionManagerService = interventionExecutionManagerService;
@@ -95,7 +95,7 @@ public class MonitoringSchedulingWorker extends Thread {
 				}
 
 				/*
-				 * The following four steps should always be performed in this
+				 * The following two steps should always be performed in this
 				 * order to retain data consistency
 				 */
 				try {
@@ -108,28 +108,9 @@ public class MonitoringSchedulingWorker extends Thread {
 							e.getMessage());
 				}
 				try {
-					log.debug("React on unanswered messages");
-					interventionExecutionManagerService
-							.reactOnAnsweredAndUnansweredMessages(false);
+					interventionExecutionManagerService.performMessaging();
 				} catch (final Exception e) {
-					log.error("Could not react on unanswered messages: {}",
-							e.getMessage());
-				}
-				try {
-					log.debug("React on answered messages");
-					interventionExecutionManagerService
-							.reactOnAnsweredAndUnansweredMessages(true);
-				} catch (final Exception e) {
-					log.error("Could not react on answered messages: {}",
-							e.getMessage());
-				}
-				try {
-					log.debug("Scheduling new messages");
-					interventionExecutionManagerService
-							.scheduleMessagesForSending();
-				} catch (final Exception e) {
-					log.error("Could not schedule new monitoring messages: {}",
-							e.getMessage());
+					log.error("Could not perform messaging: {}", e.getMessage());
 				}
 
 			} catch (final Exception e) {
