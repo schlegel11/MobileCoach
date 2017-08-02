@@ -49,8 +49,8 @@ public class OutgoingMessageWorker extends Thread {
 		val simulatorActive = Constants.isSimulatedDateAndTime();
 		try {
 			TimeUnit.SECONDS
-					.sleep(simulatorActive ? ImplementationConstants.MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR
-							: ImplementationConstants.MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR);
+					.sleep(simulatorActive ? ImplementationConstants.MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR_NO_OPEN_MESSAGES
+							: ImplementationConstants.MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR_NO_OPEN_MESSAGES);
 		} catch (final InterruptedException e) {
 			interrupt();
 			log.debug("Outgoing message worker received signal to stop (before first run)");
@@ -60,8 +60,10 @@ public class OutgoingMessageWorker extends Thread {
 			final long startingTime = System.currentTimeMillis();
 			log.info("Executing new run of outgoing message worker...started");
 
+			boolean allMessagesSent = false;
 			try {
-				interventionExecutionManagerService.handleOutgoingMessages();
+				allMessagesSent = interventionExecutionManagerService
+						.handleOutgoingMessages();
 			} catch (final Exception e) {
 				log.error("Could not send all prepared messages: {}",
 						e.getMessage());
@@ -72,9 +74,15 @@ public class OutgoingMessageWorker extends Thread {
 					(System.currentTimeMillis() - startingTime) / 1000.0);
 
 			try {
-				TimeUnit.SECONDS
-						.sleep(simulatorActive ? ImplementationConstants.MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR
-								: ImplementationConstants.MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR);
+				if (allMessagesSent) {
+					TimeUnit.SECONDS
+							.sleep(simulatorActive ? ImplementationConstants.MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR_NO_OPEN_MESSAGES
+									: ImplementationConstants.MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR_NO_OPEN_MESSAGES);
+				} else {
+					TimeUnit.SECONDS
+							.sleep(simulatorActive ? ImplementationConstants.MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR_OPEN_MESSAGES
+									: ImplementationConstants.MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR_OPEN_MESSAGES);
+				}
 			} catch (final InterruptedException e) {
 				interrupt();
 				log.debug("Outgoing message worker received signal to stop");

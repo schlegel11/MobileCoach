@@ -242,6 +242,18 @@ public class Constants {
 	private static String	smsPhoneNumberAcceptedCountryCodes	= "41,43,49";
 
 	/**
+	 * Deepstream configuration
+	 */
+	@Getter
+	private static boolean	deepstreamActive					= false;
+	@Getter
+	private static String	deepstreamHost						= "wss://localhost:6020";
+	@Getter
+	private static String	deepstreamUser						= "mc-server";
+	@Getter
+	private static String	deepstreamPassword					= "top-secret";
+
+	/**
 	 * Get all accepted country codes for SMS phone numbers
 	 * 
 	 * @return List of accepted country codes

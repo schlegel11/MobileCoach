@@ -9,7 +9,7 @@
 	<!ENTITY vaadin.version "7.6.7">
 	<!ENTITY validation.version "1.1.0.Final">
 	<!ENTITY jongo.version "1.3.0">
-	<!ENTITY mongodb-driver.version "3.2.2">
+	<!ENTITY mongodb-driver.version "3.4.2">
 	<!ENTITY jena.version "2.11.0">
 	<!ENTITY javaluator.version "2.0.0">
 	<!ENTITY lombok.version "1.16.8">
@@ -19,6 +19,7 @@
 	<!ENTITY thumbnailator.version "0.4.8">
 	<!ENTITY resteasy.version "3.0.17.Final">
 	<!ENTITY jcsv.version "1.4.0">
+	<!ENTITY deepstream.version "2.2.2">
 ]>
 <ivy-module version="2.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -124,5 +125,8 @@
 
 		<!-- jcsv -->
 		<dependency org="com.googlecode.jcsv" name="jcsv" rev="&jcsv.version;" />
+		
+		<!-- Deepstream -->
+		<dependency org="io.deepstream" name="deepstream.io-client-java" rev="&deepstream.version;" />
 	</dependencies>
 </ivy-module>

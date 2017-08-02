@@ -921,6 +921,11 @@ public class InterventionExecutionManagerService {
 		}
 	}
 
+	/**
+	 * Handles all received messages
+	 * 
+	 * @param receivedMessage
+	 */
 	@Synchronized
 	public void handleReceivedMessage(final ReceivedMessage receivedMessage) {
 		val dialogOption = getDialogOptionByTypeAndDataOfActiveInterventions(
@@ -1035,49 +1040,80 @@ public class InterventionExecutionManagerService {
 		}
 	}
 
+	/**
+	 * Handles sending of messages and returns if all waiting messages have
+	 * already be sent
+	 * 
+	 * @return
+	 */
 	@Synchronized
-	public void handleOutgoingMessages() {
+	public boolean handleOutgoingMessages() {
 		if (communicationManagerService.getMessagingThreadCount() > ImplementationConstants.MAILING_MAXIMUM_THREAD_COUNT) {
 			log.warn("Too many messages currently prepared for sending...delay until the next run");
-			return;
+			return false;
 		}
 
+		boolean allMessagesSentIntermediateStatus = true;
+
 		val dialogMessagesWithSenderIdentificationToSend = getDialogMessagesWithSenderWaitingToBeSentOfActiveInterventions();
-		int sentMessages = 0;
+
 		for (val dialogMessageWithSenderIdentificationToSend : dialogMessagesWithSenderIdentificationToSend) {
 			final val dialogMessageToSend = dialogMessageWithSenderIdentificationToSend
 					.getDialogMessage();
 			try {
 				DialogOption dialogOption = null;
-				boolean sendToSupervisor = false;
+				boolean sendToSupervisor;
 				if (dialogMessageWithSenderIdentificationToSend
 						.getDialogMessage().isSupervisorMessage()) {
 					sendToSupervisor = true;
 					dialogOption = getDialogOptionByParticipantAndRecipientType(
 							dialogMessageToSend.getParticipant(), true);
 				} else {
+					sendToSupervisor = false;
 					dialogOption = getDialogOptionByParticipantAndRecipientType(
 							dialogMessageToSend.getParticipant(), false);
 				}
 
 				if (dialogOption != null) {
+					switch (dialogOption.getType()) {
+						case SMS:
+						case EMAIL:
+						case SUPERVISOR_SMS:
+						case SUPERVISOR_EMAIL:
+							if (dialogMessageWithSenderIdentificationToSend
+									.getMessageSenderIdentification() == null
+									|| dialogMessageWithSenderIdentificationToSend
+											.getMessageSenderIdentification()
+											.equals("")) {
+								log.warn("Message to participant {} cannot be sent because it belongs to an intervention without assigned sender identification!"
+										+ dialogMessageToSend.getParticipant());
+							}
+							continue;
+						case EXTERNAL_ID:
+						case SUPERVISOR_EXTERNAL_ID:
+							// No special checks for external messages,
+							// currently
+							break;
+					}
+
 					log.debug("Sending prepared message to {} ({})",
 							sendToSupervisor ? "supervisor" : "participant",
 							dialogOption.getData());
 					communicationManagerService.sendMessage(dialogOption,
-							dialogMessageToSend.getId(),
+							dialogMessageToSend.getId(), dialogMessageToSend
+									.getOrder(),
 							dialogMessageWithSenderIdentificationToSend
 									.getMessageSenderIdentification(),
 							dialogMessageToSend.getMessage(),
 							dialogMessageToSend.isMessageExpectsAnswer());
-					sentMessages++;
 
-					if (sentMessages > ImplementationConstants.MAILING_MAXIMUM_THREAD_COUNT) {
+					if (communicationManagerService.getMessagingThreadCount() > ImplementationConstants.MAILING_MAXIMUM_THREAD_COUNT) {
 						log.debug("Too many messages currently prepared for sending...delay until the next run");
+						allMessagesSentIntermediateStatus = false;
 						break;
 					}
 				} else {
-					log.error("Could not send prepared message, because there was no valid dialog option to send message to participantor supervisor; solution: remove current dialog message");
+					log.error("Could not send prepared message, because there was no valid dialog option to send message to participant or supervisor; solution: remove current dialog message");
 
 					try {
 						databaseManagerService
@@ -1091,6 +1127,8 @@ public class InterventionExecutionManagerService {
 				log.error("Could not send prepared message: {}", e.getMessage());
 			}
 		}
+
+		return allMessagesSentIntermediateStatus;
 	}
 
 	/*
@@ -1353,7 +1391,6 @@ public class InterventionExecutionManagerService {
 	 * therefore are:
 	 *
 	 * - the belonging intervention is active
-	 * - the belonging intervention has sender identification
 	 * - the belonging intervention monitoring is active
 	 * - the participant has monitoring active
 	 * - the participant has all data for monitoring available
@@ -1371,36 +1408,34 @@ public class InterventionExecutionManagerService {
 		for (val intervention : databaseManagerService.findModelObjects(
 				Intervention.class,
 				Queries.INTERVENTION__ACTIVE_TRUE_MONITORING_ACTIVE_TRUE)) {
-			if (intervention.getAssignedSenderIdentification() != null) {
-				for (val participantId : databaseManagerService
-						.findModelObjectIds(
-								Participant.class,
-								Queries.PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE,
-								intervention.getId())) {
-					if (participantId != null) {
-						val dialogStatus = databaseManagerService
-								.findOneModelObject(
-										DialogStatus.class,
-										Queries.DIALOG_STATUS__BY_PARTICIPANT_AND_DATA_FOR_MONITORING_PARTICIPATION_AVAILABLE_TRUE_AND_SCREENING_SURVEY_PERFORMED_TRUE_AND_MONITORING_PERFORMED_FALSE,
-										participantId);
+			for (val participantId : databaseManagerService
+					.findModelObjectIds(
+							Participant.class,
+							Queries.PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE,
+							intervention.getId())) {
+				if (participantId != null) {
+					val dialogStatus = databaseManagerService
+							.findOneModelObject(
+									DialogStatus.class,
+									Queries.DIALOG_STATUS__BY_PARTICIPANT_AND_DATA_FOR_MONITORING_PARTICIPATION_AVAILABLE_TRUE_AND_SCREENING_SURVEY_PERFORMED_TRUE_AND_MONITORING_PERFORMED_FALSE,
+									participantId);
 
-						if (dialogStatus != null) {
-							val dialogMessagesWaitingToBeSendOfParticipant = databaseManagerService
-									.findModelObjects(
-											DialogMessage.class,
-											Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_SHOULD_BE_SENT_TIMESTAMP_LOWER,
-											participantId,
-											DialogMessageStatusTypes.PREPARED_FOR_SENDING,
-											InternalDateTime
-													.currentTimeMillis());
+					if (dialogStatus != null) {
+						val dialogMessagesWaitingToBeSendOfParticipant = databaseManagerService
+								.findSortedModelObjects(
+										DialogMessage.class,
+										Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_SHOULD_BE_SENT_TIMESTAMP_LOWER,
+										Queries.DIALOG_MESSAGE__SORT_BY_ORDER_ASC,
+										participantId,
+										DialogMessageStatusTypes.PREPARED_FOR_SENDING,
+										InternalDateTime.currentTimeMillis());
 
-							for (val dialogMessageWaitingToBeSendOfParticipant : dialogMessagesWaitingToBeSendOfParticipant) {
-								dialogMessagesWaitingToBeSend
-										.add(new DialogMessageWithSenderIdentification(
-												dialogMessageWaitingToBeSendOfParticipant,
-												intervention
-														.getAssignedSenderIdentification()));
-							}
+						for (val dialogMessageWaitingToBeSendOfParticipant : dialogMessagesWaitingToBeSendOfParticipant) {
+							dialogMessagesWaitingToBeSend
+									.add(new DialogMessageWithSenderIdentification(
+											dialogMessageWaitingToBeSendOfParticipant,
+											intervention
+													.getAssignedSenderIdentification()));
 						}
 					}
 				}
@@ -1516,7 +1551,6 @@ public class InterventionExecutionManagerService {
 	 * Parameters therefore are:
 	 *
 	 * - the belonging intervention is active
-	 * - the belonging intervention has a sender identification
 	 * - the belonging intervention monitoring is active
 	 * - the participant has monitoring active
 	 * - the participant has all data for monitoring available
@@ -1532,22 +1566,20 @@ public class InterventionExecutionManagerService {
 		for (val intervention : databaseManagerService.findModelObjects(
 				Intervention.class,
 				Queries.INTERVENTION__ACTIVE_TRUE_MONITORING_ACTIVE_TRUE)) {
-			if (intervention.getAssignedSenderIdentification() != null) {
-				for (val participant : databaseManagerService
-						.findModelObjects(
-								Participant.class,
-								Queries.PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE,
-								intervention.getId())) {
-					if (participant != null) {
-						val dialogStatus = databaseManagerService
-								.findOneModelObject(
-										DialogStatus.class,
-										Queries.DIALOG_STATUS__BY_PARTICIPANT_AND_DATA_FOR_MONITORING_PARTICIPATION_AVAILABLE_TRUE_AND_SCREENING_SURVEY_PERFORMED_TRUE_AND_MONITORING_PERFORMED_FALSE,
-										participant.getId());
+			for (val participant : databaseManagerService
+					.findModelObjects(
+							Participant.class,
+							Queries.PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE,
+							intervention.getId())) {
+				if (participant != null) {
+					val dialogStatus = databaseManagerService
+							.findOneModelObject(
+									DialogStatus.class,
+									Queries.DIALOG_STATUS__BY_PARTICIPANT_AND_DATA_FOR_MONITORING_PARTICIPATION_AVAILABLE_TRUE_AND_SCREENING_SURVEY_PERFORMED_TRUE_AND_MONITORING_PERFORMED_FALSE,
+									participant.getId());
 
-						if (dialogStatus != null) {
-							relevantParticipants.put(participant, dialogStatus);
-						}
+					if (dialogStatus != null) {
+						relevantParticipants.put(participant, dialogStatus);
 					}
 				}
 			}

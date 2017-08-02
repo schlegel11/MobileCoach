@@ -45,7 +45,7 @@ public class SystemVariables {
 	};
 
 	public enum READ_WRITE_PARTICIPANT_VARIABLES {
-		participantName, participantLanguage, participantGroup, participantDialogOptionSMSData, participantDialogOptionEmailData, participantSupervisorDialogOptionSMSData, participantSupervisorDialogOptionEmailData;
+		participantName, participantLanguage, participantGroup, participantDialogOptionSMSData, participantDialogOptionEmailData, participantDialogOptionExternalID, participantSupervisorDialogOptionSMSData, participantSupervisorDialogOptionEmailData, participantSupervisorDialogOptionExternalID;
 
 		public String toVariableName() {
 			return ImplementationConstants.VARIABLE_PREFIX + toString();

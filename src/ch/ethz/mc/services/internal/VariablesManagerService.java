@@ -398,6 +398,16 @@ public class VariablesManagerService {
 					return dialogOptionSMS.getData();
 				}
 				break;
+			case participantDialogOptionExternalID:
+				val dialogOptionExternalID = databaseManagerService
+						.findOneModelObject(DialogOption.class,
+								Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
+								participant.getId(),
+								DialogOptionTypes.EXTERNAL_ID);
+				if (dialogOptionExternalID != null) {
+					return dialogOptionExternalID.getData();
+				}
+				break;
 			case participantSupervisorDialogOptionEmailData:
 				val supervisorDialogOptionEmail = databaseManagerService
 						.findOneModelObject(DialogOption.class,
@@ -416,6 +426,16 @@ public class VariablesManagerService {
 								DialogOptionTypes.SUPERVISOR_SMS);
 				if (supervisorDialogOptionSMS != null) {
 					return supervisorDialogOptionSMS.getData();
+				}
+				break;
+			case participantSupervisorDialogOptionExternalID:
+				val supervisorDialogOptionExternalID = databaseManagerService
+						.findOneModelObject(DialogOption.class,
+								Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
+								participant.getId(),
+								DialogOptionTypes.SUPERVISOR_EXTERNAL_ID);
+				if (supervisorDialogOptionExternalID != null) {
+					return supervisorDialogOptionExternalID.getData();
 				}
 				break;
 			case participantName:
@@ -569,6 +589,11 @@ public class VariablesManagerService {
 							DialogOptionTypes.SMS,
 							StringHelpers.cleanPhoneNumber(variableValue));
 					break;
+				case participantDialogOptionExternalID:
+					log.debug("Setting variable 'participantDialogOptionDeepstreamData'");
+					participantSetDialogOption(participantId,
+							DialogOptionTypes.EXTERNAL_ID, variableValue);
+					break;
 				case participantSupervisorDialogOptionEmailData:
 					log.debug("Setting variable 'participantSupervisorDialogOptionEmailData'");
 					participantSetDialogOption(participantId,
@@ -580,6 +605,12 @@ public class VariablesManagerService {
 					participantSetDialogOption(participantId,
 							DialogOptionTypes.SUPERVISOR_SMS,
 							StringHelpers.cleanPhoneNumber(variableValue));
+					break;
+				case participantSupervisorDialogOptionExternalID:
+					log.debug("Setting variable 'participantSupervisorDialogOptionDeepstreamData'");
+					participantSetDialogOption(participantId,
+							DialogOptionTypes.SUPERVISOR_EXTERNAL_ID,
+							variableValue);
 					break;
 				case participantName:
 					log.debug("Setting variable 'participantName'");

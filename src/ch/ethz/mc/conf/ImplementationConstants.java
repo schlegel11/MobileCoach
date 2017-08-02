@@ -49,13 +49,15 @@ public class ImplementationConstants {
 	public static final long	MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITH_SIMULATOR		= 15;
 
 	public static final long	MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR					= 60;
-	public static final long	MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR						= 7;
+	public static final long	MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR						= 5;
 
-	public static final long	MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR						= 60;
-	public static final long	MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR							= 7;
+	public static final long	MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR_OPEN_MESSAGES		= 20;
+	public static final long	MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR_OPEN_MESSAGES			= 5;
+	public static final long	MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR_NO_OPEN_MESSAGES		= 60;
+	public static final long	MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR_NO_OPEN_MESSAGES		= 5;
 
 	public static final long	MAILING_SEND_RETRIES																= 2;
-	public static final long	MAILING_SEND_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS								= 5 * 60;
+	public static final long	MAILING_SEND_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS								= 2 * 60;
 	public static final int		MAILING_MAXIMUM_THREAD_COUNT														= 25;
 
 	public static final long	SIMULATOR_TIME_UPDATE_INTERVAL_IN_SECONDS											= 5;
@@ -138,6 +140,8 @@ public class ImplementationConstants {
 	public static final String	REGULAR_EXPRESSION_TO_CLEAN_DOUBLE_VALUES							= "\\.0+$";
 
 	public static final String	REGULAR_EXPRESSION_TO_FIND_BOLD_STRING_PARTS						= "\\*([\\w\\s]+)\\*";
+
+	public static final String	DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM								= "ds:";
 
 	public static final String	REPORT_TABLE														= "<table class=\"automatic\">|</table>";
 	public static final String	REPORT_TABLE_ROW													= "<tr #>|</tr>";

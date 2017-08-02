@@ -76,6 +76,8 @@ import ch.ethz.mc.tools.StringHelpers;
 public class CommunicationManagerService {
 	private static CommunicationManagerService	instance	= null;
 
+	private DeepstreamCommunicationService		deepstreamCommunicationService;
+
 	private InterventionExecutionManagerService	interventionExecutionManagerService;
 	private final Session						incomingMailSession;
 	private final Session						outgoingMailSession;
@@ -159,6 +161,16 @@ public class CommunicationManagerService {
 		documentBuilderFactory.setNamespaceAware(true);
 		receiverDateFormat = new SimpleDateFormat("ddMMyyyyHHmmss", Locale.US);
 
+		// Initialize deepstream communication (if required)
+		if (Constants.isDeepstreamActive()) {
+			deepstreamCommunicationService = DeepstreamCommunicationService
+					.start(Constants.getDeepstreamHost(),
+							Constants.getDeepstreamUser(),
+							Constants.getDeepstreamPassword());
+		} else {
+			deepstreamCommunicationService = null;
+		}
+
 		log.info("Started.");
 	}
 
@@ -171,6 +183,16 @@ public class CommunicationManagerService {
 
 	public void stop() throws Exception {
 		log.info("Stopping service...");
+
+		if (deepstreamCommunicationService != null) {
+			log.debug("Stopping deepstream server...");
+			try {
+				deepstreamCommunicationService.stop();
+			} catch (final Exception e) {
+				log.warn("Error when stopping deepstream server: {}",
+						e.getMessage());
+			}
+		}
 
 		log.debug("Stopping mailing threads...");
 		synchronized (runningMailingThreads) {
@@ -186,34 +208,61 @@ public class CommunicationManagerService {
 	}
 
 	/**
-	 * Sends a mail message (asynchronous)
+	 * Sends a message (asynchronous)
 	 *
 	 * @param dialogOption
 	 * @param dialogMessageId
+	 * @param order
 	 * @param message
 	 */
 	@Synchronized
 	public void sendMessage(final DialogOption dialogOption,
-			final ObjectId dialogMessageId, final String messageSender,
-			final String message, final boolean messageExpectsAnswer) {
+			final ObjectId dialogMessageId, final int messageOrder,
+			final String messageSender, final String message,
+			final boolean messageExpectsAnswer) {
 		if (interventionExecutionManagerService == null) {
 			interventionExecutionManagerService = MC.getInstance()
 					.getInterventionExecutionManagerService();
 		}
 
-		val mailingThread = new MailingThread(dialogOption, dialogMessageId,
-				messageSender, message, messageExpectsAnswer);
+		switch (dialogOption.getType()) {
+			case SMS:
+			case EMAIL:
+			case SUPERVISOR_SMS:
+			case SUPERVISOR_EMAIL:
+				val mailingThread = new MailingThread(dialogOption,
+						dialogMessageId, messageSender, message,
+						messageExpectsAnswer);
 
-		interventionExecutionManagerService
-				.dialogMessageStatusChangesForSending(dialogMessageId,
-						DialogMessageStatusTypes.SENDING,
-						InternalDateTime.currentTimeMillis());
+				synchronized (runningMailingThreads) {
+					runningMailingThreads.add(mailingThread);
+				}
 
-		synchronized (runningMailingThreads) {
-			runningMailingThreads.add(mailingThread);
+				mailingThread.start();
+
+				break;
+			case EXTERNAL_ID:
+			case SUPERVISOR_EXTERNAL_ID:
+				if (dialogOption
+						.getData()
+						.startsWith(
+								ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM)
+						&& deepstreamCommunicationService != null) {
+					try {
+						deepstreamCommunicationService.asyncSendMessage(
+								dialogOption, dialogMessageId, messageOrder,
+								message, messageExpectsAnswer);
+					} catch (final Exception e) {
+						log.warn("Could not send message using deepstream: {}",
+								e.getMessage());
+					}
+				} else {
+					log.warn(
+							"No appropriate handler could be found for external id dialog option with data {}",
+							dialogOption.getData());
+				}
+				break;
 		}
-
-		mailingThread.start();
 	}
 
 	/**
@@ -334,6 +383,18 @@ public class CommunicationManagerService {
 			}
 		}
 
+		// Add deepstream messages
+		if (deepstreamCommunicationService != null) {
+			try {
+				val receivedDeepstreamMessages = deepstreamCommunicationService
+						.getReceivedMessages();
+				receivedMessages.addAll(receivedDeepstreamMessages);
+			} catch (final Exception e) {
+				log.warn("Could not receive message using deepstream: {}",
+						e.getMessage());
+			}
+		}
+
 		/*
 		 * Messages from other services could be retrieved here
 		 */
@@ -363,7 +424,7 @@ public class CommunicationManagerService {
 	}
 
 	/**
-	 * Enables threaded sending of messages, with retries
+	 * Enables threaded sending of mailing messages, with retries
 	 *
 	 * @author Andreas Filler
 	 */
@@ -384,11 +445,15 @@ public class CommunicationManagerService {
 			messageSender = smsPhoneNumberFrom;
 			this.message = message;
 			this.messageExpectsAnswer = messageExpectsAnswer;
+
+			interventionExecutionManagerService
+					.dialogMessageStatusChangesForSending(dialogMessageId,
+							DialogMessageStatusTypes.SENDING,
+							InternalDateTime.currentTimeMillis());
 		}
 
 		@Override
 		public void run() {
-			val simulatorActive = Constants.isSimulatedDateAndTime();
 			try {
 				sendMessage(dialogOption, messageSender, message);
 
@@ -420,8 +485,7 @@ public class CommunicationManagerService {
 			for (int i = 0; i < ImplementationConstants.MAILING_SEND_RETRIES; i++) {
 				try {
 					TimeUnit.SECONDS
-							.sleep(simulatorActive ? ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR
-									: ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR);
+							.sleep(ImplementationConstants.MAILING_SEND_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS);
 				} catch (final InterruptedException e) {
 					log.warn("Interrupted messaging sending approach {}", i);
 
@@ -455,7 +519,7 @@ public class CommunicationManagerService {
 
 					return;
 				} catch (final Exception e) {
-					log.warn("Could not send mail to {} in approach {}: ",
+					log.warn("Could not send mail to {} in approach {}: {}",
 							dialogOption.getData(), i, e.getMessage());
 				}
 			}
@@ -478,7 +542,7 @@ public class CommunicationManagerService {
 		}
 
 		/**
-		 * Sends message using appropriate service
+		 * Sends mailing messages
 		 *
 		 * @param dialogOption
 		 * @param messageSender
@@ -535,9 +599,7 @@ public class CommunicationManagerService {
 						break;
 					case EXTERNAL_ID:
 					case SUPERVISOR_EXTERNAL_ID:
-						/*
-						 * Messages to other services could be sent here
-						 */
+						log.error("An external ID message was tried to be sent by a mailing thread. This should never happen!");
 						break;
 				}
 			}
