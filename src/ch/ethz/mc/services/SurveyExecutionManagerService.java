@@ -53,6 +53,7 @@ import ch.ethz.mc.model.persistent.IntermediateSurveyAndFeedbackParticipantShort
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.MediaObject;
 import ch.ethz.mc.model.persistent.Participant;
+import ch.ethz.mc.model.persistent.ParticipantVariableWithValue;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlideRule;
@@ -454,7 +455,7 @@ public class SurveyExecutionManagerService {
 	@Synchronized
 	public HashMap<String, Object> getAppropriateScreeningSurveySlide(
 			ObjectId participantId, final boolean accessGranted,
-			final boolean isScreening, final ObjectId screeningSurveyId,
+			final boolean isScreening, ObjectId screeningSurveyId,
 			final List<String> resultValues, final String checkValue,
 			final HttpSession session) {
 
@@ -473,7 +474,7 @@ public class SurveyExecutionManagerService {
 			return templateVariables;
 		}
 
-		final val screeningSurvey = getScreeningSurveyById(screeningSurveyId);
+		ScreeningSurvey screeningSurvey = getScreeningSurveyById(screeningSurveyId);
 
 		// Check if screening survey template is set
 		log.debug("Check if template is set");
@@ -693,6 +694,57 @@ public class SurveyExecutionManagerService {
 			} else {
 				nextSlide = getNextScreeningSurveySlide(participant,
 						screeningSurvey, formerSlide);
+
+				// FIXME Special solution for ready4life
+				if (formerSlide != null
+						&& formerSlide.getComment().startsWith("[[TN Check]]")) {
+					participant = databaseManagerService.getModelObjectById(
+							Participant.class, participant.getId());
+
+					val participationVariable = databaseManagerService
+							.findOneSortedModelObject(
+									ParticipantVariableWithValue.class,
+									Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME,
+									Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
+									participant.getId(), "$R4LTeiln");
+
+					String nextSlideFinder;
+					if (participationVariable.getValue().equals("1")) {
+						nextSlideFinder = "2";
+					} else {
+						nextSlideFinder = "1";
+					}
+
+					nextSlide = databaseManagerService
+							.findOneModelObject(ScreeningSurveySlide.class,
+									"{'comment':{ $regex:'TN" + nextSlideFinder
+											+ "'}}");
+
+					screeningSurvey = getScreeningSurveyById(nextSlide
+							.getScreeningSurvey());
+					screeningSurveyId = screeningSurvey.getId();
+
+					session.setAttribute(
+							GeneralSessionAttributeTypes.CURRENT_SESSION
+									.toString(), screeningSurveyId);
+
+					participant.setAssignedScreeningSurvey(screeningSurvey
+							.getId());
+					participant
+							.setAssignedFeedbackGlobalUniqueId(screeningSurvey
+									.getGlobalUniqueId());
+
+					participant.setIntervention(screeningSurvey
+							.getIntervention());
+
+					session.setAttribute(
+							ImplementationConstants.SURVEY_OR_FEEDBACK_SESSION_PREFIX
+									+ "survey_hack", screeningSurveyId);
+
+					databaseManagerService.saveModelObject(participant);
+				}
+				// End of solution
+
 				participant = databaseManagerService.getModelObjectById(
 						Participant.class, participant.getId());
 			}

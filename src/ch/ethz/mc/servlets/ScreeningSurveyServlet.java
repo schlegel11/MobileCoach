@@ -132,8 +132,27 @@ public class ScreeningSurveyServlet extends HttpServlet {
 						if (surveyExecutionManagerService
 								.surveyCheckIfActiveAndOfGivenType(
 										new ObjectId(pathParts[0]), false)) {
+
+							// FIXME Special solution for ready4life
+							ObjectId surveyObjectId;
+							if (request
+									.getSession()
+									.getAttribute(
+											ImplementationConstants.SURVEY_OR_FEEDBACK_SESSION_PREFIX
+													+ "survey_hack") != null) {
+								surveyObjectId = (ObjectId) request
+										.getSession()
+										.getAttribute(
+												ImplementationConstants.SURVEY_OR_FEEDBACK_SESSION_PREFIX
+														+ "survey_hack");
+							} else {
+								surveyObjectId = new ObjectId(pathParts[0]);
+							}
+
 							handleTemplateRequest(request, response,
-									new ObjectId(pathParts[0]));
+									surveyObjectId);
+							// End of solution
+
 							return;
 						}
 						throw new Exception(
@@ -517,8 +536,27 @@ public class ScreeningSurveyServlet extends HttpServlet {
 								+ ImplementationConstants.REGULAR_EXPRESSION_TO_MATCH_ONE_OBJECT_ID
 								+ "/$", "/");
 
-		templateVariables.put(
-				GeneralSlideTemplateFieldTypes.BASE_URL.toVariable(), baseURL);
+		// Special solution for ready4life
+		if (session
+				.getAttribute(ImplementationConstants.SURVEY_OR_FEEDBACK_SESSION_PREFIX
+						+ "survey_hack") != null) {
+			templateVariables
+					.put(GeneralSlideTemplateFieldTypes.BASE_URL.toVariable(),
+							normalizedBaseURL
+									+ ((ObjectId) session
+											.getAttribute(ImplementationConstants.SURVEY_OR_FEEDBACK_SESSION_PREFIX
+													+ "survey_hack"))
+											.toHexString() + "/");
+			session.setAttribute(
+					ImplementationConstants.SURVEY_OR_FEEDBACK_SESSION_PREFIX
+							+ "survey_hack", null);
+		} else {
+			templateVariables.put(
+					GeneralSlideTemplateFieldTypes.BASE_URL.toVariable(),
+					baseURL);
+		}
+
+		// End of solution
 
 		// Token
 		templateVariables.put(
