@@ -521,7 +521,7 @@ public class RuleEvaluator {
 						variableName);
 
 		if (duplicatesAvailable) {
-			log.debug("At least one dupliacte hast been found in the mentioend interventions");
+			log.debug("At least one duplicate has been found in the mentioned interventions");
 		} else {
 			log.debug("No duplicates have been found in the mentioned interventions");
 		}
