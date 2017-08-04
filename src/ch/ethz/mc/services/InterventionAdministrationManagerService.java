@@ -63,6 +63,7 @@ import ch.ethz.mc.model.persistent.MonitoringMessageRule;
 import ch.ethz.mc.model.persistent.MonitoringReplyRule;
 import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.Participant;
+import ch.ethz.mc.model.persistent.ParticipantVariableWithValue;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.persistent.concepts.AbstractRule;
@@ -2249,4 +2250,29 @@ public class InterventionAdministrationManagerService {
 
 		return values;
 	}
+
+	// FIXME Special solution for ready4life
+	@Synchronized
+	public int countParticipantsWithPassword(final ObjectId interventionId,
+			final String passwordString) throws Exception {
+		int count = 0;
+
+		for (val participant : databaseManagerService.findModelObjects(
+				Participant.class, Queries.PARTICIPANT__BY_INTERVENTION,
+				interventionId)) {
+			val password = databaseManagerService
+					.findOneSortedModelObject(
+							ParticipantVariableWithValue.class,
+							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME,
+							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
+							participant.getId(), "$password");
+
+			if (password != null && password.getValue().equals(passwordString)) {
+				count++;
+			}
+		}
+
+		return count;
+	}
+	// End of solution
 }

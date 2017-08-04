@@ -84,6 +84,16 @@
 		<servlet-name>r4l Admin</servlet-name>
 		<url-pattern>/r4l-admin</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>r4l Feedback</servlet-name>
+		<jsp-file>/r4l-feedback.jsp</jsp-file>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>r4l Feedback</servlet-name>
+		<url-pattern>/feedback</url-pattern>
+	</servlet-mapping>
 	<!-- Proprietary Solution for ready4life END -->
 	
 	<mime-mapping>
