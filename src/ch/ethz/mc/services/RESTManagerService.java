@@ -195,21 +195,26 @@ public class RESTManagerService {
 	 * @param interventionId
 	 * @param variable
 	 * @param group
+	 * @param filterVariable
+	 * @param filterValue
 	 * @param isService
 	 * @return
 	 * @throws ExternallyReadProtectedVariableException
 	 */
 	public CollectionOfExtendedVariables readVariableArrayForDashboardOfGroupOrIntervention(
 			final ObjectId interventionId, final String variable,
-			final String group, final boolean isService)
+			final String group, final String filterVariable,
+			final String filterValue, final boolean isService)
 			throws ExternallyReadProtectedVariableException {
-		log.debug("Try to read variable array {} of participants from {}",
+		log.debug(
+				"Try to read variable array {} of participants from {} filtered by {}={}",
 				variable, group == null ? "intervention " + interventionId
-						: "group " + group);
+						: "group " + group, filterVariable, filterValue);
 
 		try {
 			val collecionOfExtendedVariables = getVariableValueForDashboardOfParticipantsOfGroupOrIntervention(
-					interventionId, variable, group, isService);
+					interventionId, variable, group, filterVariable,
+					filterValue, isService);
 
 			log.debug(
 					"Returing variables with values {} of participants from {}",
@@ -350,7 +355,7 @@ public class RESTManagerService {
 			variableAverage.setVariable(variable);
 
 			val resultVariables = readVariableArrayForDashboardOfGroupOrIntervention(
-					interventionId, variable, group, isService);
+					interventionId, variable, group, null, null, isService);
 
 			try {
 				int i = 0;
@@ -614,19 +619,20 @@ public class RESTManagerService {
 
 	/**
 	 * Reads variable for dashboard for all participants of the given
-	 * group/intervention
+	 * group/intervention (with variable based filter if applied)
 	 *
 	 * @param interventionId
 	 * @param variable
 	 * @param group
-	 * @param isService
+	 * @param filterVariable
+	 * @param filterValue
 	 * @return
-	 * @throws ExternallyReadProtectedVariableException
 	 */
 	@Synchronized
 	private CollectionOfExtendedVariables getVariableValueForDashboardOfParticipantsOfGroupOrIntervention(
 			final ObjectId interventionId, final String variable,
-			final String group, final boolean isService)
+			final String group, final String filterVariable,
+			final String filterValue, final boolean isService)
 			throws ExternallyReadProtectedVariableException {
 		val intervention = databaseManagerService.getModelObjectById(
 				Intervention.class, interventionId);
@@ -657,6 +663,23 @@ public class RESTManagerService {
 						&& dialogStatus.isScreeningSurveyPerformed()
 						&& dialogStatus
 								.isDataForMonitoringParticipationAvailable()) {
+
+					// Check filter
+					if (filterVariable != null && filterValue != null) {
+						val userFilterVariable = variablesManagerService
+								.externallyReadVariableValueForParticipant(
+										relevantParticipant.getId(),
+										ImplementationConstants.VARIABLE_PREFIX
+												+ variable,
+										InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION_AND_DASHBOARD,
+										isService);
+
+						if (userFilterVariable == null
+								|| !userFilterVariable.equals(filterValue)) {
+							continue;
+						}
+					}
+
 					final ExtendedVariable variableWithValue = new ExtendedVariable(
 							variable,
 							variablesManagerService.externallyReadVariableValueForParticipant(
@@ -687,6 +710,23 @@ public class RESTManagerService {
 						&& dialogStatus.isScreeningSurveyPerformed()
 						&& dialogStatus
 								.isDataForMonitoringParticipationAvailable()) {
+
+					// Check filter
+					if (filterVariable != null && filterValue != null) {
+						val userFilterVariable = variablesManagerService
+								.externallyReadVariableValueForParticipant(
+										relevantParticipant.getId(),
+										ImplementationConstants.VARIABLE_PREFIX
+												+ variable,
+										InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION_AND_DASHBOARD,
+										isService);
+
+						if (userFilterVariable == null
+								|| !userFilterVariable.equals(filterValue)) {
+							continue;
+						}
+					}
+
 					final ExtendedVariable variableWithValue = new ExtendedVariable(
 							variable,
 							variablesManagerService.externallyReadVariableValueForParticipant(
