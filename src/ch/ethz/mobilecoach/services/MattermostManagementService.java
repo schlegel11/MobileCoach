@@ -352,7 +352,10 @@ public class MattermostManagementService {
 
 		return config;
 	}
-
+	
+	public Iterable<MattermostUserConfiguration> getAllUserConfigurations(){
+		return databaseManagerService.findModelObjects(MattermostUserConfiguration.class, "{}");
+	}
 
 
 	/*

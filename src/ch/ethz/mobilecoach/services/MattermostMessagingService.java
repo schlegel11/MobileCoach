@@ -47,6 +47,7 @@ import ch.ethz.mobilecoach.chatlib.engine.Input;
 import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
 import ch.ethz.mobilecoach.model.persistent.OneSignalUserConfiguration;
 import ch.ethz.mobilecoach.model.persistent.UserLastMessage;
+import ch.ethz.mobilecoach.model.persistent.subelements.MattermostChannel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -98,7 +99,8 @@ public class MattermostMessagingService implements MessagingService {
 			                                       DatabaseManagerService databaseManagerService,
 			                                       VariablesManagerService variablesManagerService){
 		MattermostMessagingService service = new MattermostMessagingService(managementService, databaseManagerService, variablesManagerService);
-		service.login();		
+		service.login();
+		service.observeTeamChannels();
 		return service;
 	}
 	
@@ -106,6 +108,38 @@ public class MattermostMessagingService implements MessagingService {
 		connectToWebSocket();
 		resync(); // TODO: remove this. instead, getUnreceivedMessages() should be called with the channelIds of ongoing conversations
 	}
+	
+	public void observeTeamChannels(){
+		for (MattermostUserConfiguration config: managementService.getAllUserConfigurations()){
+			if (config.getChannels() != null){
+				for (MattermostChannel c: config.getChannels()){
+					if ("HUMAN".equals(c.getType())){
+						observeTeamChannel(c.getId());
+					}
+				}
+			}
+		}
+	}
+	
+	public void observeTeamChannel(String channelId){
+		for (MattermostManagementService.TeamConfiguration tc: managementService.getTeamConfigurations()){
+			if (tc.managerUserId != null){
+				
+				
+				
+				
+				
+				
+			}
+			
+			
+		}
+		
+		
+		
+		
+	}
+	
 	
 	
 	private void connectToWebSocket(){
@@ -325,11 +359,11 @@ public class MattermostMessagingService implements MessagingService {
 	LinkedHashMap<String, ObjectId> senderIdToRecipient = new LinkedHashMap<>();
 	
 	
-	LinkedHashMap<ObjectId, MessageListener> listenerForRecipient = new LinkedHashMap<>();
+	LinkedHashMap<ObjectId, MessageListener> listenerForSender = new LinkedHashMap<>();
 	
 	
 	public void setListener(ObjectId recipient, MessageListener listener){
-		listenerForRecipient.put(recipient, listener);
+		listenerForSender.put(recipient, listener);
 		
 		// for continuing persisted conversations: find the Mattermost user id, if it exists, so that we can forward the incoming messages to the listener
 		MattermostUserConfiguration config = managementService.getUserConfiguration(recipient);
@@ -342,12 +376,12 @@ public class MattermostMessagingService implements MessagingService {
 	private void receiveMessage(String senderId, Post post){
 		if (senderIdToRecipient.containsKey(senderId)){
 			ObjectId recipient = senderIdToRecipient.get(senderId);
-			if (listenerForRecipient.containsKey(recipient)){
+			if (listenerForSender.containsKey(recipient)){
 				synchronized (recipient){
 					if (this.wasMessageNotProcessedYet(recipient, post.getChannelId(), post.getId(), post.getCreateAt())){
 						log.debug("Message accepted for processing: '" + post.getMessage() + "' "+ post.getId() + " to " + recipient + " at " + post.getCreateAt() + " on channel " + post.getChannelId());
 					
-						listenerForRecipient.get(recipient).receivePost(post);
+						listenerForSender.get(recipient).receivePost(post);
 						
 						// mark this message as processed
 						this.saveUserLastMessage(recipient, post.getChannelId(), post.getId(), post.getCreateAt());
