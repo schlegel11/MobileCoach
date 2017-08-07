@@ -151,11 +151,12 @@ An extended backend user guide will be published in the following months.
 ### Version @@VERSION@@
 
 ## Release notes
-### 1.5.1
+### 1.6.0
 
 **Enhancements**
 
 * Dashboards provide a way to give teachers, caretakers, service personal etc. (non-participants) a way to have look at the current status of participants within an intervention
+* Specific REST endpoints allow the retrieval of accumulated group/intervention values for the dashboard
 * The variable uniqueness check allows to check variables across interventions for uniqueness
 * Intervention starting days can now be definied dynamically
 * New rules comparators to better work with "select many" variables
