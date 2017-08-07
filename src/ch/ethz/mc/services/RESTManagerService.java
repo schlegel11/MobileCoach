@@ -670,7 +670,7 @@ public class RESTManagerService {
 								.externallyReadVariableValueForParticipant(
 										relevantParticipant.getId(),
 										ImplementationConstants.VARIABLE_PREFIX
-												+ variable,
+												+ filterVariable,
 										InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION_AND_DASHBOARD,
 										isService);
 
@@ -717,7 +717,7 @@ public class RESTManagerService {
 								.externallyReadVariableValueForParticipant(
 										relevantParticipant.getId(),
 										ImplementationConstants.VARIABLE_PREFIX
-												+ variable,
+												+ filterVariable,
 										InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION_AND_DASHBOARD,
 										isService);
 
