@@ -9,8 +9,8 @@
 	<input type="button" value="Send" onclick="send()" />
 	<script type="text/javascript">
 		var debug = true;
-		var participant = "12345678";
-		var last = -1;
+		var participant = "123456789";
+		var timestamp = 1502291961398;
 
 		var client;
 
@@ -28,43 +28,39 @@
 					});
 			log("Connected.");
 
+			
+			log("Getting old messages...");
+						client.rpc.make("message-diff", {
+				"participant" : participant,
+				"timestamp" : timestamp
+			}, function(err, result) {
+				log("Update result:");
+				timestamp = result.latest-timestamp;
+				
+				log("Older messsages:");
+				log(result.list);
+			});
+			
 			var record = client.record.getRecord("messages/" + participant);
 
-			log("Getting old messages...");
 			record.whenReady(record => {
-				  var newestId = record.get("newest");
-				  
-				  for (var i = last + 1; i <= newestId; i++) {
-						log("Message " + i + ":");
-						log(record.get("list/" + i));
-					}
-					last = newestId * 1;
-					
 					log("Listening for changes of participant " + participant + "...");
 					client.event.subscribe("message-update/" + participant, function(
-							newestId) {
-						
-						if ( newestId <= last) {
-							log("Updated Message " + newestId + ":");
-							log(record.get("list/" + newestId));
-						} else {
-						for (var i = last + 1; i <= newestId; i++) {
-							log("New Message " + i + ":");
-							log(record.get("list/" + i));
-						}
-						last = newestId * 1;
-						}
+							messageId) {
+							log("Message " + messageId + ":");
+							log(record.get("list/" + messageId));
 					});
 				});
 		};
-
+		
+		
 		var send = function() {
 			var message = document.getElementById("text").value;
 			var timestamp = (new Date()).getTime();
 			log("Sending message \"" + message + "\" with timestamp "
 					+ timestamp + "...");
 
-			client.rpc.make("inbox", {
+			client.rpc.make("message-inbox", {
 				"participant" : participant,
 				"message" : message,
 				"timestamp" : timestamp
@@ -74,7 +70,7 @@
 			});
 
 			document.getElementById("text").value = "";
-		}
+		};
 
 		init();
 	</script>
