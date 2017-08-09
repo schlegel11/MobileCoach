@@ -39,10 +39,6 @@ public class ReceivedMessage {
 
 	@Getter
 	@Setter
-	private String				recipient;
-
-	@Getter
-	@Setter
 	private String				sender;
 
 	@Getter

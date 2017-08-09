@@ -496,7 +496,7 @@ public class InterventionExecutionManagerService {
 
 	// Dialog Message
 	@Synchronized
-	private void dialogMessageCreateAsUnexpectedReceived(
+	private DialogMessage dialogMessageCreateAsUnexpectedReceived(
 			final ObjectId participantId, final ReceivedMessage receivedMessage) {
 		val dialogMessage = new DialogMessage(participantId, 0,
 				DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY, "", -1, -1,
@@ -515,6 +515,8 @@ public class InterventionExecutionManagerService {
 		}
 
 		databaseManagerService.saveModelObject(dialogMessage);
+
+		return dialogMessage;
 	}
 
 	@Synchronized
@@ -544,7 +546,7 @@ public class InterventionExecutionManagerService {
 	 */
 	@SuppressWarnings("incomplete-switch")
 	@Synchronized
-	private void dialogMessageStatusChangesAfterSending(
+	private DialogMessage dialogMessageStatusChangesAfterSending(
 			final ObjectId dialogMessageId,
 			final DialogMessageStatusTypes newStatus,
 			final long timeStampOfEvent, final String cleanedReceivedMessage,
@@ -576,6 +578,8 @@ public class InterventionExecutionManagerService {
 		}
 
 		databaseManagerService.saveModelObject(dialogMessage);
+
+		return dialogMessage;
 	}
 
 	// Dialog status
@@ -927,7 +931,8 @@ public class InterventionExecutionManagerService {
 	 * @param receivedMessage
 	 */
 	@Synchronized
-	public void handleReceivedMessage(final ReceivedMessage receivedMessage) {
+	public DialogMessage handleReceivedMessage(
+			final ReceivedMessage receivedMessage) {
 		val dialogOption = getDialogOptionByTypeAndDataOfActiveInterventions(
 				receivedMessage.getType(), receivedMessage.getSender());
 
@@ -935,7 +940,7 @@ public class InterventionExecutionManagerService {
 			log.warn(
 					"The received message with sender number '{}' does not fit to any participant of an active intervention, skip it",
 					receivedMessage.getSender());
-			return;
+			return null;
 		}
 
 		// Check if received messages is a "stop"-message
@@ -945,16 +950,16 @@ public class InterventionExecutionManagerService {
 				log.debug("Received stop message by participant {}",
 						dialogOption.getParticipant());
 
-				dialogMessageCreateAsUnexpectedReceived(
+				val dialogMessage = dialogMessageCreateAsUnexpectedReceived(
 						dialogOption.getParticipant(), receivedMessage);
 
 				dialogStatusSetMonitoringFinished(dialogOption.getParticipant());
 
-				return;
+				return dialogMessage;
 			}
 		}
 
-		val dialogMessage = getDialogMessageOfParticipantWaitingForAnswer(
+		DialogMessage dialogMessage = getDialogMessageOfParticipantWaitingForAnswer(
 				dialogOption.getParticipant(),
 				receivedMessage.getReceivedTimestamp());
 
@@ -963,12 +968,12 @@ public class InterventionExecutionManagerService {
 
 		if (dialogMessage == null) {
 			log.debug(
-					"Received an unexpected SMS from '{}', store it and mark it as unexpected",
+					"Received an unexpected message from '{}', store it and mark it as unexpected",
 					receivedMessage.getSender());
-			dialogMessageCreateAsUnexpectedReceived(
+			val dialogMessageCreated = dialogMessageCreateAsUnexpectedReceived(
 					dialogOption.getParticipant(), receivedMessage);
 
-			return;
+			return dialogMessageCreated;
 		} else {
 			// Check if result is in general automatically
 			// processable
@@ -987,12 +992,13 @@ public class InterventionExecutionManagerService {
 									.getValidationExpression())) {
 				// Has validation expression, but does not match
 
-				dialogMessageStatusChangesAfterSending(dialogMessage.getId(),
+				dialogMessage = dialogMessageStatusChangesAfterSending(
+						dialogMessage.getId(),
 						DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
 						receivedMessage.getReceivedTimestamp(),
 						cleanedMessageValue, receivedMessage.getMessage());
 
-				return;
+				return dialogMessage;
 			} else if (relatedMonitoringMessageGroup.getValidationExpression() != null
 					&& cleanedMessageValue
 							.matches(relatedMonitoringMessageGroup
@@ -1009,33 +1015,32 @@ public class InterventionExecutionManagerService {
 					// Pattern has a group
 					matcher.find();
 
-					dialogMessageStatusChangesAfterSending(
+					dialogMessage = dialogMessageStatusChangesAfterSending(
 							dialogMessage.getId(),
 							DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
 							receivedMessage.getReceivedTimestamp(),
 							matcher.group(1), receivedMessage.getMessage());
 
-					return;
+					return dialogMessage;
 				} else {
 					// Pattern has no group
-					dialogMessageStatusChangesAfterSending(
+					dialogMessage = dialogMessageStatusChangesAfterSending(
 							dialogMessage.getId(),
 							DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
 							receivedMessage.getReceivedTimestamp(),
 							cleanedMessageValue, receivedMessage.getMessage());
 
-					return;
+					return dialogMessage;
 				}
 			} else {
 				// Has no validation expression
-
-				dialogMessageStatusChangesAfterSending(
+				dialogMessage = dialogMessageStatusChangesAfterSending(
 						dialogMessage.getId(),
 						DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
 						receivedMessage.getReceivedTimestamp(),
 						cleanedMessageValue, receivedMessage.getMessage());
 
-				return;
+				return dialogMessage;
 			}
 		}
 	}

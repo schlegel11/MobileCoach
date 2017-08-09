@@ -92,7 +92,6 @@ public class Simulator {
 		simulatedReceivedMessage.setReceivedTimestamp(InternalDateTime
 				.currentTimeMillis());
 		simulatedReceivedMessage.setSender(Constants.getSmsSimulationNumber());
-		simulatedReceivedMessage.setRecipient(senderIdentification);
 		simulatedReceivedSMS.add(simulatedReceivedMessage);
 	}
 

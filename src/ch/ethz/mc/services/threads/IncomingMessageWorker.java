@@ -71,10 +71,14 @@ public class IncomingMessageWorker extends Thread {
 
 				for (val receivedMessage : receivedMessages) {
 					try {
-						interventionExecutionManagerService
+						val dialogMessage = interventionExecutionManagerService
 								.handleReceivedMessage(receivedMessage);
+						if (dialogMessage != null) {
+							communicationManagerService.acknowledgeMessage(
+									dialogMessage, receivedMessage);
+						}
 					} catch (final Exception e) {
-						log.error("Could not handle  received message: {}",
+						log.error("Could not handle received message: {}",
 								e.getMessage());
 					}
 				}

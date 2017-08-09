@@ -50,6 +50,8 @@ also available under the Apache License:
      https://github.com/resteasy/Resteasy
    * jcsv
      https://code.google.com/p/jcsv/
+   * Deepstream.io Java Client
+     https://github.com/deepstreamIO/deepstream.io-client-java/
    
 This software uses the following software components, which are 
 available under the LGPL License:

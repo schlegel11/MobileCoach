@@ -59,6 +59,7 @@ import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.memory.ReceivedMessage;
+import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
@@ -316,15 +317,6 @@ public class CommunicationManagerService {
 						receivedMessage.setSender(StringHelpers
 								.cleanPhoneNumber(sender));
 
-						val recipient = ((NodeList) xPath.evaluate(
-								"/aspsms/Recipient/PhoneNumber",
-								document.getDocumentElement(),
-								XPathConstants.NODESET)).item(0)
-								.getTextContent();
-
-						receivedMessage.setRecipient(StringHelpers
-								.cleanPhoneNumber(recipient));
-
 						val receivedTimestampString = ((NodeList) xPath
 								.evaluate("/aspsms/DateReceived",
 										document.getDocumentElement(),
@@ -400,6 +392,29 @@ public class CommunicationManagerService {
 		 */
 
 		return receivedMessages;
+	}
+
+	/**
+	 * Acknowledges received message
+	 * 
+	 * @param dialogMessage
+	 * @param receivedMessage
+	 */
+	public void acknowledgeMessage(final DialogMessage dialogMessage,
+			final ReceivedMessage receivedMessage) {
+		switch (receivedMessage.getType()) {
+			case SMS:
+			case EMAIL:
+				break;
+			case SUPERVISOR_SMS:
+			case SUPERVISOR_EMAIL:
+				break;
+			case EXTERNAL_ID:
+			case SUPERVISOR_EXTERNAL_ID:
+				deepstreamCommunicationService.asyncAcknowledgeMessage(
+						dialogMessage, receivedMessage);
+				break;
+		}
 	}
 
 	/**

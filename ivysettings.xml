@@ -3,6 +3,8 @@
 	<settings defaultResolver="default" />
 	<resolvers>
 		<chain name="default">
+			<!-- Bintray repository -->
+			<bintray />
 			<!-- Public Maven repository -->
 			<ibiblio name="public" m2compatible="true" checksums=""/>
 			
