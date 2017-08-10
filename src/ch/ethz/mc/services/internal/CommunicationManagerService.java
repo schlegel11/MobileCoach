@@ -411,8 +411,10 @@ public class CommunicationManagerService {
 				break;
 			case EXTERNAL_ID:
 			case SUPERVISOR_EXTERNAL_ID:
-				deepstreamCommunicationService.asyncAcknowledgeMessage(
-						dialogMessage, receivedMessage);
+				if (deepstreamCommunicationService != null) {
+					deepstreamCommunicationService.asyncAcknowledgeMessage(
+							dialogMessage, receivedMessage);
+				}
 				break;
 		}
 	}

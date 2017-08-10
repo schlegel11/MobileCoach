@@ -10,7 +10,7 @@
 	<script type="text/javascript">
 		var debug = true;
 		var participant = "123456789";
-		var timestamp = 1502291961398;
+		var timestamp = 4502352198081;
 
 		var client;
 
@@ -34,11 +34,15 @@
 				"participant" : participant,
 				"timestamp" : timestamp
 			}, function(err, result) {
-				log("Update result:");
-				timestamp = result.latest-timestamp;
-				
-				log("Older messsages:");
-				log(result.list);
+				if (result != null) {
+					log("Update result:");
+					timestamp = result.latest-timestamp;
+					
+					log("Older messsages:");
+					log(result.list);
+				} else {
+					log("Error when retrieving old messages!");
+				}
 			});
 			
 			var record = client.record.getRecord("messages/" + participant);

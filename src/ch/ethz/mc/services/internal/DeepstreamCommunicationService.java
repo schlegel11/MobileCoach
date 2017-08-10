@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import lombok.Getter;
 import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -53,7 +54,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import com.google.gwt.dev.json.JsonBoolean;
+import com.google.gson.JsonPrimitive;
 
 /**
  * Handles the communication with a deepstream server
@@ -62,6 +63,7 @@ import com.google.gwt.dev.json.JsonBoolean;
  */
 @Log4j2
 public class DeepstreamCommunicationService implements ConnectionStateListener {
+	@Getter
 	private static DeepstreamCommunicationService	instance		= null;
 
 	private InterventionExecutionManagerService		interventionExecutionManagerService;
@@ -165,14 +167,15 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 
 		val timestamp = InternalDateTime.currentTimeMillis();
 		try {
-			val participantIdentifier = dialogOption.getData().substring(
-					substringLength);
+			val participantOrSupervisorIdentifier = dialogOption.getData()
+					.substring(substringLength);
 			val record = client.record.getRecord("messages/"
-					+ participantIdentifier);
+					+ participantOrSupervisorIdentifier);
 
 			final JsonObject messageObject = new JsonObject();
-			messageObject.addProperty("order", messageOrder);
-			messageObject.addProperty("type", "SYSTEM_MESSAGE");
+			messageObject.addProperty("id", messageOrder);
+			messageObject.addProperty("status", "SENT_BY_SYSTEM");
+			messageObject.addProperty("type", "PLAIN_TEXT");
 			messageObject.addProperty("message", message);
 			messageObject.addProperty("message-timestamp", timestamp);
 			messageObject.addProperty("expects-answer", messageExpectsAnswer);
@@ -180,7 +183,8 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 
 			record.set("list/" + String.valueOf(messageOrder), messageObject);
 
-			client.event.emit("message-update/" + participantIdentifier,
+			client.event.emit("message-update/"
+					+ participantOrSupervisorIdentifier,
 					String.valueOf(messageOrder));
 		} catch (final Exception e) {
 			log.warn("Could not send message to {}: {}",
@@ -230,6 +234,53 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 		}
 
 		return newReceivedMessages;
+	}
+
+	/**
+	 * Acknowledge retrieval of a message
+	 * 
+	 * @param dialogMessage
+	 * @param receivedMessage
+	 */
+	@Synchronized
+	public void asyncAcknowledgeMessage(final DialogMessage dialogMessage,
+			final ReceivedMessage receivedMessage) {
+		try {
+			val participantIdentifier = receivedMessage.getSender().substring(
+					substringLength);
+			val timestamp = InternalDateTime.currentTimeMillis();
+			val record = client.record.getRecord("messages/"
+					+ participantIdentifier);
+
+			val messageOrder = dialogMessage.getOrder();
+
+			val retrievedMessageObject = record.get("list/"
+					+ String.valueOf(messageOrder));
+
+			final JsonObject messageObject;
+			if (retrievedMessageObject instanceof JsonNull) {
+				messageObject = new JsonObject();
+				messageObject.addProperty("status", "SENT_BY_USER");
+				messageObject.addProperty("type", "PLAIN_TEXT");
+				messageObject.addProperty("id", messageOrder);
+			} else {
+				messageObject = (JsonObject) retrievedMessageObject;
+				messageObject.addProperty("status", "ANSWERED_BY_USER");
+			}
+
+			messageObject.addProperty("reply", receivedMessage.getMessage());
+			messageObject.addProperty("reply-timestamp",
+					receivedMessage.getReceivedTimestamp());
+			messageObject.addProperty("last-modified", timestamp);
+
+			record.set("list/" + String.valueOf(messageOrder), messageObject);
+
+			client.event.emit("message-update/" + participantIdentifier,
+					String.valueOf(messageOrder));
+		} catch (final Exception e) {
+			log.warn("Could not acknowledge message to {}: {}",
+					receivedMessage.getSender(), e.getMessage());
+		}
 	}
 
 	/*
@@ -292,52 +343,13 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 		}
 	}
 
-	/**
-	 * Provide RPC methods
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * io.deepstream.ConnectionStateListener#connectionStateChanged(io.deepstream
+	 * .ConnectionState)
 	 */
-	private void provideMethods() {
-		client.rpc.provide(
-				"message-inbox",
-				(rpcName, data, rpcResponse) -> {
-					final JsonObject jsonData = (JsonObject) gson
-							.toJsonTree(data);
-					try {
-						final boolean receivedSuccessful = receiveMessage(
-								jsonData.get("participant").getAsString(),
-								jsonData.get("message").getAsString(), jsonData
-										.get("timestamp").getAsLong());
-
-						if (receivedSuccessful) {
-							rpcResponse.send(JsonBoolean.TRUE);
-						} else {
-							rpcResponse.send(JsonBoolean.FALSE);
-						}
-					} catch (final Exception e) {
-						log.warn("Error when receiving message: {}",
-								e.getMessage());
-						rpcResponse.send(JsonBoolean.FALSE);
-						return;
-					}
-				});
-
-		client.rpc.provide(
-				"message-diff",
-				(rpcName, data, rpcResponse) -> {
-					final JsonObject jsonData = (JsonObject) gson
-							.toJsonTree(data);
-					try {
-						final JsonObject messageDiff = getMessageDiff(jsonData
-								.get("participant").getAsString(), jsonData
-								.get("timestamp").getAsLong());
-						rpcResponse.send(messageDiff);
-					} catch (final Exception e) {
-						log.warn("Error when calculating message diff: {}",
-								e.getMessage());
-						rpcResponse.send(JsonNull.INSTANCE);
-					}
-				});
-	}
-
 	@Override
 	public void connectionStateChanged(final ConnectionState connectionState) {
 		if (startupComplete && connectionState == ConnectionState.CLOSED) {
@@ -366,12 +378,67 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 		}
 	}
 
+	/**
+	 * Provide RPC methods
+	 */
+	private void provideMethods() {
+		client.rpc.provide(
+				"message-inbox",
+				(rpcName, data, rpcResponse) -> {
+					final JsonObject jsonData = (JsonObject) gson
+							.toJsonTree(data);
+					try {
+						final boolean receivedSuccessful = receiveMessage(
+								jsonData.get("participant").getAsString(),
+								jsonData.get("message").getAsString(), jsonData
+										.get("timestamp").getAsLong());
+
+						if (receivedSuccessful) {
+							rpcResponse.send(new JsonPrimitive(true));
+						} else {
+							rpcResponse.send(new JsonPrimitive(false));
+						}
+					} catch (final Exception e) {
+						log.warn("Error when receiving message: {}",
+								e.getMessage());
+						rpcResponse.send(new JsonPrimitive(false));
+						return;
+					}
+				});
+
+		client.rpc.provide(
+				"message-diff",
+				(rpcName, data, rpcResponse) -> {
+					final JsonObject jsonData = (JsonObject) gson
+							.toJsonTree(data);
+					try {
+						final JsonObject messageDiff = getMessageDiff(jsonData
+								.get("participant").getAsString(), jsonData
+								.get("timestamp").getAsLong());
+
+						rpcResponse.send(messageDiff);
+					} catch (final Exception e) {
+						rpcResponse.send(JsonNull.INSTANCE);
+						log.warn("Error when calculating message diff: {}",
+								e.getMessage());
+					}
+				});
+	}
+
+	/**
+	 * @param participantId
+	 * @param message
+	 * @param timestamp
+	 * @return
+	 */
 	private boolean receiveMessage(final String participantId,
 			final String message, final long timestamp) {
 		log.debug("Received message for participant {}", participantId);
 
 		val receivedMessage = new ReceivedMessage();
 
+		// Always set as participant message (if it is from a supervisor it will
+		// be discarded later)
 		receivedMessage.setType(DialogOptionTypes.EXTERNAL_ID);
 		receivedMessage.setReceivedTimestamp(timestamp);
 		receivedMessage.setMessage(message);
@@ -390,15 +457,21 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 		}
 	}
 
-	private JsonObject getMessageDiff(final String participantId,
+	/**
+	 * @param participantOrSupervisorId
+	 * @param timestamp
+	 * @return
+	 */
+	private JsonObject getMessageDiff(final String participantOrSupervisorId,
 			final long timestamp) {
 		log.debug(
-				"Calculating message diff for participant {} and timestamp {}",
-				participantId, timestamp);
+				"Calculating message diff for participant/supervisor {} and timestamp {}",
+				participantOrSupervisorId, timestamp);
 
 		long newestTimestamp = 0;
 
-		val record = client.record.getRecord("messages/" + participantId);
+		val record = client.record.getRecord("messages/"
+				+ participantOrSupervisorId);
 
 		val jsonObject = new JsonObject();
 		val jsonObjects = new JsonObject();
@@ -425,43 +498,20 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 		return jsonObject;
 	}
 
-	@Synchronized
-	public void asyncAcknowledgeMessage(final DialogMessage dialogMessage,
-			final ReceivedMessage receivedMessage) {
+	/**
+	 * @param participantOrSupervisorId
+	 */
+	public void cleanupForParticipantOrSupervisor(
+			final String participantOrSupervisorId) {
 		try {
-			val participantIdentifier = receivedMessage.getSender().substring(
-					substringLength);
-			val timestamp = InternalDateTime.currentTimeMillis();
 			val record = client.record.getRecord("messages/"
-					+ participantIdentifier);
+					+ participantOrSupervisorId);
 
-			val messageOrder = dialogMessage.getOrder();
-
-			val retrievedMessageObject = record.get("list/"
-					+ String.valueOf(messageOrder));
-
-			final JsonObject messageObject;
-			if (retrievedMessageObject instanceof JsonNull) {
-				messageObject = new JsonObject();
-				messageObject.addProperty("type", "participantId_MESSAGE");
-			} else {
-				messageObject = (JsonObject) retrievedMessageObject;
-				messageObject.addProperty("type", "SYSTEM_MESSAGE_WITH_REPLY");
-			}
-
-			messageObject.addProperty("order", messageOrder);
-			messageObject.addProperty("reply", receivedMessage.getMessage());
-			messageObject.addProperty("reply-timestamp",
-					receivedMessage.getReceivedTimestamp());
-			messageObject.addProperty("last-modified", timestamp);
-
-			record.set("list/" + String.valueOf(messageOrder), messageObject);
-
-			client.event.emit("message-update/" + participantIdentifier,
-					String.valueOf(messageOrder));
+			record.delete();
 		} catch (final Exception e) {
-			log.warn("Could not acknowledge message to {}: {}",
-					receivedMessage.getSender(), e.getMessage());
+			log.warn(
+					"Could not cleanup deepstream for participant/supervisor {}",
+					participantOrSupervisorId);
 		}
 	}
 }
