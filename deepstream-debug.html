@@ -9,15 +9,15 @@
 	<input type="button" value="Send" onclick="send()" />
 	<script type="text/javascript">
 		var debug = true;
-		var participant = "123456789";
-		var timestamp = 4502352198081;
+		var user = "123456789";
+		var timestamp = 0;
 
 		var client;
 
 		var log = function(message) {
 			if (debug)
 				console.log(message);
-		}
+		};
 
 		var init = function() {
 			log("Connecting...");
@@ -31,25 +31,29 @@
 			
 			log("Getting old messages...");
 						client.rpc.make("message-diff", {
-				"participant" : participant,
+				"user" : user,
 				"timestamp" : timestamp
 			}, function(err, result) {
 				if (result != null) {
 					log("Update result:");
-					timestamp = result.latest-timestamp;
+					timestamp = result["latest-timestamp"];
+					log("Latest timestamp: " + timestamp);
 					
 					log("Older messsages:");
-					log(result.list);
+					log(result["list"]);
+					for (var i in result["list"]) {
+						log(result["list"][i]);
+					}
 				} else {
 					log("Error when retrieving old messages!");
 				}
 			});
 			
-			var record = client.record.getRecord("messages/" + participant);
+			var record = client.record.getRecord("messages/" + user);
 
 			record.whenReady(record => {
-					log("Listening for changes of participant " + participant + "...");
-					client.event.subscribe("message-update/" + participant, function(
+					log("Listening for changes of user " + user + "...");
+					client.event.subscribe("message-update/" + user, function(
 							messageId) {
 							log("Message " + messageId + ":");
 							log(record.get("list/" + messageId));
@@ -65,7 +69,7 @@
 					+ timestamp + "...");
 
 			client.rpc.make("message-inbox", {
-				"participant" : participant,
+				"user" : user,
 				"message" : message,
 				"timestamp" : timestamp
 			}, function(err, result) {

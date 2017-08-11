@@ -389,8 +389,8 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 							.toJsonTree(data);
 					try {
 						final boolean receivedSuccessful = receiveMessage(
-								jsonData.get("participant").getAsString(),
-								jsonData.get("message").getAsString(), jsonData
+								jsonData.get("user").getAsString(), jsonData
+										.get("message").getAsString(), jsonData
 										.get("timestamp").getAsLong());
 
 						if (receivedSuccessful) {
@@ -413,8 +413,8 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 							.toJsonTree(data);
 					try {
 						final JsonObject messageDiff = getMessageDiff(jsonData
-								.get("participant").getAsString(), jsonData
-								.get("timestamp").getAsLong());
+								.get("user").getAsString(),
+								jsonData.get("timestamp").getAsLong());
 
 						rpcResponse.send(messageDiff);
 					} catch (final Exception e) {
