@@ -204,4 +204,5 @@ public class Queries {
 	public static final String	UPDATE_VERSION_10__INTERVENTION__CHANGE_1																																										= "{$set:{'dashboardEnabled':false}}";
 	public static final String	UPDATE_VERSION_10__INTERVENTION__CHANGE_2																																										= "{$set:{'dashboardTemplatePath':''}}";
 	public static final String	UPDATE_VERSION_10__INTERVENTION__CHANGE_3																																										= "{$set:{'dashboardPasswordPattern':null}}";
+	public static final String	UPDATE_VERSION_11__INTERVENTION__CHANGE_1																																										= "{$set:{'deepstreamPassword':null}}";
 }

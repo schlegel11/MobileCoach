@@ -40,7 +40,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 
-import ch.ethz.mc.MC;
+import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.memory.ReceivedMessage;
 import ch.ethz.mc.model.persistent.DialogMessage;
@@ -48,6 +48,7 @@ import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
+import ch.ethz.mc.services.SurveyExecutionManagerService;
 import ch.ethz.mc.tools.InternalDateTime;
 
 import com.google.gson.Gson;
@@ -66,6 +67,7 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 	@Getter
 	private static DeepstreamCommunicationService	instance		= null;
 
+	private SurveyExecutionManagerService			surveyExecutionManagerService;
 	private InterventionExecutionManagerService		interventionExecutionManagerService;
 
 	private final int								substringLength;
@@ -79,20 +81,17 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 	private boolean									startupComplete	= false;
 	private boolean									reconnecting	= false;
 
-	final Gson										gson;
+	private final Gson								gson;
 
 	private DeepstreamCommunicationService(final String deepstreamHost,
-			final String deepstreamUser, final String deepStreamPassword)
-			throws Exception {
+			final String deepstreamServerRole,
+			final String deepstreamServerPassword) {
 		host = deepstreamHost;
 
-		if (deepstreamUser != null && !deepstreamUser.equals("")) {
-			loginData = new JsonObject();
-			loginData.addProperty("username", deepstreamUser);
-			loginData.addProperty("password", deepStreamPassword);
-		} else {
-			loginData = null;
-		}
+		loginData = new JsonObject();
+		loginData.addProperty("user", "server");
+		loginData.addProperty("role", deepstreamServerRole);
+		loginData.addProperty("secret", deepstreamServerPassword);
 
 		gson = new Gson();
 
@@ -100,6 +99,28 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 				.length();
 
 		receivedMessages = new ArrayList<ReceivedMessage>();
+	}
+
+	public static DeepstreamCommunicationService prepare(
+			final String deepstreamHost, final String deepstreamServerRole,
+			final String deepstreamServerPassword) {
+		log.info("Preparing service...");
+		if (instance == null) {
+			instance = new DeepstreamCommunicationService(deepstreamHost,
+					deepstreamServerRole, deepstreamServerPassword);
+		}
+		log.info("Prepared.");
+		return instance;
+	}
+
+	public void start(
+			final SurveyExecutionManagerService surveyExecutionManagerService,
+			final InterventionExecutionManagerService interventionExecutionManagerService)
+			throws Exception {
+		log.info("Starting service...");
+
+		this.surveyExecutionManagerService = surveyExecutionManagerService;
+		this.interventionExecutionManagerService = interventionExecutionManagerService;
 
 		try {
 			connectOrReconnect();
@@ -108,18 +129,8 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 					e.getMessage());
 			throw e;
 		}
-	}
 
-	public static DeepstreamCommunicationService start(
-			final String deepstreamHost, final String deepstreamUser,
-			final String deepStreamPassword) throws Exception {
-		log.info("Starting service...");
-		if (instance == null) {
-			instance = new DeepstreamCommunicationService(deepstreamHost,
-					deepstreamUser, deepStreamPassword);
-		}
 		log.info("Started.");
-		return instance;
 	}
 
 	public void stop() throws Exception {
@@ -152,14 +163,7 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 	@Synchronized
 	public void asyncSendMessage(final DialogOption dialogOption,
 			final ObjectId dialogMessageId, final int messageOrder,
-			final String message, final boolean messageExpectsAnswer) {
-		synchronized (this) {
-			if (interventionExecutionManagerService == null) {
-				interventionExecutionManagerService = MC.getInstance()
-						.getInterventionExecutionManagerService();
-			}
-		}
-
+			String message, final boolean messageExpectsAnswer) {
 		interventionExecutionManagerService
 				.dialogMessageStatusChangesForSending(dialogMessageId,
 						DialogMessageStatusTypes.SENDING,
@@ -175,7 +179,39 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 			final JsonObject messageObject = new JsonObject();
 			messageObject.addProperty("id", messageOrder);
 			messageObject.addProperty("status", "SENT_BY_SYSTEM");
-			messageObject.addProperty("type", "PLAIN_TEXT");
+			messageObject.addProperty("type", "PLAIN");
+			if (message.contains(Constants.getMediaObjectLinkingBaseURL())) {
+				val indexFrom = message.indexOf(Constants
+						.getMediaObjectLinkingBaseURL());
+				int indexTo;
+				if ((indexTo = message.indexOf(" ", indexFrom)) == -1) {
+					messageObject.addProperty("contains-media",
+							message.substring(indexFrom));
+				} else {
+					messageObject.addProperty("contains-media",
+							message.substring(indexFrom, indexTo));
+				}
+				message = message
+						.replaceFirst(
+								Constants.getMediaObjectLinkingBaseURL()
+										+ "[^ ]*",
+								ImplementationConstants.PLACEHOLDER_LINKED_MEDIA_OBJECT);
+			}
+			if (message.contains(Constants.getSurveyLinkingBaseURL())) {
+				val indexFrom = message.indexOf(Constants
+						.getSurveyLinkingBaseURL());
+				int indexTo;
+				if ((indexTo = message.indexOf(" ", indexFrom)) == -1) {
+					messageObject.addProperty("contains-survey",
+							message.substring(indexFrom));
+				} else {
+					messageObject.addProperty("contains-survey",
+							message.substring(indexFrom, indexTo));
+				}
+				message = message.replaceFirst(
+						Constants.getSurveyLinkingBaseURL() + "[^ ]*",
+						ImplementationConstants.PLACEHOLDER_LINKED_SURVEY);
+			}
 			messageObject.addProperty("message", message);
 			messageObject.addProperty("message-timestamp", timestamp);
 			messageObject.addProperty("expects-answer", messageExpectsAnswer);
@@ -219,13 +255,6 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 	 * @return
 	 */
 	public List<ReceivedMessage> getReceivedMessages() {
-		synchronized (this) {
-			if (interventionExecutionManagerService == null) {
-				interventionExecutionManagerService = MC.getInstance()
-						.getInterventionExecutionManagerService();
-			}
-		}
-
 		val newReceivedMessages = new ArrayList<ReceivedMessage>();
 
 		synchronized (receivedMessages) {
@@ -261,7 +290,7 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 			if (retrievedMessageObject instanceof JsonNull) {
 				messageObject = new JsonObject();
 				messageObject.addProperty("status", "SENT_BY_USER");
-				messageObject.addProperty("type", "PLAIN_TEXT");
+				messageObject.addProperty("type", "PLAIN");
 				messageObject.addProperty("id", messageOrder);
 			} else {
 				messageObject = (JsonObject) retrievedMessageObject;
@@ -309,11 +338,7 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 		do {
 			log.debug("Trying to login...");
 
-			if (loginData != null) {
-				result = client.login(loginData);
-			} else {
-				result = client.login();
-			}
+			result = client.login(loginData);
 
 			if (!result.loggedIn()) {
 				log.warn("Login and authentication failed.");
@@ -324,7 +349,7 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 					// Do nothing
 				}
 			}
-		} while (startupComplete && !result.loggedIn());
+		} while (startupComplete || !result.loggedIn());
 
 		if (result.loggedIn()) {
 			log.debug("Login successful.");
@@ -334,7 +359,6 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 			log.info("Connection to deepstream established.");
 
 			provideMethods();
-
 		} else {
 			log.error("Could not login to deepstream server at startup: {}",
 					result.getErrorEvent());
@@ -382,6 +406,43 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 	 * Provide RPC methods
 	 */
 	private void provideMethods() {
+		// Can be called by everyone
+		client.rpc.provide(
+				"register-participant",
+				(rpcName, data, rpcResponse) -> {
+					final JsonObject jsonData = (JsonObject) gson
+							.toJsonTree(data);
+					try {
+						final JsonObject credentials = registerParticipant(
+								jsonData.get("nickname").getAsString(),
+								jsonData.get("intervention-pattern")
+										.getAsString(),
+								jsonData.get("intervention-password")
+										.getAsString());
+
+						if (credentials != null) {
+							rpcResponse.send(credentials);
+						} else {
+							rpcResponse.send(JsonNull.INSTANCE);
+						}
+					} catch (final Exception e) {
+						log.warn("Error when registering participant: {}",
+								e.getMessage());
+						rpcResponse.send(JsonNull.INSTANCE);
+						return;
+					}
+				});
+		// Can be called by everyone
+		client.rpc.provide("register-supervisor",
+				(rpcName, data, rpcResponse) -> {
+					// TODO DS supervisor assignment
+			});
+		// Can only be called by a "participant" (role)
+		client.rpc.provide("request-rest-token",
+				(rpcName, data, rpcResponse) -> {
+					// TODO DS request rest token without survey
+			});
+		// Can only be called by a "participant" (role)
 		client.rpc.provide(
 				"message-inbox",
 				(rpcName, data, rpcResponse) -> {
@@ -405,7 +466,7 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 						return;
 					}
 				});
-
+		// Can be called by a "participant" or "supervisor" (role)
 		client.rpc.provide(
 				"message-diff",
 				(rpcName, data, rpcResponse) -> {
@@ -425,6 +486,14 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 				});
 	}
 
+	private JsonObject registerParticipant(final String nickname,
+			final String interventionPattern, final String interventionPassword) {
+		// TODO create participant and bring it to a stage when monitoring can
+		// start (using regular main services) --> The credentials should
+		// contain the participant DS id (unique) and the secret
+		return null;
+	}
+
 	/**
 	 * @param participantId
 	 * @param message
@@ -438,7 +507,9 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 		val receivedMessage = new ReceivedMessage();
 
 		// Always set as participant message (if it is from a supervisor it will
-		// be discarded later)
+		// be discarded later automatically when no appropriate dialog option is
+		// found)
+		// TODO Should be implemented for supervisors as well
 		receivedMessage.setType(DialogOptionTypes.EXTERNAL_ID);
 		receivedMessage.setReceivedTimestamp(timestamp);
 		receivedMessage.setMessage(message);

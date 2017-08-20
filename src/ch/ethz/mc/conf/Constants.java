@@ -31,6 +31,8 @@ import java.util.Properties;
 
 import javax.servlet.ServletContext;
 
+import org.apache.commons.lang3.RandomStringUtils;
+
 import lombok.Cleanup;
 import lombok.Getter;
 import lombok.Synchronized;
@@ -190,68 +192,74 @@ public class Constants {
 	 * Database configuration
 	 */
 	@Getter
-	private static String	databaseHost						= "127.0.0.1";
+	private static String		databaseHost						= "127.0.0.1";
 	@Getter
-	private static int		databasePort						= 27017;
+	private static int			databasePort						= 27017;
 	@Getter
-	private static String	databaseUser						= "mc";
+	private static String		databaseUser						= "mc";
 	@Getter
-	private static String	databasePassword					= "mc";
+	private static String		databasePassword					= "mc";
 	@Getter
-	private static String	databaseName						= "mc";
+	private static String		databaseName						= "mc";
 
 	/**
 	 * General Mailing configuration
 	 */
 	@Getter
-	private static String	mailhostIncoming					= "localhost";
+	private static String		mailhostIncoming					= "localhost";
 	@Getter
-	private static String	mailboxProtocol						= "pop3";
+	private static String		mailboxProtocol						= "pop3";
 	@Getter
-	private static String	mailboxFolder						= "INBOX";
+	private static String		mailboxFolder						= "INBOX";
 	@Getter
-	private static String	mailhostOutgoing					= "localhost";
+	private static String		mailhostOutgoing					= "localhost";
 	@Getter
-	private static String	mailUser							= "---";
+	private static String		mailUser							= "---";
 	@Getter
-	private static String	mailPassword						= "---";
+	private static String		mailPassword						= "---";
 
 	/**
 	 * Email configuration
 	 */
 	@Getter
-	private static String	emailFrom							= "a@b.eu";
+	private static String		emailFrom							= "a@b.eu";
 	@Getter
-	private static String	emailSubjectForParticipant			= "MobileCoach Message";
+	private static String		emailSubjectForParticipant			= "MobileCoach Message";
 	@Getter
-	private static String	emailSubjectForSupervisor			= "MobileCoach Supervisor Notification";
+	private static String		emailSubjectForSupervisor			= "MobileCoach Supervisor Notification";
 
 	/**
 	 * SMS configuration
 	 */
 	@Getter
-	private static String	smsEmailFrom						= "a@b.eu";
+	private static String		smsEmailFrom						= "a@b.eu";
 	@Getter
-	private static String	smsEmailTo							= "c@d.eu";
+	private static String		smsEmailTo							= "c@d.eu";
 	@Getter
-	private static String	smsMailSubjectStartsWith			= "SMS received on";
+	private static String		smsMailSubjectStartsWith			= "SMS received on";
 	@Getter
-	private static String	smsUserKey							= "abc";
+	private static String		smsUserKey							= "abc";
 	@Getter
-	private static String	smsUserPassword						= "xyz";
-	private static String	smsPhoneNumberAcceptedCountryCodes	= "41,43,49";
+	private static String		smsUserPassword						= "xyz";
+	private static String		smsPhoneNumberAcceptedCountryCodes	= "41,43,49";
 
 	/**
 	 * Deepstream configuration
 	 */
 	@Getter
-	private static boolean	deepstreamActive					= false;
+	private static boolean		deepstreamActive					= false;
 	@Getter
-	private static String	deepstreamHost						= "wss://localhost:6020";
+	private static String		deepstreamHost						= "wss://localhost:6020";
 	@Getter
-	private static String	deepstreamUser						= "mc-server";
+	private static String		deepstreamServerRole				= "server";
 	@Getter
-	private static String	deepstreamPassword					= "top-secret";
+	private static String		deepstreamUserRole					= "user";
+	@Getter
+	private static String		deepstreamSupervisorRole			= "supervisor";
+
+	@Getter
+	private static final String	deepstreamServerPassword			= RandomStringUtils
+																			.randomAlphanumeric(64);
 
 	/**
 	 * Get all accepted country codes for SMS phone numbers

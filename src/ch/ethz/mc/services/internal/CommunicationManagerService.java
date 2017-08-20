@@ -55,7 +55,6 @@ import org.bson.types.ObjectId;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.memory.ReceivedMessage;
@@ -64,6 +63,7 @@ import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
+import ch.ethz.mc.services.SurveyExecutionManagerService;
 import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mc.tools.Simulator;
 import ch.ethz.mc.tools.StringHelpers;
@@ -101,9 +101,8 @@ public class CommunicationManagerService {
 
 	private final List<MailingThread>			runningMailingThreads;
 
-	private CommunicationManagerService() throws Exception {
-
-		log.info("Starting service...");
+	private CommunicationManagerService() {
+		log.info("Preparing service...");
 
 		runningMailingThreads = new ArrayList<MailingThread>();
 
@@ -165,21 +164,37 @@ public class CommunicationManagerService {
 		// Initialize deepstream communication (if required)
 		if (Constants.isDeepstreamActive()) {
 			deepstreamCommunicationService = DeepstreamCommunicationService
-					.start(Constants.getDeepstreamHost(),
-							Constants.getDeepstreamUser(),
-							Constants.getDeepstreamPassword());
+					.prepare(Constants.getDeepstreamHost(),
+							Constants.getDeepstreamServerRole(),
+							Constants.getDeepstreamServerPassword());
 		} else {
 			deepstreamCommunicationService = null;
 		}
 
-		log.info("Started.");
+		log.info("Prepared.");
 	}
 
-	public static CommunicationManagerService start() throws Exception {
+	public static CommunicationManagerService prepare() throws Exception {
 		if (instance == null) {
 			instance = new CommunicationManagerService();
 		}
 		return instance;
+	}
+
+	public void start(
+			final SurveyExecutionManagerService surveyExecutionManagerService,
+			final InterventionExecutionManagerService interventionExecutionManagerService)
+			throws Exception {
+		log.info("Starting service...");
+
+		this.interventionExecutionManagerService = interventionExecutionManagerService;
+
+		if (deepstreamCommunicationService != null) {
+			deepstreamCommunicationService.start(surveyExecutionManagerService,
+					interventionExecutionManagerService);
+		}
+
+		log.info("Started.");
 	}
 
 	public void stop() throws Exception {
@@ -221,10 +236,6 @@ public class CommunicationManagerService {
 			final ObjectId dialogMessageId, final int messageOrder,
 			final String messageSender, final String message,
 			final boolean messageExpectsAnswer) {
-		if (interventionExecutionManagerService == null) {
-			interventionExecutionManagerService = MC.getInstance()
-					.getInterventionExecutionManagerService();
-		}
 
 		switch (dialogOption.getType()) {
 			case SMS:

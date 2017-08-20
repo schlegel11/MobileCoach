@@ -28,9 +28,11 @@ import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.MC;
+import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.DialogStatus;
@@ -66,6 +68,12 @@ public class RESTManagerService {
 	private final FileStorageManagerService	fileStorageManagerService;
 	private final VariablesManagerService	variablesManagerService;
 
+	String									deepstreamServerRole;
+	String									deepstreamUserRole;
+	String									deepstreamSuperviserRole;
+
+	String									deepstreamServerPassword;
+
 	private RESTManagerService(
 			final DatabaseManagerService databaseManagerService,
 			final FileStorageManagerService fileStorageManagerService,
@@ -78,6 +86,12 @@ public class RESTManagerService {
 		this.databaseManagerService = databaseManagerService;
 		this.fileStorageManagerService = fileStorageManagerService;
 		this.variablesManagerService = variablesManagerService;
+
+		deepstreamServerRole = Constants.getDeepstreamServerRole();
+		deepstreamUserRole = Constants.getDeepstreamUserRole();
+		deepstreamSuperviserRole = Constants.getDeepstreamSupervisorRole();
+
+		deepstreamServerPassword = Constants.getDeepstreamServerPassword();
 
 		log.info("Started.");
 	}
@@ -107,13 +121,12 @@ public class RESTManagerService {
 	 * @param variable
 	 * @return
 	 */
+	@Synchronized
 	public boolean checkVariableForServiceWritingRights(
 			final ObjectId participantId, final String variable) {
-		synchronized ($lock) {
-			return variablesManagerService.checkVariableForServiceWriting(
-					participantId, ImplementationConstants.VARIABLE_PREFIX
-							+ variable.trim());
-		}
+		return variablesManagerService.checkVariableForServiceWriting(
+				participantId, ImplementationConstants.VARIABLE_PREFIX
+						+ variable.trim());
 	}
 
 	/**
@@ -469,6 +482,43 @@ public class RESTManagerService {
 					"Could not write credit for {} on {} for participant {}: {}",
 					creditName, variable, participantId, e.getMessage());
 			throw e;
+		}
+	}
+
+	/*
+	 * Deepstream functions
+	 */
+	public String checkDeepstreamAccessAndRetrieveUserId(final String user,
+			final String role, final String secret) {
+
+		// Prevent unauthorized access with empty values
+		if (StringUtils.isBlank(user) || StringUtils.isBlank(role)
+				|| StringUtils.isBlank(secret)) {
+			return null;
+		}
+
+		// Check access based on role
+		if (role.equals(Constants.getDeepstreamServerRole())) {
+			// Check server access
+			if (secret.equals(deepstreamServerPassword)) {
+				log.debug("Server authorized for deepstream access");
+				return "server";
+			} else {
+				log.debug("Server not authorized for deepstream access");
+				return null;
+			}
+		} else if (role.equals(deepstreamUserRole)) {
+			// Check user access
+			// TODO Check deepstream user access
+			log.debug("User {} authorized for deepstream access", user);
+			return "123456789";
+		} else if (role.equals(deepstreamSuperviserRole)) {
+			// Check supervisor access
+			// TODO Supervisory chat is not implemented, yet.
+			return null;
+		} else {
+			log.debug("Unauthorized access with wrong role {}", role);
+			return null;
 		}
 	}
 

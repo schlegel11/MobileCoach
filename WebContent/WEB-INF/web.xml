@@ -34,6 +34,7 @@
 		<welcome-file>default.jsp</welcome-file>
 	</welcome-file-list>
 
+	<!-- 
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>MC everything</web-resource-name>
@@ -43,6 +44,7 @@
 			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
 		</user-data-constraint>
 	</security-constraint>
+	 -->
 
 	<context-param>
 		<param-name>resteasy.servlet.mapping.prefix</param-name>
@@ -67,6 +69,7 @@
 			<param-value>ch.ethz.mc.rest.RESTServiceApplication</param-value>
 		</init-param>
 		<load-on-startup>2</load-on-startup>
+		<async-supported>true</async-supported>
 	</servlet>
 
 	<servlet-mapping>

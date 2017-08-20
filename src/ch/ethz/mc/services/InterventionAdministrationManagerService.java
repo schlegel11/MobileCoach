@@ -296,7 +296,7 @@ public class InterventionAdministrationManagerService {
 	public Intervention interventionCreate(final String name) {
 		val intervention = new Intervention(name,
 				InternalDateTime.currentTimeMillis(), false, false, false, "",
-				null, false, new String[] {}, new int[] { 1 }, null);
+				null, null, false, new String[] {}, new int[] { 1 }, null);
 
 		if (name.equals("")) {
 			intervention.setName(ImplementationConstants.DEFAULT_OBJECT_NAME);
@@ -364,6 +364,14 @@ public class InterventionAdministrationManagerService {
 	public void interventionChangeDashboardPasswordPattern(
 			final Intervention intervention, final String newPasswordPattern) {
 		intervention.setDashboardPasswordPattern(newPasswordPattern);
+
+		databaseManagerService.saveModelObject(intervention);
+	}
+
+	@Synchronized
+	public void interventionChangeDeepstreamPassword(
+			final Intervention intervention, final String newPassword) {
+		intervention.setDeepstreamPassword(newPassword);
 
 		databaseManagerService.saveModelObject(intervention);
 	}

@@ -113,6 +113,14 @@ public class Intervention extends ModelObject {
 	private String		dashboardPasswordPattern;
 
 	/**
+	 * <strong>OPTIONAL:</strong> The password required to access the deepstream
+	 * interface
+	 */
+	@Getter
+	@Setter
+	private String		deepstreamPassword;
+
+	/**
 	 * Defines if {@link ScreeningSurvey}s of participants where all relevant
 	 * monitoring data is available will automatically be finished by the system
 	 */

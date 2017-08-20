@@ -110,12 +110,15 @@ public class MC implements ServletContextListener {
 					.start(fileStorageManagerService.getMediaCacheFolder());
 			variablesManagerService = VariablesManagerService
 					.start(databaseManagerService);
-			communicationManagerService = CommunicationManagerService.start();
 			modelObjectExchangeService = ModelObjectExchangeService.start(
 					databaseManagerService, fileStorageManagerService);
 			reportGeneratorService = ReportGeneratorService
 					.start(databaseManagerService);
 			lockingService = LockingService.start();
+
+			// Internal services which internally require started controller
+			// services
+			communicationManagerService = CommunicationManagerService.prepare();
 
 			// Controller services
 			surveyAdministrationManagerService = SurveyAdministrationManagerService
@@ -138,6 +141,10 @@ public class MC implements ServletContextListener {
 			restManagerService = RESTManagerService.start(
 					databaseManagerService, fileStorageManagerService,
 					variablesManagerService);
+
+			// Start communication and working
+			interventionExecutionManagerService
+					.startCommunicationAndWorking(this);
 		} catch (final Exception e) {
 			noErrorsOccurred = false;
 			log.error("Error at starting services: {}", e);
@@ -155,7 +162,13 @@ public class MC implements ServletContextListener {
 
 	@Override
 	public void contextDestroyed(final ServletContextEvent event) {
+		stopServices();
+	}
+
+	private void stopServices() {
 		log.info("Stopping services...");
+
+		ready = false;
 
 		InternalDateTime.setFastForwardMode(false);
 
@@ -178,5 +191,11 @@ public class MC implements ServletContextListener {
 		}
 
 		log.info("Services stopped.");
+	}
+
+	public void forceShutdown() {
+		log.error("Shutdown forced...");
+
+		stopServices();
 	}
 }

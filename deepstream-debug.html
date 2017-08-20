@@ -10,6 +10,7 @@
 	<script type="text/javascript">
 		var debug = true;
 		var user = "123456789";
+		var role = "user";
 		var timestamp = 0;
 
 		var client;
@@ -21,10 +22,11 @@
 
 		var init = function() {
 			log("Connecting...");
-			client = deepstream("wss://deepstream.pathmate.online:8443").login(
+			client = deepstream("ws://localhost:6020/deepstream").login(
 					{
-						"username" : "development",
-						"password" : "pm2017-public"
+						"user" : user,
+						"role" : role,
+						"secret" : "def"
 					});
 			log("Connected.");
 

@@ -133,14 +133,12 @@ public class InterventionExecutionManagerService {
 		// Reset all messages which could not be sent the last times
 		dialogMessagesResetStatusAfterRestart();
 
+		// Prepare working threads
 		outgoingMessageWorker = new OutgoingMessageWorker(this);
-		outgoingMessageWorker.start();
 		incomingMessageWorker = new IncomingMessageWorker(this,
 				communicationManagerService);
-		incomingMessageWorker.start();
 		monitoringSchedulingWorker = new MonitoringSchedulingWorker(this,
 				surveyExecutionManagerService);
-		monitoringSchedulingWorker.start();
 
 		log.info("Started.");
 	}
@@ -162,8 +160,36 @@ public class InterventionExecutionManagerService {
 		return instance;
 	}
 
+	public void startCommunicationAndWorking(final MC mc) {
+		new Thread("Communication and Worker Starter") {
+			@Override
+			public void run() {
+				log.info("Starting communication and workers...");
+
+				// Start communication manager service
+				try {
+					communicationManagerService.start(
+							surveyExecutionManagerService, instance);
+
+					// Start working threads
+					outgoingMessageWorker.start();
+					incomingMessageWorker.start();
+					monitoringSchedulingWorker.start();
+				} catch (final Exception e) {
+					log.error(
+							"Error at starting communication and workers: {}",
+							e.getMessage());
+
+					mc.forceShutdown();
+				}
+
+				log.info("Started.");
+			}
+		}.start();
+	}
+
 	public void stop() throws Exception {
-		log.info("Stopping service...");
+		log.info("Stopping communication, workers and service...");
 
 		log.debug("Stopping master rule evaluation worker...");
 		synchronized (monitoringSchedulingWorker) {
