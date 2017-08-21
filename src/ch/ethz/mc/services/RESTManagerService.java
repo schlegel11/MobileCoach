@@ -35,9 +35,11 @@ import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.Queries;
+import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.DialogStatus;
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.Participant;
+import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValuePrivacyTypes;
 import ch.ethz.mc.model.rest.CollectionOfExtendedListVariables;
 import ch.ethz.mc.model.rest.CollectionOfExtendedVariables;
@@ -46,7 +48,9 @@ import ch.ethz.mc.model.rest.ExtendedVariable;
 import ch.ethz.mc.model.rest.Variable;
 import ch.ethz.mc.model.rest.VariableAverage;
 import ch.ethz.mc.model.rest.VariableAverageWithParticipant;
+import ch.ethz.mc.services.internal.CommunicationManagerService;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
+import ch.ethz.mc.services.internal.DeepstreamCommunicationService;
 import ch.ethz.mc.services.internal.FileStorageManagerService;
 import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.services.internal.VariablesManagerService.ExternallyReadProtectedVariableException;
@@ -59,25 +63,28 @@ import ch.ethz.mc.services.internal.VariablesManagerService.ExternallyWriteProte
  */
 @Log4j2
 public class RESTManagerService {
-	private final Object					$lock;
+	private final Object							$lock;
 
-	private static RESTManagerService		instance	= null;
+	private static RESTManagerService				instance	= null;
 
-	private final DatabaseManagerService	databaseManagerService;
+	private final DatabaseManagerService			databaseManagerService;
 	@Getter
-	private final FileStorageManagerService	fileStorageManagerService;
-	private final VariablesManagerService	variablesManagerService;
+	private final FileStorageManagerService			fileStorageManagerService;
+	private final VariablesManagerService			variablesManagerService;
 
-	String									deepstreamServerRole;
-	String									deepstreamUserRole;
-	String									deepstreamSuperviserRole;
+	private final DeepstreamCommunicationService	deepstreamCommunicationService;
 
-	String									deepstreamServerPassword;
+	private final String							deepstreamServerRole;
+	private final String							deepstreamParticipantRole;
+	private final String							deepstreamSuperviserRole;
+
+	private final String							deepstreamServerPassword;
 
 	private RESTManagerService(
 			final DatabaseManagerService databaseManagerService,
 			final FileStorageManagerService fileStorageManagerService,
-			final VariablesManagerService variablesManagerService)
+			final VariablesManagerService variablesManagerService,
+			final CommunicationManagerService communicationManagerService)
 			throws Exception {
 		$lock = MC.getInstance();
 
@@ -87,8 +94,11 @@ public class RESTManagerService {
 		this.fileStorageManagerService = fileStorageManagerService;
 		this.variablesManagerService = variablesManagerService;
 
+		deepstreamCommunicationService = communicationManagerService
+				.getDeepstreamCommunicationService();
+
 		deepstreamServerRole = Constants.getDeepstreamServerRole();
-		deepstreamUserRole = Constants.getDeepstreamUserRole();
+		deepstreamParticipantRole = Constants.getDeepstreamParticipantRole();
 		deepstreamSuperviserRole = Constants.getDeepstreamSupervisorRole();
 
 		deepstreamServerPassword = Constants.getDeepstreamServerPassword();
@@ -99,11 +109,13 @@ public class RESTManagerService {
 	public static RESTManagerService start(
 			final DatabaseManagerService databaseManagerService,
 			final FileStorageManagerService fileStorageManagerService,
-			final VariablesManagerService variablesManagerService)
+			final VariablesManagerService variablesManagerService,
+			final CommunicationManagerService communicationManagerService)
 			throws Exception {
 		if (instance == null) {
 			instance = new RESTManagerService(databaseManagerService,
-					fileStorageManagerService, variablesManagerService);
+					fileStorageManagerService, variablesManagerService,
+					communicationManagerService);
 		}
 		return instance;
 	}
@@ -488,36 +500,171 @@ public class RESTManagerService {
 	/*
 	 * Deepstream functions
 	 */
-	public String checkDeepstreamAccessAndRetrieveUserId(final String user,
-			final String role, final String secret) {
+	/**
+	 * Validates deepstream access for participant/supervisor/server
+	 * 
+	 * @param user
+	 * @param password
+	 * @param role
+	 * @param secret
+	 * @return
+	 */
+	public boolean checkDeepstreamAccessAndRetrieveUserId(final String user,
+			final String password, final String role, final String secret) {
 
 		// Prevent unauthorized access with empty values
-		if (StringUtils.isBlank(user) || StringUtils.isBlank(role)
-				|| StringUtils.isBlank(secret)) {
-			return null;
+		if (StringUtils.isBlank(user) || StringUtils.isBlank(password)
+				|| StringUtils.isBlank(role) || StringUtils.isBlank(secret)) {
+			return false;
 		}
 
 		// Check access based on role
-		if (role.equals(Constants.getDeepstreamServerRole())) {
+		if (role.equals(deepstreamServerRole)) {
 			// Check server access
 			if (secret.equals(deepstreamServerPassword)) {
 				log.debug("Server authorized for deepstream access");
-				return "server";
+				return true;
 			} else {
 				log.debug("Server not authorized for deepstream access");
-				return null;
+				return false;
 			}
-		} else if (role.equals(deepstreamUserRole)) {
-			// Check user access
-			// TODO Check deepstream user access
-			log.debug("User {} authorized for deepstream access", user);
-			return "123456789";
+		} else if (role.equals(deepstreamParticipantRole)) {
+			// Check participant access
+			val dialogOption = databaseManagerService
+					.findOneModelObject(
+							DialogOption.class,
+							Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
+							DialogOptionTypes.EXTERNAL_ID,
+							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+									+ user);
+			if (dialogOption == null) {
+				log.debug(
+						"Participant with deepstream id {} not authorized for deepstream access: Dialog option not found",
+						user);
+				return false;
+			}
+
+			val participant = databaseManagerService.getModelObjectById(
+					Participant.class, dialogOption.getParticipant());
+			if (participant == null) {
+				log.debug(
+						"Participant with deepstream id {} not authorized for deepstream access: Participant not found",
+						user);
+				return false;
+			}
+
+			val intervention = databaseManagerService.getModelObjectById(
+					Intervention.class, participant.getIntervention());
+			if (intervention == null || !intervention.isActive()) {
+				log.debug(
+						"Participant with deepstream id {} not authorized for deepstream access: Intervention not active",
+						user);
+				return false;
+			}
+			if (!intervention.getDeepstreamPassword().equals(password)) {
+				log.debug(
+						"Participant with deepstream id {} not authorized for deepstream access: Password does not match deepstream intervention password",
+						user);
+				return false;
+			}
+
+			if (deepstreamCommunicationService != null
+					&& deepstreamCommunicationService.checkSecret(user, secret)) {
+				log.debug(
+						"Participant with deepstream id {} authorized for deepstream access",
+						user);
+				return true;
+			} else {
+				log.debug(
+						"Participant with deepstream id {} not authorized for deepstream access: Wrong secret",
+						user);
+				return false;
+			}
 		} else if (role.equals(deepstreamSuperviserRole)) {
 			// Check supervisor access
-			// TODO Supervisory chat is not implemented, yet.
-			return null;
+			val dialogOption = databaseManagerService
+					.findOneModelObject(
+							DialogOption.class,
+							Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
+							DialogOptionTypes.SUPERVISOR_EXTERNAL_ID,
+							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+									+ user);
+			if (dialogOption == null) {
+				log.debug(
+						"Supervisor with deepstream id {} not authorized for deepstream access: Dialog option not found",
+						user);
+				return false;
+			}
+
+			val participant = databaseManagerService.getModelObjectById(
+					Participant.class, dialogOption.getParticipant());
+			if (participant == null) {
+				log.debug(
+						"Supervisor with deepstream id {} not authorized for deepstream access: Participant not found",
+						user);
+				return false;
+			}
+
+			val intervention = databaseManagerService.getModelObjectById(
+					Intervention.class, participant.getIntervention());
+			if (intervention == null || !intervention.isActive()) {
+				log.debug(
+						"Supervisor with deepstream id {} not authorized for deepstream access: Intervention not active",
+						user);
+				return false;
+			}
+			if (!intervention.getDeepstreamPassword().equals(password)) {
+				log.debug(
+						"Supervisor with deepstream id {} not authorized for deepstream access: Password does not match deepstream intervention password",
+						user);
+				return false;
+			}
+
+			if (deepstreamCommunicationService != null
+					&& deepstreamCommunicationService.checkSecret(user, secret)) {
+				log.debug(
+						"Supervisor with deepstream id {} authorized for deepstream access",
+						user);
+				return true;
+			} else {
+				log.debug(
+						"Supervisor with deepstream id {} not authorized for deepstream access: Wrong secret",
+						user);
+				return false;
+			}
 		} else {
 			log.debug("Unauthorized access with wrong role {}", role);
+			return false;
+		}
+	}
+
+	/**
+	 * Creates a deepstream participant/supervisor and the belonging
+	 * intervention participant structures
+	 * 
+	 * @param interventionPattern
+	 * @param interventionPassword
+	 * @param relatedParticipant
+	 * @param requestedRole
+	 * @return Deepstream user id and secret
+	 */
+	public String[] createDeepstreamUser(final String nickname,
+			final String relatedParticipant, final String interventionPattern,
+			final String interventionPassword, final String requestedRole) {
+
+		if (StringUtils.isBlank(requestedRole)) {
+			return null;
+		}
+
+		if (requestedRole.equals(deepstreamParticipantRole)) {
+			return deepstreamCommunicationService.registerUser(nickname,
+					relatedParticipant, interventionPattern,
+					interventionPassword, false);
+		} else if (requestedRole.equals(deepstreamSuperviserRole)) {
+			return deepstreamCommunicationService.registerUser(nickname,
+					relatedParticipant, interventionPattern,
+					interventionPassword, true);
+		} else {
 			return null;
 		}
 	}

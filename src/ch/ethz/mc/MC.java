@@ -140,7 +140,7 @@ public class MC implements ServletContextListener {
 							surveyExecutionManagerService);
 			restManagerService = RESTManagerService.start(
 					databaseManagerService, fileStorageManagerService,
-					variablesManagerService);
+					variablesManagerService, communicationManagerService);
 
 			// Start communication and working
 			interventionExecutionManagerService

@@ -46,6 +46,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
+import lombok.Getter;
 import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -77,6 +78,7 @@ import ch.ethz.mc.tools.StringHelpers;
 public class CommunicationManagerService {
 	private static CommunicationManagerService	instance	= null;
 
+	@Getter
 	private DeepstreamCommunicationService		deepstreamCommunicationService;
 
 	private InterventionExecutionManagerService	interventionExecutionManagerService;

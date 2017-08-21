@@ -38,6 +38,7 @@ import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.Constants;
@@ -90,6 +91,7 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 
 		loginData = new JsonObject();
 		loginData.addProperty("user", "server");
+		loginData.addProperty("password", "not required");
 		loginData.addProperty("role", deepstreamServerRole);
 		loginData.addProperty("secret", deepstreamServerPassword);
 
@@ -312,6 +314,37 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 		}
 	}
 
+	/**
+	 * Check secret of user using deepstream
+	 * 
+	 * @param participantOrSupervisorIdentifier
+	 * @param secret
+	 * @return
+	 */
+	public boolean checkSecret(final String participantOrSupervisorIdentifier,
+			final String secret) {
+		try {
+			val record = client.record.getRecord("messages/"
+					+ participantOrSupervisorIdentifier);
+
+			val secretFromRecord = record.get("secret").getAsString();
+
+			if (StringUtils.isBlank(secretFromRecord)) {
+				return false;
+			}
+
+			if (secretFromRecord.equals(secret)) {
+				return true;
+			} else {
+				return false;
+			}
+		} catch (final Exception e) {
+			log.warn("Could not check secret of participant/supervisor {}",
+					participantOrSupervisorIdentifier);
+		}
+		return true;
+	}
+
 	/*
 	 * Class methods
 	 */
@@ -406,43 +439,12 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 	 * Provide RPC methods
 	 */
 	private void provideMethods() {
-		// Can be called by everyone
-		client.rpc.provide(
-				"register-participant",
-				(rpcName, data, rpcResponse) -> {
-					final JsonObject jsonData = (JsonObject) gson
-							.toJsonTree(data);
-					try {
-						final JsonObject credentials = registerParticipant(
-								jsonData.get("nickname").getAsString(),
-								jsonData.get("intervention-pattern")
-										.getAsString(),
-								jsonData.get("intervention-password")
-										.getAsString());
-
-						if (credentials != null) {
-							rpcResponse.send(credentials);
-						} else {
-							rpcResponse.send(JsonNull.INSTANCE);
-						}
-					} catch (final Exception e) {
-						log.warn("Error when registering participant: {}",
-								e.getMessage());
-						rpcResponse.send(JsonNull.INSTANCE);
-						return;
-					}
-				});
-		// Can be called by everyone
-		client.rpc.provide("register-supervisor",
-				(rpcName, data, rpcResponse) -> {
-					// TODO DS supervisor assignment
-			});
 		// Can only be called by a "participant" (role)
 		client.rpc.provide("request-rest-token",
 				(rpcName, data, rpcResponse) -> {
 					// TODO DS request rest token without survey
 			});
-		// Can only be called by a "participant" (role)
+		// Can only be called by a "supervisor" (role)
 		client.rpc.provide(
 				"message-inbox",
 				(rpcName, data, rpcResponse) -> {
@@ -484,14 +486,6 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 								e.getMessage());
 					}
 				});
-	}
-
-	private JsonObject registerParticipant(final String nickname,
-			final String interventionPattern, final String interventionPassword) {
-		// TODO create participant and bring it to a stage when monitoring can
-		// start (using regular main services) --> The credentials should
-		// contain the participant DS id (unique) and the secret
-		return null;
 	}
 
 	/**
@@ -570,6 +564,32 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 	}
 
 	/**
+	 * Creates a deepstream participant/supervisor and the belonging
+	 * intervention participant structures
+	 * 
+	 * @param nickname
+	 * @param relatedParticipant
+	 * @param interventionPattern
+	 * @param interventionPassword
+	 * @param supervisorRequest
+	 * @return Deepstream user id (0) and secret (1)
+	 */
+	public String[] registerUser(final String nickname,
+			final String relatedParticipant, final String interventionPattern,
+			final String interventionPassword, final boolean supervisorRequest) {
+		// TODO create participant and bring it to a stage when monitoring can
+		// start (using regular main services) --> The credentials should
+		// contain the participant DS id (unique) and the secret
+
+		// nickname only relevant for non supervisor
+		// relatedParticipant only relevant for supervisor
+
+		return null;
+	}
+
+	/**
+	 * Cleans up deepstream based on a specific participant/supervisor
+	 * 
 	 * @param participantOrSupervisorId
 	 */
 	public void cleanupForParticipantOrSupervisor(

@@ -253,7 +253,7 @@ public class Constants {
 	@Getter
 	private static String		deepstreamServerRole				= "server";
 	@Getter
-	private static String		deepstreamUserRole					= "user";
+	private static String		deepstreamParticipantRole			= "participant";
 	@Getter
 	private static String		deepstreamSupervisorRole			= "supervisor";
 

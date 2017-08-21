@@ -71,6 +71,8 @@ public class DeepstreamService extends AbstractService {
 	@Path("/authorize")
 	@Produces("application/json")
 	public Response authorize(final String stringPayload) {
+		checkDeepstreamAvailability();
+
 		try {
 			final JsonElement jsonElement = gson.fromJson(stringPayload,
 					JsonElement.class);
@@ -79,25 +81,28 @@ public class DeepstreamService extends AbstractService {
 			val authData = (JsonObject) jsonObjectPayload.get("authData");
 
 			val user = authData.get("user").getAsString();
+			val password = authData.get("password").getAsString();
 			val role = authData.get("role").getAsString();
 			val secret = authData.get("secret").getAsString();
 
 			// Check access
-			log.debug("Checking deepstream access for {} with role {}", user,
-					role);
-			val userId = restManagerService
-					.checkDeepstreamAccessAndRetrieveUserId(user, role, secret);
+			log.debug(
+					"Checking deepstream access for {} with password {} and role {}",
+					user, password, role);
+			val accessGranted = restManagerService
+					.checkDeepstreamAccessAndRetrieveUserId(user, password,
+							role, secret);
 
-			if (userId == null) {
+			if (!accessGranted) {
 				return Response.status(Status.FORBIDDEN).build();
 			}
 
 			// Send response
 			val responseServerData = new JsonObject();
+			responseServerData.addProperty("user", user);
 			responseServerData.addProperty("role", role);
 
 			val responseData = new JsonObject();
-			responseData.addProperty("userId", userId);
 			responseData.add("serverData", responseServerData);
 
 			return Response.status(Status.OK).entity(gson.toJson(responseData))
@@ -105,7 +110,54 @@ public class DeepstreamService extends AbstractService {
 		} catch (final Exception e) {
 			throw new WebApplicationException(
 					Response.status(Status.FORBIDDEN)
-							.entity("Could not authorize server/user/supervisor for deepstream access: "
+							.entity("Could not authorize server/participant/supervisor for deepstream access: "
+									+ e.getMessage()).build());
+		}
+	}
+
+	@POST
+	@Path("/register")
+	@Produces("application/json")
+	public Response register(final String stringPayload) {
+		checkDeepstreamAvailability();
+
+		try {
+			final JsonElement jsonElement = gson.fromJson(stringPayload,
+					JsonElement.class);
+			final JsonObject jsonPayload = jsonElement.getAsJsonObject();
+
+			val nickname = jsonPayload.get("nickname").getAsString();
+			val relatedParticipant = jsonPayload.get("participant")
+					.getAsString();
+			val interventionPattern = jsonPayload.get("intervention-pattern")
+					.getAsString();
+			val interventionPassword = jsonPayload.get("intervention-password")
+					.getAsString();
+			val requestedRole = jsonPayload.get("role").getAsString();
+
+			// Create participant or supervisor
+			val userAndSecret = restManagerService.createDeepstreamUser(
+					nickname, relatedParticipant, interventionPattern,
+					interventionPassword, requestedRole);
+
+			if (userAndSecret == null) {
+				throw new WebApplicationException(
+						Response.status(Status.FORBIDDEN)
+								.entity("Could not create participant/supervisor for deepstream access")
+								.build());
+			}
+
+			// Send response
+			val responseData = new JsonObject();
+			responseData.addProperty("user", userAndSecret[0]);
+			responseData.addProperty("secret", userAndSecret[1]);
+
+			return Response.status(Status.OK).entity(gson.toJson(responseData))
+					.build();
+		} catch (final Exception e) {
+			throw new WebApplicationException(
+					Response.status(Status.FORBIDDEN)
+							.entity("Could not create participant/supervisor for deepstream access: "
 									+ e.getMessage()).build());
 		}
 	}
