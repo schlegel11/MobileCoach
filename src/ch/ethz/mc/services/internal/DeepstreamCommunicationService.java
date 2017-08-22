@@ -38,11 +38,13 @@ import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.model.memory.ExternalRegistration;
 import ch.ethz.mc.model.memory.ReceivedMessage;
 import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogOption;
@@ -565,26 +567,64 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 
 	/**
 	 * Creates a deepstream participant/supervisor and the belonging
-	 * intervention participant structures
+	 * intervention participant structures or returns null if not allowed
 	 * 
 	 * @param nickname
-	 * @param relatedParticipant
+	 * @param relatedParticipantExternalId
 	 * @param interventionPattern
 	 * @param interventionPassword
 	 * @param supervisorRequest
-	 * @return Deepstream user id (0) and secret (1)
+	 * @return
 	 */
-	public String[] registerUser(final String nickname,
-			final String relatedParticipant, final String interventionPattern,
+	public ExternalRegistration registerUser(final String nickname,
+			final String relatedParticipantExternalId,
+			final String interventionPattern,
 			final String interventionPassword, final boolean supervisorRequest) {
-		// TODO create participant and bring it to a stage when monitoring can
-		// start (using regular main services) --> The credentials should
-		// contain the participant DS id (unique) and the secret
 
-		// nickname only relevant for non supervisor
-		// relatedParticipant only relevant for supervisor
+		// Prepare deepstream and reserve unique ID
+		String participantOrSupervisorExternalId;
+		final String secret = RandomStringUtils.randomAlphanumeric(128);
+		synchronized (client) {
+			do {
+				participantOrSupervisorExternalId = RandomStringUtils
+						.randomAlphanumeric(32);
+			} while (client.record.has(
+					"messages/" + participantOrSupervisorExternalId)
+					.getResult());
 
-		return null;
+			val record = client.record.getRecord("messages/"
+					+ participantOrSupervisorExternalId);
+			record.set("secret", secret);
+			record.set("role",
+					supervisorRequest ? Constants.getDeepstreamSupervisorRole()
+							: Constants.getDeepstreamParticipantRole());
+		}
+
+		val record = client.record.getRecord("messages/"
+				+ participantOrSupervisorExternalId);
+
+		boolean createdSucessfully = false;
+		try {
+			createdSucessfully = interventionExecutionManagerService
+					.checkAccessRightsAndRegisterParticipantOrSupervisorExternallyWithoutSurvey(
+							nickname,
+							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+									+ relatedParticipantExternalId,
+							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+									+ participantOrSupervisorExternalId,
+							interventionPattern, interventionPassword,
+							supervisorRequest);
+		} finally {
+			// Cleanup prepared user if registration was not possible
+			if (!createdSucessfully) {
+				record.delete();
+
+				return null;
+			}
+		}
+
+		return new ExternalRegistration(participantOrSupervisorExternalId,
+				secret);
 	}
 
 	/**

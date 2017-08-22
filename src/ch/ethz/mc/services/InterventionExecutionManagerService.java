@@ -1414,6 +1414,290 @@ public class InterventionExecutionManagerService {
 				hoursUntilHandledAsNotAnswered);
 	}
 
+	/**
+	 * Enables the adjustment of variables by authors directly in the results
+	 * window
+	 * 
+	 * @param participantId
+	 * @param variableName
+	 * @param variableValue
+	 * @return
+	 */
+	@Synchronized
+	public boolean participantAdjustVariableValue(final ObjectId participantId,
+			final String variableName, final String variableValue) {
+		val participant = databaseManagerService.getModelObjectById(
+				Participant.class, participantId);
+
+		try {
+			variablesManagerService.writeVariableValueOfParticipant(
+					participant.getId(), variableName, variableValue);
+		} catch (final Exception e) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Create a statistics file
+	 * 
+	 * @param statisticsFile
+	 * @throws IOException
+	 */
+	@Synchronized
+	public void createStatistics(final File statisticsFile) throws IOException {
+		final Properties statistics = new Properties() {
+			private static final long	serialVersionUID	= -478652106406702866L;
+
+			@Override
+			public synchronized Enumeration<Object> keys() {
+				return Collections.enumeration(new TreeSet<Object>(super
+						.keySet()));
+			}
+		};
+
+		statistics.setProperty("created",
+				StringHelpers.createDailyUniqueIndex());
+		val activeInterventions = databaseManagerService.findModelObjects(
+				Intervention.class, Queries.INTERVENTION__ACTIVE_TRUE);
+
+		int activeInterventionsCount = 0;
+		// Create statistics of all active interventions
+		for (val intervention : activeInterventions) {
+			activeInterventionsCount++;
+
+			// Check all relevant participants
+			val participants = databaseManagerService
+					.findModelObjects(
+							Participant.class,
+							Queries.PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE,
+							intervention.getId());
+
+			// Message counts
+			int totalSentMessages = 0;
+			int totalReceivedMessages = 0;
+			int answeredQuestions = 0;
+			int unansweredQuestions = 0;
+			int mediaObjectsViewed = 0;
+
+			for (val participant : participants) {
+				val dialogMessages = databaseManagerService
+						.findModelObjects(
+								DialogMessage.class,
+								Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_MESSAGE_TYPE,
+								participant.getId(), false);
+				for (val dialogMessage : dialogMessages) {
+					switch (dialogMessage.getStatus()) {
+						case IN_CREATION:
+							break;
+						case PREPARED_FOR_SENDING:
+							break;
+						case RECEIVED_UNEXPECTEDLY:
+							totalReceivedMessages++;
+							break;
+						case SENDING:
+							break;
+						case SENT_AND_ANSWERED_AND_PROCESSED:
+							totalSentMessages++;
+							totalReceivedMessages++;
+							answeredQuestions++;
+							break;
+						case SENT_AND_ANSWERED_BY_PARTICIPANT:
+							totalSentMessages++;
+							totalReceivedMessages++;
+							answeredQuestions++;
+							break;
+						case SENT_AND_NOT_ANSWERED_AND_PROCESSED:
+							totalSentMessages++;
+							unansweredQuestions++;
+							break;
+						case SENT_AND_WAITING_FOR_ANSWER:
+							totalSentMessages++;
+							break;
+						case SENT_BUT_NOT_WAITING_FOR_ANSWER:
+							totalSentMessages++;
+							break;
+					}
+
+					if (dialogMessage.isMediaContentViewed()) {
+						mediaObjectsViewed++;
+					}
+				}
+			}
+
+			// Write values
+			statistics.setProperty("intervention."
+					+ intervention.getId().toString() + ".name",
+					intervention.getName());
+
+			statistics.setProperty("intervention."
+					+ intervention.getId().toString() + ".totalSentMessages",
+					String.valueOf(totalSentMessages));
+			statistics.setProperty("intervention."
+					+ intervention.getId().toString()
+					+ ".totalReceivedMessages",
+					String.valueOf(totalReceivedMessages));
+			statistics.setProperty("intervention."
+					+ intervention.getId().toString() + ".answeredQuestions",
+					String.valueOf(answeredQuestions));
+			statistics.setProperty("intervention."
+					+ intervention.getId().toString() + ".unansweredQuestions",
+					String.valueOf(unansweredQuestions));
+			statistics.setProperty("intervention."
+					+ intervention.getId().toString() + ".mediaObjectsViewed",
+					String.valueOf(mediaObjectsViewed));
+		}
+
+		statistics.setProperty("activeInterventions",
+				String.valueOf(activeInterventionsCount));
+
+		@Cleanup
+		val fileWriter = new FileWriter(statisticsFile);
+		statistics.store(fileWriter,
+				ImplementationConstants.LOGGING_APPLICATION_NAME
+						+ " Statistics File");
+		fileWriter.flush();
+
+		@Cleanup
+		val stringWriter = new StringWriter();
+		statistics.store(stringWriter,
+				ImplementationConstants.LOGGING_APPLICATION_NAME
+						+ " Statistics File");
+		stringWriter.flush();
+		log.debug(stringWriter.toString());
+	}
+
+	/**
+	 * Creates a participant or assigns a supervisor and adapts the belonging
+	 * intervention structures
+	 * 
+	 * @param nickname
+	 * @param relatedParticipant
+	 * @param externalIdDialogOptionData
+	 * @param interventionPattern
+	 * @param interventionPassword
+	 * @param supervisorRequest
+	 * @return
+	 */
+	@Synchronized
+	public boolean checkAccessRightsAndRegisterParticipantOrSupervisorExternallyWithoutSurvey(
+			final String nickname, final String relatedParticipantExternalId,
+			final String externalIdDialogOptionData,
+			final String interventionPattern,
+			final String interventionPassword, final boolean supervisorRequest) {
+		log.debug(
+				"Checking external participant/supervisor creation without survey participation (intervention pattern: {})",
+				interventionPattern);
+
+		Intervention appropriateIntervention = null;
+		for (val intervention : interventionAdministrationManagerService
+				.getAllInterventions()) {
+			if (intervention.isActive()
+					&& intervention.getName().matches(interventionPattern)) {
+				// Check deepstream password (or other external services in
+				// upcoming version)
+				if (externalIdDialogOptionData
+						.startsWith(ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM)
+						&& intervention.getDeepstreamPassword().equals(
+								interventionPassword)) {
+					appropriateIntervention = intervention;
+					break;
+				}
+			}
+		}
+
+		if (appropriateIntervention == null) {
+			log.debug("No appropriate intervention found for external registration");
+			return false;
+		}
+
+		if (supervisorRequest) {
+			val dialogOption = databaseManagerService
+					.findOneModelObject(DialogOption.class,
+							Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
+							DialogOptionTypes.EXTERNAL_ID,
+							relatedParticipantExternalId);
+
+			if (dialogOption != null) {
+				val participant = databaseManagerService.getModelObjectById(
+						Participant.class, dialogOption.getParticipant());
+
+				if (participant.getIntervention().equals(
+						appropriateIntervention.getId())) {
+					log.debug(
+							"Creating supervisor externally without survey participation (intervention: {}, participant: {})",
+							appropriateIntervention.getId(),
+							dialogOption.getParticipant());
+
+					try {
+						variablesManagerService
+								.writeVariableValueOfParticipant(
+										dialogOption.getParticipant(),
+										SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES.participantSupervisorDialogOptionExternalID
+												.toVariableName(),
+										externalIdDialogOptionData, false,
+										false);
+					} catch (final Exception e) {
+						log.error(
+								"Should never occur: Error at writing participant dialog option external ID: {}",
+								e.getMessage());
+						return false;
+					}
+
+					return true;
+				}
+			}
+		} else {
+			log.debug(
+					"Creating particpant externally without survey participation (intervention: {})",
+					appropriateIntervention.getId());
+
+			final val participant = new Participant(
+					appropriateIntervention.getId(),
+					InternalDateTime.currentTimeMillis(), "",
+					Constants.getInterventionLocales()[0], null, null, null,
+					null, null, true, "", "");
+
+			databaseManagerService.saveModelObject(participant);
+
+			try {
+				variablesManagerService
+						.writeVariableValueOfParticipant(
+								participant.getId(),
+								SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES.participantDialogOptionExternalID
+										.toVariableName(),
+								externalIdDialogOptionData, false, false);
+
+				variablesManagerService
+						.writeVariableValueOfParticipant(
+								participant.getId(),
+								SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES.participantName
+										.toVariableName(), nickname, false,
+								false);
+			} catch (final Exception e) {
+				log.error(
+						"Should never occur: Error at writing participant dialog option external ID: {}",
+						e.getMessage());
+				databaseManagerService.deleteModelObject(participant);
+				return false;
+			}
+
+			final long currentTimestamp = InternalDateTime.currentTimeMillis();
+			final val dialogStatus = new DialogStatus(participant.getId(), "",
+					null, null, currentTimestamp, true, currentTimestamp,
+					currentTimestamp, true, 0, 0, false, 0);
+
+			databaseManagerService.saveModelObject(dialogStatus);
+
+			log.debug("Created participant {}", participant);
+
+			return true;
+		}
+
+		return false;
+	}
+
 	/*
 	 * PRIVATE Getter methods
 	 */
@@ -1617,144 +1901,5 @@ public class InterventionExecutionManagerService {
 		}
 
 		return relevantParticipants;
-	}
-
-	@Synchronized
-	public boolean participantAdjustVariableValue(final ObjectId participantId,
-			final String variableName, final String variableValue) {
-		val participant = databaseManagerService.getModelObjectById(
-				Participant.class, participantId);
-
-		try {
-			variablesManagerService.writeVariableValueOfParticipant(
-					participant.getId(), variableName, variableValue);
-		} catch (final Exception e) {
-			return false;
-		}
-
-		return true;
-	}
-
-	@Synchronized
-	public void createStatistics(final File statisticsFile) throws IOException {
-		final Properties statistics = new Properties() {
-			private static final long	serialVersionUID	= -478652106406702866L;
-
-			@Override
-			public synchronized Enumeration<Object> keys() {
-				return Collections.enumeration(new TreeSet<Object>(super
-						.keySet()));
-			}
-		};
-
-		statistics.setProperty("created",
-				StringHelpers.createDailyUniqueIndex());
-		val activeInterventions = databaseManagerService.findModelObjects(
-				Intervention.class, Queries.INTERVENTION__ACTIVE_TRUE);
-
-		int activeInterventionsCount = 0;
-		// Create statistics of all active interventions
-		for (val intervention : activeInterventions) {
-			activeInterventionsCount++;
-
-			// Check all relevant participants
-			val participants = databaseManagerService
-					.findModelObjects(
-							Participant.class,
-							Queries.PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE,
-							intervention.getId());
-
-			// Message counts
-			int totalSentMessages = 0;
-			int totalReceivedMessages = 0;
-			int answeredQuestions = 0;
-			int unansweredQuestions = 0;
-			int mediaObjectsViewed = 0;
-
-			for (val participant : participants) {
-				val dialogMessages = databaseManagerService
-						.findModelObjects(
-								DialogMessage.class,
-								Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_MESSAGE_TYPE,
-								participant.getId(), false);
-				for (val dialogMessage : dialogMessages) {
-					switch (dialogMessage.getStatus()) {
-						case IN_CREATION:
-							break;
-						case PREPARED_FOR_SENDING:
-							break;
-						case RECEIVED_UNEXPECTEDLY:
-							totalReceivedMessages++;
-							break;
-						case SENDING:
-							break;
-						case SENT_AND_ANSWERED_AND_PROCESSED:
-							totalSentMessages++;
-							totalReceivedMessages++;
-							answeredQuestions++;
-							break;
-						case SENT_AND_ANSWERED_BY_PARTICIPANT:
-							totalSentMessages++;
-							totalReceivedMessages++;
-							answeredQuestions++;
-							break;
-						case SENT_AND_NOT_ANSWERED_AND_PROCESSED:
-							totalSentMessages++;
-							unansweredQuestions++;
-							break;
-						case SENT_AND_WAITING_FOR_ANSWER:
-							totalSentMessages++;
-							break;
-						case SENT_BUT_NOT_WAITING_FOR_ANSWER:
-							totalSentMessages++;
-							break;
-					}
-
-					if (dialogMessage.isMediaContentViewed()) {
-						mediaObjectsViewed++;
-					}
-				}
-			}
-
-			// Write values
-			statistics.setProperty("intervention."
-					+ intervention.getId().toString() + ".name",
-					intervention.getName());
-
-			statistics.setProperty("intervention."
-					+ intervention.getId().toString() + ".totalSentMessages",
-					String.valueOf(totalSentMessages));
-			statistics.setProperty("intervention."
-					+ intervention.getId().toString()
-					+ ".totalReceivedMessages",
-					String.valueOf(totalReceivedMessages));
-			statistics.setProperty("intervention."
-					+ intervention.getId().toString() + ".answeredQuestions",
-					String.valueOf(answeredQuestions));
-			statistics.setProperty("intervention."
-					+ intervention.getId().toString() + ".unansweredQuestions",
-					String.valueOf(unansweredQuestions));
-			statistics.setProperty("intervention."
-					+ intervention.getId().toString() + ".mediaObjectsViewed",
-					String.valueOf(mediaObjectsViewed));
-		}
-
-		statistics.setProperty("activeInterventions",
-				String.valueOf(activeInterventionsCount));
-
-		@Cleanup
-		val fileWriter = new FileWriter(statisticsFile);
-		statistics.store(fileWriter,
-				ImplementationConstants.LOGGING_APPLICATION_NAME
-						+ " Statistics File");
-		fileWriter.flush();
-
-		@Cleanup
-		val stringWriter = new StringWriter();
-		statistics.store(stringWriter,
-				ImplementationConstants.LOGGING_APPLICATION_NAME
-						+ " Statistics File");
-		stringWriter.flush();
-		log.debug(stringWriter.toString());
 	}
 }

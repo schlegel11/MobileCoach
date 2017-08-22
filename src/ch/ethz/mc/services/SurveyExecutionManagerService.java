@@ -137,7 +137,6 @@ public class SurveyExecutionManagerService {
 	/*
 	 * Modification methods
 	 */
-	// Participant
 	@Synchronized
 	private Participant participantCreate(final ScreeningSurvey screeningSurvey) {
 		final val participant = new Participant(

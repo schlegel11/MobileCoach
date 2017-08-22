@@ -35,6 +35,7 @@ import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.Queries;
+import ch.ethz.mc.model.memory.ExternalRegistration;
 import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.DialogStatus;
 import ch.ethz.mc.model.persistent.Intervention;
@@ -640,7 +641,7 @@ public class RESTManagerService {
 
 	/**
 	 * Creates a deepstream participant/supervisor and the belonging
-	 * intervention participant structures
+	 * intervention participant structures or returns null if not allowed
 	 * 
 	 * @param interventionPattern
 	 * @param interventionPassword
@@ -648,7 +649,7 @@ public class RESTManagerService {
 	 * @param requestedRole
 	 * @return Deepstream user id and secret
 	 */
-	public String[] createDeepstreamUser(final String nickname,
+	public ExternalRegistration createDeepstreamUser(final String nickname,
 			final String relatedParticipant, final String interventionPattern,
 			final String interventionPassword, final String requestedRole) {
 
@@ -657,10 +658,16 @@ public class RESTManagerService {
 		}
 
 		if (requestedRole.equals(deepstreamParticipantRole)) {
+			if (nickname == null) {
+				return null;
+			}
 			return deepstreamCommunicationService.registerUser(nickname,
 					relatedParticipant, interventionPattern,
 					interventionPassword, false);
 		} else if (requestedRole.equals(deepstreamSuperviserRole)) {
+			if (relatedParticipant == null) {
+				return null;
+			}
 			return deepstreamCommunicationService.registerUser(nickname,
 					relatedParticipant, interventionPattern,
 					interventionPassword, true);

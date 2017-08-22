@@ -470,7 +470,7 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 	public void editDeepstreamPassword() {
 		log.debug("Edit deepstream password");
 		showModalStringValueEditWindow(
-				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_PASSWORD_PATTERN,
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_PASSWORD,
 				intervention.getDeepstreamPassword(), null,
 				new ShortStringEditComponent(),
 				new ExtendableButtonClickListener() {

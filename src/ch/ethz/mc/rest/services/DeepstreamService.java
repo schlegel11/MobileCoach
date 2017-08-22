@@ -126,9 +126,15 @@ public class DeepstreamService extends AbstractService {
 					JsonElement.class);
 			final JsonObject jsonPayload = jsonElement.getAsJsonObject();
 
-			val nickname = jsonPayload.get("nickname").getAsString();
-			val relatedParticipant = jsonPayload.get("participant")
-					.getAsString();
+			String nickname = null;
+			if (jsonPayload.has("nickname")) {
+				nickname = jsonPayload.get("nickname").getAsString();
+			}
+			String relatedParticipant = null;
+			if (jsonPayload.has("participant")) {
+				relatedParticipant = jsonPayload.get("participant")
+						.getAsString();
+			}
 			val interventionPattern = jsonPayload.get("intervention-pattern")
 					.getAsString();
 			val interventionPassword = jsonPayload.get("intervention-password")
@@ -136,11 +142,11 @@ public class DeepstreamService extends AbstractService {
 			val requestedRole = jsonPayload.get("role").getAsString();
 
 			// Create participant or supervisor
-			val userAndSecret = restManagerService.createDeepstreamUser(
+			val externalRegistration = restManagerService.createDeepstreamUser(
 					nickname, relatedParticipant, interventionPattern,
 					interventionPassword, requestedRole);
 
-			if (userAndSecret == null) {
+			if (externalRegistration == null) {
 				throw new WebApplicationException(
 						Response.status(Status.FORBIDDEN)
 								.entity("Could not create participant/supervisor for deepstream access")
@@ -149,8 +155,10 @@ public class DeepstreamService extends AbstractService {
 
 			// Send response
 			val responseData = new JsonObject();
-			responseData.addProperty("user", userAndSecret[0]);
-			responseData.addProperty("secret", userAndSecret[1]);
+			responseData.addProperty("user",
+					externalRegistration.getExternalId());
+			responseData
+					.addProperty("secret", externalRegistration.getSecret());
 
 			return Response.status(Status.OK).entity(gson.toJson(responseData))
 					.build();
