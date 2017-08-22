@@ -54,19 +54,24 @@
 					log("Error when retrieving old messages!");
 				}
 			});
-			
+
+			/*
 			var record = client.record.getRecord("messages/" + user);
 
 			record.whenReady(record => {
 					log("Listening for changes of user " + user + "...");
 					client.event.subscribe("message-update/" + user, function(
-							messageId) {
-							log("Message " + messageId + ":");
-							log(record.get("list/" + messageId));
+							message) {
+							log("Message " + message.id + ":");
+							log(message);
 					});
 				});
+			*/
+			client.event.subscribe("message-update/" + user, function(message) {
+					log("Message " + message.id + ":");
+					log(message);
+			});
 		};
-		
 		
 		var send = function() {
 			var message = document.getElementById("text").value;

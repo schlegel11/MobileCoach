@@ -224,8 +224,7 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 			record.set("list/" + String.valueOf(messageOrder), messageObject);
 
 			client.event.emit("message-update/"
-					+ participantOrSupervisorIdentifier,
-					String.valueOf(messageOrder));
+					+ participantOrSupervisorIdentifier, messageObject);
 		} catch (final Exception e) {
 			log.warn("Could not send message to {}: {}",
 					dialogOption.getData(), e.getMessage());
@@ -309,7 +308,7 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 			record.set("list/" + String.valueOf(messageOrder), messageObject);
 
 			client.event.emit("message-update/" + participantIdentifier,
-					String.valueOf(messageOrder));
+					messageObject);
 		} catch (final Exception e) {
 			log.warn("Could not acknowledge message to {}: {}",
 					receivedMessage.getSender(), e.getMessage());
