@@ -505,17 +505,19 @@ public class RESTManagerService {
 	 * Validates deepstream access for participant/supervisor/server
 	 * 
 	 * @param user
-	 * @param password
+	 * @param interventionPassword
 	 * @param role
 	 * @param secret
 	 * @return
 	 */
 	public boolean checkDeepstreamAccessAndRetrieveUserId(final String user,
-			final String password, final String role, final String secret) {
+			final String secret, final String role,
+			final String interventionPassword) {
 
 		// Prevent unauthorized access with empty values
-		if (StringUtils.isBlank(user) || StringUtils.isBlank(password)
-				|| StringUtils.isBlank(role) || StringUtils.isBlank(secret)) {
+		if (StringUtils.isBlank(user) || StringUtils.isBlank(secret)
+				|| StringUtils.isBlank(role)
+				|| StringUtils.isBlank(interventionPassword)) {
 			return false;
 		}
 
@@ -562,7 +564,8 @@ public class RESTManagerService {
 						user);
 				return false;
 			}
-			if (!intervention.getDeepstreamPassword().equals(password)) {
+			if (!intervention.getDeepstreamPassword().equals(
+					interventionPassword)) {
 				log.debug(
 						"Participant with deepstream id {} not authorized for deepstream access: Password does not match deepstream intervention password",
 						user);
@@ -614,7 +617,8 @@ public class RESTManagerService {
 						user);
 				return false;
 			}
-			if (!intervention.getDeepstreamPassword().equals(password)) {
+			if (!intervention.getDeepstreamPassword().equals(
+					interventionPassword)) {
 				log.debug(
 						"Supervisor with deepstream id {} not authorized for deepstream access: Password does not match deepstream intervention password",
 						user);

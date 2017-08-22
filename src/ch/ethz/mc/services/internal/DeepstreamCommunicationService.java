@@ -93,9 +93,9 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 
 		loginData = new JsonObject();
 		loginData.addProperty("user", "server");
-		loginData.addProperty("password", "not required");
-		loginData.addProperty("role", deepstreamServerRole);
 		loginData.addProperty("secret", deepstreamServerPassword);
+		loginData.addProperty("role", deepstreamServerRole);
+		loginData.addProperty("intervention-password", "not required");
 
 		gson = new Gson();
 

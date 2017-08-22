@@ -81,17 +81,18 @@ public class DeepstreamService extends AbstractService {
 			val authData = (JsonObject) jsonObjectPayload.get("authData");
 
 			val user = authData.get("user").getAsString();
-			val password = authData.get("password").getAsString();
-			val role = authData.get("role").getAsString();
 			val secret = authData.get("secret").getAsString();
+			val role = authData.get("role").getAsString();
+			val interventionPassword = authData.get("intervention-password")
+					.getAsString();
 
 			// Check access
 			log.debug(
-					"Checking deepstream access for {} with password {} and role {}",
-					user, password, role);
+					"Checking deepstream access for {} with role {} and password {}",
+					user, role, interventionPassword);
 			val accessGranted = restManagerService
-					.checkDeepstreamAccessAndRetrieveUserId(user, password,
-							role, secret);
+					.checkDeepstreamAccessAndRetrieveUserId(user, secret, role,
+							interventionPassword);
 
 			if (!accessGranted) {
 				return Response.status(Status.FORBIDDEN).build();

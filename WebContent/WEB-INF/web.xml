@@ -34,7 +34,6 @@
 		<welcome-file>default.jsp</welcome-file>
 	</welcome-file-list>
 
-	<!-- 
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>MC everything</web-resource-name>
@@ -44,7 +43,6 @@
 			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
 		</user-data-constraint>
 	</security-constraint>
-	 -->
 
 	<context-param>
 		<param-name>resteasy.servlet.mapping.prefix</param-name>

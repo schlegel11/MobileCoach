@@ -9,8 +9,11 @@
 	<input type="button" value="Send" onclick="send()" />
 	<script type="text/javascript">
 		var debug = true;
-		var user = "123456789";
-		var role = "user";
+		var user = "gej7bWdWsgVMOz5ns3iwMKjHbs0jKnBx";
+		var secret = "G3LmAVUAbiXczMTvfWXFq1KxaSpqLKGt2kOJuwgC630ntJpgluedhBos5wFUyxBu8zFXGOVV3GXwW646SNIlOpUHxa9yTC6fJDcXxTjqsGN7kCH9HG6p5juuJjsOaDzG";
+		var role = "participant";
+		var interventionPattern = "Deepstream Demo.*";
+		var interventionPassword = "1234secret";
 		var timestamp = 0;
 
 		var client;
@@ -25,8 +28,9 @@
 			client = deepstream("ws://localhost:6020/deepstream").login(
 					{
 						"user" : user,
+						"secret" : secret,
 						"role" : role,
-						"secret" : "def"
+						"intervention-password" : interventionPassword
 					});
 			log("Connected.");
 
