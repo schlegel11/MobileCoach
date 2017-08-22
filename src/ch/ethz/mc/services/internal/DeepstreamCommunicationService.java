@@ -446,7 +446,7 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 				(rpcName, data, rpcResponse) -> {
 					// TODO DS request rest token without survey
 			});
-		// Can only be called by a "supervisor" (role)
+		// Can only be called by a "participant" (role)
 		client.rpc.provide(
 				"message-inbox",
 				(rpcName, data, rpcResponse) -> {
