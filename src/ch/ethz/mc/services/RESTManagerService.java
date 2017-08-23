@@ -665,18 +665,36 @@ public class RESTManagerService {
 			if (nickname == null) {
 				return null;
 			}
-			return deepstreamCommunicationService.registerUser(nickname,
-					relatedParticipant, interventionPattern,
-					interventionPassword, false);
+			if (deepstreamCommunicationService != null) {
+				return deepstreamCommunicationService.registerUser(nickname,
+						relatedParticipant, interventionPattern,
+						interventionPassword, false);
+			} else {
+				return null;
+			}
 		} else if (requestedRole.equals(deepstreamSuperviserRole)) {
 			if (relatedParticipant == null) {
 				return null;
 			}
-			return deepstreamCommunicationService.registerUser(nickname,
-					relatedParticipant, interventionPattern,
-					interventionPassword, true);
+			if (deepstreamCommunicationService != null) {
+				return deepstreamCommunicationService.registerUser(nickname,
+						relatedParticipant, interventionPattern,
+						interventionPassword, true);
+			} else {
+				return null;
+			}
 		} else {
 			return null;
+		}
+	}
+
+	/**
+	 * Inform {@link DeepstreamCommunicationService} about startup of REST
+	 * interface
+	 */
+	public void informDeepstreamAboutStartup() {
+		if (deepstreamCommunicationService != null) {
+			deepstreamCommunicationService.RESTInterfaceStarted();
 		}
 	}
 

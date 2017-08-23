@@ -51,6 +51,8 @@ public class DeepstreamService extends AbstractService {
 		super(restManagerService);
 
 		gson = new Gson();
+
+		restManagerService.informDeepstreamAboutStartup();
 	}
 
 	@Data

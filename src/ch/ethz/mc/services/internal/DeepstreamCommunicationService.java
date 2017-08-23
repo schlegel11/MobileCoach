@@ -68,7 +68,7 @@ import com.google.gson.JsonPrimitive;
 @Log4j2
 public class DeepstreamCommunicationService implements ConnectionStateListener {
 	@Getter
-	private static DeepstreamCommunicationService	instance		= null;
+	private static DeepstreamCommunicationService	instance			= null;
 
 	private SurveyExecutionManagerService			surveyExecutionManagerService;
 	private InterventionExecutionManagerService		interventionExecutionManagerService;
@@ -77,12 +77,13 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 
 	private final List<ReceivedMessage>				receivedMessages;
 
-	private DeepstreamClient						client			= null;
+	private DeepstreamClient						client				= null;
 	private final String							host;
 	private final JsonObject						loginData;
 
-	private boolean									startupComplete	= false;
-	private boolean									reconnecting	= false;
+	private boolean									startupComplete		= false;
+	private boolean									RESTStartupComplete	= false;
+	private boolean									reconnecting		= false;
 
 	private final Gson								gson;
 
@@ -356,6 +357,11 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 	 */
 	private void connectOrReconnect() throws Exception {
 		if (!reconnecting) {
+			while (!RESTStartupComplete) {
+				log.debug("Waiting for REST interface to come up...");
+
+				Thread.sleep(1000);
+			}
 			log.info("Connecting to deepstream...");
 		} else {
 			log.info("Reconnecting to deepstream...");
@@ -643,5 +649,12 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 					"Could not cleanup deepstream for participant/supervisor {}",
 					participantOrSupervisorId);
 		}
+	}
+
+	/**
+	 * Enables the REST interface to inform this server about it's own startup
+	 */
+	public void RESTInterfaceStarted() {
+		RESTStartupComplete = true;
 	}
 }
