@@ -4,7 +4,9 @@
 	<resolvers>
 		<chain name="default">
 			<!-- Bintray repository -->
-			<bintray />
+			<ibiblio name="bintray"
+                 m2compatible="true"
+                 root="http://dl.bintray.com/content/example/external-deps"/>
 			<!-- Public Maven repository -->
 			<ibiblio name="public" m2compatible="true" checksums=""/>
 			
