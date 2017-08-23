@@ -222,6 +222,8 @@ public class Constants {
 	 * Email configuration
 	 */
 	@Getter
+	private static boolean		emailActive							= true;
+	@Getter
 	private static String		emailFrom							= "a@b.eu";
 	@Getter
 	private static String		emailSubjectForParticipant			= "MobileCoach Message";
@@ -231,6 +233,8 @@ public class Constants {
 	/**
 	 * SMS configuration
 	 */
+	@Getter
+	private static boolean		smsActive							= true;
 	@Getter
 	private static String		smsEmailFrom						= "a@b.eu";
 	@Getter
