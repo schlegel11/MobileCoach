@@ -1,4 +1,4 @@
-package ch.ethz.mc.rest.services;
+package ch.ethz.mc.rest.services.v01;
 
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
@@ -47,9 +47,9 @@ import ch.ethz.mc.tools.StringValidator;
  */
 @Path("/v01/credits")
 @Log4j2
-public class CreditsService extends AbstractService {
+public class CreditsServiceV01 extends AbstractServiceV01 {
 
-	public CreditsService(final RESTManagerService restManagerService) {
+	public CreditsServiceV01(final RESTManagerService restManagerService) {
 		super(restManagerService);
 	}
 

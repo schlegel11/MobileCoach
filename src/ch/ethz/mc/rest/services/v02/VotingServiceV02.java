@@ -1,4 +1,4 @@
-package ch.ethz.mc.rest.services;
+package ch.ethz.mc.rest.services.v02;
 
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
@@ -49,11 +49,11 @@ import ch.ethz.mc.tools.StringValidator;
  *
  * @author Andreas Filler
  */
-@Path("/v01/voting")
+@Path("/v02/voting")
 @Log4j2
-public class VotingService extends AbstractService {
+public class VotingServiceV02 extends AbstractServiceV02 {
 
-	public VotingService(final RESTManagerService restManagerService) {
+	public VotingServiceV02(final RESTManagerService restManagerService) {
 		super(restManagerService);
 	}
 

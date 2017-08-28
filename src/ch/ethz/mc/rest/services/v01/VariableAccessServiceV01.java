@@ -1,4 +1,4 @@
-package ch.ethz.mc.rest.services;
+package ch.ethz.mc.rest.services.v01;
 
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
@@ -62,9 +62,9 @@ import ch.ethz.mc.tools.StringValidator;
  */
 @Path("/v01/variable")
 @Log4j2
-public class VariableAccessService extends AbstractService {
+public class VariableAccessServiceV01 extends AbstractServiceV01 {
 
-	public VariableAccessService(final RESTManagerService restManagerService) {
+	public VariableAccessServiceV01(final RESTManagerService restManagerService) {
 		super(restManagerService);
 	}
 

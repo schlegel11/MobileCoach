@@ -64,7 +64,6 @@ import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
-import ch.ethz.mc.services.SurveyExecutionManagerService;
 import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mc.tools.Simulator;
 import ch.ethz.mc.tools.StringHelpers;
@@ -198,7 +197,6 @@ public class CommunicationManagerService {
 	}
 
 	public void start(
-			final SurveyExecutionManagerService surveyExecutionManagerService,
 			final InterventionExecutionManagerService interventionExecutionManagerService)
 			throws Exception {
 		log.info("Starting service...");
@@ -206,8 +204,8 @@ public class CommunicationManagerService {
 		this.interventionExecutionManagerService = interventionExecutionManagerService;
 
 		if (deepstreamActive) {
-			deepstreamCommunicationService.start(surveyExecutionManagerService,
-					interventionExecutionManagerService);
+			deepstreamCommunicationService
+					.start(interventionExecutionManagerService);
 		}
 
 		log.info("Started.");

@@ -694,7 +694,7 @@ public class RESTManagerService {
 	 */
 	public void informDeepstreamAboutStartup() {
 		if (deepstreamCommunicationService != null) {
-			deepstreamCommunicationService.RESTInterfaceStarted();
+			deepstreamCommunicationService.RESTInterfaceStarted(this);
 		}
 	}
 

@@ -280,15 +280,19 @@ public class FileStorageManagerService {
 			fileName = "file.unknown";
 		}
 
-		String folderName = ImplementationConstants.FILE_STORAGE_PREFIX
-				+ RandomStringUtils.randomAlphabetic(40);
-		File folder = new File(responsibleFolder, folderName);
-		while (folder.exists()) {
+		String folderName;
+		File folder;
+		synchronized (this) {
 			folderName = ImplementationConstants.FILE_STORAGE_PREFIX
 					+ RandomStringUtils.randomAlphabetic(40);
 			folder = new File(responsibleFolder, folderName);
+			while (folder.exists()) {
+				folderName = ImplementationConstants.FILE_STORAGE_PREFIX
+						+ RandomStringUtils.randomAlphabetic(40);
+				folder = new File(responsibleFolder, folderName);
+			}
+			folder.mkdirs();
 		}
-		folder.mkdirs();
 
 		final File destinationFile = new File(folder, fileName);
 		try {

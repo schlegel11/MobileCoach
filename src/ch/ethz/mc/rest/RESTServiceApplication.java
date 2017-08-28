@@ -31,11 +31,15 @@ import lombok.extern.log4j.Log4j2;
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
-import ch.ethz.mc.rest.services.CreditsService;
-import ch.ethz.mc.rest.services.DeepstreamService;
-import ch.ethz.mc.rest.services.ImageUploadService;
-import ch.ethz.mc.rest.services.VariableAccessService;
-import ch.ethz.mc.rest.services.VotingService;
+import ch.ethz.mc.rest.services.v01.CreditsServiceV01;
+import ch.ethz.mc.rest.services.v01.ImageUploadServiceV01;
+import ch.ethz.mc.rest.services.v01.VariableAccessServiceV01;
+import ch.ethz.mc.rest.services.v01.VotingServiceV01;
+import ch.ethz.mc.rest.services.v02.CreditsServiceV02;
+import ch.ethz.mc.rest.services.v02.DeepstreamServiceV02;
+import ch.ethz.mc.rest.services.v02.ImageUploadServiceV02;
+import ch.ethz.mc.rest.services.v02.VariableAccessServiceV02;
+import ch.ethz.mc.rest.services.v02.VotingServiceV02;
 
 /**
  * Service application for REST interface
@@ -54,13 +58,20 @@ public class RESTServiceApplication extends Application {
 
 		val restManagerService = MC.getInstance().getRestManagerService();
 
+		// v01 Services
+		services.add(new CreditsServiceV01(restManagerService));
+		services.add(new ImageUploadServiceV01(restManagerService));
+		services.add(new VariableAccessServiceV01(restManagerService));
+		services.add(new VotingServiceV01(restManagerService));
+
+		// v02 Services
 		if (Constants.isDeepstreamActive()) {
-			services.add(new DeepstreamService(restManagerService));
+			services.add(new DeepstreamServiceV02(restManagerService));
 		}
-		services.add(new CreditsService(restManagerService));
-		services.add(new ImageUploadService(restManagerService));
-		services.add(new VariableAccessService(restManagerService));
-		services.add(new VotingService(restManagerService));
+		services.add(new CreditsServiceV02(restManagerService));
+		services.add(new ImageUploadServiceV02(restManagerService));
+		services.add(new VariableAccessServiceV02(restManagerService));
+		services.add(new VotingServiceV02(restManagerService));
 
 		log.info("Started.");
 	}

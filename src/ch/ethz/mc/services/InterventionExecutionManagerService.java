@@ -168,8 +168,7 @@ public class InterventionExecutionManagerService {
 
 				// Start communication manager service
 				try {
-					communicationManagerService.start(
-							surveyExecutionManagerService, instance);
+					communicationManagerService.start(instance);
 
 					// Start working threads
 					outgoingMessageWorker.start();

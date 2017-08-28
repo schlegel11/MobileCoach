@@ -1,4 +1,4 @@
-package ch.ethz.mc.rest.services;
+package ch.ethz.mc.rest.services.v02;
 
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
@@ -42,12 +42,12 @@ import com.google.gson.JsonObject;
  *
  * @author Andreas Filler
  */
-@Path("/v01/deepstream")
+@Path("/v02/deepstream")
 @Log4j2
-public class DeepstreamService extends AbstractService {
+public class DeepstreamServiceV02 extends AbstractServiceV02 {
 	private final Gson	gson;
 
-	public DeepstreamService(final RESTManagerService restManagerService) {
+	public DeepstreamServiceV02(final RESTManagerService restManagerService) {
 		super(restManagerService);
 
 		gson = new Gson();

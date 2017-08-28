@@ -1,4 +1,4 @@
-package ch.ethz.mc.rest.services;
+package ch.ethz.mc.rest.services.v01;
 
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
@@ -55,10 +55,10 @@ import ch.ethz.mc.tools.StringValidator;
  */
 @Path("/v01/image")
 @Log4j2
-public class ImageUploadService extends AbstractFileUploadService {
+public class ImageUploadServiceV01 extends AbstractFileUploadServiceV01 {
 	RESTManagerService	restManagerService;
 
-	public ImageUploadService(final RESTManagerService restManagerService) {
+	public ImageUploadServiceV01(final RESTManagerService restManagerService) {
 		super(restManagerService);
 		this.restManagerService = restManagerService;
 	}

@@ -1,4 +1,4 @@
-package ch.ethz.mc.rest.services;
+package ch.ethz.mc.rest.services.v01;
 
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
@@ -41,12 +41,12 @@ import ch.ethz.mc.services.types.GeneralSessionAttributeValidatorTypes;
  * @author Andreas Filler
  */
 @Log4j2
-public abstract class AbstractService {
+public abstract class AbstractServiceV01 {
 
 	@Getter
 	RESTManagerService	restManagerService;
 
-	public AbstractService(final RESTManagerService restManagerService) {
+	public AbstractServiceV01(final RESTManagerService restManagerService) {
 		this.restManagerService = restManagerService;
 	}
 

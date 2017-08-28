@@ -51,7 +51,7 @@ import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
-import ch.ethz.mc.services.SurveyExecutionManagerService;
+import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mc.tools.InternalDateTime;
 
 import com.google.gson.Gson;
@@ -70,8 +70,9 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 	@Getter
 	private static DeepstreamCommunicationService	instance			= null;
 
-	private SurveyExecutionManagerService			surveyExecutionManagerService;
 	private InterventionExecutionManagerService		interventionExecutionManagerService;
+
+	private RESTManagerService						restManagerService;
 
 	private final int								substringLength;
 
@@ -82,7 +83,7 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 	private final JsonObject						loginData;
 
 	private boolean									startupComplete		= false;
-	private boolean									RESTStartupComplete	= false;
+	private boolean									restStartupComplete	= false;
 	private boolean									reconnecting		= false;
 
 	private final Gson								gson;
@@ -119,12 +120,10 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 	}
 
 	public void start(
-			final SurveyExecutionManagerService surveyExecutionManagerService,
 			final InterventionExecutionManagerService interventionExecutionManagerService)
 			throws Exception {
 		log.info("Starting service...");
 
-		this.surveyExecutionManagerService = surveyExecutionManagerService;
 		this.interventionExecutionManagerService = interventionExecutionManagerService;
 
 		try {
@@ -357,7 +356,7 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 	 */
 	private void connectOrReconnect() throws Exception {
 		if (!reconnecting) {
-			while (!RESTStartupComplete) {
+			while (!restStartupComplete) {
 				log.debug("Waiting for REST interface to come up...");
 
 				Thread.sleep(1000);
@@ -447,9 +446,8 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 	 */
 	private void provideMethods() {
 		// Can only be called by a "participant" (role)
-		client.rpc.provide("request-rest-token",
-				(rpcName, data, rpcResponse) -> {
-					// TODO DS request rest token without survey
+		client.rpc.provide("rest-token", (rpcName, data, rpcResponse) -> {
+			// TODO DS request rest token without survey
 			});
 		// Can only be called by a "participant" (role)
 		client.rpc.provide(
@@ -653,8 +651,11 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 
 	/**
 	 * Enables the REST interface to inform this server about it's own startup
+	 * 
+	 * @param restManagerService
 	 */
-	public void RESTInterfaceStarted() {
-		RESTStartupComplete = true;
+	public void RESTInterfaceStarted(final RESTManagerService restManagerService) {
+		this.restManagerService = restManagerService;
+		restStartupComplete = true;
 	}
 }
