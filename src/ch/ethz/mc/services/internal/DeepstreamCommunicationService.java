@@ -26,8 +26,10 @@ import io.deepstream.ConnectionStateListener;
 import io.deepstream.DeepstreamClient;
 import io.deepstream.DeepstreamFactory;
 import io.deepstream.LoginResult;
+import io.deepstream.PresenceEventListener;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -66,9 +68,12 @@ import com.google.gson.JsonPrimitive;
  * @author Andreas Filler
  */
 @Log4j2
-public class DeepstreamCommunicationService implements ConnectionStateListener {
+public class DeepstreamCommunicationService implements ConnectionStateListener,
+		PresenceEventListener {
 	@Getter
 	private static DeepstreamCommunicationService	instance			= null;
+
+	private final HashSet<String>					loggedInUsers;
 
 	private InterventionExecutionManagerService		interventionExecutionManagerService;
 
@@ -91,6 +96,8 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 	private DeepstreamCommunicationService(final String deepstreamHost,
 			final String deepstreamServerRole,
 			final String deepstreamServerPassword) {
+		loggedInUsers = new HashSet<String>();
+
 		host = deepstreamHost;
 
 		loginData = new JsonObject();
@@ -393,6 +400,17 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 		if (result.loggedIn()) {
 			log.debug("Login successful.");
 
+			log.debug("Caching presence information...");
+			synchronized (loggedInUsers) {
+				loggedInUsers.clear();
+
+				for (val user : client.presence.getAll()) {
+					loggedInUsers.add(user);
+				}
+
+				client.presence.subscribe(this);
+			}
+
 			startupComplete = true;
 			reconnecting = false;
 			log.info("Connection to deepstream established.");
@@ -423,6 +441,7 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 
 				try {
 					client.removeConnectionChangeListener(this);
+					client.presence.unsubscribe(this);
 					client = null;
 				} catch (final Exception e) {
 					log.warn("Could not cleanup on disconnect: ",
@@ -441,14 +460,52 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see io.deepstream.PresenceEventListener#onClientLogin(java.lang.String)
+	 */
+	@Override
+	public void onClientLogin(final String user) {
+		loggedInUsers.add(user);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see io.deepstream.PresenceEventListener#onClientLogout(java.lang.String)
+	 */
+	@Override
+	public void onClientLogout(final String user) {
+		loggedInUsers.remove(user);
+	}
+
 	/**
 	 * Provide RPC methods
 	 */
 	private void provideMethods() {
 		// Can only be called by a "participant" (role)
-		client.rpc.provide("rest-token", (rpcName, data, rpcResponse) -> {
-			// TODO DS request rest token without survey
-			});
+		client.rpc
+				.provide(
+						"rest-token",
+						(rpcName, data, rpcResponse) -> {
+							final JsonObject jsonData = (JsonObject) gson
+									.toJsonTree(data);
+							try {
+								val participantId = jsonData.get("user")
+										.getAsString();
+
+								final String restToken = createRESTToken(participantId);
+
+								rpcResponse.send(restToken);
+							} catch (final Exception e) {
+								log.warn(
+										"Error when requesting REST token: {}",
+										e.getMessage());
+								rpcResponse.send(JsonNull.INSTANCE);
+								return;
+							}
+						});
 		// Can only be called by a "participant" (role)
 		client.rpc.provide(
 				"message-inbox",
@@ -491,6 +548,12 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 								e.getMessage());
 					}
 				});
+	}
+
+	private String createRESTToken(final String participantId) {
+		return restManagerService
+				.createToken(ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+						+ participantId);
 	}
 
 	/**
@@ -631,6 +694,20 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 	}
 
 	/**
+	 * Checks if participant is currently connected
+	 * 
+	 * @param participantId
+	 * @return
+	 */
+	public boolean checkIfParticipantIsConnected(final String participantId) {
+		if (loggedInUsers.contains(participantId)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
 	 * Cleans up deepstream based on a specific participant/supervisor
 	 * 
 	 * @param participantOrSupervisorId
@@ -638,6 +715,10 @@ public class DeepstreamCommunicationService implements ConnectionStateListener {
 	public void cleanupForParticipantOrSupervisor(
 			final String participantOrSupervisorId) {
 		try {
+			restManagerService
+					.destroyToken(ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+							+ participantOrSupervisorId);
+
 			val record = client.record.getRecord("messages/"
 					+ participantOrSupervisorId);
 

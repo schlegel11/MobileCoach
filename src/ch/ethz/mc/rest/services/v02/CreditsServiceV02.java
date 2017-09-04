@@ -20,14 +20,12 @@ package ch.ethz.mc.rest.services.v02;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -59,16 +57,16 @@ public class CreditsServiceV02 extends AbstractServiceV02 {
 	@GET
 	@Path("/storeCredit/{variable}/{creditName}")
 	@Produces("application/json")
-	public Response storeCredit(@HeaderParam("token") final String token,
+	public Response storeCredit(@HeaderParam("user") final String user,
+			@HeaderParam("token") final String token,
 			@PathParam("variable") final String variable,
-			@PathParam("creditName") final String creditName,
-			@Context final HttpServletRequest request) {
+			@PathParam("creditName") final String creditName) {
 		log.debug("Token {}: Storing credit for {} on {}", token, creditName,
 				variable);
 		ObjectId participantId;
 		try {
-			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
-					token, request.getSession());
+			participantId = checkExternalParticipantAccessAndReturnParticipantId(
+					user, token);
 		} catch (final Exception e) {
 			throw e;
 		}

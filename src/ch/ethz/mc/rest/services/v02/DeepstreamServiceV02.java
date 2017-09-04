@@ -106,6 +106,7 @@ public class DeepstreamServiceV02 extends AbstractServiceV02 {
 			responseServerData.addProperty("role", role);
 
 			val responseData = new JsonObject();
+			responseData.addProperty("username", user);
 			responseData.add("serverData", responseServerData);
 
 			return Response.status(Status.OK).entity(gson.toJson(responseData))

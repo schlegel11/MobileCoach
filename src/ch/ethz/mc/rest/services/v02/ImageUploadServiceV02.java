@@ -67,15 +67,16 @@ public class ImageUploadServiceV02 extends AbstractFileUploadServiceV02 {
 	@Path("/upload/{variable}")
 	@Consumes("multipart/form-data")
 	@Produces("application/json")
-	public Response imageUpload(@HeaderParam("token") final String token,
+	public Response imageUpload(@HeaderParam("user") final String user,
+			@HeaderParam("token") final String token,
 			@PathParam("variable") final String variable,
 			@Context final HttpServletRequest request,
 			final MultipartFormDataInput input) {
 		log.debug("Token {}: Upload image to variable {}", token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
-					token, request.getSession());
+			participantId = checkExternalParticipantAccessAndReturnParticipantId(
+					user, token);
 		} catch (final Exception e) {
 			throw e;
 		}

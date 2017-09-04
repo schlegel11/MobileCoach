@@ -26,8 +26,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import lombok.Getter;
+import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.Constants;
@@ -51,64 +53,34 @@ public abstract class AbstractServiceV02 {
 	}
 
 	/**
-	 * Checks if the given session is valid for a specific participant and if
-	 * the token fits to the given session; returns appropriate participant id
-	 * afterwards
+	 * Checks if the given token is valid for a specific external participant
+	 * and returns appropriate participant id afterwards
 	 *
+	 * @param externalParticipant
 	 * @param token
-	 * @param session
 	 * @return
 	 */
-	protected ObjectId checkParticipantRelatedAccessAndReturnParticipantId(
-			final String token, final HttpSession session) {
-		log.debug("Checking if token {} fits to session {}", token,
-				session.getId());
-		if (token == null) {
-			log.debug("REST access denied: Given token is null");
+	protected ObjectId checkExternalParticipantAccessAndReturnParticipantId(
+			final String externalParticipantId, final String token) {
+		log.debug("Checking if token {} fits to external participant {}",
+				token, externalParticipantId);
+		if (StringUtils.isBlank(externalParticipantId)
+				|| StringUtils.isBlank(token)) {
+			log.debug("REST access denied: Given external participant id or token is null");
 			throw new WebApplicationException(Response.notAcceptable(null)
-					.entity("Access token missing").build());
+					.entity("External participant id or access token missing")
+					.build());
 		}
-		if (session.getAttribute(GeneralSessionAttributeTypes.VALIDATOR
-				.toString()) == null
-				|| !session
-						.getAttribute(
-								GeneralSessionAttributeTypes.VALIDATOR
-										.toString())
-						.toString()
-						.equals(GeneralSessionAttributeValidatorTypes.PARTICIPANT_RELATED
-								.toString())) {
-			log.debug("REST access denied: Session timed out or is no survey/feedback session");
-			throw new WebApplicationException(Response.notAcceptable(null)
-					.entity("Session timed out").build());
-		}
-		if (session.getAttribute(GeneralSessionAttributeTypes.TOKEN.toString()) == null
-				|| !token.equals(session
-						.getAttribute(GeneralSessionAttributeTypes.TOKEN
-								.toString()))) {
-			log.debug("REST access denied: Given token does not match token in session");
+
+		val participantId = restManagerService
+				.checkExternalParticipantAccessAndReturnParticipantId(
+						externalParticipantId, token);
+		if (participantId == null) {
+			log.debug("REST access denied: External participant or token not matching or unknown");
 			throw new WebApplicationException(Response.notAcceptable(null)
 					.entity("Wrong access token").build());
-		}
-
-		log.debug("Given token matches token in session");
-
-		ObjectId participantId;
-		try {
-			participantId = (ObjectId) session
-					.getAttribute(GeneralSessionAttributeTypes.CURRENT_PARTICIPANT
-							.toString());
-		} catch (final Exception e) {
-			participantId = null;
-		}
-
-		if (participantId != null) {
-			log.debug("Partipant {} fits to token {}", participantId, token);
-			return participantId;
 		} else {
-			throw new WebApplicationException(
-					Response.notAcceptable(null)
-							.entity("The current session is not yet bound to a participant")
-							.build());
+			return participantId;
 		}
 	}
 

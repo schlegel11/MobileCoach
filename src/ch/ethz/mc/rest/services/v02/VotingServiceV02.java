@@ -20,14 +20,12 @@ package ch.ethz.mc.rest.services.v02;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -63,14 +61,14 @@ public class VotingServiceV02 extends AbstractServiceV02 {
 	@GET
 	@Path("/votings/{variable}")
 	@Produces("application/json")
-	public Variable votingVotings(@HeaderParam("token") final String token,
-			@PathParam("variable") final String variable,
-			@Context final HttpServletRequest request) {
+	public Variable votingVotings(@HeaderParam("user") final String user,
+			@HeaderParam("token") final String token,
+			@PathParam("variable") final String variable) {
 		log.debug("Token {}: Read voting {}", token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
-					token, request.getSession());
+			participantId = checkExternalParticipantAccessAndReturnParticipantId(
+					user, token);
 		} catch (final Exception e) {
 			throw e;
 		}
@@ -105,16 +103,16 @@ public class VotingServiceV02 extends AbstractServiceV02 {
 	@Path("/votingsGroupArray/{variable}")
 	@Produces("application/json")
 	public CollectionOfExtendedVariables votingVotingsGroupArray(
+			@HeaderParam("user") final String user,
 			@HeaderParam("token") final String token,
-			@PathParam("variable") final String variable,
-			@Context final HttpServletRequest request) {
+			@PathParam("variable") final String variable) {
 		log.debug(
 				"Token {}: Read votings array {} of participants from same group as participant",
 				token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
-					token, request.getSession());
+			participantId = checkExternalParticipantAccessAndReturnParticipantId(
+					user, token);
 		} catch (final Exception e) {
 			throw e;
 		}
@@ -162,16 +160,16 @@ public class VotingServiceV02 extends AbstractServiceV02 {
 	@Path("/votingsInterventionArray/{variable}")
 	@Produces("application/json")
 	public CollectionOfExtendedVariables votingVotingsInterventionArray(
+			@HeaderParam("user") final String user,
 			@HeaderParam("token") final String token,
-			@PathParam("variable") final String variable,
-			@Context final HttpServletRequest request) {
+			@PathParam("variable") final String variable) {
 		log.debug(
 				"Token {}: Read votings array {} of participants from same intervention as participant",
 				token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
-					token, request.getSession());
+			participantId = checkExternalParticipantAccessAndReturnParticipantId(
+					user, token);
 		} catch (final Exception e) {
 			throw e;
 		}
@@ -222,16 +220,16 @@ public class VotingServiceV02 extends AbstractServiceV02 {
 	@Path("/vote/{variable}/{receivingParticipant}")
 	@Produces("application/json")
 	public Response votingVote(
+			@HeaderParam("user") final String user,
 			@HeaderParam("token") final String token,
 			@PathParam("variable") final String variable,
-			@PathParam("receivingParticipant") final String receivingParticipantIdString,
-			@Context final HttpServletRequest request) {
+			@PathParam("receivingParticipant") final String receivingParticipantIdString) {
 		log.debug("Token {}: Write voting {} for participant {}", token,
 				receivingParticipantIdString);
 		ObjectId participantId;
 		try {
-			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
-					token, request.getSession());
+			participantId = checkExternalParticipantAccessAndReturnParticipantId(
+					user, token);
 		} catch (final Exception e) {
 			throw e;
 		}
@@ -268,16 +266,16 @@ public class VotingServiceV02 extends AbstractServiceV02 {
 	@Path("/unvote/{variable}/{receivingParticipant}")
 	@Produces("application/json")
 	public Response votingUnvote(
+			@HeaderParam("user") final String user,
 			@HeaderParam("token") final String token,
 			@PathParam("variable") final String variable,
-			@PathParam("receivingParticipant") final String receivingParticipantIdString,
-			@Context final HttpServletRequest request) {
+			@PathParam("receivingParticipant") final String receivingParticipantIdString) {
 		log.debug("Token {}: Remove voting {} for participant {}", token,
 				receivingParticipantIdString);
 		ObjectId participantId;
 		try {
-			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
-					token, request.getSession());
+			participantId = checkExternalParticipantAccessAndReturnParticipantId(
+					user, token);
 		} catch (final Exception e) {
 			throw e;
 		}

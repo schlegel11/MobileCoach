@@ -92,7 +92,8 @@ public class ImplementationConstants {
 	public static final String	SHORT_ID_SCREEN_SURVEY_AND_FEEDBACK_SERVLET_PATH					= "surveys-short";
 	public static final String	DASHBOARD_SERVLET_PATH												= "dashboard";
 
-	public static final String	REST_API_VERSION													= "v01";
+	public static final String	REST_SESSION_BASED_API_VERSION										= "v01";
+	public static final String	TOKEN_BASED_API_VERSION												= "v02";
 	public static final String	REST_API_CREDITS_CHECK_VARIABLE_POSTFIX								= "Check";
 	public static final String	REST_API_CREDITS_REMINDER_VARIABLE_POSTFIX							= "Reminder";
 

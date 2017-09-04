@@ -548,10 +548,13 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 								.toString()));
 
 		// REST API URL
-		templateVariables.put(
-				GeneralSlideTemplateFieldTypes.REST_API_URL.toVariable(),
-				normalizedBaseURL + ImplementationConstants.REST_API_PATH + "/"
-						+ ImplementationConstants.REST_API_VERSION + "/");
+		templateVariables
+				.put(GeneralSlideTemplateFieldTypes.REST_API_URL.toVariable(),
+						normalizedBaseURL
+								+ ImplementationConstants.REST_API_PATH
+								+ "/"
+								+ ImplementationConstants.REST_SESSION_BASED_API_VERSION
+								+ "/");
 
 		// Uploaded media content URL
 		templateVariables.put(

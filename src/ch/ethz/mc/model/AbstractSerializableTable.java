@@ -71,7 +71,11 @@ public class AbstractSerializableTable {
 	 * @return
 	 */
 	@JsonIgnore
-	protected String wrapRow(final String tableString) {
+	protected String wrapRow(String tableString) {
+		if (tableString == null) {
+			tableString = "";
+		}
+
 		return ImplementationConstants.REPORT_TABLE_ROW.replace("#", "")
 				.replace("|", tableString);
 	}
@@ -84,8 +88,11 @@ public class AbstractSerializableTable {
 	 * @return
 	 */
 	@JsonIgnore
-	protected String wrapRow(final String tableString,
-			final String additionalStyle) {
+	protected String wrapRow(String tableString, final String additionalStyle) {
+		if (tableString == null) {
+			tableString = "";
+		}
+
 		return ImplementationConstants.REPORT_TABLE_ROW.replace("#",
 				"style=\"" + additionalStyle + "\"").replace("|", tableString);
 	}
@@ -97,7 +104,11 @@ public class AbstractSerializableTable {
 	 * @return
 	 */
 	@JsonIgnore
-	protected String wrapHeader(final String tableString) {
+	protected String wrapHeader(String tableString) {
+		if (tableString == null) {
+			tableString = "";
+		}
+
 		return ImplementationConstants.REPORT_TABLE_HEADER_FIELD.replace("#",
 				"").replace("|", tableString);
 	}
@@ -110,8 +121,11 @@ public class AbstractSerializableTable {
 	 * @return
 	 */
 	@JsonIgnore
-	protected String wrapHeader(final String tableString,
-			final String additionalStyle) {
+	protected String wrapHeader(String tableString, final String additionalStyle) {
+		if (tableString == null) {
+			tableString = "";
+		}
+
 		return ImplementationConstants.REPORT_TABLE_HEADER_FIELD.replace("#",
 				"style=\"" + additionalStyle + "\"").replace("|", tableString);
 	}
@@ -123,7 +137,11 @@ public class AbstractSerializableTable {
 	 * @return
 	 */
 	@JsonIgnore
-	protected String wrapField(final String tableString) {
+	protected String wrapField(String tableString) {
+		if (tableString == null) {
+			tableString = "";
+		}
+
 		return ImplementationConstants.REPORT_TABLE_NORMAL_FIELD.replace("#",
 				"").replace("|", tableString);
 	}
@@ -136,8 +154,11 @@ public class AbstractSerializableTable {
 	 * @return
 	 */
 	@JsonIgnore
-	protected String wrapField(final String tableString,
-			final String additionalStyle) {
+	protected String wrapField(String tableString, final String additionalStyle) {
+		if (tableString == null) {
+			tableString = "";
+		}
+
 		return ImplementationConstants.REPORT_TABLE_NORMAL_FIELD.replace("#",
 				"style=\"" + additionalStyle + "\"").replace("|", tableString);
 	}

@@ -527,19 +527,22 @@ public class ScreeningSurveyServlet extends HttpServlet {
 								.toString()));
 
 		// REST API URL
-		templateVariables.put(
-				GeneralSlideTemplateFieldTypes.REST_API_URL.toVariable(),
-				request.getRequestURL()
-						.toString()
-						.substring(
-								0,
-								request.getRequestURL().toString()
-										.indexOf(request.getRequestURI()))
-						+ request.getContextPath()
-						+ "/"
-						+ ImplementationConstants.REST_API_PATH
-						+ "/"
-						+ ImplementationConstants.REST_API_VERSION + "/");
+		templateVariables
+				.put(GeneralSlideTemplateFieldTypes.REST_API_URL.toVariable(),
+						request.getRequestURL()
+								.toString()
+								.substring(
+										0,
+										request.getRequestURL()
+												.toString()
+												.indexOf(
+														request.getRequestURI()))
+								+ request.getContextPath()
+								+ "/"
+								+ ImplementationConstants.REST_API_PATH
+								+ "/"
+								+ ImplementationConstants.REST_SESSION_BASED_API_VERSION
+								+ "/");
 
 		// Uploaded media content URL
 		templateVariables.put(

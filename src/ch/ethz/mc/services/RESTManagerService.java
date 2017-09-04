@@ -22,12 +22,14 @@ package ch.ethz.mc.services;
  */
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.Getter;
 import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
@@ -68,6 +70,8 @@ public class RESTManagerService {
 
 	private static RESTManagerService				instance	= null;
 
+	private final ConcurrentHashMap<String, String>	externalParticipantsTokenHashMap;
+
 	private final DatabaseManagerService			databaseManagerService;
 	@Getter
 	private final FileStorageManagerService			fileStorageManagerService;
@@ -94,6 +98,8 @@ public class RESTManagerService {
 		this.databaseManagerService = databaseManagerService;
 		this.fileStorageManagerService = fileStorageManagerService;
 		this.variablesManagerService = variablesManagerService;
+
+		externalParticipantsTokenHashMap = new ConcurrentHashMap<String, String>();
 
 		deepstreamCommunicationService = communicationManagerService
 				.getDeepstreamCommunicationService();
@@ -496,6 +502,88 @@ public class RESTManagerService {
 					creditName, variable, participantId, e.getMessage());
 			throw e;
 		}
+	}
+
+	/*
+	 * Access management functions
+	 */
+	/**
+	 * Creates a token for a specific external participant
+	 * 
+	 * @param externalParticipantId
+	 * @return
+	 */
+	public String createToken(final String externalParticipantId) {
+		synchronized (externalParticipantsTokenHashMap) {
+			if (externalParticipantsTokenHashMap
+					.containsKey(externalParticipantId)) {
+				return externalParticipantsTokenHashMap
+						.get(externalParticipantId);
+			} else {
+				val token = RandomStringUtils.randomAlphanumeric(128);
+
+				externalParticipantsTokenHashMap.put(externalParticipantId,
+						token);
+
+				return token;
+			}
+		}
+	}
+
+	/**
+	 * Destroys a token for a specific external participant
+	 * 
+	 * @param externalParticipantId
+	 */
+	public void destroyToken(final String externalParticipantId) {
+		externalParticipantsTokenHashMap.remove(externalParticipantId);
+	}
+
+	/**
+	 * Check external participant and token and return {@link ObjectId} of
+	 * participant if token fits to logged in participant; otherwise return null
+	 * 
+	 * @param externalParticipantId
+	 * @param token
+	 * @return
+	 */
+	public ObjectId checkExternalParticipantAccessAndReturnParticipantId(
+			final String externalParticipantId, final String token) {
+		val tokenToCheck = externalParticipantsTokenHashMap
+				.get(externalParticipantId);
+
+		if (tokenToCheck == null || !tokenToCheck.equals(token)) {
+			return null;
+		}
+
+		// Check participant access
+		val dialogOption = databaseManagerService.findOneModelObject(
+				DialogOption.class, Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
+				DialogOptionTypes.EXTERNAL_ID, externalParticipantId);
+
+		if (dialogOption == null) {
+			log.debug(
+					"Participant with external participant id {} not authorized for REST access: Dialog option not found",
+					externalParticipantId);
+			return null;
+		}
+
+		// Check based on type
+		if (externalParticipantId
+				.startsWith(ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM)) {
+			if (deepstreamCommunicationService == null
+					|| !deepstreamCommunicationService
+							.checkIfParticipantIsConnected(externalParticipantId
+									.substring(ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+											.length()))) {
+				log.debug(
+						"Participant with external participant id {} is currently not connected using deepstream",
+						externalParticipantId);
+				return null;
+			}
+		}
+
+		return dialogOption.getParticipant();
 	}
 
 	/*

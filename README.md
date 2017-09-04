@@ -51,7 +51,7 @@ The *FileServletWrapper* is an optional component for the MobileCoach system. To
 * Java (8 or newer) SDK 
 * Web application server (Apache Tomcat 8 or newer/compatible)
 * Web application server configured to listen on port 80 (HTTP) and 443 (HTTPS) with a valid or self-signed certificate
-* MongoDB (2.6.x or newer, but lower than 3.x.x) installation with enabled user authentication, a created database and configured user
+* MongoDB (2.6.x or newer) installation with enabled user authentication, a created database and configured user
 * [Eclipse IDE for Java EE Developers](https://eclipse.org/downloads/packages/eclipse-ide-java-ee-developers/keplersr2) (Project files included in repository)
 * [Apache Ivy Eclipse Integration](http://ant.apache.org/ivy/ivyde/) (already included in some distributions)
 * [Project Lombok Eclipse Integration](http://projectlombok.org) (Can be installed using a double-click on the **.jar** file)
@@ -63,7 +63,7 @@ The *FileServletWrapper* is an optional component for the MobileCoach system. To
 * Java (8 or newer) SDK 
 * Web application server (Apache Tomcat 8 or newer/compatible)
 * Web application server configured to listen on port 80 (HTTP) and 443 (HTTPS) with a valid certificate
-* MongoDB (2.6.* or newer, but lower than 3.*) installation with enabled user authentication, a created database and configured user
+* MongoDB (2.6.* or newer) installation with enabled user authentication, a created database and configured user
 
 ## Basic configuration
 
@@ -151,6 +151,22 @@ An extended backend user guide will be published in the following months.
 ### Version @@VERSION@@
 
 ## Release notes
+### 1.7.0
+
+**Enhancements**
+
+* Support for MongoDB 3.*
+* Deepstream.io integrated as communication service (for apps)
+
+**Changes**
+
+* Email communication can now be configured (active/inactive) in the configuration file
+* Text messaging can now be configured (active/inactive) in the configuration file
+
+**Bugfixes**
+
+* Several minor bugfixes and performance improvements, esp. in the non-UI parts
+
 ### 1.6.0
 
 **Enhancements**

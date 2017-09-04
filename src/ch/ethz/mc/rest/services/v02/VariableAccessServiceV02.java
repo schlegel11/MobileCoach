@@ -21,10 +21,7 @@ package ch.ethz.mc.rest.services.v02;
  * limitations under the License.
  */
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Hashtable;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -33,7 +30,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -43,15 +39,12 @@ import lombok.extern.log4j.Log4j2;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.ImplementationConstants;
-import ch.ethz.mc.model.rest.ClusterValue;
 import ch.ethz.mc.model.rest.CollectionOfExtendedListVariables;
 import ch.ethz.mc.model.rest.CollectionOfExtendedVariables;
 import ch.ethz.mc.model.rest.OK;
-import ch.ethz.mc.model.rest.VariableAverage;
 import ch.ethz.mc.model.rest.VariableAverageWithParticipant;
 import ch.ethz.mc.model.rest.Variable;
 import ch.ethz.mc.model.rest.CollectionOfVariables;
-import ch.ethz.mc.model.rest.VariableCluster;
 import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mc.tools.StringValidator;
 
@@ -74,14 +67,14 @@ public class VariableAccessServiceV02 extends AbstractServiceV02 {
 	@GET
 	@Path("/read/{variable}")
 	@Produces("application/json")
-	public Variable variableRead(@HeaderParam("token") final String token,
-			@PathParam("variable") final String variable,
-			@Context final HttpServletRequest request) {
+	public Variable variableRead(@HeaderParam("user") final String user,
+			@HeaderParam("token") final String token,
+			@PathParam("variable") final String variable) {
 		log.debug("Token {}: Read variable {}", token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
-					token, request.getSession());
+			participantId = checkExternalParticipantAccessAndReturnParticipantId(
+					user, token);
 		} catch (final Exception e) {
 			throw e;
 		}
@@ -106,14 +99,14 @@ public class VariableAccessServiceV02 extends AbstractServiceV02 {
 	@Path("/readMany/{variables}")
 	@Produces("application/json")
 	public CollectionOfVariables variableReadMany(
+			@HeaderParam("user") final String user,
 			@HeaderParam("token") final String token,
-			@PathParam("variables") final String variables,
-			@Context final HttpServletRequest request) {
+			@PathParam("variables") final String variables) {
 		log.debug("Token {}: Read variables {}", token, variables);
 		ObjectId participantId;
 		try {
-			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
-					token, request.getSession());
+			participantId = checkExternalParticipantAccessAndReturnParticipantId(
+					user, token);
 		} catch (final Exception e) {
 			throw e;
 		}
@@ -149,16 +142,16 @@ public class VariableAccessServiceV02 extends AbstractServiceV02 {
 	@Path("/readGroupArray/{variable}")
 	@Produces("application/json")
 	public CollectionOfExtendedVariables variableReadGroupArray(
+			@HeaderParam("user") final String user,
 			@HeaderParam("token") final String token,
-			@PathParam("variable") final String variable,
-			@Context final HttpServletRequest request) {
+			@PathParam("variable") final String variable) {
 		log.debug(
 				"Token {}: Read variable array {} of participants from same group as participant",
 				token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
-					token, request.getSession());
+			participantId = checkExternalParticipantAccessAndReturnParticipantId(
+					user, token);
 		} catch (final Exception e) {
 			throw e;
 		}
@@ -186,16 +179,16 @@ public class VariableAccessServiceV02 extends AbstractServiceV02 {
 	@Path("/readGroupArrayMany/{variables}")
 	@Produces("application/json")
 	public CollectionOfExtendedListVariables variableReadGroupArrayMany(
+			@HeaderParam("user") final String user,
 			@HeaderParam("token") final String token,
-			@PathParam("variables") final String variables,
-			@Context final HttpServletRequest request) {
+			@PathParam("variables") final String variables) {
 		log.debug(
 				"Token {}: Read variables array {} of participants from same group as participant",
 				token, variables);
 		ObjectId participantId;
 		try {
-			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
-					token, request.getSession());
+			participantId = checkExternalParticipantAccessAndReturnParticipantId(
+					user, token);
 		} catch (final Exception e) {
 			throw e;
 		}
@@ -228,16 +221,16 @@ public class VariableAccessServiceV02 extends AbstractServiceV02 {
 	@Path("/readInterventionArray/{variable}")
 	@Produces("application/json")
 	public CollectionOfExtendedVariables variableReadInterventionArray(
+			@HeaderParam("user") final String user,
 			@HeaderParam("token") final String token,
-			@PathParam("variable") final String variable,
-			@Context final HttpServletRequest request) {
+			@PathParam("variable") final String variable) {
 		log.debug(
 				"Token {}: Read variable array {} of participants from same intervention as participant",
 				token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
-					token, request.getSession());
+			participantId = checkExternalParticipantAccessAndReturnParticipantId(
+					user, token);
 		} catch (final Exception e) {
 			throw e;
 		}
@@ -265,16 +258,16 @@ public class VariableAccessServiceV02 extends AbstractServiceV02 {
 	@Path("/readInterventionArrayMany/{variables}")
 	@Produces("application/json")
 	public CollectionOfExtendedListVariables variableReadInterventionArrayMany(
+			@HeaderParam("user") final String user,
 			@HeaderParam("token") final String token,
-			@PathParam("variables") final String variables,
-			@Context final HttpServletRequest request) {
+			@PathParam("variables") final String variables) {
 		log.debug(
 				"Token {}: Read variables array {} of participants from same intervention as participant",
 				token, variables);
 		ObjectId participantId;
 		try {
-			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
-					token, request.getSession());
+			participantId = checkExternalParticipantAccessAndReturnParticipantId(
+					user, token);
 		} catch (final Exception e) {
 			throw e;
 		}
@@ -304,279 +297,19 @@ public class VariableAccessServiceV02 extends AbstractServiceV02 {
 	}
 
 	@GET
-	@Path("/readDashboardGroupCluster/{group}/{variable}")
-	@Produces("application/json")
-	public VariableCluster variableReadDashboardGroupCluster(
-			@HeaderParam("token") final String token,
-			@PathParam("group") final String group,
-			@PathParam("variable") final String variable,
-			@Context final HttpServletRequest request) {
-		log.debug(
-				"Token {}: Read variable cluster of variable {} of group {} of intervention",
-				token, variable, group);
-		ObjectId interventionId;
-		try {
-			interventionId = checkDashboardAccess(token, request.getSession());
-		} catch (final Exception e) {
-			throw e;
-		}
-
-		try {
-			if (!StringValidator
-					.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
-							+ variable.trim())) {
-				throw new Exception("The variable name is not valid");
-			}
-
-			val collectionOfExtendedVariables = restManagerService
-					.readVariableArrayForDashboardOfGroupOrIntervention(
-							interventionId, variable, group, null, null, false);
-
-			val clusterHashtable = new Hashtable<String, Integer>();
-
-			for (val resultVariable : collectionOfExtendedVariables
-					.getVariables()) {
-				val value = resultVariable.getValue();
-				if (clusterHashtable.containsKey(value)) {
-					clusterHashtable
-							.put(value, clusterHashtable.get(value) + 1);
-				} else {
-					clusterHashtable.put(value, 1);
-				}
-			}
-
-			val variableCluster = new VariableCluster();
-			variableCluster.setVariable(variable);
-			val clusterValues = variableCluster.getClusteredValues();
-
-			for (val key : clusterHashtable.keySet()) {
-				val clusterValue = new ClusterValue(key,
-						clusterHashtable.get(key));
-				clusterValues.add(clusterValue);
-			}
-
-			Collections.sort(clusterValues, (a, b) -> a.getValue()
-					.compareToIgnoreCase(b.getValue()));
-
-			return variableCluster;
-		} catch (final Exception e) {
-			throw new WebApplicationException(Response
-					.status(Status.FORBIDDEN)
-					.entity("Could not read cluster of variable: "
-							+ e.getMessage()).build());
-		}
-	}
-
-	@GET
-	@Path("/readDashboardInterventionCluster/{variable}")
-	@Produces("application/json")
-	public VariableCluster variableReadDashboardInterventionCluster(
-			@HeaderParam("token") final String token,
-			@PathParam("variable") final String variable,
-			@Context final HttpServletRequest request) {
-		log.debug(
-				"Token {}: Read variable cluster of variable {} of intervention",
-				token, variable);
-		ObjectId interventionId;
-		try {
-			interventionId = checkDashboardAccess(token, request.getSession());
-		} catch (final Exception e) {
-			throw e;
-		}
-
-		try {
-			if (!StringValidator
-					.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
-							+ variable.trim())) {
-				throw new Exception("The variable name is not valid");
-			}
-
-			val collectionOfExtendedVariables = restManagerService
-					.readVariableArrayForDashboardOfGroupOrIntervention(
-							interventionId, variable, null, null, null, false);
-
-			val clusterHashtable = new Hashtable<String, Integer>();
-
-			for (val resultVariable : collectionOfExtendedVariables
-					.getVariables()) {
-				val value = resultVariable.getValue();
-				if (clusterHashtable.containsKey(value)) {
-					clusterHashtable
-							.put(value, clusterHashtable.get(value) + 1);
-				} else {
-					clusterHashtable.put(value, 1);
-				}
-			}
-
-			val variableCluster = new VariableCluster();
-			variableCluster.setVariable(variable);
-			val clusterValues = variableCluster.getClusteredValues();
-
-			for (val key : clusterHashtable.keySet()) {
-				val clusterValue = new ClusterValue(key,
-						clusterHashtable.get(key));
-				clusterValues.add(clusterValue);
-			}
-
-			Collections.sort(clusterValues, (a, b) -> a.getValue()
-					.compareToIgnoreCase(b.getValue()));
-
-			return variableCluster;
-		} catch (final Exception e) {
-			throw new WebApplicationException(Response
-					.status(Status.FORBIDDEN)
-					.entity("Could not read cluster of variable: "
-							+ e.getMessage()).build());
-		}
-	}
-
-	@GET
-	@Path("/readDashboardFilteredGroupCluster/{group}/{variable}/{filterVariable}/{filterValue}")
-	@Produces("application/json")
-	public VariableCluster variableReadDashboardFilteredGroupCluster(
-			@HeaderParam("token") final String token,
-			@PathParam("group") final String group,
-			@PathParam("variable") final String variable,
-			@PathParam("filterVariable") final String filterVariable,
-			@PathParam("filterValue") final String filterValue,
-			@Context final HttpServletRequest request) {
-		log.debug(
-				"Token {}: Read variable cluster of variable {} of group {} of intervention filtered by {}={}",
-				token, variable, group, filterVariable, filterValue);
-		ObjectId interventionId;
-		try {
-			interventionId = checkDashboardAccess(token, request.getSession());
-		} catch (final Exception e) {
-			throw e;
-		}
-
-		try {
-			if (!StringValidator
-					.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
-							+ variable.trim())) {
-				throw new Exception("The variable name is not valid");
-			}
-
-			val collectionOfExtendedVariables = restManagerService
-					.readVariableArrayForDashboardOfGroupOrIntervention(
-							interventionId, variable, group, filterVariable,
-							filterValue, false);
-
-			val clusterHashtable = new Hashtable<String, Integer>();
-
-			for (val resultVariable : collectionOfExtendedVariables
-					.getVariables()) {
-				val value = resultVariable.getValue();
-				if (clusterHashtable.containsKey(value)) {
-					clusterHashtable
-							.put(value, clusterHashtable.get(value) + 1);
-				} else {
-					clusterHashtable.put(value, 1);
-				}
-			}
-
-			val variableCluster = new VariableCluster();
-			variableCluster.setVariable(variable);
-			val clusterValues = variableCluster.getClusteredValues();
-
-			for (val key : clusterHashtable.keySet()) {
-				val clusterValue = new ClusterValue(key,
-						clusterHashtable.get(key));
-				clusterValues.add(clusterValue);
-			}
-
-			Collections.sort(clusterValues, (a, b) -> a.getValue()
-					.compareToIgnoreCase(b.getValue()));
-
-			return variableCluster;
-		} catch (final Exception e) {
-			throw new WebApplicationException(Response
-					.status(Status.FORBIDDEN)
-					.entity("Could not read cluster of variable: "
-							+ e.getMessage()).build());
-		}
-	}
-
-	@GET
-	@Path("/readDashboardFilteredInterventionCluster/{variable}/{filterVariable}/{filterValue}")
-	@Produces("application/json")
-	public VariableCluster variableReadDashboardFilteredInterventionCluster(
-			@HeaderParam("token") final String token,
-			@PathParam("variable") final String variable,
-			@PathParam("filterVariable") final String filterVariable,
-			@PathParam("filterValue") final String filterValue,
-			@Context final HttpServletRequest request) {
-		log.debug(
-				"Token {}: Read variable cluster of variable {} of intervention filtered by {}={}",
-				token, variable, filterVariable, filterValue);
-		ObjectId interventionId;
-		try {
-			interventionId = checkDashboardAccess(token, request.getSession());
-		} catch (final Exception e) {
-			throw e;
-		}
-
-		try {
-			if (!StringValidator
-					.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
-							+ variable.trim())) {
-				throw new Exception("The variable name is not valid");
-			}
-
-			val collectionOfExtendedVariables = restManagerService
-					.readVariableArrayForDashboardOfGroupOrIntervention(
-							interventionId, variable, null, filterVariable,
-							filterValue, false);
-
-			val clusterHashtable = new Hashtable<String, Integer>();
-
-			for (val resultVariable : collectionOfExtendedVariables
-					.getVariables()) {
-				val value = resultVariable.getValue();
-				if (clusterHashtable.containsKey(value)) {
-					clusterHashtable
-							.put(value, clusterHashtable.get(value) + 1);
-				} else {
-					clusterHashtable.put(value, 1);
-				}
-			}
-
-			val variableCluster = new VariableCluster();
-			variableCluster.setVariable(variable);
-			val clusterValues = variableCluster.getClusteredValues();
-
-			for (val key : clusterHashtable.keySet()) {
-				val clusterValue = new ClusterValue(key,
-						clusterHashtable.get(key));
-				clusterValues.add(clusterValue);
-			}
-
-			Collections.sort(clusterValues, (a, b) -> a.getValue()
-					.compareToIgnoreCase(b.getValue()));
-
-			return variableCluster;
-		} catch (final Exception e) {
-			throw new WebApplicationException(Response
-					.status(Status.FORBIDDEN)
-					.entity("Could not read cluster of variable: "
-							+ e.getMessage()).build());
-		}
-	}
-
-	@GET
 	@Path("/calculateGroupAverage/{variable}")
 	@Produces("application/json")
 	public VariableAverageWithParticipant variableCalculateGroupAverage(
+			@HeaderParam("user") final String user,
 			@HeaderParam("token") final String token,
-			@PathParam("variable") final String variable,
-			@Context final HttpServletRequest request) {
+			@PathParam("variable") final String variable) {
 		log.debug(
 				"Token {}: Calculate variable average of variable {} of participants from same group as participant",
 				token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
-					token, request.getSession());
+			participantId = checkExternalParticipantAccessAndReturnParticipantId(
+					user, token);
 		} catch (final Exception e) {
 			throw e;
 		}
@@ -602,57 +335,19 @@ public class VariableAccessServiceV02 extends AbstractServiceV02 {
 	}
 
 	@GET
-	@Path("/calculateDashboardGroupAverage/{group}/{variable}")
-	@Produces("application/json")
-	public VariableAverage variableCalculateDashboardGroupAverage(
-			@HeaderParam("token") final String token,
-			@PathParam("group") final String group,
-			@PathParam("variable") final String variable,
-			@Context final HttpServletRequest request) {
-		log.debug(
-				"Token {}: Calculate variable average of variable {} of group {} of intervention",
-				token, variable, group);
-		ObjectId interventionId;
-		try {
-			interventionId = checkDashboardAccess(token, request.getSession());
-		} catch (final Exception e) {
-			throw e;
-		}
-
-		try {
-			if (!StringValidator
-					.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
-							+ variable.trim())) {
-				throw new Exception("The variable name is not valid");
-			}
-
-			val variableAverage = restManagerService
-					.calculateAverageOfVariableArrayForDashboardOfGroupOrIntervention(
-							interventionId, variable.trim(), group, false);
-
-			return variableAverage;
-		} catch (final Exception e) {
-			throw new WebApplicationException(Response
-					.status(Status.FORBIDDEN)
-					.entity("Could not calculate average of variable: "
-							+ e.getMessage()).build());
-		}
-	}
-
-	@GET
 	@Path("/calculateInterventionAverage/{variable}")
 	@Produces("application/json")
 	public VariableAverageWithParticipant variableCalculateInterventionAverage(
+			@HeaderParam("user") final String user,
 			@HeaderParam("token") final String token,
-			@PathParam("variable") final String variable,
-			@Context final HttpServletRequest request) {
+			@PathParam("variable") final String variable) {
 		log.debug(
 				"Token {}: Calculate variable average of variable {} of participants from same intervention as participant",
 				token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
-					token, request.getSession());
+			participantId = checkExternalParticipantAccessAndReturnParticipantId(
+					user, token);
 		} catch (final Exception e) {
 			throw e;
 		}
@@ -677,43 +372,6 @@ public class VariableAccessServiceV02 extends AbstractServiceV02 {
 		}
 	}
 
-	@GET
-	@Path("/calculateDashboardInterventionAverage/{variable}")
-	@Produces("application/json")
-	public VariableAverage variableCalculateDashboardInterventionAverage(
-			@HeaderParam("token") final String token,
-			@PathParam("variable") final String variable,
-			@Context final HttpServletRequest request) {
-		log.debug(
-				"Token {}: Calculate variable average of variable {} of intervention",
-				token, variable);
-		ObjectId interventionId;
-		try {
-			interventionId = checkDashboardAccess(token, request.getSession());
-		} catch (final Exception e) {
-			throw e;
-		}
-
-		try {
-			if (!StringValidator
-					.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
-							+ variable.trim())) {
-				throw new Exception("The variable name is not valid");
-			}
-
-			val variableAverage = restManagerService
-					.calculateAverageOfVariableArrayForDashboardOfGroupOrIntervention(
-							interventionId, variable.trim(), null, false);
-
-			return variableAverage;
-		} catch (final Exception e) {
-			throw new WebApplicationException(Response
-					.status(Status.FORBIDDEN)
-					.entity("Could not calculate average of variable: "
-							+ e.getMessage()).build());
-		}
-	}
-
 	/*
 	 * Write functions
 	 */
@@ -721,14 +379,14 @@ public class VariableAccessServiceV02 extends AbstractServiceV02 {
 	@Path("/write/{variable}")
 	@Consumes("text/plain")
 	@Produces("application/json")
-	public Response variableWrite(@HeaderParam("token") final String token,
-			@PathParam("variable") final String variable,
-			@Context final HttpServletRequest request, String content) {
+	public Response variableWrite(@HeaderParam("user") final String user,
+			@HeaderParam("token") final String token,
+			@PathParam("variable") final String variable, String content) {
 		log.debug("Token {}: Write variable {}", token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
-					token, request.getSession());
+			participantId = checkExternalParticipantAccessAndReturnParticipantId(
+					user, token);
 		} catch (final Exception e) {
 			throw e;
 		}
