@@ -77,7 +77,7 @@
 			int countIntervention1 = iam.countParticipantsWithPassword(
 					intervention1.getId(), password);
 			int countIntervention2 = iam.countParticipantsWithPassword(
-					intervention1.getId(), password);
+					intervention2.getId(), password);
 
 			ObjectId appropriateInterventionId;
 			int appropriateModule;
