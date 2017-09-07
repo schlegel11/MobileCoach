@@ -6,12 +6,12 @@
 			<attribute name="owner.project.facets" value="jst.web"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.apache.ivyde.eclipse.cpcontainer.IVYDE_CONTAINER/?project=MC&amp;ivyXmlPath=ivy.xml&amp;confs=default">
+	<classpathentry kind="con" path="org.apache.ivyde.eclipse.cpcontainer.IVYDE_CONTAINER/?project=MC&amp;ivyXmlPath=ivy.xml&amp;confs=default&amp;ivySettingsPath=ivysettings.xml&amp;loadSettingsOnDemand=false&amp;ivyUserDir=&amp;propertyFiles=">
 		<attributes>
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.apache.ivyde.eclipse.cpcontainer.IVYDE_CONTAINER/?project=MC&amp;ivyXmlPath=ivy.xml&amp;confs=widgetset-compile%2Cnodeploy">
+	<classpathentry kind="con" path="org.apache.ivyde.eclipse.cpcontainer.IVYDE_CONTAINER/?project=MC&amp;ivyXmlPath=ivy.xml&amp;confs=widgetset-compile%2Cnodeploy&amp;ivySettingsPath=ivysettings.xml&amp;loadSettingsOnDemand=false&amp;ivyUserDir=&amp;propertyFiles=">
 		<attributes>
 			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
 		</attributes>
