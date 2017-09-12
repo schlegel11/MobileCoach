@@ -34,6 +34,7 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.collections.IteratorUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
@@ -219,24 +220,15 @@ public class RuleEvaluator {
 					ruleEvaluationResult.setRuleMatchesEquationSign(false);
 					break;
 				case CALCULATE_AMOUNT_OF_SELECT_MANY_VALUES:
-					if (!ruleEvaluationResult.getTextRuleValue().contains(
-							ImplementationConstants.SELECT_MANY_SEPARATOR)) {
-						ruleEvaluationResult.setRuleMatchesEquationSign(false);
+					ruleEvaluationResult.setRuleMatchesEquationSign(true);
 
-						ruleEvaluationResult.setCalculatedRuleValue(0);
-						ruleEvaluationResult.setTextRuleValue("0");
-					} else {
-						ruleEvaluationResult.setRuleMatchesEquationSign(true);
+					String[] parts = ruleEvaluationResult
+							.getTextRuleValue()
+							.split(ImplementationConstants.SELECT_MANY_SEPARATOR);
 
-						val parts = ruleEvaluationResult
-								.getTextRuleValue()
-								.split(ImplementationConstants.SELECT_MANY_SEPARATOR);
-
-						ruleEvaluationResult
-								.setCalculatedRuleValue(parts.length);
-						ruleEvaluationResult.setTextRuleValue(String
-								.valueOf(parts.length));
-					}
+					ruleEvaluationResult.setCalculatedRuleValue(parts.length);
+					ruleEvaluationResult.setTextRuleValue(String
+							.valueOf(parts.length));
 					break;
 				case TEXT_VALUE_EQUALS:
 					if (ruleEvaluationResult
@@ -287,17 +279,14 @@ public class RuleEvaluator {
 					}
 					break;
 				case TEXT_VALUE_FROM_SELECT_MANY_AT_POSITION:
-					if (!ruleEvaluationResult.getTextRuleValue().contains(
-							ImplementationConstants.SELECT_MANY_SEPARATOR)
-							|| !StringUtils.isNumeric(ruleEvaluationResult
-									.getTextRuleComparisonTermValue())) {
+					if (!StringUtils.isNumeric(ruleEvaluationResult
+							.getTextRuleComparisonTermValue())) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(false);
 
 						ruleEvaluationResult.setTextRuleValue("");
 					} else {
-						val parts = ruleEvaluationResult
-								.getTextRuleValue()
-								.split(ImplementationConstants.SELECT_MANY_SEPARATOR);
+						parts = ruleEvaluationResult.getTextRuleValue().split(
+								ImplementationConstants.SELECT_MANY_SEPARATOR);
 
 						val position = Integer.parseInt(ruleEvaluationResult
 								.getTextRuleComparisonTermValue()) - 1;
@@ -315,6 +304,16 @@ public class RuleEvaluator {
 							ruleEvaluationResult.setTextRuleValue("");
 						}
 					}
+					break;
+				case TEXT_VALUE_FROM_SELECT_MANY_AT_RANDOM_POSITION:
+					parts = ruleEvaluationResult.getTextRuleValue().split(
+							ImplementationConstants.SELECT_MANY_SEPARATOR);
+
+					val position = RandomUtils.nextInt(0, parts.length);
+
+					ruleEvaluationResult.setRuleMatchesEquationSign(true);
+
+					ruleEvaluationResult.setTextRuleValue(parts[position]);
 					break;
 				case DATE_DIFFERENCE_VALUE_EQUALS:
 					val calendarDiff = Calendar.getInstance();
