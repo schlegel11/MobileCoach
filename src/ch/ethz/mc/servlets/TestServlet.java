@@ -141,7 +141,7 @@ public class TestServlet extends HttpServlet {
 		// stringTests();
 		// dateCalculationTests();
 		// languageStringSerializationTest();
-		ruleTests();
+		// ruleTests();
 	}
 
 	@SuppressWarnings("unused")
