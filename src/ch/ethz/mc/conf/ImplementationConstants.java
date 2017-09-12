@@ -56,6 +56,10 @@ public class ImplementationConstants {
 
 	// FIXME Special solution for MC tobacco & ready4life
 	public static String		VARIABLE_DEFINING_PARTICIPATION_IN_MOBILE_COACH_EXTRA								= "$participation_extra";
+	// FIXME Special solution for MCAT & ready4life
+	public static String		VARIABLE_DEFINING_MRCT_STATUS														= "$mrctStatus";
+	// FIXME Special solution for MCAT & ready4life
+	public static String		MESSAGE_GROUP_NAME_SUBSTRING_DEFINING_MRCT_AGREE_TRIGGER							= "mrct agree";
 
 	public static final long	MAILING_SEND_RETRIES																= 2;
 	public static final long	MAILING_SEND_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS								= 5 * 60;

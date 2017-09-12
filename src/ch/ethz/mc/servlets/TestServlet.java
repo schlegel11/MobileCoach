@@ -141,7 +141,7 @@ public class TestServlet extends HttpServlet {
 		// stringTests();
 		// dateCalculationTests();
 		// languageStringSerializationTest();
-		// ruleTests();
+		ruleTests();
 	}
 
 	@SuppressWarnings("unused")
@@ -296,7 +296,7 @@ public class TestServlet extends HttpServlet {
 				variables);
 		log.debug(">> " + result7.getCalculatedRuleValue());
 
-		val rule7 = new MonitoringMessageRule(null, 0, "7,3",
+		val rule7 = new MonitoringMessageRule(null, 0, "7,3,5",
 				RuleEquationSignTypes.CALCULATE_AMOUNT_OF_SELECT_MANY_VALUES,
 				"", "");
 		final val result8 = RuleEvaluator.evaluateRule(null, null, rule7,
@@ -309,6 +309,16 @@ public class TestServlet extends HttpServlet {
 		final val result9 = RuleEvaluator.evaluateRule(null, null, rule8,
 				variables);
 		log.debug(">> " + result9.getTextRuleValue());
+
+		val rule11 = new MonitoringMessageRule(
+				null,
+				0,
+				"$impins",
+				RuleEquationSignTypes.TEXT_VALUE_FROM_SELECT_MANY_AT_RANDOM_POSITION,
+				"", "");
+		final val result12 = RuleEvaluator.evaluateRule(null, null, rule11,
+				variables);
+		log.debug(">> " + result12.getTextRuleValue());
 
 		val rule9 = new MonitoringMessageRule(
 				null,

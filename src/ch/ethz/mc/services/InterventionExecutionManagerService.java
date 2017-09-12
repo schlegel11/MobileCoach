@@ -65,6 +65,7 @@ import ch.ethz.mc.model.persistent.MonitoringMessageRule;
 import ch.ethz.mc.model.persistent.MonitoringReplyRule;
 import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.Participant;
+import ch.ethz.mc.model.persistent.ParticipantVariableWithValue;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
@@ -1077,6 +1078,64 @@ public class InterventionExecutionManagerService {
 				}
 
 				if (dialogOption != null) {
+					// FIXME Special solution for MCAT & ready4life
+					log.debug("Checking messages for special mRCT case in MCAT & ready4life");
+					if (dialogMessageToSend.getRelatedMonitoringMessage() != null) {
+						val relatedMonitoringMessage = databaseManagerService
+								.getModelObjectById(MonitoringMessage.class,
+										dialogMessageToSend
+												.getRelatedMonitoringMessage());
+						val relatedMonitoringMessageGroup = databaseManagerService
+								.getModelObjectById(
+										MonitoringMessageGroup.class,
+										relatedMonitoringMessage
+												.getMonitoringMessageGroup());
+
+						val messageGroupName = relatedMonitoringMessageGroup
+								.getName().toLowerCase();
+						if (messageGroupName
+								.startsWith(ImplementationConstants.MESSAGE_GROUP_NAME_SUBSTRING_DEFINING_MRCT_AGREE_TRIGGER)) {
+							log.debug("Message found from mRCT case in MCAT & ready4life - checking status variable for further proceeding");
+
+							// Status: 0 = inactive, 1 = sent, no reply yet, 2 =
+							// answered and yes, 3 = not answered or no
+							val participantVariableWithValue = databaseManagerService
+									.findOneSortedModelObject(
+											ParticipantVariableWithValue.class,
+											Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME,
+											Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
+											dialogMessageToSend
+													.getParticipant(),
+											ImplementationConstants.VARIABLE_DEFINING_MRCT_STATUS);
+
+							if (participantVariableWithValue != null) {
+								if (participantVariableWithValue.getValue()
+										.equals("0")) {
+									log.debug("mRCT currently inactive (should not happen) - simply ignore message for a while");
+
+									continue;
+								} else if (participantVariableWithValue
+										.getValue().equals("1")) {
+									log.debug("mRCT sent - delay messsage and wait for reply");
+
+									continue;
+								} else if (participantVariableWithValue
+										.getValue().equals("2")) {
+									log.debug("mRCT was answered and yes -> send message now");
+								} else if (participantVariableWithValue
+										.getValue().equals("3")) {
+									log.debug("mRCT was not answered or no -> delete message");
+
+									databaseManagerService
+											.deleteModelObject(dialogMessageToSend);
+
+									continue;
+								}
+							}
+						}
+					}
+					// End of solution
+
 					log.debug("Sending prepared message to {} ({})",
 							sendToSupervisor ? "supervisor" : "participant",
 							dialogOption.getData());

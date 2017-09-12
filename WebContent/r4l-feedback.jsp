@@ -90,6 +90,8 @@
 				appropriateModule = 2;
 			}
 
+			log.debug("Redirecting to module {}: {} vs. {}", appropriateModule, countIntervention1, countIntervention2);
+			
 			response.sendRedirect("https://r4l.swiss/MC/dashboard/"
 					+ appropriateInterventionId.toHexString() + "/"
 					+ lang + appropriateModule + password);
