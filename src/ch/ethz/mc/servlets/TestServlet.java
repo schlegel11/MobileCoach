@@ -142,6 +142,7 @@ public class TestServlet extends HttpServlet {
 		// dateCalculationTests();
 		// languageStringSerializationTest();
 		// ruleTests();
+		// randomRuleTests();
 	}
 
 	@SuppressWarnings("unused")
@@ -335,5 +336,43 @@ public class TestServlet extends HttpServlet {
 		final val result11 = RuleEvaluator.evaluateRule(null, null, rule10,
 				variables);
 		log.debug(">> " + result11.getTextRuleValue());
+	}
+
+	@SuppressWarnings("unused")
+	private void randomRuleTests() {
+		val variables = new ArrayList<AbstractVariableWithValue>();
+		variables.add(new InterventionVariableWithValue(null, "$days", "1,3,7",
+				InterventionVariableWithValuePrivacyTypes.PRIVATE,
+				InterventionVariableWithValueAccessTypes.INTERNAL));
+
+		val rule1 = new MonitoringMessageRule(
+				null,
+				0,
+				"$days",
+				RuleEquationSignTypes.TEXT_VALUE_FROM_SELECT_MANY_AT_RANDOM_POSITION,
+				"", "");
+		final val result1 = RuleEvaluator.evaluateRule(null, null, rule1,
+				variables);
+		log.debug(">> " + result1.getTextRuleValue());
+
+		val rule2 = new MonitoringMessageRule(
+				null,
+				0,
+				"$days",
+				RuleEquationSignTypes.TEXT_VALUE_FROM_SELECT_MANY_AT_RANDOM_POSITION,
+				"", "");
+		final val result2 = RuleEvaluator.evaluateRule(null, null, rule2,
+				variables);
+		log.debug(">> " + result2.getTextRuleValue());
+
+		val rule3 = new MonitoringMessageRule(
+				null,
+				0,
+				"$days",
+				RuleEquationSignTypes.TEXT_VALUE_FROM_SELECT_MANY_AT_RANDOM_POSITION,
+				"", "");
+		final val result3 = RuleEvaluator.evaluateRule(null, null, rule3,
+				variables);
+		log.debug(">> " + result3.getTextRuleValue());
 	}
 }
