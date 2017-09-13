@@ -28,6 +28,7 @@ import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.MC;
@@ -664,6 +665,29 @@ public class RESTManagerService {
 						&& dialogStatus
 								.isDataForMonitoringParticipationAvailable()) {
 
+					// FIXME Special solution for ready4life
+					val specialFilterVariable = variablesManagerService
+							.externallyReadVariableValueForParticipant(
+									relevantParticipant.getId(),
+									ImplementationConstants.VARIABLE_PREFIX
+											+ "kanton",
+									InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION_AND_DASHBOARD,
+									isService);
+
+					if (StringUtils.isBlank(specialFilterVariable)
+							|| !StringUtils.isNumeric(specialFilterVariable)) {
+						continue;
+					}
+
+					val specialFilterVariableIntValue = Integer
+							.parseInt(specialFilterVariable);
+
+					if (specialFilterVariableIntValue < 1
+							|| specialFilterVariableIntValue > 8) {
+						continue;
+					}
+					// End of solution
+
 					// Check filter
 					if (filterVariable != null && filterValue != null) {
 						val userFilterVariable = variablesManagerService
@@ -710,6 +734,29 @@ public class RESTManagerService {
 						&& dialogStatus.isScreeningSurveyPerformed()
 						&& dialogStatus
 								.isDataForMonitoringParticipationAvailable()) {
+
+					// FIXME Special solution for ready4life
+					val specialFilterVariable = variablesManagerService
+							.externallyReadVariableValueForParticipant(
+									relevantParticipant.getId(),
+									ImplementationConstants.VARIABLE_PREFIX
+											+ "kanton",
+									InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION_AND_DASHBOARD,
+									isService);
+
+					if (StringUtils.isBlank(specialFilterVariable)
+							|| !StringUtils.isNumeric(specialFilterVariable)) {
+						continue;
+					}
+
+					val specialFilterVariableIntValue = Integer
+							.parseInt(specialFilterVariable);
+
+					if (specialFilterVariableIntValue < 1
+							|| specialFilterVariableIntValue > 8) {
+						continue;
+					}
+					// End of solution
 
 					// Check filter
 					if (filterVariable != null && filterValue != null) {
