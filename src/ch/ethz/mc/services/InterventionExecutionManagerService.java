@@ -72,6 +72,7 @@ import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.services.internal.CommunicationManagerService;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.RecursiveAbstractMonitoringRulesResolver;
+import ch.ethz.mc.services.internal.RecursiveAbstractMonitoringRulesResolver.EXECUTION_CASE;
 import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.services.threads.IncomingMessageWorker;
 import ch.ethz.mc.services.threads.MonitoringSchedulingWorker;
@@ -672,10 +673,18 @@ public class InterventionExecutionManagerService {
 					e.getMessage());
 		}
 		try {
-			log.debug("Scheduling new messages");
-			scheduleMessagesForSending(participantsWithDialogStatus);
+			log.debug("Scheduling new messages (daily)");
+			scheduleMessagesForSending(participantsWithDialogStatus, false);
 		} catch (final Exception e) {
-			log.error("Could not schedule new monitoring messages: {}",
+			log.error("Could not schedule new monitoring messages (daily): {}",
+					e.getMessage());
+		}
+		try {
+			log.debug("Scheduling new messages (periodic)");
+			scheduleMessagesForSending(participantsWithDialogStatus, true);
+		} catch (final Exception e) {
+			log.error(
+					"Could not schedule new monitoring messages (periodic): {}",
 					e.getMessage());
 		}
 	}
@@ -782,7 +791,7 @@ public class InterventionExecutionManagerService {
 								databaseManagerService,
 								variablesManagerService,
 								participant,
-								false,
+								EXECUTION_CASE.MONITORING_RULES_REPLY,
 								dialogMessage.getRelatedMonitoringMessage(),
 								dialogMessage
 										.getRelatedMonitoringRuleForReplyRules(),
@@ -832,7 +841,8 @@ public class InterventionExecutionManagerService {
 
 	@Synchronized
 	private void scheduleMessagesForSending(
-			final Hashtable<Participant, DialogStatus> participantsWithDialogStatus) {
+			final Hashtable<Participant, DialogStatus> participantsWithDialogStatus,
+			final boolean periodicCheck) {
 		log.debug("Scheduling monitoring messages");
 
 		val dateIndex = StringHelpers.createDailyUniqueIndex();
@@ -871,20 +881,30 @@ public class InterventionExecutionManagerService {
 			}
 
 			if (dialogStatus != null
-					&& !dialogStatus
+					&& (periodicCheck || !dialogStatus
 							.getDateIndexOfLastDailyMonitoringProcessing()
-							.equals(dateIndex)) {
-				log.debug(
-						"Participant {} has not been scheduled today! Start scheduling...",
-						participant.getId());
+							.equals(dateIndex))) {
+				if (periodicCheck) {
+					log.debug(
+							"Start periodic scheduling for participant {}...",
+							participant.getId());
+				} else {
+					log.debug(
+							"Participant {} has not been scheduled today! Start dailyscheduling...",
+							participant.getId());
+				}
 
 				// Resolve rules
 				RecursiveAbstractMonitoringRulesResolver recursiveRuleResolver;
 				try {
 					recursiveRuleResolver = new RecursiveAbstractMonitoringRulesResolver(
-							this, databaseManagerService,
-							variablesManagerService, participant, true, null,
-							null, false);
+							this,
+							databaseManagerService,
+							variablesManagerService,
+							participant,
+							periodicCheck ? EXECUTION_CASE.MONITORING_RULES_PERIODIC
+									: EXECUTION_CASE.MONITORING_RULES_DAILY,
+							null, null, false);
 
 					recursiveRuleResolver.resolve();
 				} catch (final Exception e) {
@@ -943,8 +963,10 @@ public class InterventionExecutionManagerService {
 						}
 					}
 
-					// Update status and status values
-					dialogStatusUpdate(dialogStatus.getId(), dateIndex);
+					if (!periodicCheck) {
+						// Update status and status values
+						dialogStatusUpdate(dialogStatus.getId(), dateIndex);
+					}
 				}
 			}
 		}

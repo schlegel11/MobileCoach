@@ -38,6 +38,7 @@ import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
 import ch.ethz.mc.model.persistent.MonitoringReplyRule;
 import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.concepts.AbstractMonitoringRule;
+import ch.ethz.mc.model.persistent.types.MonitoringRuleTypes;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.ui.views.components.AbstractClosableEditComponent;
 import ch.ethz.mc.ui.views.components.interventions.monitoring_rules.MonitoringReplyRuleEditComponentWithController;
@@ -50,8 +51,8 @@ import com.vaadin.event.DataBoundTransferable;
 import com.vaadin.event.Transferable;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
-import com.vaadin.event.dd.acceptcriteria.AcceptAll;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
+import com.vaadin.event.dd.acceptcriteria.ServerSideCriterion;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.shared.ui.dd.VerticalDropLocation;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
@@ -88,6 +89,14 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 
 	private final ThemeResource		RULE_ICON						= new ThemeResource(
 																			ThemeImageStrings.RULE_ICON_SMALL);
+	private final ThemeResource		DAILY_RULE_ICON					= new ThemeResource(
+																			ThemeImageStrings.CALENDAR_ICON_SMALL);
+	private final ThemeResource		PERIODIC_RULE_ICON				= new ThemeResource(
+																			ThemeImageStrings.WATCH_ICON_SMALL);
+	private final ThemeResource		UNEXPECTED_MESSAGE_RULE_ICON	= new ThemeResource(
+																			ThemeImageStrings.BUBBLE_ICON_SMALL);
+	private final ThemeResource		INTENTION_RULE_ICON				= new ThemeResource(
+																			ThemeImageStrings.SIGNS_ICON_SMALL);
 	private final ThemeResource		MESSAGE_RULE_ICON				= new ThemeResource(
 																			ThemeImageStrings.MESSAGE_ICON_SMALL);
 	private final ThemeResource		SUPERVISOR_MESSAGE_RULE_ICON	= new ThemeResource(
@@ -277,12 +286,15 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 			setNothingSelected();
 		} else {
 			final AbstractMonitoringRule selectedMonitoringRule;
+			final MonitoringRuleTypes ruleType;
 			if (isMonitoringRule) {
 				selectedMonitoringRule = getInterventionAdministrationManagerService()
 						.getMonitoringRule(selectedMonitoringRuleId);
+				ruleType = ((MonitoringRule) selectedMonitoringRule).getType();
 			} else {
 				selectedMonitoringRule = getInterventionAdministrationManagerService()
 						.getMonitoringReplyRule(selectedMonitoringRuleId);
+				ruleType = null;
 			}
 
 			String resultVariable;
@@ -342,8 +354,44 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 				}
 			}
 
-			setSomethingSelected(resultVariable, sendMessage);
+			setSomethingSelected(ruleType, resultVariable, sendMessage);
 		}
+	}
+
+	/**
+	 * Determines the appropriate icon of the rule
+	 * 
+	 * @param abstractMonitoringRule
+	 * @return
+	 */
+	private ThemeResource getAppropriateIcon(
+			final AbstractMonitoringRule abstractMonitoringRule) {
+		ThemeResource icon;
+		if (abstractMonitoringRule.isSendMessageIfTrue()) {
+			if (abstractMonitoringRule.isSendMessageToSupervisor()) {
+				icon = SUPERVISOR_MESSAGE_RULE_ICON;
+			} else {
+				icon = MESSAGE_RULE_ICON;
+			}
+		} else if (isMonitoringRule) {
+			val monitoringRule = (MonitoringRule) abstractMonitoringRule;
+			if (monitoringRule.isStopInterventionWhenTrue()) {
+				icon = STOP_RULE_ICON;
+			} else if (monitoringRule.getType() == MonitoringRuleTypes.DAILY) {
+				icon = DAILY_RULE_ICON;
+			} else if (monitoringRule.getType() == MonitoringRuleTypes.PERIODIC) {
+				icon = PERIODIC_RULE_ICON;
+			} else if (monitoringRule.getType() == MonitoringRuleTypes.UNEXPECTED_MESSAGE) {
+				icon = UNEXPECTED_MESSAGE_RULE_ICON;
+			} else if (monitoringRule.getType() == MonitoringRuleTypes.USER_INTENTION) {
+				icon = INTENTION_RULE_ICON;
+			} else {
+				icon = RULE_ICON;
+			}
+		} else {
+			icon = RULE_ICON;
+		}
+		return icon;
 	}
 
 	public void expandOrCollapseTree(final boolean expandTree) {
@@ -433,22 +481,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 						final String name = StringHelpers.createRuleName(
 								selectedAbstractMonitoringRule, true);
 
-						ThemeResource icon;
-						if (selectedAbstractMonitoringRule
-								.isSendMessageIfTrue()) {
-							if (selectedAbstractMonitoringRule
-									.isSendMessageToSupervisor()) {
-								icon = SUPERVISOR_MESSAGE_RULE_ICON;
-							} else {
-								icon = MESSAGE_RULE_ICON;
-							}
-						} else if (isMonitoringRule
-								&& ((MonitoringRule) selectedAbstractMonitoringRule)
-										.isStopInterventionWhenTrue()) {
-							icon = STOP_RULE_ICON;
-						} else {
-							icon = RULE_ICON;
-						}
+						final ThemeResource icon = getAppropriateIcon(selectedAbstractMonitoringRule);
 
 						val item = container.getItem(selectedMonitoringRuleId);
 						item.getItemProperty(NAME).setValue(name);
@@ -462,6 +495,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 
 						closeWindow();
 					}
+
 				});
 	}
 
@@ -481,20 +515,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 		final String name = StringHelpers.createRuleName(
 				abstractMonitoringRule, true);
 
-		ThemeResource icon;
-		if (abstractMonitoringRule.isSendMessageIfTrue()) {
-			if (abstractMonitoringRule.isSendMessageToSupervisor()) {
-				icon = SUPERVISOR_MESSAGE_RULE_ICON;
-			} else {
-				icon = MESSAGE_RULE_ICON;
-			}
-		} else if (isMonitoringRule
-				&& ((MonitoringRule) abstractMonitoringRule)
-						.isStopInterventionWhenTrue()) {
-			icon = STOP_RULE_ICON;
-		} else {
-			icon = RULE_ICON;
-		}
+		final ThemeResource icon = getAppropriateIcon(abstractMonitoringRule);
 
 		// Add item to tree
 		val item = container.addItem(monitoringRuleId);
@@ -533,6 +554,26 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 					.monitoringReplyRuleMove(movement.ordinal(), sourceItemId,
 							parentItemId, sameLevelTargetItemId,
 							relatedMonitoringRuleId, isGotAnswerRule);
+		}
+	}
+
+	/**
+	 * Checks if {@link AbstractMonitoringRule} can be dragged
+	 * 
+	 * @param abstractMonitoringRuleId
+	 * @return
+	 */
+	private boolean checkIfDragAllowed(final ObjectId abstractMonitoringRuleId) {
+		if (isMonitoringRule) {
+			val monitoringRule = getInterventionAdministrationManagerService()
+					.getMonitoringRule(abstractMonitoringRuleId);
+			if (monitoringRule.getType() == MonitoringRuleTypes.NORMAL) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return true;
 		}
 	}
 
@@ -646,7 +687,33 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 
 		@Override
 		public AcceptCriterion getAcceptCriterion() {
-			return AcceptAll.get();
+			return new ServerSideCriterion() {
+				ObjectId	lastId;
+				boolean		lastResult;
+
+				@Override
+				public boolean accept(final DragAndDropEvent dragEvent) {
+					// Make sure the drag source is the same tree
+					final Transferable transferable = dragEvent
+							.getTransferable();
+					if (transferable.getSourceComponent() != tree
+							|| !(transferable instanceof DataBoundTransferable)) {
+						return false;
+					}
+
+					final ObjectId sourceItemId = (ObjectId) ((DataBoundTransferable) transferable)
+							.getItemId();
+
+					if (lastId != null && lastId == sourceItemId) {
+						return lastResult;
+					}
+
+					lastId = sourceItemId;
+					lastResult = component.checkIfDragAllowed(sourceItemId);
+
+					return lastResult;
+				}
+			};
 		}
 
 		@Override
@@ -654,18 +721,17 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 			// Called whenever a drop occurs on the component
 
 			// Make sure the drag source is the same tree
-			final Transferable t = dropEvent.getTransferable();
-
-			// see the comment in getAcceptCriterion()
-			if (t.getSourceComponent() != tree
-					|| !(t instanceof DataBoundTransferable)) {
+			final Transferable transferable = dropEvent.getTransferable();
+			if (transferable.getSourceComponent() != tree
+					|| !(transferable instanceof DataBoundTransferable)) {
 				return;
 			}
 
 			final TreeTargetDetails dropData = (TreeTargetDetails) dropEvent
 					.getTargetDetails();
 
-			final Object sourceItemId = ((DataBoundTransferable) t).getItemId();
+			final Object sourceItemId = ((DataBoundTransferable) transferable)
+					.getItemId();
 
 			final Object parentTargetItemId = dropData.getItemIdInto();
 
@@ -674,6 +740,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 			// Location describes on which part of the node the drop took
 			// place
 			final VerticalDropLocation location = dropData.getDropLocation();
+
+			// Check if drag and drop is allowed for source item
 
 			moveNode(sourceItemId, parentTargetItemId, sameLevelTargetItemId,
 					location);

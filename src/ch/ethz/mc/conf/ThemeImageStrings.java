@@ -52,6 +52,14 @@ public class ThemeImageStrings {
 																+ "supervisor-icon-small.png";
 	public static final String	RULE_ICON_SMALL			= IMAGE_PATH
 																+ "rule-icon-small.png";
+	public static final String	CALENDAR_ICON_SMALL		= IMAGE_PATH
+																+ "calendar-icon-small.png";
+	public static final String	WATCH_ICON_SMALL		= IMAGE_PATH
+																+ "watch-icon-small.png";
+	public static final String	BUBBLE_ICON_SMALL		= IMAGE_PATH
+																+ "bubble-icon-small.png";
+	public static final String	SIGNS_ICON_SMALL		= IMAGE_PATH
+																+ "signs-icon-small.png";
 	public static final String	STOP_ICON_SMALL			= IMAGE_PATH
 																+ "stop-icon-small.png";
 }

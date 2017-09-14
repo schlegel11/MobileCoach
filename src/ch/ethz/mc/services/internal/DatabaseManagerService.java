@@ -127,8 +127,10 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 	 * Update data to appropriate version
 	 *
 	 * @param versionToBeReached
+	 * @throws Exception
 	 */
-	private void updateDataToVersionIfNecessary(final int versionToBeReached) {
+	private void updateDataToVersionIfNecessary(final int versionToBeReached)
+			throws Exception {
 		log.debug("Retrieving current data model version from database...");
 
 		// -1 if no version available = first DB setup
@@ -150,6 +152,15 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 		if (configuration != null) {
 			currentVersion = configuration.getVersion();
 			log.info("Database is on data model version {}", currentVersion);
+			if (currentVersion > 0 && currentVersion < 4) {
+				log.error(
+						"The database is on a very old version ({})! Use MC 1.6.0 to update to a newer state of the database before proceeding with this version.",
+						currentVersion);
+				throw new Exception(
+						"The database is on a very old version ("
+								+ currentVersion
+								+ ")! Use MC 1.6.0 to update to a newer state of the database before proceeding with this version.");
+			}
 		} else {
 			log.info("Database is new - no data model version");
 		}

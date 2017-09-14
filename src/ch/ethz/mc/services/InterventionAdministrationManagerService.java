@@ -72,6 +72,7 @@ import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValueAccessTypes;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValuePrivacyTypes;
 import ch.ethz.mc.model.persistent.types.MediaObjectTypes;
+import ch.ethz.mc.model.persistent.types.MonitoringRuleTypes;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import ch.ethz.mc.modules.AbstractModule;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
@@ -303,6 +304,14 @@ public class InterventionAdministrationManagerService {
 		}
 
 		databaseManagerService.saveModelObject(intervention);
+		monitoringRuleCreate(intervention.getId(), null,
+				MonitoringRuleTypes.DAILY);
+		monitoringRuleCreate(intervention.getId(), null,
+				MonitoringRuleTypes.PERIODIC);
+		monitoringRuleCreate(intervention.getId(), null,
+				MonitoringRuleTypes.UNEXPECTED_MESSAGE);
+		monitoringRuleCreate(intervention.getId(), null,
+				MonitoringRuleTypes.USER_INTENTION);
 
 		return intervention;
 	}
@@ -1032,8 +1041,9 @@ public class InterventionAdministrationManagerService {
 
 	// Monitoring Rule
 	@Synchronized
-	public MonitoringRule monitoringRuleCreate(final ObjectId interventionId,
-			final ObjectId parentMonitoringRuleId) {
+	private MonitoringRule monitoringRuleCreate(final ObjectId interventionId,
+			final ObjectId parentMonitoringRuleId,
+			final MonitoringRuleTypes type) {
 		val monitoringRule = new MonitoringRule(
 				"",
 				RuleEquationSignTypes.CALCULATED_VALUE_EQUALS,
@@ -1044,6 +1054,7 @@ public class InterventionAdministrationManagerService {
 				null,
 				false,
 				null,
+				type,
 				interventionId,
 				ImplementationConstants.DEFAULT_HOUR_TO_SEND_MESSAGE,
 				ImplementationConstants.DEFAULT_HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED,
@@ -1061,6 +1072,14 @@ public class InterventionAdministrationManagerService {
 
 		databaseManagerService.saveModelObject(monitoringRule);
 
+		return monitoringRule;
+	}
+
+	@Synchronized
+	public MonitoringRule monitoringRuleCreate(final ObjectId interventionId,
+			final ObjectId parentMonitoringRuleId) {
+		val monitoringRule = monitoringRuleCreate(interventionId,
+				parentMonitoringRuleId, MonitoringRuleTypes.NORMAL);
 		return monitoringRule;
 	}
 

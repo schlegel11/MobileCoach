@@ -88,6 +88,8 @@ public class VariablesManagerService {
 
 	private final ConcurrentHashMap<String, Hashtable<String, ParticipantVariableWithValue>>	participantsVariablesCache;
 
+	private static SimpleDateFormat																hourOfDayFormatter	= new SimpleDateFormat(
+																															"H");
 	private static SimpleDateFormat																dayInWeekFormatter	= new SimpleDateFormat(
 																															"u");
 	private static SimpleDateFormat																dayOfMonthFormatter	= new SimpleDateFormat(
@@ -455,6 +457,8 @@ public class VariablesManagerService {
 			final READ_ONLY_SYSTEM_VARIABLES variable,
 			MonitoringMessage relatedMonitoringMessage) {
 		switch (variable) {
+			case systemHourOfDay:
+				return hourOfDayFormatter.format(date);
 			case systemDayInWeek:
 				return dayInWeekFormatter.format(date);
 			case systemDayOfMonth:

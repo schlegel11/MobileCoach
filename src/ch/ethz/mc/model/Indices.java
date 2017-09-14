@@ -62,7 +62,9 @@ public class Indices {
 			"{'participant':1}", "{'participant':1,'name':1}"								};
 	private static final String[]	interventionVariableWithValuesIndices					= new String[] { "{'intervention':1}" };
 
-	private static final String[]	monitoringRuleIndices									= new String[] { "{'intervention':1,'isSubRuleOfMonitoringRule':1}" };
+	private static final String[]	monitoringRuleIndices									= new String[] {
+			"{'intervention':1,'isSubRuleOfMonitoringRule':1}",
+			"{'intervention':1,'type':1}"													};
 	private static final String[]	monitoringReplyRuleIndices								= new String[] { "{'isSubRuleOfMonitoringRule':1}" };
 
 	private static final String[]	screeningSurveySlideIndices								= new String[] { "{'screeningSurvey':1}" };

@@ -372,7 +372,8 @@ public class MonitoringRuleEditComponent extends AbstractClosableEditComponent {
 		hourToSendMessageLabel.setImmediate(false);
 		hourToSendMessageLabel.setWidth("-1px");
 		hourToSendMessageLabel.setHeight("-1px");
-		hourToSendMessageLabel.setValue("!!! Hour to send message:");
+		hourToSendMessageLabel
+				.setValue("!!! Hour to send message (0 =  immediately):");
 		gridLayout2.addComponent(hourToSendMessageLabel, 0, 1);
 
 		// hourToSendMessageSlider

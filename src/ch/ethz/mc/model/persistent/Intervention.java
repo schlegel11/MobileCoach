@@ -49,10 +49,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  *
  * @author Andreas Filler
  */
-/**
- * @author Andreas Filler
- *
- */
 @NoArgsConstructor
 @AllArgsConstructor
 public class Intervention extends ModelObject {

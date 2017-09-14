@@ -29,7 +29,7 @@ import ch.ethz.mc.conf.ImplementationConstants;
  */
 public class SystemVariables {
 	public enum READ_ONLY_SYSTEM_VARIABLES {
-		systemDayOfMonth, systemMonth, systemYear, systemDayInWeek, systemLinkedSurvey, systemLinkedMediaObject;
+		systemHourOfDay, systemDayOfMonth, systemMonth, systemYear, systemDayInWeek, systemLinkedSurvey, systemLinkedMediaObject;
 
 		public String toVariableName() {
 			return ImplementationConstants.VARIABLE_PREFIX + toString();
@@ -61,6 +61,7 @@ public class SystemVariables {
 	}
 
 	public static final String[]	EXTERNALLY_READABLE_SYSTEM_VARIABLE_NAMES		= new String[] {
+			READ_ONLY_SYSTEM_VARIABLES.systemHourOfDay.toVariableName(),
 			READ_ONLY_SYSTEM_VARIABLES.systemDayOfMonth.toVariableName(),
 			READ_ONLY_SYSTEM_VARIABLES.systemMonth.toVariableName(),
 			READ_ONLY_SYSTEM_VARIABLES.systemYear.toVariableName(),

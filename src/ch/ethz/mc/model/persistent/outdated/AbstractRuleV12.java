@@ -25,54 +25,51 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
-
-import org.bson.types.ObjectId;
-import org.jongo.marshall.jackson.oid.MongoId;
-
-import ch.ethz.mc.model.persistent.Participant;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+import ch.ethz.mc.model.ModelObject;
+import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 
 /**
- * CAUTION: Will only be used for conversion from data model 2 to 3
+ * {@link ModelObject} to represent a rule
+ *
+ * An {@link AbstractRuleV12} consists of the rule itself, an equation sign and
+ * a
+ * comparison term. The rule can be evaluated and checked against the comparison
+ * term based on the equation sign.
  *
  * @author Andreas Filler
  */
 @NoArgsConstructor
 @AllArgsConstructor
-public class ParticipantVariableWithValueV4 {
-	@MongoId
-	@JsonProperty("_id")
-	public ObjectId		id;
-
+public abstract class AbstractRuleV12 extends ModelObject {
 	/**
-	 * Name of the variable
+	 * Rule containing placeholders for variables
 	 */
 	@Getter
 	@Setter
 	@NonNull
-	private String		name;
+	private String					ruleWithPlaceholders;
 
 	/**
-	 * Value of the variable
+	 * Equation sign to compare the rule with the rule comparison term
 	 */
 	@Getter
 	@Setter
 	@NonNull
-	private String		value;
+	private RuleEquationSignTypes	ruleEquationSign;
 
 	/**
-	 * {@link Participant} to which this variable and its value belong to
+	 * The term containing placeholders to compare the rule with
 	 */
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId	participant;
+	private String					ruleComparisonTermWithPlaceholders;
 
 	/**
-	 * The moment in time when the variable was created
+	 * A comment for the author, not visible to any participant
 	 */
 	@Getter
 	@Setter
-	private long		timestamp;
+	@NonNull
+	private String					comment;
 }
