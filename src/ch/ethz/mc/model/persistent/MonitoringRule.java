@@ -68,7 +68,8 @@ public class MonitoringRule extends AbstractMonitoringRule {
 			final MonitoringRuleTypes type, final ObjectId intervention,
 			final int hourToSendMessage,
 			final int hoursUntilMessageIsHandledAsUnanswered,
-			final boolean stopInterventionWhenTrue) {
+			final boolean stopInterventionWhenTrue,
+			final boolean solvesUnexpectedMessageCase) {
 		super(ruleWithPlaceholders, ruleEquationSign,
 				ruleComparisonTermWithPlaceholders, comment,
 				isSubRuleOfMonitoringRule, order, storeValueToVariableWithName,
@@ -79,6 +80,7 @@ public class MonitoringRule extends AbstractMonitoringRule {
 		this.hourToSendMessage = hourToSendMessage;
 		this.hoursUntilMessageIsHandledAsUnanswered = hoursUntilMessageIsHandledAsUnanswered;
 		this.stopInterventionWhenTrue = stopInterventionWhenTrue;
+		this.solvesUnexpectedMessageCase = solvesUnexpectedMessageCase;
 	}
 
 	/**
@@ -121,6 +123,14 @@ public class MonitoringRule extends AbstractMonitoringRule {
 	@Getter
 	@Setter
 	private boolean				stopInterventionWhenTrue;
+
+	/**
+	 * <strong>OPTIONAL:</strong> The unexpected incoming message will be
+	 * handled as solved
+	 */
+	@Getter
+	@Setter
+	private boolean				solvesUnexpectedMessageCase;
 
 	/*
 	 * (non-Javadoc)

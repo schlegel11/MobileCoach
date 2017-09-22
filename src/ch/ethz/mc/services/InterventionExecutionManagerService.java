@@ -421,12 +421,18 @@ public class InterventionExecutionManagerService {
 							.cleanReceivedMessageString(newUncleanedButCorrectedResult),
 					dialogMessage.getAnswerReceivedRaw());
 		} else if (dialogMessage.getStatus() == DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY) {
-			dialogMessage.setAnswerNotAutomaticallyProcessable(false);
-			databaseManagerService.saveModelObject(dialogMessage);
+			unexpectedDialogMessageSetProblemSolved(dialogMessage);
 		} else {
 			throw new NotificationMessageException(
 					AdminMessageStrings.NOTIFICATION__CASE_CANT_BE_SOLVED_ANYMORE);
 		}
+	}
+
+	@Synchronized
+	private void unexpectedDialogMessageSetProblemSolved(
+			final DialogMessage dialogMessage) {
+		dialogMessage.setAnswerNotAutomaticallyProcessable(false);
+		databaseManagerService.saveModelObject(dialogMessage);
 	}
 
 	/**
@@ -728,11 +734,13 @@ public class InterventionExecutionManagerService {
 					if (relatedMonitoringMessage != null) {
 						val cleanedMessageValue = dialogMessage
 								.getAnswerReceived();
+						val rawMessageValue = dialogMessage
+								.getAnswerReceivedRaw();
 
 						log.debug(
-								"Store value '{}' (cleaned: '{}') of message to '{}' for participant {}",
-								dialogMessage.getAnswerReceived(),
-								cleanedMessageValue, relatedMonitoringMessage
+								"Store value '{}' (cleand as: '{}') of message to '{}' and reply variables for participant {}",
+								rawMessageValue, cleanedMessageValue,
+								relatedMonitoringMessage
 										.getStoreValueToVariableWithName(),
 								participant.getId());
 						try {
@@ -754,6 +762,12 @@ public class InterventionExecutionManagerService {
 											SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantMessageReply
 													.toVariableName(),
 											cleanedMessageValue, true, false);
+							variablesManagerService
+									.writeVariableValueOfParticipant(
+											participant.getId(),
+											SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantRawMessageReply
+													.toVariableName(),
+											rawMessageValue, true, false);
 						} catch (final Exception e) {
 							log.error(
 									"Could not store value '{}' of message to '{}' for participant {}: {}",
@@ -990,19 +1004,27 @@ public class InterventionExecutionManagerService {
 			return null;
 		}
 
-		// Check if received messages is a "stop"-message
-		for (val stopWord : acceptedStopWords) {
-			if (StringHelpers.cleanReceivedMessageString(
-					receivedMessage.getMessage()).equals(stopWord)) {
-				log.debug("Received stop message by participant {}",
-						dialogOption.getParticipant());
+		val rawMessageValue = receivedMessage.getMessage();
+		val cleanedMessageValue = StringHelpers
+				.cleanReceivedMessageString(receivedMessage.getMessage());
 
-				val dialogMessage = dialogMessageCreateAsUnexpectedReceived(
-						dialogOption.getParticipant(), receivedMessage);
+		// Check if received messages is a "stop"-message (only relevant for SMS
+		// or Email messages)
+		if (dialogOption.getType() == DialogOptionTypes.SMS
+				|| dialogOption.getType() == DialogOptionTypes.EMAIL) {
+			for (val stopWord : acceptedStopWords) {
+				if (cleanedMessageValue.equals(stopWord)) {
+					log.debug("Received stop message by participant {}",
+							dialogOption.getParticipant());
 
-				dialogStatusSetMonitoringFinished(dialogOption.getParticipant());
+					val dialogMessage = dialogMessageCreateAsUnexpectedReceived(
+							dialogOption.getParticipant(), receivedMessage);
 
-				return dialogMessage;
+					dialogStatusSetMonitoringFinished(dialogOption
+							.getParticipant());
+
+					return dialogMessage;
+				}
 			}
 		}
 
@@ -1010,20 +1032,98 @@ public class InterventionExecutionManagerService {
 				dialogOption.getParticipant(),
 				receivedMessage.getReceivedTimestamp());
 
-		val cleanedMessageValue = StringHelpers
-				.cleanReceivedMessageString(receivedMessage.getMessage());
-
 		if (dialogMessage == null) {
 			log.debug(
-					"Received an unexpected message from '{}', store it and mark it as unexpected",
+					"Received an unexpected message from '{}', store it, mark it as unexpected and execute rules",
 					receivedMessage.getSender());
+
 			val dialogMessageCreated = dialogMessageCreateAsUnexpectedReceived(
 					dialogOption.getParticipant(), receivedMessage);
+
+			val participant = databaseManagerService.getModelObjectById(
+					Participant.class, dialogOption.getParticipant());
+
+			try {
+				variablesManagerService
+						.writeVariableValueOfParticipant(
+								participant.getId(),
+								SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantUnexpectedMessage
+										.toVariableName(), cleanedMessageValue,
+								true, false);
+				variablesManagerService
+						.writeVariableValueOfParticipant(
+								participant.getId(),
+								SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantUnexpectedRawMessage
+										.toVariableName(), rawMessageValue,
+								true, false);
+			} catch (final Exception e) {
+				log.error(
+						"Could not store value '{}' of unexpected message for participant {}: {}",
+						rawMessageValue, participant.getId(), e.getMessage());
+				return null;
+			}
+
+			log.debug("Caring for unexpected message rules resolving");
+
+			// Resolve rules
+			RecursiveAbstractMonitoringRulesResolver recursiveRuleResolver;
+			try {
+				recursiveRuleResolver = new RecursiveAbstractMonitoringRulesResolver(
+						this, databaseManagerService, variablesManagerService,
+						participant,
+						EXECUTION_CASE.MONITORING_RULES_UNEXPECTED_MESSAGE,
+						null, null, false);
+
+				recursiveRuleResolver.resolve();
+			} catch (final Exception e) {
+				log.error(
+						"Could not resolve unexpected message rules for participant {}: {}",
+						participant.getId(), e.getMessage());
+				return null;
+			}
+
+			if (recursiveRuleResolver.isUnexpectedMessageProblemSolved()) {
+				unexpectedDialogMessageSetProblemSolved(dialogMessageCreated);
+			}
+
+			for (val messageToSendTask : recursiveRuleResolver
+					.getMessageSendingResultForMonitoringReplyRules()) {
+				if (messageToSendTask.getMessageTextToSend() != null) {
+					log.debug("Preparing reply message for sending for participant");
+
+					MonitoringReplyRule monitoringReplyRule = null;
+					if (messageToSendTask
+							.getAbstractMonitoringRuleRequiredToPrepareMessage() != null) {
+						monitoringReplyRule = (MonitoringReplyRule) messageToSendTask
+								.getAbstractMonitoringRuleRequiredToPrepareMessage();
+					}
+					val monitoringMessage = messageToSendTask
+							.getMonitoringMessageToSend();
+					val messageTextToSend = messageToSendTask
+							.getMessageTextToSend();
+
+					// Prepare message for sending
+					dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
+							participant,
+							messageTextToSend,
+							false,
+							InternalDateTime.currentTimeMillis(),
+							null,
+							monitoringMessage,
+							monitoringReplyRule != null ? monitoringReplyRule
+									.isSendMessageToSupervisor() : false,
+							false, 0);
+				}
+			}
 
 			return dialogMessageCreated;
 		} else {
 			// Check if result is in general automatically
 			// processable
+			log.debug(
+					"Received an expected message from '{}', start validation",
+					receivedMessage.getSender());
+
 			val relatedMonitoringMessage = databaseManagerService
 					.getModelObjectById(MonitoringMessage.class,
 							dialogMessage.getRelatedMonitoringMessage());

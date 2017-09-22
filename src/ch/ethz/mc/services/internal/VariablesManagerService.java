@@ -290,6 +290,9 @@ public class VariablesManagerService {
 				.values()) {
 			switch (variable) {
 				case participantMessageReply:
+				case participantRawMessageReply:
+				case participantUnexpectedMessage:
+				case participantUnexpectedRawMessage:
 					if (!variablesWithValues.containsKey(variable
 							.toVariableName())) {
 						addToHashtable(variablesWithValues,

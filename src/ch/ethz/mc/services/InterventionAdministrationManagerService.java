@@ -1058,7 +1058,7 @@ public class InterventionAdministrationManagerService {
 				interventionId,
 				ImplementationConstants.DEFAULT_HOUR_TO_SEND_MESSAGE,
 				ImplementationConstants.DEFAULT_HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED,
-				false);
+				false, false);
 
 		val highestOrderRule = databaseManagerService.findOneSortedModelObject(
 				MonitoringRule.class,

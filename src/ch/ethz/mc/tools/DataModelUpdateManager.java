@@ -83,6 +83,9 @@ public class DataModelUpdateManager {
 				case 12:
 					updateToVersion12();
 					break;
+				case 13:
+					updateToVersion13();
+					break;
 			}
 
 			log.info("Update to version {} done", updateToVersionInThisStep);
@@ -285,5 +288,14 @@ public class DataModelUpdateManager {
 				monitoringRuleCollection.save(monitoringRule);
 			}
 		}
+	}
+
+	/**
+	 * Changes for version 13:
+	 */
+	private static void updateToVersion13() {
+		val monitoringRulesCollection = jongo.getCollection("MonitoringRule");
+		monitoringRulesCollection.update(Queries.EVERYTHING).multi()
+				.with(Queries.UPDATE_VERSION_13__MONITORING_RULE__CHANGE_1);
 	}
 }

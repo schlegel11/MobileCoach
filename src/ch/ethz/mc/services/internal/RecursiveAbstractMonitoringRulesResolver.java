@@ -87,6 +87,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 
 	// Only relevant for MonitoringRules
 	private boolean										interventionIsFinishedForParticipantAfterThisResolving	= false;
+	private boolean										unexpectedMessageProblemSolved							= false;
 
 	/*
 	 * Helper classes containing resolved values about messages to send
@@ -425,6 +426,16 @@ public class RecursiveAbstractMonitoringRulesResolver {
 			}
 		}
 
+		if (isMonitoringRule
+				&& executionCase == EXECUTION_CASE.MONITORING_RULES_UNEXPECTED_MESSAGE
+				&& ruleResult.isRuleMatchesEquationSign()
+				&& ((MonitoringRule) rule).isSolvesUnexpectedMessageCase()) {
+			// Check if message solves unexpected message problem
+			log.debug("Rule will mark message as solved!");
+
+			unexpectedMessageProblemSolved = true;
+		}
+
 		if (ruleResult.isRuleMatchesEquationSign()
 				&& rule.isSendMessageIfTrue()) {
 			// Sending message
@@ -456,10 +467,11 @@ public class RecursiveAbstractMonitoringRulesResolver {
 		return ruleResult.isRuleMatchesEquationSign();
 	}
 
-	/*
-	 * Methods to return results
-	 */
 	public boolean isInterventionFinishedForParticipantAfterThisResolving() {
 		return interventionIsFinishedForParticipantAfterThisResolving;
+	}
+
+	public boolean isUnexpectedMessageProblemSolved() {
+		return unexpectedMessageProblemSolved;
 	}
 }
