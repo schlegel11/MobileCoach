@@ -1193,6 +1193,14 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
+	public void monitoringRuleChangeMarkCaseAsSolvedIfTrue(
+			final MonitoringRule monitoringRule, final boolean newValue) {
+		monitoringRule.setMarkCaseAsSolvedWhenTrue(newValue);
+
+		databaseManagerService.saveModelObject(monitoringRule);
+	}
+
+	@Synchronized
 	public void monitoringRuleChangeStopInterventionIfTrue(
 			final MonitoringRule monitoringRule, final boolean newValue) {
 		monitoringRule.setStopInterventionWhenTrue(newValue);

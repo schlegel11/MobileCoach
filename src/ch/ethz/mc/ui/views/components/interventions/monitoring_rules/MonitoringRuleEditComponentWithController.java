@@ -100,7 +100,7 @@ public class MonitoringRuleEditComponentWithController extends
 				currentMonitoringMessageGroup = monitoringMessageGroup;
 
 				if (monitoringMessageGroup.isMessagesExpectAnswer()) {
-					getSendToSupervisorComboBox().setEnabled(false);
+					getSendToSupervisorCheckBox().setEnabled(false);
 				}
 			}
 		}
@@ -134,13 +134,13 @@ public class MonitoringRuleEditComponentWithController extends
 						if (currentMonitoringMessageGroup != null
 								&& currentMonitoringMessageGroup
 										.isMessagesExpectAnswer()
-								&& getSendToSupervisorComboBox().isEnabled()) {
-							if (getSendToSupervisorComboBox().getValue()) {
-								getSendToSupervisorComboBox().setValue(false);
+								&& getSendToSupervisorCheckBox().isEnabled()) {
+							if (getSendToSupervisorCheckBox().getValue()) {
+								getSendToSupervisorCheckBox().setValue(false);
 							}
-							getSendToSupervisorComboBox().setEnabled(false);
-						} else if (!getSendToSupervisorComboBox().isEnabled()) {
-							getSendToSupervisorComboBox().setEnabled(true);
+							getSendToSupervisorCheckBox().setEnabled(false);
+						} else if (!getSendToSupervisorCheckBox().isEnabled()) {
+							getSendToSupervisorCheckBox().setEnabled(true);
 						}
 
 						adjust();
@@ -173,9 +173,9 @@ public class MonitoringRuleEditComponentWithController extends
 				buttonClickListener);
 
 		// Add other listeners
-		getSendMessageIfTrueComboBox().setValue(
+		getSendMessageIfTrueCheckBox().setValue(
 				monitoringRule.isSendMessageIfTrue());
-		getSendMessageIfTrueComboBox().addValueChangeListener(
+		getSendMessageIfTrueCheckBox().addValueChangeListener(
 				new ValueChangeListener() {
 
 					@Override
@@ -187,24 +187,30 @@ public class MonitoringRuleEditComponentWithController extends
 								.monitoringRuleChangeSendMessageIfTrue(
 										monitoringRule, newValue);
 
-						if (newValue
-								&& getStopRuleExecutionAndFinishInterventionIfTrueComboBox()
-										.getValue()) {
-							getStopRuleExecutionAndFinishInterventionIfTrueComboBox()
-									.setValue(false);
+						if (newValue) {
+							if (getMarkCaseAsSolvedWhenTrueCheckBox()
+									.getValue()) {
+								getMarkCaseAsSolvedWhenTrueCheckBox().setValue(
+										false);
+							}
+							if (getStopRuleExecutionAndFinishInterventionIfTrueCheckBox()
+									.getValue()) {
+								getStopRuleExecutionAndFinishInterventionIfTrueCheckBox()
+										.setValue(false);
+							}
 						}
 						if (!newValue
-								&& getSendToSupervisorComboBox().getValue()) {
-							getSendToSupervisorComboBox().setValue(false);
+								&& getSendToSupervisorCheckBox().getValue()) {
+							getSendToSupervisorCheckBox().setValue(false);
 						}
 
 						adjust();
 					}
 				});
 
-		getSendToSupervisorComboBox().setValue(
+		getSendToSupervisorCheckBox().setValue(
 				monitoringRule.isSendMessageToSupervisor());
-		getSendToSupervisorComboBox().addValueChangeListener(
+		getSendToSupervisorCheckBox().addValueChangeListener(
 				new ValueChangeListener() {
 
 					@Override
@@ -216,24 +222,61 @@ public class MonitoringRuleEditComponentWithController extends
 								.monitoringRuleChangeSendMessageToSupervisor(
 										monitoringRule, newValue);
 
-						if (newValue
-								&& getStopRuleExecutionAndFinishInterventionIfTrueComboBox()
-										.getValue()) {
-							getStopRuleExecutionAndFinishInterventionIfTrueComboBox()
-									.setValue(false);
-						}
-						if (newValue
-								&& !getSendMessageIfTrueComboBox().getValue()) {
-							getSendMessageIfTrueComboBox().setValue(true);
+						if (newValue) {
+							if (!getSendMessageIfTrueCheckBox().getValue()) {
+								getSendMessageIfTrueCheckBox().setValue(true);
+							}
+							if (getMarkCaseAsSolvedWhenTrueCheckBox()
+									.getValue()) {
+								getMarkCaseAsSolvedWhenTrueCheckBox().setValue(
+										false);
+							}
+							if (getStopRuleExecutionAndFinishInterventionIfTrueCheckBox()
+									.getValue()) {
+								getStopRuleExecutionAndFinishInterventionIfTrueCheckBox()
+										.setValue(false);
+							}
 						}
 
 						adjust();
 					}
 				});
 
-		getStopRuleExecutionAndFinishInterventionIfTrueComboBox().setValue(
+		getMarkCaseAsSolvedWhenTrueCheckBox().setValue(
+				monitoringRule.isMarkCaseAsSolvedWhenTrue());
+		getMarkCaseAsSolvedWhenTrueCheckBox().addValueChangeListener(
+				new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						log.debug("Adjust mark case as solved");
+						val newValue = (boolean) event.getProperty().getValue();
+
+						getInterventionAdministrationManagerService()
+								.monitoringRuleChangeMarkCaseAsSolvedIfTrue(
+										monitoringRule, newValue);
+
+						if (newValue) {
+							if (getSendMessageIfTrueCheckBox().getValue()) {
+								getSendMessageIfTrueCheckBox().setValue(false);
+							}
+							if (getSendToSupervisorCheckBox().getValue()) {
+								getSendToSupervisorCheckBox().setValue(false);
+							}
+							if (getStopRuleExecutionAndFinishInterventionIfTrueCheckBox()
+									.getValue()) {
+								getStopRuleExecutionAndFinishInterventionIfTrueCheckBox()
+										.setValue(false);
+							}
+						}
+
+						adjust();
+					}
+				});
+
+		getStopRuleExecutionAndFinishInterventionIfTrueCheckBox().setValue(
 				monitoringRule.isStopInterventionWhenTrue());
-		getStopRuleExecutionAndFinishInterventionIfTrueComboBox()
+		getStopRuleExecutionAndFinishInterventionIfTrueCheckBox()
 				.addValueChangeListener(new ValueChangeListener() {
 
 					@Override
@@ -246,11 +289,16 @@ public class MonitoringRuleEditComponentWithController extends
 										monitoringRule, newValue);
 
 						if (newValue) {
-							if (getSendMessageIfTrueComboBox().getValue()) {
-								getSendMessageIfTrueComboBox().setValue(false);
+							if (getSendMessageIfTrueCheckBox().getValue()) {
+								getSendMessageIfTrueCheckBox().setValue(false);
 							}
-							if (getSendToSupervisorComboBox().getValue()) {
-								getSendToSupervisorComboBox().setValue(false);
+							if (getSendToSupervisorCheckBox().getValue()) {
+								getSendToSupervisorCheckBox().setValue(false);
+							}
+							if (getMarkCaseAsSolvedWhenTrueCheckBox()
+									.getValue()) {
+								getMarkCaseAsSolvedWhenTrueCheckBox().setValue(
+										false);
 							}
 						}
 

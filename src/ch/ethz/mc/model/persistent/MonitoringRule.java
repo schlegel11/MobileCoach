@@ -69,7 +69,7 @@ public class MonitoringRule extends AbstractMonitoringRule {
 			final int hourToSendMessage,
 			final int hoursUntilMessageIsHandledAsUnanswered,
 			final boolean stopInterventionWhenTrue,
-			final boolean solvesUnexpectedMessageCase) {
+			final boolean markCaseAsSolvedWhenTrue) {
 		super(ruleWithPlaceholders, ruleEquationSign,
 				ruleComparisonTermWithPlaceholders, comment,
 				isSubRuleOfMonitoringRule, order, storeValueToVariableWithName,
@@ -80,7 +80,7 @@ public class MonitoringRule extends AbstractMonitoringRule {
 		this.hourToSendMessage = hourToSendMessage;
 		this.hoursUntilMessageIsHandledAsUnanswered = hoursUntilMessageIsHandledAsUnanswered;
 		this.stopInterventionWhenTrue = stopInterventionWhenTrue;
-		this.solvesUnexpectedMessageCase = solvesUnexpectedMessageCase;
+		this.markCaseAsSolvedWhenTrue = markCaseAsSolvedWhenTrue;
 	}
 
 	/**
@@ -125,12 +125,12 @@ public class MonitoringRule extends AbstractMonitoringRule {
 	private boolean				stopInterventionWhenTrue;
 
 	/**
-	 * <strong>OPTIONAL:</strong> The unexpected incoming message will be
-	 * handled as solved
+	 * <strong>OPTIONAL:</strong> The unexpected incoming message or intention
+	 * will be handled as solved when the rule evaluates to true
 	 */
 	@Getter
 	@Setter
-	private boolean				solvesUnexpectedMessageCase;
+	private boolean				markCaseAsSolvedWhenTrue;
 
 	/*
 	 * (non-Javadoc)

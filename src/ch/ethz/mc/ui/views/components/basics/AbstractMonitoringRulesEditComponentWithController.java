@@ -89,6 +89,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 
 	private final ThemeResource		RULE_ICON						= new ThemeResource(
 																			ThemeImageStrings.RULE_ICON_SMALL);
+	private final ThemeResource		SOLVING_RULE_ICON				= new ThemeResource(
+																			ThemeImageStrings.OK_ICON_SMALL);
 	private final ThemeResource		DAILY_RULE_ICON					= new ThemeResource(
 																			ThemeImageStrings.CALENDAR_ICON_SMALL);
 	private final ThemeResource		PERIODIC_RULE_ICON				= new ThemeResource(
@@ -385,6 +387,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 				icon = UNEXPECTED_MESSAGE_RULE_ICON;
 			} else if (monitoringRule.getType() == MonitoringRuleTypes.USER_INTENTION) {
 				icon = INTENTION_RULE_ICON;
+			} else if (monitoringRule.isMarkCaseAsSolvedWhenTrue()) {
+				icon = SOLVING_RULE_ICON;
 			} else {
 				icon = RULE_ICON;
 			}

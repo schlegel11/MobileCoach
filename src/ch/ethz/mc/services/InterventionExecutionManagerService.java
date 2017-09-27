@@ -938,7 +938,7 @@ public class InterventionExecutionManagerService {
 							.getMessageSendingResultForMonitoringRules()) {
 						if (messageToSendTask.getMessageTextToSend() != null) {
 
-							log.debug("Preparing message for sending for participant");
+							log.debug("Preparing message for sending to participant");
 
 							val monitoringRule = (MonitoringRule) messageToSendTask
 									.getAbstractMonitoringRuleRequiredToPrepareMessage();
@@ -1082,14 +1082,14 @@ public class InterventionExecutionManagerService {
 				return null;
 			}
 
-			if (recursiveRuleResolver.isUnexpectedMessageProblemSolved()) {
+			if (recursiveRuleResolver.isCaseMarkedAsSolved()) {
 				unexpectedDialogMessageSetProblemSolved(dialogMessageCreated);
 			}
 
 			for (val messageToSendTask : recursiveRuleResolver
 					.getMessageSendingResultForMonitoringReplyRules()) {
 				if (messageToSendTask.getMessageTextToSend() != null) {
-					log.debug("Preparing reply message for sending for participant");
+					log.debug("Preparing reply message on unexpected message for sending to participant");
 
 					MonitoringReplyRule monitoringReplyRule = null;
 					if (messageToSendTask
