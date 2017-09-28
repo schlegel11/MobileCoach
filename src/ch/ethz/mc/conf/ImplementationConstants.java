@@ -140,7 +140,7 @@ public class ImplementationConstants {
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_VALUE_MODIFIER							= "\\{[^\\}]+\\}";
 
 	public static final String	REGULAR_EXPRESSION_TO_CLEAN_PHONE_NUMBERS							= "[^\\d]";
-	public static final String	REGULAR_EXPRESSION_TO_CLEAN_RECEIVED_MESSAGE						= "[^a-z0-9\\-\\s\\.\\,]";
+	public static final String	REGULAR_EXPRESSION_TO_CLEAN_RECEIVED_MESSAGE						= "[^àáÀÁa-z0-9\\-\\s\\.\\,]";
 	public static final String	REGULAR_EXPRESSION_TO_CLEAN_FILE_NAMES								= "[^A-Za-z0-9\\_\\-\\d.]";
 	public static final String	REGULAR_EXPRESSION_TO_CLEAN_DOUBLE_VALUES							= "\\.0+$";
 
