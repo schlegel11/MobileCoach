@@ -140,7 +140,7 @@ public class RichConversationService {
 			
 			String interventionId = null;
 			String conversation;
-			String restString = message.substring(START_CONVERSATION_PREFIX.length());
+			String restString = message.substring(START_CONVERSATION_PREFIX.length()).trim();
 			int slashIndex = restString.indexOf("/");
 			if (slashIndex > -1){
 				interventionId = restString.substring(0, slashIndex);
