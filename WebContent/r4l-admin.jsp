@@ -60,74 +60,107 @@
 
 	// Configuration
 	Hashtable<String, String> groups = new Hashtable<String, String>();
-	groups.put("11", "Bern ab 01.10.");
-	groups.put("12", "Bern ab 01.11.");
-	groups.put("13", "Bern ab 01.12.");
-	groups.put("14", "Bern ab 01.01.");
-	groups.put("21", "Basel ab 01.10.");
-	groups.put("22", "Basel ab 01.11.");
-	groups.put("23", "Basel ab 01.12.");
-	groups.put("24", "Basel ab 01.01.");
-	groups.put("31", "Aargau ab 01.10.");
-	groups.put("32", "Aargau ab 01.11.");
-	groups.put("33", "Aargau ab 01.12.");
-	groups.put("34", "Aargau ab 01.01.");
-	groups.put("41", "Genf und Waadt ab 01.10.");
-	groups.put("42", "Genf und Waadt ab 01.11.");
-	groups.put("43", "Genf und Waadt ab 01.12.");
-	groups.put("44", "Genf und Waadt ab 01.01.");
-	groups.put("51", "LUNGENLIGA intern ab 01.10.");
-	groups.put("52", "LUNGENLIGA intern ab 01.11.");
-	groups.put("53", "LUNGENLIGA intern ab 01.12.");
-	groups.put("54", "St. Gallen ab 01.01.");
+	groups.put("11", "Bern ab 02.10.");
+	groups.put("12", "Bern ab 06.11.");
+	groups.put("13", "Bern ab 04.12.");
+	groups.put("21", "Basel ab 02.10.");
+	groups.put("22", "Basel ab 06.11.");
+	groups.put("23", "Basel ab 04.12.");
+	groups.put("31", "Aargau ab 02.10.");
+	groups.put("32", "Aargau ab 06.11.");
+	groups.put("33", "Aargau ab 04.12.");
+	groups.put("41", "Genf/Waadt ab 02.10.");
+	groups.put("42", "Genf/Waadt ab 06.11.");
+	groups.put("43", "Genf/Waadt ab 04.12.");
+	groups.put("51", "St. Gallen ab 02.10.");
+	groups.put("52", "St. Gallen ab 06.11.");
+	groups.put("53", "St. Gallen ab 04.12.");
+	groups.put("61", "Schwyz ab 02.10.");
+	groups.put("62", "Schwyz ab 06.11.");
+	groups.put("63", "Schwyz ab 04.12.");
+	groups.put("91", "LUNGENLIGA ab 02.10.");
+	groups.put("92", "LUNGENLIGA ab 06.11.");
+	groups.put("93", "LUNGENLIGA ab 04.12.");
+	groups.put("00", "Interne Testgruppe ab 18.09.");
+	groups.put("01", "Interne Testgruppe ab 02.10.");
+	groups.put("02", "Interne Testgruppe ab 06.11.");
+	groups.put("03", "Interne Testgruppe ab 04.12.");
+	
+	Hashtable<String, String> challenges1 = new Hashtable<String, String>();
+	challenges1.put("challenge#01", "M1 - 01. Challenge - Own positive activity picture + message");
+	challenges1.put("challenge#02", "M1 - 02. Challenge - Own anti-stress picture + message");
+	challenges1.put("challenge#04", "M1 - 04. Challenge - Own quit message");
+	challenges1.put("challenge#05", "M1 - 05. Challenge - Own motivational message");
+	challenges1.put("challenge#06", "M1 - 06. Challenge - Own resistance message");
+	challenges1.put("challenge#21", "M1 - 21. Challenge - Booster Be You: Helpful strategy against stress");
 
-	Hashtable<String, String> challenges = new Hashtable<String, String>();
-	challenges.put("challenge#01", "1. Challenge - Own positive activity picture + message");
-	challenges.put("challenge#02", "2. Challenge - Own anti-stress picture + message");
-	challenges.put("challenge#03", "3. Challenge - Own say NO message");
-	challenges.put("challenge#04", "4. Challenge - Own motivational message + picture (Non-Smoker smokestatus=2)");
-	challenges.put("challenge#05", "5. Challenge - Own quit message + picture (Smoker c/d)");
-	challenges.put("challenge#06", "6. Challenge - Own quit message + picture (Non-Smoker smokestatus!=2)");
-	challenges.put("challenge#07", "7. Challenge - Booster be healthy message + picture");
+	Hashtable<String, String> challenges2 = new Hashtable<String, String>();
+	challenges2.put("challenge#01", "M2 - 01. Challenge - Own positive social competence picture + message");
+	challenges2.put("challenge#02", "M2 - 02. Challenge - Challenge offline time");
+	challenges2.put("challenge#03", "M2 - 03. Challenge - Own say NO message tabak");
+	challenges2.put("challenge#04", "M2 - 04. Challenge - Own say NO message Substanzen allgemein");
+	challenges2.put("challenge#22", "M2 - 22. Challenge - Booster Be Smart: Personal social competence strategy");
 
 	// Data preparation
-	Hashtable<String, Participant> groupParticipants = new Hashtable<String, Participant>();
+	Hashtable<String, Participant> groupParticipants1 = new Hashtable<String, Participant>();
+	Hashtable<String, Participant> groupParticipants2 = new Hashtable<String, Participant>();
 
 	List<String> sortedGroups = new ArrayList<String>();
 	sortedGroups.addAll(groups.keySet());
 	Collections.sort(sortedGroups);
 
-	List<String> sortedChallenges = new ArrayList<String>();
-	sortedChallenges.addAll(challenges.keySet());
-	Collections.sort(sortedChallenges);
+	List<String> sortedChallenges1 = new ArrayList<String>();
+	sortedChallenges1.addAll(challenges1.keySet());
+	Collections.sort(sortedChallenges1);
 
-	Intervention intervention = null;
+	List<String> sortedChallenges2 = new ArrayList<String>();
+	sortedChallenges2.addAll(challenges2.keySet());
+	Collections.sort(sortedChallenges2);
+
+	Intervention intervention1 = null;
+	Intervention intervention2 = null;
 	Iterable<Intervention> interventions = iam.getAllInterventions();
 
 	for (Intervention interventionInLoop : interventions) {
 		if (interventionInLoop.getName().toLowerCase()
-		.startsWith("ready4life 2016")
+		.startsWith("ready4life 2017 modul 1")
 		&& interventionInLoop.isActive()) {
-	intervention = interventionInLoop;
-	break;
+	intervention1 = interventionInLoop;
+		} else if (interventionInLoop.getName().toLowerCase()
+		.startsWith("ready4life 2017 modul 2")
+		&& interventionInLoop.isActive()) {
+	intervention2 = interventionInLoop;
 		}
 	}
 
-	if (intervention == null) {
+	if (intervention1 == null ||intervention2 == null) {
 		out.write("Intervention not ready.");
 		out.flush();
 		out.close();
 		return;
 	}
 
-	Iterable<Participant> participants = iam
-	.getAllParticipantsOfIntervention(intervention.getId());
+	Iterable<Participant> participants1 = iam
+	.getAllParticipantsOfIntervention(intervention1.getId());
 
 	for (String group : sortedGroups) {
-		for (Participant participant : participants) {
+		for (Participant participant : participants1) {
 	if (participant.getGroup() != null
 	&& participant.getGroup().equals(group)) {
-		groupParticipants.put(group, participant);
+		groupParticipants1.put(group, participant);
+		break;
+	}
+		}
+	}
+
+	Iterable<Participant> participants2 = iam
+	.getAllParticipantsOfIntervention(intervention2.getId());
+
+	for (String group : sortedGroups) {
+		for (Participant participant : participants2) {
+	if (participant.getGroup() != null
+	&& participant.getGroup().equals(group)) {
+		groupParticipants2.put(group, participant);
 		break;
 	}
 		}
@@ -226,7 +259,7 @@ th {
 <script
 	src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 <script type="text/javascript">
-	var setAppropriate = function(action, challenge, participant) {
+	var setAppropriate = function(action, intervention, challenge, participant) {
 		$("#form").attr("action",
 				"#post_" + challenge.replace("#", "_") + "_" + participant);
 		$("#form").find("input[name='action']").attr("value", action);
@@ -242,111 +275,134 @@ th {
 			name="challenge" value="" /> <input type="hidden" name="participant"
 			value="" />
 	</form>
+	<h1>ready4life Module 1 & 2</h1>
+	<p>This page only shows images/comments of participants during
+		posting and checking phase.</p>
+	<%
+		for (int n = 0; n < 2; n++) {
+			Intervention intervention;
+			Hashtable<String, Participant> groupParticipants;
+			Hashtable<String, String> challenges;
+			List<String> sortedChallenges;
+
+			if (n == 0) {
+				intervention = intervention1;
+				groupParticipants = groupParticipants1;
+				challenges = challenges1;
+				sortedChallenges = sortedChallenges1;
+			} else {
+				intervention = intervention2;
+				groupParticipants = groupParticipants2;
+				challenges = challenges2;
+				sortedChallenges = sortedChallenges2;
+			}
+	%>
 	<h1><%=intervention.getName()%></h1>
-	<p>This page only shows images/comments of participants during posting and checking phase.</p>
 	<%
 		for (String group : sortedGroups) {
 	%>
 	<h2><%=groups.get(group)%></h2>
 	<%
 		Participant participant = groupParticipants.get(group);
-			if (participant == null) {
+				if (participant == null) {
 	%>
 	<p class="warn">No participant in this group.</p>
 	<%
 		} else {
-				for (String challenge : sortedChallenges) {
+					for (String challenge : sortedChallenges) {
 	%>
 	<h3><%=challenges.get(challenge)%></h3>
 	<%
 		List<String> variableList = new ArrayList<String>();
-					variableList.add(challenge.replace("#", "Comment"));
-					variableList.add(challenge.replace("#", "Image"));
-					variableList.add(challenge.replace("#",
-							"NotAppropriate"));
+						variableList.add(challenge.replace("#", "Comment"));
+						variableList.add(challenge.replace("#", "Image"));
+						variableList.add(challenge.replace("#",
+								"NotAppropriate"));
 
-					CollectionOfExtendedListVariables result = rms
-							.readVariableListArrayOfGroupOrIntervention(
-									participant.getId(), variableList,
-									true, true);
+						CollectionOfExtendedListVariables result = rms
+								.readVariableListArrayOfGroupOrIntervention(
+										participant.getId(), variableList,
+										true, true);
 
-					int i = 0;
-					out.write("<table><tr>");
+						int i = 0;
+						out.write("<table><tr>");
 
-					List<ExtendedListVariable> variableListing = result
-							.getVariableListing();
-					Hashtable<String, ExtendedListVariable> variableNameHashtable = new Hashtable<String, ExtendedListVariable>();
+						List<ExtendedListVariable> variableListing = result
+								.getVariableListing();
+						Hashtable<String, ExtendedListVariable> variableNameHashtable = new Hashtable<String, ExtendedListVariable>();
 
-					List<String> variableNameListing = new ArrayList<String>();
-					for (ExtendedListVariable post : variableListing) {
-						variableNameListing.add(post.getIdentifier());
-						variableNameHashtable.put(post.getIdentifier(),
-								post);
-					}
-					Collections.sort(variableNameListing);
+						List<String> variableNameListing = new ArrayList<String>();
+						for (ExtendedListVariable post : variableListing) {
+							variableNameListing.add(post.getIdentifier());
+							variableNameHashtable.put(post.getIdentifier(),
+									post);
+						}
+						Collections.sort(variableNameListing);
 
-					for (String postName : variableNameListing) {
-						ExtendedListVariable post = variableNameHashtable
-								.get(postName);
+						for (String postName : variableNameListing) {
+							ExtendedListVariable post = variableNameHashtable
+									.get(postName);
 
-						String comment = post.getVariables().get(0)
-								.getValue();
-						String image = post.getVariables().get(1)
-								.getValue();
-						boolean notAppropriate = post.getVariables().get(2)
-								.getValue().equals("0") ? false : true;
+							String comment = post.getVariables().get(0)
+									.getValue();
+							String image = post.getVariables().get(1)
+									.getValue();
+							boolean notAppropriate = post.getVariables()
+									.get(2).getValue().equals("0") ? false
+									: true;
 
-						Variable statusVariable = rms.readVariable(
-								new ObjectId(post.getIdentifier()),
-								challenge.replace("#", "Status"), true);
+							Variable statusVariable = rms.readVariable(
+									new ObjectId(post.getIdentifier()),
+									challenge.replace("#", "Status"), true);
 
-						if ((statusVariable.getValue().equals("0") || statusVariable
-								.getValue().equals("1"))
-								&& (!comment.equals("") || !image
-										.equals(""))) {
-							i++;
+							if ((statusVariable.getValue().equals("0") || statusVariable
+									.getValue().equals("1"))
+									&& (!comment.equals("") || !image
+											.equals(""))) {
+								i++;
 	%>
 	<td
-		id="post_<%=challenge.replace("#", "_")%>_<%=post.getIdentifier()%>">
+		id="post_<%=n %>_<%=challenge.replace("#", "_")%>_<%=post.getIdentifier()%>">
 		<%
 			if (!image.equals("")) {
 		%> <a
 		href="<%=ImplementationConstants.FILE_STREAMING_SERVLET_PATH
-											+ "/" + image%>"
+												+ "/" + image%>"
 		target="_blank"><img
 			src="<%=ImplementationConstants.FILE_STREAMING_SERVLET_PATH
-											+ "/" + image%>/200/200/false/true" /></a><br />
+												+ "/" + image%>/200/200/false/true" /></a><br />
 		<%
 			}
 		%> <%=esc(comment)%><br /> <br /> <%
  	if (statusVariable.getValue().equals("1")) {
- 							if (notAppropriate) {
- 								out.write("<button onclick=\"setAppropriate(true, '"
- 										+ challenge
- 										+ "', '"
- 										+ post.getIdentifier()
- 										+ "')\" class=\"red\">Set appropriate</button>");
+ 								if (notAppropriate) {
+ 									out.write("<button onclick=\"setAppropriate(true, '"+n+"', '"
+ 											+ challenge
+ 											+ "', '"
+ 											+ post.getIdentifier()
+ 											+ "')\" class=\"red\">Set appropriate</button>");
+ 								} else {
+ 									out.write("<button onclick=\"setAppropriate(false, '"+n+"', '"
+ 											+ challenge
+ 											+ "', '"
+ 											+ post.getIdentifier()
+ 											+ "')\" class=\"green\">Set NOT appropriate</button>");
+ 								}
  							} else {
- 								out.write("<button onclick=\"setAppropriate(false, '"
- 										+ challenge
- 										+ "', '"
- 										+ post.getIdentifier()
- 										+ "')\" class=\"green\">Set NOT appropriate</button>");
- 							}
- 						} else {
  %> <span class="bold">Still open for posting</span> <%
  	}
  %>
 	</td>
 	<%
 		if (i == 4) {
-								out.write("</tr><tr>");
-								i = 0;
-							}
+									out.write("</tr><tr>");
+									i = 0;
+								}
 
+							}
 						}
+						out.write("</tr></table>");
 					}
-					out.write("</tr></table>");
 				}
 			}
 		}
