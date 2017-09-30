@@ -20,6 +20,7 @@ package ch.ethz.mc.services;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -50,6 +51,7 @@ import ch.ethz.mc.services.internal.FileStorageManagerService;
 import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.services.internal.VariablesManagerService.ExternallyReadProtectedVariableException;
 import ch.ethz.mc.services.internal.VariablesManagerService.ExternallyWriteProtectedVariableException;
+import ch.ethz.mobilecoach.model.persistent.MediaLibraryEntry;
 
 /**
  * Cares for the orchestration of all REST calls
@@ -418,6 +420,17 @@ public class RESTManagerService {
 		for (AbstractVariableWithValue v: variables.values()){
 			result.put(v.getName(), v.getValue());
 		}
+		return result;
+	}
+	
+	public List<MediaLibraryEntry> getMediaLibrary(final ObjectId participantId){
+		List<MediaLibraryEntry> result = new LinkedList<MediaLibraryEntry>();
+		
+		val all = databaseManagerService.findModelObjects(MediaLibraryEntry.class, "{participantId:#}", participantId).iterator();
+		while (all.hasNext()) {
+			result.add(all.next());
+	    }
+		
 		return result;
 	}
 

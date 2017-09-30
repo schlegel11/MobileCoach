@@ -84,7 +84,7 @@ public class RestoreChatEngineStateTest extends TestFramework {
 		ChatEngineStateStore chatEngineStateStore = new ChatEngineStateStore(databaseManagerService, participantId);
 		MockConversationUI conversationUI = new MockConversationUI();
 
-		ChatEngine engine = new ChatEngine(repository, conversationUI, new InMemoryVariableStore(), null, null, chatEngineStateStore);
+		ChatEngine engine = new ChatEngine(repository, conversationUI, new InMemoryVariableStore(), null, null, null, chatEngineStateStore);
 		Logger logger = new MockLogger();
 		engine.setLogger(logger);
 		engine.sendExceptionAsMessage =  false;
@@ -104,7 +104,7 @@ public class RestoreChatEngineStateTest extends TestFramework {
 			ChatEnginePersistentState ces = iterator.next();
 			if(ChatEngineStateStore.containsARecentChatEngineState(ces)){
 				ChatEngineStateStore chatEngineStateStore2 = new ChatEngineStateStore(databaseManagerService, ces.getParticipantId());
-				ChatEngine engine2 = new ChatEngine(repository, conversationUI, new InMemoryVariableStore(), null, null, chatEngineStateStore2);
+				ChatEngine engine2 = new ChatEngine(repository, conversationUI, new InMemoryVariableStore(), null, null, null, chatEngineStateStore2);
 				engine2.sendExceptionAsMessage =  false;
 				engine2.setLogger(logger);
 				chatEngineStateStore.restoreState(engine2);

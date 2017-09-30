@@ -35,6 +35,7 @@ import ch.ethz.mobilecoach.chatlib.engine.conversation.UserReplyListener;
 import ch.ethz.mobilecoach.chatlib.engine.helpers.IncrementVariableHelper;
 import ch.ethz.mobilecoach.chatlib.engine.helpers.MinusVariableHelper;
 import ch.ethz.mobilecoach.chatlib.engine.helpers.SumVariablesHelper;
+import ch.ethz.mobilecoach.chatlib.engine.media.MediaLibrary;
 import ch.ethz.mobilecoach.chatlib.engine.model.AnswerOption;
 import ch.ethz.mobilecoach.chatlib.engine.model.Message;
 import ch.ethz.mobilecoach.chatlib.engine.timing.TimingCalculatorAdvanced;
@@ -215,13 +216,14 @@ public class RichConversationService {
 		};
 
 		VariableStore variableStore = createVariableStore(participant.getId());
+		MediaLibrary mediaLibrary = new InDataBaseMediaLibrary(dBManagerService, participant.getId());
 
 		MattermostConnector ui = new MattermostConnector(participant.getId());
 		HelpersRepository helpers = new HelpersRepository();
 		
 		
 		Translator translator = prepareTranslator(participant.getLanguage(), repository, variableStore);
-		ChatEngine engine = new ChatEngine(repository, ui, variableStore, 
+		ChatEngine engine = new ChatEngine(repository, ui, variableStore, mediaLibrary,
 				helpers, translator, chatEngineStateStore, new TimingCalculatorAdvanced());
 		engine.sendExceptionAsMessage = false;
 		

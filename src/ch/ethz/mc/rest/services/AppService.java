@@ -1,5 +1,7 @@
 package ch.ethz.mc.rest.services;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +20,7 @@ import ch.ethz.mc.model.persistent.AppToken;
 import ch.ethz.mc.model.persistent.OneTimeToken;
 import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
+import ch.ethz.mobilecoach.model.persistent.MediaLibraryEntry;
 import ch.ethz.mobilecoach.services.MattermostManagementService;
 import ch.ethz.mobilecoach.services.MattermostManagementService.UserConfigurationForAuthentication;
 import lombok.AllArgsConstructor;
@@ -71,6 +74,35 @@ public class AppService {
 				new UserConfigurationForAuthentication(userConfiguration),
 				getVariables(userId));
 	}
+	
+	@GET
+	@Path("/media-library")
+	@Produces("application/json")
+	public List<LibraryEntry> mediaLibrary(@Context final HttpServletRequest request,
+			@HeaderParam("Authentication") final String token) throws BadRequestException {
+		
+		// TODO: if more services are added, authentication should be separated out into a function or decorator
+
+		if (token == null) {
+			throw new WebApplicationException(Response.status(400).entity("Missing header 'Authentication'.").build());
+		}
+		
+		ObjectId userId = null;
+		if (AppToken.isAppToken(token)){
+			userId = restManagerService.findParticipantIdForAppToken(token);
+		}
+		
+		if (userId == null) {
+			throw new WebApplicationException(Response.status(403).entity("Invalid Token supplied").build());
+		}
+		
+		List<LibraryEntry> result = new LinkedList<LibraryEntry>();
+		for (MediaLibraryEntry e: restManagerService.getMediaLibrary(userId)){
+			result.add(new LibraryEntry(e.getType(), e.getUrl(), e.getTitle()));
+		}
+		return result;
+	}
+	
 
 	private MattermostUserConfiguration fetchUserConfiguration(final ObjectId participantId) {
 		MattermostUserConfiguration userConfig;
@@ -106,6 +138,20 @@ public class AppService {
 		private final String participant_id;
 		@Getter
 		private final String token;
+
+	}
+	
+	@AllArgsConstructor
+	private static class LibraryEntry {
+
+		@Getter
+		private final String type;
+
+		@Getter
+		private final String url;
+		
+		@Getter
+		private final String title;
 
 	}
 }
