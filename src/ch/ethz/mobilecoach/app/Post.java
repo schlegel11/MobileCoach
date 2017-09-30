@@ -53,6 +53,19 @@ public class Post {
 		return requestType;
 	}
 	
+	@Setter
+	private String mediaType;
+	
+	public String getMedia_type(){
+		return mediaType;
+	}
+	
+	@Setter
+	private String mediaUrl;
+	
+	public String getMedia_url(){
+		return mediaUrl;
+	}
 	
 	@Getter
 	@Setter

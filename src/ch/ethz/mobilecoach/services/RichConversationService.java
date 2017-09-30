@@ -414,7 +414,10 @@ public class RichConversationService {
 					post.setPostType(Post.POST_TYPE_REQUEST);
 					post.setRequestType(message.requestType);
 				}
-
+				
+				post.setMediaType(message.mediaType);
+				post.setMediaUrl(message.mediaUrl);				
+				
 				post.getParameters().putAll(message.parameters);
 				post.setHidden(message.hidden);
 
