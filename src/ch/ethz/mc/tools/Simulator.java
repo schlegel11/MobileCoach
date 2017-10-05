@@ -88,6 +88,7 @@ public class Simulator {
 			final String senderIdentification, final String message) {
 		val simulatedReceivedMessage = new ReceivedMessage();
 		simulatedReceivedMessage.setType(DialogOptionTypes.SMS);
+		simulatedReceivedMessage.setIntention(false);
 		simulatedReceivedMessage.setMessage(message);
 		simulatedReceivedMessage.setReceivedTimestamp(InternalDateTime
 				.currentTimeMillis());

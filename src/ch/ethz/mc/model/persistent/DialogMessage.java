@@ -37,6 +37,7 @@ import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
+import ch.ethz.mc.model.persistent.types.DialogMessageTypes;
 import ch.ethz.mc.model.ui.UIDialogMessageProblemViewWithParticipant;
 import ch.ethz.mc.model.ui.UIDialogMessageWithParticipant;
 import ch.ethz.mc.model.ui.results.UIDialogMessageWithParticipantForResults;
@@ -75,6 +76,14 @@ public class DialogMessage extends ModelObject {
 	@Setter
 	@NonNull
 	private DialogMessageStatusTypes	status;
+
+	/**
+	 * The {@link DialogMessageTypes} of the message
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private DialogMessageTypes			type;
 
 	/**
 	 * The message sent to the {@link Participant}
@@ -202,6 +211,22 @@ public class DialogMessage extends ModelObject {
 			final String organization, final String organizationUnit,
 			final boolean containsMediaContent) {
 
+		String typeString = null;
+		switch (type) {
+			case COMMAND:
+				typeString = Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__COMMAND_MESSAGE);
+				break;
+			case INTENTION:
+				typeString = Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__USER_INTENTION_MESSAGE);
+				break;
+			case PLAIN:
+				typeString = Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__PLAIN_TEXT_MESSAGE);
+				break;
+		}
+
 		final val dialogMessage = new UIDialogMessageWithParticipantForResults(
 				participantId,
 				participantName,
@@ -217,6 +242,7 @@ public class DialogMessage extends ModelObject {
 						.getAdminString(AdminMessageStrings.UI_MODEL__SUPERVISOR_MESSAGE)
 						: Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__PARTICIPANT_MESSAGE),
+				typeString,
 				message == null || message.equals("") ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 						: message,
@@ -264,6 +290,23 @@ public class DialogMessage extends ModelObject {
 			final String language, final String group,
 			final String organization, final String organizationUnit,
 			final boolean containsMediaContent) {
+
+		String typeString = null;
+		switch (type) {
+			case COMMAND:
+				typeString = Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__COMMAND_MESSAGE);
+				break;
+			case INTENTION:
+				typeString = Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__USER_INTENTION_MESSAGE);
+				break;
+			case PLAIN:
+				typeString = Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__PLAIN_TEXT_MESSAGE);
+				break;
+		}
+
 		final val dialogMessage = new UIDialogMessageWithParticipant(
 				participantId,
 				participantName,
@@ -279,6 +322,7 @@ public class DialogMessage extends ModelObject {
 						.getAdminString(AdminMessageStrings.UI_MODEL__SUPERVISOR_MESSAGE)
 						: Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__PARTICIPANT_MESSAGE),
+				typeString,
 				message == null || message.equals("") ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 						: message,
@@ -327,6 +371,23 @@ public class DialogMessage extends ModelObject {
 			final String participantId, final String participantName,
 			final String language, final String group,
 			final String organization, final String organizationUnit) {
+
+		String typeString = null;
+		switch (type) {
+			case COMMAND:
+				typeString = Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__COMMAND_MESSAGE);
+				break;
+			case INTENTION:
+				typeString = Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__USER_INTENTION_MESSAGE);
+				break;
+			case PLAIN:
+				typeString = Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__PLAIN_TEXT_MESSAGE);
+				break;
+		}
+
 		final val dialogMessage = new UIDialogMessageProblemViewWithParticipant(
 				participantId,
 				participantName,
@@ -340,8 +401,9 @@ public class DialogMessage extends ModelObject {
 						.getAdminString(AdminMessageStrings.UI_MODEL__SUPERVISOR_MESSAGE)
 						: Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__PARTICIPANT_MESSAGE),
-				message, sentTimestamp <= 0 ? null : new Date(sentTimestamp),
-				answerReceived == null || answerReceived.equals("") ? Messages
+				typeString, message, sentTimestamp <= 0 ? null : new Date(
+						sentTimestamp), answerReceived == null
+						|| answerReceived.equals("") ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
 						: answerReceived, answerReceivedRaw == null
 						|| answerReceivedRaw.equals("") ? Messages

@@ -53,7 +53,7 @@ public class SystemVariables {
 	};
 
 	public enum READ_ONLY_PARTICIPANT_REPLY_VARIABLES {
-		participantMessageReply, participantRawMessageReply, participantUnexpectedMessage, participantUnexpectedRawMessage;
+		participantMessageReply, participantRawMessageReply, participantUnexpectedMessage, participantUnexpectedRawMessage, participantIntention;
 
 		public String toVariableName() {
 			return ImplementationConstants.VARIABLE_PREFIX + toString();

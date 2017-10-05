@@ -122,7 +122,6 @@ public class AccountEditComponent extends AbstractCustomComponent {
 		// resetAllLocksButton
 		resetAllLocksButton = new Button();
 		resetAllLocksButton.setCaption("!!! Reset All Locks");
-		resetAllLocksButton.setEnabled(false);
 		resetAllLocksButton.setImmediate(true);
 		resetAllLocksButton.setWidth("150px");
 		resetAllLocksButton.setHeight("-1px");

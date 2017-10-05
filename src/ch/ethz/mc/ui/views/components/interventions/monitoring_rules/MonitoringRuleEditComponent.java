@@ -297,7 +297,7 @@ public class MonitoringRuleEditComponent extends AbstractClosableEditComponent {
 		markCaseAsSolvedWhenTrueCheckBox = new CheckBox();
 		markCaseAsSolvedWhenTrueCheckBox.setStyleName("bold");
 		markCaseAsSolvedWhenTrueCheckBox
-				.setCaption("!!! Mark case as solved (unexpected message/user intention) and stop the current rule execution run if result is TRUE");
+				.setCaption("!!! Mark case as solved (unexpected message) and stop the current rule execution run if result is TRUE");
 		markCaseAsSolvedWhenTrueCheckBox.setImmediate(false);
 		markCaseAsSolvedWhenTrueCheckBox.setWidth("100.0%");
 		markCaseAsSolvedWhenTrueCheckBox.setHeight("-1px");

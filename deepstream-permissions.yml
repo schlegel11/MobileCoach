@@ -30,7 +30,10 @@ rpc:
   "message-diff":
     provide: "user.data.role === 'server'"
     request: "(user.data.role === 'participant' || user.data.role === 'supervisor') && user.data.user === data.user"
-  "message-inbox":
+  "user-message":
+    provide: "user.data.role === 'server'"
+    request: "user.data.role === 'participant' && user.data.user === data.user"
+  "user-intention":
     provide: "user.data.role === 'server'"
     request: "user.data.role === 'participant' && user.data.user === data.user"
   "rest-token":

@@ -51,6 +51,7 @@ import ch.ethz.mc.model.memory.ReceivedMessage;
 import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
+import ch.ethz.mc.model.persistent.types.DialogMessageTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
 import ch.ethz.mc.services.RESTManagerService;
@@ -175,7 +176,7 @@ public class DeepstreamCommunicationService implements ConnectionStateListener,
 	public void asyncSendMessage(final DialogOption dialogOption,
 			final ObjectId dialogMessageId, final int messageOrder,
 			String message, final boolean messageExpectsAnswer) {
-		interventionExecutionManagerService
+		val dialogMessage = interventionExecutionManagerService
 				.dialogMessageStatusChangesForSending(dialogMessageId,
 						DialogMessageStatusTypes.SENDING,
 						InternalDateTime.currentTimeMillis());
@@ -190,7 +191,11 @@ public class DeepstreamCommunicationService implements ConnectionStateListener,
 			final JsonObject messageObject = new JsonObject();
 			messageObject.addProperty("id", messageOrder);
 			messageObject.addProperty("status", "SENT_BY_SYSTEM");
-			messageObject.addProperty("type", "PLAIN");
+			messageObject
+					.addProperty(
+							"type",
+							dialogMessage.getType() == DialogMessageTypes.COMMAND ? "COMMAND"
+									: "PLAIN");
 			if (message.contains(Constants.getMediaObjectLinkingBaseURL())) {
 				val indexFrom = message.indexOf(Constants
 						.getMediaObjectLinkingBaseURL());
@@ -508,7 +513,7 @@ public class DeepstreamCommunicationService implements ConnectionStateListener,
 						});
 		// Can only be called by a "participant" (role)
 		client.rpc.provide(
-				"message-inbox",
+				"user-message",
 				(rpcName, data, rpcResponse) -> {
 					final JsonObject jsonData = (JsonObject) gson
 							.toJsonTree(data);
@@ -516,7 +521,7 @@ public class DeepstreamCommunicationService implements ConnectionStateListener,
 						final boolean receivedSuccessful = receiveMessage(
 								jsonData.get("user").getAsString(), jsonData
 										.get("message").getAsString(), jsonData
-										.get("timestamp").getAsLong());
+										.get("timestamp").getAsLong(), false);
 
 						if (receivedSuccessful) {
 							rpcResponse.send(new JsonPrimitive(true));
@@ -525,6 +530,30 @@ public class DeepstreamCommunicationService implements ConnectionStateListener,
 						}
 					} catch (final Exception e) {
 						log.warn("Error when receiving message: {}",
+								e.getMessage());
+						rpcResponse.send(new JsonPrimitive(false));
+						return;
+					}
+				});
+		// Can only be called by a "participant" (role)
+		client.rpc.provide(
+				"user-intention",
+				(rpcName, data, rpcResponse) -> {
+					final JsonObject jsonData = (JsonObject) gson
+							.toJsonTree(data);
+					try {
+						final boolean receivedSuccessful = receiveMessage(
+								jsonData.get("user").getAsString(), jsonData
+										.get("intention").getAsString(),
+								jsonData.get("timestamp").getAsLong(), true);
+
+						if (receivedSuccessful) {
+							rpcResponse.send(new JsonPrimitive(true));
+						} else {
+							rpcResponse.send(new JsonPrimitive(false));
+						}
+					} catch (final Exception e) {
+						log.warn("Error when receiving intention message: {}",
 								e.getMessage());
 						rpcResponse.send(new JsonPrimitive(false));
 						return;
@@ -558,13 +587,16 @@ public class DeepstreamCommunicationService implements ConnectionStateListener,
 
 	/**
 	 * @param participantId
-	 * @param message
+	 * @param content
 	 * @param timestamp
+	 * @param isIntention
 	 * @return
 	 */
 	private boolean receiveMessage(final String participantId,
-			final String message, final long timestamp) {
-		log.debug("Received message for participant {}", participantId);
+			final String content, final long timestamp,
+			final boolean isIntention) {
+		log.debug("Received {} message for participant {}",
+				isIntention ? "intention" : "regular", participantId);
 
 		val receivedMessage = new ReceivedMessage();
 
@@ -573,8 +605,9 @@ public class DeepstreamCommunicationService implements ConnectionStateListener,
 		// found)
 		// TODO Should be implemented for supervisors as well
 		receivedMessage.setType(DialogOptionTypes.EXTERNAL_ID);
+		receivedMessage.setIntention(isIntention);
 		receivedMessage.setReceivedTimestamp(timestamp);
-		receivedMessage.setMessage(message);
+		receivedMessage.setMessage(content);
 		receivedMessage
 				.setSender(ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
 						+ participantId);

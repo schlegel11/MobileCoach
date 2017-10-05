@@ -343,6 +343,7 @@ public class CommunicationManagerService {
 									message.getSubject());
 							val receivedMessage = new ReceivedMessage();
 							receivedMessage.setType(DialogOptionTypes.SMS);
+							receivedMessage.setIntention(false);
 
 							// Parse message content
 							val documentBuilder = documentBuilderFactory

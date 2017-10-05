@@ -68,6 +68,7 @@ import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
+import ch.ethz.mc.model.persistent.types.DialogMessageTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.services.internal.CommunicationManagerService;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
@@ -267,15 +268,16 @@ public class InterventionExecutionManagerService {
 	// Dialog message
 	@Synchronized
 	private void dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
-			final Participant participant, String message,
-			final boolean manuallySent, final long timestampToSendMessage,
+			final Participant participant, final DialogMessageTypes type,
+			String message, final boolean manuallySent,
+			final long timestampToSendMessage,
 			final MonitoringRule relatedMonitoringRule,
 			final MonitoringMessage relatedMonitoringMessage,
 			final boolean supervisorMessage, final boolean answerExpected,
 			final int hoursUntilHandledAsNotAnswered) {
 		log.debug("Create message and prepare for sending");
 		val dialogMessage = new DialogMessage(participant.getId(), 0,
-				DialogMessageStatusTypes.PREPARED_FOR_SENDING, message,
+				DialogMessageStatusTypes.PREPARED_FOR_SENDING, type, message,
 				timestampToSendMessage, -1, supervisorMessage, answerExpected,
 				-1, -1, null, null, false, relatedMonitoringRule == null ? null
 						: relatedMonitoringRule.getId(),
@@ -444,7 +446,7 @@ public class InterventionExecutionManagerService {
 	 * @param timeStampOfEvent
 	 */
 	@Synchronized
-	public void dialogMessageStatusChangesForSending(
+	public DialogMessage dialogMessageStatusChangesForSending(
 			final ObjectId dialogMessageId,
 			final DialogMessageStatusTypes newStatus,
 			final long timeStampOfEvent) {
@@ -486,6 +488,8 @@ public class InterventionExecutionManagerService {
 		}
 
 		databaseManagerService.saveModelObject(dialogMessage);
+
+		return dialogMessage;
 	}
 
 	/*
@@ -528,13 +532,19 @@ public class InterventionExecutionManagerService {
 
 	// Dialog Message
 	@Synchronized
-	private DialogMessage dialogMessageCreateAsUnexpectedReceived(
-			final ObjectId participantId, final ReceivedMessage receivedMessage) {
-		val dialogMessage = new DialogMessage(participantId, 0,
-				DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY, "", -1, -1,
-				false, false, -1, receivedMessage.getReceivedTimestamp(),
+	private DialogMessage dialogMessageCreateAsUnexpectedReceivedOrIntention(
+			final ObjectId participantId, final DialogMessageTypes type,
+			final ReceivedMessage receivedMessage) {
+		val dialogMessage = new DialogMessage(
+				participantId,
+				0,
+				type == DialogMessageTypes.INTENTION ? DialogMessageStatusTypes.RECEIVED_AS_INTENTION
+						: DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY, type,
+				"", -1, -1, false, false, -1,
+				receivedMessage.getReceivedTimestamp(),
 				receivedMessage.getMessage(), receivedMessage.getMessage(),
-				true, null, null, false, false);
+				type == DialogMessageTypes.INTENTION ? false : true, null,
+				null, false, false);
 
 		val highestOrderMessage = databaseManagerService
 				.findOneSortedModelObject(DialogMessage.class,
@@ -835,9 +845,14 @@ public class InterventionExecutionManagerService {
 							val messageTextToSend = messageToSendTask
 									.getMessageTextToSend();
 
+							val dialogMessageType = monitoringMessage == null ? DialogMessageTypes.PLAIN
+									: monitoringMessage.isCommandMessage() ? DialogMessageTypes.COMMAND
+											: DialogMessageTypes.PLAIN;
+
 							// Prepare message for sending
 							dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
 									participant,
+									dialogMessageType,
 									messageTextToSend,
 									false,
 									InternalDateTime.currentTimeMillis(),
@@ -962,9 +977,14 @@ public class InterventionExecutionManagerService {
 							timeToSendMessage.set(Calendar.SECOND, 0);
 							timeToSendMessage.set(Calendar.MILLISECOND, 0);
 
+							val dialogMessageType = monitoringMessage == null ? DialogMessageTypes.PLAIN
+									: monitoringMessage.isCommandMessage() ? DialogMessageTypes.COMMAND
+											: DialogMessageTypes.PLAIN;
+
 							// Prepare message for sending
 							dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
 									participant,
+									dialogMessageType,
 									messageTextToSend,
 									false,
 									timeToSendMessage.getTimeInMillis(),
@@ -1017,8 +1037,9 @@ public class InterventionExecutionManagerService {
 					log.debug("Received stop message by participant {}",
 							dialogOption.getParticipant());
 
-					val dialogMessage = dialogMessageCreateAsUnexpectedReceived(
-							dialogOption.getParticipant(), receivedMessage);
+					val dialogMessage = dialogMessageCreateAsUnexpectedReceivedOrIntention(
+							dialogOption.getParticipant(),
+							DialogMessageTypes.PLAIN, receivedMessage);
 
 					dialogStatusSetMonitoringFinished(dialogOption
 							.getParticipant());
@@ -1028,68 +1049,94 @@ public class InterventionExecutionManagerService {
 			}
 		}
 
-		DialogMessage dialogMessage = getDialogMessageOfParticipantWaitingForAnswer(
-				dialogOption.getParticipant(),
-				receivedMessage.getReceivedTimestamp());
+		// Check for intention messages or reply case
+		DialogMessage dialogMessage = null;
+		val isIntention = receivedMessage.isIntention();
+		if (!isIntention) {
+			dialogMessage = getDialogMessageOfParticipantWaitingForAnswer(
+					dialogOption.getParticipant(),
+					receivedMessage.getReceivedTimestamp());
+		}
 
 		if (dialogMessage == null) {
 			log.debug(
-					"Received an unexpected message from '{}', store it, mark it as unexpected and execute rules",
+					"Received an {} message from '{}', store it, mark it accordinly and execute rules",
+					isIntention ? "intention" : "unexpected",
 					receivedMessage.getSender());
 
-			val dialogMessageCreated = dialogMessageCreateAsUnexpectedReceived(
-					dialogOption.getParticipant(), receivedMessage);
+			val dialogMessageCreated = dialogMessageCreateAsUnexpectedReceivedOrIntention(
+					dialogOption.getParticipant(),
+					isIntention ? DialogMessageTypes.INTENTION
+							: DialogMessageTypes.PLAIN, receivedMessage);
 
 			val participant = databaseManagerService.getModelObjectById(
 					Participant.class, dialogOption.getParticipant());
 
 			try {
-				variablesManagerService
-						.writeVariableValueOfParticipant(
-								participant.getId(),
-								SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantUnexpectedMessage
-										.toVariableName(), cleanedMessageValue,
-								true, false);
-				variablesManagerService
-						.writeVariableValueOfParticipant(
-								participant.getId(),
-								SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantUnexpectedRawMessage
-										.toVariableName(), rawMessageValue,
-								true, false);
+				if (isIntention) {
+					variablesManagerService
+							.writeVariableValueOfParticipant(
+									participant.getId(),
+									SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantIntention
+											.toVariableName(), rawMessageValue,
+									true, false);
+				} else {
+					variablesManagerService
+							.writeVariableValueOfParticipant(
+									participant.getId(),
+									SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantUnexpectedMessage
+											.toVariableName(),
+									cleanedMessageValue, true, false);
+					variablesManagerService
+							.writeVariableValueOfParticipant(
+									participant.getId(),
+									SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantUnexpectedRawMessage
+											.toVariableName(), rawMessageValue,
+									true, false);
+				}
 			} catch (final Exception e) {
 				log.error(
-						"Could not store value '{}' of unexpected message for participant {}: {}",
-						rawMessageValue, participant.getId(), e.getMessage());
+						"Could not store value '{}' of {} message for participant {}: {}",
+						rawMessageValue, isIntention ? "intention"
+								: "unexpected", participant.getId(), e
+								.getMessage());
 				return null;
 			}
 
-			log.debug("Caring for unexpected message rules resolving");
+			log.debug("Caring for {} message rules resolving",
+					isIntention ? "intention" : "unexpected");
 
 			// Resolve rules
 			RecursiveAbstractMonitoringRulesResolver recursiveRuleResolver;
 			try {
 				recursiveRuleResolver = new RecursiveAbstractMonitoringRulesResolver(
-						this, databaseManagerService, variablesManagerService,
+						this,
+						databaseManagerService,
+						variablesManagerService,
 						participant,
-						EXECUTION_CASE.MONITORING_RULES_UNEXPECTED_MESSAGE,
+						isIntention ? EXECUTION_CASE.MONITORING_RULES_USER_INTENTION
+								: EXECUTION_CASE.MONITORING_RULES_UNEXPECTED_MESSAGE,
 						null, null, false);
 
 				recursiveRuleResolver.resolve();
 			} catch (final Exception e) {
 				log.error(
-						"Could not resolve unexpected message rules for participant {}: {}",
+						"Could not resolve {} message rules for participant {}: {}",
+						isIntention ? "intention" : "unexpected",
 						participant.getId(), e.getMessage());
 				return null;
 			}
 
-			if (recursiveRuleResolver.isCaseMarkedAsSolved()) {
+			if (recursiveRuleResolver.isCaseMarkedAsSolved() && !isIntention) {
 				unexpectedDialogMessageSetProblemSolved(dialogMessageCreated);
 			}
 
 			for (val messageToSendTask : recursiveRuleResolver
 					.getMessageSendingResultForMonitoringReplyRules()) {
 				if (messageToSendTask.getMessageTextToSend() != null) {
-					log.debug("Preparing reply message on unexpected message for sending to participant");
+					log.debug(
+							"Preparing reply message on {} message for sending to participant",
+							isIntention ? "intention" : "unexpected");
 
 					MonitoringReplyRule monitoringReplyRule = null;
 					if (messageToSendTask
@@ -1102,9 +1149,14 @@ public class InterventionExecutionManagerService {
 					val messageTextToSend = messageToSendTask
 							.getMessageTextToSend();
 
+					val dialogMessageType = monitoringMessage == null ? DialogMessageTypes.PLAIN
+							: monitoringMessage.isCommandMessage() ? DialogMessageTypes.COMMAND
+									: DialogMessageTypes.PLAIN;
+
 					// Prepare message for sending
 					dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
 							participant,
+							dialogMessageType,
 							messageTextToSend,
 							false,
 							InternalDateTime.currentTimeMillis(),
@@ -1488,8 +1540,9 @@ public class InterventionExecutionManagerService {
 
 		// Create dialog message
 		dialogMessageCreateManuallyOrByRulesIncludingMediaObject(participant,
-				messageTextToSend, true, InternalDateTime.currentTimeMillis(),
-				null, null, advisorMessage, false, 0);
+				DialogMessageTypes.PLAIN, messageTextToSend, true,
+				InternalDateTime.currentTimeMillis(), null, null,
+				advisorMessage, false, 0);
 	}
 
 	/**
@@ -1528,9 +1581,12 @@ public class InterventionExecutionManagerService {
 						variablesWithValues.values(), "");
 
 		// Create dialog message
-		dialogMessageCreateManuallyOrByRulesIncludingMediaObject(participant,
-				messageTextToSend, true, InternalDateTime.currentTimeMillis(),
-				null, determinedMonitoringMessageToSend, advisorMessage,
+		dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
+				participant,
+				determinedMonitoringMessageToSend.isCommandMessage() ? DialogMessageTypes.COMMAND
+						: DialogMessageTypes.PLAIN, messageTextToSend, true,
+				InternalDateTime.currentTimeMillis(), null,
+				determinedMonitoringMessageToSend, advisorMessage,
 				monitoringMessageGroup.isMessagesExpectAnswer(),
 				hoursUntilHandledAsNotAnswered);
 	}
@@ -1615,6 +1671,9 @@ public class InterventionExecutionManagerService {
 						case PREPARED_FOR_SENDING:
 							break;
 						case RECEIVED_UNEXPECTEDLY:
+							totalReceivedMessages++;
+							break;
+						case RECEIVED_AS_INTENTION:
 							totalReceivedMessages++;
 							break;
 						case SENDING:

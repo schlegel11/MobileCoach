@@ -107,7 +107,7 @@
             log("Sending message \"" + message + "\" with timestamp " +
                 timestamp + "...");
 
-            client.rpc.make("message-inbox", {
+            client.rpc.make("user-message", {
                 "user": user,
                 "message": message,
                 "timestamp": timestamp

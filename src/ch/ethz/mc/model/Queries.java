@@ -190,4 +190,6 @@ public class Queries {
 	public static final String	UPDATE_VERSION_11__INTERVENTION__CHANGE_1																																										= "{$set:{'deepstreamPassword':null}}";
 	public static final String	UPDATE_VERSION_12__MONITORING_RULE__CHANGE_1																																									= "{$set:{'type':'NORMAL'}}";
 	public static final String	UPDATE_VERSION_13__MONITORING_RULE__CHANGE_1																																									= "{$set:{'markCaseAsSolvedWhenTrue':false}}";
+	public static final String	UPDATE_VERSION_14__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'type':'PLAIN'}}";
+	public static final String	UPDATE_VERSION_14__MONITORING_MESSAGE__CHANGE_1																																									= "{$set:{'isCommandMessage':false}}";
 }

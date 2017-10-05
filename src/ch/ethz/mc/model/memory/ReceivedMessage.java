@@ -47,5 +47,9 @@ public class ReceivedMessage {
 
 	@Getter
 	@Setter
+	private boolean				isIntention;
+
+	@Getter
+	@Setter
 	private long				receivedTimestamp;
 }

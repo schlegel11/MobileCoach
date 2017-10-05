@@ -761,7 +761,7 @@ public class InterventionAdministrationManagerService {
 	public MonitoringMessage monitoringMessageCreate(
 			final ObjectId monitoringMessageGroupId) {
 		val monitoringMessage = new MonitoringMessage(monitoringMessageGroupId,
-				new LString(), 0, null, null, null);
+				new LString(), false, 0, null, null, null);
 
 		val highestOrderMessage = databaseManagerService
 				.findOneSortedModelObject(
@@ -822,6 +822,15 @@ public class InterventionAdministrationManagerService {
 			final MonitoringMessage monitoringMessage,
 			final ObjectId screeningSurveyId) {
 		monitoringMessage.setLinkedIntermediateSurvey(screeningSurveyId);
+
+		databaseManagerService.saveModelObject(monitoringMessage);
+	}
+
+	@Synchronized
+	public void monitoringMessageSetIsCommandMessage(
+			final MonitoringMessage monitoringMessage,
+			final boolean isCommandMessage) {
+		monitoringMessage.setCommandMessage(isCommandMessage);
 
 		databaseManagerService.saveModelObject(monitoringMessage);
 	}
@@ -2215,6 +2224,9 @@ public class InterventionAdministrationManagerService {
 				case PREPARED_FOR_SENDING:
 					break;
 				case RECEIVED_UNEXPECTEDLY:
+					totalReceivedMessages++;
+					break;
+				case RECEIVED_AS_INTENTION:
 					totalReceivedMessages++;
 					break;
 				case SENDING:

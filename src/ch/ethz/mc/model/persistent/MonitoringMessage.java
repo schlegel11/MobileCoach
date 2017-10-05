@@ -73,6 +73,13 @@ public class MonitoringMessage extends ModelObject {
 	private LString		textWithPlaceholders;
 
 	/**
+	 * The message itself is a command for the client
+	 */
+	@Getter
+	@Setter
+	private boolean		isCommandMessage;
+
+	/**
 	 * The position of the {@link MonitoringMessage} compared to all other
 	 * {@link MonitoringMessage}s in the same {@link MonitoringMessageGroup}
 	 */
@@ -129,6 +136,10 @@ public class MonitoringMessage extends ModelObject {
 		final val monitoringMessage = new UIMonitoringMessage(
 				order,
 				textWithPlaceholders.toShortenedString(80),
+				isCommandMessage ? Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
+						: Messages
+								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
 				linkedMediaObject != null ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
 						: Messages

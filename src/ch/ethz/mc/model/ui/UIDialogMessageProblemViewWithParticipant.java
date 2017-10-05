@@ -42,6 +42,7 @@ public class UIDialogMessageProblemViewWithParticipant extends UIModelObject {
 	public static final String	ORGANIZATION_UNIT			= "organizationUnit";
 
 	public static final String	MESSAGE						= "message";
+	public static final String	SENDER_TYPE					= "senderType";
 	public static final String	TYPE						= "type";
 
 	public static final String	SENT_TIMESTAMP				= "sentTimestamp";
@@ -68,6 +69,9 @@ public class UIDialogMessageProblemViewWithParticipant extends UIModelObject {
 	@PropertyId(ORGANIZATION_UNIT)
 	private String				organizationUnit;
 
+	@PropertyId(SENDER_TYPE)
+	private String				senderType;
+
 	@PropertyId(TYPE)
 	private String				type;
 
@@ -88,8 +92,9 @@ public class UIDialogMessageProblemViewWithParticipant extends UIModelObject {
 
 	public static Object[] getVisibleColumns() {
 		return new Object[] { PARTICIPANT_ID, PARTICIPANT_NAME, LANGUAGE,
-				GROUP, ORGANIZATION, ORGANIZATION_UNIT, TYPE, MESSAGE,
-				SENT_TIMESTAMP, ANSWER, RAW_ANSWER, ANSWER_RECEIVED_TIMESTAMP };
+				GROUP, ORGANIZATION, ORGANIZATION_UNIT, SENDER_TYPE, TYPE,
+				MESSAGE, SENT_TIMESTAMP, ANSWER, RAW_ANSWER,
+				ANSWER_RECEIVED_TIMESTAMP };
 	}
 
 	public static String[] getColumnHeaders() {
@@ -100,6 +105,7 @@ public class UIDialogMessageProblemViewWithParticipant extends UIModelObject {
 				localize(AdminMessageStrings.UI_COLUMNS__GROUP),
 				localize(AdminMessageStrings.UI_COLUMNS__ORGANIZATION),
 				localize(AdminMessageStrings.UI_COLUMNS__ORGANIZATION_UNIT),
+				localize(AdminMessageStrings.UI_COLUMNS__SENDER_TYPE),
 				localize(AdminMessageStrings.UI_COLUMNS__TYPE),
 				localize(AdminMessageStrings.UI_COLUMNS__MESSAGE),
 				localize(AdminMessageStrings.UI_COLUMNS__SENT_TIMESTAMP),
