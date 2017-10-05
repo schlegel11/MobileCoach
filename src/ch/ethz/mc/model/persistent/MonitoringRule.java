@@ -127,7 +127,7 @@ public class MonitoringRule extends AbstractMonitoringRule {
 	/**
 	 * <strong>OPTIONAL:</strong> The unexpected incoming message or intention
 	 * will be handled as solved when the rule evaluates to true and the rule
-	 * execution run will be stoped as well
+	 * execution run will be stopped as well
 	 */
 	@Getter
 	@Setter
