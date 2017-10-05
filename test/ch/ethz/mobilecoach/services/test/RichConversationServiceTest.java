@@ -26,7 +26,7 @@ public class RichConversationServiceTest {
     	MessagingServiceMock ms = new MessagingServiceMock();
     	
     	ConversationManagementServiceMock conversationManagementService = new ConversationManagementServiceMock();
-    	RichConversationService service = RichConversationService.start(ms, conversationManagementService, null, null);
+    	RichConversationService service = RichConversationService.start(ms, conversationManagementService, null, null, null);
     	
     	service.sendMessage("dummy", new ObjectId(), "start-conversation:test-conversation1");
    	

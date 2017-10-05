@@ -15,6 +15,7 @@ import org.mockito.exceptions.verification.NeverWantedButInvoked;
 
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.Participant;
+import ch.ethz.mc.services.SurveyExecutionManagerService;
 import ch.ethz.mc.services.internal.ChatEngineStateStore;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.InDataBaseVariableStore;
@@ -59,15 +60,17 @@ public class RichConversationService {
 
 	private VariablesManagerService				variablesManagerService;
 	private DatabaseManagerService				dBManagerService;
+	private SurveyExecutionManagerService		surveyService;
 	private LinkedHashMap<ObjectId, ChatEngine>	chatEngines	= new LinkedHashMap<>();
 
 	private RichConversationService(MessagingService mattermostMessagingService,
 			ConversationManagementService conversationManagementService,
 			VariablesManagerService variablesManagerService,
-			DatabaseManagerService dBManagerService) throws Exception {
+			DatabaseManagerService dBManagerService,
+			SurveyExecutionManagerService surveyService) throws Exception {
 		this.messagingService = mattermostMessagingService;
 		this.conversationManagementService = conversationManagementService;
-
+		this.surveyService = surveyService;
 		this.variablesManagerService = variablesManagerService;
 		this.dBManagerService = dBManagerService;
 		continueConversation();
@@ -77,10 +80,11 @@ public class RichConversationService {
 			MessagingService messagingService,
 			ConversationManagementService conversationManagementService,
 			VariablesManagerService variablesManagerService,
-			DatabaseManagerService dBManagerService) throws Exception {
+			DatabaseManagerService dBManagerService,
+			SurveyExecutionManagerService surveyService) throws Exception {
 		RichConversationService service = new RichConversationService(
 				messagingService, conversationManagementService,
-				variablesManagerService, dBManagerService);
+				variablesManagerService, dBManagerService, surveyService);
 		return service;
 	}
 
@@ -216,7 +220,7 @@ public class RichConversationService {
 		};
 
 		VariableStore variableStore = createVariableStore(participant.getId());
-		MediaLibrary mediaLibrary = new InDataBaseMediaLibrary(dBManagerService, participant.getId());
+		MediaLibrary mediaLibrary = new InDataBaseMediaLibrary(dBManagerService, surveyService, participant.getId(), participant.getIntervention());
 
 		MattermostConnector ui = new MattermostConnector(participant.getId());
 		HelpersRepository helpers = new HelpersRepository();
