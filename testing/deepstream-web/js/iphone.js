@@ -13,8 +13,11 @@ $('form.chat input[type="submit"]').click(function(event) {
   event.preventDefault();
   var inputBox = $('form.chat input[type="text"]');
   var message = inputBox.val();
-  if ($('form.chat input[type="text"]').val()) {
+  if (message) {
     var d = new Date();
+      
+    send(message, d);  
+      
     var hour = d.getHours();
     var minutes = d.getMinutes();
     var seconds = d.getSeconds();
@@ -42,7 +45,12 @@ function encodeHTML(value) {
     return $("<div/>").text(value).html();
 }
 
+function showSimulator() {
+    $("div.iphone").show();
+}
+
 function addServerMessage(message) {
+    message = encodeHTML(message).replace(/\n/g, "<br/>");
     var d = new Date();
     var hour = d.getHours();
     var minutes = d.getMinutes();
@@ -54,6 +62,6 @@ function addServerMessage(message) {
       (('' + day).length < 2 ? '0' : '') + day + '.' +
       (('' + month).length < 2 ? '0' : '') + month + '.' +
       d.getFullYear() + '&nbsp;&nbsp;' + clock;
-    $('form.chat div.messages').append('<div class="message"><div class="fromThem"><p>' + encodeHTML(message) + '</p><date>' + currentDate + '</date></div></div>');
+    $('form.chat div.messages').append('<div class="message"><div class="fromThem"><p>' + message + '</p><date>' + currentDate + '</date></div></div>');
     scrollDown();
 }

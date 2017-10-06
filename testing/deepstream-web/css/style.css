@@ -276,6 +276,11 @@ form.chat input[type='submit']{
   background-size:100% 100%;
   margin:0 auto;
   position:relative;
+  display: none;
+}
+
+.user-selection {
+    text-align: center;
 }
 
 .border{
@@ -306,4 +311,11 @@ a.article{
 .title {
   font: 400 20px 'Open Sans', sans-serif;
     color: #3A99D8;
+}
+
+.bottom{
+  margin:0 auto;
+  position:relative;
+  text-align: center;
+    padding: 30px 0px 10px 0px;
 }

@@ -15,7 +15,13 @@
         <span class="title">Web Simulator</span>
     </div>
     
-  <div class="iphone">
+    <div class="user-selection">
+        <form class="subscription">
+            <input type="text" placeholder="Your nickname"/> <input type="button" onclick="subscribe()" value="Subscribe"/>
+        </form>
+    </div>
+  
+    <div class="iphone">
   <div class="border">
     <form class="chat">
       <span></span>
@@ -39,9 +45,11 @@
       <input type="submit" value="Send">
     </form>
   </div>
-</div>
-
-<input type="button" onclick="addServerMessage('TEsdfsdfsdfsdf dsf sdST');" value="ABC"/>
+    </div>
+    
+    <div class="bottom">
+        <input type="button" value="Reset" onclick="location.reload()" />
+    </div>
     
     <script src="js/jquery-3.1.0.min.js"></script>
     <script  src="js/iphone.js"></script>
