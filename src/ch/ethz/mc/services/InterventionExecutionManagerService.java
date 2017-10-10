@@ -1060,7 +1060,7 @@ public class InterventionExecutionManagerService {
 
 		if (dialogMessage == null) {
 			log.debug(
-					"Received an {} message from '{}', store it, mark it accordinly and execute rules",
+					"Received an {} message from '{}', store it, mark it accordingly and execute rules",
 					isIntention ? "intention" : "unexpected",
 					receivedMessage.getSender());
 
@@ -1132,16 +1132,16 @@ public class InterventionExecutionManagerService {
 			}
 
 			for (val messageToSendTask : recursiveRuleResolver
-					.getMessageSendingResultForMonitoringReplyRules()) {
+					.getMessageSendingResultForMonitoringRules()) {
 				if (messageToSendTask.getMessageTextToSend() != null) {
 					log.debug(
-							"Preparing reply message on {} message for sending to participant",
+							"Preparing message on {} message for sending to participant",
 							isIntention ? "intention" : "unexpected");
 
-					MonitoringReplyRule monitoringReplyRule = null;
+					MonitoringRule monitoringRule = null;
 					if (messageToSendTask
 							.getAbstractMonitoringRuleRequiredToPrepareMessage() != null) {
-						monitoringReplyRule = (MonitoringReplyRule) messageToSendTask
+						monitoringRule = (MonitoringRule) messageToSendTask
 								.getAbstractMonitoringRuleRequiredToPrepareMessage();
 					}
 					val monitoringMessage = messageToSendTask
@@ -1162,7 +1162,7 @@ public class InterventionExecutionManagerService {
 							InternalDateTime.currentTimeMillis(),
 							null,
 							monitoringMessage,
-							monitoringReplyRule != null ? monitoringReplyRule
+							monitoringRule != null ? monitoringRule
 									.isSendMessageToSupervisor() : false,
 							false, 0);
 				}

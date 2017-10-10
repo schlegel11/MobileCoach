@@ -261,7 +261,7 @@ public class RuleEvaluator {
 									"^"
 											+ ruleEvaluationResult
 													.getTextRuleComparisonTermValue()
-													.trim() + "$")) {
+													.trim().toLowerCase() + "$")) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
@@ -274,7 +274,7 @@ public class RuleEvaluator {
 									"^"
 											+ ruleEvaluationResult
 													.getTextRuleComparisonTermValue()
-													.trim() + "$")) {
+													.trim().toLowerCase() + "$")) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
