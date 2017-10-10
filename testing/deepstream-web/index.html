@@ -1,60 +1,46 @@
 <!DOCTYPE html>
-<html >
-<head>
-  <meta charset="UTF-8">
-  <title>MobileCoach Web Simulator</title>
-  
-      <link rel="stylesheet" href="css/style.css">
+<html>
 
-  
+<head>
+    <meta charset="UTF-8">
+    <title>MobileCoach Web Simulator</title>
+
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
     <div class="top">
-        <img id="logo" src="img/mc-logo.png" width="320"/><br/>
+        <img id="logo" src="img/mc-logo.png" width="320" /><br/>
         <span class="title">Web Simulator</span>
     </div>
-    
+
     <div class="user-selection">
         <form class="subscription">
-            <input type="text" placeholder="Your nickname"/> <input type="button" onclick="subscribe()" value="Subscribe"/>
+            <input type="text" placeholder="Your nickname" /> <input type="button" onclick="subscribe()" value="Subscribe" />
         </form>
     </div>
-  
+
     <div class="iphone">
-  <div class="border">
-    <form class="chat">
-      <span></span>
-      <div class="messages" id="adobewordpress">
-        <!--
-        <div class="message">
-          <div class="myMessage">
-            <p>It looks beautiful!</p>
-            <date><b>John Doe</b> 08.03.2016 14:30:07</date>
-          </div>
+        <div class="border">
+            <form class="chat">
+                <span></span>
+                <div class="messages" id="adobewordpress">
+                </div>
+                <input type="text" placeholder="Your message">
+                <input type="submit" value="Send">
+            </form>
         </div>
-        <div class="message">
-          <div class="fromThem">
-            <p>It looks like the iPhone message box.</p>
-            <date><b>Vatanay</b> 08.03.2016 14:31:22</date>
-          </div>
-        </div>
-        -->
-      </div>
-      <input type="text" placeholder="Your message">
-      <input type="submit" value="Send">
-    </form>
-  </div>
     </div>
-    
+
     <div class="bottom">
         <input type="button" value="Reset" onclick="location.reload()" />
     </div>
-    
+
     <script src="js/jquery-3.1.0.min.js"></script>
-    <script  src="js/iphone.js"></script>
-    <script  src="js/deepstream.min.js"></script>
-    <script  src="js/script.js"></script>
+    <script src="js/iphone.js"></script>
+    <script src="js/deepstream.min.js"></script>
+    <script src="js/script.js"></script>
 
 </body>
+
 </html>
