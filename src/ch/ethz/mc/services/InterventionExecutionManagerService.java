@@ -965,17 +965,26 @@ public class InterventionExecutionManagerService {
 									.getMessageTextToSend();
 
 							// Calculate time to send message
+							long timeToSendMessageInMillis;
 							final int hourToSendMessage = monitoringRule
 									.getHourToSendMessage();
-							final Calendar timeToSendMessage = Calendar
-									.getInstance();
-							timeToSendMessage.setTimeInMillis(InternalDateTime
-									.currentTimeMillis());
-							timeToSendMessage.set(Calendar.HOUR_OF_DAY,
-									hourToSendMessage);
-							timeToSendMessage.set(Calendar.MINUTE, 0);
-							timeToSendMessage.set(Calendar.SECOND, 0);
-							timeToSendMessage.set(Calendar.MILLISECOND, 0);
+							if (hourToSendMessage > 0) {
+								final Calendar timeToSendMessage = Calendar
+										.getInstance();
+								timeToSendMessage
+										.setTimeInMillis(InternalDateTime
+												.currentTimeMillis());
+								timeToSendMessage.set(Calendar.HOUR_OF_DAY,
+										hourToSendMessage);
+								timeToSendMessage.set(Calendar.MINUTE, 0);
+								timeToSendMessage.set(Calendar.SECOND, 0);
+								timeToSendMessage.set(Calendar.MILLISECOND, 0);
+								timeToSendMessageInMillis = timeToSendMessage
+										.getTimeInMillis();
+							} else {
+								timeToSendMessageInMillis = InternalDateTime
+										.currentTimeMillis();
+							}
 
 							val dialogMessageType = monitoringMessage == null ? DialogMessageTypes.PLAIN
 									: monitoringMessage.isCommandMessage() ? DialogMessageTypes.COMMAND
@@ -987,7 +996,7 @@ public class InterventionExecutionManagerService {
 									dialogMessageType,
 									messageTextToSend,
 									false,
-									timeToSendMessage.getTimeInMillis(),
+									timeToSendMessageInMillis,
 									monitoringRule,
 									monitoringMessage,
 									monitoringRule != null ? monitoringRule
@@ -1138,18 +1147,35 @@ public class InterventionExecutionManagerService {
 							"Preparing message on {} message for sending to participant",
 							isIntention ? "intention" : "unexpected");
 
-					MonitoringRule monitoringRule = null;
-					if (messageToSendTask
-							.getAbstractMonitoringRuleRequiredToPrepareMessage() != null) {
-						monitoringRule = (MonitoringRule) messageToSendTask
-								.getAbstractMonitoringRuleRequiredToPrepareMessage();
-					}
+					val monitoringRule = (MonitoringRule) messageToSendTask
+							.getAbstractMonitoringRuleRequiredToPrepareMessage();
 					val monitoringMessage = messageToSendTask
 							.getMonitoringMessageToSend();
 					val monitoringMessageExpectsAnswer = messageToSendTask
 							.isMonitoringRuleExpectsAnswer();
 					val messageTextToSend = messageToSendTask
 							.getMessageTextToSend();
+
+					// Calculate time to send message
+					long timeToSendMessageInMillis;
+					final int hourToSendMessage = monitoringRule
+							.getHourToSendMessage();
+					if (hourToSendMessage > 0) {
+						final Calendar timeToSendMessage = Calendar
+								.getInstance();
+						timeToSendMessage.setTimeInMillis(InternalDateTime
+								.currentTimeMillis());
+						timeToSendMessage.set(Calendar.HOUR_OF_DAY,
+								hourToSendMessage);
+						timeToSendMessage.set(Calendar.MINUTE, 0);
+						timeToSendMessage.set(Calendar.SECOND, 0);
+						timeToSendMessage.set(Calendar.MILLISECOND, 0);
+						timeToSendMessageInMillis = timeToSendMessage
+								.getTimeInMillis();
+					} else {
+						timeToSendMessageInMillis = InternalDateTime
+								.currentTimeMillis();
+					}
 
 					val dialogMessageType = monitoringMessage == null ? DialogMessageTypes.PLAIN
 							: monitoringMessage.isCommandMessage() ? DialogMessageTypes.COMMAND
@@ -1161,8 +1187,8 @@ public class InterventionExecutionManagerService {
 							dialogMessageType,
 							messageTextToSend,
 							false,
-							InternalDateTime.currentTimeMillis(),
-							null,
+							timeToSendMessageInMillis,
+							monitoringRule,
 							monitoringMessage,
 							monitoringRule != null ? monitoringRule
 									.isSendMessageToSupervisor() : false,
