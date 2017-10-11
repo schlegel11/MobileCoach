@@ -355,10 +355,6 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 							.isMonitoringActive());
 		}
 
-		interventionBasicSettingsComponent.getSimulatorComponent()
-				.setSenderIdentification(
-						intervention.getAssignedSenderIdentification());
-
 		// Adjust password text fields
 		interventionBasicSettingsComponent
 				.getDashboardPasswordTextFieldComponent().setValue(

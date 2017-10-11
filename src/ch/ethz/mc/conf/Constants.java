@@ -112,63 +112,63 @@ public class Constants {
 	 * Admin configuration
 	 */
 	@Getter
-	private static String	defaultAdminUsername				= "admin";
+	private static String		defaultAdminUsername				= "admin";
 	@Getter
-	private static String	defaultAdminPassword				= "admin";
+	private static String		defaultAdminPassword				= "admin";
 
 	/**
 	 * CAUTION: Do NEVER activate this on public servers! It's only for
 	 * development.
 	 */
 	@Getter
-	private static boolean	automaticallyLoginAsDefaultAdmin	= false;
+	private static boolean		automaticallyLoginAsDefaultAdmin	= false;
 
 	@Getter
-	private static Locale	adminLocale							= new Locale(
-																		"en",
-																		"GB");
+	private static Locale		adminLocale							= new Locale(
+																			"en",
+																			"GB");
 
 	@Getter
-	private static Locale[]	interventionLocales					= new Locale[] {
-			new Locale("de", "CH"), new Locale("fr", "CH")		};
+	private static Locale[]		interventionLocales					= new Locale[] {
+			new Locale("de", "CH"), new Locale("fr", "CH")			};
 
 	@Getter
-	private static String	loggingFolder						= "/mc_data/logs";
+	private static String		loggingFolder						= "/mc_data/logs";
 	@Getter
-	private static String	storageFolder						= "/mc_data/FileStorage";
+	private static String		storageFolder						= "/mc_data/FileStorage";
 	@Getter
-	private static String	mediaUploadFolder					= "/mc_data/MediaUpload";
+	private static String		mediaUploadFolder					= "/mc_data/MediaUpload";
 	@Getter
-	private static String	mediaCacheFolder					= "/mc_data/MediaCache";
+	private static String		mediaCacheFolder					= "/mc_data/MediaCache";
 	@Getter
-	private static String	templatesFolder						= "/mc_data/templates";
+	private static String		templatesFolder						= "/mc_data/templates";
 
 	@Getter
-	private static String	loggingConsoleLevel					= "DEBUG";
+	private static String		loggingConsoleLevel					= "DEBUG";
 	@Getter
-	private static String	loggingRollingFileLevel				= "DEBUG";
+	private static String		loggingRollingFileLevel				= "DEBUG";
 
 	@Getter
-	private static String	fileExtension						= ".mc";
+	private static String		fileExtension						= ".mc";
 
 	/**
 	 * Survey listing configuration
 	 */
 	@Getter
-	private static String	surveyListingTitle					= "Active surveys:";
+	private static String		surveyListingTitle					= "Active surveys:";
 	@Getter
-	private static String	surveyListingNoneActive				= "No survey active.";
+	private static String		surveyListingNoneActive				= "No survey active.";
 	@Getter
-	private static String	surveyListingNotActive				= "Survey listing inactive.";
+	private static String		surveyListingNotActive				= "Survey listing inactive.";
 
 	/**
 	 * Statistics configuration
 	 */
 	@Getter
-	private static boolean	statisticsFileEnabled				= false;
+	private static boolean		statisticsFileEnabled				= false;
 
 	@Getter
-	private static String	statisticsFile						= "/mc_data/statistics.properties";
+	private static String		statisticsFile						= "/mc_data/statistics.properties";
 
 	/**
 	 * Simulation configuration
@@ -180,13 +180,7 @@ public class Constants {
 	 * interventions should never be transfered back to another system.
 	 */
 	@Getter
-	private static boolean	simulatedDateAndTime				= false;
-
-	private static String	smsSimulationNumber					= "+99999";
-
-	public static String getSmsSimulationNumber() {
-		return StringHelpers.cleanPhoneNumber(smsSimulationNumber);
-	}
+	private static boolean		simulatedDateAndTime				= false;
 
 	/**
 	 * Database configuration

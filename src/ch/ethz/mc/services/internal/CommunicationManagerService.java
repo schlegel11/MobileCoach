@@ -51,7 +51,6 @@ import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -65,7 +64,6 @@ import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
 import ch.ethz.mc.tools.InternalDateTime;
-import ch.ethz.mc.tools.Simulator;
 import ch.ethz.mc.tools.StringHelpers;
 
 /**
@@ -311,10 +309,6 @@ public class CommunicationManagerService {
 	 */
 	public List<ReceivedMessage> receiveMessages() {
 		val receivedMessages = new ArrayList<ReceivedMessage>();
-
-		// Add simulated messages if available
-		CollectionUtils.addAll(receivedMessages, Simulator.getInstance()
-				.getSimulatedReceivedMessages());
 
 		// Add Email messages
 		if (emailActive) {
@@ -627,52 +621,42 @@ public class CommunicationManagerService {
 			log.debug("Sending message with text {} to {}", message,
 					dialogOption.getData());
 
-			if (dialogOption.getType() == DialogOptionTypes.SMS
-					&& dialogOption.getData().equals(
-							Constants.getSmsSimulationNumber())) {
-				log.debug("IT'S ONLY SIMULATED");
-				Simulator.getInstance().simulateSMSBySystem(message);
-			} else {
-				switch (dialogOption.getType()) {
-					case SMS:
-					case SUPERVISOR_SMS:
-						val SMSMailMessage = new MimeMessage(
-								outgoingMailSession);
+			switch (dialogOption.getType()) {
+				case SMS:
+				case SUPERVISOR_SMS:
+					val SMSMailMessage = new MimeMessage(outgoingMailSession);
 
-						SMSMailMessage
-								.setFrom(new InternetAddress(smsEmailFrom));
-						SMSMailMessage.addRecipient(Message.RecipientType.TO,
-								new InternetAddress(smsEmailTo));
-						SMSMailMessage.setSubject("UserKey=" + smsUserKey
-								+ ",Password=" + smsUserPassword
-								+ ",Recipient=" + dialogOption.getData()
-								+ ",Originator=" + messageSender
-								+ ",Notify=none");
-						SMSMailMessage.setText(message, "ISO-8859-1");
+					SMSMailMessage.setFrom(new InternetAddress(smsEmailFrom));
+					SMSMailMessage.addRecipient(Message.RecipientType.TO,
+							new InternetAddress(smsEmailTo));
+					SMSMailMessage.setSubject("UserKey=" + smsUserKey
+							+ ",Password=" + smsUserPassword + ",Recipient="
+							+ dialogOption.getData() + ",Originator="
+							+ messageSender + ",Notify=none");
+					SMSMailMessage.setText(message, "ISO-8859-1");
 
-						Transport.send(SMSMailMessage);
-						break;
-					case EMAIL:
-					case SUPERVISOR_EMAIL:
-						val EmailMessage = new MimeMessage(outgoingMailSession);
+					Transport.send(SMSMailMessage);
+					break;
+				case EMAIL:
+				case SUPERVISOR_EMAIL:
+					val EmailMessage = new MimeMessage(outgoingMailSession);
 
-						EmailMessage.setFrom(new InternetAddress(emailFrom));
-						EmailMessage.addRecipient(Message.RecipientType.TO,
-								new InternetAddress(dialogOption.getData()));
-						if (dialogOption.getType() == DialogOptionTypes.EMAIL) {
-							EmailMessage.setSubject(emailSubjectForParticipant);
-						} else {
-							EmailMessage.setSubject(emailSubjectForSupervisor);
-						}
-						EmailMessage.setText(message, "UTF-8");
+					EmailMessage.setFrom(new InternetAddress(emailFrom));
+					EmailMessage.addRecipient(Message.RecipientType.TO,
+							new InternetAddress(dialogOption.getData()));
+					if (dialogOption.getType() == DialogOptionTypes.EMAIL) {
+						EmailMessage.setSubject(emailSubjectForParticipant);
+					} else {
+						EmailMessage.setSubject(emailSubjectForSupervisor);
+					}
+					EmailMessage.setText(message, "UTF-8");
 
-						Transport.send(EmailMessage);
-						break;
-					case EXTERNAL_ID:
-					case SUPERVISOR_EXTERNAL_ID:
-						log.error("An external ID message was tried to be sent by a mailing thread. This should never happen!");
-						break;
-				}
+					Transport.send(EmailMessage);
+					break;
+				case EXTERNAL_ID:
+				case SUPERVISOR_EXTERNAL_ID:
+					log.error("An external ID message was tried to be sent by a mailing thread. This should never happen!");
+					break;
 			}
 
 			log.debug("Message sent to {}", dialogOption.getData());
