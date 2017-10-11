@@ -85,6 +85,9 @@ public class AccountEditComponent extends AbstractCustomComponent {
 		if (isAdministrator) {
 			resetAllLocksButton.setVisible(true);
 			resetAllLocksButton.setEnabled(true);
+		} else {
+			resetAllLocksButton.setVisible(false);
+			resetAllLocksButton.setEnabled(false);
 		}
 	}
 
