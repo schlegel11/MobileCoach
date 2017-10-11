@@ -439,7 +439,7 @@ public class InterventionExecutionManagerService {
 
 	/**
 	 * Handles states form "PREPARED_FOR_SENDING" to
-	 * "SENT_AND_WAITING_FOR_ANSWER" or "SENT_AND_WAITING_FOR_ANSWER"
+	 * "SENT_AND_WAITING_FOR_ANSWER" or "SENT_BUT_NOT_WAITING_FOR_ANSWER"
 	 *
 	 * @param dialogMessageId
 	 * @param newStatus
@@ -1146,6 +1146,8 @@ public class InterventionExecutionManagerService {
 					}
 					val monitoringMessage = messageToSendTask
 							.getMonitoringMessageToSend();
+					val monitoringMessageExpectsAnswer = messageToSendTask
+							.isMonitoringRuleExpectsAnswer();
 					val messageTextToSend = messageToSendTask
 							.getMessageTextToSend();
 
@@ -1164,7 +1166,7 @@ public class InterventionExecutionManagerService {
 							monitoringMessage,
 							monitoringRule != null ? monitoringRule
 									.isSendMessageToSupervisor() : false,
-							false, 0);
+							monitoringMessageExpectsAnswer, 0);
 				}
 			}
 
