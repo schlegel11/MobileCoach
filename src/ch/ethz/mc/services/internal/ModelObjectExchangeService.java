@@ -46,6 +46,7 @@ import org.bson.types.ObjectId;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.memory.ExchangeModelObject;
+import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.MediaObject;
 import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
 import ch.ethz.mc.services.types.ModelObjectExchangeFormatTypes;
@@ -220,6 +221,13 @@ public class ModelObjectExchangeService {
 							"Could not set new file reference {} to model object {}",
 							exchangeModelObject.getFileReference(), modelObject);
 				}
+			}
+
+			// Adjust status of imported interventions
+			if (modelObject instanceof Intervention) {
+				val intervention = (Intervention) modelObject;
+				intervention.setActive(false);
+				intervention.setMonitoringActive(false);
 			}
 
 			modelObjects.add(modelObject);
