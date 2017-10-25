@@ -1048,6 +1048,13 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.deleteModelObject(mediaObject);
 	}
 
+	@Synchronized
+	public File mediaObjectGetFile(final MediaObject mediaObject,
+			final FILE_STORES fileStore) {
+		return fileStorageManagerService.getFileByReference(
+				mediaObject.getFileReference(), fileStore);
+	}
+
 	// Monitoring Rule
 	@Synchronized
 	private MonitoringRule monitoringRuleCreate(final ObjectId interventionId,

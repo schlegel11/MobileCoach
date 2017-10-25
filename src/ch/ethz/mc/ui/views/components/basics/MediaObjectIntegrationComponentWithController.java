@@ -31,6 +31,7 @@ import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.io.FileUtils;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
@@ -39,6 +40,7 @@ import ch.ethz.mc.conf.ThemeImageStrings;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.persistent.MediaObject;
 import ch.ethz.mc.model.persistent.types.MediaObjectTypes;
+import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.ui.NotificationMessageException;
 
@@ -47,6 +49,7 @@ import com.vaadin.server.ExternalResource;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Upload.FailedEvent;
 import com.vaadin.ui.Upload.FailedListener;
 import com.vaadin.ui.Upload.Receiver;
@@ -127,6 +130,44 @@ public class MediaObjectIntegrationComponentWithController extends
 			getUploadComponent().setEnabled(false);
 			getSetURLButton().setEnabled(false);
 			getDeleteButton().setEnabled(true);
+
+			// Care for HTML editing
+			if (mediaObject.getType() == MediaObjectTypes.HTML_TEXT) {
+				val file = getInterventionAdministrationManagerService()
+						.mediaObjectGetFile(mediaObject, FILE_STORES.STORAGE);
+				try {
+					val fileContent = FileUtils.readFileToString(file);
+					getTextArea().setValue(fileContent);
+					getHtmlLabel().setValue(fileContent);
+				} catch (final IOException e) {
+					log.error("File could not be read for editing: {}",
+							e.getMessage());
+				}
+
+				getSaveButton().addClickListener(new ClickListener() {
+
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							val htmlContent = getTextArea().getValue();
+
+							FileUtils.writeStringToFile(file, htmlContent);
+
+							getSaveButton().setEnabled(true);
+							getAdminUI()
+									.showInformationNotification(
+											AdminMessageStrings.NOTIFICATION__FILE_CHANGES_SAVED);
+
+							getHtmlLabel().setValue(htmlContent);
+						} catch (final IOException e) {
+							log.error(
+									"File could not be written after editing: {}",
+									e.getMessage());
+						}
+
+					}
+				});
+			}
 		}
 	}
 
@@ -280,6 +321,9 @@ public class MediaObjectIntegrationComponentWithController extends
 			} else if (temporaryFileExtension.equals(".aac")
 					|| temporaryFileExtension.equals(".m4a")) {
 				originalFileType = MediaObjectTypes.AUDIO;
+			} else if (temporaryFileExtension.equals(".htm")
+					|| temporaryFileExtension.equals(".html")) {
+				originalFileType = MediaObjectTypes.HTML_TEXT;
 			} else {
 				return null;
 			}
