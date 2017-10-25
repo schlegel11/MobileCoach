@@ -38,6 +38,7 @@ import ch.ethz.mc.tools.BCrypt;
 import ch.ethz.mc.tools.DataModelUpdateManager;
 
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 
@@ -59,9 +60,11 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 			mongoCredentials.add(MongoCredential.createMongoCRCredential(
 					Constants.getDatabaseUser(), Constants.getDatabaseName(),
 					Constants.getDatabasePassword().toCharArray()));
+			val mongoDBOptions = MongoClientOptions.builder()
+					.socketKeepAlive(true).build();
 			mongoClient = new MongoClient(new ServerAddress(
 					Constants.getDatabaseHost(), Constants.getDatabasePort()),
-					mongoCredentials);
+					mongoCredentials, mongoDBOptions);
 
 			// Checking connection
 			log.debug("Existing collections in database {}: ",

@@ -22,9 +22,8 @@ package ch.ethz.mc.services.threads;
  */
 import java.util.concurrent.TimeUnit;
 
-import lombok.val;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
-import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
 
@@ -37,56 +36,50 @@ import ch.ethz.mc.services.InterventionExecutionManagerService;
 public class OutgoingMessageWorker extends Thread {
 	private final InterventionExecutionManagerService	interventionExecutionManagerService;
 
+	@Setter
+	private boolean										shouldStop	= false;
+
 	public OutgoingMessageWorker(
 			final InterventionExecutionManagerService interventionExecutionManagerService) {
 		setName("Outgoing Message Worker");
+		setPriority(NORM_PRIORITY - 2);
 
 		this.interventionExecutionManagerService = interventionExecutionManagerService;
 	}
 
 	@Override
 	public void run() {
-		val simulatorActive = Constants.isSimulatedDateAndTime();
 		try {
-			TimeUnit.SECONDS
-					.sleep(simulatorActive ? ImplementationConstants.MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR_NO_OPEN_MESSAGES
-							: ImplementationConstants.MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR_NO_OPEN_MESSAGES);
+			TimeUnit.MILLISECONDS
+					.sleep(ImplementationConstants.OUTGOING_MESSAGE_WORKER_MILLISECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
 		} catch (final InterruptedException e) {
 			interrupt();
 			log.debug("Outgoing message worker received signal to stop (before first run)");
 		}
 
-		while (!isInterrupted()) {
+		while (!isInterrupted() && !shouldStop) {
 			final long startingTime = System.currentTimeMillis();
-			log.info("Executing new run of outgoing message worker...started");
+			log.debug("Executing new run of outgoing message worker...started");
 
-			boolean allMessagesSent = false;
 			try {
-				allMessagesSent = interventionExecutionManagerService
-						.handleOutgoingMessages();
+				interventionExecutionManagerService.handleOutgoingMessages();
 			} catch (final Exception e) {
 				log.error("Could not send all prepared messages: {}",
 						e.getMessage());
 			}
 
-			log.info(
-					"Executing new run of outgoing message worker...done ({} seconds)",
-					(System.currentTimeMillis() - startingTime) / 1000.0);
+			log.debug(
+					"Executing new run of outgoing message worker...done ({} milliseconds)",
+					System.currentTimeMillis() - startingTime);
 
 			try {
-				if (allMessagesSent) {
-					TimeUnit.SECONDS
-							.sleep(simulatorActive ? ImplementationConstants.MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR_NO_OPEN_MESSAGES
-									: ImplementationConstants.MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR_NO_OPEN_MESSAGES);
-				} else {
-					TimeUnit.SECONDS
-							.sleep(simulatorActive ? ImplementationConstants.MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR_OPEN_MESSAGES
-									: ImplementationConstants.MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR_OPEN_MESSAGES);
-				}
+				TimeUnit.MILLISECONDS
+						.sleep(ImplementationConstants.OUTGOING_MESSAGE_WORKER_MILLISECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
 			} catch (final InterruptedException e) {
 				interrupt();
-				log.debug("Outgoing message worker received signal to stop");
+				return;
 			}
 		}
+		log.debug("Outgoing message worker received signal to stop");
 	}
 }

@@ -22,9 +22,9 @@ package ch.ethz.mc.services.threads;
  */
 import java.util.concurrent.TimeUnit;
 
+import lombok.Setter;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
-import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
 import ch.ethz.mc.services.internal.CommunicationManagerService;
@@ -39,10 +39,14 @@ public class IncomingMessageWorker extends Thread {
 	private final InterventionExecutionManagerService	interventionExecutionManagerService;
 	private final CommunicationManagerService			communicationManagerService;
 
+	@Setter
+	private boolean										shouldStop	= false;
+
 	public IncomingMessageWorker(
 			final InterventionExecutionManagerService interventionExecutionManagerService,
 			final CommunicationManagerService communicationManagerService) {
 		setName("Incoming Message Worker");
+		setPriority(NORM_PRIORITY - 2);
 
 		this.interventionExecutionManagerService = interventionExecutionManagerService;
 		this.communicationManagerService = communicationManagerService;
@@ -50,19 +54,17 @@ public class IncomingMessageWorker extends Thread {
 
 	@Override
 	public void run() {
-		val simulatorActive = Constants.isSimulatedDateAndTime();
 		try {
-			TimeUnit.SECONDS
-					.sleep(simulatorActive ? ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR
-							: ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR);
+			TimeUnit.MILLISECONDS
+					.sleep(ImplementationConstants.INCOMING_MESSAGE_WORKER_MILLISECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
 		} catch (final InterruptedException e) {
 			interrupt();
 			log.debug("Incoming message worker received signal to stop (before first run)");
 		}
 
-		while (!isInterrupted()) {
+		while (!isInterrupted() && !shouldStop) {
 			final long startingTime = System.currentTimeMillis();
-			log.info("Executing new run of incoming message worker...started");
+			log.debug("Executing new run of incoming message worker...started");
 
 			try {
 				val receivedMessages = communicationManagerService
@@ -87,17 +89,19 @@ public class IncomingMessageWorker extends Thread {
 						e.getMessage());
 			}
 
-			log.info(
-					"Executing new run of incoming message worker...done ({} seconds)",
-					(System.currentTimeMillis() - startingTime) / 1000.0);
+			log.debug(
+					"Executing new run of incoming message worker...done ({} milliseconds)",
+					System.currentTimeMillis() - startingTime);
+
 			try {
-				TimeUnit.SECONDS
-						.sleep(simulatorActive ? ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR
-								: ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR);
+				TimeUnit.MILLISECONDS
+						.sleep(ImplementationConstants.INCOMING_MESSAGE_WORKER_MILLISECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
 			} catch (final InterruptedException e) {
 				interrupt();
-				log.debug("Incoming message worker received signal to stop");
+				log.debug("Incoming message worker received signal to stop (interrupted)");
+				return;
 			}
 		}
+		log.debug("Incoming message worker received signal to stop");
 	}
 }

@@ -34,7 +34,32 @@
 			<AppenderRef ref="File" level="WARN" />
 			<AppenderRef ref="RollingFile" level="${sys:mc_logging_rolling_file_level}" />
 		</Logger>
+		<Logger name="ch.ethz.mc.model.ModelObject" level="INFO" additivity="false">
+			<AppenderRef ref="Console" level="${sys:mc_logging_console_level}" />
+			<AppenderRef ref="File" level="WARN" />
+			<AppenderRef ref="RollingFile" level="${sys:mc_logging_rolling_file_level}" />
+		</Logger>
+		<Logger name="ch.ethz.mc.services.InterventionExecutionManagerService" level="INFO" additivity="false">
+			<AppenderRef ref="Console" level="${sys:mc_logging_console_level}" />
+			<AppenderRef ref="File" level="WARN" />
+			<AppenderRef ref="RollingFile" level="${sys:mc_logging_rolling_file_level}" />
+		</Logger>
 		<Logger name="ch.ethz.mc.services.internal.ModelObjectExchangeService" level="INFO" additivity="false">
+			<AppenderRef ref="Console" level="${sys:mc_logging_console_level}" />
+			<AppenderRef ref="File" level="WARN" />
+			<AppenderRef ref="RollingFile" level="${sys:mc_logging_rolling_file_level}" />
+		</Logger>
+		<Logger name="ch.ethz.mc.services.threads.MonitoringSchedulingWorker" level="INFO" additivity="false">
+			<AppenderRef ref="Console" level="${sys:mc_logging_console_level}" />
+			<AppenderRef ref="File" level="WARN" />
+			<AppenderRef ref="RollingFile" level="${sys:mc_logging_rolling_file_level}" />
+		</Logger>
+		<Logger name="ch.ethz.mc.services.threads.IncomingMessageWorker" level="INFO" additivity="false">
+			<AppenderRef ref="Console" level="${sys:mc_logging_console_level}" />
+			<AppenderRef ref="File" level="WARN" />
+			<AppenderRef ref="RollingFile" level="${sys:mc_logging_rolling_file_level}" />
+		</Logger>
+		<Logger name="ch.ethz.mc.services.threads.OutgoingMessageWorker" level="INFO" additivity="false">
 			<AppenderRef ref="Console" level="${sys:mc_logging_console_level}" />
 			<AppenderRef ref="File" level="WARN" />
 			<AppenderRef ref="RollingFile" level="${sys:mc_logging_rolling_file_level}" />

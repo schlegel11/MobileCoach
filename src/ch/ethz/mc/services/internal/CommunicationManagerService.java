@@ -73,7 +73,12 @@ import ch.ethz.mc.tools.StringHelpers;
  */
 @Log4j2
 public class CommunicationManagerService {
-	private static CommunicationManagerService	instance	= null;
+	private static CommunicationManagerService	instance		= null;
+
+	private final boolean						simulatorActive;
+
+	private long								lastSMSCheck	= 0;
+	private long								lastEmailCheck	= 0;
 
 	private final boolean						emailActive;
 	private final boolean						smsActive;
@@ -108,6 +113,8 @@ public class CommunicationManagerService {
 		log.info("Preparing service...");
 
 		runningMailingThreads = new ArrayList<MailingThread>();
+
+		simulatorActive = Constants.isSimulatedDateAndTime();
 
 		// General settings
 		emailActive = Constants.isEmailActive();
@@ -310,16 +317,28 @@ public class CommunicationManagerService {
 	public List<ReceivedMessage> receiveMessages() {
 		val receivedMessages = new ArrayList<ReceivedMessage>();
 
-		// Add Email messages
-		if (emailActive) {
+		// Add Email messages (every x minutes only)
+		if (emailActive
+				& System.currentTimeMillis() > lastEmailCheck
+						+ (simulatorActive ? ImplementationConstants.SMS_AND_EMAIL_RETRIEVAL_INTERVAL_IN_SECONDS_WITH_SIMULATOR
+								: ImplementationConstants.SMS_AND_EMAIL_RETRIEVAL_INTERVAL_IN_SECONDS_WITHOUT_SIMULATOR)
+						* 1000) {
+			lastEmailCheck = System.currentTimeMillis();
+
 			// Emails are currently not handled, but it could be implemented
 			// here.
 		}
 
-		// Add SMS messages
+		// Add SMS messages (every x minutes only)
 		Store store = null;
 		Folder folder = null;
-		if (smsActive) {
+		if (smsActive
+				& System.currentTimeMillis() > lastSMSCheck
+						+ (simulatorActive ? ImplementationConstants.SMS_AND_EMAIL_RETRIEVAL_INTERVAL_IN_SECONDS_WITH_SIMULATOR
+								: ImplementationConstants.SMS_AND_EMAIL_RETRIEVAL_INTERVAL_IN_SECONDS_WITHOUT_SIMULATOR)
+						* 1000) {
+			lastSMSCheck = System.currentTimeMillis();
+
 			try {
 				log.debug("Retrieving SMS messages...");
 				store = incomingMailSession.getStore(mailboxProtocol);
@@ -368,7 +387,7 @@ public class CommunicationManagerService {
 									receivedTimestampString).getTime();
 
 							// Abjust for simulated date and time
-							if (Constants.isSimulatedDateAndTime()) {
+							if (simulatorActive) {
 								receivedMessage
 										.setReceivedTimestamp(InternalDateTime
 												.currentTimeMillis());
@@ -543,14 +562,14 @@ public class CommunicationManagerService {
 				log.warn(
 						"Could not send mail to {}, retrying later another {} times: ",
 						dialogOption.getData(),
-						ImplementationConstants.MAILING_SEND_RETRIES,
+						ImplementationConstants.EMAIL_SENDING_RETRIES,
 						e.getMessage());
 			}
 
-			for (int i = 0; i < ImplementationConstants.MAILING_SEND_RETRIES; i++) {
+			for (int i = 0; i < ImplementationConstants.EMAIL_SENDING_RETRIES; i++) {
 				try {
 					TimeUnit.SECONDS
-							.sleep(ImplementationConstants.MAILING_SEND_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS);
+							.sleep(ImplementationConstants.EMAIL_SENDING_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS);
 				} catch (final InterruptedException e) {
 					log.warn("Interrupted messaging sending approach {}", i);
 
