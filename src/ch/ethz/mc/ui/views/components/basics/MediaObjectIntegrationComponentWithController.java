@@ -76,6 +76,7 @@ public class MediaObjectIntegrationComponentWithController extends
 
 		val buttonClickListener = new ButtonClickListener();
 		getSetURLButton().addClickListener(buttonClickListener);
+		getCreateHTMLButton().addClickListener(buttonClickListener);
 		getDeleteButton().addClickListener(buttonClickListener);
 
 		val uploader = new Uploader();
@@ -93,6 +94,8 @@ public class MediaObjectIntegrationComponentWithController extends
 				destroyMediaObject();
 			} else if (event.getButton() == getSetURLButton()) {
 				setURL();
+			} else if (event.getButton() == getCreateHTMLButton()) {
+				createHTML();
 			}
 		}
 	}
@@ -107,6 +110,7 @@ public class MediaObjectIntegrationComponentWithController extends
 
 			getUploadComponent().setEnabled(true);
 			getSetURLButton().setEnabled(true);
+			getCreateHTMLButton().setEnabled(true);
 			getDeleteButton().setEnabled(false);
 		} else {
 			String externalReference;
@@ -129,6 +133,7 @@ public class MediaObjectIntegrationComponentWithController extends
 
 			getUploadComponent().setEnabled(false);
 			getSetURLButton().setEnabled(false);
+			getCreateHTMLButton().setEnabled(false);
 			getDeleteButton().setEnabled(true);
 
 			// Care for HTML editing
@@ -203,6 +208,23 @@ public class MediaObjectIntegrationComponentWithController extends
 						closeWindow();
 					}
 				}, null);
+	}
+
+	/**
+	 * Creates an empty HTML object
+	 */
+	private void createHTML() {
+		log.debug("Create empty HTML object");
+
+		try {
+			val temporaryFile = File.createTempFile("HTML-snippet", "html");
+
+			createMediaObjectForFile(temporaryFile, "HTML-snippet.html",
+					MediaObjectTypes.HTML_TEXT);
+		} catch (final IOException e) {
+			log.error("Could not create temporary file for HTML snippet: {}",
+					e.getMessage());
+		}
 	}
 
 	/*
