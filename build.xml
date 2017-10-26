@@ -41,7 +41,11 @@ This can be set in the "JRE" tab when configuring an ANT task in the eclipse GUI
 		<basename property="project" file="${basedir}" />
 		<eclipse.refreshLocal resource="${project}" depth="infinite" />
 		<eclipse.incrementalBuild project="${project}" kind="full" />
-
+		
+		<!-- Ensure SSL (add) -->
+		<replace file="WebContent/WEB-INF/web.xml" token="&lt;!-- ##START##" value="&lt;!-- ##START## --&gt;" />
+		<replace file="WebContent/WEB-INF/web.xml" token="##END## --&gt;" value="&lt;!-- ##END## --&gt;" />
+		
 		<!-- Create .war file -->
 		<war destfile="out/MC.war" webxml="WebContent/WEB-INF/web.xml" update="true">
 			<classes dir="build/classes" />
@@ -50,7 +54,11 @@ This can be set in the "JRE" tab when configuring an ANT task in the eclipse GUI
 				<exclude name="WEB-INF/web.xml" />
 			</fileset>
 		</war>
-
+				
+		<!-- Ensure SSL (remove) -->
+		<replace file="WebContent/WEB-INF/web.xml" token="&lt;!-- ##START## --&gt;" value="&lt;!-- ##START##" />
+		<replace file="WebContent/WEB-INF/web.xml" token="&lt;!-- ##END## --&gt;" value="##END## --&gt;" />
+		
 		<!-- Cleaning -->
 		<delete dir="lib" />
 
