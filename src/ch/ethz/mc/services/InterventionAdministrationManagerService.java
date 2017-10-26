@@ -1021,8 +1021,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public MediaObject mediaObjectCreateWithURL(final String url,
-			final MediaObjectTypes mediaObjectType) {
+	public MediaObject mediaObjectCreateWithURL(final String url) {
 
 		if (url == null) {
 			log.error("Can't create media object with empty URL");

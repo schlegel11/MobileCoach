@@ -94,6 +94,36 @@ public class DialogMessage extends ModelObject {
 	private String						message;
 
 	/**
+	 * The message sent to the {@link Participant} (version for older
+	 * technologies, e.g. email, SMS)
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private String						messageWithForcedLinks;
+
+	/**
+	 * Optional survey link contained in message
+	 */
+	@Getter
+	@Setter
+	private String						surveyLink;
+
+	/**
+	 * Optional media object link contained in message
+	 */
+	@Getter
+	@Setter
+	private String						mediaObjectLink;
+
+	/**
+	 * Optional text based media object content
+	 */
+	@Getter
+	@Setter
+	private String						textBasedMediaObjectContent;
+
+	/**
 	 * Timestamp when the {@link DialogMessage} should have been sent
 	 */
 	@Getter

@@ -43,6 +43,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.IteratorUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
@@ -73,6 +74,7 @@ import ch.ethz.mc.model.persistent.types.DialogMessageTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.services.internal.CommunicationManagerService;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
+import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
 import ch.ethz.mc.services.internal.RecursiveAbstractMonitoringRulesResolver;
 import ch.ethz.mc.services.internal.RecursiveAbstractMonitoringRulesResolver.EXECUTION_CASE;
 import ch.ethz.mc.services.internal.VariablesManagerService;
@@ -286,7 +288,7 @@ public class InterventionExecutionManagerService {
 	@Synchronized
 	private void dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
 			final Participant participant, final DialogMessageTypes type,
-			String message, final boolean manuallySent,
+			final String message, final boolean manuallySent,
 			final long timestampToSendMessage,
 			final MonitoringRule relatedMonitoringRule,
 			final MonitoringMessage relatedMonitoringMessage,
@@ -295,9 +297,10 @@ public class InterventionExecutionManagerService {
 		log.debug("Create message and prepare for sending");
 		val dialogMessage = new DialogMessage(participant.getId(), 0,
 				DialogMessageStatusTypes.PREPARED_FOR_SENDING, type, message,
-				timestampToSendMessage, -1, supervisorMessage, answerExpected,
-				-1, -1, null, null, false, relatedMonitoringRule == null ? null
-						: relatedMonitoringRule.getId(),
+				message, null, null, null, timestampToSendMessage, -1,
+				supervisorMessage, answerExpected, -1, -1, null, null, false,
+				relatedMonitoringRule == null ? null : relatedMonitoringRule
+						.getId(),
 				relatedMonitoringMessage == null ? null
 						: relatedMonitoringMessage.getId(), false, manuallySent);
 
@@ -353,6 +356,7 @@ public class InterventionExecutionManagerService {
 		}
 
 		// Special saving case for linked media object or intermediate survey
+		String messageWithForcedLinks = message;
 		if (linkedMediaObject != null || linkedIntermediateSurvey != null) {
 			dialogMessage.setStatus(DialogMessageStatusTypes.IN_CREATION);
 			databaseManagerService.saveModelObject(dialogMessage);
@@ -369,14 +373,38 @@ public class InterventionExecutionManagerService {
 				log.debug("Integrating media object into message with URL {}",
 						mediaObjectParticipantShortURLString);
 
+				dialogMessage
+						.setMediaObjectLink(mediaObjectParticipantShortURLString);
 				if (message
 						.contains(ImplementationConstants.PLACEHOLDER_LINKED_MEDIA_OBJECT)) {
-					message = message
+					messageWithForcedLinks = messageWithForcedLinks
 							.replace(
 									ImplementationConstants.PLACEHOLDER_LINKED_MEDIA_OBJECT,
 									mediaObjectParticipantShortURLString);
 				} else {
 					URLsToAdd += " " + mediaObjectParticipantShortURLString;
+				}
+
+				// Read media objects if it is text-based
+				if (linkedMediaObject.isTextBased()) {
+					if (linkedMediaObject.isFileBased()) {
+						val file = interventionAdministrationManagerService
+								.mediaObjectGetFile(linkedMediaObject,
+										FILE_STORES.STORAGE);
+						try {
+							val fileContent = FileUtils.readFileToString(file);
+							dialogMessage
+									.setTextBasedMediaObjectContent(fileContent);
+						} catch (final IOException e) {
+							log.error(
+									"File could not be read for creating dialog message with file content: {}",
+									e.getMessage());
+						}
+					} else {
+						dialogMessage
+								.setTextBasedMediaObjectContent(linkedMediaObject
+										.getUrlReference());
+					}
 				}
 			}
 
@@ -393,9 +421,10 @@ public class InterventionExecutionManagerService {
 						"Integrating intermediate survey into message with URL {}",
 						intermediateSurveyShortURLString);
 
+				dialogMessage.setSurveyLink(intermediateSurveyShortURLString);
 				if (message
 						.contains(ImplementationConstants.PLACEHOLDER_LINKED_SURVEY)) {
-					message = message.replace(
+					messageWithForcedLinks = messageWithForcedLinks.replace(
 							ImplementationConstants.PLACEHOLDER_LINKED_SURVEY,
 							intermediateSurveyShortURLString);
 				} else {
@@ -403,7 +432,8 @@ public class InterventionExecutionManagerService {
 				}
 			}
 
-			dialogMessage.setMessage(message + URLsToAdd);
+			dialogMessage.setMessageWithForcedLinks(messageWithForcedLinks
+					+ URLsToAdd);
 			dialogMessage
 					.setStatus(DialogMessageStatusTypes.PREPARED_FOR_SENDING);
 		}
@@ -557,7 +587,7 @@ public class InterventionExecutionManagerService {
 				0,
 				type == DialogMessageTypes.INTENTION ? DialogMessageStatusTypes.RECEIVED_AS_INTENTION
 						: DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY, type,
-				"", -1, -1, false, false, -1,
+				"", "", null, null, null, -1, -1, false, false, -1,
 				receivedMessage.getReceivedTimestamp(),
 				receivedMessage.getMessage(), receivedMessage.getMessage(),
 				type == DialogMessageTypes.INTENTION ? false : true, null,
@@ -1411,13 +1441,9 @@ public class InterventionExecutionManagerService {
 											: "participant", dialogOption
 											.getData());
 							communicationManagerService.sendMessage(
-									dialogOption, dialogMessageToSend.getId(),
-									dialogMessageToSend.getOrder(),
+									dialogOption, dialogMessageToSend,
 									dialogMessageWithSenderIdentificationToSend
-											.getMessageSenderIdentification(),
-									dialogMessageToSend.getMessage(),
-									dialogMessageToSend
-											.isMessageExpectsAnswer());
+											.getMessageSenderIdentification());
 						} else {
 							log.error("Could not send prepared message, because there was no valid dialog option to send message to participant or supervisor; solution: remove current dialog message");
 

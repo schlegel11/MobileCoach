@@ -170,12 +170,17 @@ public class DeepstreamCommunicationService implements ConnectionStateListener,
 	 * @param dialogMessageId
 	 * @param messageOrder
 	 * @param message
+	 * @param textBasedMediaObjectContent
+	 * @param surveyLink
+	 * @param contentObjectLink
 	 * @param messageExpectsAnswer
 	 */
 	@Synchronized
 	public void asyncSendMessage(final DialogOption dialogOption,
 			final ObjectId dialogMessageId, final int messageOrder,
-			String message, final boolean messageExpectsAnswer) {
+			final String message, final String textBasedMediaObjectContent,
+			final String surveyLink, final String contentObjectLink,
+			final boolean messageExpectsAnswer) {
 		val dialogMessage = interventionExecutionManagerService
 				.dialogMessageStatusChangesForSending(dialogMessageId,
 						DialogMessageStatusTypes.SENDING,
@@ -183,6 +188,8 @@ public class DeepstreamCommunicationService implements ConnectionStateListener,
 
 		val timestamp = InternalDateTime.currentTimeMillis();
 		try {
+			val isCommand = dialogMessage.getType() == DialogMessageTypes.COMMAND;
+
 			val participantOrSupervisorIdentifier = dialogOption.getData()
 					.substring(substringLength);
 			val record = client.record.getRecord("messages/"
@@ -191,42 +198,22 @@ public class DeepstreamCommunicationService implements ConnectionStateListener,
 			final JsonObject messageObject = new JsonObject();
 			messageObject.addProperty("id", messageOrder);
 			messageObject.addProperty("status", "SENT_BY_SYSTEM");
-			messageObject
-					.addProperty(
-							"type",
-							dialogMessage.getType() == DialogMessageTypes.COMMAND ? "COMMAND"
-									: "PLAIN");
-			if (message.contains(Constants.getMediaObjectLinkingBaseURL())) {
-				val indexFrom = message.indexOf(Constants
-						.getMediaObjectLinkingBaseURL());
-				int indexTo;
-				if ((indexTo = message.indexOf(" ", indexFrom)) == -1) {
-					messageObject.addProperty("contains-media",
-							message.substring(indexFrom));
-				} else {
-					messageObject.addProperty("contains-media",
-							message.substring(indexFrom, indexTo));
-				}
-				message = message
-						.replaceFirst(
-								Constants.getMediaObjectLinkingBaseURL()
-										+ "[^ ]*",
-								ImplementationConstants.PLACEHOLDER_LINKED_MEDIA_OBJECT);
+			messageObject.addProperty("type", isCommand ? "COMMAND" : "PLAIN");
+			if (!StringUtils.isBlank(dialogMessage.getSurveyLink())) {
+				messageObject.addProperty("contains-survey",
+						dialogMessage.getSurveyLink());
 			}
-			if (message.contains(Constants.getSurveyLinkingBaseURL())) {
-				val indexFrom = message.indexOf(Constants
-						.getSurveyLinkingBaseURL());
-				int indexTo;
-				if ((indexTo = message.indexOf(" ", indexFrom)) == -1) {
-					messageObject.addProperty("contains-survey",
-							message.substring(indexFrom));
+			if (!StringUtils.isBlank(dialogMessage.getMediaObjectLink())) {
+				messageObject.addProperty("contains-media",
+						dialogMessage.getMediaObjectLink());
+			}
+			if (isCommand) {
+				if (!StringUtils.isBlank(textBasedMediaObjectContent)) {
+					messageObject.addProperty("content",
+							textBasedMediaObjectContent);
 				} else {
-					messageObject.addProperty("contains-survey",
-							message.substring(indexFrom, indexTo));
+					messageObject.addProperty("content", "");
 				}
-				message = message.replaceFirst(
-						Constants.getSurveyLinkingBaseURL() + "[^ ]*",
-						ImplementationConstants.PLACEHOLDER_LINKED_SURVEY);
 			}
 			messageObject.addProperty("message", message);
 			messageObject.addProperty("message-timestamp", timestamp);

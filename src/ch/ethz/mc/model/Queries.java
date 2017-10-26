@@ -192,4 +192,9 @@ public class Queries {
 	public static final String	UPDATE_VERSION_13__MONITORING_RULE__CHANGE_1																																									= "{$set:{'markCaseAsSolvedWhenTrue':false}}";
 	public static final String	UPDATE_VERSION_14__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'type':'PLAIN'}}";
 	public static final String	UPDATE_VERSION_14__MONITORING_MESSAGE__CHANGE_1																																									= "{$set:{'isCommandMessage':false}}";
+	public static final String	UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_1_FIELD																																								= "message";
+	public static final String	UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_1_CHANGE																																								= "{$set:{'messageWithForcedLinks':#}}";
+	public static final String	UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_2																																										= "{$set:{'surveyLink':null}}";
+	public static final String	UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_3																																										= "{$set:{'mediaObjectLink':null}}";
+	public static final String	UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_4																																										= "{$set:{'textBasedMediaObjectContent':null}}";
 }

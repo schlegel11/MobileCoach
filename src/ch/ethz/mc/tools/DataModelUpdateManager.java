@@ -26,6 +26,7 @@ import java.util.List;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.bson.types.ObjectId;
 import org.jongo.Jongo;
 
 import ch.ethz.mc.conf.Constants;
@@ -36,6 +37,8 @@ import ch.ethz.mc.model.persistent.outdated.InterventionV12;
 import ch.ethz.mc.model.persistent.outdated.MonitoringRuleV12;
 import ch.ethz.mc.model.persistent.types.MonitoringRuleTypes;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
+
+import com.mongodb.DBObject;
 
 /**
  * Manages the modification of the Data Model on the startup of the system
@@ -88,6 +91,9 @@ public class DataModelUpdateManager {
 					break;
 				case 14:
 					updateToVersion14();
+					break;
+				case 15:
+					updateToVersion15();
 					break;
 			}
 
@@ -313,5 +319,30 @@ public class DataModelUpdateManager {
 				.getCollection("MonitoringMessage");
 		monitoringMessageCollection.update(Queries.EVERYTHING).multi()
 				.with(Queries.UPDATE_VERSION_14__MONITORING_MESSAGE__CHANGE_1);
+	}
+
+	/**
+	 * Changes for version 14:
+	 */
+	private static void updateToVersion15() {
+		val mongoDriverDialogMessageCollection = jongo.getDatabase()
+				.getCollection("DialogMessage");
+		val dialogMessageCollection = jongo.getCollection("DialogMessage");
+
+		for (final DBObject document : mongoDriverDialogMessageCollection
+				.find().snapshot()) {
+
+			dialogMessageCollection
+					.update((ObjectId) document.get("_id"))
+					.with(Queries.UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_1_CHANGE,
+							document.get(Queries.UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_1_FIELD));
+		}
+
+		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+				.with(Queries.UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_2);
+		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+				.with(Queries.UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_3);
+		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+				.with(Queries.UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_4);
 	}
 }

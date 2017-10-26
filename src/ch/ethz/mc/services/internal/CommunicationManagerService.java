@@ -246,23 +246,27 @@ public class CommunicationManagerService {
 	 * Sends a message (asynchronous)
 	 *
 	 * @param dialogOption
-	 * @param dialogMessageId
-	 * @param order
-	 * @param message
+	 * @param dialogMessage
+	 * @param messageSender
 	 */
 	@Synchronized
 	public void sendMessage(final DialogOption dialogOption,
-			final ObjectId dialogMessageId, final int messageOrder,
-			final String messageSender, final String message,
-			final boolean messageExpectsAnswer) {
+			final DialogMessage dialogMessage, final String messageSender) {
+
+		final int messageOrder = dialogMessage.getOrder();
+		final String message = dialogMessage.getMessage();
+		final String messageWithForcedLinks = dialogMessage
+				.getMessageWithForcedLinks();
+		final boolean messageExpectsAnswer = dialogMessage
+				.isMessageExpectsAnswer();
 
 		switch (dialogOption.getType()) {
 			case SMS:
 			case SUPERVISOR_SMS:
 				if (smsActive) {
 					val mailingThread = new MailingThread(dialogOption,
-							dialogMessageId, messageSender, message,
-							messageExpectsAnswer);
+							dialogMessage.getId(), messageSender,
+							messageWithForcedLinks, messageExpectsAnswer);
 
 					synchronized (runningMailingThreads) {
 						runningMailingThreads.add(mailingThread);
@@ -275,8 +279,8 @@ public class CommunicationManagerService {
 			case SUPERVISOR_EMAIL:
 				if (emailActive) {
 					val mailingThread = new MailingThread(dialogOption,
-							dialogMessageId, messageSender, message,
-							messageExpectsAnswer);
+							dialogMessage.getId(), messageSender,
+							messageWithForcedLinks, messageExpectsAnswer);
 
 					synchronized (runningMailingThreads) {
 						runningMailingThreads.add(mailingThread);
@@ -294,8 +298,12 @@ public class CommunicationManagerService {
 						&& deepstreamActive) {
 					try {
 						deepstreamCommunicationService.asyncSendMessage(
-								dialogOption, dialogMessageId, messageOrder,
-								message, messageExpectsAnswer);
+								dialogOption, dialogMessage.getId(),
+								messageOrder, message,
+								dialogMessage.getTextBasedMediaObjectContent(),
+								dialogMessage.getSurveyLink(),
+								dialogMessage.getMediaObjectLink(),
+								messageExpectsAnswer);
 					} catch (final Exception e) {
 						log.warn("Could not send message using deepstream: {}",
 								e.getMessage());

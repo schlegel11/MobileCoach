@@ -260,7 +260,7 @@ public class MediaObjectIntegrationComponentWithController extends
 		}
 
 		val newMediaObject = getInterventionAdministrationManagerService()
-				.mediaObjectCreateWithURL(url, MediaObjectTypes.URL);
+				.mediaObjectCreateWithURL(url);
 
 		if (newMediaObject != null) {
 			mediaObject = newMediaObject;
