@@ -31,6 +31,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
+import ch.ethz.mc.conf.DeepstreamConstants;
 import ch.ethz.mc.services.RESTManagerService;
 
 import com.google.gson.Gson;
@@ -38,7 +39,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 /**
- * Service to read voting values and to vote/unvote using REST
+ * REST-based services required for the interplay with deepstream
  *
  * @author Andreas Filler
  */
@@ -80,12 +81,17 @@ public class DeepstreamServiceV02 extends AbstractServiceV02 {
 					JsonElement.class);
 			final JsonObject jsonObjectPayload = jsonElement.getAsJsonObject();
 
-			val authData = (JsonObject) jsonObjectPayload.get("authData");
+			val authData = (JsonObject) jsonObjectPayload
+					.get(DeepstreamConstants.DS_FIELD_AUTH_DATA);
 
-			val user = authData.get("user").getAsString();
-			val secret = authData.get("secret").getAsString();
-			val role = authData.get("role").getAsString();
-			val interventionPassword = authData.get("intervention-password")
+			val user = authData.get(DeepstreamConstants.REST_FIELD_USER)
+					.getAsString();
+			val secret = authData.get(DeepstreamConstants.REST_FIELD_SECRET)
+					.getAsString();
+			val role = authData.get(DeepstreamConstants.REST_FIELD_ROLE)
+					.getAsString();
+			val interventionPassword = authData.get(
+					DeepstreamConstants.REST_FIELD_INTERVENTION_PASSWORD)
 					.getAsString();
 
 			// Check access
@@ -102,12 +108,16 @@ public class DeepstreamServiceV02 extends AbstractServiceV02 {
 
 			// Send response
 			val responseServerData = new JsonObject();
-			responseServerData.addProperty("user", user);
-			responseServerData.addProperty("role", role);
+			responseServerData.addProperty(DeepstreamConstants.REST_FIELD_USER,
+					user);
+			responseServerData.addProperty(DeepstreamConstants.REST_FIELD_ROLE,
+					role);
 
 			val responseData = new JsonObject();
-			responseData.addProperty("username", user);
-			responseData.add("serverData", responseServerData);
+			responseData.addProperty(DeepstreamConstants.DS_FIELD_USERNAME,
+					user);
+			responseData.add(DeepstreamConstants.DS_FIELD_SERVER_DATA,
+					responseServerData);
 
 			return Response.status(Status.OK).entity(gson.toJson(responseData))
 					.build();
@@ -131,19 +141,24 @@ public class DeepstreamServiceV02 extends AbstractServiceV02 {
 			final JsonObject jsonPayload = jsonElement.getAsJsonObject();
 
 			String nickname = null;
-			if (jsonPayload.has("nickname")) {
-				nickname = jsonPayload.get("nickname").getAsString();
+			if (jsonPayload.has(DeepstreamConstants.REST_FIELD_NICKNAME)) {
+				nickname = jsonPayload.get(
+						DeepstreamConstants.REST_FIELD_NICKNAME).getAsString();
 			}
 			String relatedParticipant = null;
-			if (jsonPayload.has("participant")) {
-				relatedParticipant = jsonPayload.get("participant")
+			if (jsonPayload.has(DeepstreamConstants.REST_FIELD_PARTICIPANT)) {
+				relatedParticipant = jsonPayload.get(
+						DeepstreamConstants.REST_FIELD_PARTICIPANT)
 						.getAsString();
 			}
-			val interventionPattern = jsonPayload.get("intervention-pattern")
+			val interventionPattern = jsonPayload.get(
+					DeepstreamConstants.REST_FIELD_INTERVENTION_PATTERN)
 					.getAsString();
-			val interventionPassword = jsonPayload.get("intervention-password")
+			val interventionPassword = jsonPayload.get(
+					DeepstreamConstants.REST_FIELD_INTERVENTION_PASSWORD)
 					.getAsString();
-			val requestedRole = jsonPayload.get("role").getAsString();
+			val requestedRole = jsonPayload.get(
+					DeepstreamConstants.REST_FIELD_ROLE).getAsString();
 
 			// Create participant or supervisor
 			val externalRegistration = restManagerService.createDeepstreamUser(
@@ -159,10 +174,10 @@ public class DeepstreamServiceV02 extends AbstractServiceV02 {
 
 			// Send response
 			val responseData = new JsonObject();
-			responseData.addProperty("user",
+			responseData.addProperty(DeepstreamConstants.REST_FIELD_USER,
 					externalRegistration.getExternalId());
-			responseData
-					.addProperty("secret", externalRegistration.getSecret());
+			responseData.addProperty(DeepstreamConstants.REST_FIELD_SECRET,
+					externalRegistration.getSecret());
 
 			return Response.status(Status.OK).entity(gson.toJson(responseData))
 					.build();
