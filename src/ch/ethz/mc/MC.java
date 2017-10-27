@@ -60,12 +60,13 @@ public class MC implements ServletContextListener {
 	private boolean								ready	= false;
 
 	// Internal services
+	@Getter
 	DatabaseManagerService						databaseManagerService;
 	FileStorageManagerService					fileStorageManagerService;
 
 	@Getter
 	ImageCachingService							imageCachingService;
-
+	@Getter
 	VariablesManagerService						variablesManagerService;
 
 	CommunicationManagerService					communicationManagerService;

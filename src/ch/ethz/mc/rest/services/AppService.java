@@ -80,21 +80,8 @@ public class AppService {
 	@Produces("application/json")
 	public List<LibraryEntry> mediaLibrary(@Context final HttpServletRequest request,
 			@HeaderParam("Authentication") final String token) throws BadRequestException {
-		
-		// TODO: if more services are added, authentication should be separated out into a function or decorator
 
-		if (token == null) {
-			throw new WebApplicationException(Response.status(400).entity("Missing header 'Authentication'.").build());
-		}
-		
-		ObjectId userId = null;
-		if (AppToken.isAppToken(token)){
-			userId = restManagerService.findParticipantIdForAppToken(token);
-		}
-		
-		if (userId == null) {
-			throw new WebApplicationException(Response.status(403).entity("Invalid Token supplied").build());
-		}
+		ObjectId userId = restManagerService.checkTokenAndGetParticipantId(token);
 		
 		List<LibraryEntry> result = new LinkedList<LibraryEntry>();
 		for (MediaLibraryEntry e: restManagerService.getMediaLibrary(userId)){

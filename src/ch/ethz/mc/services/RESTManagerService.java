@@ -24,6 +24,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
 import lombok.Getter;
 import lombok.Synchronized;
 import lombok.val;
@@ -432,6 +435,23 @@ public class RESTManagerService {
 	    }
 		
 		return result;
+	}
+	
+	public ObjectId checkTokenAndGetParticipantId(String token){
+		if (token == null) {
+			throw new WebApplicationException(Response.status(400).entity("Missing header 'Authentication'.").build());
+		}
+		
+		ObjectId userId = null;
+		if (AppToken.isAppToken(token)){
+			userId = findParticipantIdForAppToken(token);
+		}
+		
+		if (userId == null) {
+			throw new WebApplicationException(Response.status(403).entity("Invalid Token supplied").build());
+		}
+		
+		return userId;
 	}
 
 	/*
