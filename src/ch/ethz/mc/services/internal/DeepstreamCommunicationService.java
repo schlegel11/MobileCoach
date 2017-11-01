@@ -24,9 +24,11 @@ import io.deepstream.ConfigOptions;
 import io.deepstream.ConnectionState;
 import io.deepstream.ConnectionStateListener;
 import io.deepstream.DeepstreamClient;
-import io.deepstream.DeepstreamFactory;
+import io.deepstream.DeepstreamRuntimeErrorHandler;
+import io.deepstream.Event;
 import io.deepstream.LoginResult;
 import io.deepstream.PresenceEventListener;
+import io.deepstream.Topic;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -70,8 +72,8 @@ import com.google.gson.JsonPrimitive;
  * @author Andreas Filler
  */
 @Log4j2
-public class DeepstreamCommunicationService implements ConnectionStateListener,
-		PresenceEventListener {
+public class DeepstreamCommunicationService implements PresenceEventListener,
+		DeepstreamRuntimeErrorHandler, ConnectionStateListener {
 	@Getter
 	private static DeepstreamCommunicationService	instance			= null;
 
@@ -138,12 +140,9 @@ public class DeepstreamCommunicationService implements ConnectionStateListener,
 
 		this.interventionExecutionManagerService = interventionExecutionManagerService;
 
-		try {
-			connectOrReconnect();
-		} catch (final Exception e) {
-			log.error("Problem when connecting to deepstream: {}",
-					e.getMessage());
-			throw e;
+		if (!connectOrReconnect()) {
+			throw new Exception(
+					"A problem when connecting to deepstream at startup occurred.");
 		}
 
 		log.info("Started.");
@@ -153,8 +152,7 @@ public class DeepstreamCommunicationService implements ConnectionStateListener,
 		log.info("Stopping service...");
 
 		try {
-			client.removeConnectionChangeListener(this);
-			client.close();
+			cleanupClient();
 			client = null;
 		} catch (final Exception e) {
 			log.warn("Could not close deepstream connection: {}",
@@ -378,7 +376,7 @@ public class DeepstreamCommunicationService implements ConnectionStateListener,
 	 * 
 	 * @throws Exception
 	 */
-	private void connectOrReconnect() throws Exception {
+	private boolean connectOrReconnect() throws Exception {
 		if (!reconnecting) {
 			while (!restStartupComplete) {
 				log.debug("Waiting for REST interface to come up...");
@@ -388,93 +386,52 @@ public class DeepstreamCommunicationService implements ConnectionStateListener,
 			log.info("Connecting to deepstream...");
 		} else {
 			log.info("Reconnecting to deepstream...");
+			Thread.sleep(1000);
 		}
 
 		final Properties properties = new Properties();
 		properties.setProperty(ConfigOptions.MAX_RECONNECT_ATTEMPTS.toString(),
-				"8");
+				"0");
 
-		client = DeepstreamFactory.getInstance().getClient(host, properties);
+		client = new DeepstreamClient(host, properties);
+		client.setRuntimeErrorHandler(this);
 		client.addConnectionChangeListener(this);
 
 		LoginResult result = null;
-		do {
-			log.debug("Trying to login...");
+		log.debug("Trying to login...");
+		result = client.login(loginData);
 
-			result = client.login(loginData);
-
-			if (!result.loggedIn()) {
-				log.warn("Login and authentication failed.");
-
-				try {
-					Thread.sleep(1000);
-				} catch (final InterruptedException e) {
-					// Do nothing
-				}
-			}
-		} while (startupComplete || !result.loggedIn());
-
-		if (result.loggedIn()) {
-			log.debug("Login successful.");
-
-			log.debug("Caching presence information...");
-			synchronized (loggedInUsers) {
-				loggedInUsers.clear();
-
-				for (val user : client.presence.getAll()) {
-					loggedInUsers.add(user);
-				}
-
-				client.presence.subscribe(this);
-			}
-
-			startupComplete = true;
-			reconnecting = false;
-			log.info("Connection to deepstream established.");
-
-			provideMethods();
-		} else {
-			log.error("Could not login to deepstream server at startup: {}",
-					result.getErrorEvent());
-			throw new Exception(
-					"Could not connect to deepstream server at startup!");
+		if (!result.loggedIn()) {
+			log.warn("Login failed.");
+			return false;
 		}
-	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * io.deepstream.ConnectionStateListener#connectionStateChanged(io.deepstream
-	 * .ConnectionState)
-	 */
-	@Override
-	public void connectionStateChanged(final ConnectionState connectionState) {
-		if (startupComplete && connectionState == ConnectionState.CLOSED) {
-			if (reconnecting) {
-				log.warn("Deepstream connection still lost...");
-			} else {
-				log.warn("Deepstream connection lost!");
+		log.debug("Login successful.");
 
-				try {
-					client.removeConnectionChangeListener(this);
-					client.presence.unsubscribe(this);
-					client = null;
-				} catch (final Exception e) {
-					log.warn("Could not cleanup on disconnect: ",
-							e.getMessage());
-				}
-
-				reconnecting = true;
-			}
-
-			try {
-				connectOrReconnect();
-			} catch (final Exception e) {
-				log.error("Problem when reconnecting to deepstream: {}",
-						e.getMessage());
-			}
+		if (client.getConnectionState() != ConnectionState.OPEN) {
+			log.error("Could not login to deepstream server: {}");
+			return false;
 		}
+
+		log.debug("Caching presence information...");
+		synchronized (loggedInUsers) {
+			loggedInUsers.clear();
+
+			for (val user : client.presence.getAll()) {
+				loggedInUsers.add(user);
+			}
+
+			client.presence.subscribe(this);
+		}
+
+		startupComplete = true;
+		reconnecting = false;
+
+		log.info("Connection to deepstream established.");
+
+		provideMethods();
+
+		return true;
 	}
 
 	/*
@@ -504,7 +461,7 @@ public class DeepstreamCommunicationService implements ConnectionStateListener,
 		// Can only be called by a "participant" (role)
 		client.rpc
 				.provide(
-						DeepstreamConstants.REST_TOKEN,
+						DeepstreamConstants.RPC_REST_TOKEN,
 						(rpcName, data, rpcResponse) -> {
 							final JsonObject jsonData = (JsonObject) gson
 									.toJsonTree(data);
@@ -801,5 +758,54 @@ public class DeepstreamCommunicationService implements ConnectionStateListener,
 	public void RESTInterfaceStarted(final RESTManagerService restManagerService) {
 		this.restManagerService = restManagerService;
 		restStartupComplete = true;
+	}
+
+	@Override
+	public void onException(final Topic topic, final Event event,
+			final String description) {
+		if (startupComplete && event == Event.CONNECTION_ERROR) {
+			if (reconnecting) {
+				log.warn("Deepstream connection still lost...");
+			} else {
+				log.warn("Deepstream connection lost!");
+			}
+
+			try {
+				cleanupClient();
+				client = null;
+			} catch (final Exception e) {
+				log.warn("Could not cleanup on disconnect: ", e.getMessage());
+			} finally {
+				client = null;
+			}
+
+			reconnecting = true;
+
+			try {
+				connectOrReconnect();
+			} catch (final Exception e) {
+				log.error("Problem when reconnecting to deepstream: {}",
+						e.getMessage());
+			}
+		}
+	}
+
+	@Override
+	public void connectionStateChanged(final ConnectionState connectionState) {
+		log.debug("New deepstream connection state: {}", connectionState);
+
+		if (startupComplete && connectionState == ConnectionState.CLOSED) {
+			onException(null, Event.CONNECTION_ERROR, null);
+		}
+	}
+
+	private void cleanupClient() throws Exception {
+		client.setRuntimeErrorHandler(null);
+		client.removeConnectionChangeListener(this);
+		client.presence.unsubscribe(this);
+		client.rpc.unprovide(DeepstreamConstants.RPC_REST_TOKEN);
+		client.rpc.unprovide(DeepstreamConstants.RPC_USER_MESSAGE);
+		client.rpc.unprovide(DeepstreamConstants.RPC_USER_INTENTION);
+		client.rpc.unprovide(DeepstreamConstants.RPC_MESSAGE_DIFF);
 	}
 }

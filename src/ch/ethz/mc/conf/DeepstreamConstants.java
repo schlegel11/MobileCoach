@@ -45,6 +45,7 @@ public class DeepstreamConstants {
 	public static final String	TYPE_PLAIN							= "PLAIN";
 	public static final String	TYPE_COMMAND						= "COMMAND";
 
+	public static final String	RPC_REST_TOKEN						= "rest-token";
 	public static final String	RPC_USER_MESSAGE					= "user-message";
 	public static final String	RPC_USER_INTENTION					= "user-intention";
 	public static final String	RPC_MESSAGE_DIFF					= "message-diff";
@@ -63,7 +64,6 @@ public class DeepstreamConstants {
 	public static final String	CONTENT								= "content";
 	public static final String	SERVER_TIMESTAMP					= "server-timestamp";
 	public static final String	USER_INTENTION						= "user-intention";
-	public static final String	REST_TOKEN							= "rest-token";
 	public static final String	USER_TIMESTAMP						= "user-timestamp";
 	public static final String	USER_MESSAGE						= "user-message";
 	public static final String	LAST_MODIFIED						= "last-modified";
