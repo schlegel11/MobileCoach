@@ -800,12 +800,18 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 	}
 
 	private void cleanupClient() throws Exception {
-		client.setRuntimeErrorHandler(null);
-		client.removeConnectionChangeListener(this);
-		client.presence.unsubscribe(this);
-		client.rpc.unprovide(DeepstreamConstants.RPC_REST_TOKEN);
-		client.rpc.unprovide(DeepstreamConstants.RPC_USER_MESSAGE);
-		client.rpc.unprovide(DeepstreamConstants.RPC_USER_INTENTION);
-		client.rpc.unprovide(DeepstreamConstants.RPC_MESSAGE_DIFF);
+		try {
+			client.setRuntimeErrorHandler(null);
+			client.removeConnectionChangeListener(this);
+			client.presence.unsubscribe(this);
+			client.rpc.unprovide(DeepstreamConstants.RPC_REST_TOKEN);
+			client.rpc.unprovide(DeepstreamConstants.RPC_USER_MESSAGE);
+			client.rpc.unprovide(DeepstreamConstants.RPC_USER_INTENTION);
+			client.rpc.unprovide(DeepstreamConstants.RPC_MESSAGE_DIFF);
+		} catch (final Exception e) {
+			log.warn("Problems when cleaning up client: {}", e.getMessage());
+		} finally {
+			client.close();
+		}
 	}
 }
