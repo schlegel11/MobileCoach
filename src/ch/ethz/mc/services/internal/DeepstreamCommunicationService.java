@@ -302,15 +302,59 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 					.get(DeepstreamConstants.PATH_LIST
 							+ String.valueOf(messageOrder));
 
+			final JsonObject messageConfirmationObject;
 			final JsonObject messageObject;
 			if (retrievedMessageObject instanceof JsonNull) {
+				// No separate confirmation required
+				messageConfirmationObject = null;
+
+				// No related former message by user
 				messageObject = new JsonObject();
 				messageObject.addProperty(DeepstreamConstants.STATUS,
 						DeepstreamConstants.STATUS_SENT_BY_USER);
-				messageObject.addProperty(DeepstreamConstants.TYPE,
-						DeepstreamConstants.TYPE_PLAIN);
+				switch (dialogMessage.getType()) {
+					case PLAIN:
+						messageObject.addProperty(DeepstreamConstants.TYPE,
+								DeepstreamConstants.TYPE_PLAIN);
+						break;
+					case INTENTION:
+						messageObject.addProperty(DeepstreamConstants.TYPE,
+								DeepstreamConstants.TYPE_INTENTION);
+						break;
+					default:
+						log.error(
+								"A message of a type {} should never be acknowledged",
+								dialogMessage.getType());
+						break;
+				}
 				messageObject.addProperty(DeepstreamConstants.ID, messageOrder);
 			} else {
+				// Prepare confirmation for message
+				messageConfirmationObject = new JsonObject();
+				messageConfirmationObject.addProperty(
+						DeepstreamConstants.STATUS,
+						DeepstreamConstants.STATUS_SENT_BY_USER);
+				switch (dialogMessage.getType()) {
+					case PLAIN:
+						messageConfirmationObject.addProperty(
+								DeepstreamConstants.TYPE,
+								DeepstreamConstants.TYPE_PLAIN);
+						break;
+					case INTENTION:
+						messageConfirmationObject.addProperty(
+								DeepstreamConstants.TYPE,
+								DeepstreamConstants.TYPE_INTENTION);
+						break;
+					default:
+						log.error(
+								"A message of a type {} should never be acknowledged",
+								dialogMessage.getType());
+						break;
+				}
+				messageConfirmationObject.addProperty(DeepstreamConstants.ID,
+						"c-" + receivedMessage.getReceivedTimestamp());
+
+				// Former message will be extended afterwards
 				messageObject = (JsonObject) retrievedMessageObject;
 				messageObject.addProperty(DeepstreamConstants.STATUS,
 						DeepstreamConstants.STATUS_ANSWERED_BY_USER);
@@ -322,6 +366,27 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 					receivedMessage.getReceivedTimestamp());
 			messageObject.addProperty(DeepstreamConstants.LAST_MODIFIED,
 					timestamp);
+
+			if (messageConfirmationObject != null) {
+				messageConfirmationObject.addProperty(
+						DeepstreamConstants.USER_MESSAGE,
+						receivedMessage.getMessage());
+				messageConfirmationObject.addProperty(
+						DeepstreamConstants.USER_TIMESTAMP,
+						receivedMessage.getReceivedTimestamp());
+				messageConfirmationObject.addProperty(
+						DeepstreamConstants.LAST_MODIFIED, timestamp);
+			}
+
+			if (messageConfirmationObject != null) {
+				record.set(
+						DeepstreamConstants.PATH_LIST
+								+ String.valueOf("c-" + timestamp),
+						messageConfirmationObject);
+
+				client.event.emit(DeepstreamConstants.PATH_MESSAGE_UPDATE
+						+ participantIdentifier, messageConfirmationObject);
+			}
 
 			record.set(
 					DeepstreamConstants.PATH_LIST
