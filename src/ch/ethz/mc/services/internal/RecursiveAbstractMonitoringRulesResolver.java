@@ -38,6 +38,7 @@ import ch.ethz.mc.model.persistent.MonitoringReplyRule;
 import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.concepts.AbstractMonitoringRule;
+import ch.ethz.mc.model.persistent.types.MonitoringRuleTypes;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
 import ch.ethz.mc.tools.RuleEvaluator;
 import ch.ethz.mc.tools.StringHelpers;
@@ -52,6 +53,10 @@ import ch.ethz.mc.tools.VariableStringReplacer;
  */
 @Log4j2
 public class RecursiveAbstractMonitoringRulesResolver {
+	public static enum EXECUTION_CASE {
+		MONITORING_RULES_DAILY, MONITORING_RULES_PERIODIC, MONITORING_RULES_UNEXPECTED_MESSAGE, MONITORING_RULES_USER_INTENTION, MONITORING_RULES_REPLY
+	}
+
 	// General objects
 	private final InterventionExecutionManagerService	interventionExecutionManagerService;
 	private final DatabaseManagerService				databaseManagerService;
@@ -63,8 +68,9 @@ public class RecursiveAbstractMonitoringRulesResolver {
 	// Relevant for both cases
 	private final Participant							participant;
 
-	// Gives information if the whole class should handle MonitoringRules or
-	// MonitoringReplyRules
+	// Gives information if the whole class should handle MonitoringRules
+	// (different types) or MonitoringReplyRules
+	private final EXECUTION_CASE						executionCase;
 	private final boolean								isMonitoringRule;
 
 	// Only relevant for MonitoringRules
@@ -81,6 +87,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 
 	// Only relevant for MonitoringRules
 	private boolean										interventionIsFinishedForParticipantAfterThisResolving	= false;
+	private boolean										markCaseAsSolved										= false;
 
 	/*
 	 * Helper classes containing resolved values about messages to send
@@ -124,7 +131,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 			final InterventionExecutionManagerService interventionExecutionManagerService,
 			final DatabaseManagerService databaseManagerService,
 			final VariablesManagerService variablesManagerService,
-			final Participant participant, final boolean isMonitoringRule,
+			final Participant participant, final EXECUTION_CASE executionCase,
 			final ObjectId relatedMonitoringMessageForReplyRuleCase,
 			final ObjectId relatedMonitoringRuleForReplyRuleCase,
 			final boolean monitoringReplyRuleCase) {
@@ -137,7 +144,14 @@ public class RecursiveAbstractMonitoringRulesResolver {
 		intervention = databaseManagerService.getModelObjectById(
 				Intervention.class, participant.getIntervention());
 
-		this.isMonitoringRule = isMonitoringRule;
+		this.executionCase = executionCase;
+
+		if (executionCase == EXECUTION_CASE.MONITORING_RULES_REPLY) {
+			isMonitoringRule = false;
+		} else {
+			isMonitoringRule = true;
+		}
+
 		if (!isMonitoringRule) {
 			this.relatedMonitoringMessageForReplyRuleCase = databaseManagerService
 					.getModelObjectById(MonitoringMessage.class,
@@ -247,12 +261,52 @@ public class RecursiveAbstractMonitoringRulesResolver {
 		Iterable<? extends AbstractMonitoringRule> rulesOnCurrentLevel;
 		if (parent == null) {
 			if (isMonitoringRule) {
+				MonitoringRule masterParent = null;
+
+				switch (executionCase) {
+					case MONITORING_RULES_DAILY:
+						masterParent = databaseManagerService
+								.findOneModelObject(
+										MonitoringRule.class,
+										Queries.MONITORING_RULE__BY_INTERVENTION_AND_TYPE,
+										intervention.getId(),
+										MonitoringRuleTypes.DAILY);
+						break;
+					case MONITORING_RULES_PERIODIC:
+						masterParent = databaseManagerService
+								.findOneModelObject(
+										MonitoringRule.class,
+										Queries.MONITORING_RULE__BY_INTERVENTION_AND_TYPE,
+										intervention.getId(),
+										MonitoringRuleTypes.PERIODIC);
+						break;
+					case MONITORING_RULES_UNEXPECTED_MESSAGE:
+						masterParent = databaseManagerService
+								.findOneModelObject(
+										MonitoringRule.class,
+										Queries.MONITORING_RULE__BY_INTERVENTION_AND_TYPE,
+										intervention.getId(),
+										MonitoringRuleTypes.UNEXPECTED_MESSAGE);
+						break;
+					case MONITORING_RULES_USER_INTENTION:
+						masterParent = databaseManagerService
+								.findOneModelObject(
+										MonitoringRule.class,
+										Queries.MONITORING_RULE__BY_INTERVENTION_AND_TYPE,
+										intervention.getId(),
+										MonitoringRuleTypes.USER_INTENTION);
+						break;
+					case MONITORING_RULES_REPLY:
+						log.error("Reply rule request in monitoring rule exection: Should never happen!");
+						break;
+				}
+
 				rulesOnCurrentLevel = databaseManagerService
 						.findSortedModelObjects(
 								MonitoringRule.class,
 								Queries.MONITORING_RULE__BY_INTERVENTION_AND_PARENT,
 								Queries.MONITORING_RULE__SORT_BY_ORDER_ASC,
-								intervention.getId(), null);
+								intervention.getId(), masterParent.getId());
 			} else {
 				if (monitoringReplyRuleCaseIsTrue) {
 					rulesOnCurrentLevel = databaseManagerService
@@ -372,6 +426,15 @@ public class RecursiveAbstractMonitoringRulesResolver {
 			}
 		}
 
+		if (isMonitoringRule && ruleResult.isRuleMatchesEquationSign()
+				&& ((MonitoringRule) rule).isMarkCaseAsSolvedWhenTrue()) {
+			// Check if message solves case and stops further rule executions
+			log.debug("Rule will mark case as solved and stop rule execution!");
+
+			markCaseAsSolved = true;
+			completelyStop = true;
+		}
+
 		if (ruleResult.isRuleMatchesEquationSign()
 				&& rule.isSendMessageIfTrue()) {
 			// Sending message
@@ -403,10 +466,11 @@ public class RecursiveAbstractMonitoringRulesResolver {
 		return ruleResult.isRuleMatchesEquationSign();
 	}
 
-	/*
-	 * Methods to return results
-	 */
 	public boolean isInterventionFinishedForParticipantAfterThisResolving() {
 		return interventionIsFinishedForParticipantAfterThisResolving;
+	}
+
+	public boolean isCaseMarkedAsSolved() {
+		return markCaseAsSolved;
 	}
 }

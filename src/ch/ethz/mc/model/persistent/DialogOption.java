@@ -27,11 +27,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.val;
 
 import org.bson.types.ObjectId;
 
+import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
+import ch.ethz.mc.services.internal.DeepstreamCommunicationService;
 
 /**
  * {@link ModelObject} to represent an {@link DialogOption}
@@ -81,5 +84,35 @@ public class DialogOption extends ModelObject {
 	protected void collectThisAndRelatedModelObjectsForExport(
 			final List<ModelObject> exportList) {
 		exportList.add(this);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ch.ethz.mc.model.ModelObject#performOnDelete()
+	 */
+	@Override
+	public void performOnDelete() {
+		switch (type) {
+			case SMS:
+			case SUPERVISOR_SMS:
+			case EMAIL:
+			case SUPERVISOR_EMAIL:
+				break;
+			case EXTERNAL_ID:
+			case SUPERVISOR_EXTERNAL_ID:
+				if (data.startsWith(ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM)) {
+					val deepstreamCommunicationService = DeepstreamCommunicationService
+							.getInstance();
+
+					if (deepstreamCommunicationService != null) {
+						deepstreamCommunicationService
+								.cleanupForParticipantOrSupervisor(data
+										.substring(ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+												.length()));
+					}
+				}
+				break;
+		}
 	}
 }

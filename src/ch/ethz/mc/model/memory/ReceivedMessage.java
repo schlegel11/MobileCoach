@@ -39,15 +39,15 @@ public class ReceivedMessage {
 
 	@Getter
 	@Setter
-	private String				recipient;
-
-	@Getter
-	@Setter
 	private String				sender;
 
 	@Getter
 	@Setter
 	private String				message;
+
+	@Getter
+	@Setter
+	private boolean				isIntention;
 
 	@Getter
 	@Setter

@@ -1,4 +1,4 @@
-package ch.ethz.mc.rest.services;
+package ch.ethz.mc.rest.services.v02;
 
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
@@ -53,12 +53,12 @@ import ch.ethz.mc.tools.StringValidator;
  *
  * @author Andreas Filler
  */
-@Path("/v01/image")
+@Path("/v02/image")
 @Log4j2
-public class ImageUploadService extends AbstractFileUploadService {
+public class ImageUploadServiceV02 extends AbstractFileUploadServiceV02 {
 	RESTManagerService	restManagerService;
 
-	public ImageUploadService(final RESTManagerService restManagerService) {
+	public ImageUploadServiceV02(final RESTManagerService restManagerService) {
 		super(restManagerService);
 		this.restManagerService = restManagerService;
 	}
@@ -67,15 +67,16 @@ public class ImageUploadService extends AbstractFileUploadService {
 	@Path("/upload/{variable}")
 	@Consumes("multipart/form-data")
 	@Produces("application/json")
-	public Response imageUpload(@HeaderParam("token") final String token,
+	public Response imageUpload(@HeaderParam("user") final String user,
+			@HeaderParam("token") final String token,
 			@PathParam("variable") final String variable,
 			@Context final HttpServletRequest request,
 			final MultipartFormDataInput input) {
 		log.debug("Token {}: Upload image to variable {}", token, variable);
 		ObjectId participantId;
 		try {
-			participantId = checkParticipantRelatedAccessAndReturnParticipantId(
-					token, request.getSession());
+			participantId = checkExternalParticipantAccessAndReturnParticipantId(
+					user, token);
 		} catch (final Exception e) {
 			throw e;
 		}

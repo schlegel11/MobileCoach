@@ -170,6 +170,23 @@ public class MonitoringMessageEditComponentWithController extends
 										intermediateSurveyToSet);
 					}
 				});
+
+		// Handle check box
+		val isCommandMessagCheckBox = getIsCommandCheckbox();
+		isCommandMessagCheckBox.setValue(monitoringMessage.isCommandMessage());
+
+		isCommandMessagCheckBox
+				.addValueChangeListener(new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						getInterventionAdministrationManagerService()
+								.monitoringMessageSetIsCommandMessage(
+										monitoringMessage,
+										(boolean) event.getProperty()
+												.getValue());
+					}
+				});
 	}
 
 	private void adjust() {

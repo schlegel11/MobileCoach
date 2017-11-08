@@ -22,20 +22,27 @@ package ch.ethz.mc.services;
  */
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.Getter;
 import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.MC;
+import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.Queries;
+import ch.ethz.mc.model.memory.ExternalRegistration;
+import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.DialogStatus;
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.Participant;
+import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValuePrivacyTypes;
 import ch.ethz.mc.model.rest.CollectionOfExtendedListVariables;
 import ch.ethz.mc.model.rest.CollectionOfExtendedVariables;
@@ -44,7 +51,9 @@ import ch.ethz.mc.model.rest.ExtendedVariable;
 import ch.ethz.mc.model.rest.Variable;
 import ch.ethz.mc.model.rest.VariableAverage;
 import ch.ethz.mc.model.rest.VariableAverageWithParticipant;
+import ch.ethz.mc.services.internal.CommunicationManagerService;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
+import ch.ethz.mc.services.internal.DeepstreamCommunicationService;
 import ch.ethz.mc.services.internal.FileStorageManagerService;
 import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.services.internal.VariablesManagerService.ExternallyReadProtectedVariableException;
@@ -57,19 +66,30 @@ import ch.ethz.mc.services.internal.VariablesManagerService.ExternallyWriteProte
  */
 @Log4j2
 public class RESTManagerService {
-	private final Object					$lock;
+	private final Object							$lock;
 
-	private static RESTManagerService		instance	= null;
+	private static RESTManagerService				instance	= null;
 
-	private final DatabaseManagerService	databaseManagerService;
+	private final ConcurrentHashMap<String, String>	externalParticipantsTokenHashMap;
+
+	private final DatabaseManagerService			databaseManagerService;
 	@Getter
-	private final FileStorageManagerService	fileStorageManagerService;
-	private final VariablesManagerService	variablesManagerService;
+	private final FileStorageManagerService			fileStorageManagerService;
+	private final VariablesManagerService			variablesManagerService;
+
+	private final DeepstreamCommunicationService	deepstreamCommunicationService;
+
+	private final String							deepstreamServerRole;
+	private final String							deepstreamParticipantRole;
+	private final String							deepstreamSuperviserRole;
+
+	private final String							deepstreamServerPassword;
 
 	private RESTManagerService(
 			final DatabaseManagerService databaseManagerService,
 			final FileStorageManagerService fileStorageManagerService,
-			final VariablesManagerService variablesManagerService)
+			final VariablesManagerService variablesManagerService,
+			final CommunicationManagerService communicationManagerService)
 			throws Exception {
 		$lock = MC.getInstance();
 
@@ -79,17 +99,30 @@ public class RESTManagerService {
 		this.fileStorageManagerService = fileStorageManagerService;
 		this.variablesManagerService = variablesManagerService;
 
+		externalParticipantsTokenHashMap = new ConcurrentHashMap<String, String>();
+
+		deepstreamCommunicationService = communicationManagerService
+				.getDeepstreamCommunicationService();
+
+		deepstreamServerRole = Constants.getDeepstreamServerRole();
+		deepstreamParticipantRole = Constants.getDeepstreamParticipantRole();
+		deepstreamSuperviserRole = Constants.getDeepstreamSupervisorRole();
+
+		deepstreamServerPassword = Constants.getDeepstreamServerPassword();
+
 		log.info("Started.");
 	}
 
 	public static RESTManagerService start(
 			final DatabaseManagerService databaseManagerService,
 			final FileStorageManagerService fileStorageManagerService,
-			final VariablesManagerService variablesManagerService)
+			final VariablesManagerService variablesManagerService,
+			final CommunicationManagerService communicationManagerService)
 			throws Exception {
 		if (instance == null) {
 			instance = new RESTManagerService(databaseManagerService,
-					fileStorageManagerService, variablesManagerService);
+					fileStorageManagerService, variablesManagerService,
+					communicationManagerService);
 		}
 		return instance;
 	}
@@ -107,13 +140,12 @@ public class RESTManagerService {
 	 * @param variable
 	 * @return
 	 */
+	@Synchronized
 	public boolean checkVariableForServiceWritingRights(
 			final ObjectId participantId, final String variable) {
-		synchronized ($lock) {
-			return variablesManagerService.checkVariableForServiceWriting(
-					participantId, ImplementationConstants.VARIABLE_PREFIX
-							+ variable.trim());
-		}
+		return variablesManagerService.checkVariableForServiceWriting(
+				participantId, ImplementationConstants.VARIABLE_PREFIX
+						+ variable.trim());
 	}
 
 	/**
@@ -469,6 +501,288 @@ public class RESTManagerService {
 					"Could not write credit for {} on {} for participant {}: {}",
 					creditName, variable, participantId, e.getMessage());
 			throw e;
+		}
+	}
+
+	/*
+	 * Access management functions
+	 */
+	/**
+	 * Creates a token for a specific external participant
+	 * 
+	 * @param externalParticipantId
+	 * @return
+	 */
+	public String createToken(final String externalParticipantId) {
+		synchronized (externalParticipantsTokenHashMap) {
+			if (externalParticipantsTokenHashMap
+					.containsKey(externalParticipantId)) {
+				return externalParticipantsTokenHashMap
+						.get(externalParticipantId);
+			} else {
+				val token = RandomStringUtils.randomAlphanumeric(128);
+
+				externalParticipantsTokenHashMap.put(externalParticipantId,
+						token);
+
+				return token;
+			}
+		}
+	}
+
+	/**
+	 * Destroys a token for a specific external participant
+	 * 
+	 * @param externalParticipantId
+	 */
+	public void destroyToken(final String externalParticipantId) {
+		externalParticipantsTokenHashMap.remove(externalParticipantId);
+	}
+
+	/**
+	 * Check external participant and token and return {@link ObjectId} of
+	 * participant if token fits to logged in participant; otherwise return null
+	 * 
+	 * @param externalParticipantId
+	 * @param token
+	 * @return
+	 */
+	public ObjectId checkExternalParticipantAccessAndReturnParticipantId(
+			final String externalParticipantId, final String token) {
+		val tokenToCheck = externalParticipantsTokenHashMap
+				.get(externalParticipantId);
+
+		if (tokenToCheck == null || !tokenToCheck.equals(token)) {
+			return null;
+		}
+
+		// Check participant access
+		val dialogOption = databaseManagerService.findOneModelObject(
+				DialogOption.class, Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
+				DialogOptionTypes.EXTERNAL_ID, externalParticipantId);
+
+		if (dialogOption == null) {
+			log.debug(
+					"Participant with external participant id {} not authorized for REST access: Dialog option not found",
+					externalParticipantId);
+			return null;
+		}
+
+		// Check based on type
+		if (externalParticipantId
+				.startsWith(ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM)) {
+			if (deepstreamCommunicationService == null
+					|| !deepstreamCommunicationService
+							.checkIfParticipantIsConnected(externalParticipantId
+									.substring(ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+											.length()))) {
+				log.debug(
+						"Participant with external participant id {} is currently not connected using deepstream",
+						externalParticipantId);
+				return null;
+			}
+		}
+
+		return dialogOption.getParticipant();
+	}
+
+	/*
+	 * Deepstream functions
+	 */
+	/**
+	 * Validates deepstream access for participant/supervisor/server
+	 * 
+	 * @param user
+	 * @param interventionPassword
+	 * @param role
+	 * @param secret
+	 * @return
+	 */
+	public boolean checkDeepstreamAccessAndRetrieveUserId(final String user,
+			final String secret, final String role,
+			final String interventionPassword) {
+
+		// Prevent unauthorized access with empty values
+		if (StringUtils.isBlank(user) || StringUtils.isBlank(secret)
+				|| StringUtils.isBlank(role)
+				|| StringUtils.isBlank(interventionPassword)) {
+			return false;
+		}
+
+		// Check access based on role
+		if (role.equals(deepstreamServerRole)) {
+			// Check server access
+			if (secret.equals(deepstreamServerPassword)) {
+				log.debug("Server authorized for deepstream access");
+				return true;
+			} else {
+				log.debug("Server not authorized for deepstream access");
+				return false;
+			}
+		} else if (role.equals(deepstreamParticipantRole)) {
+			// Check participant access
+			val dialogOption = databaseManagerService
+					.findOneModelObject(
+							DialogOption.class,
+							Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
+							DialogOptionTypes.EXTERNAL_ID,
+							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+									+ user);
+			if (dialogOption == null) {
+				log.debug(
+						"Participant with deepstream id {} not authorized for deepstream access: Dialog option not found",
+						user);
+				return false;
+			}
+
+			val participant = databaseManagerService.getModelObjectById(
+					Participant.class, dialogOption.getParticipant());
+			if (participant == null) {
+				log.debug(
+						"Participant with deepstream id {} not authorized for deepstream access: Participant not found",
+						user);
+				return false;
+			}
+
+			val intervention = databaseManagerService.getModelObjectById(
+					Intervention.class, participant.getIntervention());
+			if (intervention == null || !intervention.isActive()) {
+				log.debug(
+						"Participant with deepstream id {} not authorized for deepstream access: Intervention not active",
+						user);
+				return false;
+			}
+			if (!intervention.getDeepstreamPassword().equals(
+					interventionPassword)) {
+				log.debug(
+						"Participant with deepstream id {} not authorized for deepstream access: Password does not match deepstream intervention password",
+						user);
+				return false;
+			}
+
+			if (deepstreamCommunicationService != null
+					&& deepstreamCommunicationService.checkSecret(user, secret)) {
+				log.debug(
+						"Participant with deepstream id {} authorized for deepstream access",
+						user);
+				return true;
+			} else {
+				log.debug(
+						"Participant with deepstream id {} not authorized for deepstream access: Wrong secret",
+						user);
+				return false;
+			}
+		} else if (role.equals(deepstreamSuperviserRole)) {
+			// Check supervisor access
+			val dialogOption = databaseManagerService
+					.findOneModelObject(
+							DialogOption.class,
+							Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
+							DialogOptionTypes.SUPERVISOR_EXTERNAL_ID,
+							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+									+ user);
+			if (dialogOption == null) {
+				log.debug(
+						"Supervisor with deepstream id {} not authorized for deepstream access: Dialog option not found",
+						user);
+				return false;
+			}
+
+			val participant = databaseManagerService.getModelObjectById(
+					Participant.class, dialogOption.getParticipant());
+			if (participant == null) {
+				log.debug(
+						"Supervisor with deepstream id {} not authorized for deepstream access: Participant not found",
+						user);
+				return false;
+			}
+
+			val intervention = databaseManagerService.getModelObjectById(
+					Intervention.class, participant.getIntervention());
+			if (intervention == null || !intervention.isActive()) {
+				log.debug(
+						"Supervisor with deepstream id {} not authorized for deepstream access: Intervention not active",
+						user);
+				return false;
+			}
+			if (!intervention.getDeepstreamPassword().equals(
+					interventionPassword)) {
+				log.debug(
+						"Supervisor with deepstream id {} not authorized for deepstream access: Password does not match deepstream intervention password",
+						user);
+				return false;
+			}
+
+			if (deepstreamCommunicationService != null
+					&& deepstreamCommunicationService.checkSecret(user, secret)) {
+				log.debug(
+						"Supervisor with deepstream id {} authorized for deepstream access",
+						user);
+				return true;
+			} else {
+				log.debug(
+						"Supervisor with deepstream id {} not authorized for deepstream access: Wrong secret",
+						user);
+				return false;
+			}
+		} else {
+			log.debug("Unauthorized access with wrong role {}", role);
+			return false;
+		}
+	}
+
+	/**
+	 * Creates a deepstream participant/supervisor and the belonging
+	 * intervention participant structures or returns null if not allowed
+	 * 
+	 * @param interventionPattern
+	 * @param interventionPassword
+	 * @param relatedParticipant
+	 * @param requestedRole
+	 * @return Deepstream user id and secret
+	 */
+	public ExternalRegistration createDeepstreamUser(final String nickname,
+			final String relatedParticipant, final String interventionPattern,
+			final String interventionPassword, final String requestedRole) {
+
+		if (StringUtils.isBlank(requestedRole)) {
+			return null;
+		}
+
+		if (requestedRole.equals(deepstreamParticipantRole)) {
+			if (nickname == null) {
+				return null;
+			}
+			if (deepstreamCommunicationService != null) {
+				return deepstreamCommunicationService.registerUser(nickname,
+						relatedParticipant, interventionPattern,
+						interventionPassword, false);
+			} else {
+				return null;
+			}
+		} else if (requestedRole.equals(deepstreamSuperviserRole)) {
+			if (relatedParticipant == null) {
+				return null;
+			}
+			if (deepstreamCommunicationService != null) {
+				return deepstreamCommunicationService.registerUser(nickname,
+						relatedParticipant, interventionPattern,
+						interventionPassword, true);
+			} else {
+				return null;
+			}
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * Inform {@link DeepstreamCommunicationService} about startup of REST
+	 * interface
+	 */
+	public void informDeepstreamAboutStartup() {
+		if (deepstreamCommunicationService != null) {
+			deepstreamCommunicationService.RESTInterfaceStarted(this);
 		}
 	}
 

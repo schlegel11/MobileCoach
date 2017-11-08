@@ -117,6 +117,7 @@ public class Queries {
 
 	public static final String	MONITORING_RULE__BY_INTERVENTION																																												= "{'intervention':#}";
 	public static final String	MONITORING_RULE__BY_INTERVENTION_AND_PARENT																																										= "{'intervention':#,'isSubRuleOfMonitoringRule':#}";
+	public static final String	MONITORING_RULE__BY_INTERVENTION_AND_TYPE																																										= "{'intervention':#,'type':#}";
 	public static final String	MONITORING_RULE__BY_PARENT																																														= "{'isSubRuleOfMonitoringRule':#}";
 	public static final String	MONITORING_RULE__SORT_BY_ORDER_ASC																																												= "{'order':1}";
 	public static final String	MONITORING_RULE__SORT_BY_ORDER_DESC																																												= "{'order':-1}";
@@ -175,24 +176,6 @@ public class Queries {
 
 	// Special
 	public static final String	EVERYTHING																																																		= "{}";
-	public static final String	UPDATE_VERSION_1__INTERVENTION__CHANGE_1																																										= "{$set:{'assignedSenderIdentification':null}}";
-	public static final String	UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_1																																										= "{$set:{'screeningSurveyStartedTimestamp':0}}";
-	public static final String	UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_2																																										= "{$set:{'monitoringStartedTimestamp' : 0 } }";
-	public static final String	UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_3																																										= "{$set:{'lastVisitedScreeningSurveySlide':null}}";
-	public static final String	UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_4																																										= "{$set:{'lastVisitedScreeningSurveySlideGlobalUniqueId':null}}";
-	public static final String	UPDATE_VERSION_1__DIALOG_STATUS__CHANGE_5																																										= "{$set:{'lastVisitedScreeningSurveySlideTimestamp':0}}";
-	public static final String	UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE__CHANGE_1																																								= "{$set:{'globalUniqueId':'---' }}";
-	public static final String	UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE__CHANGE_2																																								= "{$set:{'validationErrorMessage':''}}";
-	public static final String	UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE__CHANGE_3																																								= "{$set:{'defaultValue':''}}";
-	public static final String	UPDATE_VERSION_1__SCREENING_SURVEY_SLIDE_RULE__CHANGE_1																																							= "{$set:{'showSameSlideBecauseValueNotValidWhenTrue':false}}";
-	public static final String	UPDATE_VERSION_3__PARTICIPANT_VARIABLE_WITH_VALUE__CHANGE_1																																						= "{$set:{'describesMediaUpload':false}}";
-	public static final String	UPDATE_VERSION_3__SCREENING_SURVEY__CHANGE_1																																									= "{$set:{'intermediateSurvey':false}}";
-	public static final String	UPDATE_VERSION_3__MONITORING_MESSAGE__CHANGE_1																																									= "{$set:{'linkedIntermediateSurvey':null}}";
-	public static final String	UPDATE_VERSION_3__MEDIA_OBJECT__CHANGE_1																																										= "{$set:{'urlReference':null}}";
-	public static final String	UPDATE_VERSION_3__PARTICIPANT__CHANGE_1																																											= "{$set:{'language':#}}";
-	public static final String	UPDATE_VERSION_3__PARTICIPANT__CHANGE_2																																											= "{$set:{'group':null}}";
-	public static final String	UPDATE_VERSION_3__GENERAL_UPDATE_FOR_FILLED_LSTRING																																								= "{$set:{'#':{'values':{#:#}}}}";
-	public static final String	UPDATE_VERSION_3__GENERAL_UPDATE_FOR_EMPTY_LSTRING																																								= "{$set:{'#':{'values':{}}}}";
 	public static final String	UPDATE_VERSION_5__GENERAL_UPDATE_FOR_COMMENT																																									= "{$set:{'comment':''}}";
 	public static final String	UPDATE_VERSION_6__INTERVENTION__CHANGE_1																																										= "{$set:{'automaticallyFinishScreeningSurveys':false}}";
 	public static final String	UPDATE_VERSION_6__SCREENING_SURVEY_SLIDE__CHANGE_1																																								= "{$set:{'linkedIntermediateSurvey':null}}";
@@ -204,4 +187,14 @@ public class Queries {
 	public static final String	UPDATE_VERSION_10__INTERVENTION__CHANGE_1																																										= "{$set:{'dashboardEnabled':false}}";
 	public static final String	UPDATE_VERSION_10__INTERVENTION__CHANGE_2																																										= "{$set:{'dashboardTemplatePath':''}}";
 	public static final String	UPDATE_VERSION_10__INTERVENTION__CHANGE_3																																										= "{$set:{'dashboardPasswordPattern':null}}";
+	public static final String	UPDATE_VERSION_11__INTERVENTION__CHANGE_1																																										= "{$set:{'deepstreamPassword':null}}";
+	public static final String	UPDATE_VERSION_12__MONITORING_RULE__CHANGE_1																																									= "{$set:{'type':'NORMAL'}}";
+	public static final String	UPDATE_VERSION_13__MONITORING_RULE__CHANGE_1																																									= "{$set:{'markCaseAsSolvedWhenTrue':false}}";
+	public static final String	UPDATE_VERSION_14__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'type':'PLAIN'}}";
+	public static final String	UPDATE_VERSION_14__MONITORING_MESSAGE__CHANGE_1																																									= "{$set:{'isCommandMessage':false}}";
+	public static final String	UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_1_FIELD																																								= "message";
+	public static final String	UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_1_CHANGE																																								= "{$set:{'messageWithForcedLinks':#}}";
+	public static final String	UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_2																																										= "{$set:{'surveyLink':null}}";
+	public static final String	UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_3																																										= "{$set:{'mediaObjectLink':null}}";
+	public static final String	UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_4																																										= "{$set:{'textBasedMediaObjectContent':null}}";
 }

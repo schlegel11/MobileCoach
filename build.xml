@@ -13,8 +13,13 @@ This can be set in the "JRE" tab when configuring an ANT task in the eclipse GUI
 		MobileCoach WAR creation
 	</description>
 
+	<property name="ensure-https" value="true" />
+
 	<path id="ivy-libs">
-		<fileset dir="ivy-libs" includes="*.jar" />
+		<fileset dir="ant-libs" includes="ivy-*.jar" />
+	</path>
+	<path id="ant-contrib-libs">
+		<fileset dir="ant-libs" includes="ant-contrib-*.jar" />
 	</path>
 	<path id="ivy-lib" />
 
@@ -27,6 +32,8 @@ This can be set in the "JRE" tab when configuring an ANT task in the eclipse GUI
 
 		<!-- Use Ivy in ANT -->
 		<taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy-libs" />
+		<!-- Use Ant-Contrib in ANT -->
+		<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="ant-contrib-libs" />
 
 		<ivy:configure file="ivysettings.xml" />
 		<ivy:cachepath pathid="ivy-lib" />
@@ -42,6 +49,15 @@ This can be set in the "JRE" tab when configuring an ANT task in the eclipse GUI
 		<eclipse.refreshLocal resource="${project}" depth="infinite" />
 		<eclipse.incrementalBuild project="${project}" kind="full" />
 
+		<if>
+			<equals arg1="${ensure-https}" arg2="true" />
+			<then>
+				<!-- Ensure SSL (add) -->
+				<replace file="WebContent/WEB-INF/web.xml" token="&lt;!-- ##START##" value="&lt;!-- ##START## --&gt;" />
+				<replace file="WebContent/WEB-INF/web.xml" token="##END## --&gt;" value="&lt;!-- ##END## --&gt;" />
+			</then>
+		</if>
+
 		<!-- Create .war file -->
 		<war destfile="out/MC.war" webxml="WebContent/WEB-INF/web.xml" update="true">
 			<classes dir="build/classes" />
@@ -50,6 +66,15 @@ This can be set in the "JRE" tab when configuring an ANT task in the eclipse GUI
 				<exclude name="WEB-INF/web.xml" />
 			</fileset>
 		</war>
+
+		<if>
+			<equals arg1="${ensure-https}" arg2="true" />
+			<then>
+				<!-- Ensure SSL (remove) -->
+				<replace file="WebContent/WEB-INF/web.xml" token="&lt;!-- ##START## --&gt;" value="&lt;!-- ##START##" />
+				<replace file="WebContent/WEB-INF/web.xml" token="&lt;!-- ##END## --&gt;" value="##END## --&gt;" />
+			</then>
+		</if>
 
 		<!-- Cleaning -->
 		<delete dir="lib" />

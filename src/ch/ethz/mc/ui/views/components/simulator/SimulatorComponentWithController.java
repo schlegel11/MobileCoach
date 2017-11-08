@@ -24,7 +24,6 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import lombok.Setter;
 import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -32,13 +31,8 @@ import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.conf.Messages;
-import ch.ethz.mc.model.ui.UISimulatedMessage;
 import ch.ethz.mc.tools.InternalDateTime;
-import ch.ethz.mc.tools.Simulator;
-import ch.ethz.mc.tools.Simulator.SimulatorListener;
-import ch.ethz.mc.ui.views.helper.CaseInsensitiveItemSorter;
 
-import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 
@@ -49,15 +43,9 @@ import com.vaadin.ui.Button.ClickEvent;
  */
 @SuppressWarnings("serial")
 @Log4j2
-public class SimulatorComponentWithController extends SimulatorComponent
-		implements SimulatorListener {
+public class SimulatorComponentWithController extends SimulatorComponent {
 
-	private final BeanItemContainer<UISimulatedMessage>	beanContainer;
-
-	private final DateFormat							dateFormat;
-
-	@Setter
-	private String										senderIdentification;
+	private final DateFormat	dateFormat;
 
 	public SimulatorComponentWithController() {
 		super();
@@ -65,22 +53,6 @@ public class SimulatorComponentWithController extends SimulatorComponent
 		// init date format
 		dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
 				DateFormat.MEDIUM, Constants.getAdminLocale());
-
-		// table options
-		val messagesTable = getMessagesTable();
-		messagesTable.setImmediate(true);
-		messagesTable.setSortEnabled(false);
-
-		// table content
-		beanContainer = new BeanItemContainer<UISimulatedMessage>(
-				UISimulatedMessage.class);
-		beanContainer.setItemSorter(new CaseInsensitiveItemSorter());
-
-		messagesTable.setContainerDataSource(beanContainer);
-		messagesTable.setSortContainerPropertyId(UISimulatedMessage
-				.getSortColumn());
-		messagesTable.setVisibleColumns(UISimulatedMessage.getVisibleColumns());
-		messagesTable.setColumnHeaders(UISimulatedMessage.getColumnHeaders());
 
 		// handle time label
 		val timeUpdateThread = new Thread("Time Update Thread") {
@@ -106,9 +78,7 @@ public class SimulatorComponentWithController extends SimulatorComponent
 		timeUpdateThread.start();
 
 		// handle buttons
-		val instance = this;
 		val buttonClickListener = new ButtonClickListener();
-		getSendSimulatedMessageButton().addClickListener(buttonClickListener);
 		getActivateFastForwadModeButton().addClickListener(buttonClickListener);
 		getDeactivateFastForwardModeButton().addClickListener(
 				buttonClickListener);
@@ -116,10 +86,7 @@ public class SimulatorComponentWithController extends SimulatorComponent
 		getNextDayButton().addClickListener(buttonClickListener);
 
 		if (Constants.isSimulatedDateAndTime()) {
-			Simulator.getInstance().registerSimulatorListener(this);
-
 			addDetachListener(new DetachListener() {
-
 				@Override
 				public void detach(final DetachEvent event) {
 					try {
@@ -130,8 +97,6 @@ public class SimulatorComponentWithController extends SimulatorComponent
 					} catch (final InterruptedException e) {
 						// do nothing
 					}
-
-					Simulator.getInstance().removeSimulatorListener(instance);
 				}
 			});
 		}
@@ -154,9 +119,7 @@ public class SimulatorComponentWithController extends SimulatorComponent
 
 		@Override
 		public void buttonClick(final ClickEvent event) {
-			if (event.getButton() == getSendSimulatedMessageButton()) {
-				sendMessage();
-			} else if (event.getButton() == getNextHourButton()) {
+			if (event.getButton() == getNextHourButton()) {
 				jumpToNextHour();
 			} else if (event.getButton() == getNextDayButton()) {
 				jumpToNextDay();
@@ -187,41 +150,5 @@ public class SimulatorComponentWithController extends SimulatorComponent
 		InternalDateTime.setFastForwardMode(active);
 
 		updateTime();
-	}
-
-	public void sendMessage() {
-		log.debug("Sending simulated message...");
-		val newMessageTextField = getNewMessageTextField();
-		val messageToSend = newMessageTextField.getValue();
-
-		newMessageTextField.setValue("");
-
-		addMessageToTable(false, messageToSend);
-
-		Simulator.getInstance().simulateSMSReplyByParticipant(
-				senderIdentification, messageToSend);
-	}
-
-	@Override
-	@Synchronized
-	public void newSimulatedMessageFromSystem(final String message) {
-		addMessageToTable(true, message);
-	}
-
-	@Synchronized
-	private void addMessageToTable(final boolean isSystemMessage,
-			final String message) {
-		log.debug("Adding message to table");
-		val uiSimulatedMessage = new UISimulatedMessage(
-				new Date(InternalDateTime.currentTimeMillis()),
-				isSystemMessage ? Messages
-						.getAdminString(AdminMessageStrings.SIMULATOR_COMPONENT__SYSTEM)
-						: Messages
-								.getAdminString(AdminMessageStrings.SIMULATOR_COMPONENT__PARTICIPANT),
-				message);
-
-		beanContainer.addItem(uiSimulatedMessage);
-
-		getAdminUI().push();
 	}
 }

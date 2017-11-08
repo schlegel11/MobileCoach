@@ -31,6 +31,7 @@ import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.io.FileUtils;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
@@ -39,6 +40,7 @@ import ch.ethz.mc.conf.ThemeImageStrings;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.persistent.MediaObject;
 import ch.ethz.mc.model.persistent.types.MediaObjectTypes;
+import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.ui.NotificationMessageException;
 
@@ -47,6 +49,7 @@ import com.vaadin.server.ExternalResource;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Upload.FailedEvent;
 import com.vaadin.ui.Upload.FailedListener;
 import com.vaadin.ui.Upload.Receiver;
@@ -73,6 +76,7 @@ public class MediaObjectIntegrationComponentWithController extends
 
 		val buttonClickListener = new ButtonClickListener();
 		getSetURLButton().addClickListener(buttonClickListener);
+		getCreateHTMLButton().addClickListener(buttonClickListener);
 		getDeleteButton().addClickListener(buttonClickListener);
 
 		val uploader = new Uploader();
@@ -90,6 +94,8 @@ public class MediaObjectIntegrationComponentWithController extends
 				destroyMediaObject();
 			} else if (event.getButton() == getSetURLButton()) {
 				setURL();
+			} else if (event.getButton() == getCreateHTMLButton()) {
+				createHTML();
 			}
 		}
 	}
@@ -104,6 +110,7 @@ public class MediaObjectIntegrationComponentWithController extends
 
 			getUploadComponent().setEnabled(true);
 			getSetURLButton().setEnabled(true);
+			getCreateHTMLButton().setEnabled(true);
 			getDeleteButton().setEnabled(false);
 		} else {
 			String externalReference;
@@ -126,7 +133,46 @@ public class MediaObjectIntegrationComponentWithController extends
 
 			getUploadComponent().setEnabled(false);
 			getSetURLButton().setEnabled(false);
+			getCreateHTMLButton().setEnabled(false);
 			getDeleteButton().setEnabled(true);
+
+			// Care for HTML editing
+			if (mediaObject.getType() == MediaObjectTypes.HTML_TEXT) {
+				val file = getInterventionAdministrationManagerService()
+						.mediaObjectGetFile(mediaObject, FILE_STORES.STORAGE);
+				try {
+					val fileContent = FileUtils.readFileToString(file);
+					getTextArea().setValue(fileContent);
+					getHtmlLabel().setValue(fileContent);
+				} catch (final IOException e) {
+					log.error("File could not be read for editing: {}",
+							e.getMessage());
+				}
+
+				getSaveButton().addClickListener(new ClickListener() {
+
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							val htmlContent = getTextArea().getValue();
+
+							FileUtils.writeStringToFile(file, htmlContent);
+
+							getSaveButton().setEnabled(true);
+							getAdminUI()
+									.showInformationNotification(
+											AdminMessageStrings.NOTIFICATION__FILE_CHANGES_SAVED);
+
+							getHtmlLabel().setValue(htmlContent);
+						} catch (final IOException e) {
+							log.error(
+									"File could not be written after editing: {}",
+									e.getMessage());
+						}
+
+					}
+				});
+			}
 		}
 	}
 
@@ -164,6 +210,23 @@ public class MediaObjectIntegrationComponentWithController extends
 				}, null);
 	}
 
+	/**
+	 * Creates an empty HTML object
+	 */
+	private void createHTML() {
+		log.debug("Create empty HTML object");
+
+		try {
+			val temporaryFile = File.createTempFile("HTML-snippet", "html");
+
+			createMediaObjectForFile(temporaryFile, "HTML-snippet.html",
+					MediaObjectTypes.HTML_TEXT);
+		} catch (final IOException e) {
+			log.error("Could not create temporary file for HTML snippet: {}",
+					e.getMessage());
+		}
+	}
+
 	/*
 	 * Media object creation/deletion for specific types
 	 */
@@ -197,7 +260,7 @@ public class MediaObjectIntegrationComponentWithController extends
 		}
 
 		val newMediaObject = getInterventionAdministrationManagerService()
-				.mediaObjectCreateWithURL(url, MediaObjectTypes.URL);
+				.mediaObjectCreateWithURL(url);
 
 		if (newMediaObject != null) {
 			mediaObject = newMediaObject;
@@ -280,6 +343,9 @@ public class MediaObjectIntegrationComponentWithController extends
 			} else if (temporaryFileExtension.equals(".aac")
 					|| temporaryFileExtension.equals(".m4a")) {
 				originalFileType = MediaObjectTypes.AUDIO;
+			} else if (temporaryFileExtension.equals(".htm")
+					|| temporaryFileExtension.equals(".html")) {
+				originalFileType = MediaObjectTypes.HTML_TEXT;
 			} else {
 				return null;
 			}

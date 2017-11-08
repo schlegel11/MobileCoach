@@ -162,8 +162,11 @@ public class Participant extends ModelObject {
 	 */
 	@Override
 	public UIModelObject toUIModelObject() {
-		val screeningSurvey = ModelObject.get(ScreeningSurvey.class,
-				assignedScreeningSurvey);
+		ScreeningSurvey screeningSurvey = null;
+		if (assignedScreeningSurvey != null) {
+			screeningSurvey = ModelObject.get(ScreeningSurvey.class,
+					assignedScreeningSurvey);
+		}
 
 		String screeningSurveyName;
 		if (screeningSurvey == null) {

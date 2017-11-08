@@ -1,4 +1,4 @@
-package ch.ethz.mc.rest.services;
+package ch.ethz.mc.rest.services.v01;
 
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
@@ -23,12 +23,14 @@ package ch.ethz.mc.rest.services;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 
+import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mc.services.types.GeneralSessionAttributeTypes;
 import ch.ethz.mc.services.types.GeneralSessionAttributeValidatorTypes;
@@ -39,12 +41,12 @@ import ch.ethz.mc.services.types.GeneralSessionAttributeValidatorTypes;
  * @author Andreas Filler
  */
 @Log4j2
-public abstract class AbstractService {
+public abstract class AbstractServiceV01 {
 
 	@Getter
 	RESTManagerService	restManagerService;
 
-	public AbstractService(final RESTManagerService restManagerService) {
+	public AbstractServiceV01(final RESTManagerService restManagerService) {
 		this.restManagerService = restManagerService;
 	}
 
@@ -169,6 +171,16 @@ public abstract class AbstractService {
 					Response.notAcceptable(null)
 							.entity("The current session is not bound to an intervention")
 							.build());
+		}
+	}
+
+	/**
+	 * Checks deepstream availability and throws exception if it's not available
+	 */
+	protected void checkDeepstreamAvailability() {
+		if (!Constants.isDeepstreamActive()) {
+			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
+					.entity("Deepstream is not active on this server").build());
 		}
 	}
 }

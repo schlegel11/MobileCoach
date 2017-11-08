@@ -31,6 +31,8 @@ import java.util.Properties;
 
 import javax.servlet.ServletContext;
 
+import org.apache.commons.lang3.RandomStringUtils;
+
 import lombok.Cleanup;
 import lombok.Getter;
 import lombok.Synchronized;
@@ -73,7 +75,7 @@ public class Constants {
 	 * 
 	 * CAUTION: Can NOT be defined in configuration file
 	 */
-	public static final int		DATA_MODEL_VERSION					= 10;
+	public static final int		DATA_MODEL_VERSION					= 15;
 	/**
 	 * Data model configuration collection
 	 * 
@@ -110,63 +112,63 @@ public class Constants {
 	 * Admin configuration
 	 */
 	@Getter
-	private static String	defaultAdminUsername				= "admin";
+	private static String		defaultAdminUsername				= "admin";
 	@Getter
-	private static String	defaultAdminPassword				= "admin";
+	private static String		defaultAdminPassword				= "admin";
 
 	/**
 	 * CAUTION: Do NEVER activate this on public servers! It's only for
 	 * development.
 	 */
 	@Getter
-	private static boolean	automaticallyLoginAsDefaultAdmin	= false;
+	private static boolean		automaticallyLoginAsDefaultAdmin	= false;
 
 	@Getter
-	private static Locale	adminLocale							= new Locale(
-																		"en",
-																		"GB");
+	private static Locale		adminLocale							= new Locale(
+																			"en",
+																			"GB");
 
 	@Getter
-	private static Locale[]	interventionLocales					= new Locale[] {
-			new Locale("de", "CH"), new Locale("fr", "CH")		};
+	private static Locale[]		interventionLocales					= new Locale[] {
+			new Locale("de", "CH"), new Locale("fr", "CH")			};
 
 	@Getter
-	private static String	loggingFolder						= "/mc_data/logs";
+	private static String		loggingFolder						= "/mc_data/logs";
 	@Getter
-	private static String	storageFolder						= "/mc_data/FileStorage";
+	private static String		storageFolder						= "/mc_data/FileStorage";
 	@Getter
-	private static String	mediaUploadFolder					= "/mc_data/MediaUpload";
+	private static String		mediaUploadFolder					= "/mc_data/MediaUpload";
 	@Getter
-	private static String	mediaCacheFolder					= "/mc_data/MediaCache";
+	private static String		mediaCacheFolder					= "/mc_data/MediaCache";
 	@Getter
-	private static String	templatesFolder						= "/mc_data/templates";
+	private static String		templatesFolder						= "/mc_data/templates";
 
 	@Getter
-	private static String	loggingConsoleLevel					= "DEBUG";
+	private static String		loggingConsoleLevel					= "DEBUG";
 	@Getter
-	private static String	loggingRollingFileLevel				= "DEBUG";
+	private static String		loggingRollingFileLevel				= "DEBUG";
 
 	@Getter
-	private static String	fileExtension						= ".mc";
+	private static String		fileExtension						= ".mc";
 
 	/**
 	 * Survey listing configuration
 	 */
 	@Getter
-	private static String	surveyListingTitle					= "Active surveys:";
+	private static String		surveyListingTitle					= "Active surveys:";
 	@Getter
-	private static String	surveyListingNoneActive				= "No survey active.";
+	private static String		surveyListingNoneActive				= "No survey active.";
 	@Getter
-	private static String	surveyListingNotActive				= "Survey listing inactive.";
+	private static String		surveyListingNotActive				= "Survey listing inactive.";
 
 	/**
 	 * Statistics configuration
 	 */
 	@Getter
-	private static boolean	statisticsFileEnabled				= false;
+	private static boolean		statisticsFileEnabled				= false;
 
 	@Getter
-	private static String	statisticsFile						= "/mc_data/statistics.properties";
+	private static String		statisticsFile						= "/mc_data/statistics.properties";
 
 	/**
 	 * Simulation configuration
@@ -178,68 +180,84 @@ public class Constants {
 	 * interventions should never be transfered back to another system.
 	 */
 	@Getter
-	private static boolean	simulatedDateAndTime				= false;
-
-	private static String	smsSimulationNumber					= "+99999";
-
-	public static String getSmsSimulationNumber() {
-		return StringHelpers.cleanPhoneNumber(smsSimulationNumber);
-	}
+	private static boolean		simulatedDateAndTime				= false;
 
 	/**
 	 * Database configuration
 	 */
 	@Getter
-	private static String	databaseHost						= "127.0.0.1";
+	private static String		databaseHost						= "127.0.0.1";
 	@Getter
-	private static int		databasePort						= 27017;
+	private static int			databasePort						= 27017;
 	@Getter
-	private static String	databaseUser						= "mc";
+	private static String		databaseUser						= "mc";
 	@Getter
-	private static String	databasePassword					= "mc";
+	private static String		databasePassword					= "mc";
 	@Getter
-	private static String	databaseName						= "mc";
+	private static String		databaseName						= "mc";
 
 	/**
 	 * General Mailing configuration
 	 */
 	@Getter
-	private static String	mailhostIncoming					= "localhost";
+	private static String		mailhostIncoming					= "localhost";
 	@Getter
-	private static String	mailboxProtocol						= "pop3";
+	private static String		mailboxProtocol						= "pop3";
 	@Getter
-	private static String	mailboxFolder						= "INBOX";
+	private static String		mailboxFolder						= "INBOX";
 	@Getter
-	private static String	mailhostOutgoing					= "localhost";
+	private static String		mailhostOutgoing					= "localhost";
 	@Getter
-	private static String	mailUser							= "---";
+	private static String		mailUser							= "---";
 	@Getter
-	private static String	mailPassword						= "---";
+	private static String		mailPassword						= "---";
 
 	/**
 	 * Email configuration
 	 */
 	@Getter
-	private static String	emailFrom							= "a@b.eu";
+	private static boolean		emailActive							= true;
 	@Getter
-	private static String	emailSubjectForParticipant			= "MobileCoach Message";
+	private static String		emailFrom							= "a@b.eu";
 	@Getter
-	private static String	emailSubjectForSupervisor			= "MobileCoach Supervisor Notification";
+	private static String		emailSubjectForParticipant			= "MobileCoach Message";
+	@Getter
+	private static String		emailSubjectForSupervisor			= "MobileCoach Supervisor Notification";
 
 	/**
 	 * SMS configuration
 	 */
 	@Getter
-	private static String	smsEmailFrom						= "a@b.eu";
+	private static boolean		smsActive							= true;
 	@Getter
-	private static String	smsEmailTo							= "c@d.eu";
+	private static String		smsEmailFrom						= "a@b.eu";
 	@Getter
-	private static String	smsMailSubjectStartsWith			= "SMS received on";
+	private static String		smsEmailTo							= "c@d.eu";
 	@Getter
-	private static String	smsUserKey							= "abc";
+	private static String		smsMailSubjectStartsWith			= "SMS received on";
 	@Getter
-	private static String	smsUserPassword						= "xyz";
-	private static String	smsPhoneNumberAcceptedCountryCodes	= "41,43,49";
+	private static String		smsUserKey							= "abc";
+	@Getter
+	private static String		smsUserPassword						= "xyz";
+	private static String		smsPhoneNumberAcceptedCountryCodes	= "41,43,49";
+
+	/**
+	 * Deepstream configuration
+	 */
+	@Getter
+	private static boolean		deepstreamActive					= false;
+	@Getter
+	private static String		deepstreamHost						= "wss://localhost:6020";
+	@Getter
+	private static String		deepstreamServerRole				= "server";
+	@Getter
+	private static String		deepstreamParticipantRole			= "participant";
+	@Getter
+	private static String		deepstreamSupervisorRole			= "supervisor";
+
+	@Getter
+	private static final String	deepstreamServerPassword			= RandomStringUtils
+																			.randomAlphanumeric(64);
 
 	/**
 	 * Get all accepted country codes for SMS phone numbers

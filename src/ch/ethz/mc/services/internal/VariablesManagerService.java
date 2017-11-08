@@ -88,6 +88,8 @@ public class VariablesManagerService {
 
 	private final ConcurrentHashMap<String, Hashtable<String, ParticipantVariableWithValue>>	participantsVariablesCache;
 
+	private static SimpleDateFormat																hourOfDayFormatter	= new SimpleDateFormat(
+																															"H");
 	private static SimpleDateFormat																dayInWeekFormatter	= new SimpleDateFormat(
 																															"u");
 	private static SimpleDateFormat																dayOfMonthFormatter	= new SimpleDateFormat(
@@ -288,6 +290,10 @@ public class VariablesManagerService {
 				.values()) {
 			switch (variable) {
 				case participantMessageReply:
+				case participantRawMessageReply:
+				case participantUnexpectedMessage:
+				case participantUnexpectedRawMessage:
+				case participantIntention:
 					if (!variablesWithValues.containsKey(variable
 							.toVariableName())) {
 						addToHashtable(variablesWithValues,
@@ -398,6 +404,16 @@ public class VariablesManagerService {
 					return dialogOptionSMS.getData();
 				}
 				break;
+			case participantDialogOptionExternalID:
+				val dialogOptionExternalID = databaseManagerService
+						.findOneModelObject(DialogOption.class,
+								Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
+								participant.getId(),
+								DialogOptionTypes.EXTERNAL_ID);
+				if (dialogOptionExternalID != null) {
+					return dialogOptionExternalID.getData();
+				}
+				break;
 			case participantSupervisorDialogOptionEmailData:
 				val supervisorDialogOptionEmail = databaseManagerService
 						.findOneModelObject(DialogOption.class,
@@ -418,6 +434,16 @@ public class VariablesManagerService {
 					return supervisorDialogOptionSMS.getData();
 				}
 				break;
+			case participantSupervisorDialogOptionExternalID:
+				val supervisorDialogOptionExternalID = databaseManagerService
+						.findOneModelObject(DialogOption.class,
+								Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
+								participant.getId(),
+								DialogOptionTypes.SUPERVISOR_EXTERNAL_ID);
+				if (supervisorDialogOptionExternalID != null) {
+					return supervisorDialogOptionExternalID.getData();
+				}
+				break;
 			case participantName:
 				return participant.getNickname();
 			case participantLanguage:
@@ -435,6 +461,8 @@ public class VariablesManagerService {
 			final READ_ONLY_SYSTEM_VARIABLES variable,
 			MonitoringMessage relatedMonitoringMessage) {
 		switch (variable) {
+			case systemHourOfDay:
+				return hourOfDayFormatter.format(date);
 			case systemDayInWeek:
 				return dayInWeekFormatter.format(date);
 			case systemDayOfMonth:
@@ -569,6 +597,11 @@ public class VariablesManagerService {
 							DialogOptionTypes.SMS,
 							StringHelpers.cleanPhoneNumber(variableValue));
 					break;
+				case participantDialogOptionExternalID:
+					log.debug("Setting variable 'participantDialogOptionDeepstreamData'");
+					participantSetDialogOption(participantId,
+							DialogOptionTypes.EXTERNAL_ID, variableValue);
+					break;
 				case participantSupervisorDialogOptionEmailData:
 					log.debug("Setting variable 'participantSupervisorDialogOptionEmailData'");
 					participantSetDialogOption(participantId,
@@ -580,6 +613,12 @@ public class VariablesManagerService {
 					participantSetDialogOption(participantId,
 							DialogOptionTypes.SUPERVISOR_SMS,
 							StringHelpers.cleanPhoneNumber(variableValue));
+					break;
+				case participantSupervisorDialogOptionExternalID:
+					log.debug("Setting variable 'participantSupervisorDialogOptionDeepstreamData'");
+					participantSetDialogOption(participantId,
+							DialogOptionTypes.SUPERVISOR_EXTERNAL_ID,
+							variableValue);
 					break;
 				case participantName:
 					log.debug("Setting variable 'participantName'");

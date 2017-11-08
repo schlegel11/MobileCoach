@@ -1,4 +1,4 @@
-package ch.ethz.mc.model.persistent.outdated;
+package ch.ethz.mc.model.persistent.types;
 
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
@@ -20,52 +20,16 @@ package ch.ethz.mc.model.persistent.outdated;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.Setter;
-
-import org.bson.types.ObjectId;
-
-import ch.ethz.mc.model.ModelObject;
-import ch.ethz.mc.model.persistent.Participant;
-
 /**
- * CAUTION: Will only be used for conversion from data model 2 to 3
+ * Supported dialog message types
  *
  * @author Andreas Filler
  */
-@NoArgsConstructor
-@AllArgsConstructor
-public class ParticipantVariableWithValueV3 extends ModelObject {
-	/**
-	 * Name of the variable
-	 */
-	@Getter
-	@Setter
-	@NonNull
-	private String		name;
+public enum DialogMessageTypes {
+	PLAIN, INTENTION, COMMAND;
 
-	/**
-	 * Value of the variable
-	 */
-	@Getter
-	@Setter
-	@NonNull
-	private String		value;
-	/**
-	 * {@link Participant} to which this variable and its value belong to
-	 */
-	@Getter
-	@Setter
-	@NonNull
-	private ObjectId	participant;
-
-	/**
-	 * The moment in time when the variable was updated the last time
-	 */
-	@Getter
-	@Setter
-	private long		lastUpdated;
+	@Override
+	public String toString() {
+		return name().toLowerCase().replace("_", " ");
+	}
 }

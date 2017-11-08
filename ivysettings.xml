@@ -5,6 +5,10 @@
 		<chain name="default">
 			<!-- Public Maven repository -->
 			<ibiblio name="public" m2compatible="true" checksums=""/>
+
+			<!-- Deepstream Maven -->
+			<ibiblio name="bintray-deepstream-maven" usepoms="true" m2compatible="true"
+				root="http://dl.bintray.com/deepstreamio/maven" />
 			
 			<!-- Vaadin Add-on repository -->
 			<ibiblio name="vaadin-addons" usepoms="true" m2compatible="true"

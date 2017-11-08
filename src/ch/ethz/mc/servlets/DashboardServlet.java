@@ -351,19 +351,22 @@ public class DashboardServlet extends HttpServlet {
 						.toString()));
 
 		// REST API URL
-		templateVariables.put(
-				DashboardTemplateFields.REST_API_URL.toVariable(),
-				request.getRequestURL()
-						.toString()
-						.substring(
-								0,
-								request.getRequestURL().toString()
-										.indexOf(request.getRequestURI()))
-						+ request.getContextPath()
-						+ "/"
-						+ ImplementationConstants.REST_API_PATH
-						+ "/"
-						+ ImplementationConstants.REST_API_VERSION + "/");
+		templateVariables
+				.put(DashboardTemplateFields.REST_API_URL.toVariable(),
+						request.getRequestURL()
+								.toString()
+								.substring(
+										0,
+										request.getRequestURL()
+												.toString()
+												.indexOf(
+														request.getRequestURI()))
+								+ request.getContextPath()
+								+ "/"
+								+ ImplementationConstants.REST_API_PATH
+								+ "/"
+								+ ImplementationConstants.REST_SESSION_BASED_API_VERSION
+								+ "/");
 
 		// Given password
 		templateVariables.put(DashboardTemplateFields.PASSWORD.toVariable(),

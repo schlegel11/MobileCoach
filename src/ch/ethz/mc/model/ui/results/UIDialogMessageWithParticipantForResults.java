@@ -39,8 +39,10 @@ public class UIDialogMessageWithParticipantForResults extends UIModelObject {
 	public static final String	GROUP						= "group";
 	public static final String	ORGANIZATION				= "organization";
 	public static final String	ORGANIZATION_UNIT			= "organizationUnit";
+
 	public static final String	ORDER						= "order";
 	public static final String	STATUS						= "status";
+	public static final String	SENDER_TYPE					= "senderType";
 	public static final String	TYPE						= "type";
 
 	public static final String	MESSAGE						= "message";
@@ -79,6 +81,9 @@ public class UIDialogMessageWithParticipantForResults extends UIModelObject {
 	@PropertyId(STATUS)
 	private String				status;
 
+	@PropertyId(SENDER_TYPE)
+	private String				senderType;
+
 	@PropertyId(TYPE)
 	private String				type;
 
@@ -102,17 +107,19 @@ public class UIDialogMessageWithParticipantForResults extends UIModelObject {
 
 	@PropertyId(MANUALLY_SENT)
 	private String				manuallySent;
+
 	@PropertyId(CONTAINS_MEDIA_CONTENT)
 	private String				containsMediaContent;
+
 	@PropertyId(MEDIA_CONTENT_VIEWED)
 	private String				mediaContentViewed;
 
 	public static Object[] getVisibleColumns() {
 		return new Object[] { PARTICIPANT_ID, PARTICIPANT_NAME, LANGUAGE,
-				GROUP, ORGANIZATION, ORGANIZATION_UNIT, ORDER, STATUS, TYPE,
-				MESSAGE, SHOULD_BE_SENT_TIMESTAMP, SENT_TIMESTAMP, ANSWER,
-				RAW_ANSWER, ANSWER_RECEIVED_TIMESTAMP, MANUALLY_SENT,
-				CONTAINS_MEDIA_CONTENT, MEDIA_CONTENT_VIEWED };
+				GROUP, ORGANIZATION, ORGANIZATION_UNIT, ORDER, STATUS,
+				SENDER_TYPE, TYPE, MESSAGE, SHOULD_BE_SENT_TIMESTAMP,
+				SENT_TIMESTAMP, ANSWER, RAW_ANSWER, ANSWER_RECEIVED_TIMESTAMP,
+				MANUALLY_SENT, CONTAINS_MEDIA_CONTENT, MEDIA_CONTENT_VIEWED };
 	}
 
 	public static String[] getColumnHeaders() {
@@ -125,6 +132,7 @@ public class UIDialogMessageWithParticipantForResults extends UIModelObject {
 				localize(AdminMessageStrings.UI_COLUMNS__ORGANIZATION_UNIT),
 				localize(AdminMessageStrings.UI_COLUMNS__ORDER),
 				localize(AdminMessageStrings.UI_COLUMNS__STATUS),
+				localize(AdminMessageStrings.UI_COLUMNS__SENDER_TYPE),
 				localize(AdminMessageStrings.UI_COLUMNS__TYPE),
 				localize(AdminMessageStrings.UI_COLUMNS__MESSAGE),
 				localize(AdminMessageStrings.UI_COLUMNS__SHOULD_BE_SENT_TIMESTAMP),

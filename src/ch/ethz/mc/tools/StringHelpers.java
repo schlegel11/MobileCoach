@@ -32,7 +32,9 @@ import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.conf.Messages;
+import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.concepts.AbstractRule;
+import ch.ethz.mc.model.persistent.types.MonitoringRuleTypes;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 
 /**
@@ -56,6 +58,37 @@ public class StringHelpers {
 	public static String createRuleName(final AbstractRule abstractRule,
 			final boolean withComment) {
 		val name = new StringBuffer();
+
+		if (abstractRule instanceof MonitoringRule
+				&& ((MonitoringRule) abstractRule).getType() != MonitoringRuleTypes.NORMAL) {
+			val monitoringRule = (MonitoringRule) abstractRule;
+
+			switch (monitoringRule.getType()) {
+				case DAILY:
+					name.append(Messages
+							.getAdminString(AdminMessageStrings.UI_MODEL__DAILY_RULE));
+					break;
+				case PERIODIC:
+					val simulatorActive = Constants.isSimulatedDateAndTime();
+					name.append(Messages.getAdminString(
+							AdminMessageStrings.UI_MODEL__PERIODIC_RULE,
+							String.valueOf((int) (simulatorActive ? ImplementationConstants.PERIODIC_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITH_SIMULATOR
+									: ImplementationConstants.PERIODIC_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITHOUT_SIMULATOR / 60))));
+					break;
+				case UNEXPECTED_MESSAGE:
+					name.append(Messages
+							.getAdminString(AdminMessageStrings.UI_MODEL__UNEXPECTED_MESSAGE_RULE));
+					break;
+				case USER_INTENTION:
+					name.append(Messages
+							.getAdminString(AdminMessageStrings.UI_MODEL__USER_INTENTION_RULE));
+					break;
+				default:
+					break;
+			}
+
+			return name.toString();
+		}
 
 		if (withComment && !abstractRule.getComment().equals("")) {
 			name.append(abstractRule.getComment() + ": ");

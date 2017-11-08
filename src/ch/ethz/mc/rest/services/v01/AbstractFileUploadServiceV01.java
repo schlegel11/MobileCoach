@@ -1,4 +1,4 @@
-package ch.ethz.mc.rest.services;
+package ch.ethz.mc.rest.services.v01;
 
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
@@ -51,10 +51,11 @@ import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
  * @author Andreas Filler
  */
 @Log4j2
-public abstract class AbstractFileUploadService extends AbstractService {
+public abstract class AbstractFileUploadServiceV01 extends AbstractServiceV01 {
 	private final FileStorageManagerService	fileStorageManagerService;
 
-	public AbstractFileUploadService(final RESTManagerService restManagerService) {
+	public AbstractFileUploadServiceV01(
+			final RESTManagerService restManagerService) {
 		super(restManagerService);
 		fileStorageManagerService = restManagerService
 				.getFileStorageManagerService();

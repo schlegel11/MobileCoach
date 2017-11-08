@@ -46,25 +46,24 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
+import lombok.Getter;
 import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.memory.ReceivedMessage;
+import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
 import ch.ethz.mc.tools.InternalDateTime;
-import ch.ethz.mc.tools.Simulator;
 import ch.ethz.mc.tools.StringHelpers;
 
 /**
@@ -74,7 +73,19 @@ import ch.ethz.mc.tools.StringHelpers;
  */
 @Log4j2
 public class CommunicationManagerService {
-	private static CommunicationManagerService	instance	= null;
+	private static CommunicationManagerService	instance		= null;
+
+	private final boolean						simulatorActive;
+
+	private long								lastSMSCheck	= 0;
+	private long								lastEmailCheck	= 0;
+
+	private final boolean						emailActive;
+	private final boolean						smsActive;
+	private final boolean						deepstreamActive;
+
+	@Getter
+	private DeepstreamCommunicationService		deepstreamCommunicationService;
 
 	private InterventionExecutionManagerService	interventionExecutionManagerService;
 	private final Session						incomingMailSession;
@@ -98,11 +109,17 @@ public class CommunicationManagerService {
 
 	private final List<MailingThread>			runningMailingThreads;
 
-	private CommunicationManagerService() throws Exception {
-
-		log.info("Starting service...");
+	private CommunicationManagerService() {
+		log.info("Preparing service...");
 
 		runningMailingThreads = new ArrayList<MailingThread>();
+
+		simulatorActive = Constants.isSimulatedDateAndTime();
+
+		// General settings
+		emailActive = Constants.isEmailActive();
+		smsActive = Constants.isSmsActive();
+		deepstreamActive = Constants.isDeepstreamActive();
 
 		// Mailing configuration
 		val mailhostIncoming = Constants.getMailhostIncoming();
@@ -143,15 +160,20 @@ public class CommunicationManagerService {
 		}
 		log.debug(properties);
 
-		// Setup mail sessions
-		if (useAuthentication) {
-			incomingMailSession = Session.getInstance(properties,
-					new PasswordAuthenticator(mailUser, mailPassword));
-			outgoingMailSession = Session.getInstance(properties,
-					new PasswordAuthenticator(mailUser, mailPassword));
+		// Setup mail sessions (if required)
+		if (emailActive || smsActive) {
+			if (useAuthentication) {
+				incomingMailSession = Session.getInstance(properties,
+						new PasswordAuthenticator(mailUser, mailPassword));
+				outgoingMailSession = Session.getInstance(properties,
+						new PasswordAuthenticator(mailUser, mailPassword));
+			} else {
+				incomingMailSession = Session.getInstance(properties);
+				outgoingMailSession = Session.getInstance(properties);
+			}
 		} else {
-			incomingMailSession = Session.getInstance(properties);
-			outgoingMailSession = Session.getInstance(properties);
+			incomingMailSession = null;
+			outgoingMailSession = null;
 		}
 
 		// Prepare XML parsing
@@ -159,18 +181,53 @@ public class CommunicationManagerService {
 		documentBuilderFactory.setNamespaceAware(true);
 		receiverDateFormat = new SimpleDateFormat("ddMMyyyyHHmmss", Locale.US);
 
-		log.info("Started.");
+		// Initialize deepstream communication (if required)
+		if (deepstreamActive) {
+			deepstreamCommunicationService = DeepstreamCommunicationService
+					.prepare(Constants.getDeepstreamHost(),
+							Constants.getDeepstreamServerRole(),
+							Constants.getDeepstreamServerPassword());
+		} else {
+			deepstreamCommunicationService = null;
+		}
+
+		log.info("Prepared.");
 	}
 
-	public static CommunicationManagerService start() throws Exception {
+	public static CommunicationManagerService prepare() throws Exception {
 		if (instance == null) {
 			instance = new CommunicationManagerService();
 		}
 		return instance;
 	}
 
+	public void start(
+			final InterventionExecutionManagerService interventionExecutionManagerService)
+			throws Exception {
+		log.info("Starting service...");
+
+		this.interventionExecutionManagerService = interventionExecutionManagerService;
+
+		if (deepstreamActive) {
+			deepstreamCommunicationService
+					.start(interventionExecutionManagerService);
+		}
+
+		log.info("Started.");
+	}
+
 	public void stop() throws Exception {
 		log.info("Stopping service...");
+
+		if (deepstreamActive) {
+			log.debug("Stopping deepstream server...");
+			try {
+				deepstreamCommunicationService.stop();
+			} catch (final Exception e) {
+				log.warn("Error when stopping deepstream server: {}",
+						e.getMessage());
+			}
+		}
 
 		log.debug("Stopping mailing threads...");
 		synchronized (runningMailingThreads) {
@@ -186,34 +243,78 @@ public class CommunicationManagerService {
 	}
 
 	/**
-	 * Sends a mail message (asynchronous)
+	 * Sends a message (asynchronous)
 	 *
 	 * @param dialogOption
-	 * @param dialogMessageId
-	 * @param message
+	 * @param dialogMessage
+	 * @param messageSender
 	 */
 	@Synchronized
 	public void sendMessage(final DialogOption dialogOption,
-			final ObjectId dialogMessageId, final String messageSender,
-			final String message, final boolean messageExpectsAnswer) {
-		if (interventionExecutionManagerService == null) {
-			interventionExecutionManagerService = MC.getInstance()
-					.getInterventionExecutionManagerService();
+			final DialogMessage dialogMessage, final String messageSender) {
+
+		final int messageOrder = dialogMessage.getOrder();
+		final String message = dialogMessage.getMessage();
+		final String messageWithForcedLinks = dialogMessage
+				.getMessageWithForcedLinks();
+		final boolean messageExpectsAnswer = dialogMessage
+				.isMessageExpectsAnswer();
+
+		switch (dialogOption.getType()) {
+			case SMS:
+			case SUPERVISOR_SMS:
+				if (smsActive) {
+					val mailingThread = new MailingThread(dialogOption,
+							dialogMessage.getId(), messageSender,
+							messageWithForcedLinks, messageExpectsAnswer);
+
+					synchronized (runningMailingThreads) {
+						runningMailingThreads.add(mailingThread);
+					}
+
+					mailingThread.start();
+				}
+				break;
+			case EMAIL:
+			case SUPERVISOR_EMAIL:
+				if (emailActive) {
+					val mailingThread = new MailingThread(dialogOption,
+							dialogMessage.getId(), messageSender,
+							messageWithForcedLinks, messageExpectsAnswer);
+
+					synchronized (runningMailingThreads) {
+						runningMailingThreads.add(mailingThread);
+					}
+
+					mailingThread.start();
+				}
+				break;
+			case EXTERNAL_ID:
+			case SUPERVISOR_EXTERNAL_ID:
+				if (dialogOption
+						.getData()
+						.startsWith(
+								ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM)
+						&& deepstreamActive) {
+					try {
+						deepstreamCommunicationService.asyncSendMessage(
+								dialogOption, dialogMessage.getId(),
+								messageOrder, message,
+								dialogMessage.getTextBasedMediaObjectContent(),
+								dialogMessage.getSurveyLink(),
+								dialogMessage.getMediaObjectLink(),
+								messageExpectsAnswer);
+					} catch (final Exception e) {
+						log.warn("Could not send message using deepstream: {}",
+								e.getMessage());
+					}
+				} else {
+					log.warn(
+							"No appropriate handler could be found for external id dialog option with data {}",
+							dialogOption.getData());
+				}
+				break;
 		}
-
-		val mailingThread = new MailingThread(dialogOption, dialogMessageId,
-				messageSender, message, messageExpectsAnswer);
-
-		interventionExecutionManagerService
-				.dialogMessageStatusChangesForSending(dialogMessageId,
-						DialogMessageStatusTypes.SENDING,
-						InternalDateTime.currentTimeMillis());
-
-		synchronized (runningMailingThreads) {
-			runningMailingThreads.add(mailingThread);
-		}
-
-		mailingThread.start();
 	}
 
 	/**
@@ -224,113 +325,134 @@ public class CommunicationManagerService {
 	public List<ReceivedMessage> receiveMessages() {
 		val receivedMessages = new ArrayList<ReceivedMessage>();
 
-		// Add simulated messages if available
-		CollectionUtils.addAll(receivedMessages, Simulator.getInstance()
-				.getSimulatedReceivedMessages());
+		// Add Email messages (every x minutes only)
+		if (emailActive
+				& System.currentTimeMillis() > lastEmailCheck
+						+ (simulatorActive ? ImplementationConstants.SMS_AND_EMAIL_RETRIEVAL_INTERVAL_IN_SECONDS_WITH_SIMULATOR
+								: ImplementationConstants.SMS_AND_EMAIL_RETRIEVAL_INTERVAL_IN_SECONDS_WITHOUT_SIMULATOR)
+						* 1000) {
+			lastEmailCheck = System.currentTimeMillis();
 
-		// Add SMS messages
+			// Emails are currently not handled, but it could be implemented
+			// here.
+		}
+
+		// Add SMS messages (every x minutes only)
 		Store store = null;
 		Folder folder = null;
-		try {
-			log.debug("Retrieving SMS messages...");
-			store = incomingMailSession.getStore(mailboxProtocol);
-			store.connect();
-			folder = store.getFolder(mailboxFolder);
-			folder.open(Folder.READ_WRITE);
+		if (smsActive
+				& System.currentTimeMillis() > lastSMSCheck
+						+ (simulatorActive ? ImplementationConstants.SMS_AND_EMAIL_RETRIEVAL_INTERVAL_IN_SECONDS_WITH_SIMULATOR
+								: ImplementationConstants.SMS_AND_EMAIL_RETRIEVAL_INTERVAL_IN_SECONDS_WITHOUT_SIMULATOR)
+						* 1000) {
+			lastSMSCheck = System.currentTimeMillis();
 
-			for (val message : folder.getMessages()) {
-				// Only handle messages who match the subject pattern
-				if (message.getSubject().startsWith(smsMailSubjectStartsWith)) {
-					try {
+			try {
+				log.debug("Retrieving SMS messages...");
+				store = incomingMailSession.getStore(mailboxProtocol);
+				store.connect();
+				folder = store.getFolder(mailboxFolder);
+				folder.open(Folder.READ_WRITE);
 
-						log.debug("Mail received with subject '{}'",
-								message.getSubject());
-						val receivedMessage = new ReceivedMessage();
-						receivedMessage.setType(DialogOptionTypes.SMS);
+				for (val message : folder.getMessages()) {
+					// Only handle messages who match the subject pattern
+					if (message.getSubject().startsWith(
+							smsMailSubjectStartsWith)) {
+						try {
 
-						// Parse message content
-						val documentBuilder = documentBuilderFactory
-								.newDocumentBuilder();
-						val inputSource = new InputSource(new StringReader(
-								String.class.cast(message.getContent())));
-						val document = documentBuilder.parse(inputSource);
+							log.debug("Mail received with subject '{}'",
+									message.getSubject());
+							val receivedMessage = new ReceivedMessage();
+							receivedMessage.setType(DialogOptionTypes.SMS);
+							receivedMessage.setIntention(false);
 
-						final XPath xPath = XPathFactory.newInstance()
-								.newXPath();
+							// Parse message content
+							val documentBuilder = documentBuilderFactory
+									.newDocumentBuilder();
+							val inputSource = new InputSource(new StringReader(
+									String.class.cast(message.getContent())));
+							val document = documentBuilder.parse(inputSource);
 
-						val sender = ((NodeList) xPath.evaluate(
-								"/aspsms/Originator/PhoneNumber",
-								document.getDocumentElement(),
-								XPathConstants.NODESET)).item(0)
-								.getTextContent();
+							final XPath xPath = XPathFactory.newInstance()
+									.newXPath();
 
-						receivedMessage.setSender(StringHelpers
-								.cleanPhoneNumber(sender));
+							val sender = ((NodeList) xPath.evaluate(
+									"/aspsms/Originator/PhoneNumber",
+									document.getDocumentElement(),
+									XPathConstants.NODESET)).item(0)
+									.getTextContent();
 
-						val recipient = ((NodeList) xPath.evaluate(
-								"/aspsms/Recipient/PhoneNumber",
-								document.getDocumentElement(),
-								XPathConstants.NODESET)).item(0)
-								.getTextContent();
+							receivedMessage.setSender(StringHelpers
+									.cleanPhoneNumber(sender));
 
-						receivedMessage.setRecipient(StringHelpers
-								.cleanPhoneNumber(recipient));
+							val receivedTimestampString = ((NodeList) xPath
+									.evaluate("/aspsms/DateReceived",
+											document.getDocumentElement(),
+											XPathConstants.NODESET)).item(0)
+									.getTextContent();
 
-						val receivedTimestampString = ((NodeList) xPath
-								.evaluate("/aspsms/DateReceived",
-										document.getDocumentElement(),
-										XPathConstants.NODESET)).item(0)
-								.getTextContent();
+							val receivedTimestamp = receiverDateFormat.parse(
+									receivedTimestampString).getTime();
 
-						val receivedTimestamp = receiverDateFormat.parse(
-								receivedTimestampString).getTime();
+							// Abjust for simulated date and time
+							if (simulatorActive) {
+								receivedMessage
+										.setReceivedTimestamp(InternalDateTime
+												.currentTimeMillis());
+							} else {
+								receivedMessage
+										.setReceivedTimestamp(receivedTimestamp);
+							}
 
-						// Abjust for simulated date and time
-						if (Constants.isSimulatedDateAndTime()) {
-							receivedMessage
-									.setReceivedTimestamp(InternalDateTime
-											.currentTimeMillis());
-						} else {
-							receivedMessage
-									.setReceivedTimestamp(receivedTimestamp);
+							val messageStringEncoded = ((NodeList) xPath
+									.evaluate("/aspsms/MessageData",
+											document.getDocumentElement(),
+											XPathConstants.NODESET)).item(0)
+									.getTextContent();
+							val messageString = URLDecoder.decode(
+									messageStringEncoded, "ISO-8859-1");
+
+							receivedMessage.setMessage(messageString);
+
+							log.debug("Mail parsed as {}",
+									receivedMessage.toString());
+
+							receivedMessages.add(receivedMessage);
+						} catch (final Exception e) {
+							log.error(
+									"Could not parse message, so remove it unparsed. Reason: {}",
+									e.getMessage());
 						}
-
-						val messageStringEncoded = ((NodeList) xPath.evaluate(
-								"/aspsms/MessageData",
-								document.getDocumentElement(),
-								XPathConstants.NODESET)).item(0)
-								.getTextContent();
-						val messageString = URLDecoder.decode(
-								messageStringEncoded, "ISO-8859-1");
-
-						receivedMessage.setMessage(messageString);
-
-						log.debug("Mail parsed as {}",
-								receivedMessage.toString());
-
-						receivedMessages.add(receivedMessage);
-					} catch (final Exception e) {
-						log.error(
-								"Could not parse message, so remove it unparsed. Reason: {}",
-								e.getMessage());
 					}
-				}
 
-				// Delete also messages not matching the subject pattern
-				message.setFlag(Flags.Flag.DELETED, true);
-			}
-		} catch (final Exception e) {
-			log.error("Could not retrieve SMS messages: {}", e.getMessage());
-		} finally {
-			try {
-				folder.close(true);
+					// Delete also messages not matching the subject pattern
+					message.setFlag(Flags.Flag.DELETED, true);
+				}
 			} catch (final Exception e) {
-				// Do nothing
+				log.error("Could not retrieve SMS messages: {}", e.getMessage());
+			} finally {
+				try {
+					folder.close(true);
+				} catch (final Exception e) {
+					// Do nothing
+				}
+				try {
+					store.close();
+				} catch (final Exception e) {
+					// Do nothing
+				}
 			}
+		}
+
+		// Add deepstream messages
+		if (deepstreamActive) {
 			try {
-				store.close();
+				val receivedDeepstreamMessages = deepstreamCommunicationService
+						.getReceivedMessages();
+				receivedMessages.addAll(receivedDeepstreamMessages);
 			} catch (final Exception e) {
-				// Do nothing
+				log.warn("Could not receive message using deepstream: {}",
+						e.getMessage());
 			}
 		}
 
@@ -339,6 +461,37 @@ public class CommunicationManagerService {
 		 */
 
 		return receivedMessages;
+	}
+
+	/**
+	 * Acknowledges received message
+	 * 
+	 * @param dialogMessage
+	 * @param receivedMessage
+	 */
+	public void acknowledgeMessage(final DialogMessage dialogMessage,
+			final ReceivedMessage receivedMessage) {
+		switch (receivedMessage.getType()) {
+			case SMS:
+			case SUPERVISOR_SMS:
+				if (smsActive) {
+					// Not necessary for SMS
+				}
+				break;
+			case EMAIL:
+			case SUPERVISOR_EMAIL:
+				if (emailActive) {
+					// Not necessary for Email
+				}
+				break;
+			case EXTERNAL_ID:
+			case SUPERVISOR_EXTERNAL_ID:
+				if (deepstreamActive) {
+					deepstreamCommunicationService.asyncAcknowledgeMessage(
+							dialogMessage, receivedMessage);
+				}
+				break;
+		}
 	}
 
 	/**
@@ -363,7 +516,7 @@ public class CommunicationManagerService {
 	}
 
 	/**
-	 * Enables threaded sending of messages, with retries
+	 * Enables threaded sending of mailing messages, with retries
 	 *
 	 * @author Andreas Filler
 	 */
@@ -384,11 +537,15 @@ public class CommunicationManagerService {
 			messageSender = smsPhoneNumberFrom;
 			this.message = message;
 			this.messageExpectsAnswer = messageExpectsAnswer;
+
+			interventionExecutionManagerService
+					.dialogMessageStatusChangesForSending(dialogMessageId,
+							DialogMessageStatusTypes.SENDING,
+							InternalDateTime.currentTimeMillis());
 		}
 
 		@Override
 		public void run() {
-			val simulatorActive = Constants.isSimulatedDateAndTime();
 			try {
 				sendMessage(dialogOption, messageSender, message);
 
@@ -413,15 +570,14 @@ public class CommunicationManagerService {
 				log.warn(
 						"Could not send mail to {}, retrying later another {} times: ",
 						dialogOption.getData(),
-						ImplementationConstants.MAILING_SEND_RETRIES,
+						ImplementationConstants.EMAIL_SENDING_RETRIES,
 						e.getMessage());
 			}
 
-			for (int i = 0; i < ImplementationConstants.MAILING_SEND_RETRIES; i++) {
+			for (int i = 0; i < ImplementationConstants.EMAIL_SENDING_RETRIES; i++) {
 				try {
 					TimeUnit.SECONDS
-							.sleep(simulatorActive ? ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR
-									: ImplementationConstants.MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR);
+							.sleep(ImplementationConstants.EMAIL_SENDING_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS);
 				} catch (final InterruptedException e) {
 					log.warn("Interrupted messaging sending approach {}", i);
 
@@ -455,7 +611,7 @@ public class CommunicationManagerService {
 
 					return;
 				} catch (final Exception e) {
-					log.warn("Could not send mail to {} in approach {}: ",
+					log.warn("Could not send mail to {} in approach {}: {}",
 							dialogOption.getData(), i, e.getMessage());
 				}
 			}
@@ -478,7 +634,7 @@ public class CommunicationManagerService {
 		}
 
 		/**
-		 * Sends message using appropriate service
+		 * Sends mailing messages
 		 *
 		 * @param dialogOption
 		 * @param messageSender
@@ -492,54 +648,42 @@ public class CommunicationManagerService {
 			log.debug("Sending message with text {} to {}", message,
 					dialogOption.getData());
 
-			if (dialogOption.getType() == DialogOptionTypes.SMS
-					&& dialogOption.getData().equals(
-							Constants.getSmsSimulationNumber())) {
-				log.debug("IT'S ONLY SIMULATED");
-				Simulator.getInstance().simulateSMSBySystem(message);
-			} else {
-				switch (dialogOption.getType()) {
-					case SMS:
-					case SUPERVISOR_SMS:
-						val SMSMailMessage = new MimeMessage(
-								outgoingMailSession);
+			switch (dialogOption.getType()) {
+				case SMS:
+				case SUPERVISOR_SMS:
+					val SMSMailMessage = new MimeMessage(outgoingMailSession);
 
-						SMSMailMessage
-								.setFrom(new InternetAddress(smsEmailFrom));
-						SMSMailMessage.addRecipient(Message.RecipientType.TO,
-								new InternetAddress(smsEmailTo));
-						SMSMailMessage.setSubject("UserKey=" + smsUserKey
-								+ ",Password=" + smsUserPassword
-								+ ",Recipient=" + dialogOption.getData()
-								+ ",Originator=" + messageSender
-								+ ",Notify=none");
-						SMSMailMessage.setText(message, "ISO-8859-1");
+					SMSMailMessage.setFrom(new InternetAddress(smsEmailFrom));
+					SMSMailMessage.addRecipient(Message.RecipientType.TO,
+							new InternetAddress(smsEmailTo));
+					SMSMailMessage.setSubject("UserKey=" + smsUserKey
+							+ ",Password=" + smsUserPassword + ",Recipient="
+							+ dialogOption.getData() + ",Originator="
+							+ messageSender + ",Notify=none");
+					SMSMailMessage.setText(message, "ISO-8859-1");
 
-						Transport.send(SMSMailMessage);
-						break;
-					case EMAIL:
-					case SUPERVISOR_EMAIL:
-						val EmailMessage = new MimeMessage(outgoingMailSession);
+					Transport.send(SMSMailMessage);
+					break;
+				case EMAIL:
+				case SUPERVISOR_EMAIL:
+					val EmailMessage = new MimeMessage(outgoingMailSession);
 
-						EmailMessage.setFrom(new InternetAddress(emailFrom));
-						EmailMessage.addRecipient(Message.RecipientType.TO,
-								new InternetAddress(dialogOption.getData()));
-						if (dialogOption.getType() == DialogOptionTypes.EMAIL) {
-							EmailMessage.setSubject(emailSubjectForParticipant);
-						} else {
-							EmailMessage.setSubject(emailSubjectForSupervisor);
-						}
-						EmailMessage.setText(message, "UTF-8");
+					EmailMessage.setFrom(new InternetAddress(emailFrom));
+					EmailMessage.addRecipient(Message.RecipientType.TO,
+							new InternetAddress(dialogOption.getData()));
+					if (dialogOption.getType() == DialogOptionTypes.EMAIL) {
+						EmailMessage.setSubject(emailSubjectForParticipant);
+					} else {
+						EmailMessage.setSubject(emailSubjectForSupervisor);
+					}
+					EmailMessage.setText(message, "UTF-8");
 
-						Transport.send(EmailMessage);
-						break;
-					case EXTERNAL_ID:
-					case SUPERVISOR_EXTERNAL_ID:
-						/*
-						 * Messages to other services could be sent here
-						 */
-						break;
-				}
+					Transport.send(EmailMessage);
+					break;
+				case EXTERNAL_ID:
+				case SUPERVISOR_EXTERNAL_ID:
+					log.error("An external ID message was tried to be sent by a mailing thread. This should never happen!");
+					break;
 			}
 
 			log.debug("Message sent to {}", dialogOption.getData());

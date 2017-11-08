@@ -38,25 +38,29 @@ public class ImplementationConstants {
 	public static final int		HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX									= 96;
 	public static final int		DEFAULT_HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED								= 4;
 
-	public static final int		HOUR_TO_SEND_MESSAGE_MIN															= 1;
+	public static final int		HOUR_TO_SEND_MESSAGE_MIN															= 0;
 	public static final int		HOUR_TO_SEND_MESSAGE_MAX															= 23;
-	public static final int		DEFAULT_HOUR_TO_SEND_MESSAGE														= 18;
+	public static final int		DEFAULT_HOUR_TO_SEND_MESSAGE														= 0;
 
 	public static final long	HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR												= 60 * 60 * 1000;
 	public static final long	DAYS_TO_TIME_IN_MILLIS_MULTIPLICATOR												= 24 * 60 * 60 * 1000;
 
-	public static final long	MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITHOUT_SIMULATOR	= 300;
-	public static final long	MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITH_SIMULATOR		= 15;
+	public static final long	MASTER_RULE_EVALUTION_WORKER_MILLISECONDS_SLEEP_BETWEEN_CHECK_CYCLES				= 200;
 
-	public static final long	MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR					= 60;
-	public static final long	MAILING_RETRIEVAL_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR						= 7;
+	public static final long	PERIODIC_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITHOUT_SIMULATOR	= 300;
+	public static final long	PERIODIC_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITH_SIMULATOR	= 10;
 
-	public static final long	MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITHOUT_SIMULATOR						= 60;
-	public static final long	MAILING_SENDING_CHECK_SLEEP_CYCLE_IN_SECONDS_WITH_SIMULATOR							= 7;
+	public static final long	FINISH_UNFINISHED_SCREENING_SURVEYS_INTERVAL_IN_SECONDS								= 600;
 
-	public static final long	MAILING_SEND_RETRIES																= 2;
-	public static final long	MAILING_SEND_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS								= 5 * 60;
-	public static final int		MAILING_MAXIMUM_THREAD_COUNT														= 25;
+	public static final long	INCOMING_MESSAGE_WORKER_MILLISECONDS_SLEEP_BETWEEN_CHECK_CYCLES						= 200;
+	public static final long	OUTGOING_MESSAGE_WORKER_MILLISECONDS_SLEEP_BETWEEN_CHECK_CYCLES						= 200;
+
+	public static final long	SMS_AND_EMAIL_RETRIEVAL_INTERVAL_IN_SECONDS_WITHOUT_SIMULATOR						= 30;
+	public static final long	SMS_AND_EMAIL_RETRIEVAL_INTERVAL_IN_SECONDS_WITH_SIMULATOR							= 5;
+
+	public static final long	EMAIL_SENDING_RETRIES																= 2;
+	public static final long	EMAIL_SENDING_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS								= 2 * 60;
+	public static final int		EMAIL_SENDING_MAXIMUM_THREAD_COUNT													= 25;
 
 	public static final long	SIMULATOR_TIME_UPDATE_INTERVAL_IN_SECONDS											= 5;
 
@@ -90,7 +94,8 @@ public class ImplementationConstants {
 	public static final String	SHORT_ID_SCREEN_SURVEY_AND_FEEDBACK_SERVLET_PATH					= "surveys-short";
 	public static final String	DASHBOARD_SERVLET_PATH												= "dashboard";
 
-	public static final String	REST_API_VERSION													= "v01";
+	public static final String	REST_SESSION_BASED_API_VERSION										= "v01";
+	public static final String	TOKEN_BASED_API_VERSION												= "v02";
 	public static final String	REST_API_CREDITS_CHECK_VARIABLE_POSTFIX								= "Check";
 	public static final String	REST_API_CREDITS_REMINDER_VARIABLE_POSTFIX							= "Reminder";
 
@@ -138,6 +143,8 @@ public class ImplementationConstants {
 	public static final String	REGULAR_EXPRESSION_TO_CLEAN_DOUBLE_VALUES							= "\\.0+$";
 
 	public static final String	REGULAR_EXPRESSION_TO_FIND_BOLD_STRING_PARTS						= "\\*([\\w\\s]+)\\*";
+
+	public static final String	DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM								= "ds:";
 
 	public static final String	REPORT_TABLE														= "<table class=\"automatic\">|</table>";
 	public static final String	REPORT_TABLE_ROW													= "<tr #>|</tr>";

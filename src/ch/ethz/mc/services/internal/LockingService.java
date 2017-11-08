@@ -143,4 +143,14 @@ public class LockingService {
 			releaseLockOfUISession(uiSessionToReleaseLock);
 		}
 	}
+
+	/**
+	 * Releases all locks of all sessions
+	 */
+	@Synchronized
+	public void releaseAllLocks() {
+		log.debug("Releasing all locks (as an admin)");
+
+		lockedInterventionsByUISession.clear();
+	}
 }

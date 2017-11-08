@@ -23,6 +23,7 @@ package ch.ethz.mc.services.threads;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
+import lombok.Setter;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 import ch.ethz.mc.conf.Constants;
@@ -43,15 +44,19 @@ public class MonitoringSchedulingWorker extends Thread {
 	private final InterventionExecutionManagerService	interventionExecutionManagerService;
 
 	private final boolean								statisticsEnabled;
-	private String										lastStatisticsCreation	= "";
+	private String										lastStatisticsCreation				= "";
+	private long										lastScreeningSurveyFinishingCheck	= 0;
 
-	private static File									statisticsFile			= null;
+	private static File									statisticsFile						= null;
+
+	@Setter
+	private boolean										shouldStop							= false;
 
 	public MonitoringSchedulingWorker(
 			final InterventionExecutionManagerService interventionExecutionManagerService,
 			final SurveyExecutionManagerService screeningSurveyExecutionManagerService) {
 		setName("Monitoring Scheduling Worker");
-		setPriority(NORM_PRIORITY - 1);
+		setPriority(NORM_PRIORITY - 2);
 
 		this.screeningSurveyExecutionManagerService = screeningSurveyExecutionManagerService;
 		this.interventionExecutionManagerService = interventionExecutionManagerService;
@@ -63,23 +68,22 @@ public class MonitoringSchedulingWorker extends Thread {
 
 	@Override
 	public void run() {
-		val simulatorActive = Constants.isSimulatedDateAndTime();
 		try {
-			TimeUnit.SECONDS
-					.sleep(simulatorActive ? ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITH_SIMULATOR
-							: ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITHOUT_SIMULATOR);
+			TimeUnit.MILLISECONDS
+					.sleep(ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_MILLISECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
 		} catch (final InterruptedException e) {
 			interrupt();
 			log.debug("Monitoring scheduling worker received signal to stop (before first run)");
 		}
 
-		while (!isInterrupted()) {
+		while (!isInterrupted() && !shouldStop) {
 			final long startingTime = System.currentTimeMillis();
-			log.info("Executing new run of monitoring scheduling worker...started");
+			log.debug("Executing new run of monitoring scheduling worker...started");
 
 			try {
 				if (statisticsEnabled) {
 					try {
+						// Statistics creation: Perform only once per day
 						val dailyUniqueIndex = StringHelpers
 								.createDailyUniqueIndex();
 						if (!lastStatisticsCreation.equals(dailyUniqueIndex)) {
@@ -94,42 +98,47 @@ public class MonitoringSchedulingWorker extends Thread {
 					}
 				}
 
-				/*
-				 * The following two steps should always be performed in this
-				 * order to retain data consistency
-				 */
 				try {
-					log.debug("Finishing unfinished screening surveys");
-					screeningSurveyExecutionManagerService
-							.finishUnfinishedScreeningSurveys();
+					// Finish unfinished screening surveys: Check only every x
+					// minutes
+					if (System.currentTimeMillis() > lastScreeningSurveyFinishingCheck
+							+ ImplementationConstants.FINISH_UNFINISHED_SCREENING_SURVEYS_INTERVAL_IN_SECONDS
+							* 1000) {
+						lastScreeningSurveyFinishingCheck = System
+								.currentTimeMillis();
+						log.debug("Finishing unfinished screening surveys");
+						screeningSurveyExecutionManagerService
+								.finishUnfinishedScreeningSurveys();
+					}
 				} catch (final Exception e) {
 					log.error(
 							"Could not finish unfinished screening surveys: {}",
 							e.getMessage());
 				}
 				try {
+					// Perform message: "Continuous" process
 					interventionExecutionManagerService.performMessaging();
 				} catch (final Exception e) {
 					log.error("Could not perform messaging: {}", e.getMessage());
 				}
-
 			} catch (final Exception e) {
 				log.error("Could not run whole scheduling process: {}",
 						e.getMessage());
 			}
 
-			log.info(
-					"Executing new run of monitoring scheduling worker...done ({} seconds)",
-					(System.currentTimeMillis() - startingTime) / 1000.0);
+			log.debug(
+					"Executing new run of monitoring scheduling worker...done ({} milliseconds)",
+					System.currentTimeMillis() - startingTime);
 
 			try {
-				TimeUnit.SECONDS
-						.sleep(simulatorActive ? ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITH_SIMULATOR
-								: ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITHOUT_SIMULATOR);
+				TimeUnit.MILLISECONDS
+						.sleep(ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_MILLISECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
 			} catch (final InterruptedException e) {
 				interrupt();
-				log.debug("Monitoring scheduling worker received signal to stop");
+				log.debug("Monitoring scheduling worker received signal to stop (interrupted)");
+				return;
 			}
 		}
+		log.debug("Monitoring scheduling worker received signal to stop");
 	}
 }

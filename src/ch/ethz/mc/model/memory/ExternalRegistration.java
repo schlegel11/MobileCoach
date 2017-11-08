@@ -1,4 +1,4 @@
-package ch.ethz.mc.model.persistent.outdated;
+package ch.ethz.mc.model.memory;
 
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
@@ -20,59 +20,19 @@ package ch.ethz.mc.model.persistent.outdated;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.Data;
 import lombok.NonNull;
-import lombok.Setter;
-
-import org.bson.types.ObjectId;
-import org.jongo.marshall.jackson.oid.MongoId;
-
-import ch.ethz.mc.model.persistent.Participant;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * CAUTION: Will only be used for conversion from data model 2 to 3
+ * Contains the user id and secret after a registration based on an external id
  *
  * @author Andreas Filler
  */
-@NoArgsConstructor
-@AllArgsConstructor
-public class ParticipantVariableWithValueV4 {
-	@MongoId
-	@JsonProperty("_id")
-	public ObjectId		id;
-
-	/**
-	 * Name of the variable
-	 */
-	@Getter
-	@Setter
+@Data
+public class ExternalRegistration {
 	@NonNull
-	private String		name;
+	private String	externalId;
 
-	/**
-	 * Value of the variable
-	 */
-	@Getter
-	@Setter
 	@NonNull
-	private String		value;
-
-	/**
-	 * {@link Participant} to which this variable and its value belong to
-	 */
-	@Getter
-	@Setter
-	@NonNull
-	private ObjectId	participant;
-
-	/**
-	 * The moment in time when the variable was created
-	 */
-	@Getter
-	@Setter
-	private long		timestamp;
+	private String	secret;
 }

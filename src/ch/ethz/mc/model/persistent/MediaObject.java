@@ -108,6 +108,46 @@ public class MediaObject extends ModelObject {
 		setFileReference(fileReference);
 	}
 
+	/**
+	 * Returns <code>true</code> when type is text based
+	 * 
+	 * @return
+	 */
+	@JsonIgnore
+	public boolean isTextBased() {
+		switch (type) {
+			case HTML_TEXT:
+			case URL:
+				return true;
+			case AUDIO:
+			case IMAGE:
+			case VIDEO:
+				break;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Returns <code>true</code> when type is file based
+	 * 
+	 * @return
+	 */
+	@JsonIgnore
+	public boolean isFileBased() {
+		switch (type) {
+			case HTML_TEXT:
+			case AUDIO:
+			case IMAGE:
+			case VIDEO:
+				return true;
+			case URL:
+				break;
+		}
+
+		return false;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

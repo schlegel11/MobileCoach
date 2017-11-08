@@ -25,6 +25,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 
+import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.model.persistent.Author;
 import ch.ethz.mc.ui.views.components.basics.PasswordEditComponent;
@@ -56,6 +57,8 @@ public class AccountTabComponentWithController extends AccountTabComponent {
 		val buttonClickListener = new ButtonClickListener();
 		getAccountEditComponent().getSetPasswordButton().addClickListener(
 				buttonClickListener);
+		getAccountEditComponent().getResetAllLocksButton().addClickListener(
+				buttonClickListener);
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
@@ -65,6 +68,9 @@ public class AccountTabComponentWithController extends AccountTabComponent {
 			if (event.getButton() == getAccountEditComponent()
 					.getSetPasswordButton()) {
 				setAccountPassword();
+			} else if (event.getButton() == getAccountEditComponent()
+					.getResetAllLocksButton()) {
+				resetAllLocks();
 			}
 		}
 	}
@@ -93,5 +99,25 @@ public class AccountTabComponentWithController extends AccountTabComponent {
 						closeWindow();
 					}
 				}, null);
+	}
+
+	public void resetAllLocks() {
+		log.debug("Reset all locks");
+		showConfirmationWindow(new ExtendableButtonClickListener() {
+			@Override
+			public void buttonClick(final ClickEvent event) {
+				try {
+					// Reset all locks
+					MC.getInstance().getLockingService().releaseAllLocks();
+				} catch (final Exception e) {
+					handleException(e);
+					return;
+				}
+
+				getAdminUI().showInformationNotification(
+						AdminMessageStrings.NOTIFICATION__ALL_LOCKS_RESET);
+				closeWindow();
+			}
+		}, null);
 	}
 }

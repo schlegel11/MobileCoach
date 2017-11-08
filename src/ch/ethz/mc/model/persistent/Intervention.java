@@ -49,10 +49,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  *
  * @author Andreas Filler
  */
-/**
- * @author Andreas Filler
- *
- */
 @NoArgsConstructor
 @AllArgsConstructor
 public class Intervention extends ModelObject {
@@ -111,6 +107,14 @@ public class Intervention extends ModelObject {
 	@Getter
 	@Setter
 	private String		dashboardPasswordPattern;
+
+	/**
+	 * <strong>OPTIONAL:</strong> The password required to access the deepstream
+	 * interface
+	 */
+	@Getter
+	@Setter
+	private String		deepstreamPassword;
 
 	/**
 	 * Defines if {@link ScreeningSurvey}s of participants where all relevant

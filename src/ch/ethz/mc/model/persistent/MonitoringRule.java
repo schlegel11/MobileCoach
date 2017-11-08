@@ -33,6 +33,7 @@ import org.bson.types.ObjectId;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.concepts.AbstractMonitoringRule;
+import ch.ethz.mc.model.persistent.types.MonitoringRuleTypes;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import ch.ethz.mc.tools.StringHelpers;
 
@@ -64,19 +65,31 @@ public class MonitoringRule extends AbstractMonitoringRule {
 			final int order, final String storeValueToVariableWithName,
 			final boolean sendMessageIfTrue,
 			final ObjectId relatedMonitoringMessageGroup,
-			final ObjectId intervention, final int hourToSendMessage,
+			final MonitoringRuleTypes type, final ObjectId intervention,
+			final int hourToSendMessage,
 			final int hoursUntilMessageIsHandledAsUnanswered,
-			final boolean stopInterventionWhenTrue) {
+			final boolean stopInterventionWhenTrue,
+			final boolean markCaseAsSolvedWhenTrue) {
 		super(ruleWithPlaceholders, ruleEquationSign,
 				ruleComparisonTermWithPlaceholders, comment,
 				isSubRuleOfMonitoringRule, order, storeValueToVariableWithName,
 				sendMessageIfTrue, relatedMonitoringMessageGroup);
 
+		this.type = type;
 		this.intervention = intervention;
 		this.hourToSendMessage = hourToSendMessage;
 		this.hoursUntilMessageIsHandledAsUnanswered = hoursUntilMessageIsHandledAsUnanswered;
 		this.stopInterventionWhenTrue = stopInterventionWhenTrue;
+		this.markCaseAsSolvedWhenTrue = markCaseAsSolvedWhenTrue;
 	}
+
+	/**
+	 * The type of the {@link MonitoringRule}
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private MonitoringRuleTypes	type;
 
 	/**
 	 * {@link Intervention} to which this {@link MonitoringRule} belongs to
@@ -84,7 +97,7 @@ public class MonitoringRule extends AbstractMonitoringRule {
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId	intervention;
+	private ObjectId			intervention;
 
 	/**
 	 * <strong>OPTIONAL if sendMessageIfTrue is false:</strong> The hour the
@@ -92,7 +105,7 @@ public class MonitoringRule extends AbstractMonitoringRule {
 	 */
 	@Getter
 	@Setter
-	private int			hourToSendMessage;
+	private int					hourToSendMessage;
 
 	/**
 	 * <strong>OPTIONAL if sendMessageIfTrue is false:</strong> The hours a
@@ -101,7 +114,7 @@ public class MonitoringRule extends AbstractMonitoringRule {
 	 */
 	@Getter
 	@Setter
-	private int			hoursUntilMessageIsHandledAsUnanswered;
+	private int					hoursUntilMessageIsHandledAsUnanswered;
 
 	/**
 	 * <strong>OPTIONAL:</strong> The intervention will be set to finished for
@@ -109,7 +122,16 @@ public class MonitoringRule extends AbstractMonitoringRule {
 	 */
 	@Getter
 	@Setter
-	private boolean		stopInterventionWhenTrue;
+	private boolean				stopInterventionWhenTrue;
+
+	/**
+	 * <strong>OPTIONAL:</strong> The unexpected incoming message or intention
+	 * will be handled as solved when the rule evaluates to true and the rule
+	 * execution run will be stopped as well
+	 */
+	@Getter
+	@Setter
+	private boolean				markCaseAsSolvedWhenTrue;
 
 	/*
 	 * (non-Javadoc)

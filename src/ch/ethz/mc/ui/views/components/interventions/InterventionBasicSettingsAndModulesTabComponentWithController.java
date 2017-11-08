@@ -156,8 +156,12 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 				.addClickListener(buttonClickListener);
 		interventionBasicSettingsComponent.getSwitchMessagingButton()
 				.addClickListener(buttonClickListener);
-		interventionBasicSettingsComponent.getPasswordTextFieldComponent()
-				.getButton().addClickListener(buttonClickListener);
+		interventionBasicSettingsComponent
+				.getDashboardPasswordTextFieldComponent().getButton()
+				.addClickListener(buttonClickListener);
+		interventionBasicSettingsComponent
+				.getDeepstreamPasswordTextFieldComponent().getButton()
+				.addClickListener(buttonClickListener);
 
 		// Handle checkboxes
 		val dashboardEnabledCheckbox = getInterventionBasicSettingsAndModulesComponent()
@@ -351,13 +355,13 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 							.isMonitoringActive());
 		}
 
-		interventionBasicSettingsComponent.getSimulatorComponent()
-				.setSenderIdentification(
-						intervention.getAssignedSenderIdentification());
-
-		// Adjust password text field
-		interventionBasicSettingsComponent.getPasswordTextFieldComponent()
-				.setValue(intervention.getDashboardPasswordPattern());
+		// Adjust password text fields
+		interventionBasicSettingsComponent
+				.getDashboardPasswordTextFieldComponent().setValue(
+						intervention.getDashboardPasswordPattern());
+		interventionBasicSettingsComponent
+				.getDeepstreamPasswordTextFieldComponent().setValue(
+						intervention.getDeepstreamPassword());
 
 		lastInterventionMonitoringState = intervention.isMonitoringActive();
 	}
@@ -375,8 +379,11 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 					.getSwitchMessagingButton()) {
 				switchMessaging();
 			} else if (event.getButton() == interventionBasicSettingsComponent
-					.getPasswordTextFieldComponent().getButton()) {
-				editPassword();
+					.getDashboardPasswordTextFieldComponent().getButton()) {
+				editDashboardPassword();
+			} else if (event.getButton() == interventionBasicSettingsComponent
+					.getDeepstreamPasswordTextFieldComponent().getButton()) {
+				editDeepstreamPassword();
 			}
 			event.getButton().setEnabled(true);
 		}
@@ -429,8 +436,8 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 		}, null);
 	}
 
-	public void editPassword() {
-		log.debug("Edit password");
+	public void editDashboardPassword() {
+		log.debug("Edit dashboard password");
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_PASSWORD_PATTERN,
 				intervention.getDashboardPasswordPattern(), null,
@@ -443,6 +450,33 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 							// Change password
 							getInterventionAdministrationManagerService()
 									.interventionChangeDashboardPasswordPattern(
+											intervention, getStringValue());
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						adjust();
+
+						closeWindow();
+					}
+				}, null);
+	}
+
+	public void editDeepstreamPassword() {
+		log.debug("Edit deepstream password");
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_PASSWORD,
+				intervention.getDeepstreamPassword(), null,
+				new ShortStringEditComponent(),
+				new ExtendableButtonClickListener() {
+
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Change password
+							getInterventionAdministrationManagerService()
+									.interventionChangeDeepstreamPassword(
 											intervention, getStringValue());
 						} catch (final Exception e) {
 							handleException(e);

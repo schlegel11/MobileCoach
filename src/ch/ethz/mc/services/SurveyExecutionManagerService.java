@@ -137,7 +137,6 @@ public class SurveyExecutionManagerService {
 	/*
 	 * Modification methods
 	 */
-	// Participant
 	@Synchronized
 	private Participant participantCreate(final ScreeningSurvey screeningSurvey) {
 		final val participant = new Participant(
@@ -1026,41 +1025,69 @@ public class SurveyExecutionManagerService {
 	 * - the participant has all data for monitoring available
 	 * - the participant has not finished the screening survey
 	 * - the participant has not finished the monitoring
-	 *
+	 * 
+	 * Important: For performance reasons this method is NOT synchronized
+	 * anymore.
 	 */
-	@Synchronized
 	public void finishUnfinishedScreeningSurveys() {
 		for (final val interventionId : databaseManagerService
 				.findModelObjectIds(
 						Intervention.class,
 						Queries.INTERVENTION__ACTIVE_TRUE_AND_AUTOMATICALLY_FINISH_SCREENING_SURVEYS_TRUE)) {
-			for (final val participant : databaseManagerService
+			for (val participantToCheck : databaseManagerService
 					.findModelObjects(Participant.class,
 							Queries.PARTICIPANT__BY_INTERVENTION,
 							interventionId)) {
-				if (participant != null) {
-					for (final val dialogStatus : databaseManagerService
-							.findModelObjects(
+
+				// Synchronization is only be done on participant level
+				synchronized ($lock) {
+					// Participant and intervention check has to be done again
+					// (due
+					// to potential inconsistency because of missing
+					// synchronization)
+					val participant = databaseManagerService
+							.getModelObjectById(Participant.class,
+									participantToCheck.getId());
+
+					if (participant == null) {
+						continue;
+					}
+
+					val intervention = databaseManagerService
+							.getModelObjectById(Intervention.class,
+									participant.getIntervention());
+
+					if (intervention == null
+							|| !intervention
+									.isAutomaticallyFinishScreeningSurveys()) {
+						continue;
+					}
+
+					// Check dialog status:
+					// - the participant has all data for monitoring available
+					// - the participant has finished the screening survey
+					// - the participant not finished the monitoring
+					val dialogStatus = databaseManagerService
+							.findOneModelObject(
 									DialogStatus.class,
 									Queries.DIALOG_STATUS__BY_PARTICIPANT_AND_LAST_VISITED_SCREENING_SURVEY_SLIDE_TIMESTAMP_LOWER_AND_DATA_FOR_MONITORING_PARTICIPATION_AVAILABLE_TRUE_AND_SCREENING_SURVEY_PERFORMED_FALSE_AND_MONITORING_PERFORMED_FALSE,
 									participant.getId(),
 									InternalDateTime.currentTimeMillis()
 											- ImplementationConstants.HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR
-											* 2)) {
-						if (dialogStatus != null) {
+											* 2);
 
-							log.debug("Trying to finish the screening survey for a participant who did not finish the screening survey");
+					if (dialogStatus != null) {
+						log.debug("Trying to finish the screening survey for a participant who did not finish the screening survey");
 
-							try {
-								finishScreeningSurveyForParticipant(participant);
-								log.debug(
-										"Screening survey finished for participant {}",
-										participant.getId());
-							} catch (final Exception e) {
-								log.debug(
-										"Could not finish the screening survey for a participant who did not finish it: {}",
-										e.getMessage());
-							}
+						try {
+							finishScreeningSurveyForParticipant(participant);
+							log.debug(
+									"Screening survey finished for participant {}",
+									participant.getId());
+						} catch (final Exception e) {
+							log.debug(
+									"Could not finish the screening survey for a participant who did not finish it: {}",
+									e.getMessage());
 						}
 					}
 				}

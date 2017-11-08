@@ -72,6 +72,7 @@ import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValueAccessTypes;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValuePrivacyTypes;
 import ch.ethz.mc.model.persistent.types.MediaObjectTypes;
+import ch.ethz.mc.model.persistent.types.MonitoringRuleTypes;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import ch.ethz.mc.modules.AbstractModule;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
@@ -296,13 +297,21 @@ public class InterventionAdministrationManagerService {
 	public Intervention interventionCreate(final String name) {
 		val intervention = new Intervention(name,
 				InternalDateTime.currentTimeMillis(), false, false, false, "",
-				null, false, new String[] {}, new int[] { 1 }, null);
+				null, null, false, new String[] {}, new int[] { 1 }, null);
 
 		if (name.equals("")) {
 			intervention.setName(ImplementationConstants.DEFAULT_OBJECT_NAME);
 		}
 
 		databaseManagerService.saveModelObject(intervention);
+		monitoringRuleCreate(intervention.getId(), null,
+				MonitoringRuleTypes.DAILY);
+		monitoringRuleCreate(intervention.getId(), null,
+				MonitoringRuleTypes.PERIODIC);
+		monitoringRuleCreate(intervention.getId(), null,
+				MonitoringRuleTypes.UNEXPECTED_MESSAGE);
+		monitoringRuleCreate(intervention.getId(), null,
+				MonitoringRuleTypes.USER_INTENTION);
 
 		return intervention;
 	}
@@ -364,6 +373,14 @@ public class InterventionAdministrationManagerService {
 	public void interventionChangeDashboardPasswordPattern(
 			final Intervention intervention, final String newPasswordPattern) {
 		intervention.setDashboardPasswordPattern(newPasswordPattern);
+
+		databaseManagerService.saveModelObject(intervention);
+	}
+
+	@Synchronized
+	public void interventionChangeDeepstreamPassword(
+			final Intervention intervention, final String newPassword) {
+		intervention.setDeepstreamPassword(newPassword);
 
 		databaseManagerService.saveModelObject(intervention);
 	}
@@ -744,7 +761,7 @@ public class InterventionAdministrationManagerService {
 	public MonitoringMessage monitoringMessageCreate(
 			final ObjectId monitoringMessageGroupId) {
 		val monitoringMessage = new MonitoringMessage(monitoringMessageGroupId,
-				new LString(), 0, null, null, null);
+				new LString(), false, 0, null, null, null);
 
 		val highestOrderMessage = databaseManagerService
 				.findOneSortedModelObject(
@@ -805,6 +822,15 @@ public class InterventionAdministrationManagerService {
 			final MonitoringMessage monitoringMessage,
 			final ObjectId screeningSurveyId) {
 		monitoringMessage.setLinkedIntermediateSurvey(screeningSurveyId);
+
+		databaseManagerService.saveModelObject(monitoringMessage);
+	}
+
+	@Synchronized
+	public void monitoringMessageSetIsCommandMessage(
+			final MonitoringMessage monitoringMessage,
+			final boolean isCommandMessage) {
+		monitoringMessage.setCommandMessage(isCommandMessage);
 
 		databaseManagerService.saveModelObject(monitoringMessage);
 	}
@@ -995,8 +1021,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public MediaObject mediaObjectCreateWithURL(final String url,
-			final MediaObjectTypes mediaObjectType) {
+	public MediaObject mediaObjectCreateWithURL(final String url) {
 
 		if (url == null) {
 			log.error("Can't create media object with empty URL");
@@ -1022,10 +1047,18 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.deleteModelObject(mediaObject);
 	}
 
+	@Synchronized
+	public File mediaObjectGetFile(final MediaObject mediaObject,
+			final FILE_STORES fileStore) {
+		return fileStorageManagerService.getFileByReference(
+				mediaObject.getFileReference(), fileStore);
+	}
+
 	// Monitoring Rule
 	@Synchronized
-	public MonitoringRule monitoringRuleCreate(final ObjectId interventionId,
-			final ObjectId parentMonitoringRuleId) {
+	private MonitoringRule monitoringRuleCreate(final ObjectId interventionId,
+			final ObjectId parentMonitoringRuleId,
+			final MonitoringRuleTypes type) {
 		val monitoringRule = new MonitoringRule(
 				"",
 				RuleEquationSignTypes.CALCULATED_VALUE_EQUALS,
@@ -1036,10 +1069,11 @@ public class InterventionAdministrationManagerService {
 				null,
 				false,
 				null,
+				type,
 				interventionId,
 				ImplementationConstants.DEFAULT_HOUR_TO_SEND_MESSAGE,
 				ImplementationConstants.DEFAULT_HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED,
-				false);
+				false, false);
 
 		val highestOrderRule = databaseManagerService.findOneSortedModelObject(
 				MonitoringRule.class,
@@ -1053,6 +1087,14 @@ public class InterventionAdministrationManagerService {
 
 		databaseManagerService.saveModelObject(monitoringRule);
 
+		return monitoringRule;
+	}
+
+	@Synchronized
+	public MonitoringRule monitoringRuleCreate(final ObjectId interventionId,
+			final ObjectId parentMonitoringRuleId) {
+		val monitoringRule = monitoringRuleCreate(interventionId,
+				parentMonitoringRuleId, MonitoringRuleTypes.NORMAL);
 		return monitoringRule;
 	}
 
@@ -1161,6 +1203,14 @@ public class InterventionAdministrationManagerService {
 	public void monitoringRuleChangeSendMessageToSupervisor(
 			final MonitoringRule monitoringRule, final boolean newValue) {
 		monitoringRule.setSendMessageToSupervisor(newValue);
+
+		databaseManagerService.saveModelObject(monitoringRule);
+	}
+
+	@Synchronized
+	public void monitoringRuleChangeMarkCaseAsSolvedIfTrue(
+			final MonitoringRule monitoringRule, final boolean newValue) {
+		monitoringRule.setMarkCaseAsSolvedWhenTrue(newValue);
 
 		databaseManagerService.saveModelObject(monitoringRule);
 	}
@@ -2180,6 +2230,9 @@ public class InterventionAdministrationManagerService {
 				case PREPARED_FOR_SENDING:
 					break;
 				case RECEIVED_UNEXPECTEDLY:
+					totalReceivedMessages++;
+					break;
+				case RECEIVED_AS_INTENTION:
 					totalReceivedMessages++;
 					break;
 				case SENDING:
