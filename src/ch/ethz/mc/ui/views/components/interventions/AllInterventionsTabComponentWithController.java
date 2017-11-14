@@ -60,8 +60,8 @@ import com.vaadin.ui.Button.ClickEvent;
  */
 @SuppressWarnings("serial")
 @Log4j2
-public class AllInterventionsTabComponentWithController extends
-		AllInterventionsTabComponent {
+public class AllInterventionsTabComponentWithController
+		extends AllInterventionsTabComponent {
 
 	private final MainView													mainView;
 
@@ -87,8 +87,9 @@ public class AllInterventionsTabComponentWithController extends
 		allInterventionsTable.setImmediate(true);
 
 		// table content
-		val allRelevantIntervention = getUISession().isAdmin() ? getInterventionAdministrationManagerService()
-				.getAllInterventions()
+		val allRelevantIntervention = getUISession().isAdmin()
+				? getInterventionAdministrationManagerService()
+						.getAllInterventions()
 				: getInterventionAdministrationManagerService()
 						.getAllInterventionsForAuthor(
 								getUISession().getCurrentAuthorId());
@@ -97,12 +98,12 @@ public class AllInterventionsTabComponentWithController extends
 
 		allInterventionsTable
 				.setContainerDataSource(interventionsBeanContainer);
-		allInterventionsTable.setSortContainerPropertyId(UIIntervention
-				.getSortColumn());
-		allInterventionsTable.setVisibleColumns(UIIntervention
-				.getVisibleColumns());
-		allInterventionsTable.setColumnHeaders(UIIntervention
-				.getColumnHeaders());
+		allInterventionsTable
+				.setSortContainerPropertyId(UIIntervention.getSortColumn());
+		allInterventionsTable
+				.setVisibleColumns(UIIntervention.getVisibleColumns());
+		allInterventionsTable
+				.setColumnHeaders(UIIntervention.getColumnHeaders());
 
 		// handle selection change
 		allInterventionsTable.addValueChangeListener(new ValueChangeListener() {
@@ -115,8 +116,8 @@ public class AllInterventionsTabComponentWithController extends
 					selectedUIIntervention = null;
 					selectedUIInterventionBeanItem = null;
 
-					getAdminUI().getLockingService().releaseLockOfUISession(
-							getUISession());
+					getAdminUI().getLockingService()
+							.releaseLockOfUISession(getUISession());
 				} else {
 					selectedUIIntervention = getUIModelObjectFromTableByObjectId(
 							allInterventionsTable, UIIntervention.class,
@@ -133,9 +134,8 @@ public class AllInterventionsTabComponentWithController extends
 						selectedUIIntervention = null;
 						selectedUIInterventionBeanItem = null;
 
-						getAdminUI()
-								.showWarningNotification(
-										AdminMessageStrings.NOTIFICATION__INTERVENTION_LOCKED);
+						getAdminUI().showWarningNotification(
+								AdminMessageStrings.NOTIFICATION__INTERVENTION_LOCKED);
 					}
 				}
 
@@ -191,24 +191,24 @@ public class AllInterventionsTabComponentWithController extends
 
 		// handle buttons
 		val buttonClickListener = new ButtonClickListener();
-		allInterventionsEditComponent.getNewButton().addClickListener(
-				buttonClickListener);
-		allInterventionsEditComponent.getImportButton().addClickListener(
-				buttonClickListener);
-		allInterventionsEditComponent.getRenameButton().addClickListener(
-				buttonClickListener);
-		allInterventionsEditComponent.getResultsButton().addClickListener(
-				buttonClickListener);
-		allInterventionsEditComponent.getProblemsButton().addClickListener(
-				buttonClickListener);
-		allInterventionsEditComponent.getEditButton().addClickListener(
-				buttonClickListener);
-		allInterventionsEditComponent.getDuplicateButton().addClickListener(
-				buttonClickListener);
-		allInterventionsEditComponent.getDeleteButton().addClickListener(
-				buttonClickListener);
-		allInterventionsEditComponent.getOpenModuleButton().addClickListener(
-				buttonClickListener);
+		allInterventionsEditComponent.getNewButton()
+				.addClickListener(buttonClickListener);
+		allInterventionsEditComponent.getImportButton()
+				.addClickListener(buttonClickListener);
+		allInterventionsEditComponent.getRenameButton()
+				.addClickListener(buttonClickListener);
+		allInterventionsEditComponent.getResultsButton()
+				.addClickListener(buttonClickListener);
+		allInterventionsEditComponent.getProblemsButton()
+				.addClickListener(buttonClickListener);
+		allInterventionsEditComponent.getEditButton()
+				.addClickListener(buttonClickListener);
+		allInterventionsEditComponent.getDuplicateButton()
+				.addClickListener(buttonClickListener);
+		allInterventionsEditComponent.getDeleteButton()
+				.addClickListener(buttonClickListener);
+		allInterventionsEditComponent.getOpenModuleButton()
+				.addClickListener(buttonClickListener);
 
 		// Special handle for export button
 		val onDemandFileDownloaderExport = new OnDemandFileDownloader(
@@ -222,7 +222,8 @@ public class AllInterventionsTabComponentWithController extends
 									getInterventionAdministrationManagerService()
 											.interventionExport(
 													selectedUIIntervention
-															.getRelatedModelObject(Intervention.class)));
+															.getRelatedModelObject(
+																	Intervention.class)));
 						} catch (final FileNotFoundException e) {
 							log.warn("Error during export: {}", e.getMessage());
 							throw e;
@@ -240,8 +241,8 @@ public class AllInterventionsTabComponentWithController extends
 								+ Constants.getFileExtension();
 					}
 				});
-		onDemandFileDownloaderExport.extend(allInterventionsEditComponent
-				.getExportButton());
+		onDemandFileDownloaderExport
+				.extend(allInterventionsEditComponent.getExportButton());
 		allInterventionsEditComponent.getExportButton().setDisableOnClick(true);
 
 		// Special handle for report button
@@ -252,13 +253,12 @@ public class AllInterventionsTabComponentWithController extends
 					@SneakyThrows(FileNotFoundException.class)
 					public InputStream getStream() {
 						try {
-							return new FileInputStream(
-									MC.getInstance()
-											.getReportGeneratorService()
-											.generateReport(
-													selectedUIIntervention
-															.getRelatedModelObject(Intervention.class),
-													getUISession().getBaseURL()));
+							return new FileInputStream(MC.getInstance()
+									.getReportGeneratorService().generateReport(
+											selectedUIIntervention
+													.getRelatedModelObject(
+															Intervention.class),
+											getUISession().getBaseURL()));
 						} catch (final FileNotFoundException e) {
 							log.warn("Error during report generation: {}",
 									e.getMessage());
@@ -277,8 +277,8 @@ public class AllInterventionsTabComponentWithController extends
 								+ ".html";
 					}
 				});
-		onDemandFileDownloaderReport.extend(allInterventionsEditComponent
-				.getReportButton());
+		onDemandFileDownloaderReport
+				.extend(allInterventionsEditComponent.getReportButton());
 		allInterventionsEditComponent.getReportButton().setDisableOnClick(true);
 	}
 
@@ -340,15 +340,15 @@ public class AllInterventionsTabComponentWithController extends
 						}
 
 						// Adapt UI
-						interventionsBeanContainer.addItem(newIntervention
-								.getId(), UIIntervention.class
-								.cast(newIntervention.toUIModelObject()));
+						interventionsBeanContainer.addItem(
+								newIntervention.getId(),
+								UIIntervention.class.cast(
+										newIntervention.toUIModelObject()));
 						getAllInterventionsEditComponent()
-								.getAllInterventionsTable().select(
-										newIntervention.getId());
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__INTERVENTION_CREATED);
+								.getAllInterventionsTable()
+								.select(newIntervention.getId());
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__INTERVENTION_CREATED);
 
 						closeWindow();
 					}
@@ -362,9 +362,8 @@ public class AllInterventionsTabComponentWithController extends
 			@Override
 			public void buttonClick(final ClickEvent event) {
 				final File temporaryBackupFile = getInterventionAdministrationManagerService()
-						.interventionExport(
-								selectedUIIntervention
-										.getRelatedModelObject(Intervention.class));
+						.interventionExport(selectedUIIntervention
+								.getRelatedModelObject(Intervention.class));
 
 				try {
 					final Intervention importedIntervention = getInterventionAdministrationManagerService()
@@ -376,22 +375,21 @@ public class AllInterventionsTabComponentWithController extends
 					}
 
 					// Adapt UI
-					interventionsBeanContainer.addItem(importedIntervention
-							.getId(), UIIntervention.class
-							.cast(importedIntervention.toUIModelObject()));
+					interventionsBeanContainer.addItem(
+							importedIntervention.getId(),
+							UIIntervention.class.cast(
+									importedIntervention.toUIModelObject()));
 					getAllInterventionsEditComponent()
-							.getAllInterventionsTable().select(
-									importedIntervention.getId());
+							.getAllInterventionsTable()
+							.select(importedIntervention.getId());
 					getAllInterventionsEditComponent()
 							.getAllInterventionsTable().sort();
 
-					getAdminUI()
-							.showInformationNotification(
-									AdminMessageStrings.NOTIFICATION__INTERVENTION_DUPLICATED);
+					getAdminUI().showInformationNotification(
+							AdminMessageStrings.NOTIFICATION__INTERVENTION_DUPLICATED);
 				} catch (final Exception e) {
-					getAdminUI()
-							.showWarningNotification(
-									AdminMessageStrings.NOTIFICATION__INTERVENTION_DUPLICATION_FAILED);
+					getAdminUI().showWarningNotification(
+							AdminMessageStrings.NOTIFICATION__INTERVENTION_DUPLICATION_FAILED);
 				}
 
 				try {
@@ -412,7 +410,8 @@ public class AllInterventionsTabComponentWithController extends
 		fileUploadComponentWithController.setListener(new UploadListener() {
 			@Override
 			public void fileUploadReceived(final File file) {
-				log.debug("File upload sucessful, starting import of intervention");
+				log.debug(
+						"File upload sucessful, starting import of intervention");
 
 				try {
 					final Intervention importedIntervention = getInterventionAdministrationManagerService()
@@ -424,22 +423,21 @@ public class AllInterventionsTabComponentWithController extends
 					}
 
 					// Adapt UI
-					interventionsBeanContainer.addItem(importedIntervention
-							.getId(), UIIntervention.class
-							.cast(importedIntervention.toUIModelObject()));
+					interventionsBeanContainer.addItem(
+							importedIntervention.getId(),
+							UIIntervention.class.cast(
+									importedIntervention.toUIModelObject()));
 					getAllInterventionsEditComponent()
-							.getAllInterventionsTable().select(
-									importedIntervention.getId());
+							.getAllInterventionsTable()
+							.select(importedIntervention.getId());
 					getAllInterventionsEditComponent()
 							.getAllInterventionsTable().sort();
 
-					getAdminUI()
-							.showInformationNotification(
-									AdminMessageStrings.NOTIFICATION__INTERVENTION_IMPORTED);
+					getAdminUI().showInformationNotification(
+							AdminMessageStrings.NOTIFICATION__INTERVENTION_IMPORTED);
 				} catch (final Exception e) {
-					getAdminUI()
-							.showWarningNotification(
-									AdminMessageStrings.NOTIFICATION__INTERVENTION_IMPORT_FAILED);
+					getAdminUI().showWarningNotification(
+							AdminMessageStrings.NOTIFICATION__INTERVENTION_IMPORT_FAILED);
 				} finally {
 					try {
 						file.delete();
@@ -459,8 +457,8 @@ public class AllInterventionsTabComponentWithController extends
 
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_NAME_FOR_INTERVENTION,
-				selectedUIIntervention
-						.getRelatedModelObject(Intervention.class).getName(),
+				selectedUIIntervention.getRelatedModelObject(Intervention.class)
+						.getName(),
 				null, new ShortStringEditComponent(),
 				new ExtendableButtonClickListener() {
 					@Override
@@ -481,13 +479,14 @@ public class AllInterventionsTabComponentWithController extends
 
 						// Adapt UI
 						getStringItemProperty(selectedUIInterventionBeanItem,
-								UIIntervention.INTERVENTION_NAME).setValue(
-								selectedUIIntervention.getRelatedModelObject(
-										Intervention.class).getName());
+								UIIntervention.INTERVENTION_NAME)
+										.setValue(selectedUIIntervention
+												.getRelatedModelObject(
+														Intervention.class)
+												.getName());
 
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__INTERVENTION_RENAMED);
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__INTERVENTION_RENAMED);
 						closeWindow();
 					}
 				}, null);
@@ -543,7 +542,8 @@ public class AllInterventionsTabComponentWithController extends
 			@Override
 			public void buttonClick(final ClickEvent event) {
 				try {
-					val selectedIntervention = selectedUIIntervention.getRelatedModelObject(Intervention.class);
+					val selectedIntervention = selectedUIIntervention
+							.getRelatedModelObject(Intervention.class);
 
 					// Delete intervention
 					getInterventionAdministrationManagerService()
@@ -556,9 +556,9 @@ public class AllInterventionsTabComponentWithController extends
 
 				// Adapt UI
 				getAllInterventionsEditComponent().getAllInterventionsTable()
-						.removeItem(
-								selectedUIIntervention.getRelatedModelObject(
-										Intervention.class).getId());
+						.removeItem(selectedUIIntervention
+								.getRelatedModelObject(Intervention.class)
+								.getId());
 				getAdminUI().showInformationNotification(
 						AdminMessageStrings.NOTIFICATION__INTERVENTION_DELETED);
 

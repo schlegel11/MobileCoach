@@ -65,8 +65,8 @@ import com.vaadin.ui.Upload.SucceededListener;
  */
 @SuppressWarnings("serial")
 @Log4j2
-public class MediaObjectIntegrationComponentWithController extends
-		MediaObjectIntegrationComponent {
+public class MediaObjectIntegrationComponentWithController
+		extends MediaObjectIntegrationComponent {
 
 	private MediaObject								mediaObject	= null;
 	private MediaObjectCreationOrDeleteionListener	listener;
@@ -105,8 +105,8 @@ public class MediaObjectIntegrationComponentWithController extends
 	 */
 	private void adjust() {
 		if (mediaObject == null) {
-			adjustEmbeddedMediaObject(null, null, new ThemeResource(
-					ThemeImageStrings.BLANK_MEDIA_OBJECT));
+			adjustEmbeddedMediaObject(null, null,
+					new ThemeResource(ThemeImageStrings.BLANK_MEDIA_OBJECT));
 
 			getUploadComponent().setEnabled(true);
 			getSetURLButton().setEnabled(true);
@@ -116,11 +116,8 @@ public class MediaObjectIntegrationComponentWithController extends
 			String externalReference;
 			if (mediaObject.getFileReference() != null) {
 				externalReference = ImplementationConstants.FILE_STREAMING_SERVLET_PATH
-						+ "/"
-						+ mediaObject.getId()
-						+ "/"
-						+ StringHelpers.cleanFilenameString(mediaObject
-								.getName());
+						+ "/" + mediaObject.getId() + "/" + StringHelpers
+								.cleanFilenameString(mediaObject.getName());
 				log.debug("Streaming file {} with file servlet",
 						externalReference);
 			} else {
@@ -128,8 +125,8 @@ public class MediaObjectIntegrationComponentWithController extends
 			}
 
 			adjustEmbeddedMediaObject(mediaObject.getType(),
-					mediaObject.getName(), new ExternalResource(
-							externalReference));
+					mediaObject.getName(),
+					new ExternalResource(externalReference));
 
 			getUploadComponent().setEnabled(false);
 			getSetURLButton().setEnabled(false);
@@ -159,9 +156,8 @@ public class MediaObjectIntegrationComponentWithController extends
 							FileUtils.writeStringToFile(file, htmlContent);
 
 							getSaveButton().setEnabled(true);
-							getAdminUI()
-									.showInformationNotification(
-											AdminMessageStrings.NOTIFICATION__FILE_CHANGES_SAVED);
+							getAdminUI().showInformationNotification(
+									AdminMessageStrings.NOTIFICATION__FILE_CHANGES_SAVED);
 
 							getHtmlLabel().setValue(htmlContent);
 						} catch (final IOException e) {
@@ -192,8 +188,8 @@ public class MediaObjectIntegrationComponentWithController extends
 						try {
 							// Change URL
 							val url = new URL(getStringValue());
-							createOrUpdateMediaObjectForURL(url
-									.toExternalForm());
+							createOrUpdateMediaObjectForURL(
+									url.toExternalForm());
 						} catch (final Exception e) {
 							log.debug("Given URL cannot be set: {}",
 									e.getMessage());
@@ -255,8 +251,8 @@ public class MediaObjectIntegrationComponentWithController extends
 
 			adjust();
 
-			getInterventionAdministrationManagerService().mediaObjectDelete(
-					mediaObjectToDelete);
+			getInterventionAdministrationManagerService()
+					.mediaObjectDelete(mediaObjectToDelete);
 		}
 
 		val newMediaObject = getInterventionAdministrationManagerService()
@@ -322,11 +318,11 @@ public class MediaObjectIntegrationComponentWithController extends
 				final String mimeType) {
 
 			String temporaryFileExtension = null;
-			val temporaryFileName = filename
-					.replaceAll("[^A-Za-z0-9_. ]+", "_");
+			val temporaryFileName = filename.replaceAll("[^A-Za-z0-9_. ]+",
+					"_");
 			if (filename.lastIndexOf(".") > -1) {
-				temporaryFileExtension = filename.substring(
-						filename.lastIndexOf(".")).toLowerCase();
+				temporaryFileExtension = filename
+						.substring(filename.lastIndexOf(".")).toLowerCase();
 			} else {
 				return null;
 			}
@@ -368,9 +364,8 @@ public class MediaObjectIntegrationComponentWithController extends
 
 			reset();
 
-			getAdminUI()
-					.showErrorNotification(
-							AdminMessageStrings.NOTIFICATION__UPLOAD_FAILED_OR_UNSUPPORTED_FILE_TYPE);
+			getAdminUI().showErrorNotification(
+					AdminMessageStrings.NOTIFICATION__UPLOAD_FAILED_OR_UNSUPPORTED_FILE_TYPE);
 		}
 
 		@Override

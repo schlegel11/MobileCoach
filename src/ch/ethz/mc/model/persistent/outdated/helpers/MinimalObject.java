@@ -36,5 +36,5 @@ public class MinimalObject {
 	@MongoId
 	@JsonProperty("_id")
 	@Getter
-	private ObjectId	id;
+	private ObjectId id;
 }

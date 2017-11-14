@@ -85,7 +85,8 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 	 * @see Servlet#init(ServletConfig)
 	 */
 	@Override
-	public void init(final ServletConfig servletConfig) throws ServletException {
+	public void init(final ServletConfig servletConfig)
+			throws ServletException {
 		super.init(servletConfig);
 		// Only start servlet if context is ready
 		if (!MC.getInstance().isReady()) {
@@ -110,20 +111,19 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 	 */
 	@Override
 	protected void doGet(final HttpServletRequest request,
-			final HttpServletResponse response) throws ServletException,
-			IOException {
+			final HttpServletResponse response)
+			throws ServletException, IOException {
 		log.debug("Intermediate survey or feedback servlet call");
 
 		request.setCharacterEncoding("UTF-8");
 		try {
 			// Determine request path
-			String path = request
-					.getRequestURI()
-					.substring(
-							request.getContextPath().length()
-									+ ImplementationConstants.SHORT_ID_SCREEN_SURVEY_AND_FEEDBACK_SERVLET_PATH
-											.length() + 1).replaceAll("^/", "")
-					.replaceAll("/$", "");
+			String path = request.getRequestURI()
+					.substring(request.getContextPath().length()
+							+ ImplementationConstants.SHORT_ID_SCREEN_SURVEY_AND_FEEDBACK_SERVLET_PATH
+									.length()
+							+ 1)
+					.replaceAll("^/", "").replaceAll("/$", "");
 
 			// Determine request type
 			val pathParts = path.split("/");
@@ -137,7 +137,8 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 			val shortIdLong = IntermediateSurveyAndFeedbackParticipantShortURL
 					.validateURLIdPartAndReturnShortId(pathParts[0]);
 			val shortId = surveyExecutionManagerService
-					.getIntermediateSurveyAndFeedbackParticipantShortURL(shortIdLong);
+					.getIntermediateSurveyAndFeedbackParticipantShortURL(
+							shortIdLong);
 			if (shortId == null
 					|| !shortId.validateSecretInGivenIdPart(pathParts[0])) {
 				throw new Exception("Invalid id");
@@ -189,8 +190,8 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 	 */
 	@Override
 	protected void doPost(final HttpServletRequest request,
-			final HttpServletResponse response) throws ServletException,
-			IOException {
+			final HttpServletResponse response)
+			throws ServletException, IOException {
 		log.debug("Redirecting POST request to GET request");
 		doGet(request, response);
 	}
@@ -238,10 +239,11 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 						: feedback.getTemplatePath());
 		final File requestedFile = new File(basicTemplateFolder, fileRequest);
 
-		if (!requestedFile.getAbsolutePath().startsWith(
-				basicTemplateFolder.getAbsolutePath())
+		if (!requestedFile.getAbsolutePath()
+				.startsWith(basicTemplateFolder.getAbsolutePath())
 				|| !requestedFile.exists()) {
-			log.warn("Requested a file outside the 'sandbox' of the template folder or a file that does not exist");
+			log.warn(
+					"Requested a file outside the 'sandbox' of the template folder or a file that does not exist");
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
@@ -249,8 +251,8 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 		log.debug("Requested file is '{}'", requestedFile.getAbsolutePath());
 
 		// Get the MIME type of the requested file
-		final String mimeType = getServletContext().getMimeType(
-				requestedFile.getAbsolutePath());
+		final String mimeType = getServletContext()
+				.getMimeType(requestedFile.getAbsolutePath());
 		if (mimeType == null) {
 			log.warn("Could not get MIME type of file '{}'",
 					requestedFile.getAbsolutePath());
@@ -267,17 +269,18 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 		response.setContentLength((int) requestedFile.length());
 
 		// Set name
-		response.setHeader("Content-Disposition", "inline; filename=\""
-				+ requestedFile.getName() + "\"");
+		response.setHeader("Content-Disposition",
+				"inline; filename=\"" + requestedFile.getName() + "\"");
 
 		// Allow caching
 		if (Constants.isCachingActive()) {
 			response.setHeader("Pragma", "cache");
 			response.setHeader("Cache-Control", "max-age="
 					+ ImplementationConstants.SURVEY_FILE_CACHE_IN_MINUTES);
-			response.setDateHeader("Expires", System.currentTimeMillis()
-					+ ImplementationConstants.SURVEY_FILE_CACHE_IN_MINUTES
-					* 1000);
+			response.setDateHeader("Expires",
+					System.currentTimeMillis()
+							+ ImplementationConstants.SURVEY_FILE_CACHE_IN_MINUTES
+									* 1000);
 		} else {
 			response.setHeader("Pragma", "No-cache");
 			response.setHeader("Cache-Control", "no-cache,no-store,max-age=0");
@@ -327,11 +330,10 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 		// different survey
 		if (session.getAttribute(GeneralSessionAttributeTypes.CURRENT_SESSION
 				.toString()) != null) {
-			val currentSurveyRegardingSession = (ObjectId) session
-					.getAttribute(GeneralSessionAttributeTypes.CURRENT_SESSION
-							.toString());
-			if ((surveyId != null && !surveyId
-					.equals(currentSurveyRegardingSession))
+			val currentSurveyRegardingSession = (ObjectId) session.getAttribute(
+					GeneralSessionAttributeTypes.CURRENT_SESSION.toString());
+			if ((surveyId != null
+					&& !surveyId.equals(currentSurveyRegardingSession))
 					|| (feedbackId != null && !feedbackId
 							.equals(currentSurveyRegardingSession))) {
 
@@ -341,8 +343,8 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 				while (sessionAttributeNames.hasMoreElements()) {
 					val attribute = (String) sessionAttributeNames
 							.nextElement();
-					if (attribute
-							.startsWith(ImplementationConstants.SURVEY_OR_FEEDBACK_SESSION_PREFIX)
+					if (attribute.startsWith(
+							ImplementationConstants.SURVEY_OR_FEEDBACK_SESSION_PREFIX)
 							&& !attribute
 									.equals(SurveySessionAttributeTypes.SURVEY_FROM_URL
 											.toString()))
@@ -356,8 +358,8 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 		if (session
 				.getAttribute(GeneralSessionAttributeTypes.CURRENT_PARTICIPANT
 						.toString()) != null
-				&& !((ObjectId) session
-						.getAttribute(GeneralSessionAttributeTypes.CURRENT_PARTICIPANT
+				&& !((ObjectId) session.getAttribute(
+						GeneralSessionAttributeTypes.CURRENT_PARTICIPANT
 								.toString())).equals(participantId)) {
 
 			// Session needs to be reset
@@ -365,8 +367,8 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 			val sessionAttributeNames = session.getAttributeNames();
 			while (sessionAttributeNames.hasMoreElements()) {
 				val attribute = (String) sessionAttributeNames.nextElement();
-				if (attribute
-						.startsWith(ImplementationConstants.SURVEY_OR_FEEDBACK_SESSION_PREFIX)) {
+				if (attribute.startsWith(
+						ImplementationConstants.SURVEY_OR_FEEDBACK_SESSION_PREFIX)) {
 					session.removeAttribute(attribute);
 				}
 			}
@@ -381,7 +383,8 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 		session.setAttribute(GeneralSessionAttributeTypes.VALIDATOR.toString(),
 				GeneralSessionAttributeValidatorTypes.PARTICIPANT_RELATED
 						.toString());
-		if (session.getAttribute(GeneralSessionAttributeTypes.TOKEN.toString()) == null) {
+		if (session.getAttribute(
+				GeneralSessionAttributeTypes.TOKEN.toString()) == null) {
 			session.setAttribute(GeneralSessionAttributeTypes.TOKEN.toString(),
 					StringHelpers.createRandomString(40));
 		}
@@ -404,8 +407,8 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 			// Get information from session
 			boolean accessGranted;
 			try {
-				accessGranted = (boolean) session
-						.getAttribute(SurveySessionAttributeTypes.SURVEY_PARTICIPANT_ACCESS_GRANTED
+				accessGranted = (boolean) session.getAttribute(
+						SurveySessionAttributeTypes.SURVEY_PARTICIPANT_ACCESS_GRANTED
 								.toString());
 			} catch (final Exception e) {
 				accessGranted = false;
@@ -416,8 +419,8 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 			int i = 0;
 			String resultValue = null;
 			do {
-				resultValue = request
-						.getParameter(ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLES
+				resultValue = request.getParameter(
+						ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLES
 								+ i);
 
 				if (resultValue != null) {
@@ -432,8 +435,8 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 			// Get consistency check value if available
 			String checkValue;
 			try {
-				checkValue = request
-						.getParameter(ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE);
+				checkValue = request.getParameter(
+						ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE);
 			} catch (final Exception e) {
 				checkValue = null;
 			}
@@ -450,10 +453,9 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 								accessGranted, false, surveyId, resultValues,
 								checkValue, session);
 
-				if (templateVariables == null
-						|| !templateVariables
-								.containsKey(GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER
-										.toVariable())) {
+				if (templateVariables == null || !templateVariables.containsKey(
+						GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER
+								.toVariable())) {
 					throw new NullPointerException();
 				}
 			} catch (final Exception e) {
@@ -461,7 +463,8 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 						"An error occurred while getting appropriate slide: {}",
 						e.getMessage());
 
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				response.sendError(
+						HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				return;
 			}
 		} else {
@@ -472,8 +475,8 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 			// Get navigation value if available
 			String navigationValue;
 			try {
-				navigationValue = request
-						.getParameter(ImplementationConstants.FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE);
+				navigationValue = request.getParameter(
+						ImplementationConstants.FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE);
 			} catch (final Exception e) {
 				navigationValue = null;
 			}
@@ -481,8 +484,8 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 			// Get consistency check value if available
 			String checkValue;
 			try {
-				checkValue = request
-						.getParameter(ImplementationConstants.FEEDBACK_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE);
+				checkValue = request.getParameter(
+						ImplementationConstants.FEEDBACK_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE);
 			} catch (final Exception e) {
 				checkValue = null;
 			}
@@ -497,10 +500,9 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 						.getAppropriateFeedbackSlide(participantId, feedbackId,
 								navigationValue, checkValue, session);
 
-				if (templateVariables == null
-						|| !templateVariables
-								.containsKey(GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER
-										.toVariable())) {
+				if (templateVariables == null || !templateVariables.containsKey(
+						GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER
+								.toVariable())) {
 					throw new NullPointerException();
 				}
 			} catch (final Exception e) {
@@ -508,7 +510,8 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 						"An error occurred while getting appropriate slide: {}",
 						e.getMessage());
 
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				response.sendError(
+						HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				return;
 			}
 		}
@@ -529,11 +532,8 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 		if (!baseURL.endsWith("/")) {
 			baseURL += "/";
 		}
-		final String normalizedBaseURL = request
-				.getRequestURL()
-				.toString()
-				.substring(
-						0,
+		final String normalizedBaseURL = request.getRequestURL().toString()
+				.substring(0,
 						request.getRequestURL().toString()
 								.indexOf(request.getRequestURI()))
 				+ request.getContextPath() + "/";
@@ -542,24 +542,22 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 				GeneralSlideTemplateFieldTypes.BASE_URL.toVariable(), baseURL);
 
 		// Token
-		templateVariables.put(
-				GeneralSlideTemplateFieldTypes.TOKEN.toVariable(), session
-						.getAttribute(GeneralSessionAttributeTypes.TOKEN
-								.toString()));
+		templateVariables.put(GeneralSlideTemplateFieldTypes.TOKEN.toVariable(),
+				session.getAttribute(
+						GeneralSessionAttributeTypes.TOKEN.toString()));
 
 		// REST API URL
-		templateVariables
-				.put(GeneralSlideTemplateFieldTypes.REST_API_URL.toVariable(),
-						normalizedBaseURL
-								+ ImplementationConstants.REST_API_PATH
-								+ "/"
-								+ ImplementationConstants.REST_SESSION_BASED_API_VERSION
-								+ "/");
+		templateVariables.put(
+				GeneralSlideTemplateFieldTypes.REST_API_URL.toVariable(),
+				normalizedBaseURL + ImplementationConstants.REST_API_PATH + "/"
+						+ ImplementationConstants.REST_SESSION_BASED_API_VERSION
+						+ "/");
 
 		// Uploaded media content URL
 		templateVariables.put(
 				GeneralSlideTemplateFieldTypes.UPLOADED_MEDIA_CONTENT_URL
-						.toVariable(), normalizedBaseURL
+						.toVariable(),
+				normalizedBaseURL
 						+ ImplementationConstants.FILE_STREAMING_SERVLET_PATH
 						+ "/");
 
@@ -567,25 +565,25 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 		if (surveyId != null) {
 			templateVariables.put(
 					SurveySlideTemplateFieldTypes.IS_SURVEY.toVariable(), true);
-			templateVariables.put(
-					SurveySlideTemplateFieldTypes.IS_INTERMEDIATE_SURVEY
+			templateVariables
+					.put(SurveySlideTemplateFieldTypes.IS_INTERMEDIATE_SURVEY
 							.toVariable(), true);
 		} else {
 			templateVariables.put(
 					FeedbackSlideTemplateFieldTypes.IS_FEEDBACK.toVariable(),
 					true);
 
-			if (session
-					.getAttribute(SurveySessionAttributeTypes.SURVEY_FROM_URL
-							.toString()) != null) {
-				templateVariables
-						.put(FeedbackSlideTemplateFieldTypes.FROM_SCREENING_SURVEY
-								.toVariable(),
-								session.getAttribute(SurveySessionAttributeTypes.SURVEY_FROM_URL
-										.toString()));
-			} else {
+			if (session.getAttribute(SurveySessionAttributeTypes.SURVEY_FROM_URL
+					.toString()) != null) {
 				templateVariables.put(
 						FeedbackSlideTemplateFieldTypes.FROM_SCREENING_SURVEY
+								.toVariable(),
+						session.getAttribute(
+								SurveySessionAttributeTypes.SURVEY_FROM_URL
+										.toString()));
+			} else {
+				templateVariables
+						.put(FeedbackSlideTemplateFieldTypes.FROM_SCREENING_SURVEY
 								.toVariable(), false);
 			}
 		}
@@ -608,15 +606,15 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 				&& templateVariables
 						.get(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_TYPE_URL
 								.toVariable()) == null) {
-			templateVariables
-					.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL
+			templateVariables.put(
+					GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL
 							.toVariable(),
-							normalizedBaseURL
-									+ ImplementationConstants.FILE_STREAMING_SERVLET_PATH
-									+ "/"
-									+ templateVariables
-											.get(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL
-													.toVariable()));
+					normalizedBaseURL
+							+ ImplementationConstants.FILE_STREAMING_SERVLET_PATH
+							+ "/"
+							+ templateVariables
+									.get(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL
+											.toVariable()));
 		}
 
 		// Create new Mustache template factory on non-production system
@@ -628,11 +626,10 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 		}
 
 		// Get template folder
-		final String templateFolder = (String) templateVariables
-				.get(GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER
-						.toVariable());
-		templateVariables.remove(GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER
-				.toVariable());
+		final String templateFolder = (String) templateVariables.get(
+				GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER.toVariable());
+		templateVariables.remove(
+				GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER.toVariable());
 
 		// Fill template
 		log.debug("Filling template in folder {}", templateFolder);
@@ -640,12 +637,13 @@ public class ShortURLIntermediateSurveyAndFeedbackServlet extends HttpServlet {
 		Mustache mustache;
 		synchronized (mustacheFactory) {
 			try {
-				mustache = mustacheFactory.compile(templateFolder
-						+ "/index.html");
+				mustache = mustacheFactory
+						.compile(templateFolder + "/index.html");
 			} catch (final Exception e) {
 				log.error("There seems to be a problem with the template: {}",
 						e.getMessage());
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				response.sendError(
+						HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				return;
 			}
 		}

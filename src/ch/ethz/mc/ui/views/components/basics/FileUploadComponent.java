@@ -65,8 +65,8 @@ public class FileUploadComponent extends AbstractClosableEditComponent {
 		setCompositionRoot(mainLayout);
 
 		// manually added
-		uploadComponent.setButtonCaption(Messages
-				.getAdminString(AdminMessageStrings.GENERAL__UPLOAD));
+		uploadComponent.setButtonCaption(
+				Messages.getAdminString(AdminMessageStrings.GENERAL__UPLOAD));
 		localize(cancelButton, AdminMessageStrings.GENERAL__CANCEL);
 
 		uploadComponent.setEnabled(true);
@@ -78,7 +78,8 @@ public class FileUploadComponent extends AbstractClosableEditComponent {
 	}
 
 	@Override
-	public void registerCancelButtonListener(final ClickListener clickListener) {
+	public void registerCancelButtonListener(
+			final ClickListener clickListener) {
 		// do nothing
 	}
 

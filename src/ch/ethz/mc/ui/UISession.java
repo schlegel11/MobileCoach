@@ -76,11 +76,11 @@ public class UISession implements Serializable {
 	}
 
 	public ObjectId getCurrentAuthorParticipantId() {
-		if (session
-				.getAttribute(ImplementationConstants.PARTICIPANT_SESSION_ATTRIBUTE) != null) {
+		if (session.getAttribute(
+				ImplementationConstants.PARTICIPANT_SESSION_ATTRIBUTE) != null) {
 			try {
-				val authorParticipant = (ObjectId) session
-						.getAttribute(ImplementationConstants.PARTICIPANT_SESSION_ATTRIBUTE);
+				val authorParticipant = (ObjectId) session.getAttribute(
+						ImplementationConstants.PARTICIPANT_SESSION_ATTRIBUTE);
 
 				return authorParticipant;
 			} catch (final Exception e) {
@@ -123,7 +123,8 @@ public class UISession implements Serializable {
 					ImplementationConstants.PARTICIPANT_SESSION_ATTRIBUTE_EXPECTED,
 					true);
 			session.setAttribute(
-					ImplementationConstants.PARTICIPANT_SESSION_ATTRIBUTE, null);
+					ImplementationConstants.PARTICIPANT_SESSION_ATTRIBUTE,
+					null);
 		}
 	}
 

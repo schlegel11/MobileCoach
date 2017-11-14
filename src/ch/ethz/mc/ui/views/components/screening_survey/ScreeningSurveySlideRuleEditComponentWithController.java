@@ -46,8 +46,8 @@ import com.vaadin.ui.Button.ClickEvent;
  */
 @SuppressWarnings("serial")
 @Log4j2
-public class ScreeningSurveySlideRuleEditComponentWithController extends
-		ScreeningSurveySlideRuleEditComponent {
+public class ScreeningSurveySlideRuleEditComponentWithController
+		extends ScreeningSurveySlideRuleEditComponent {
 
 	private final AbstractRuleEditComponentWithController	ruleEditComponent;
 
@@ -55,9 +55,9 @@ public class ScreeningSurveySlideRuleEditComponentWithController extends
 
 	private final ObjectId									screeningSurveyId;
 
-	private class JumpIfTrueFalseValueChangeListener implements
-			ValueChangeListener {
-		private boolean	isTrueCase	= false;
+	private class JumpIfTrueFalseValueChangeListener
+			implements ValueChangeListener {
+		private boolean isTrueCase = false;
 
 		public void setCase(final boolean isTrueCase) {
 			this.isTrueCase = isTrueCase;
@@ -68,12 +68,15 @@ public class ScreeningSurveySlideRuleEditComponentWithController extends
 			ObjectId selectedScreeningSurveySlide = null;
 			if (event.getProperty().getValue() != null) {
 				selectedScreeningSurveySlide = ((UIScreeningSurveySlide) event
-						.getProperty().getValue()).getRelatedModelObject(
-						ScreeningSurveySlide.class).getId();
+						.getProperty().getValue())
+								.getRelatedModelObject(
+										ScreeningSurveySlide.class)
+								.getId();
 			}
 
 			log.debug("Adjust case {} to screening survey slide {}",
-					isTrueCase ? "true" : "false", selectedScreeningSurveySlide);
+					isTrueCase ? "true" : "false",
+					selectedScreeningSurveySlide);
 			getSurveyAdministrationManagerService()
 					.screeningSurveySlideRuleSetJumpToSlide(
 							screeningSurveySlideRule, isTrueCase,
@@ -99,7 +102,8 @@ public class ScreeningSurveySlideRuleEditComponentWithController extends
 		 */
 		// Handle combo boxes
 		val allScreeningSurveySlidesOfScreeningSurvey = getSurveyAdministrationManagerService()
-				.getAllScreeningSurveySlidesOfScreeningSurvey(screeningSurveyId);
+				.getAllScreeningSurveySlidesOfScreeningSurvey(
+						screeningSurveyId);
 
 		val jumpIfTrueComboBox = getJumpIfTrueComboBox();
 		val jumpIfFalseComboBox = getJumpIfFalseComboBox();
@@ -107,27 +111,24 @@ public class ScreeningSurveySlideRuleEditComponentWithController extends
 		for (val screeningSurveySlide : allScreeningSurveySlidesOfScreeningSurvey) {
 			val uiScreeningSurveySlide = screeningSurveySlide.toUIModelObject();
 			// Add if not the same slide as the rule belongs to
-			if (!screeningSurveySlide.getId()
-					.equals(screeningSurveySlideRule
-							.getBelongingScreeningSurveySlide())) {
+			if (!screeningSurveySlide.getId().equals(screeningSurveySlideRule
+					.getBelongingScreeningSurveySlide())) {
 				jumpIfTrueComboBox.addItem(uiScreeningSurveySlide);
 				jumpIfFalseComboBox.addItem(uiScreeningSurveySlide);
-				if (screeningSurveySlide.getId().equals(
-						screeningSurveySlideRule
-								.getNextScreeningSurveySlideWhenTrue())) {
+				if (screeningSurveySlide.getId().equals(screeningSurveySlideRule
+						.getNextScreeningSurveySlideWhenTrue())) {
 					jumpIfTrueComboBox.select(uiScreeningSurveySlide);
 				}
-				if (screeningSurveySlide.getId().equals(
-						screeningSurveySlideRule
-								.getNextScreeningSurveySlideWhenFalse())) {
+				if (screeningSurveySlide.getId().equals(screeningSurveySlideRule
+						.getNextScreeningSurveySlideWhenFalse())) {
 					jumpIfFalseComboBox.select(uiScreeningSurveySlide);
 				}
 			}
 		}
 
 		// Handle checkbox
-		getInvalidWhenTrueCheckbox().addValueChangeListener(
-				new ValueChangeListener() {
+		getInvalidWhenTrueCheckbox()
+				.addValueChangeListener(new ValueChangeListener() {
 
 					@Override
 					public void valueChange(final ValueChangeEvent event) {
@@ -143,10 +144,10 @@ public class ScreeningSurveySlideRuleEditComponentWithController extends
 
 		// Handle buttons
 		val buttonClickListener = new ButtonClickListener();
-		getStoreVariableTextFieldComponent().getButton().addClickListener(
-				buttonClickListener);
-		getStoreValueTextFieldComponent().getButton().addClickListener(
-				buttonClickListener);
+		getStoreVariableTextFieldComponent().getButton()
+				.addClickListener(buttonClickListener);
+		getStoreValueTextFieldComponent().getButton()
+				.addClickListener(buttonClickListener);
 
 		// Handle combo boxes
 		val jumpIfTrueValueChangeListener = new JumpIfTrueFalseValueChangeListener();
@@ -165,13 +166,12 @@ public class ScreeningSurveySlideRuleEditComponentWithController extends
 		// Adjust variable text fields
 		getStoreVariableTextFieldComponent().setValue(
 				screeningSurveySlideRule.getStoreValueToVariableWithName());
-		getStoreValueTextFieldComponent().setValue(
-				screeningSurveySlideRule.getValueToStoreToVariable());
+		getStoreValueTextFieldComponent()
+				.setValue(screeningSurveySlideRule.getValueToStoreToVariable());
 
 		// Adjust checkbox
-		getInvalidWhenTrueCheckbox().setValue(
-				screeningSurveySlideRule
-						.isShowSameSlideBecauseValueNotValidWhenTrue());
+		getInvalidWhenTrueCheckbox().setValue(screeningSurveySlideRule
+				.isShowSameSlideBecauseValueNotValidWhenTrue());
 
 		// Adjust jump to slide combo boxes
 		if (screeningSurveySlideRule
@@ -208,8 +208,7 @@ public class ScreeningSurveySlideRuleEditComponentWithController extends
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_VARIABLE,
 				screeningSurveySlideRule.getStoreValueToVariableWithName(),
-				allPossibleVariables,
-				new ShortPlaceholderStringEditComponent(),
+				allPossibleVariables, new ShortPlaceholderStringEditComponent(),
 				new ExtendableButtonClickListener() {
 
 					@Override

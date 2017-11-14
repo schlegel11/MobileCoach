@@ -69,7 +69,8 @@ public abstract class AbstractModule extends AbstractClosableEditComponent {
 	}
 
 	@Override
-	public void registerCancelButtonListener(final ClickListener clickListener) {
+	public void registerCancelButtonListener(
+			final ClickListener clickListener) {
 		// not required
 	}
 

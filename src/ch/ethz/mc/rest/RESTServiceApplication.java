@@ -50,7 +50,7 @@ import ch.ethz.mc.rest.services.v02.VotingServiceV02;
 @Log4j2
 public class RESTServiceApplication extends Application {
 
-	private final Set<Object>	services;
+	private final Set<Object> services;
 
 	public RESTServiceApplication() {
 		log.info("Starting REST application...");

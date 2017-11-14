@@ -75,8 +75,10 @@ public class UIMonitoringMessage extends UIModelObject {
 		return new String[] {
 				localize(AdminMessageStrings.UI_COLUMNS__MESSAGE_TEXT),
 				localize(AdminMessageStrings.UI_COLUMNS__COMMAND_MESSAGE),
-				localize(AdminMessageStrings.UI_COLUMNS__CONTAINS_MEDIA_CONTENT),
-				localize(AdminMessageStrings.UI_COLUMNS__CONTAINS_LINK_TO_INTERMEDIATE_SURVEY),
+				localize(
+						AdminMessageStrings.UI_COLUMNS__CONTAINS_MEDIA_CONTENT),
+				localize(
+						AdminMessageStrings.UI_COLUMNS__CONTAINS_LINK_TO_INTERMEDIATE_SURVEY),
 				localize(AdminMessageStrings.UI_COLUMNS__ANSWER_TYPE),
 				localize(AdminMessageStrings.UI_COLUMNS__RESULT_VARIABLE),
 				localize(AdminMessageStrings.UI_COLUMNS__CONTAINS_RULES) };

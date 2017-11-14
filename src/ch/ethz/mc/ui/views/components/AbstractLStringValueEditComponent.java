@@ -32,8 +32,8 @@ import ch.ethz.mc.model.persistent.subelements.LString;
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
-public abstract class AbstractLStringValueEditComponent extends
-		AbstractConfirmationComponent {
+public abstract class AbstractLStringValueEditComponent
+		extends AbstractConfirmationComponent {
 
 	/**
 	 * Set the current {@link LString} value

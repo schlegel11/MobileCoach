@@ -22,10 +22,12 @@ package ch.ethz.mc.services.internal;
  */
 import java.util.ArrayList;
 
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-
 import org.jongo.Jongo;
+
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoCredential;
+import com.mongodb.ServerAddress;
 
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.AbstractModelObjectAccessService;
@@ -36,11 +38,8 @@ import ch.ethz.mc.model.persistent.Author;
 import ch.ethz.mc.model.persistent.consistency.DataModelConfiguration;
 import ch.ethz.mc.tools.BCrypt;
 import ch.ethz.mc.tools.DataModelUpdateManager;
-
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
-import com.mongodb.MongoCredential;
-import com.mongodb.ServerAddress;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class DatabaseManagerService extends AbstractModelObjectAccessService {
@@ -49,7 +48,8 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 	private MongoClient						mongoClient;
 	private Jongo							jongo;
 
-	// TODO This warning will be removed when Jongo will support the new MongoDB
+	// TODO LONGTERM This warning will be removed when Jongo will support the
+	// new MongoDB
 	// API
 	@SuppressWarnings("deprecation")
 	private DatabaseManagerService(final int expectedVersion) throws Exception {
@@ -62,15 +62,17 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 					Constants.getDatabasePassword().toCharArray()));
 			val mongoDBOptions = MongoClientOptions.builder()
 					.socketKeepAlive(true).build();
-			mongoClient = new MongoClient(new ServerAddress(
-					Constants.getDatabaseHost(), Constants.getDatabasePort()),
+			mongoClient = new MongoClient(
+					new ServerAddress(Constants.getDatabaseHost(),
+							Constants.getDatabasePort()),
 					mongoCredentials, mongoDBOptions);
 
 			// Checking connection
 			log.debug("Existing collections in database {}: ",
 					Constants.getDatabaseName());
-			for (val collection : mongoClient.getDatabase(
-					Constants.getDatabaseName()).listCollectionNames()) {
+			for (val collection : mongoClient
+					.getDatabase(Constants.getDatabaseName())
+					.listCollectionNames()) {
 				log.debug(" {}", collection);
 			}
 
@@ -94,8 +96,8 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 		} catch (final Exception e) {
 			log.error("Error at creating MongoDB connection: {}",
 					e.getMessage());
-			throw new Exception("Error at creating MongoDB connection: "
-					+ e.getMessage());
+			throw new Exception(
+					"Error at creating MongoDB connection: " + e.getMessage());
 		}
 
 		// Give Jongo object to model object
@@ -106,11 +108,13 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 			updateDataToVersionIfNecessary(expectedVersion);
 		} catch (final Exception e) {
 			log.error("Error at updating database: {}", e.getMessage());
-			throw new Exception("Error at updating database: " + e.getMessage());
+			throw new Exception(
+					"Error at updating database: " + e.getMessage());
 		}
 
 		// Checking for admin account
-		val authors = findModelObjects(Author.class, Queries.AUTHOR__ADMIN_TRUE);
+		val authors = findModelObjects(Author.class,
+				Queries.AUTHOR__ADMIN_TRUE);
 		if (!authors.iterator().hasNext()) {
 			// Create new admin account if none exists
 			log.warn(
@@ -144,8 +148,8 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 		try {
 			val configurationCollection = jongo
 					.getCollection(Constants.DATA_MODEL_CONFIGURATION);
-			configuration = configurationCollection.findOne().as(
-					DataModelConfiguration.class);
+			configuration = configurationCollection.findOne()
+					.as(DataModelConfiguration.class);
 		} catch (final Exception e) {
 			log.error("Error at retrieving data model configuration: {}",
 					e.getMessage());
@@ -159,10 +163,9 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 				log.error(
 						"The database is on a very old version ({})! Use MC 1.6.0 to update to a newer state of the database before proceeding with this version.",
 						currentVersion);
-				throw new Exception(
-						"The database is on a very old version ("
-								+ currentVersion
-								+ ")! Use MC 1.6.0 to update to a newer state of the database before proceeding with this version.");
+				throw new Exception("The database is on a very old version ("
+						+ currentVersion
+						+ ")! Use MC 1.6.0 to update to a newer state of the database before proceeding with this version.");
 			}
 		} else {
 			log.info("Database is new - no data model version");
@@ -172,7 +175,8 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 		DataModelUpdateManager.updateDataFromVersionToVersion(currentVersion,
 				versionToBeReached, jongo);
 
-		log.info("Database is now on data model version {}", versionToBeReached);
+		log.info("Database is now on data model version {}",
+				versionToBeReached);
 	}
 
 	public static DatabaseManagerService start(final int expectedVersion)

@@ -79,7 +79,8 @@ public class FileStorageManagerService {
 			throw new FileNotFoundException();
 		}
 
-		log.info("Using media cache folder {}", Constants.getMediaCacheFolder());
+		log.info("Using media cache folder {}",
+				Constants.getMediaCacheFolder());
 		mediaCacheFolder = new File(Constants.getMediaCacheFolder());
 		mediaCacheFolder.mkdirs();
 		if (!mediaCacheFolder.exists()) {
@@ -99,17 +100,19 @@ public class FileStorageManagerService {
 		HashSet<String> requiredFileReferences = new HashSet<String>();
 
 		log.info("Checking media objects and storage folder for consistency:");
-		val mediaObjects = databaseManagerService.findModelObjects(
-				MediaObject.class, Queries.ALL);
+		val mediaObjects = databaseManagerService
+				.findModelObjects(MediaObject.class, Queries.ALL);
 
 		for (val mediaObject : mediaObjects) {
 			if (mediaObject.getFileReference() != null) {
 				final String fileReference = mediaObject.getFileReference();
 				requiredFileReferences.add(fileReference.split("/")[0]);
-				if (getFileByReference(fileReference, FILE_STORES.STORAGE) == null) {
+				if (getFileByReference(fileReference,
+						FILE_STORES.STORAGE) == null) {
 					log.warn(
 							"Media object {} contains missing file reference {}",
-							mediaObject.getId(), mediaObject.getFileReference());
+							mediaObject.getId(),
+							mediaObject.getFileReference());
 				}
 			}
 		}
@@ -119,7 +122,8 @@ public class FileStorageManagerService {
 					&& file.getName().startsWith(
 							ImplementationConstants.FILE_STORAGE_PREFIX)
 					&& !requiredFileReferences.contains(file.getName())) {
-				log.debug("Deleting unused resource {}", file.getAbsolutePath());
+				log.debug("Deleting unused resource {}",
+						file.getAbsolutePath());
 				for (val nestedFile : file.listFiles()) {
 					nestedFile.delete();
 				}
@@ -133,17 +137,17 @@ public class FileStorageManagerService {
 		requiredFileReferences = new HashSet<String>();
 
 		log.info("Checking variables and media upload folder for consistency:");
-		val mediaUploadVariables = databaseManagerService
-				.findModelObjects(
-						ParticipantVariableWithValue.class,
-						Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_DESCRIBES_MEDIA_UPLOAD,
-						true);
+		val mediaUploadVariables = databaseManagerService.findModelObjects(
+				ParticipantVariableWithValue.class,
+				Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_DESCRIBES_MEDIA_UPLOAD,
+				true);
 
 		for (val mediaUploadVariable : mediaUploadVariables) {
 			if (mediaUploadVariable.getValue() != null) {
 				final String fileReference = mediaUploadVariable.getValue();
 				requiredFileReferences.add(fileReference.split("-")[0]);
-				if (getFileByReference(fileReference, FILE_STORES.MEDIA_UPLOAD) == null) {
+				if (getFileByReference(fileReference,
+						FILE_STORES.MEDIA_UPLOAD) == null) {
 					log.warn(
 							"Media upload variable {} contains missing file reference {}",
 							mediaUploadVariable.getId(),
@@ -157,7 +161,8 @@ public class FileStorageManagerService {
 					&& file.getName().startsWith(
 							ImplementationConstants.FILE_STORAGE_PREFIX)
 					&& !requiredFileReferences.contains(file.getName())) {
-				log.debug("Deleting unused resource {}", file.getAbsolutePath());
+				log.debug("Deleting unused resource {}",
+						file.getAbsolutePath());
 				for (val nestedFile : file.listFiles()) {
 					nestedFile.delete();
 				}
@@ -169,9 +174,8 @@ public class FileStorageManagerService {
 
 		log.info("Clearing media cache...");
 		for (val file : mediaCacheFolder.listFiles()) {
-			if (file.isFile()
-					&& file.getName().startsWith(
-							ImplementationConstants.FILE_STORAGE_PREFIX)) {
+			if (file.isFile() && file.getName()
+					.startsWith(ImplementationConstants.FILE_STORAGE_PREFIX)) {
 				log.debug("Deleting cache file {}", file.getAbsolutePath());
 				file.delete();
 			}
@@ -232,7 +236,8 @@ public class FileStorageManagerService {
 		log.debug("Checking for file with reference {}", fileReference);
 
 		if (fileReferenceParts.length != 2) {
-			log.warn("Preventing security lack by not accepting different file names as regularly expected");
+			log.warn(
+					"Preventing security lack by not accepting different file names as regularly expected");
 			return null;
 		}
 
@@ -307,8 +312,8 @@ public class FileStorageManagerService {
 
 		final String fileReference = folderName + "/" + fileName;
 
-		log.debug("File copied to {} and created reference {}",
-				destinationFile, fileReference);
+		log.debug("File copied to {} and created reference {}", destinationFile,
+				fileReference);
 
 		return fileReference;
 	}

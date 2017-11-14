@@ -31,5 +31,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class UploadOK {
 	@Getter
-	private final String	mediaReference;
+	private final String mediaReference;
 }

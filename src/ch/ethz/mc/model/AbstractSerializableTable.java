@@ -40,8 +40,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public class AbstractSerializableTable {
 	@JsonIgnore
-	private final SimpleDateFormat	longDateFormat	= new SimpleDateFormat(
-															"yyyy-MM-dd HH:mm:ss");
+	private final SimpleDateFormat longDateFormat = new SimpleDateFormat(
+			"yyyy-MM-dd HH:mm:ss");
 
 	/**
 	 * Creates a HTML table string of the current {@link ModelObject}
@@ -93,8 +93,9 @@ public class AbstractSerializableTable {
 			tableString = "";
 		}
 
-		return ImplementationConstants.REPORT_TABLE_ROW.replace("#",
-				"style=\"" + additionalStyle + "\"").replace("|", tableString);
+		return ImplementationConstants.REPORT_TABLE_ROW
+				.replace("#", "style=\"" + additionalStyle + "\"")
+				.replace("|", tableString);
 	}
 
 	/**
@@ -109,8 +110,8 @@ public class AbstractSerializableTable {
 			tableString = "";
 		}
 
-		return ImplementationConstants.REPORT_TABLE_HEADER_FIELD.replace("#",
-				"").replace("|", tableString);
+		return ImplementationConstants.REPORT_TABLE_HEADER_FIELD
+				.replace("#", "").replace("|", tableString);
 	}
 
 	/**
@@ -121,13 +122,15 @@ public class AbstractSerializableTable {
 	 * @return
 	 */
 	@JsonIgnore
-	protected String wrapHeader(String tableString, final String additionalStyle) {
+	protected String wrapHeader(String tableString,
+			final String additionalStyle) {
 		if (tableString == null) {
 			tableString = "";
 		}
 
-		return ImplementationConstants.REPORT_TABLE_HEADER_FIELD.replace("#",
-				"style=\"" + additionalStyle + "\"").replace("|", tableString);
+		return ImplementationConstants.REPORT_TABLE_HEADER_FIELD
+				.replace("#", "style=\"" + additionalStyle + "\"")
+				.replace("|", tableString);
 	}
 
 	/**
@@ -142,8 +145,8 @@ public class AbstractSerializableTable {
 			tableString = "";
 		}
 
-		return ImplementationConstants.REPORT_TABLE_NORMAL_FIELD.replace("#",
-				"").replace("|", tableString);
+		return ImplementationConstants.REPORT_TABLE_NORMAL_FIELD
+				.replace("#", "").replace("|", tableString);
 	}
 
 	/**
@@ -154,13 +157,15 @@ public class AbstractSerializableTable {
 	 * @return
 	 */
 	@JsonIgnore
-	protected String wrapField(String tableString, final String additionalStyle) {
+	protected String wrapField(String tableString,
+			final String additionalStyle) {
 		if (tableString == null) {
 			tableString = "";
 		}
 
-		return ImplementationConstants.REPORT_TABLE_NORMAL_FIELD.replace("#",
-				"style=\"" + additionalStyle + "\"").replace("|", tableString);
+		return ImplementationConstants.REPORT_TABLE_NORMAL_FIELD
+				.replace("#", "style=\"" + additionalStyle + "\"")
+				.replace("|", tableString);
 	}
 
 	/**
@@ -199,7 +204,8 @@ public class AbstractSerializableTable {
 	/**
 	 * Formats the given String as a date
 	 *
-	 * @param new Date(created)
+	 * @param new
+	 *            Date(created)
 	 * @return
 	 */
 	@JsonIgnore
@@ -250,7 +256,7 @@ public class AbstractSerializableTable {
 	 */
 	@JsonIgnore
 	protected String createLink(final String reference, final String name) {
-		return "<a href=\"" + reference + "\" target=\"_blank\">"
-				+ escape(name) + "</a>";
+		return "<a href=\"" + reference + "\" target=\"_blank\">" + escape(name)
+				+ "</a>";
 	}
 }

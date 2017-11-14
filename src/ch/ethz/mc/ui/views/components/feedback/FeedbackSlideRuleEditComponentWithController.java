@@ -32,10 +32,10 @@ import ch.ethz.mc.ui.views.components.basics.AbstractRuleEditComponentWithContro
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
-public class FeedbackSlideRuleEditComponentWithController extends
-		FeedbackSlideRuleEditComponent {
+public class FeedbackSlideRuleEditComponentWithController
+		extends FeedbackSlideRuleEditComponent {
 
-	private final AbstractRuleEditComponentWithController	ruleEditComponent;
+	private final AbstractRuleEditComponentWithController ruleEditComponent;
 
 	public FeedbackSlideRuleEditComponentWithController(
 			final FeedbackSlideRule feedbackSlideRule,

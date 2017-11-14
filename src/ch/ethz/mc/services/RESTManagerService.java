@@ -144,8 +144,8 @@ public class RESTManagerService {
 	public boolean checkVariableForServiceWritingRights(
 			final ObjectId participantId, final String variable) {
 		return variablesManagerService.checkVariableForServiceWriting(
-				participantId, ImplementationConstants.VARIABLE_PREFIX
-						+ variable.trim());
+				participantId,
+				ImplementationConstants.VARIABLE_PREFIX + variable.trim());
 	}
 
 	/**
@@ -199,16 +199,16 @@ public class RESTManagerService {
 
 		try {
 			val collecionOfExtendedVariables = getVariableValueOfParticipantsOfGroupOrIntervention(
-					participantId,
-					variable,
-					sameGroup ? InterventionVariableWithValuePrivacyTypes.SHARED_WITH_GROUP
+					participantId, variable,
+					sameGroup
+							? InterventionVariableWithValuePrivacyTypes.SHARED_WITH_GROUP
 							: InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION,
 					isService);
 
 			log.debug(
 					"Returing variables with values {} of participants from the same {} as participant {}",
-					collecionOfExtendedVariables, sameGroup ? "group"
-							: "intervention", participantId);
+					collecionOfExtendedVariables,
+					sameGroup ? "group" : "intervention", participantId);
 
 			return collecionOfExtendedVariables;
 		} catch (final Exception e) {
@@ -241,7 +241,8 @@ public class RESTManagerService {
 		log.debug(
 				"Try to read variable array {} of participants from {} filtered by {}={}",
 				variable, group == null ? "intervention " + interventionId
-						: "group " + group, filterVariable, filterValue);
+						: "group " + group,
+				filterVariable, filterValue);
 
 		try {
 			val collecionOfExtendedVariables = getVariableValueForDashboardOfParticipantsOfGroupOrIntervention(
@@ -251,14 +252,15 @@ public class RESTManagerService {
 			log.debug(
 					"Returing variables with values {} of participants from {}",
 					collecionOfExtendedVariables,
-					group == null ? "intervention " + interventionId : "group "
-							+ group);
+					group == null ? "intervention " + interventionId
+							: "group " + group);
 
 			return collecionOfExtendedVariables;
 		} catch (final Exception e) {
 			log.debug("Could not read variable {} of participants from {}: {}",
 					variable, group == null ? "intervention " + interventionId
-							: "group " + group, e.getMessage());
+							: "group " + group,
+					e.getMessage());
 			throw e;
 		}
 	}
@@ -284,16 +286,16 @@ public class RESTManagerService {
 
 		try {
 			val collectionOfExtendendListVariables = getVariableValueOfParticipantsOfGroupOrIntervention(
-					participantId,
-					variables,
-					sameGroup ? InterventionVariableWithValuePrivacyTypes.SHARED_WITH_GROUP
+					participantId, variables,
+					sameGroup
+							? InterventionVariableWithValuePrivacyTypes.SHARED_WITH_GROUP
 							: InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION,
 					isService);
 
 			log.debug(
 					"Returing variables with values {} of participants from the same {} as participant {}",
-					collectionOfExtendendListVariables, sameGroup ? "group"
-							: "intervention", participantId);
+					collectionOfExtendendListVariables,
+					sameGroup ? "group" : "intervention", participantId);
 			return collectionOfExtendendListVariables;
 		} catch (final Exception e) {
 			log.debug(
@@ -337,8 +339,8 @@ public class RESTManagerService {
 				for (val resultVariable : resultVariables.getVariables()) {
 					i++;
 					if (resultVariable.isOwnValue()) {
-						variableAverage.setValueOfParticipant(Double
-								.parseDouble(resultVariable.getValue()));
+						variableAverage.setValueOfParticipant(
+								Double.parseDouble(resultVariable.getValue()));
 					}
 
 					average += Double.parseDouble(resultVariable.getValue());
@@ -409,7 +411,8 @@ public class RESTManagerService {
 			log.debug(
 					"Could not calculate average of variable {} of participants from {}: {}",
 					variable, group == null ? "intervention " + interventionId
-							: "group " + group, e.getMessage());
+							: "group " + group,
+					e.getMessage());
 			throw e;
 		}
 	}
@@ -484,8 +487,8 @@ public class RESTManagerService {
 	 * @param creditName
 	 * @throws ExternallyWriteProtectedVariableException
 	 */
-	public void writeCredit(final ObjectId participantId,
-			final String variable, final String creditName)
+	public void writeCredit(final ObjectId participantId, final String variable,
+			final String creditName)
 			throws ExternallyWriteProtectedVariableException {
 		log.debug("Try to write credit for {} on {} for participant {}",
 				creditName, variable, participantId);
@@ -569,13 +572,14 @@ public class RESTManagerService {
 		}
 
 		// Check based on type
-		if (externalParticipantId
-				.startsWith(ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM)) {
+		if (externalParticipantId.startsWith(
+				ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM)) {
 			if (deepstreamCommunicationService == null
 					|| !deepstreamCommunicationService
-							.checkIfParticipantIsConnected(externalParticipantId
-									.substring(ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
-											.length()))) {
+							.checkIfParticipantIsConnected(
+									externalParticipantId.substring(
+											ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+													.length()))) {
 				log.debug(
 						"Participant with external participant id {} is currently not connected using deepstream",
 						externalParticipantId);
@@ -621,13 +625,11 @@ public class RESTManagerService {
 			}
 		} else if (role.equals(deepstreamParticipantRole)) {
 			// Check participant access
-			val dialogOption = databaseManagerService
-					.findOneModelObject(
-							DialogOption.class,
-							Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
-							DialogOptionTypes.EXTERNAL_ID,
-							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
-									+ user);
+			val dialogOption = databaseManagerService.findOneModelObject(
+					DialogOption.class, Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
+					DialogOptionTypes.EXTERNAL_ID,
+					ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+							+ user);
 			if (dialogOption == null) {
 				log.debug(
 						"Participant with deepstream id {} not authorized for deepstream access: Dialog option not found",
@@ -652,8 +654,8 @@ public class RESTManagerService {
 						user);
 				return false;
 			}
-			if (!intervention.getDeepstreamPassword().equals(
-					interventionPassword)) {
+			if (!intervention.getDeepstreamPassword()
+					.equals(interventionPassword)) {
 				log.debug(
 						"Participant with deepstream id {} not authorized for deepstream access: Password does not match deepstream intervention password",
 						user);
@@ -661,7 +663,8 @@ public class RESTManagerService {
 			}
 
 			if (deepstreamCommunicationService != null
-					&& deepstreamCommunicationService.checkSecret(user, secret)) {
+					&& deepstreamCommunicationService.checkSecret(user,
+							secret)) {
 				log.debug(
 						"Participant with deepstream id {} authorized for deepstream access",
 						user);
@@ -674,13 +677,11 @@ public class RESTManagerService {
 			}
 		} else if (role.equals(deepstreamSuperviserRole)) {
 			// Check supervisor access
-			val dialogOption = databaseManagerService
-					.findOneModelObject(
-							DialogOption.class,
-							Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
-							DialogOptionTypes.SUPERVISOR_EXTERNAL_ID,
-							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
-									+ user);
+			val dialogOption = databaseManagerService.findOneModelObject(
+					DialogOption.class, Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
+					DialogOptionTypes.SUPERVISOR_EXTERNAL_ID,
+					ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+							+ user);
 			if (dialogOption == null) {
 				log.debug(
 						"Supervisor with deepstream id {} not authorized for deepstream access: Dialog option not found",
@@ -705,8 +706,8 @@ public class RESTManagerService {
 						user);
 				return false;
 			}
-			if (!intervention.getDeepstreamPassword().equals(
-					interventionPassword)) {
+			if (!intervention.getDeepstreamPassword()
+					.equals(interventionPassword)) {
 				log.debug(
 						"Supervisor with deepstream id {} not authorized for deepstream access: Password does not match deepstream intervention password",
 						user);
@@ -714,7 +715,8 @@ public class RESTManagerService {
 			}
 
 			if (deepstreamCommunicationService != null
-					&& deepstreamCommunicationService.checkSecret(user, secret)) {
+					&& deepstreamCommunicationService.checkSecret(user,
+							secret)) {
 				log.debug(
 						"Supervisor with deepstream id {} authorized for deepstream access",
 						user);
@@ -827,8 +829,8 @@ public class RESTManagerService {
 			final InterventionVariableWithValuePrivacyTypes requestPrivacyType,
 			final boolean isService)
 			throws ExternallyReadProtectedVariableException {
-		val participant = databaseManagerService.getModelObjectById(
-				Participant.class, participantId);
+		val participant = databaseManagerService
+				.getModelObjectById(Participant.class, participantId);
 
 		if (participant == null) {
 			throw variablesManagerService.new ExternallyReadProtectedVariableException(
@@ -851,13 +853,12 @@ public class RESTManagerService {
 			case PRIVATE:
 				resultVariables.add(new ExtendedVariable(variable,
 						getVariableValueOfParticipant(participantId, variable,
-								isService), participant.getId().toHexString(),
-						true, null));
+								isService),
+						participant.getId().toHexString(), true, null));
 				break;
 			case SHARED_WITH_GROUP:
 				Iterable<Participant> relevantParticipants = databaseManagerService
-						.findModelObjects(
-								Participant.class,
+						.findModelObjects(Participant.class,
 								Queries.PARTICIPANT__BY_INTERVENTION_AND_GROUP_AND_MONITORING_ACTIVE_TRUE,
 								interventionId, group);
 
@@ -879,10 +880,11 @@ public class RESTManagerService {
 												ImplementationConstants.VARIABLE_PREFIX
 														+ variable,
 												InterventionVariableWithValuePrivacyTypes.SHARED_WITH_GROUP,
-												isService), relevantParticipant
-										.getId().toHexString(),
-								participantId.equals(relevantParticipant
-										.getId()), null);
+												isService),
+								relevantParticipant.getId().toHexString(),
+								participantId.equals(
+										relevantParticipant.getId()),
+								null);
 
 						resultVariables.add(variableWithValue);
 					}
@@ -890,11 +892,10 @@ public class RESTManagerService {
 				break;
 			case SHARED_WITH_INTERVENTION:
 			case SHARED_WITH_INTERVENTION_AND_DASHBOARD:
-				relevantParticipants = databaseManagerService
-						.findModelObjects(
-								Participant.class,
-								Queries.PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE,
-								interventionId);
+				relevantParticipants = databaseManagerService.findModelObjects(
+						Participant.class,
+						Queries.PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE,
+						interventionId);
 
 				for (val relevantParticipant : relevantParticipants) {
 					val dialogStatus = databaseManagerService
@@ -914,10 +915,11 @@ public class RESTManagerService {
 												ImplementationConstants.VARIABLE_PREFIX
 														+ variable,
 												InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION,
-												isService), relevantParticipant
-										.getId().toHexString(),
-								participantId.equals(relevantParticipant
-										.getId()), null);
+												isService),
+								relevantParticipant.getId().toHexString(),
+								participantId.equals(
+										relevantParticipant.getId()),
+								null);
 
 						resultVariables.add(variableWithValue);
 					}
@@ -948,8 +950,8 @@ public class RESTManagerService {
 			final String group, final String filterVariable,
 			final String filterValue, final boolean isService)
 			throws ExternallyReadProtectedVariableException {
-		val intervention = databaseManagerService.getModelObjectById(
-				Intervention.class, interventionId);
+		val intervention = databaseManagerService
+				.getModelObjectById(Intervention.class, interventionId);
 
 		if (intervention == null) {
 			throw variablesManagerService.new ExternallyReadProtectedVariableException(
@@ -962,8 +964,7 @@ public class RESTManagerService {
 
 		if (group != null) {
 			final Iterable<Participant> relevantParticipants = databaseManagerService
-					.findModelObjects(
-							Participant.class,
+					.findModelObjects(Participant.class,
 							Queries.PARTICIPANT__BY_INTERVENTION_AND_GROUP_AND_MONITORING_ACTIVE_TRUE,
 							interventionId, group);
 
@@ -996,21 +997,22 @@ public class RESTManagerService {
 
 					final ExtendedVariable variableWithValue = new ExtendedVariable(
 							variable,
-							variablesManagerService.externallyReadVariableValueForParticipant(
-									relevantParticipant.getId(),
-									ImplementationConstants.VARIABLE_PREFIX
-											+ variable,
-									InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION_AND_DASHBOARD,
-									isService), relevantParticipant.getId()
-									.toHexString(), null, null);
+							variablesManagerService
+									.externallyReadVariableValueForParticipant(
+											relevantParticipant.getId(),
+											ImplementationConstants.VARIABLE_PREFIX
+													+ variable,
+											InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION_AND_DASHBOARD,
+											isService),
+							relevantParticipant.getId().toHexString(), null,
+							null);
 
 					resultVariables.add(variableWithValue);
 				}
 			}
 		} else {
 			final Iterable<Participant> relevantParticipants = databaseManagerService
-					.findModelObjects(
-							Participant.class,
+					.findModelObjects(Participant.class,
 							Queries.PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE,
 							interventionId);
 
@@ -1043,13 +1045,15 @@ public class RESTManagerService {
 
 					final ExtendedVariable variableWithValue = new ExtendedVariable(
 							variable,
-							variablesManagerService.externallyReadVariableValueForParticipant(
-									relevantParticipant.getId(),
-									ImplementationConstants.VARIABLE_PREFIX
-											+ variable,
-									InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION_AND_DASHBOARD,
-									isService), relevantParticipant.getId()
-									.toHexString(), null, null);
+							variablesManagerService
+									.externallyReadVariableValueForParticipant(
+											relevantParticipant.getId(),
+											ImplementationConstants.VARIABLE_PREFIX
+													+ variable,
+											InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION_AND_DASHBOARD,
+											isService),
+							relevantParticipant.getId().toHexString(), null,
+							null);
 
 					resultVariables.add(variableWithValue);
 				}
@@ -1080,8 +1084,8 @@ public class RESTManagerService {
 			final InterventionVariableWithValuePrivacyTypes requestPrivacyType,
 			final boolean isService)
 			throws ExternallyReadProtectedVariableException {
-		val participant = databaseManagerService.getModelObjectById(
-				Participant.class, participantId);
+		val participant = databaseManagerService
+				.getModelObjectById(Participant.class, participantId);
 
 		if (participant == null) {
 			throw variablesManagerService.new ExternallyReadProtectedVariableException(
@@ -1106,19 +1110,17 @@ public class RESTManagerService {
 						participant.getId().toHexString(), true);
 
 				for (val variable : variables) {
-					extendedListVariable
-							.getVariables()
+					extendedListVariable.getVariables()
 							.add(new Variable(variable,
-									getVariableValueOfParticipant(
-											participantId, variable, isService)));
+									getVariableValueOfParticipant(participantId,
+											variable, isService)));
 				}
 
 				resultVariables.add(extendedListVariable);
 				break;
 			case SHARED_WITH_GROUP:
 				Iterable<Participant> relevantParticipants = databaseManagerService
-						.findModelObjects(
-								Participant.class,
+						.findModelObjects(Participant.class,
 								Queries.PARTICIPANT__BY_INTERVENTION_AND_GROUP_AND_MONITORING_ACTIVE_TRUE,
 								interventionId, group);
 
@@ -1134,14 +1136,12 @@ public class RESTManagerService {
 									.isDataForMonitoringParticipationAvailable()) {
 						extendedListVariable = new ExtendedListVariable(
 								relevantParticipant.getId().toHexString(),
-								participantId.equals(relevantParticipant
-										.getId()));
+								participantId
+										.equals(relevantParticipant.getId()));
 
 						for (val variable : variables) {
-							extendedListVariable
-									.getVariables()
-									.add(new Variable(
-											variable,
+							extendedListVariable.getVariables()
+									.add(new Variable(variable,
 											variablesManagerService
 													.externallyReadVariableValueForParticipant(
 															relevantParticipant
@@ -1157,11 +1157,10 @@ public class RESTManagerService {
 				break;
 			case SHARED_WITH_INTERVENTION:
 			case SHARED_WITH_INTERVENTION_AND_DASHBOARD:
-				relevantParticipants = databaseManagerService
-						.findModelObjects(
-								Participant.class,
-								Queries.PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE,
-								interventionId);
+				relevantParticipants = databaseManagerService.findModelObjects(
+						Participant.class,
+						Queries.PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE,
+						interventionId);
 
 				for (val relevantParticipant : relevantParticipants) {
 					val dialogStatus = databaseManagerService
@@ -1175,14 +1174,12 @@ public class RESTManagerService {
 									.isDataForMonitoringParticipationAvailable()) {
 						extendedListVariable = new ExtendedListVariable(
 								relevantParticipant.getId().toHexString(),
-								participantId.equals(relevantParticipant
-										.getId()));
+								participantId
+										.equals(relevantParticipant.getId()));
 
 						for (val variable : variables) {
-							extendedListVariable
-									.getVariables()
-									.add(new Variable(
-											variable,
+							extendedListVariable.getVariables()
+									.add(new Variable(variable,
 											variablesManagerService
 													.externallyReadVariableValueForParticipant(
 															relevantParticipant
@@ -1220,8 +1217,9 @@ public class RESTManagerService {
 			final boolean describesMediaUpload, final boolean isService)
 			throws ExternallyWriteProtectedVariableException {
 		variablesManagerService.externallyWriteVariableForParticipant(
-				participantId, ImplementationConstants.VARIABLE_PREFIX
-						+ variable, value, describesMediaUpload, isService);
+				participantId,
+				ImplementationConstants.VARIABLE_PREFIX + variable, value,
+				describesMediaUpload, isService);
 	}
 
 	/**
@@ -1235,15 +1233,12 @@ public class RESTManagerService {
 	 */
 	@Synchronized
 	private void writeVotingFromParticipantForParticipant(
-			final ObjectId participantId,
-			final ObjectId receivingParticipantId, final String variable,
-			final boolean addVote)
+			final ObjectId participantId, final ObjectId receivingParticipantId,
+			final String variable, final boolean addVote)
 			throws ExternallyWriteProtectedVariableException {
-		variablesManagerService
-				.serviceWriteVotingFromParticipantForParticipant(participantId,
-						receivingParticipantId,
-						ImplementationConstants.VARIABLE_PREFIX + variable,
-						addVote);
+		variablesManagerService.serviceWriteVotingFromParticipantForParticipant(
+				participantId, receivingParticipantId,
+				ImplementationConstants.VARIABLE_PREFIX + variable, addVote);
 	}
 
 	/**

@@ -63,7 +63,8 @@ public class UIIntervention extends UIModelObject {
 				localize(AdminMessageStrings.UI_COLUMNS__INTERVENTION),
 				localize(AdminMessageStrings.UI_COLUMNS__INTERVENTION_STATUS),
 				localize(AdminMessageStrings.UI_COLUMNS__MONITORING_STATUS),
-				localize(AdminMessageStrings.UI_COLUMNS__ASSIGNED_SENDER_IDENTIFICATION), };
+				localize(
+						AdminMessageStrings.UI_COLUMNS__ASSIGNED_SENDER_IDENTIFICATION), };
 	}
 
 	public static String getSortColumn() {

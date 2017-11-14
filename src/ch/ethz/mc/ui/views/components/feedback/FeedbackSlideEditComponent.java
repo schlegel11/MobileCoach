@@ -112,22 +112,17 @@ public class FeedbackSlideEditComponent extends AbstractClosableEditComponent {
 		// manually added
 		integratedMediaObjectLabel.setContentMode(ContentMode.HTML);
 
-		localize(
-				titleWithPlaceholdersLabel,
+		localize(titleWithPlaceholdersLabel,
 				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__TITLE_WITH_PLACEHOLDERS);
 		localize(commentLabel,
 				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__COMMENT);
-		localize(
-				optionalLayoutAttributeLabel,
+		localize(optionalLayoutAttributeLabel,
 				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__OPTIONAL_LAYOUT_ATTRIBUTE_WITH_PLACEHOLDERS);
-		localize(
-				feedbackTextWithPlaceholdersLabel,
+		localize(feedbackTextWithPlaceholdersLabel,
 				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__FEEDBACK_TEXT);
-		localize(
-				integratedMediaObjectLabel,
+		localize(integratedMediaObjectLabel,
 				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__INTEGRATED_MEDIA_OBJECT);
-		localize(
-				informationLabel,
+		localize(informationLabel,
 				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__FEEDBACK_INFORMATION_TEXT);
 
 		localize(newRuleButton, AdminMessageStrings.GENERAL__NEW);
@@ -159,7 +154,8 @@ public class FeedbackSlideEditComponent extends AbstractClosableEditComponent {
 	}
 
 	@Override
-	public void registerCancelButtonListener(final ClickListener clickListener) {
+	public void registerCancelButtonListener(
+			final ClickListener clickListener) {
 		// not required
 	}
 
@@ -191,8 +187,8 @@ public class FeedbackSlideEditComponent extends AbstractClosableEditComponent {
 		informationLabel.setImmediate(false);
 		informationLabel.setWidth("-1px");
 		informationLabel.setHeight("-1px");
-		informationLabel
-				.setValue("!!! Slide will only be shown if the following rules are ALL TRUE:");
+		informationLabel.setValue(
+				"!!! Slide will only be shown if the following rules are ALL TRUE:");
 		mainLayout.addComponent(informationLabel);
 
 		// rulesTable
@@ -238,8 +234,8 @@ public class FeedbackSlideEditComponent extends AbstractClosableEditComponent {
 		titleWithPlaceholdersTextFieldComponent.setImmediate(false);
 		titleWithPlaceholdersTextFieldComponent.setWidth("350px");
 		titleWithPlaceholdersTextFieldComponent.setHeight("-1px");
-		switchesLayoutGroup.addComponent(
-				titleWithPlaceholdersTextFieldComponent, 1, 0);
+		switchesLayoutGroup
+				.addComponent(titleWithPlaceholdersTextFieldComponent, 1, 0);
 		switchesLayoutGroup.setComponentAlignment(
 				titleWithPlaceholdersTextFieldComponent, new Alignment(6));
 
@@ -248,8 +244,8 @@ public class FeedbackSlideEditComponent extends AbstractClosableEditComponent {
 		optionalLayoutAttributeLabel.setImmediate(false);
 		optionalLayoutAttributeLabel.setWidth("-1px");
 		optionalLayoutAttributeLabel.setHeight("-1px");
-		optionalLayoutAttributeLabel
-				.setValue("!!! Optional layout attribute (with placeholders, e.g. CSS classes):");
+		optionalLayoutAttributeLabel.setValue(
+				"!!! Optional layout attribute (with placeholders, e.g. CSS classes):");
 		switchesLayoutGroup.addComponent(optionalLayoutAttributeLabel, 0, 2);
 
 		// commentTextFieldComponent
@@ -274,8 +270,8 @@ public class FeedbackSlideEditComponent extends AbstractClosableEditComponent {
 		optionalLayoutAttributeTextFieldComponent.setImmediate(false);
 		optionalLayoutAttributeTextFieldComponent.setWidth("350px");
 		optionalLayoutAttributeTextFieldComponent.setHeight("-1px");
-		switchesLayoutGroup.addComponent(
-				optionalLayoutAttributeTextFieldComponent, 1, 2);
+		switchesLayoutGroup
+				.addComponent(optionalLayoutAttributeTextFieldComponent, 1, 2);
 		switchesLayoutGroup.setComponentAlignment(
 				optionalLayoutAttributeTextFieldComponent, new Alignment(6));
 
@@ -365,8 +361,8 @@ public class FeedbackSlideEditComponent extends AbstractClosableEditComponent {
 		// moveUpRuleButton
 		moveUpRuleButton = new Button();
 		moveUpRuleButton.setCaption("!!! Move Up");
-		moveUpRuleButton.setIcon(new ThemeResource(
-				"img/arrow-up-icon-small.png"));
+		moveUpRuleButton
+				.setIcon(new ThemeResource("img/arrow-up-icon-small.png"));
 		moveUpRuleButton.setImmediate(true);
 		moveUpRuleButton.setWidth("120px");
 		moveUpRuleButton.setHeight("-1px");
@@ -375,8 +371,8 @@ public class FeedbackSlideEditComponent extends AbstractClosableEditComponent {
 		// moveDownRuleButton
 		moveDownRuleButton = new Button();
 		moveDownRuleButton.setCaption("!!! Move Down");
-		moveDownRuleButton.setIcon(new ThemeResource(
-				"img/arrow-down-icon-small.png"));
+		moveDownRuleButton
+				.setIcon(new ThemeResource("img/arrow-down-icon-small.png"));
 		moveDownRuleButton.setImmediate(true);
 		moveDownRuleButton.setWidth("120px");
 		moveDownRuleButton.setHeight("-1px");

@@ -165,12 +165,12 @@ public class ExchangeModelObject {
 		ModelObject modelObject;
 
 		// Set object id to null
-		final String contentToConvert = content.replaceFirst(
-				"\"_id\":\"[^\"]+\"", "\"_id\":null");
+		final String contentToConvert = content
+				.replaceFirst("\"_id\":\"[^\"]+\"", "\"_id\":null");
 
 		try {
-			modelObject = (ModelObject) objectMapper.readValue(
-					contentToConvert, Class.forName(packageAndClazz));
+			modelObject = (ModelObject) objectMapper.readValue(contentToConvert,
+					Class.forName(packageAndClazz));
 		} catch (final Exception e) {
 			log.warn("Could not create model object from JSON: {} (JSON: {})",
 					e.getMessage(), contentToConvert);

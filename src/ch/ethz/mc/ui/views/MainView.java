@@ -47,7 +47,8 @@ import com.vaadin.ui.Component;
  */
 @SuppressWarnings("serial")
 @Log4j2
-public class MainView extends AbstractView implements View, LayoutClickListener {
+public class MainView extends AbstractView
+		implements View, LayoutClickListener {
 	private MainViewComponent	mainViewComponent;
 
 	private MenuButtonComponent	currentMenuButton;
@@ -61,8 +62,8 @@ public class MainView extends AbstractView implements View, LayoutClickListener 
 		// Create view and listeners
 		mainViewComponent = new MainViewComponent();
 
-		mainViewComponent.getLogoutButton().addClickListener(
-				new LogoutButtonListener());
+		mainViewComponent.getLogoutButton()
+				.addClickListener(new LogoutButtonListener());
 		mainViewComponent.getMenuButtonsLayout().addLayoutClickListener(this);
 
 		// Adjust view of non-admins
@@ -125,7 +126,8 @@ public class MainView extends AbstractView implements View, LayoutClickListener 
 					switchToAccessControlView();
 				}
 				break componentLoop;
-			} else if (clickedComponent == mainViewComponent.getAccountButton()) {
+			} else if (clickedComponent == mainViewComponent
+					.getAccountButton()) {
 				log.debug("ACCOUNT button clicked");
 				if (clickedComponent != currentMenuButton) {
 					currentMenuButton.removeStyleName("active");
@@ -188,8 +190,8 @@ public class MainView extends AbstractView implements View, LayoutClickListener 
 		removeAllTabs();
 
 		addTab(mainViewComponent.getContentAccordion(),
-				new AccountTabComponentWithController(getUISession()
-						.getCurrentAuthorId()),
+				new AccountTabComponentWithController(
+						getUISession().getCurrentAuthorId()),
 				AdminMessageStrings.MAIN_VIEW__ACCOUNT_TAB,
 				ThemeImageStrings.ACCOUNT_ICON);
 	}

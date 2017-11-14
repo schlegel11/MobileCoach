@@ -69,8 +69,8 @@ import com.vaadin.ui.Tree.TreeTargetDetails;
  */
 @SuppressWarnings("serial")
 @Log4j2
-public abstract class AbstractMonitoringRulesEditComponentWithController extends
-		AbstractMonitoringRulesEditComponent {
+public abstract class AbstractMonitoringRulesEditComponentWithController
+		extends AbstractMonitoringRulesEditComponent {
 
 	private Intervention			intervention;
 
@@ -88,23 +88,23 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 	public static final String		ICON							= "icon";
 
 	private final ThemeResource		RULE_ICON						= new ThemeResource(
-																			ThemeImageStrings.RULE_ICON_SMALL);
+			ThemeImageStrings.RULE_ICON_SMALL);
 	private final ThemeResource		SOLVING_RULE_ICON				= new ThemeResource(
-																			ThemeImageStrings.OK_ICON_SMALL);
+			ThemeImageStrings.OK_ICON_SMALL);
 	private final ThemeResource		DAILY_RULE_ICON					= new ThemeResource(
-																			ThemeImageStrings.CALENDAR_ICON_SMALL);
+			ThemeImageStrings.CALENDAR_ICON_SMALL);
 	private final ThemeResource		PERIODIC_RULE_ICON				= new ThemeResource(
-																			ThemeImageStrings.WATCH_ICON_SMALL);
+			ThemeImageStrings.WATCH_ICON_SMALL);
 	private final ThemeResource		UNEXPECTED_MESSAGE_RULE_ICON	= new ThemeResource(
-																			ThemeImageStrings.BUBBLE_ICON_SMALL);
+			ThemeImageStrings.BUBBLE_ICON_SMALL);
 	private final ThemeResource		INTENTION_RULE_ICON				= new ThemeResource(
-																			ThemeImageStrings.SIGNS_ICON_SMALL);
+			ThemeImageStrings.SIGNS_ICON_SMALL);
 	private final ThemeResource		MESSAGE_RULE_ICON				= new ThemeResource(
-																			ThemeImageStrings.MESSAGE_ICON_SMALL);
+			ThemeImageStrings.MESSAGE_ICON_SMALL);
 	private final ThemeResource		SUPERVISOR_MESSAGE_RULE_ICON	= new ThemeResource(
-																			ThemeImageStrings.SUPERVISOR_ICON_SMALL);
+			ThemeImageStrings.SUPERVISOR_ICON_SMALL);
 	private final ThemeResource		STOP_RULE_ICON					= new ThemeResource(
-																			ThemeImageStrings.STOP_ICON_SMALL);
+			ThemeImageStrings.STOP_ICON_SMALL);
 
 	private HierarchicalContainer	container;
 
@@ -177,8 +177,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 		rulesTree.setItemIconPropertyId(ICON);
 
 		rulesTree.setDragMode(TreeDragMode.NODE);
-		rulesTree.setDropHandler(new TreeSortDropHandler(rulesTree, container,
-				this));
+		rulesTree.setDropHandler(
+				new TreeSortDropHandler(rulesTree, container, this));
 
 		recursiveAddItemsToTree(null, monitoringRuleIdCache);
 
@@ -194,7 +194,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 							relatedMonitoringRuleId, isGotAnswerRule);
 		}
 		for (final AbstractMonitoringRule abstractMonitoringRule : allMonitoringRules) {
-			if (!monitoringRuleIdCache.contains(abstractMonitoringRule.getId())) {
+			if (!monitoringRuleIdCache
+					.contains(abstractMonitoringRule.getId())) {
 				log.warn("Deleting unlinked rule with id {}",
 						abstractMonitoringRule.getId());
 				if (isMonitoringRule) {
@@ -312,31 +313,28 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 			String sendMessage;
 			if (selectedMonitoringRule.isSendMessageIfTrue()) {
 				val recipient = selectedMonitoringRule
-						.isSendMessageToSupervisor() ? Messages
-						.getAdminString(AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__TO_SUPERVISOR)
-						: Messages
-								.getAdminString(AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__TO_PARTICIPANT);
-				if (selectedMonitoringRule.getRelatedMonitoringMessageGroup() == null) {
-					sendMessage = Messages
-							.getAdminString(
-									AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_MESSAGE_BUT_NO_GROUP_SELECTED,
-									recipient);
+						.isSendMessageToSupervisor()
+								? Messages.getAdminString(
+										AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__TO_SUPERVISOR)
+								: Messages.getAdminString(
+										AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__TO_PARTICIPANT);
+				if (selectedMonitoringRule
+						.getRelatedMonitoringMessageGroup() == null) {
+					sendMessage = Messages.getAdminString(
+							AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_MESSAGE_BUT_NO_GROUP_SELECTED,
+							recipient);
 				} else {
 					final MonitoringMessageGroup monitoringMessageGroup = getInterventionAdministrationManagerService()
-							.getMonitoringMessageGroup(
-									selectedMonitoringRule
-											.getRelatedMonitoringMessageGroup());
+							.getMonitoringMessageGroup(selectedMonitoringRule
+									.getRelatedMonitoringMessageGroup());
 					if (monitoringMessageGroup == null) {
-						sendMessage = Messages
-								.getAdminString(
-										AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_MESSAGE_FROM_ALREADY_DELETED_GROUP,
-										recipient);
+						sendMessage = Messages.getAdminString(
+								AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_MESSAGE_FROM_ALREADY_DELETED_GROUP,
+								recipient);
 					} else {
-						sendMessage = Messages
-								.getAdminString(
-										AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_MESSAGE_FROM_GROUP,
-										recipient,
-										monitoringMessageGroup.getName());
+						sendMessage = Messages.getAdminString(
+								AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_MESSAGE_FROM_GROUP,
+								recipient, monitoringMessageGroup.getName());
 					}
 				}
 			} else {
@@ -344,15 +342,15 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 					val selectedMonitoringRuleCasted = (MonitoringRule) selectedMonitoringRule;
 					if (selectedMonitoringRuleCasted
 							.isStopInterventionWhenTrue()) {
-						sendMessage = Messages
-								.getAdminString(AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_NO_MESSAGE_BUT_FINISH_INTERVENTION);
+						sendMessage = Messages.getAdminString(
+								AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_NO_MESSAGE_BUT_FINISH_INTERVENTION);
 					} else {
-						sendMessage = Messages
-								.getAdminString(AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_NO_MESSAGE);
+						sendMessage = Messages.getAdminString(
+								AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_NO_MESSAGE);
 					}
 				} else {
-					sendMessage = Messages
-							.getAdminString(AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_NO_MESSAGE);
+					sendMessage = Messages.getAdminString(
+							AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_NO_MESSAGE);
 				}
 			}
 
@@ -381,11 +379,14 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 				icon = STOP_RULE_ICON;
 			} else if (monitoringRule.getType() == MonitoringRuleTypes.DAILY) {
 				icon = DAILY_RULE_ICON;
-			} else if (monitoringRule.getType() == MonitoringRuleTypes.PERIODIC) {
+			} else if (monitoringRule
+					.getType() == MonitoringRuleTypes.PERIODIC) {
 				icon = PERIODIC_RULE_ICON;
-			} else if (monitoringRule.getType() == MonitoringRuleTypes.UNEXPECTED_MESSAGE) {
+			} else if (monitoringRule
+					.getType() == MonitoringRuleTypes.UNEXPECTED_MESSAGE) {
 				icon = UNEXPECTED_MESSAGE_RULE_ICON;
-			} else if (monitoringRule.getType() == MonitoringRuleTypes.USER_INTENTION) {
+			} else if (monitoringRule
+					.getType() == MonitoringRuleTypes.USER_INTENTION) {
 				icon = INTENTION_RULE_ICON;
 			} else if (monitoringRule.isMarkCaseAsSolvedWhenTrue()) {
 				icon = SOLVING_RULE_ICON;
@@ -411,16 +412,15 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 		final AbstractMonitoringRule newAbstractMonitoringRule;
 		if (isMonitoringRule) {
 			newAbstractMonitoringRule = getInterventionAdministrationManagerService()
-					.monitoringRuleCreate(
-							intervention.getId(),
+					.monitoringRuleCreate(intervention.getId(),
 							selectedMonitoringRuleId == null ? null
 									: selectedMonitoringRuleId);
 		} else {
 			newAbstractMonitoringRule = getInterventionAdministrationManagerService()
-					.monitoringReplyRuleCreate(
-							relatedMonitoringRuleId,
+					.monitoringReplyRuleCreate(relatedMonitoringRuleId,
 							selectedMonitoringRuleId == null ? null
-									: selectedMonitoringRuleId, isGotAnswerRule);
+									: selectedMonitoringRuleId,
+							isGotAnswerRule);
 		}
 
 		AbstractClosableEditComponent componentWithController;
@@ -442,9 +442,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 								selectedMonitoringRuleId);
 						rulesTree.select(newAbstractMonitoringRule.getId());
 
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__MONITORING_RULE_CREATED);
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__MONITORING_RULE_CREATED);
 
 						adjust();
 
@@ -475,7 +474,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 						AbstractMonitoringRule selectedAbstractMonitoringRule;
 						if (isMonitoringRule) {
 							selectedAbstractMonitoringRule = getInterventionAdministrationManagerService()
-									.getMonitoringRule(selectedMonitoringRuleId);
+									.getMonitoringRule(
+											selectedMonitoringRuleId);
 						} else {
 							selectedAbstractMonitoringRule = getInterventionAdministrationManagerService()
 									.getMonitoringReplyRule(
@@ -485,15 +485,15 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 						final String name = StringHelpers.createRuleName(
 								selectedAbstractMonitoringRule, true);
 
-						final ThemeResource icon = getAppropriateIcon(selectedAbstractMonitoringRule);
+						final ThemeResource icon = getAppropriateIcon(
+								selectedAbstractMonitoringRule);
 
 						val item = container.getItem(selectedMonitoringRuleId);
 						item.getItemProperty(NAME).setValue(name);
 						item.getItemProperty(ICON).setValue(icon);
 
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__MONITORING_RULE_UPDATED);
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__MONITORING_RULE_UPDATED);
 
 						adjust();
 
@@ -516,8 +516,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 					.getMonitoringReplyRule(monitoringRuleId);
 		}
 
-		final String name = StringHelpers.createRuleName(
-				abstractMonitoringRule, true);
+		final String name = StringHelpers.createRuleName(abstractMonitoringRule,
+				true);
 
 		final ThemeResource icon = getAppropriateIcon(abstractMonitoringRule);
 
@@ -567,7 +567,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 	 * @param abstractMonitoringRuleId
 	 * @return
 	 */
-	private boolean checkIfDragAllowed(final ObjectId abstractMonitoringRuleId) {
+	private boolean checkIfDragAllowed(
+			final ObjectId abstractMonitoringRuleId) {
 		if (isMonitoringRule) {
 			val monitoringRule = getInterventionAdministrationManagerService()
 					.getMonitoringRule(abstractMonitoringRuleId);
@@ -655,9 +656,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 				// Adapt UI
 				container.removeItemRecursively(selectedMonitoringRuleId);
 
-				getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__MONITORING_RULE_DELETED);
+				getAdminUI().showInformationNotification(
+						AdminMessageStrings.NOTIFICATION__MONITORING_RULE_DELETED);
 
 				rulesTree.select(null);
 
@@ -681,8 +681,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController extends
 		 * @param tree
 		 * @param container
 		 */
-		public TreeSortDropHandler(
-				final Tree tree,
+		public TreeSortDropHandler(final Tree tree,
 				final HierarchicalContainer container,
 				final AbstractMonitoringRulesEditComponentWithController component) {
 			this.tree = tree;

@@ -51,8 +51,8 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class LocalizedPlaceholderStringEditComponent extends
-		AbstractLStringValueEditComponent {
+public class LocalizedPlaceholderStringEditComponent
+		extends AbstractLStringValueEditComponent {
 
 	/*- VaadinEditorProperties={"grid":"RegularGrid,20","showGrid":true,"snapToGrid":true,"snapToObject":true,"movingGuides":false,"snappingDistance":10} */
 
@@ -122,7 +122,8 @@ public class LocalizedPlaceholderStringEditComponent extends
 	}
 
 	@Override
-	public void registerCancelButtonListener(final ClickListener clickListener) {
+	public void registerCancelButtonListener(
+			final ClickListener clickListener) {
 		cancelButton.addClickListener(clickListener);
 	}
 
@@ -209,8 +210,8 @@ public class LocalizedPlaceholderStringEditComponent extends
 		variableListSelect.setHeight("100.0%");
 		editAreaLayout.addComponent(variableListSelect);
 		editAreaLayout.setExpandRatio(variableListSelect, 0.4f);
-		editAreaLayout.setComponentAlignment(variableListSelect, new Alignment(
-				48));
+		editAreaLayout.setComponentAlignment(variableListSelect,
+				new Alignment(48));
 
 		return editAreaLayout;
 	}

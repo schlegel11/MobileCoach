@@ -45,7 +45,8 @@ public class UIModule extends UIModelObject {
 	}
 
 	public static String[] getColumnHeaders() {
-		return new String[] { localize(AdminMessageStrings.MODULES__MODULE_NAME) };
+		return new String[] {
+				localize(AdminMessageStrings.MODULES__MODULE_NAME) };
 	}
 
 	public static String getSortColumn() {

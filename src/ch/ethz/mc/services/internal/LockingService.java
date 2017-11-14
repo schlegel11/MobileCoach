@@ -95,7 +95,8 @@ public class LockingService {
 			final ObjectId objectId) {
 		for (final ObjectId objectIdToCompare : lockedInterventionsByUISession
 				.values()) {
-			if (objectIdToCompare != null && objectId.equals(objectIdToCompare)) {
+			if (objectIdToCompare != null
+					&& objectId.equals(objectIdToCompare)) {
 				log.debug(
 						"Can't lock intervention {} because it's already locked by {}",
 						objectId, uiSession.getCurrentAuthorId());

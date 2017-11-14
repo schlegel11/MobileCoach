@@ -42,7 +42,8 @@ public class UIMonitoringMessageWithGroup extends UIModelObject {
 	}
 
 	public static String[] getColumnHeaders() {
-		return new String[] { localize(AdminMessageStrings.UI_COLUMNS__MESSAGE_TEXT) };
+		return new String[] {
+				localize(AdminMessageStrings.UI_COLUMNS__MESSAGE_TEXT) };
 	}
 
 	public static String getSortColumn() {

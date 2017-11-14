@@ -23,11 +23,6 @@ package ch.ethz.mc.services.internal;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.model.Queries;
@@ -38,11 +33,16 @@ import ch.ethz.mc.model.persistent.MonitoringReplyRule;
 import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.concepts.AbstractMonitoringRule;
+import ch.ethz.mc.model.persistent.types.AnswerTypes;
 import ch.ethz.mc.model.persistent.types.MonitoringRuleTypes;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
 import ch.ethz.mc.tools.RuleEvaluator;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.tools.VariableStringReplacer;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Helps to recursively resolve tree-based rule structures of
@@ -100,6 +100,14 @@ public class RecursiveAbstractMonitoringRulesResolver {
 
 		@Getter
 		@Setter
+		private AnswerTypes				answerTypeToSend								= null;
+
+		@Getter
+		@Setter
+		private String					answerOptionsToSend								= null;
+
+		@Getter
+		@Setter
 		private MonitoringMessage		monitoringMessageToSend							= null;
 
 		@Getter
@@ -111,12 +119,12 @@ public class RecursiveAbstractMonitoringRulesResolver {
 		private boolean					monitoringRuleExpectsAnswer						= false;
 	}
 
-	public class MessageSendingResultForMonitoringRule extends
-			AbstractMessageSendingResultForAbstractMontoringRule {
+	public class MessageSendingResultForMonitoringRule
+			extends AbstractMessageSendingResultForAbstractMontoringRule {
 	}
 
-	public class MessageSendingResultForMonitoringReplyRule extends
-			AbstractMessageSendingResultForAbstractMontoringRule {
+	public class MessageSendingResultForMonitoringReplyRule
+			extends AbstractMessageSendingResultForAbstractMontoringRule {
 	}
 
 	/*
@@ -193,8 +201,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 			// Determine message to send by checking message groups for already
 			// sent messages
 			val monitoringMessageGroup = databaseManagerService
-					.getModelObjectById(
-							MonitoringMessageGroup.class,
+					.getModelObjectById(MonitoringMessageGroup.class,
 							resultToCreateMessageFor
 									.getAbstractMonitoringRuleRequiredToPrepareMessage()
 									.getRelatedMonitoringMessageGroup());
@@ -210,9 +217,8 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				continue;
 			}
 
-			resultToCreateMessageFor
-					.setMonitoringRuleExpectsAnswer(monitoringMessageGroup
-							.isMessagesExpectAnswer());
+			resultToCreateMessageFor.setMonitoringRuleExpectsAnswer(
+					monitoringMessageGroup.isMessagesExpectAnswer());
 
 			val determinedMonitoringMessageToSend = interventionExecutionManagerService
 					.determineMessageOfMessageGroupToSend(participant,
@@ -233,20 +239,38 @@ public class RecursiveAbstractMonitoringRulesResolver {
 			}
 
 			// Remember message that will be sent
-			resultToCreateMessageFor
-					.setMonitoringMessageToSend(determinedMonitoringMessageToSend);
+			resultToCreateMessageFor.setMonitoringMessageToSend(
+					determinedMonitoringMessageToSend);
 
-			// Determine message text to send
+			// Determine message text and answer type with options to send
 			val variablesWithValues = variablesManagerService
 					.getAllVariablesWithValuesOfParticipantAndSystem(
 							participant, determinedMonitoringMessageToSend);
 			val messageTextToSend = VariableStringReplacer
-					.findVariablesAndReplaceWithTextValues(participant
-							.getLanguage(), determinedMonitoringMessageToSend
-							.getTextWithPlaceholders().get(participant),
+					.findVariablesAndReplaceWithTextValues(
+							participant.getLanguage(),
+							determinedMonitoringMessageToSend
+									.getTextWithPlaceholders().get(participant),
 							variablesWithValues.values(), "");
 
+			AnswerTypes answerTypeToSend = null;
+			String answerOptionsToSend = null;
+			if (monitoringMessageGroup.isMessagesExpectAnswer()) {
+				answerTypeToSend = determinedMonitoringMessageToSend
+						.getAnswerType();
+
+				answerOptionsToSend = StringHelpers
+						.parseColonSeparatedMultiLineStringToJSON(
+								determinedMonitoringMessageToSend
+										.getAnswerOptionsWithPlaceholders(),
+								participant.getLanguage(),
+								variablesWithValues.values());
+			}
+
 			resultToCreateMessageFor.setMessageTextToSend(messageTextToSend);
+			resultToCreateMessageFor.setAnswerTypeToSend(answerTypeToSend);
+			resultToCreateMessageFor
+					.setAnswerOptionsToSend(answerOptionsToSend);
 		}
 	}
 
@@ -266,91 +290,86 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				switch (executionCase) {
 					case MONITORING_RULES_DAILY:
 						masterParent = databaseManagerService
-								.findOneModelObject(
-										MonitoringRule.class,
+								.findOneModelObject(MonitoringRule.class,
 										Queries.MONITORING_RULE__BY_INTERVENTION_AND_TYPE,
 										intervention.getId(),
 										MonitoringRuleTypes.DAILY);
 						break;
 					case MONITORING_RULES_PERIODIC:
 						masterParent = databaseManagerService
-								.findOneModelObject(
-										MonitoringRule.class,
+								.findOneModelObject(MonitoringRule.class,
 										Queries.MONITORING_RULE__BY_INTERVENTION_AND_TYPE,
 										intervention.getId(),
 										MonitoringRuleTypes.PERIODIC);
 						break;
 					case MONITORING_RULES_UNEXPECTED_MESSAGE:
 						masterParent = databaseManagerService
-								.findOneModelObject(
-										MonitoringRule.class,
+								.findOneModelObject(MonitoringRule.class,
 										Queries.MONITORING_RULE__BY_INTERVENTION_AND_TYPE,
 										intervention.getId(),
 										MonitoringRuleTypes.UNEXPECTED_MESSAGE);
 						break;
 					case MONITORING_RULES_USER_INTENTION:
 						masterParent = databaseManagerService
-								.findOneModelObject(
-										MonitoringRule.class,
+								.findOneModelObject(MonitoringRule.class,
 										Queries.MONITORING_RULE__BY_INTERVENTION_AND_TYPE,
 										intervention.getId(),
 										MonitoringRuleTypes.USER_INTENTION);
 						break;
 					case MONITORING_RULES_REPLY:
-						log.error("Reply rule request in monitoring rule exection: Should never happen!");
+						log.error(
+								"Reply rule request in monitoring rule exection: Should never happen!");
 						break;
 				}
 
 				rulesOnCurrentLevel = databaseManagerService
-						.findSortedModelObjects(
-								MonitoringRule.class,
+						.findSortedModelObjects(MonitoringRule.class,
 								Queries.MONITORING_RULE__BY_INTERVENTION_AND_PARENT,
 								Queries.MONITORING_RULE__SORT_BY_ORDER_ASC,
 								intervention.getId(), masterParent.getId());
 			} else {
 				if (monitoringReplyRuleCaseIsTrue) {
 					rulesOnCurrentLevel = databaseManagerService
-							.findSortedModelObjects(
-									MonitoringReplyRule.class,
+							.findSortedModelObjects(MonitoringReplyRule.class,
 									Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_ANSWER,
 									Queries.MONITORING_REPLY_RULE__SORT_BY_ORDER_ASC,
 									relatedMonitoringRuleForReplyRuleCase
-											.getId(), null);
+											.getId(),
+									null);
 				} else {
 					rulesOnCurrentLevel = databaseManagerService
-							.findSortedModelObjects(
-									MonitoringReplyRule.class,
+							.findSortedModelObjects(MonitoringReplyRule.class,
 									Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_NO_ANSWER,
 									Queries.MONITORING_REPLY_RULE__SORT_BY_ORDER_ASC,
 									relatedMonitoringRuleForReplyRuleCase
-											.getId(), null);
+											.getId(),
+									null);
 				}
 			}
 		} else {
 			if (isMonitoringRule) {
 				rulesOnCurrentLevel = databaseManagerService
-						.findSortedModelObjects(
-								MonitoringRule.class,
+						.findSortedModelObjects(MonitoringRule.class,
 								Queries.MONITORING_RULE__BY_INTERVENTION_AND_PARENT,
 								Queries.MONITORING_RULE__SORT_BY_ORDER_ASC,
 								intervention.getId(), parent.getId());
 			} else {
 				if (monitoringReplyRuleCaseIsTrue) {
 					rulesOnCurrentLevel = databaseManagerService
-							.findSortedModelObjects(
-									MonitoringReplyRule.class,
+							.findSortedModelObjects(MonitoringReplyRule.class,
 									Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_ANSWER,
 									Queries.MONITORING_REPLY_RULE__SORT_BY_ORDER_ASC,
 									relatedMonitoringRuleForReplyRuleCase
-											.getId(), parent.getId());
+											.getId(),
+									parent.getId());
 				} else {
 					rulesOnCurrentLevel = databaseManagerService
-							.findSortedModelObjects(
-									MonitoringReplyRule.class,
+							.findSortedModelObjects(MonitoringReplyRule.class,
 									Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_NO_ANSWER,
 									Queries.MONITORING_REPLY_RULE__SORT_BY_ORDER_ASC,
 									relatedMonitoringRuleForReplyRuleCase
-											.getId(), parent.getId());
+											.getId(),
+									parent.getId());
 				}
 			}
 		}
@@ -417,10 +436,10 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				variablesManagerService.writeVariableValueOfParticipant(
 						participant.getId(),
 						rule.getStoreValueToVariableWithName(),
-						ruleResult.isCalculatedRule() ? StringHelpers
-								.cleanDoubleValue(ruleResult
-										.getCalculatedRuleValue()) : ruleResult
-								.getTextRuleValue());
+						ruleResult.isCalculatedRule()
+								? StringHelpers.cleanDoubleValue(
+										ruleResult.getCalculatedRuleValue())
+								: ruleResult.getTextRuleValue());
 			} catch (final Exception e) {
 				log.warn("Could not write variable value: {}", e.getMessage());
 			}

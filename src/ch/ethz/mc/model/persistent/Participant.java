@@ -197,39 +197,40 @@ public class Participant extends ModelObject {
 			monitoringStatus = dialogStatus.isMonitoringPerformed();
 		}
 
-		val participant = new UIParticipant(
-				getId().toString(),
-				nickname.equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+		val participant = new UIParticipant(getId().toString(),
+				nickname.equals("")
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NOT_SET)
 						: nickname,
 				language.getDisplayLanguage() + " (" + language.toLanguageTag()
 						+ ")",
-				group == null ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: group,
-				organization,
-				organizationUnit,
-				new Date(createdTimestamp),
+				group == null ? Messages.getAdminString(
+						AdminMessageStrings.UI_MODEL__NOT_SET) : group,
+				organization, organizationUnit, new Date(createdTimestamp),
 				screeningSurveyName,
-				screeningSurveyStatus ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__FINISHED)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_FINISHED),
+				screeningSurveyStatus
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__FINISHED)
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NOT_FINISHED),
 				screeningSurveyStatus,
-				dataForMonitoringAvailable ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
+				dataForMonitoringAvailable
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__YES)
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NO),
 				dataForMonitoringAvailable,
-				monitoringStatus ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__FINISHED)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NOT_FINISHED),
+				monitoringStatus
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__FINISHED)
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NOT_FINISHED),
 				monitoringStatus,
-				monitoringActive ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE),
+				monitoringActive
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__ACTIVE)
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__INACTIVE),
 				monitoringActive);
 
 		participant.setRelatedModelObject(this);
@@ -310,7 +311,7 @@ public class Participant extends ModelObject {
 				.find(IntermediateSurveyAndFeedbackParticipantShortURL.class,
 						Queries.INTERMEDIATE_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_PARTICIPANT,
 						getId());
-		ModelObject
-				.delete(intermediateSurveysAndFeedbackParticipantShortURLsToDelete);
+		ModelObject.delete(
+				intermediateSurveysAndFeedbackParticipantShortURLsToDelete);
 	}
 }

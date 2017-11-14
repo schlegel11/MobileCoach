@@ -144,7 +144,8 @@ public abstract class ModelObject extends AbstractSerializableTable {
 	 */
 	@JsonIgnore
 	public UIModelObject toUIModelObject() {
-		log.error("A model object should have been transformed to a UI model object, but the conversion is not implemented!");
+		log.error(
+				"A model object should have been transformed to a UI model object, but the conversion is not implemented!");
 		throw new NotImplementedException(this.getClass().getName());
 	}
 
@@ -176,13 +177,13 @@ public abstract class ModelObject extends AbstractSerializableTable {
 	@JsonIgnore
 	protected void save() {
 		synchronized (db) {
-			final MongoCollection collection = db.getCollection(this.getClass()
-					.getSimpleName());
+			final MongoCollection collection = db
+					.getCollection(this.getClass().getSimpleName());
 
 			collection.save(this);
 
-			log.debug("Saved {} with id {}: {}", this.getClass()
-					.getSimpleName(), id, this);
+			log.debug("Saved {} with id {}: {}",
+					this.getClass().getSimpleName(), id, this);
 		}
 	}
 
@@ -200,8 +201,8 @@ public abstract class ModelObject extends AbstractSerializableTable {
 	protected static final <ModelObjectSubclass extends ModelObject> ModelObjectSubclass get(
 			final Class<ModelObjectSubclass> clazz, final ObjectId id) {
 		synchronized (db) {
-			final MongoCollection collection = db.getCollection(clazz
-					.getSimpleName());
+			final MongoCollection collection = db
+					.getCollection(clazz.getSimpleName());
 
 			ModelObjectSubclass modelObject = null;
 			try {
@@ -231,8 +232,8 @@ public abstract class ModelObject extends AbstractSerializableTable {
 		}
 
 		synchronized (db) {
-			final MongoCollection collection = db.getCollection(modelObject
-					.getClass().getSimpleName());
+			final MongoCollection collection = db
+					.getCollection(modelObject.getClass().getSimpleName());
 
 			try {
 				if (modelObject != null) {
@@ -249,12 +250,13 @@ public abstract class ModelObject extends AbstractSerializableTable {
 
 			try {
 				collection.remove(modelObject.getId());
-				log.debug("Removed {} with id {}", modelObject.getClass()
-						.getSimpleName(), modelObject.getId());
+				log.debug("Removed {} with id {}",
+						modelObject.getClass().getSimpleName(),
+						modelObject.getId());
 			} catch (final Exception e) {
-				log.warn("Could not delete {} with id {}: {}", modelObject
-						.getClass().getSimpleName(), modelObject.getId(), e
-						.getMessage());
+				log.warn("Could not delete {} with id {}: {}",
+						modelObject.getClass().getSimpleName(),
+						modelObject.getId(), e.getMessage());
 			}
 		}
 	}
@@ -268,11 +270,11 @@ public abstract class ModelObject extends AbstractSerializableTable {
 	 *            The {@link ObjectId} of the {@link ModelObject}
 	 */
 	@JsonIgnore
-	protected static final void delete(
-			final Class<? extends ModelObject> clazz, final ObjectId id) {
+	protected static final void delete(final Class<? extends ModelObject> clazz,
+			final ObjectId id) {
 		synchronized (db) {
-			final MongoCollection collection = db.getCollection(clazz
-					.getSimpleName());
+			final MongoCollection collection = db
+					.getCollection(clazz.getSimpleName());
 
 			try {
 				final ModelObject modelObject = get(clazz, id);
@@ -331,14 +333,14 @@ public abstract class ModelObject extends AbstractSerializableTable {
 			final Class<ModelObjectSubclass> clazz, final String query,
 			final Object... parameters) {
 		synchronized (db) {
-			final MongoCollection collection = db.getCollection(clazz
-					.getSimpleName());
+			final MongoCollection collection = db
+					.getCollection(clazz.getSimpleName());
 
 			ModelObjectSubclass modelObject = null;
 			try {
 				if (parameters != null && parameters.length > 0) {
-					modelObject = collection.findOne(query, parameters).as(
-							clazz);
+					modelObject = collection.findOne(query, parameters)
+							.as(clazz);
 				} else {
 					modelObject = collection.findOne(query).as(clazz);
 				}
@@ -377,8 +379,8 @@ public abstract class ModelObject extends AbstractSerializableTable {
 			final Class<ModelObjectSubclass> clazz, final String query,
 			final String sort, final Object... parameters) {
 		synchronized (db) {
-			final MongoCollection collection = db.getCollection(clazz
-					.getSimpleName());
+			final MongoCollection collection = db
+					.getCollection(clazz.getSimpleName());
 
 			ModelObjectSubclass modelObject = null;
 			try {
@@ -388,8 +390,8 @@ public abstract class ModelObject extends AbstractSerializableTable {
 								.sort(sort).limit(1).as(clazz).iterator()
 								.next();
 					} else {
-						modelObject = collection.find(query).sort(sort)
-								.limit(1).as(clazz).iterator().next();
+						modelObject = collection.find(query).sort(sort).limit(1)
+								.as(clazz).iterator().next();
 					}
 				} catch (final NullPointerException f) {
 					modelObject = null;
@@ -429,8 +431,8 @@ public abstract class ModelObject extends AbstractSerializableTable {
 			final Class<ModelObjectSubclass> clazz, final String query,
 			final Object... parameters) {
 		synchronized (db) {
-			final MongoCollection collection = db.getCollection(clazz
-					.getSimpleName());
+			final MongoCollection collection = db
+					.getCollection(clazz.getSimpleName());
 
 			Iterable<ModelObjectSubclass> iteratable = null;
 			try {
@@ -470,8 +472,8 @@ public abstract class ModelObject extends AbstractSerializableTable {
 			final Class<? extends ModelObject> clazz, final String query,
 			final Object... parameters) {
 		synchronized (db) {
-			final MongoCollection collection = db.getCollection(clazz
-					.getSimpleName());
+			final MongoCollection collection = db
+					.getCollection(clazz.getSimpleName());
 
 			Iterable<ObjectId> iteratable = null;
 			try {
@@ -516,8 +518,8 @@ public abstract class ModelObject extends AbstractSerializableTable {
 			final Class<ModelObjectSubclass> clazz, final String query,
 			final String sort, final Object... parameters) {
 		synchronized (db) {
-			final MongoCollection collection = db.getCollection(clazz
-					.getSimpleName());
+			final MongoCollection collection = db
+					.getCollection(clazz.getSimpleName());
 
 			Iterable<ModelObjectSubclass> iteratable = null;
 			try {

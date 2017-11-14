@@ -136,8 +136,8 @@ public class Feedback extends ModelObject {
 				.find(IntermediateSurveyAndFeedbackParticipantShortURL.class,
 						Queries.INTERMEDIATE_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_FEEDBACK,
 						getId());
-		ModelObject
-				.delete(intermediateSurveysAndFeedbackParticipantShortURLsToDelete);
+		ModelObject.delete(
+				intermediateSurveysAndFeedbackParticipantShortURLsToDelete);
 	}
 
 	/*
@@ -149,8 +149,8 @@ public class Feedback extends ModelObject {
 	@JsonIgnore
 	public String toTable() {
 		String table = wrapRow(wrapHeader("Name:") + wrapField(escape(name)));
-		table += wrapRow(wrapHeader("Template:")
-				+ wrapField(escape(templatePath)));
+		table += wrapRow(
+				wrapHeader("Template:") + wrapField(escape(templatePath)));
 
 		// Slides
 		final StringBuffer buffer = new StringBuffer();
@@ -163,8 +163,8 @@ public class Feedback extends ModelObject {
 		}
 
 		if (buffer.length() > 0) {
-			table += wrapRow(wrapHeader("Slides:")
-					+ wrapField(buffer.toString()));
+			table += wrapRow(
+					wrapHeader("Slides:") + wrapField(buffer.toString()));
 		}
 
 		return wrapTable(table);

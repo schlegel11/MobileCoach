@@ -33,9 +33,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.Synchronized;
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.persistent.InterventionVariableWithValue;
@@ -47,8 +46,9 @@ import ch.ethz.mc.model.persistent.types.InterventionVariableWithValuePrivacyTyp
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import ch.ethz.mc.tools.RuleEvaluator;
 import ch.ethz.mc.tools.StringHelpers;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Synchronized;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Andreas Filler
@@ -63,7 +63,8 @@ public class TestServlet extends HttpServlet {
 	private MC					mc;
 
 	@Override
-	public void init(final ServletConfig servletConfig) throws ServletException {
+	public void init(final ServletConfig servletConfig)
+			throws ServletException {
 		super.init(servletConfig);
 		// Only start servlet if context is ready
 		if (!MC.getInstance().isReady()) {
@@ -98,8 +99,8 @@ public class TestServlet extends HttpServlet {
 	@Override
 	@Synchronized
 	protected void doGet(final HttpServletRequest request,
-			final HttpServletResponse response) throws ServletException,
-			IOException {
+			final HttpServletResponse response)
+			throws ServletException, IOException {
 		// Set header information (e.g. for no caching)
 		response.setHeader("Pragma", "No-cache");
 		response.setHeader("Cache-Control", "no-cache,no-store,max-age=0");
@@ -136,7 +137,7 @@ public class TestServlet extends HttpServlet {
 	 * TESTCASES START HERE
 	 */
 	private void runTestcases() {
-		// TODO for TESTING (OPTIONAL): Test cases can be defined here
+		// TODO TESTING Test cases can be defined here
 
 		// stringTests();
 		// dateCalculationTests();
@@ -152,9 +153,7 @@ public class TestServlet extends HttpServlet {
 
 	@SuppressWarnings("unused")
 	private void dateCalculationTests() {
-		final MonitoringMessageRule m1 = new MonitoringMessageRule(
-				null,
-				0,
+		final MonitoringMessageRule m1 = new MonitoringMessageRule(null, 0,
 				"26.10.2015",
 				RuleEquationSignTypes.CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_TRUE_IF_ZERO,
 				"01.01.16", "");
@@ -162,9 +161,7 @@ public class TestServlet extends HttpServlet {
 				new ArrayList<AbstractVariableWithValue>());
 		log.debug(">> " + x1.getCalculatedRuleValue());
 
-		final MonitoringMessageRule m2 = new MonitoringMessageRule(
-				null,
-				0,
+		final MonitoringMessageRule m2 = new MonitoringMessageRule(null, 0,
 				"26.10.2015",
 				RuleEquationSignTypes.CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_TRUE_IF_ZERO,
 				"01.01.2016", "");
@@ -191,9 +188,7 @@ public class TestServlet extends HttpServlet {
 				"$fieldWithValues", "5,42,3",
 				InterventionVariableWithValuePrivacyTypes.PRIVATE,
 				InterventionVariableWithValueAccessTypes.INTERNAL));
-		final MonitoringMessageRule m = new MonitoringMessageRule(
-				null,
-				0,
+		final MonitoringMessageRule m = new MonitoringMessageRule(null, 0,
 				"position(1,$fieldWithValues)",
 				RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
 				"", "");
@@ -240,9 +235,7 @@ public class TestServlet extends HttpServlet {
 				InterventionVariableWithValuePrivacyTypes.PRIVATE,
 				InterventionVariableWithValueAccessTypes.INTERNAL));
 
-		val rule1 = new MonitoringMessageRule(
-				null,
-				0,
+		val rule1 = new MonitoringMessageRule(null, 0,
 				"position($sex,position($auditGT0Digit,position($alterkDigit,26,16,15,24),position($alterkDigit,53,60,63,53),position($alterkDigit,21,25,23,24)),position($auditGT0Digit,position($alterkDigit,21,14,13,14),position($alterkDigit,47,45,52,52),position($alterkDigit,33,42,35,34)))",
 				RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
 				"", "");
@@ -250,19 +243,14 @@ public class TestServlet extends HttpServlet {
 				variables);
 		log.debug(">> " + result1.getCalculatedRuleValue());
 
-		val rule2 = new MonitoringMessageRule(
-				null,
-				0,
-				"first(5,3,2,7,2,4,3,5)",
+		val rule2 = new MonitoringMessageRule(null, 0, "first(5,3,2,7,2,4,3,5)",
 				RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
 				"", "");
 		final val result2 = RuleEvaluator.evaluateRule(null, null, rule2,
 				variables);
 		log.debug(">> " + result2.getCalculatedRuleValue());
 
-		val rule3 = new MonitoringMessageRule(
-				null,
-				0,
+		val rule3 = new MonitoringMessageRule(null, 0,
 				"second(5,3,2,7,2,4,3,5)",
 				RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
 				"", "");
@@ -276,19 +264,14 @@ public class TestServlet extends HttpServlet {
 				variables);
 		log.debug(">> " + result5.getCalculatedRuleValue());
 
-		val rule5 = new MonitoringMessageRule(
-				null,
-				0,
-				"third(5,3,2,7,2,4,3,5)",
+		val rule5 = new MonitoringMessageRule(null, 0, "third(5,3,2,7,2,4,3,5)",
 				RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
 				"", "");
 		final val result6 = RuleEvaluator.evaluateRule(null, null, rule5,
 				variables);
 		log.debug(">> " + result6.getCalculatedRuleValue());
 
-		val rule4 = new MonitoringMessageRule(
-				null,
-				0,
+		val rule4 = new MonitoringMessageRule(null, 0,
 				"position(4,5,3,2,7,2,4,3,5)",
 				RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
 				"", "");
@@ -310,10 +293,7 @@ public class TestServlet extends HttpServlet {
 				variables);
 		log.debug(">> " + result9.getTextRuleValue());
 
-		val rule9 = new MonitoringMessageRule(
-				null,
-				0,
-				"round(random())",
+		val rule9 = new MonitoringMessageRule(null, 0, "round(random())",
 				RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
 				"", "");
 		final val result10 = RuleEvaluator.evaluateRule(null, null, rule9,

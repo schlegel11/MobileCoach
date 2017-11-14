@@ -46,8 +46,8 @@ import com.vaadin.ui.Button.ClickEvent;
  */
 @SuppressWarnings("serial")
 @Log4j2
-public class MonitoringReplyRuleEditComponentWithController extends
-		MonitoringReplyRuleEditComponent {
+public class MonitoringReplyRuleEditComponentWithController
+		extends MonitoringReplyRuleEditComponent {
 	private final ObjectId									interventionId;
 
 	private final AbstractRuleEditComponentWithController	ruleEditComponent;
@@ -119,14 +119,14 @@ public class MonitoringReplyRuleEditComponentWithController extends
 
 		// Add button listeners
 		val buttonClickListener = new ButtonClickListener();
-		getStoreVariableTextFieldComponent().getButton().addClickListener(
-				buttonClickListener);
+		getStoreVariableTextFieldComponent().getButton()
+				.addClickListener(buttonClickListener);
 
 		// Add other listeners
-		getSendMessageIfTrueComboBox().setValue(
-				monitoringRule.isSendMessageIfTrue());
-		getSendMessageIfTrueComboBox().addValueChangeListener(
-				new ValueChangeListener() {
+		getSendMessageIfTrueComboBox()
+				.setValue(monitoringRule.isSendMessageIfTrue());
+		getSendMessageIfTrueComboBox()
+				.addValueChangeListener(new ValueChangeListener() {
 
 					@Override
 					public void valueChange(final ValueChangeEvent event) {
@@ -135,9 +135,8 @@ public class MonitoringReplyRuleEditComponentWithController extends
 
 						getInterventionAdministrationManagerService()
 								.monitoringReplyRuleChangeSendMessageIfTrue(
-										monitoringRule,
-										(boolean) event.getProperty()
-												.getValue());
+										monitoringRule, (boolean) event
+												.getProperty().getValue());
 
 						if (!newValue
 								&& getSendToSupervisorComboBox().getValue()) {
@@ -148,10 +147,10 @@ public class MonitoringReplyRuleEditComponentWithController extends
 					}
 				});
 
-		getSendToSupervisorComboBox().setValue(
-				monitoringRule.isSendMessageToSupervisor());
-		getSendToSupervisorComboBox().addValueChangeListener(
-				new ValueChangeListener() {
+		getSendToSupervisorComboBox()
+				.setValue(monitoringRule.isSendMessageToSupervisor());
+		getSendToSupervisorComboBox()
+				.addValueChangeListener(new ValueChangeListener() {
 
 					@Override
 					public void valueChange(final ValueChangeEvent event) {
@@ -188,8 +187,8 @@ public class MonitoringReplyRuleEditComponentWithController extends
 
 	private void adjust() {
 		// Adjust store result variable
-		getStoreVariableTextFieldComponent().setValue(
-				monitoringRule.getStoreValueToVariableWithName());
+		getStoreVariableTextFieldComponent()
+				.setValue(monitoringRule.getStoreValueToVariableWithName());
 
 		// Adjust stop rule execution checkbox
 		if (monitoringRule.isSendMessageIfTrue()) {
@@ -209,8 +208,7 @@ public class MonitoringReplyRuleEditComponentWithController extends
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_VARIABLE,
 				monitoringRule.getStoreValueToVariableWithName(),
-				allPossibleVariables,
-				new ShortPlaceholderStringEditComponent(),
+				allPossibleVariables, new ShortPlaceholderStringEditComponent(),
 				new ExtendableButtonClickListener() {
 
 					@Override

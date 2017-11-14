@@ -34,7 +34,7 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 @SuppressWarnings("serial")
 @Log4j2
 public class ErrorView extends AbstractView implements View {
-	private ErrorViewComponent	errorViewComponent;
+	private ErrorViewComponent errorViewComponent;
 
 	@Override
 	public void enter(final ViewChangeEvent event) {

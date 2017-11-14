@@ -23,19 +23,19 @@ package ch.ethz.mc.ui.views.components.interventions;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-import ch.ethz.mc.conf.AdminMessageStrings;
-import ch.ethz.mc.conf.ThemeImageStrings;
-import ch.ethz.mc.model.persistent.Intervention;
-import ch.ethz.mc.ui.views.components.interventions.monitoring_messages.MonitoringMessageGroupsTabComponentWithController;
-import ch.ethz.mc.ui.views.components.interventions.monitoring_rules.MonitoringRulesEditComponentWithController;
-
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
 import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
 import com.vaadin.ui.TabSheet.Tab;
+
+import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.conf.ThemeImageStrings;
+import ch.ethz.mc.model.persistent.Intervention;
+import ch.ethz.mc.ui.views.components.interventions.monitoring_messages.MonitoringMessageGroupsTabComponentWithController;
+import ch.ethz.mc.ui.views.components.interventions.monitoring_rules.MonitoringRulesEditComponentWithController;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Extends the intervention editing container component with a controller
@@ -44,9 +44,9 @@ import com.vaadin.ui.TabSheet.Tab;
  */
 @SuppressWarnings("serial")
 @Log4j2
-public class InterventionEditingContainerComponentWithController extends
-		InterventionEditingContainerComponent implements
-		SelectedTabChangeListener {
+public class InterventionEditingContainerComponentWithController
+		extends InterventionEditingContainerComponent
+		implements SelectedTabChangeListener {
 
 	private boolean			editingAllowed								= false;
 	private final List<Tab>	availableTabsToSwitchDependingOnMessaging	= new ArrayList<Tab>();
@@ -57,14 +57,13 @@ public class InterventionEditingContainerComponentWithController extends
 		super();
 
 		// Localize
-		localize(
-				getInterventionTitleLabel(),
+		localize(getInterventionTitleLabel(),
 				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__INTERVENTIONS_TITLE,
 				intervention.getName());
 
 		// Handle buttons
-		getListAllInterventionsButton().addClickListener(
-				new Button.ClickListener() {
+		getListAllInterventionsButton()
+				.addClickListener(new Button.ClickListener() {
 
 					@Override
 					public void buttonClick(final ClickEvent event) {
@@ -78,56 +77,56 @@ public class InterventionEditingContainerComponentWithController extends
 
 		// Fill tab sheet
 		// Add basic settings tab
-		addPointableTab(
-				getContentTabSheet(),
+		addPointableTab(getContentTabSheet(),
 				new InterventionBasicSettingsAndModulesTabComponentWithController(
 						intervention, this),
 				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__BASIC_SETTINGS_AND_MODULES_TAB,
 				ThemeImageStrings.COMPONENT_ICON);
 
 		// Add intervention screening surveys tab
-		registerToSetEditingDependingOnMessaging(addPointableTab(
-				getContentTabSheet(),
-				new InterventionScreeningSurveysTabComponentWithController(
-						intervention),
-				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__SCREENING_SURVEYS_TAB,
-				ThemeImageStrings.COMPONENT_ICON));
+		registerToSetEditingDependingOnMessaging(
+				addPointableTab(getContentTabSheet(),
+						new InterventionScreeningSurveysTabComponentWithController(
+								intervention),
+						AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__SCREENING_SURVEYS_TAB,
+						ThemeImageStrings.COMPONENT_ICON));
 
 		// Add intervention participants tab
-		addPointableTab(
-				getContentTabSheet(),
+		addPointableTab(getContentTabSheet(),
 				new InterventionParticipantsTabComponentWithController(
 						intervention),
 				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__PARTICIPANTS_TAB,
 				ThemeImageStrings.COMPONENT_ICON);
 
 		// Add intervention variables tab
-		registerToSetEditingDependingOnMessaging(addPointableTab(
-				getContentTabSheet(),
-				new InterventionVariablesTabComponentWithController(
-						intervention),
-				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__VARIABLES_TAB,
-				ThemeImageStrings.COMPONENT_ICON));
+		registerToSetEditingDependingOnMessaging(
+				addPointableTab(getContentTabSheet(),
+						new InterventionVariablesTabComponentWithController(
+								intervention),
+						AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__VARIABLES_TAB,
+						ThemeImageStrings.COMPONENT_ICON));
 
 		// Add monitoring rules tab
-		registerToSetEditingDependingOnMessaging(addPointableTab(
-				getContentTabSheet(),
-				new MonitoringRulesEditComponentWithController(intervention),
-				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__MONITORING_RULES_TAB,
-				ThemeImageStrings.COMPONENT_ICON));
+		registerToSetEditingDependingOnMessaging(
+				addPointableTab(getContentTabSheet(),
+						new MonitoringRulesEditComponentWithController(
+								intervention),
+						AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__MONITORING_RULES_TAB,
+						ThemeImageStrings.COMPONENT_ICON));
 
 		// Add monitoring message groups tab
-		registerToSetEditingDependingOnMessaging(addPointableTab(
-				getContentTabSheet(),
-				new MonitoringMessageGroupsTabComponentWithController(
-						intervention),
-				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__MONITORING_MESSAGE_GROUPS_TAB,
-				ThemeImageStrings.COMPONENT_ICON));
+		registerToSetEditingDependingOnMessaging(
+				addPointableTab(getContentTabSheet(),
+						new MonitoringMessageGroupsTabComponentWithController(
+								intervention),
+						AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__MESSAGE_GROUPS_TAB,
+						ThemeImageStrings.COMPONENT_ICON));
+
+		// TODO Micro Dialogs can be added here
 
 		if (getUISession().isAdmin()) {
 			// Add intervention access tab
-			addPointableTab(
-					getContentTabSheet(),
+			addPointableTab(getContentTabSheet(),
 					new InterventionAccessTabComponentWithController(
 							intervention),
 					AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__ACCESS_TAB,

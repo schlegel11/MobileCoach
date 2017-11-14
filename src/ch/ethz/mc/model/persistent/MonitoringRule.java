@@ -217,17 +217,19 @@ public class MonitoringRule extends AbstractMonitoringRule {
 
 				if (messageGroup.isMessagesExpectAnswer()) {
 					final int daysUntilMessageIsHandledAsUnanswered = (int) Math
-							.floor(getHoursUntilMessageIsHandledAsUnanswered() / 24);
+							.floor(getHoursUntilMessageIsHandledAsUnanswered()
+									/ 24);
 					final int hoursWithoutDaysUntilMessageIsHandledAsUnanswered = getHoursUntilMessageIsHandledAsUnanswered()
 							- daysUntilMessageIsHandledAsUnanswered * 24;
 
 					table += wrapRow(wrapHeader(
 							"Hours until message is handled as unanswered:",
 							style)
-							+ wrapField(escape(daysUntilMessageIsHandledAsUnanswered
-									+ " day(s), "
-									+ hoursWithoutDaysUntilMessageIsHandledAsUnanswered
-									+ " hour(s)")));
+							+ wrapField(
+									escape(daysUntilMessageIsHandledAsUnanswered
+											+ " day(s), "
+											+ hoursWithoutDaysUntilMessageIsHandledAsUnanswered
+											+ " hour(s)")));
 
 					/*
 					 * Reply Rules
@@ -235,8 +237,7 @@ public class MonitoringRule extends AbstractMonitoringRule {
 
 					// Reply-Case
 					Iterable<MonitoringReplyRule> replyRulesOnRootLevel = ModelObject
-							.findSorted(
-									MonitoringReplyRule.class,
+							.findSorted(MonitoringReplyRule.class,
 									Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_ANSWER,
 									Queries.MONITORING_RULE__SORT_BY_ORDER_ASC,
 									getId(), null);
@@ -252,12 +253,11 @@ public class MonitoringRule extends AbstractMonitoringRule {
 					}
 
 					// No-Reply-Case
-					replyRulesOnRootLevel = ModelObject
-							.findSorted(
-									MonitoringReplyRule.class,
-									Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_NO_ANSWER,
-									Queries.MONITORING_RULE__SORT_BY_ORDER_ASC,
-									getId(), null);
+					replyRulesOnRootLevel = ModelObject.findSorted(
+							MonitoringReplyRule.class,
+							Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_NO_ANSWER,
+							Queries.MONITORING_RULE__SORT_BY_ORDER_ASC, getId(),
+							null);
 
 					buffer = new StringBuffer();
 					for (val replyRule : replyRulesOnRootLevel) {
@@ -272,7 +272,8 @@ public class MonitoringRule extends AbstractMonitoringRule {
 			} else {
 				table += wrapRow(wrapHeader(
 						"Monitoring Message Group to send from:", style)
-						+ wrapField(formatWarning("Message Group set, but not found")));
+						+ wrapField(formatWarning(
+								"Message Group set, but not found")));
 			}
 		}
 

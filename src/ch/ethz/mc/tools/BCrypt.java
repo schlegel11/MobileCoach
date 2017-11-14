@@ -72,7 +72,7 @@ public class BCrypt {
 			0x85a308d3, 0x13198a2e, 0x03707344, 0xa4093822, 0x299f31d0,
 			0x082efa98, 0xec4e6c89, 0x452821e6, 0x38d01377, 0xbe5466cf,
 			0x34e90c6c, 0xc0ac29b7, 0xc97c50dd, 0x3f84d5b5, 0xb5470917,
-			0x9216d5d9, 0x8979fb1b							};
+			0x9216d5d9, 0x8979fb1b };
 	private static final int	S_orig[]					= { 0xd1310ba6,
 			0x98dfb5ac, 0x2ffd72db, 0xd01adfb7, 0xb8e1afed, 0x6a267e96,
 			0xba7c9045, 0xf12c7f99, 0x24a19947, 0xb3916cf7, 0x0801f2e2,
@@ -278,7 +278,7 @@ public class BCrypt {
 			0x77afa1c5, 0x20756060, 0x85cbfe4e, 0x8ae88dd8, 0x7aaaf9b0,
 			0x4cf9aa7e, 0x1948c25c, 0x02fb8a8c, 0x01c36ae4, 0xd6ebe1f9,
 			0x90d4f869, 0xa65cdea0, 0x3f09252d, 0xc208e69f, 0xb74e6132,
-			0xce77e25b, 0x578fdfe3, 0x3ac372e6				};
+			0xce77e25b, 0x578fdfe3, 0x3ac372e6 };
 
 	// bcrypt IV: "OrpheanBeholderScryDoubt"
 	static private final int	bf_crypt_ciphertext[]		= { 0x4f727068,
@@ -290,7 +290,7 @@ public class BCrypt {
 			'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a',
 			'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
 			'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0',
-			'1', '2', '3', '4', '5', '6', '7', '8', '9'	};
+			'1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
 	// Table for Base64 decoding
 	static private final byte	index_64[]					= { -1, -1, -1, -1,
@@ -301,7 +301,7 @@ public class BCrypt {
 			11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
 			-1, -1, -1, -1, -1, -1, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38,
 			39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, -1, -1,
-			-1, -1, -1										};
+			-1, -1, -1 };
 
 	// Expanded Blowfish key
 	private int					P[];
@@ -684,7 +684,8 @@ public class BCrypt {
 	 *            an instance of SecureRandom to use
 	 * @return an encoded salt value
 	 */
-	public static String gensalt(final int log_rounds, final SecureRandom random) {
+	public static String gensalt(final int log_rounds,
+			final SecureRandom random) {
 		final StringBuffer rs = new StringBuffer();
 		final byte rnd[] = new byte[BCRYPT_SALT_LEN];
 

@@ -46,8 +46,8 @@ import com.vaadin.ui.Button.ClickEvent;
  */
 @SuppressWarnings("serial")
 @Log4j2
-public class InterventionAccessTabComponentWithController extends
-		InterventionAccessTabComponent {
+public class InterventionAccessTabComponentWithController
+		extends InterventionAccessTabComponent {
 
 	private final Intervention						intervention;
 
@@ -140,10 +140,10 @@ public class InterventionAccessTabComponentWithController extends
 
 		// handle buttons
 		val buttonClickListener = new ButtonClickListener();
-		accessControlEditComponent.getAddButton().addClickListener(
-				buttonClickListener);
-		accessControlEditComponent.getRemoveButton().addClickListener(
-				buttonClickListener);
+		accessControlEditComponent.getAddButton()
+				.addClickListener(buttonClickListener);
+		accessControlEditComponent.getRemoveButton()
+				.addClickListener(buttonClickListener);
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
@@ -152,7 +152,8 @@ public class InterventionAccessTabComponentWithController extends
 		public void buttonClick(final ClickEvent event) {
 			val accessControlEditComponent = getInterventionAccessEditComponent();
 
-			if (event.getButton() == accessControlEditComponent.getAddButton()) {
+			if (event.getButton() == accessControlEditComponent
+					.getAddButton()) {
 				addAccountToIntervention();
 			} else if (event.getButton() == accessControlEditComponent
 					.getRemoveButton()) {
@@ -166,27 +167,28 @@ public class InterventionAccessTabComponentWithController extends
 		try {
 			// Add author to intervention
 			getInterventionAdministrationManagerService()
-					.authorInterventionAccessCreate(
-							selectedUIAuthorInComboBox.getRelatedModelObject(
-									Author.class).getId(), intervention.getId());
+					.authorInterventionAccessCreate(selectedUIAuthorInComboBox
+							.getRelatedModelObject(Author.class).getId(),
+							intervention.getId());
 		} catch (final Exception e) {
 			handleException(e);
 			return;
 		}
 
 		// Adapt UI
-		tableBeanContainer.addItem(selectedUIAuthorInComboBox
-				.getRelatedModelObject(Author.class).getId(),
-				selectedUIAuthorInComboBox);
-		getInterventionAccessEditComponent().getAccountsTable().select(
-				selectedUIAuthorInComboBox.getRelatedModelObject(Author.class)
-						.getId());
+		tableBeanContainer
+				.addItem(
+						selectedUIAuthorInComboBox
+								.getRelatedModelObject(Author.class).getId(),
+						selectedUIAuthorInComboBox);
+		getInterventionAccessEditComponent().getAccountsTable()
+				.select(selectedUIAuthorInComboBox
+						.getRelatedModelObject(Author.class).getId());
 		getInterventionAccessEditComponent().getAccountsSelectComboBox()
 				.removeItem(selectedUIAuthorInComboBox);
 
-		getAdminUI()
-				.showInformationNotification(
-						AdminMessageStrings.NOTIFICATION__ACCOUNT_ADDED_TO_INTERVENTION);
+		getAdminUI().showInformationNotification(
+				AdminMessageStrings.NOTIFICATION__ACCOUNT_ADDED_TO_INTERVENTION);
 	}
 
 	public void removeAccountFromIntervention() {
@@ -209,12 +211,11 @@ public class InterventionAccessTabComponentWithController extends
 				selectedUIAuthorInTable);
 		comboBoxBeanContainer.sort(new String[] { UIAuthor.getSortColumn() },
 				new boolean[] { true });
-		getInterventionAccessEditComponent().getAccountsTable().removeItem(
-				selectedUIAuthorInTable.getRelatedModelObject(Author.class)
-						.getId());
+		getInterventionAccessEditComponent().getAccountsTable()
+				.removeItem(selectedUIAuthorInTable
+						.getRelatedModelObject(Author.class).getId());
 
-		getAdminUI()
-				.showInformationNotification(
-						AdminMessageStrings.NOTIFICATION__ACCOUNT_REMOVED_FROM_INTERVENTION);
+		getAdminUI().showInformationNotification(
+				AdminMessageStrings.NOTIFICATION__ACCOUNT_REMOVED_FROM_INTERVENTION);
 	}
 }

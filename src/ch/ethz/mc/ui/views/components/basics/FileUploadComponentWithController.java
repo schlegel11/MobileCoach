@@ -50,7 +50,7 @@ import com.vaadin.ui.Upload.SucceededListener;
 @Log4j2
 public class FileUploadComponentWithController extends FileUploadComponent {
 
-	private UploadListener	listener;
+	private UploadListener listener;
 
 	public FileUploadComponentWithController() {
 		super();
@@ -74,7 +74,7 @@ public class FileUploadComponentWithController extends FileUploadComponent {
 	 */
 	private class Uploader implements Receiver, StartedListener,
 			SucceededListener, FailedListener, ErrorHandler {
-		public File	temporaryFile;
+		public File temporaryFile;
 
 		@Override
 		@SneakyThrows(FileNotFoundException.class)
@@ -82,17 +82,17 @@ public class FileUploadComponentWithController extends FileUploadComponent {
 				final String mimeType) {
 
 			String temporaryFileExtension = null;
-			val temporaryFileName = filename
-					.replaceAll("[^A-Za-z0-9_. ]+", "_");
+			val temporaryFileName = filename.replaceAll("[^A-Za-z0-9_. ]+",
+					"_");
 			if (filename.lastIndexOf(".") > -1) {
-				temporaryFileExtension = filename.substring(
-						filename.lastIndexOf(".")).toLowerCase();
+				temporaryFileExtension = filename
+						.substring(filename.lastIndexOf(".")).toLowerCase();
 			} else {
 				return null;
 			}
 
-			if (!temporaryFileExtension.toLowerCase().equals(
-					Constants.getFileExtension())) {
+			if (!temporaryFileExtension.toLowerCase()
+					.equals(Constants.getFileExtension())) {
 				return null;
 			}
 
@@ -114,9 +114,8 @@ public class FileUploadComponentWithController extends FileUploadComponent {
 
 			reset();
 
-			getAdminUI()
-					.showErrorNotification(
-							AdminMessageStrings.NOTIFICATION__UPLOAD_FAILED_OR_UNSUPPORTED_FILE_TYPE);
+			getAdminUI().showErrorNotification(
+					AdminMessageStrings.NOTIFICATION__UPLOAD_FAILED_OR_UNSUPPORTED_FILE_TYPE);
 		}
 
 		@Override

@@ -86,11 +86,13 @@ public class VotingServiceV01 extends AbstractServiceV01 {
 			val votingVariable = restManagerService.readVariable(participantId,
 					variable.trim(), true);
 
-			if (votingVariable.getValue().length() < ImplementationConstants.OBJECT_ID_LENGTH) {
+			if (votingVariable.getValue()
+					.length() < ImplementationConstants.OBJECT_ID_LENGTH) {
 				votingVariable.setValue("0");
 			} else {
-				votingVariable.setValue(String.valueOf(StringUtils
-						.countMatches(votingVariable.getValue(), ",") + 1));
+				votingVariable.setValue(String.valueOf(
+						StringUtils.countMatches(votingVariable.getValue(), ",")
+								+ 1));
 			}
 
 			return votingVariable;
@@ -134,12 +136,13 @@ public class VotingServiceV01 extends AbstractServiceV01 {
 			for (val votingVariable : collectionOfExtendedVariables
 					.getVariables()) {
 
-				if (votingVariable.getValue().length() < ImplementationConstants.OBJECT_ID_LENGTH) {
+				if (votingVariable.getValue()
+						.length() < ImplementationConstants.OBJECT_ID_LENGTH) {
 					votingVariable.setValue("0");
 					votingVariable.setVoted(false);
 				} else {
-					if (votingVariable.getValue().contains(
-							participantId.toHexString())) {
+					if (votingVariable.getValue()
+							.contains(participantId.toHexString())) {
 						votingVariable.setVoted(true);
 					} else {
 						votingVariable.setVoted(false);
@@ -191,12 +194,13 @@ public class VotingServiceV01 extends AbstractServiceV01 {
 			for (val votingVariable : collectionOfExtendedVariables
 					.getVariables()) {
 
-				if (votingVariable.getValue().length() < ImplementationConstants.OBJECT_ID_LENGTH) {
+				if (votingVariable.getValue()
+						.length() < ImplementationConstants.OBJECT_ID_LENGTH) {
 					votingVariable.setValue("0");
 					votingVariable.setVoted(false);
 				} else {
-					if (votingVariable.getValue().contains(
-							participantId.toHexString())) {
+					if (votingVariable.getValue()
+							.contains(participantId.toHexString())) {
 						votingVariable.setVoted(true);
 					} else {
 						votingVariable.setVoted(false);
@@ -221,8 +225,7 @@ public class VotingServiceV01 extends AbstractServiceV01 {
 	@GET
 	@Path("/vote/{variable}/{receivingParticipant}")
 	@Produces("application/json")
-	public Response votingVote(
-			@HeaderParam("token") final String token,
+	public Response votingVote(@HeaderParam("token") final String token,
 			@PathParam("variable") final String variable,
 			@PathParam("receivingParticipant") final String receivingParticipantIdString,
 			@Context final HttpServletRequest request) {
@@ -240,10 +243,10 @@ public class VotingServiceV01 extends AbstractServiceV01 {
 		if (ObjectId.isValid(receivingParticipantIdString)) {
 			receivingParticipantId = new ObjectId(receivingParticipantIdString);
 		} else {
-			throw new WebApplicationException(Response
-					.status(Status.BAD_REQUEST)
-					.entity("The given receiving participant is not valid")
-					.build());
+			throw new WebApplicationException(
+					Response.status(Status.BAD_REQUEST)
+							.entity("The given receiving participant is not valid")
+							.build());
 		}
 
 		try {
@@ -267,8 +270,7 @@ public class VotingServiceV01 extends AbstractServiceV01 {
 	@GET
 	@Path("/unvote/{variable}/{receivingParticipant}")
 	@Produces("application/json")
-	public Response votingUnvote(
-			@HeaderParam("token") final String token,
+	public Response votingUnvote(@HeaderParam("token") final String token,
 			@PathParam("variable") final String variable,
 			@PathParam("receivingParticipant") final String receivingParticipantIdString,
 			@Context final HttpServletRequest request) {
@@ -286,10 +288,10 @@ public class VotingServiceV01 extends AbstractServiceV01 {
 		if (ObjectId.isValid(receivingParticipantIdString)) {
 			receivingParticipantId = new ObjectId(receivingParticipantIdString);
 		} else {
-			throw new WebApplicationException(Response
-					.status(Status.BAD_REQUEST)
-					.entity("The given receiving participant is not valid")
-					.build());
+			throw new WebApplicationException(
+					Response.status(Status.BAD_REQUEST)
+							.entity("The given receiving participant is not valid")
+							.build());
 		}
 
 		try {

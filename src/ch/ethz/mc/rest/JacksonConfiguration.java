@@ -47,7 +47,7 @@ import org.codehaus.jackson.map.module.SimpleModule;
  */
 @Provider
 public class JacksonConfiguration implements ContextResolver<ObjectMapper> {
-	private final ObjectMapper	objectMapper;
+	private final ObjectMapper objectMapper;
 
 	class BooleanSerializer extends JsonSerializer<Boolean> {
 

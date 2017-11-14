@@ -35,7 +35,7 @@ public abstract class UIModelObject extends UIObject {
 	 * Contains the reference to the related model object
 	 */
 	@NonNull
-	private ModelObject	relatedModelObject;
+	private ModelObject relatedModelObject;
 
 	public <ModelObjectSubclass extends ModelObject> ModelObjectSubclass getRelatedModelObject(
 			final Class<ModelObjectSubclass> modelObjectClass) {

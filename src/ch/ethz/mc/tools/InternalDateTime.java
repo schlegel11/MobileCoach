@@ -74,7 +74,8 @@ public class InternalDateTime {
 	 * @param active
 	 * @throws InterruptedException
 	 */
-	public static synchronized void setFastForwardMode(final boolean newStatus) {
+	public static synchronized void setFastForwardMode(
+			final boolean newStatus) {
 		fastForwardMode = newStatus;
 
 		if (newStatus && fastForwardModeThread == null) {

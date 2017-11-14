@@ -58,7 +58,8 @@ import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
  */
 @SuppressWarnings("serial")
 @WebServlet(displayName = "Short URL based Media Object File Streaming", urlPatterns = "/"
-		+ ImplementationConstants.SHORT_ID_FILE_STREAMING_SERVLET_PATH + "/*", asyncSupported = true, loadOnStartup = 1)
+		+ ImplementationConstants.SHORT_ID_FILE_STREAMING_SERVLET_PATH
+		+ "/*", asyncSupported = true, loadOnStartup = 1)
 @Log4j2
 public class ShortURLMediaObjectURLAndFileStreamingServlet extends HttpServlet {
 	private InterventionAdministrationManagerService	interventionAdministrationManagerService;
@@ -119,7 +120,8 @@ public class ShortURLMediaObjectURLAndFileStreamingServlet extends HttpServlet {
 		}
 
 		final val mediaObject = interventionAdministrationManagerService
-				.getMediaObject(mediaObjectParticipantShortURL.getMediaObject());
+				.getMediaObject(
+						mediaObjectParticipantShortURL.getMediaObject());
 
 		// Check if media object exists
 		if (mediaObject == null) {
@@ -128,9 +130,8 @@ public class ShortURLMediaObjectURLAndFileStreamingServlet extends HttpServlet {
 		}
 
 		// Mark media object as seen
-		interventionExecutionManagerService
-				.dialogMessageSetMediaContentViewed(mediaObjectParticipantShortURL
-						.getDialogMessage());
+		interventionExecutionManagerService.dialogMessageSetMediaContentViewed(
+				mediaObjectParticipantShortURL.getDialogMessage());
 
 		// Handle file or URL based media objects
 		if (mediaObject.getFileReference() != null) {
@@ -177,8 +178,8 @@ public class ShortURLMediaObjectURLAndFileStreamingServlet extends HttpServlet {
 	 */
 	@Override
 	protected void doHead(final HttpServletRequest request,
-			final HttpServletResponse response) throws ServletException,
-			IOException {
+			final HttpServletResponse response)
+			throws ServletException, IOException {
 		log.debug("Serving short id dynamic {}", request.getPathInfo());
 
 		handleRequest(request, response, true);
@@ -191,8 +192,8 @@ public class ShortURLMediaObjectURLAndFileStreamingServlet extends HttpServlet {
 	 */
 	@Override
 	protected void doGet(final HttpServletRequest request,
-			final HttpServletResponse response) throws ServletException,
-			IOException {
+			final HttpServletResponse response)
+			throws ServletException, IOException {
 		log.debug("Serving short id dynamic {}", request.getPathInfo());
 
 		handleRequest(request, response, false);

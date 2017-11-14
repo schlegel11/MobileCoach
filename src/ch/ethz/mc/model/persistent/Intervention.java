@@ -154,20 +154,19 @@ public class Intervention extends ModelObject {
 	 */
 	@Override
 	public UIModelObject toUIModelObject() {
-		val intervention = new UIIntervention(
-				name,
-				active,
-				active ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE),
+		val intervention = new UIIntervention(name, active, active
+				? Messages.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
+				: Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE),
 				monitoringActive,
-				monitoringActive ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE),
-				assignedSenderIdentification == null ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+				monitoringActive
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__ACTIVE)
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__INACTIVE),
+				assignedSenderIdentification == null
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NOT_SET)
 						: assignedSenderIdentification);
 
 		intervention.setRelatedModelObject(this);
@@ -270,15 +269,16 @@ public class Intervention extends ModelObject {
 	@JsonIgnore
 	public String toTable() {
 		String table = wrapRow(wrapHeader("Name:") + wrapField(escape(name)));
-		table += wrapRow(wrapHeader("Created:")
-				+ wrapField(formatDate(created)));
+		table += wrapRow(
+				wrapHeader("Created:") + wrapField(formatDate(created)));
 		table += wrapRow(wrapHeader("Intervention Status:")
 				+ wrapField(formatStatus(active)));
 		table += wrapRow(wrapHeader("Monitoring Status:")
 				+ wrapField(formatStatus(monitoringActive)));
 		table += wrapRow(wrapHeader("Assigned Sender Identification:")
 				+ wrapField(assignedSenderIdentification));
-		table += wrapRow(wrapHeader("Screening Surveys shall automatically be finished:")
+		table += wrapRow(wrapHeader(
+				"Screening Surveys shall automatically be finished:")
 				+ wrapField(formatYesNo(automaticallyFinishScreeningSurveys)));
 		table += wrapRow(wrapHeader("Monitoring Starting Days:")
 				+ wrapField(StringUtils.join(monitoringStartingDays, ',')));

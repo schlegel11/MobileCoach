@@ -64,7 +64,8 @@ import ch.ethz.mc.tools.StringValidator;
 @Log4j2
 public class VariableAccessServiceV01 extends AbstractServiceV01 {
 
-	public VariableAccessServiceV01(final RESTManagerService restManagerService) {
+	public VariableAccessServiceV01(
+			final RESTManagerService restManagerService) {
 		super(restManagerService);
 	}
 
@@ -125,14 +126,14 @@ public class VariableAccessServiceV01 extends AbstractServiceV01 {
 			val resultVariables = collectionOfVariables.getVariables();
 
 			for (val variable : variableArray) {
-				if (!StringValidator
-						.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
+				if (!StringValidator.isValidVariableName(
+						ImplementationConstants.VARIABLE_PREFIX
 								+ variable.trim())) {
 					throw new Exception("The variable name is not valid");
 				}
 
-				resultVariables.add(restManagerService.readVariable(
-						participantId, variable.trim(), false));
+				resultVariables.add(restManagerService
+						.readVariable(participantId, variable.trim(), false));
 			}
 
 			collectionOfVariables.setSize(resultVariables.size());
@@ -204,8 +205,8 @@ public class VariableAccessServiceV01 extends AbstractServiceV01 {
 			val cleanedVariableList = new ArrayList<String>();
 
 			for (val variable : variables.split(",")) {
-				if (!StringValidator
-						.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
+				if (!StringValidator.isValidVariableName(
+						ImplementationConstants.VARIABLE_PREFIX
 								+ variable.trim())) {
 					throw new Exception("The variable name is not valid");
 				}
@@ -283,8 +284,8 @@ public class VariableAccessServiceV01 extends AbstractServiceV01 {
 			val cleanedVariableList = new ArrayList<String>();
 
 			for (val variable : variables.split(",")) {
-				if (!StringValidator
-						.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
+				if (!StringValidator.isValidVariableName(
+						ImplementationConstants.VARIABLE_PREFIX
 								+ variable.trim())) {
 					throw new Exception("The variable name is not valid");
 				}
@@ -338,8 +339,8 @@ public class VariableAccessServiceV01 extends AbstractServiceV01 {
 					.getVariables()) {
 				val value = resultVariable.getValue();
 				if (clusterHashtable.containsKey(value)) {
-					clusterHashtable
-							.put(value, clusterHashtable.get(value) + 1);
+					clusterHashtable.put(value,
+							clusterHashtable.get(value) + 1);
 				} else {
 					clusterHashtable.put(value, 1);
 				}
@@ -355,15 +356,15 @@ public class VariableAccessServiceV01 extends AbstractServiceV01 {
 				clusterValues.add(clusterValue);
 			}
 
-			Collections.sort(clusterValues, (a, b) -> a.getValue()
-					.compareToIgnoreCase(b.getValue()));
+			Collections.sort(clusterValues,
+					(a, b) -> a.getValue().compareToIgnoreCase(b.getValue()));
 
 			return variableCluster;
 		} catch (final Exception e) {
-			throw new WebApplicationException(Response
-					.status(Status.FORBIDDEN)
+			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
 					.entity("Could not read cluster of variable: "
-							+ e.getMessage()).build());
+							+ e.getMessage())
+					.build());
 		}
 	}
 
@@ -401,8 +402,8 @@ public class VariableAccessServiceV01 extends AbstractServiceV01 {
 					.getVariables()) {
 				val value = resultVariable.getValue();
 				if (clusterHashtable.containsKey(value)) {
-					clusterHashtable
-							.put(value, clusterHashtable.get(value) + 1);
+					clusterHashtable.put(value,
+							clusterHashtable.get(value) + 1);
 				} else {
 					clusterHashtable.put(value, 1);
 				}
@@ -418,15 +419,15 @@ public class VariableAccessServiceV01 extends AbstractServiceV01 {
 				clusterValues.add(clusterValue);
 			}
 
-			Collections.sort(clusterValues, (a, b) -> a.getValue()
-					.compareToIgnoreCase(b.getValue()));
+			Collections.sort(clusterValues,
+					(a, b) -> a.getValue().compareToIgnoreCase(b.getValue()));
 
 			return variableCluster;
 		} catch (final Exception e) {
-			throw new WebApplicationException(Response
-					.status(Status.FORBIDDEN)
+			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
 					.entity("Could not read cluster of variable: "
-							+ e.getMessage()).build());
+							+ e.getMessage())
+					.build());
 		}
 	}
 
@@ -468,8 +469,8 @@ public class VariableAccessServiceV01 extends AbstractServiceV01 {
 					.getVariables()) {
 				val value = resultVariable.getValue();
 				if (clusterHashtable.containsKey(value)) {
-					clusterHashtable
-							.put(value, clusterHashtable.get(value) + 1);
+					clusterHashtable.put(value,
+							clusterHashtable.get(value) + 1);
 				} else {
 					clusterHashtable.put(value, 1);
 				}
@@ -485,15 +486,15 @@ public class VariableAccessServiceV01 extends AbstractServiceV01 {
 				clusterValues.add(clusterValue);
 			}
 
-			Collections.sort(clusterValues, (a, b) -> a.getValue()
-					.compareToIgnoreCase(b.getValue()));
+			Collections.sort(clusterValues,
+					(a, b) -> a.getValue().compareToIgnoreCase(b.getValue()));
 
 			return variableCluster;
 		} catch (final Exception e) {
-			throw new WebApplicationException(Response
-					.status(Status.FORBIDDEN)
+			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
 					.entity("Could not read cluster of variable: "
-							+ e.getMessage()).build());
+							+ e.getMessage())
+					.build());
 		}
 	}
 
@@ -534,8 +535,8 @@ public class VariableAccessServiceV01 extends AbstractServiceV01 {
 					.getVariables()) {
 				val value = resultVariable.getValue();
 				if (clusterHashtable.containsKey(value)) {
-					clusterHashtable
-							.put(value, clusterHashtable.get(value) + 1);
+					clusterHashtable.put(value,
+							clusterHashtable.get(value) + 1);
 				} else {
 					clusterHashtable.put(value, 1);
 				}
@@ -551,15 +552,15 @@ public class VariableAccessServiceV01 extends AbstractServiceV01 {
 				clusterValues.add(clusterValue);
 			}
 
-			Collections.sort(clusterValues, (a, b) -> a.getValue()
-					.compareToIgnoreCase(b.getValue()));
+			Collections.sort(clusterValues,
+					(a, b) -> a.getValue().compareToIgnoreCase(b.getValue()));
 
 			return variableCluster;
 		} catch (final Exception e) {
-			throw new WebApplicationException(Response
-					.status(Status.FORBIDDEN)
+			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
 					.entity("Could not read cluster of variable: "
-							+ e.getMessage()).build());
+							+ e.getMessage())
+					.build());
 		}
 	}
 
@@ -594,10 +595,10 @@ public class VariableAccessServiceV01 extends AbstractServiceV01 {
 
 			return variableAverage;
 		} catch (final Exception e) {
-			throw new WebApplicationException(Response
-					.status(Status.FORBIDDEN)
+			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
 					.entity("Could not calculate average of variable: "
-							+ e.getMessage()).build());
+							+ e.getMessage())
+					.build());
 		}
 	}
 
@@ -632,10 +633,10 @@ public class VariableAccessServiceV01 extends AbstractServiceV01 {
 
 			return variableAverage;
 		} catch (final Exception e) {
-			throw new WebApplicationException(Response
-					.status(Status.FORBIDDEN)
+			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
 					.entity("Could not calculate average of variable: "
-							+ e.getMessage()).build());
+							+ e.getMessage())
+					.build());
 		}
 	}
 
@@ -670,10 +671,10 @@ public class VariableAccessServiceV01 extends AbstractServiceV01 {
 
 			return variableAverage;
 		} catch (final Exception e) {
-			throw new WebApplicationException(Response
-					.status(Status.FORBIDDEN)
+			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
 					.entity("Could not calculate average of variable: "
-							+ e.getMessage()).build());
+							+ e.getMessage())
+					.build());
 		}
 	}
 
@@ -707,10 +708,10 @@ public class VariableAccessServiceV01 extends AbstractServiceV01 {
 
 			return variableAverage;
 		} catch (final Exception e) {
-			throw new WebApplicationException(Response
-					.status(Status.FORBIDDEN)
+			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
 					.entity("Could not calculate average of variable: "
-							+ e.getMessage()).build());
+							+ e.getMessage())
+					.build());
 		}
 	}
 

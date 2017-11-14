@@ -56,7 +56,7 @@ import ch.ethz.mc.tools.StringValidator;
 @Path("/v01/image")
 @Log4j2
 public class ImageUploadServiceV01 extends AbstractFileUploadServiceV01 {
-	RESTManagerService	restManagerService;
+	RESTManagerService restManagerService;
 
 	public ImageUploadServiceV01(final RESTManagerService restManagerService) {
 		super(restManagerService);
@@ -81,29 +81,29 @@ public class ImageUploadServiceV01 extends AbstractFileUploadServiceV01 {
 		}
 
 		log.debug("Size of image upload: {}", request.getContentLength());
-		if (request.getContentLength() > ImplementationConstants.MAX_UPLOAD_SIZE_IN_BYTE) {
+		if (request
+				.getContentLength() > ImplementationConstants.MAX_UPLOAD_SIZE_IN_BYTE) {
 			throw new WebApplicationException(
 					Response.status(Status.BAD_REQUEST)
 							.entity("Could not upload image: The image file is too big")
 							.build());
 		}
 
-		if (!StringValidator
-				.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
-						+ variable.trim())) {
-			throw new WebApplicationException(
-					Response.serverError()
-							.entity("Could not upload image: The variable name is not valid")
-							.build());
+		if (!StringValidator.isValidVariableName(
+				ImplementationConstants.VARIABLE_PREFIX + variable.trim())) {
+			throw new WebApplicationException(Response.serverError()
+					.entity("Could not upload image: The variable name is not valid")
+					.build());
 		}
 
 		val uploadToVariableAllowed = restManagerService
 				.checkVariableForServiceWritingRights(participantId, variable);
 		if (uploadToVariableAllowed == false) {
-			throw new WebApplicationException(Response
-					.serverError()
-					.entity("The variable " + variable
-							+ " cannot be written by the participant").build());
+			throw new WebApplicationException(
+					Response.serverError()
+							.entity("The variable " + variable
+									+ " cannot be written by the participant")
+							.build());
 		}
 
 		// Do upload to temporary file
@@ -150,16 +150,17 @@ public class ImageUploadServiceV01 extends AbstractFileUploadServiceV01 {
 					fileReference.replace("/", "-"), true, true);
 		} catch (final ExternallyWriteProtectedVariableException e) {
 			try {
-				restManagerService.getFileStorageManagerService().deleteFile(
-						fileReference, FILE_STORES.MEDIA_UPLOAD);
+				restManagerService.getFileStorageManagerService()
+						.deleteFile(fileReference, FILE_STORES.MEDIA_UPLOAD);
 			} catch (final Exception f) {
 				// Nothing to do
 			}
 
-			throw new WebApplicationException(Response
-					.serverError()
-					.entity("The variable " + variable
-							+ " cannot be written by the participant").build());
+			throw new WebApplicationException(
+					Response.serverError()
+							.entity("The variable " + variable
+									+ " cannot be written by the participant")
+							.build());
 		}
 
 		return Response.ok(new UploadOK(fileReference.replace("/", "-")))

@@ -126,11 +126,13 @@ public class FeedbackSlide extends ModelObject {
 	@Override
 	public UIModelObject toUIModelObject() {
 		val feedbackSlide = new UIFeedbackSlide(order,
-				titleWithPlaceholders.isEmpty() ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+				titleWithPlaceholders.isEmpty()
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NOT_SET)
 						: titleWithPlaceholders.toShortenedString(40),
-				comment.equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+				comment.equals("")
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NOT_SET)
 						: comment);
 
 		feedbackSlide.setRelatedModelObject(this);
@@ -152,8 +154,8 @@ public class FeedbackSlide extends ModelObject {
 
 		// Linked media object
 		if (linkedMediaObject != null) {
-			exportList.add(ModelObject
-					.get(MediaObject.class, linkedMediaObject));
+			exportList
+					.add(ModelObject.get(MediaObject.class, linkedMediaObject));
 		}
 
 		// Add feedback slide rule
@@ -199,8 +201,8 @@ public class FeedbackSlide extends ModelObject {
 		table += wrapRow(wrapHeader("Comment:") + wrapField(escape(comment)));
 		table += wrapRow(wrapHeader("Optional Layout Attributes:")
 				+ wrapField(escape(optionalLayoutAttributeWithPlaceholders)));
-		table += wrapRow(wrapHeader("Text:")
-				+ wrapField(escape(textWithPlaceholders)));
+		table += wrapRow(
+				wrapHeader("Text:") + wrapField(escape(textWithPlaceholders)));
 
 		if (linkedMediaObject != null) {
 			val mediaObject = ModelObject.get(MediaObject.class,
@@ -209,20 +211,18 @@ public class FeedbackSlide extends ModelObject {
 				String externalReference;
 				if (mediaObject.getFileReference() != null) {
 					externalReference = "javascript:showMediaObject('"
-							+ mediaObject.getId()
-							+ "/"
-							+ StringHelpers.cleanFilenameString(mediaObject
-									.getName()) + "')";
+							+ mediaObject.getId() + "/" + StringHelpers
+									.cleanFilenameString(mediaObject.getName())
+							+ "')";
 				} else {
 					externalReference = mediaObject.getUrlReference();
 				}
 
-				table += wrapRow(wrapHeader("Linked Media Object:")
-						+ wrapField(createLink(externalReference,
-								mediaObject.getName())));
+				table += wrapRow(wrapHeader("Linked Media Object:") + wrapField(
+						createLink(externalReference, mediaObject.getName())));
 			} else {
-				table += wrapRow(wrapHeader("Linked Media Object:")
-						+ wrapField(formatWarning("Media Object set, but not found")));
+				table += wrapRow(wrapHeader("Linked Media Object:") + wrapField(
+						formatWarning("Media Object set, but not found")));
 			}
 		}
 
@@ -237,8 +237,8 @@ public class FeedbackSlide extends ModelObject {
 		}
 
 		if (buffer.length() > 0) {
-			table += wrapRow(wrapHeader("Rules:")
-					+ wrapField(buffer.toString()));
+			table += wrapRow(
+					wrapHeader("Rules:") + wrapField(buffer.toString()));
 		}
 
 		return wrapTable(table);

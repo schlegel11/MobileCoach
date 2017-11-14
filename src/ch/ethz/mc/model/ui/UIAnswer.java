@@ -52,7 +52,8 @@ public class UIAnswer extends UIObject {
 
 	public static String[] getColumnHeaders() {
 		return new String[] {
-				localize(AdminMessageStrings.UI_COLUMNS__ANSWER_WITH_PLACEHODLERS),
+				localize(
+						AdminMessageStrings.UI_COLUMNS__ANSWER_WITH_PLACEHODLERS),
 				localize(AdminMessageStrings.UI_COLUMNS__VALUE) };
 	}
 

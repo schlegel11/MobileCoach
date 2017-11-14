@@ -60,8 +60,10 @@ public class UIScreeningSurvey extends UIModelObject {
 		return new String[] {
 				localize(AdminMessageStrings.UI_COLUMNS__SCREENING_SURVEY),
 				localize(AdminMessageStrings.UI_COLUMNS__SCREENING_SURVEY_TYPE),
-				localize(AdminMessageStrings.UI_COLUMNS__SCREENING_SURVEY_PASSWORD),
-				localize(AdminMessageStrings.UI_COLUMNS__SCREENING_SURVEY_STATUS) };
+				localize(
+						AdminMessageStrings.UI_COLUMNS__SCREENING_SURVEY_PASSWORD),
+				localize(
+						AdminMessageStrings.UI_COLUMNS__SCREENING_SURVEY_STATUS) };
 	}
 
 	public static String getSortColumn() {

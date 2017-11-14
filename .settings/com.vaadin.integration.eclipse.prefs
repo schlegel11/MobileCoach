@@ -1,3 +1,4 @@
+com.vaadin.integration.eclipse.mavenLatestVersionsUpgrade=["7.6.8","7.7.12"]
 com.vaadin.integration.eclipse.previousCompileAction=both
 com.vaadin.integration.eclipse.useLatestNightly=false
 com.vaadin.integration.eclipse.widgetsetCompilationEta=70665

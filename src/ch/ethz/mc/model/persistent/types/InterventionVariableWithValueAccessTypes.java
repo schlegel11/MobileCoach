@@ -28,11 +28,11 @@ import lombok.Getter;
  * @author Andreas Filler
  */
 public enum InterventionVariableWithValueAccessTypes {
-	INTERNAL(0), MANAGEABLE_BY_SERVICE(1), EXTERNALLY_READABLE(2), EXTERNALLY_READ_AND_WRITABLE(
-			3);
+	INTERNAL(0), MANAGEABLE_BY_SERVICE(1), EXTERNALLY_READABLE(
+			2), EXTERNALLY_READ_AND_WRITABLE(3);
 
 	@Getter
-	private int	intValue;
+	private int intValue;
 
 	private InterventionVariableWithValueAccessTypes(final int intValue) {
 		this.intValue = intValue;

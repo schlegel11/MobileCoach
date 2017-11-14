@@ -45,8 +45,8 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class LocalizedStringEditComponent extends
-		AbstractLStringValueEditComponent {
+public class LocalizedStringEditComponent
+		extends AbstractLStringValueEditComponent {
 
 	/*- VaadinEditorProperties={"grid":"RegularGrid,20","showGrid":true,"snapToGrid":true,"snapToObject":true,"movingGuides":false,"snappingDistance":10} */
 
@@ -90,7 +90,8 @@ public class LocalizedStringEditComponent extends
 	}
 
 	@Override
-	public void registerCancelButtonListener(final ClickListener clickListener) {
+	public void registerCancelButtonListener(
+			final ClickListener clickListener) {
 		cancelButton.addClickListener(clickListener);
 	}
 

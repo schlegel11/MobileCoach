@@ -162,12 +162,11 @@ public class FeedbackEditComponentWithController extends FeedbackEditComponent {
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
 						slidesBeanContainer.addItem(newFeedbackSlide.getId(),
-								UIFeedbackSlide.class.cast(newFeedbackSlide
-										.toUIModelObject()));
+								UIFeedbackSlide.class.cast(
+										newFeedbackSlide.toUIModelObject()));
 						slidesTable.select(newFeedbackSlide.getId());
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__FEEDBACK_SLIDE_CREATED);
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__FEEDBACK_SLIDE_CREATED);
 
 						closeWindow();
 					}
@@ -191,9 +190,8 @@ public class FeedbackEditComponentWithController extends FeedbackEditComponent {
 								slidesBeanContainer, selectedFeedbackSlide);
 						slidesTable.sort();
 						slidesTable.select(selectedFeedbackSlide.getId());
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__FEEDBACK_SLIDE_UPDATED);
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__FEEDBACK_SLIDE_UPDATED);
 
 						closeWindow();
 					}
@@ -204,9 +202,8 @@ public class FeedbackEditComponentWithController extends FeedbackEditComponent {
 		log.debug("Duplicate slide");
 
 		final File temporaryBackupFile = getSurveyAdministrationManagerService()
-				.feedbackSlideExport(
-						selectedUIFeedbackSlide
-								.getRelatedModelObject(FeedbackSlide.class));
+				.feedbackSlideExport(selectedUIFeedbackSlide
+						.getRelatedModelObject(FeedbackSlide.class));
 
 		try {
 			final FeedbackSlide importedFeedbackSlide = getSurveyAdministrationManagerService()
@@ -218,8 +215,8 @@ public class FeedbackEditComponentWithController extends FeedbackEditComponent {
 
 			// Adapt UI
 			slidesBeanContainer.addItem(importedFeedbackSlide.getId(),
-					UIFeedbackSlide.class.cast(importedFeedbackSlide
-							.toUIModelObject()));
+					UIFeedbackSlide.class
+							.cast(importedFeedbackSlide.toUIModelObject()));
 			slidesTable.select(importedFeedbackSlide.getId());
 
 			getAdminUI().showInformationNotification(
@@ -263,7 +260,8 @@ public class FeedbackEditComponentWithController extends FeedbackEditComponent {
 			@Override
 			public void buttonClick(final ClickEvent event) {
 				try {
-					val selectedFeedbackSlide = selectedUIFeedbackSlide.getRelatedModelObject(FeedbackSlide.class);
+					val selectedFeedbackSlide = selectedUIFeedbackSlide
+							.getRelatedModelObject(FeedbackSlide.class);
 
 					// Delete variable
 					getSurveyAdministrationManagerService()
@@ -277,9 +275,8 @@ public class FeedbackEditComponentWithController extends FeedbackEditComponent {
 				// Adapt UI
 				slidesTable.removeItem(selectedUIFeedbackSlide
 						.getRelatedModelObject(FeedbackSlide.class).getId());
-				getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__FEEDBACK_SLIDE_DELETED);
+				getAdminUI().showInformationNotification(
+						AdminMessageStrings.NOTIFICATION__FEEDBACK_SLIDE_DELETED);
 
 				closeWindow();
 			}

@@ -59,8 +59,7 @@ public abstract class WelcomeTabComponent extends AbstractCustomComponent {
 		setCompositionRoot(mainLayout);
 
 		// manually added
-		localize(welcomeLabel,
-				AdminMessageStrings.WELCOME_TAB__WELCOME_MESSAGE,
+		localize(welcomeLabel, AdminMessageStrings.WELCOME_TAB__WELCOME_MESSAGE,
 				getUISession().getCurrentAuthorUsername());
 	}
 

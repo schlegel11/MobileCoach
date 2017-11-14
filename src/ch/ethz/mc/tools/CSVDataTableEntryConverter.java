@@ -31,7 +31,8 @@ import com.googlecode.jcsv.writer.CSVEntryConverter;
  * 
  * @author Andreas Filler
  */
-public class CSVDataTableEntryConverter implements CSVEntryConverter<DataEntry> {
+public class CSVDataTableEntryConverter
+		implements CSVEntryConverter<DataEntry> {
 
 	@Override
 	public String[] convertEntry(final DataEntry dataEntry) {

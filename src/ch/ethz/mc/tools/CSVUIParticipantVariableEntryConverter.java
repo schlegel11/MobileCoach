@@ -31,8 +31,8 @@ import com.googlecode.jcsv.writer.CSVEntryConverter;
  * 
  * @author Andreas Filler
  */
-public class CSVUIParticipantVariableEntryConverter implements
-		CSVEntryConverter<UIVariableWithParticipantForResults> {
+public class CSVUIParticipantVariableEntryConverter
+		implements CSVEntryConverter<UIVariableWithParticipantForResults> {
 
 	@Override
 	public String[] convertEntry(

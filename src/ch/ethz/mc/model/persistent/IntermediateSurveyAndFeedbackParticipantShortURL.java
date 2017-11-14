@@ -47,8 +47,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 @NoArgsConstructor
 @AllArgsConstructor
-public class IntermediateSurveyAndFeedbackParticipantShortURL extends
-		ModelObject {
+public class IntermediateSurveyAndFeedbackParticipantShortURL
+		extends ModelObject {
 	/**
 	 * The short id defining this
 	 * {@link IntermediateSurveyAndFeedbackParticipantShortURL}
@@ -146,17 +146,19 @@ public class IntermediateSurveyAndFeedbackParticipantShortURL extends
 			throws Exception {
 
 		if (idPart.length() < 6) {
-			throw new Exception("The following id part is not valid: " + idPart);
+			throw new Exception(
+					"The following id part is not valid: " + idPart);
 		}
 
-		val shortId = String.valueOf(Long.parseLong(
-				idPart.substring(1, idPart.length() - 4), 36));
+		val shortId = String.valueOf(
+				Long.parseLong(idPart.substring(1, idPart.length() - 4), 36));
 		final String checksum = calculateChecksum(shortId);
 
 		if (checksum.equals(idPart.substring(0, 1))) {
 			return Long.parseLong(shortId);
 		} else {
-			throw new Exception("The following id part is not valid: " + idPart);
+			throw new Exception(
+					"The following id part is not valid: " + idPart);
 		}
 	}
 

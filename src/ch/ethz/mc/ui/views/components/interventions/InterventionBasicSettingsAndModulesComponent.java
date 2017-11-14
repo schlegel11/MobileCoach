@@ -49,8 +49,8 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class InterventionBasicSettingsAndModulesComponent extends
-		AbstractCustomComponent {
+public class InterventionBasicSettingsAndModulesComponent
+		extends AbstractCustomComponent {
 
 	/*- VaadinEditorProperties={"grid":"RegularGrid,20","showGrid":true,"snapToGrid":true,"snapToObject":true,"movingGuides":false,"snappingDistance":10} */
 
@@ -123,56 +123,39 @@ public class InterventionBasicSettingsAndModulesComponent extends
 		setCompositionRoot(mainLayout);
 
 		// manually added
-		localize(
-				switchInterventionButton,
+		localize(switchInterventionButton,
 				AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__SWITCH_INTERVENTION_BUTTON_INACTIVE);
-		localize(
-				switchMessagingButton,
+		localize(switchMessagingButton,
 				AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__SWITCH_MONITORING_BUTTON_INACTIVE);
-		localize(
-				senderIdentificationSelectionLabel,
+		localize(senderIdentificationSelectionLabel,
 				AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__SENDER_IDENTIFICATION_SELECTION_LABEL);
-		localize(
-				finishScreeningSurveysCheckbox,
+		localize(finishScreeningSurveysCheckbox,
 				AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__AUTOMATICALLY_FINISH_SCREENING_SURVEYS_CHECKBOX);
-		localize(
-				dashboardEnabledCheckbox,
+		localize(dashboardEnabledCheckbox,
 				AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__DASHBOARD_ENABLED_CHECKBOX);
-		localize(
-				dashboardTemplatePathLabel,
+		localize(dashboardTemplatePathLabel,
 				AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__DASHBOARD_TEMPLATE_PATH_LABEL);
-		localize(
-				dashboardPasswordExpressionLabel,
+		localize(dashboardPasswordExpressionLabel,
 				AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__DASHBOARD_PASSWORD_EXPRESSION_LABEL);
-		localize(
-				deepstreamPasswordLabel,
+		localize(deepstreamPasswordLabel,
 				AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__DEEPSTREAM_PASSWORD_LABEL);
-		localize(
-				monitoringStartingDaysLabel,
+		localize(monitoringStartingDaysLabel,
 				AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__MONITORING_STARTING_DAYS_LABEL);
-		localize(
-				mondayCheckbox,
+		localize(mondayCheckbox,
 				AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__MONDAY_CHECKBOX);
-		localize(
-				tuesdayCheckbox,
+		localize(tuesdayCheckbox,
 				AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__TUESDAY_CHECKBOX);
-		localize(
-				wednesdayCheckbox,
+		localize(wednesdayCheckbox,
 				AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__WEDNESDAY_CHECKBOX);
-		localize(
-				thursdayCheckbox,
+		localize(thursdayCheckbox,
 				AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__THURSDAY_CHECKBOX);
-		localize(
-				fridayCheckbox,
+		localize(fridayCheckbox,
 				AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__FRIDAY_CHECKBOX);
-		localize(
-				saturdayCheckbox,
+		localize(saturdayCheckbox,
 				AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__SATURDAY_CHECKBOX);
-		localize(
-				sundayCheckbox,
+		localize(sundayCheckbox,
 				AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__SUNDAY_CHECKBOX);
-		localize(
-				uniquenessLabel,
+		localize(uniquenessLabel,
 				AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__UNIQUENESS_LABEL);
 
 		// Adjust combo boxes
@@ -213,18 +196,16 @@ public class InterventionBasicSettingsAndModulesComponent extends
 			final boolean messagingStatus) {
 		// Adjust intervention status
 		if (interventionStatus) {
-			switchInterventionButton.setIcon(new ThemeResource(
-					ThemeImageStrings.ACTIVE_ICON_SMALL));
-			localize(
-					switchInterventionButton,
+			switchInterventionButton.setIcon(
+					new ThemeResource(ThemeImageStrings.ACTIVE_ICON_SMALL));
+			localize(switchInterventionButton,
 					AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__SWITCH_INTERVENTION_BUTTON_ACTIVE);
 
 			switchMessagingButton.setEnabled(true);
 		} else {
-			switchInterventionButton.setIcon(new ThemeResource(
-					ThemeImageStrings.INACTIVE_ICON_SMALL));
-			localize(
-					switchInterventionButton,
+			switchInterventionButton.setIcon(
+					new ThemeResource(ThemeImageStrings.INACTIVE_ICON_SMALL));
+			localize(switchInterventionButton,
 					AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__SWITCH_INTERVENTION_BUTTON_INACTIVE);
 
 			switchMessagingButton.setEnabled(false);
@@ -232,18 +213,16 @@ public class InterventionBasicSettingsAndModulesComponent extends
 
 		// Adjust messaging status
 		if (messagingStatus) {
-			switchMessagingButton.setIcon(new ThemeResource(
-					ThemeImageStrings.ACTIVE_ICON_SMALL));
-			localize(
-					switchMessagingButton,
+			switchMessagingButton.setIcon(
+					new ThemeResource(ThemeImageStrings.ACTIVE_ICON_SMALL));
+			localize(switchMessagingButton,
 					AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__SWITCH_MONITORING_BUTTON_ACTIVE);
 
 			switchInterventionButton.setEnabled(false);
 		} else {
-			switchMessagingButton.setIcon(new ThemeResource(
-					ThemeImageStrings.INACTIVE_ICON_SMALL));
-			localize(
-					switchMessagingButton,
+			switchMessagingButton.setIcon(
+					new ThemeResource(ThemeImageStrings.INACTIVE_ICON_SMALL));
+			localize(switchMessagingButton,
 					AdminMessageStrings.INTERVENTION_BASIC_SETTINGS_TAB__SWITCH_MONITORING_BUTTON_INACTIVE);
 
 			switchInterventionButton.setEnabled(true);
@@ -368,8 +347,8 @@ public class InterventionBasicSettingsAndModulesComponent extends
 
 		// finishScreeningSurveysCheckbox
 		finishScreeningSurveysCheckbox = new CheckBox();
-		finishScreeningSurveysCheckbox
-				.setCaption("!! Automatically finish unfinished screening surveys (with default values)");
+		finishScreeningSurveysCheckbox.setCaption(
+				"!! Automatically finish unfinished screening surveys (with default values)");
 		finishScreeningSurveysCheckbox.setImmediate(false);
 		finishScreeningSurveysCheckbox.setWidth("-1px");
 		finishScreeningSurveysCheckbox.setHeight("-1px");
@@ -439,8 +418,8 @@ public class InterventionBasicSettingsAndModulesComponent extends
 		deepstreamPasswordTextFieldComponent.setWidth("300px");
 		deepstreamPasswordTextFieldComponent.setHeight("-1px");
 		gridLayout_1.addComponent(deepstreamPasswordTextFieldComponent, 1, 5);
-		gridLayout_1.setComponentAlignment(
-				deepstreamPasswordTextFieldComponent, new Alignment(34));
+		gridLayout_1.setComponentAlignment(deepstreamPasswordTextFieldComponent,
+				new Alignment(34));
 
 		return gridLayout_1;
 	}
@@ -462,8 +441,8 @@ public class InterventionBasicSettingsAndModulesComponent extends
 		mondayCheckbox.setWidth("-1px");
 		mondayCheckbox.setHeight("-1px");
 		horizontalLayout_1.addComponent(mondayCheckbox);
-		horizontalLayout_1.setComponentAlignment(mondayCheckbox, new Alignment(
-				48));
+		horizontalLayout_1.setComponentAlignment(mondayCheckbox,
+				new Alignment(48));
 
 		// tuesdayCheckbox
 		tuesdayCheckbox = new CheckBox();

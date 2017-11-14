@@ -65,7 +65,7 @@ public class SystemVariables {
 			READ_ONLY_SYSTEM_VARIABLES.systemDayOfMonth.toVariableName(),
 			READ_ONLY_SYSTEM_VARIABLES.systemMonth.toVariableName(),
 			READ_ONLY_SYSTEM_VARIABLES.systemYear.toVariableName(),
-			READ_ONLY_SYSTEM_VARIABLES.systemDayInWeek.toVariableName()			};
+			READ_ONLY_SYSTEM_VARIABLES.systemDayInWeek.toVariableName() };
 
 	public static final String[]	EXTERNALLY_READABLE_PARTICIPANT_VARIABLE_NAMES	= new String[] {
 			READ_ONLY_PARTICIPANT_VARIABLES.participantParticipationInWeeks
@@ -77,5 +77,6 @@ public class SystemVariables {
 			READ_WRITE_PARTICIPANT_VARIABLES.participantName.toVariableName(),
 			READ_WRITE_PARTICIPANT_VARIABLES.participantLanguage
 					.toVariableName(),
-			READ_WRITE_PARTICIPANT_VARIABLES.participantGroup.toVariableName()		};
+			READ_WRITE_PARTICIPANT_VARIABLES.participantGroup
+					.toVariableName() };
 }

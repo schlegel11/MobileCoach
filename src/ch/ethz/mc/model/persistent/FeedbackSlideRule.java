@@ -120,8 +120,8 @@ public class FeedbackSlideRule extends AbstractRule {
 	public String toTable() {
 		String table = wrapRow(wrapHeader("Rule:")
 				+ wrapField(escape(StringHelpers.createRuleName(this, false))));
-		table += wrapRow(wrapHeader("Comment:")
-				+ wrapField(escape(getComment())));
+		table += wrapRow(
+				wrapHeader("Comment:") + wrapField(escape(getComment())));
 
 		return wrapTable(table);
 	}

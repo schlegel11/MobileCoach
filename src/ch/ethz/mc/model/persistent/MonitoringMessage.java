@@ -167,24 +167,26 @@ public class MonitoringMessage extends ModelObject {
 			}
 		}
 
-		final val monitoringMessage = new UIMonitoringMessage(
-				order,
+		final val monitoringMessage = new UIMonitoringMessage(order,
 				textWithPlaceholders.toShortenedString(80),
-				isCommandMessage ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-				linkedMediaObject != null ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-				linkedIntermediateSurvey != null ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-				answerType.toString(),
-				storeValueToVariableWithName != null ? storeValueToVariableWithName
-						: "", messageRules);
+				isCommandMessage
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__YES)
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NO),
+				linkedMediaObject != null
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__YES)
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NO),
+				linkedIntermediateSurvey != null
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__YES)
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NO),
+				answerType.toString(), storeValueToVariableWithName != null
+						? storeValueToVariableWithName : "",
+				messageRules);
 
 		monitoringMessage.setRelatedModelObject(this);
 
@@ -205,15 +207,15 @@ public class MonitoringMessage extends ModelObject {
 
 		// Linked media object
 		if (linkedMediaObject != null) {
-			exportList.add(ModelObject
-					.get(MediaObject.class, linkedMediaObject));
+			exportList
+					.add(ModelObject.get(MediaObject.class, linkedMediaObject));
 		}
 
 		// Add monitoring message rule
-		for (val monitoringMessageRule : ModelObject
-				.find(MonitoringMessageRule.class,
-						Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE,
-						getId())) {
+		for (val monitoringMessageRule : ModelObject.find(
+				MonitoringMessageRule.class,
+				Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE,
+				getId())) {
 			monitoringMessageRule
 					.collectThisAndRelatedModelObjectsForExport(exportList);
 		}
@@ -236,10 +238,9 @@ public class MonitoringMessage extends ModelObject {
 		}
 
 		// Delete sub rules
-		val rulesToDelete = ModelObject
-				.find(MonitoringMessageRule.class,
-						Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE,
-						getId());
+		val rulesToDelete = ModelObject.find(MonitoringMessageRule.class,
+				Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE,
+				getId());
 		ModelObject.delete(rulesToDelete);
 	}
 
@@ -251,8 +252,8 @@ public class MonitoringMessage extends ModelObject {
 	@Override
 	@JsonIgnore
 	public String toTable() {
-		String table = wrapRow(wrapHeader("Text:")
-				+ wrapField(escape(textWithPlaceholders)));
+		String table = wrapRow(
+				wrapHeader("Text:") + wrapField(escape(textWithPlaceholders)));
 
 		if (linkedMediaObject != null) {
 			val mediaObject = ModelObject.get(MediaObject.class,
@@ -261,20 +262,18 @@ public class MonitoringMessage extends ModelObject {
 				String externalReference;
 				if (mediaObject.getFileReference() != null) {
 					externalReference = "javascript:showMediaObject('"
-							+ mediaObject.getId()
-							+ "/"
-							+ StringHelpers.cleanFilenameString(mediaObject
-									.getName()) + "')";
+							+ mediaObject.getId() + "/" + StringHelpers
+									.cleanFilenameString(mediaObject.getName())
+							+ "')";
 				} else {
 					externalReference = mediaObject.getUrlReference();
 				}
 
-				table += wrapRow(wrapHeader("Linked Media Object:")
-						+ wrapField(createLink(externalReference,
-								mediaObject.getName())));
+				table += wrapRow(wrapHeader("Linked Media Object:") + wrapField(
+						createLink(externalReference, mediaObject.getName())));
 			} else {
-				table += wrapRow(wrapHeader("Linked Media Object:")
-						+ wrapField(formatWarning("Media Object set, but not found")));
+				table += wrapRow(wrapHeader("Linked Media Object:") + wrapField(
+						formatWarning("Media Object set, but not found")));
 			}
 		}
 
@@ -285,8 +284,9 @@ public class MonitoringMessage extends ModelObject {
 				table += wrapRow(wrapHeader("Linked intermediate survey:")
 						+ wrapField(escape(linkedSurvey.getName())));
 			} else {
-				table += wrapRow(wrapHeader("Linked intermediate survey:")
-						+ wrapField(formatWarning("Survey set, but not found")));
+				table += wrapRow(
+						wrapHeader("Linked intermediate survey:") + wrapField(
+								formatWarning("Survey set, but not found")));
 			}
 		}
 
@@ -304,8 +304,8 @@ public class MonitoringMessage extends ModelObject {
 		}
 
 		if (buffer.length() > 0) {
-			table += wrapRow(wrapHeader("Rules:")
-					+ wrapField(buffer.toString()));
+			table += wrapRow(
+					wrapHeader("Rules:") + wrapField(buffer.toString()));
 		}
 
 		return wrapTable(table);

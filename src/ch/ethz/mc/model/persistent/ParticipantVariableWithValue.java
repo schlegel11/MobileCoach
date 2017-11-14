@@ -100,10 +100,10 @@ public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 
 		variable = new UIParticipantVariableWithParticipant(participantId,
 				participantName,
-				group == null ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: group, organization, organizationUnit, getName(),
-				getValue(), new Date(timestamp));
+				group == null ? Messages.getAdminString(
+						AdminMessageStrings.UI_MODEL__NOT_SET) : group,
+				organization, organizationUnit, getName(), getValue(),
+				new Date(timestamp));
 
 		variable.setRelatedModelObject(this);
 

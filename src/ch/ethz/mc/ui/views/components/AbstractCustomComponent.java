@@ -99,8 +99,8 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	 *
 	 * @author Andreas Filler
 	 */
-	public abstract class ExtendableButtonClickListener implements
-			Button.ClickListener {
+	public abstract class ExtendableButtonClickListener
+			implements Button.ClickListener {
 		@Setter
 		private Window							belongingWindow;
 
@@ -380,8 +380,8 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 
 		val confirmationComponent = new ConfirmationComponent();
 
-		val modalWindow = new Window(
-				Messages.getAdminString(AdminMessageStrings.CONFIRMATION_WINDOW__TITLE));
+		val modalWindow = new Window(Messages.getAdminString(
+				AdminMessageStrings.CONFIRMATION_WINDOW__TITLE));
 		modalWindow.setModal(true);
 		modalWindow.setResizable(false);
 		modalWindow.setClosable(false);
@@ -438,9 +438,8 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 
 		if (iterableModelObjects != null) {
 			for (final ModelObject modelObject : iterableModelObjects) {
-				beanContainer.addItem(modelObject.getId(),
-						uiModelObjectSubclass.cast(modelObject
-								.toUIModelObject()));
+				beanContainer.addItem(modelObject.getId(), uiModelObjectSubclass
+						.cast(modelObject.toUIModelObject()));
 			}
 		}
 
@@ -577,7 +576,8 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	 */
 	protected Tab addPointableTab(final TabSheet tabSheet,
 			final AbstractCustomComponent tabComponent,
-			final AdminMessageStrings tabSheetCaption, final String tabSheetIcon) {
+			final AdminMessageStrings tabSheetCaption,
+			final String tabSheetIcon) {
 		if (tabSheetIcon == null) {
 			val tab = tabSheet.addTab(tabComponent,
 					Messages.getAdminString(tabSheetCaption));
@@ -642,7 +642,7 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	@SuppressWarnings("unchecked")
 	protected <SubClassOfUIModelObject extends UIModelObject> void removeAndAddModelObjectToBeanContainer(
 
-	final BeanContainer<ObjectId, SubClassOfUIModelObject> beanContainer,
+			final BeanContainer<ObjectId, SubClassOfUIModelObject> beanContainer,
 			final ModelObject modelObject) {
 		beanContainer.removeItem(modelObject.getId());
 		beanContainer.addItem(modelObject.getId(),

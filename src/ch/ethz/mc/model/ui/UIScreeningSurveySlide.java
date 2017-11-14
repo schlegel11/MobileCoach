@@ -65,7 +65,8 @@ public class UIScreeningSurveySlide extends UIModelObject {
 
 	public static String[] getColumnHeaders() {
 		return new String[] {
-				localize(AdminMessageStrings.UI_COLUMNS__SLIDE_TITLE_WITH_PLACEHOLDERS),
+				localize(
+						AdminMessageStrings.UI_COLUMNS__SLIDE_TITLE_WITH_PLACEHOLDERS),
 				localize(AdminMessageStrings.UI_COLUMNS__COMMENT),
 				localize(AdminMessageStrings.UI_COLUMNS__QUESTION_TYPE),
 				localize(AdminMessageStrings.UI_COLUMNS__RESULT_VARIABLE),

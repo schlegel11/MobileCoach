@@ -46,7 +46,8 @@ public class UIQuestion extends UIObject {
 	}
 
 	public static String[] getColumnHeaders() {
-		return new String[] { localize(AdminMessageStrings.UI_COLUMNS__QUESTION) };
+		return new String[] {
+				localize(AdminMessageStrings.UI_COLUMNS__QUESTION) };
 	}
 
 	public static String getSortColumn() {

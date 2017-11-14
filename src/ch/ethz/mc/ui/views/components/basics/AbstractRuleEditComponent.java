@@ -74,11 +74,9 @@ public class AbstractRuleEditComponent extends AbstractCustomComponent {
 		setCompositionRoot(mainLayout);
 
 		// manually added
-		localize(
-				ruleTextFieldComponent,
+		localize(ruleTextFieldComponent,
 				AdminMessageStrings.ABSTRACT_RULE_EDITING__RULE_WITH_PLACEHOLDERS);
-		localize(
-				ruleComparisonTermTextFieldComponent,
+		localize(ruleComparisonTermTextFieldComponent,
 				AdminMessageStrings.ABSTRACT_RULE_EDITING__RULE_COMPARISON_TERM_WITH_PLACEHOLDERS);
 		localize(commentVariableTextFieldComponent,
 				AdminMessageStrings.ABSTRACT_RULE_EDITING__COMMENT);

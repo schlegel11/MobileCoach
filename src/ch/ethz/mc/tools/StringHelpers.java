@@ -21,12 +21,17 @@ package ch.ethz.mc.tools;
  * limitations under the License.
  */
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
-import lombok.val;
-
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
@@ -34,8 +39,11 @@ import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.concepts.AbstractRule;
+import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
+import ch.ethz.mc.model.persistent.subelements.LString;
 import ch.ethz.mc.model.persistent.types.MonitoringRuleTypes;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
+import lombok.val;
 
 /**
  * Small helpers for {@link String}s
@@ -44,9 +52,11 @@ import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
  */
 public class StringHelpers {
 	private static SimpleDateFormat	simpleDateFormat	= new SimpleDateFormat(
-																"yyyy-MM-dd");
+			"yyyy-MM-dd");
 	private static SimpleDateFormat	longDateFormat		= new SimpleDateFormat(
-																"yyyy-MM-dd HH:mm:ss");
+			"yyyy-MM-dd HH:mm:ss");
+
+	private static Gson				gson				= new Gson();
 
 	/**
 	 * Creates a readable name representation of a rule's name
@@ -60,28 +70,31 @@ public class StringHelpers {
 		val name = new StringBuffer();
 
 		if (abstractRule instanceof MonitoringRule
-				&& ((MonitoringRule) abstractRule).getType() != MonitoringRuleTypes.NORMAL) {
+				&& ((MonitoringRule) abstractRule)
+						.getType() != MonitoringRuleTypes.NORMAL) {
 			val monitoringRule = (MonitoringRule) abstractRule;
 
 			switch (monitoringRule.getType()) {
 				case DAILY:
-					name.append(Messages
-							.getAdminString(AdminMessageStrings.UI_MODEL__DAILY_RULE));
+					name.append(Messages.getAdminString(
+							AdminMessageStrings.UI_MODEL__DAILY_RULE));
 					break;
 				case PERIODIC:
 					val simulatorActive = Constants.isSimulatedDateAndTime();
 					name.append(Messages.getAdminString(
 							AdminMessageStrings.UI_MODEL__PERIODIC_RULE,
-							String.valueOf((int) (simulatorActive ? ImplementationConstants.PERIODIC_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITH_SIMULATOR
-									: ImplementationConstants.PERIODIC_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITHOUT_SIMULATOR / 60))));
+							String.valueOf((int) (simulatorActive
+									? ImplementationConstants.PERIODIC_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITH_SIMULATOR
+									: ImplementationConstants.PERIODIC_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITHOUT_SIMULATOR
+											/ 60))));
 					break;
 				case UNEXPECTED_MESSAGE:
-					name.append(Messages
-							.getAdminString(AdminMessageStrings.UI_MODEL__UNEXPECTED_MESSAGE_RULE));
+					name.append(Messages.getAdminString(
+							AdminMessageStrings.UI_MODEL__UNEXPECTED_MESSAGE_RULE));
 					break;
 				case USER_INTENTION:
-					name.append(Messages
-							.getAdminString(AdminMessageStrings.UI_MODEL__USER_INTENTION_RULE));
+					name.append(Messages.getAdminString(
+							AdminMessageStrings.UI_MODEL__USER_INTENTION_RULE));
 					break;
 				default:
 					break;
@@ -96,10 +109,14 @@ public class StringHelpers {
 
 		if (abstractRule.getRuleWithPlaceholders() == null
 				|| abstractRule.getRuleWithPlaceholders().equals("")) {
-			if (abstractRule.getRuleEquationSign() != RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE
-					&& abstractRule.getRuleEquationSign() != RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_FALSE
-					&& abstractRule.getRuleEquationSign() != RuleEquationSignTypes.CREATE_TEXT_BUT_RESULT_IS_ALWAYS_TRUE
-					&& abstractRule.getRuleEquationSign() != RuleEquationSignTypes.CREATE_TEXT_BUT_RESULT_IS_ALWAYS_FALSE) {
+			if (abstractRule
+					.getRuleEquationSign() != RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE
+					&& abstractRule
+							.getRuleEquationSign() != RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_FALSE
+					&& abstractRule
+							.getRuleEquationSign() != RuleEquationSignTypes.CREATE_TEXT_BUT_RESULT_IS_ALWAYS_TRUE
+					&& abstractRule
+							.getRuleEquationSign() != RuleEquationSignTypes.CREATE_TEXT_BUT_RESULT_IS_ALWAYS_FALSE) {
 				name.append(ImplementationConstants.DEFAULT_OBJECT_NAME + " ");
 			}
 		} else {
@@ -109,17 +126,21 @@ public class StringHelpers {
 		name.append(abstractRule.getRuleEquationSign().toString());
 
 		if (abstractRule.getRuleComparisonTermWithPlaceholders() == null
-				|| abstractRule.getRuleComparisonTermWithPlaceholders().equals(
-						"")) {
-			if (abstractRule.getRuleEquationSign() != RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE
-					&& abstractRule.getRuleEquationSign() != RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_FALSE
-					&& abstractRule.getRuleEquationSign() != RuleEquationSignTypes.CREATE_TEXT_BUT_RESULT_IS_ALWAYS_TRUE
-					&& abstractRule.getRuleEquationSign() != RuleEquationSignTypes.CREATE_TEXT_BUT_RESULT_IS_ALWAYS_FALSE) {
+				|| abstractRule.getRuleComparisonTermWithPlaceholders()
+						.equals("")) {
+			if (abstractRule
+					.getRuleEquationSign() != RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE
+					&& abstractRule
+							.getRuleEquationSign() != RuleEquationSignTypes.CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_FALSE
+					&& abstractRule
+							.getRuleEquationSign() != RuleEquationSignTypes.CREATE_TEXT_BUT_RESULT_IS_ALWAYS_TRUE
+					&& abstractRule
+							.getRuleEquationSign() != RuleEquationSignTypes.CREATE_TEXT_BUT_RESULT_IS_ALWAYS_FALSE) {
 				name.append(" " + ImplementationConstants.DEFAULT_OBJECT_NAME);
 			}
 		} else {
-			name.append(" "
-					+ abstractRule.getRuleComparisonTermWithPlaceholders());
+			name.append(
+					" " + abstractRule.getRuleComparisonTermWithPlaceholders());
 		}
 
 		return name.toString();
@@ -150,11 +171,11 @@ public class StringHelpers {
 	 * @return
 	 */
 	public static String cleanPhoneNumber(final String phoneNumber) {
-		String numberWithoutZeros = phoneNumber
-				.trim()
+		String numberWithoutZeros = phoneNumber.trim()
 				.replaceAll(
 						ImplementationConstants.REGULAR_EXPRESSION_TO_CLEAN_PHONE_NUMBERS,
-						"").replaceAll("^0+", "");
+						"")
+				.replaceAll("^0+", "");
 
 		boolean needsCorrection = true;
 
@@ -190,13 +211,13 @@ public class StringHelpers {
 	 * @param messageString
 	 * @return
 	 */
-	public static String cleanReceivedMessageString(final String messageString) {
-		val newValue = messageString
-				.trim()
-				.toLowerCase()
+	public static String cleanReceivedMessageString(
+			final String messageString) {
+		val newValue = messageString.trim().toLowerCase()
 				.replaceAll(
 						ImplementationConstants.REGULAR_EXPRESSION_TO_CLEAN_RECEIVED_MESSAGE,
-						"").replace(",", ".");
+						"")
+				.replace(",", ".");
 		return newValue;
 	}
 
@@ -220,11 +241,9 @@ public class StringHelpers {
 	 * @return
 	 */
 	public static String cleanDoubleValue(final double doubleValue) {
-		val stringValue = String
-				.valueOf(doubleValue)
-				.replaceAll(
-						ImplementationConstants.REGULAR_EXPRESSION_TO_CLEAN_DOUBLE_VALUES,
-						"");
+		val stringValue = String.valueOf(doubleValue).replaceAll(
+				ImplementationConstants.REGULAR_EXPRESSION_TO_CLEAN_DOUBLE_VALUES,
+				"");
 		return stringValue;
 	}
 
@@ -239,14 +258,70 @@ public class StringHelpers {
 	}
 
 	/**
+	 * Parses an colon separated multi-line list to JSON
+	 * 
+	 * @param text
+	 * @param language
+	 * @param variablesWithValues
+	 * @return
+	 */
+	public static String parseColonSeparatedMultiLineStringToJSON(
+			final LString text, final Locale language,
+			final Collection<AbstractVariableWithValue> variablesWithValues) {
+
+		val jsonArray = new JsonArray();
+
+		for (val line : text.get(language).split("\n")) {
+			if (!StringUtils.isBlank(line)) {
+				val jsonObject = new JsonObject();
+
+				final int indexOfColon = line.lastIndexOf(":");
+				if (indexOfColon > -1) {
+					String name = line.substring(0, indexOfColon);
+					String value = line.substring(indexOfColon + 1);
+
+					if (name.contains(
+							ImplementationConstants.VARIABLE_PREFIX)) {
+						name = VariableStringReplacer
+								.findVariablesAndReplaceWithTextValues(language,
+										name, variablesWithValues, "");
+					}
+					jsonObject.addProperty("name", name);
+
+					if (value.contains(
+							ImplementationConstants.VARIABLE_PREFIX)) {
+						value = VariableStringReplacer
+								.findVariablesAndReplaceWithTextValues(language,
+										value, variablesWithValues, "");
+					}
+					jsonObject.addProperty("value", value);
+				} else {
+					if (line.contains(
+							ImplementationConstants.VARIABLE_PREFIX)) {
+						jsonObject.addProperty("name", VariableStringReplacer
+								.findVariablesAndReplaceWithTextValues(language,
+										line, variablesWithValues, ""));
+					} else {
+						jsonObject.addProperty("name", line);
+					}
+				}
+
+				jsonArray.add(jsonObject);
+			}
+		}
+
+		return gson.toJson(jsonArray);
+	}
+
+	/**
 	 * Replaces the simple commands within the text with HTML commands
 	 *
 	 * @param text
 	 * @return
 	 */
 	public static String parseHTMLFormatting(String text) {
-		val pattern = Pattern
-				.compile(ImplementationConstants.REGULAR_EXPRESSION_TO_FIND_BOLD_STRING_PARTS);
+		val pattern = Pattern.compile(
+				ImplementationConstants.REGULAR_EXPRESSION_TO_FIND_BOLD_STRING_PARTS);
 		val matcher = pattern.matcher(text);
 
 		while (matcher.find()) {

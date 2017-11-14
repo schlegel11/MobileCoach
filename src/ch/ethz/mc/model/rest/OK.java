@@ -31,5 +31,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class OK {
 	@Getter
-	private final String	result	= "OK";
+	private final String result = "OK";
 }

@@ -74,12 +74,11 @@ public class Author extends ModelObject {
 	 */
 	@Override
 	public UIModelObject toUIModelObject() {
-		final val author = new UIAuthor(
-				username,
-				admin ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__ADMINISTRATOR)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__AUTHOR));
+		final val author = new UIAuthor(username,
+				admin ? Messages.getAdminString(
+						AdminMessageStrings.UI_MODEL__ADMINISTRATOR)
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__AUTHOR));
 
 		author.setRelatedModelObject(this);
 

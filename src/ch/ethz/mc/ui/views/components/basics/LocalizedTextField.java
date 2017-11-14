@@ -86,8 +86,8 @@ public class LocalizedTextField extends CustomComponent {
 						currentButton = button;
 
 						if (value != null) {
-							textField.setValue(value.get((Locale) currentButton
-									.getData()));
+							textField.setValue(value
+									.get((Locale) currentButton.getData()));
 							textField.setCursorPosition(0);
 							textField.setSelectionRange(0, 0);
 						}

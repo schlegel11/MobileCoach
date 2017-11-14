@@ -72,20 +72,15 @@ public class SimulatorComponent extends AbstractCustomComponent {
 		setCompositionRoot(mainLayout);
 
 		// manually added
-		localize(
-				nextHourButton,
+		localize(nextHourButton,
 				AdminMessageStrings.SIMULATOR_COMPONENT__JUMP_ONE_HOUR_TO_THE_FUTURE);
-		localize(
-				nextDayButton,
+		localize(nextDayButton,
 				AdminMessageStrings.SIMULATOR_COMPONENT__JUMP_ONE_DAY_TO_THE_FUTURE);
-		localize(
-				activateFastForwadModeButton,
+		localize(activateFastForwadModeButton,
 				AdminMessageStrings.SIMULATOR_COMPONENT__ACTIVATE_FAST_FORWARD_MODE);
-		localize(
-				deactivateFastForwardModeButton,
+		localize(deactivateFastForwardModeButton,
 				AdminMessageStrings.SIMULATOR_COMPONENT__DEACTIVATE_FAST_FORWARD_MODE);
-		localize(
-				currentTimeLabel,
+		localize(currentTimeLabel,
 				AdminMessageStrings.SIMULATOR_COMPONENT__THE_CURRENT_SIMULATED_TIME_IS_X);
 		localize(simulatorLabel,
 				AdminMessageStrings.SIMULATOR_COMPONENT__SIMULATOR);

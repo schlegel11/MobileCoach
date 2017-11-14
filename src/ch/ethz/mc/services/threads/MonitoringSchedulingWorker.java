@@ -69,16 +69,18 @@ public class MonitoringSchedulingWorker extends Thread {
 	@Override
 	public void run() {
 		try {
-			TimeUnit.MILLISECONDS
-					.sleep(ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_MILLISECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
+			TimeUnit.MILLISECONDS.sleep(
+					ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_MILLISECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
 		} catch (final InterruptedException e) {
 			interrupt();
-			log.debug("Monitoring scheduling worker received signal to stop (before first run)");
+			log.debug(
+					"Monitoring scheduling worker received signal to stop (before first run)");
 		}
 
 		while (!isInterrupted() && !shouldStop) {
 			final long startingTime = System.currentTimeMillis();
-			log.debug("Executing new run of monitoring scheduling worker...started");
+			log.debug(
+					"Executing new run of monitoring scheduling worker...started");
 
 			try {
 				if (statisticsEnabled) {
@@ -101,9 +103,10 @@ public class MonitoringSchedulingWorker extends Thread {
 				try {
 					// Finish unfinished screening surveys: Check only every x
 					// minutes
-					if (System.currentTimeMillis() > lastScreeningSurveyFinishingCheck
-							+ ImplementationConstants.FINISH_UNFINISHED_SCREENING_SURVEYS_INTERVAL_IN_SECONDS
-							* 1000) {
+					if (System
+							.currentTimeMillis() > lastScreeningSurveyFinishingCheck
+									+ ImplementationConstants.FINISH_UNFINISHED_SCREENING_SURVEYS_INTERVAL_IN_SECONDS
+											* 1000) {
 						lastScreeningSurveyFinishingCheck = System
 								.currentTimeMillis();
 						log.debug("Finishing unfinished screening surveys");
@@ -119,7 +122,8 @@ public class MonitoringSchedulingWorker extends Thread {
 					// Perform message: "Continuous" process
 					interventionExecutionManagerService.performMessaging();
 				} catch (final Exception e) {
-					log.error("Could not perform messaging: {}", e.getMessage());
+					log.error("Could not perform messaging: {}",
+							e.getMessage());
 				}
 			} catch (final Exception e) {
 				log.error("Could not run whole scheduling process: {}",
@@ -131,11 +135,12 @@ public class MonitoringSchedulingWorker extends Thread {
 					System.currentTimeMillis() - startingTime);
 
 			try {
-				TimeUnit.MILLISECONDS
-						.sleep(ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_MILLISECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
+				TimeUnit.MILLISECONDS.sleep(
+						ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_MILLISECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
 			} catch (final InterruptedException e) {
 				interrupt();
-				log.debug("Monitoring scheduling worker received signal to stop (interrupted)");
+				log.debug(
+						"Monitoring scheduling worker received signal to stop (interrupted)");
 				return;
 			}
 		}

@@ -37,8 +37,8 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public abstract class InterventionScreeningSurveysTabComponent extends
-		AbstractCustomComponent {
+public abstract class InterventionScreeningSurveysTabComponent
+		extends AbstractCustomComponent {
 
 	/*- VaadinEditorProperties={"grid":"RegularGrid,20","showGrid":true,"snapToGrid":true,"snapToObject":true,"movingGuides":false,"snappingDistance":10} */
 

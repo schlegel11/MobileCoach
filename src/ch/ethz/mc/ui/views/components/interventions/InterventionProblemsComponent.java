@@ -43,8 +43,8 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class InterventionProblemsComponent extends
-		AbstractClosableEditComponent {
+public class InterventionProblemsComponent
+		extends AbstractClosableEditComponent {
 
 	/*- VaadinEditorProperties={"grid":"RegularGrid,20","showGrid":true,"snapToGrid":true,"snapToObject":true,"movingGuides":false,"snappingDistance":10} */
 
@@ -102,7 +102,8 @@ public class InterventionProblemsComponent extends
 	}
 
 	@Override
-	public void registerCancelButtonListener(final ClickListener clickListener) {
+	public void registerCancelButtonListener(
+			final ClickListener clickListener) {
 		// Not required
 	}
 
@@ -136,8 +137,8 @@ public class InterventionProblemsComponent extends
 		messageDialogProblemsLabel.setImmediate(false);
 		messageDialogProblemsLabel.setWidth("-1px");
 		messageDialogProblemsLabel.setHeight("-1px");
-		messageDialogProblemsLabel
-				.setValue("!!! The following replies could not be automatically processed:");
+		messageDialogProblemsLabel.setValue(
+				"!!! The following replies could not be automatically processed:");
 		mainLayout.addComponent(messageDialogProblemsLabel);
 
 		// dialogMessagesTable
@@ -198,8 +199,8 @@ public class InterventionProblemsComponent extends
 		// sendMessageButton
 		sendMessageButton = new Button();
 		sendMessageButton.setCaption("!!! Send Message");
-		sendMessageButton.setIcon(new ThemeResource(
-				"img/message-icon-small.png"));
+		sendMessageButton
+				.setIcon(new ThemeResource("img/message-icon-small.png"));
 		sendMessageButton.setImmediate(true);
 		sendMessageButton.setWidth("150px");
 		sendMessageButton.setHeight("-1px");

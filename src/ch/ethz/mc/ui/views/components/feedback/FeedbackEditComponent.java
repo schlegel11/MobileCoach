@@ -134,7 +134,8 @@ public class FeedbackEditComponent extends AbstractClosableEditComponent {
 	}
 
 	@Override
-	public void registerCancelButtonListener(final ClickListener clickListener) {
+	public void registerCancelButtonListener(
+			final ClickListener clickListener) {
 		// not required
 	}
 
@@ -262,8 +263,8 @@ public class FeedbackEditComponent extends AbstractClosableEditComponent {
 		// moveDownButton
 		moveDownButton = new Button();
 		moveDownButton.setCaption("!!! Move Down");
-		moveDownButton.setIcon(new ThemeResource(
-				"img/arrow-down-icon-small.png"));
+		moveDownButton
+				.setIcon(new ThemeResource("img/arrow-down-icon-small.png"));
 		moveDownButton.setImmediate(true);
 		moveDownButton.setWidth("120px");
 		moveDownButton.setHeight("-1px");

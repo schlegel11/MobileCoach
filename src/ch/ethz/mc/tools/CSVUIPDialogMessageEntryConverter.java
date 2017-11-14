@@ -30,8 +30,8 @@ import com.googlecode.jcsv.writer.CSVEntryConverter;
  * 
  * @author Andreas Filler
  */
-public class CSVUIPDialogMessageEntryConverter implements
-		CSVEntryConverter<UIDialogMessageWithParticipantForResults> {
+public class CSVUIPDialogMessageEntryConverter
+		implements CSVEntryConverter<UIDialogMessageWithParticipantForResults> {
 
 	@Override
 	public String[] convertEntry(

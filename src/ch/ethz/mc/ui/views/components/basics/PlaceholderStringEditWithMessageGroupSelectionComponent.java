@@ -62,8 +62,8 @@ import com.vaadin.ui.VerticalLayout;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Log4j2
-public class PlaceholderStringEditWithMessageGroupSelectionComponent extends
-		AbstractStringValueEditComponent {
+public class PlaceholderStringEditWithMessageGroupSelectionComponent
+		extends AbstractStringValueEditComponent {
 
 	/*- VaadinEditorProperties={"grid":"RegularGrid,20","showGrid":true,"snapToGrid":true,"snapToObject":true,"movingGuides":false,"snappingDistance":10} */
 
@@ -125,11 +125,9 @@ public class PlaceholderStringEditWithMessageGroupSelectionComponent extends
 		localize(variableListSelect,
 				AdminMessageStrings.PLACEHOLDER_STRING_EDITOR__SELECT_VARIABLE);
 		localize(orLabel, AdminMessageStrings.GENERAL__OR);
-		localize(
-				messageGroupLabel,
+		localize(messageGroupLabel,
 				AdminMessageStrings.MONITORING_RULE_EDITING__MESSAGE_GROUP_TO_SEND_MESSAGES_FROM);
-		localize(
-				hoursUntilHandledAsNotAnsweredLabel,
+		localize(hoursUntilHandledAsNotAnsweredLabel,
 				AdminMessageStrings.MONITORING_RULE_EDITING__HOURS_AFTER_SENDING_UNTIL_HANDLED_AS_NOT_ANSWERED);
 		localize(sendToSupervisorComboBox,
 				AdminMessageStrings.MONITORING_RULE_EDITING__SEND_TO_SUPERVISOR);
@@ -161,17 +159,18 @@ public class PlaceholderStringEditWithMessageGroupSelectionComponent extends
 								+ stringTextArea.getValue().substring(
 										stringTextArea.getCursorPosition()));
 
-						stringTextArea.setCursorPosition(stringTextArea
-								.getCursorPosition()
-								+ selectedVariable.length());
+						stringTextArea.setCursorPosition(
+								stringTextArea.getCursorPosition()
+										+ selectedVariable.length());
 					} catch (final Exception e) {
-						log.warn("Error occured while setting variable to string text area...fixing by setting text to the beginning (Workaround for Vaadin time shift)");
+						log.warn(
+								"Error occured while setting variable to string text area...fixing by setting text to the beginning (Workaround for Vaadin time shift)");
 
-						stringTextArea.setValue(stringTextArea.getValue()
-								+ selectedVariable);
+						stringTextArea.setValue(
+								stringTextArea.getValue() + selectedVariable);
 
-						stringTextArea.setCursorPosition(stringTextArea
-								.getValue().length());
+						stringTextArea.setCursorPosition(
+								stringTextArea.getValue().length());
 					}
 
 					variableListSelect.unselect(selectedVariable);
@@ -205,7 +204,8 @@ public class PlaceholderStringEditWithMessageGroupSelectionComponent extends
 							getVariableListSelect().setEnabled(true);
 						} else {
 							selectedMonitoringMessageGroup = uiMonitoringMessageGroup
-									.getRelatedModelObject(MonitoringMessageGroup.class);
+									.getRelatedModelObject(
+											MonitoringMessageGroup.class);
 
 							getStringTextArea().setValue("");
 							getStringTextArea().setEnabled(false);
@@ -242,10 +242,10 @@ public class PlaceholderStringEditWithMessageGroupSelectionComponent extends
 
 		// Handle slider
 		hoursUntilHandledAsNotAnsweredSlider.setImmediate(true);
-		hoursUntilHandledAsNotAnsweredSlider
-				.setMin(ImplementationConstants.HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MIN);
-		hoursUntilHandledAsNotAnsweredSlider
-				.setMax(ImplementationConstants.HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX);
+		hoursUntilHandledAsNotAnsweredSlider.setMin(
+				ImplementationConstants.HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MIN);
+		hoursUntilHandledAsNotAnsweredSlider.setMax(
+				ImplementationConstants.HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX);
 		hoursUntilHandledAsNotAnsweredSlider.setEnabled(false);
 
 		stringTextArea.focus();
@@ -257,7 +257,8 @@ public class PlaceholderStringEditWithMessageGroupSelectionComponent extends
 	}
 
 	@Override
-	public void registerCancelButtonListener(final ClickListener clickListener) {
+	public void registerCancelButtonListener(
+			final ClickListener clickListener) {
 		cancelButton.addClickListener(clickListener);
 	}
 
@@ -349,8 +350,8 @@ public class PlaceholderStringEditWithMessageGroupSelectionComponent extends
 		variableListSelect.setHeight("100.0%");
 		editAreaLayout.addComponent(variableListSelect);
 		editAreaLayout.setExpandRatio(variableListSelect, 0.4f);
-		editAreaLayout.setComponentAlignment(variableListSelect, new Alignment(
-				48));
+		editAreaLayout.setComponentAlignment(variableListSelect,
+				new Alignment(48));
 
 		return editAreaLayout;
 	}
@@ -425,8 +426,8 @@ public class PlaceholderStringEditWithMessageGroupSelectionComponent extends
 		hoursUntilHandledAsNotAnsweredSlider.setWidth("270px");
 		hoursUntilHandledAsNotAnsweredSlider.setHeight("-1px");
 		gridLayout_1.addComponent(hoursUntilHandledAsNotAnsweredSlider, 1, 1);
-		gridLayout_1.setComponentAlignment(
-				hoursUntilHandledAsNotAnsweredSlider, new Alignment(34));
+		gridLayout_1.setComponentAlignment(hoursUntilHandledAsNotAnsweredSlider,
+				new Alignment(34));
 
 		// sendToSupervisorComboBox
 		sendToSupervisorComboBox = new CheckBox();

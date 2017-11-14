@@ -42,7 +42,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class LString {
 	// Contains all values in different values in different languages
 	@JsonProperty
-	private final HashMap<Locale, String>	values	= new HashMap<Locale, String>();
+	private final HashMap<Locale, String> values = new HashMap<Locale, String>();
 
 	@JsonIgnore
 	public LString(final String defaultValue) {
@@ -65,7 +65,8 @@ public class LString {
 	@JsonIgnore
 	public String get(final Participant participant) {
 		if (participant == null) {
-			log.error("Language string requested with non-existing participant");
+			log.error(
+					"Language string requested with non-existing participant");
 			return "";
 		}
 		val requestedLocale = participant.getLanguage();

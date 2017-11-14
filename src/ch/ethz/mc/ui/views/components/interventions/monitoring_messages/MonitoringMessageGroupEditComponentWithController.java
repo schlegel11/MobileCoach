@@ -50,8 +50,8 @@ import com.vaadin.ui.Button.ClickEvent;
  */
 @SuppressWarnings("serial")
 @Log4j2
-public class MonitoringMessageGroupEditComponentWithController extends
-		MonitoringMessageGroupEditComponent {
+public class MonitoringMessageGroupEditComponentWithController
+		extends MonitoringMessageGroupEditComponent {
 
 	private final MonitoringMessageGroup						monitoringMessageGroup;
 
@@ -81,26 +81,26 @@ public class MonitoringMessageGroupEditComponentWithController extends
 				UIMonitoringMessage.class, messagesOfMessageGroup);
 
 		monitoringMessageTable.setContainerDataSource(beanContainer);
-		monitoringMessageTable.setSortContainerPropertyId(UIMonitoringMessage
-				.getSortColumn());
-		monitoringMessageTable.setVisibleColumns(UIMonitoringMessage
-				.getVisibleColumns());
-		monitoringMessageTable.setColumnHeaders(UIMonitoringMessage
-				.getColumnHeaders());
+		monitoringMessageTable.setSortContainerPropertyId(
+				UIMonitoringMessage.getSortColumn());
+		monitoringMessageTable
+				.setVisibleColumns(UIMonitoringMessage.getVisibleColumns());
+		monitoringMessageTable
+				.setColumnHeaders(UIMonitoringMessage.getColumnHeaders());
 		monitoringMessageTable.setSortAscending(true);
 		monitoringMessageTable.setSortEnabled(false);
 
 		// check boxes
-		getMessagesExpectAnswerCheckBox().setValue(
-				monitoringMessageGroup.isMessagesExpectAnswer());
-		getRandomOrderCheckBox().setValue(
-				monitoringMessageGroup.isSendInRandomOrder());
+		getMessagesExpectAnswerCheckBox()
+				.setValue(monitoringMessageGroup.isMessagesExpectAnswer());
+		getRandomOrderCheckBox()
+				.setValue(monitoringMessageGroup.isSendInRandomOrder());
 		getSendSamePositionIfSendingAsReplyCheckBox().setValue(
 				monitoringMessageGroup.isSendSamePositionIfSendingAsReply());
 
 		// validation expression
-		getValidationExpressionTextFieldComponent().setValue(
-				monitoringMessageGroup.getValidationExpression());
+		getValidationExpressionTextFieldComponent()
+				.setValue(monitoringMessageGroup.getValidationExpression());
 
 		// handle table selection change
 		monitoringMessageTable
@@ -122,8 +122,8 @@ public class MonitoringMessageGroupEditComponentWithController extends
 				});
 
 		// handle check box change
-		getMessagesExpectAnswerCheckBox().addValueChangeListener(
-				new ValueChangeListener() {
+		getMessagesExpectAnswerCheckBox()
+				.addValueChangeListener(new ValueChangeListener() {
 
 					@Override
 					public void valueChange(final ValueChangeEvent event) {
@@ -134,8 +134,8 @@ public class MonitoringMessageGroupEditComponentWithController extends
 												.getValue());
 					}
 				});
-		getRandomOrderCheckBox().addValueChangeListener(
-				new ValueChangeListener() {
+		getRandomOrderCheckBox()
+				.addValueChangeListener(new ValueChangeListener() {
 
 					@Override
 					public void valueChange(final ValueChangeEvent event) {
@@ -152,8 +152,8 @@ public class MonitoringMessageGroupEditComponentWithController extends
 						}
 					}
 				});
-		getSendSamePositionIfSendingAsReplyCheckBox().addValueChangeListener(
-				new ValueChangeListener() {
+		getSendSamePositionIfSendingAsReplyCheckBox()
+				.addValueChangeListener(new ValueChangeListener() {
 
 					@Override
 					public void valueChange(final ValueChangeEvent event) {
@@ -198,8 +198,9 @@ public class MonitoringMessageGroupEditComponentWithController extends
 				moveMessage(false);
 			} else if (event.getButton() == getDeleteButton()) {
 				deleteMessage();
-			} else if (event.getButton() == getValidationExpressionTextFieldComponent()
-					.getButton()) {
+			} else if (event
+					.getButton() == getValidationExpressionTextFieldComponent()
+							.getButton()) {
 				editValidationExpression();
 			}
 			event.getButton().setEnabled(true);
@@ -223,11 +224,10 @@ public class MonitoringMessageGroupEditComponentWithController extends
 								UIMonitoringMessage.class
 										.cast(newMonitoringMessage
 												.toUIModelObject()));
-						getMonitoringMessageTable().select(
-								newMonitoringMessage.getId());
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_CREATED);
+						getMonitoringMessageTable()
+								.select(newMonitoringMessage.getId());
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_CREATED);
 
 						closeWindow();
 					}
@@ -250,11 +250,10 @@ public class MonitoringMessageGroupEditComponentWithController extends
 						removeAndAddModelObjectToBeanContainer(beanContainer,
 								selectedMonitoringMessage);
 						getMonitoringMessageTable().sort();
-						getMonitoringMessageTable().select(
-								selectedMonitoringMessage.getId());
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_UPDATED);
+						getMonitoringMessageTable()
+								.select(selectedMonitoringMessage.getId());
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_UPDATED);
 
 						closeWindow();
 					}
@@ -265,9 +264,8 @@ public class MonitoringMessageGroupEditComponentWithController extends
 		log.debug("Duplicate message");
 
 		final File temporaryBackupFile = getInterventionAdministrationManagerService()
-				.monitoringMessageExport(
-						selectedUIMonitoringMessage
-								.getRelatedModelObject(MonitoringMessage.class));
+				.monitoringMessageExport(selectedUIMonitoringMessage
+						.getRelatedModelObject(MonitoringMessage.class));
 
 		try {
 			final MonitoringMessage importedMonitoringMessage = getInterventionAdministrationManagerService()
@@ -279,18 +277,16 @@ public class MonitoringMessageGroupEditComponentWithController extends
 
 			// Adapt UI
 			beanContainer.addItem(importedMonitoringMessage.getId(),
-					UIMonitoringMessage.class.cast(importedMonitoringMessage
-							.toUIModelObject()));
-			getMonitoringMessageTable().select(
-					importedMonitoringMessage.getId());
+					UIMonitoringMessage.class
+							.cast(importedMonitoringMessage.toUIModelObject()));
+			getMonitoringMessageTable()
+					.select(importedMonitoringMessage.getId());
 
-			getAdminUI()
-					.showInformationNotification(
-							AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_DUPLICATED);
+			getAdminUI().showInformationNotification(
+					AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_DUPLICATED);
 		} catch (final Exception e) {
-			getAdminUI()
-					.showWarningNotification(
-							AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_DUPLICATION_FAILED);
+			getAdminUI().showWarningNotification(
+					AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_DUPLICATION_FAILED);
 		}
 
 		try {
@@ -327,7 +323,8 @@ public class MonitoringMessageGroupEditComponentWithController extends
 			@Override
 			public void buttonClick(final ClickEvent event) {
 				try {
-					val selectedMonitoringMessage = selectedUIMonitoringMessage.getRelatedModelObject(MonitoringMessage.class);
+					val selectedMonitoringMessage = selectedUIMonitoringMessage
+							.getRelatedModelObject(MonitoringMessage.class);
 
 					// Delete variable
 					getInterventionAdministrationManagerService()
@@ -339,12 +336,12 @@ public class MonitoringMessageGroupEditComponentWithController extends
 				}
 
 				// Adapt UI
-				getMonitoringMessageTable().removeItem(
-						selectedUIMonitoringMessage.getRelatedModelObject(
-								MonitoringMessage.class).getId());
-				getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_DELETED);
+				getMonitoringMessageTable()
+						.removeItem(selectedUIMonitoringMessage
+								.getRelatedModelObject(MonitoringMessage.class)
+								.getId());
+				getAdminUI().showInformationNotification(
+						AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_DELETED);
 
 				closeWindow();
 			}
@@ -367,12 +364,11 @@ public class MonitoringMessageGroupEditComponentWithController extends
 										monitoringMessageGroup,
 										getStringValue());
 
-						getValidationExpressionTextFieldComponent().setValue(
-								monitoringMessageGroup
+						getValidationExpressionTextFieldComponent()
+								.setValue(monitoringMessageGroup
 										.getValidationExpression());
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__VALIDATION_EXPRESSION_UPDATED);
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__VALIDATION_EXPRESSION_UPDATED);
 
 						closeWindow();
 					}

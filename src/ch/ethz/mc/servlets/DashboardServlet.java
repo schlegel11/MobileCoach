@@ -62,7 +62,8 @@ import com.github.mustachejava.MustacheFactory;
  */
 @SuppressWarnings("serial")
 @WebServlet(displayName = "Dashboards", urlPatterns = "/"
-		+ ImplementationConstants.DASHBOARD_SERVLET_PATH + "/*", asyncSupported = true, loadOnStartup = 1)
+		+ ImplementationConstants.DASHBOARD_SERVLET_PATH
+		+ "/*", asyncSupported = true, loadOnStartup = 1)
 @Log4j2
 public class DashboardServlet extends HttpServlet {
 	private MustacheFactory					mustacheFactory;
@@ -73,7 +74,8 @@ public class DashboardServlet extends HttpServlet {
 	 * @see Servlet#init(ServletConfig)
 	 */
 	@Override
-	public void init(final ServletConfig servletConfig) throws ServletException {
+	public void init(final ServletConfig servletConfig)
+			throws ServletException {
 		super.init(servletConfig);
 		// Only start servlet if context is ready
 		if (!MC.getInstance().isReady()) {
@@ -98,20 +100,19 @@ public class DashboardServlet extends HttpServlet {
 	 */
 	@Override
 	protected void doGet(final HttpServletRequest request,
-			final HttpServletResponse response) throws ServletException,
-			IOException {
+			final HttpServletResponse response)
+			throws ServletException, IOException {
 		log.debug("Dashboard servlet call");
 
 		request.setCharacterEncoding("UTF-8");
 		try {
 			// Determine request path
-			final String path = request
-					.getRequestURI()
-					.substring(
-							request.getContextPath().length()
-									+ ImplementationConstants.DASHBOARD_SERVLET_PATH
-											.length() + 1).replaceAll("^/", "")
-					.replaceAll("/$", "");
+			final String path = request.getRequestURI()
+					.substring(request.getContextPath().length()
+							+ ImplementationConstants.DASHBOARD_SERVLET_PATH
+									.length()
+							+ 1)
+					.replaceAll("^/", "").replaceAll("/$", "");
 
 			// Determine request type
 			val pathParts = path.split("/");
@@ -142,8 +143,8 @@ public class DashboardServlet extends HttpServlet {
 				default:
 					// Object id and file request
 					if (ObjectId.isValid(pathParts[0])) {
-						handleFileRequest(request, response, new ObjectId(
-								pathParts[0]),
+						handleFileRequest(request, response,
+								new ObjectId(pathParts[0]),
 								path.substring(path.indexOf("/") + 1));
 						return;
 					} else {
@@ -163,8 +164,8 @@ public class DashboardServlet extends HttpServlet {
 	 */
 	@Override
 	protected void doPost(final HttpServletRequest request,
-			final HttpServletResponse response) throws ServletException,
-			IOException {
+			final HttpServletResponse response)
+			throws ServletException, IOException {
 		log.debug("Redirecting POST request to GET request");
 		doGet(request, response);
 	}
@@ -188,8 +189,7 @@ public class DashboardServlet extends HttpServlet {
 			return;
 		}
 
-		log.debug(
-				"Handling file request '{}' for dashboard of intervention {}",
+		log.debug("Handling file request '{}' for dashboard of intervention {}",
 				fileRequest, interventionId);
 
 		final File basicTemplateFolder = new File(
@@ -197,10 +197,11 @@ public class DashboardServlet extends HttpServlet {
 				intervention.getDashboardTemplatePath());
 		final File requestedFile = new File(basicTemplateFolder, fileRequest);
 
-		if (!requestedFile.getAbsolutePath().startsWith(
-				basicTemplateFolder.getAbsolutePath())
+		if (!requestedFile.getAbsolutePath()
+				.startsWith(basicTemplateFolder.getAbsolutePath())
 				|| !requestedFile.exists()) {
-			log.warn("Requested a file outside the 'sandbox' of the template folder or a file that does not exist");
+			log.warn(
+					"Requested a file outside the 'sandbox' of the template folder or a file that does not exist");
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
@@ -208,8 +209,8 @@ public class DashboardServlet extends HttpServlet {
 		log.debug("Requested file is '{}'", requestedFile.getAbsolutePath());
 
 		// Get the MIME type of the requested file
-		final String mimeType = getServletContext().getMimeType(
-				requestedFile.getAbsolutePath());
+		final String mimeType = getServletContext()
+				.getMimeType(requestedFile.getAbsolutePath());
 		if (mimeType == null) {
 			log.warn("Could not get MIME type of file '{}'",
 					requestedFile.getAbsolutePath());
@@ -226,17 +227,18 @@ public class DashboardServlet extends HttpServlet {
 		response.setContentLength((int) requestedFile.length());
 
 		// Set name
-		response.setHeader("Content-Disposition", "inline; filename=\""
-				+ requestedFile.getName() + "\"");
+		response.setHeader("Content-Disposition",
+				"inline; filename=\"" + requestedFile.getName() + "\"");
 
 		// Allow caching
 		if (Constants.isCachingActive()) {
 			response.setHeader("Pragma", "cache");
 			response.setHeader("Cache-Control", "max-age="
 					+ ImplementationConstants.DASHBOARD_FILE_CACHE_IN_MINUTES);
-			response.setDateHeader("Expires", System.currentTimeMillis()
-					+ ImplementationConstants.DASHBOARD_FILE_CACHE_IN_MINUTES
-					* 1000);
+			response.setDateHeader("Expires",
+					System.currentTimeMillis()
+							+ ImplementationConstants.DASHBOARD_FILE_CACHE_IN_MINUTES
+									* 1000);
 		} else {
 			response.setHeader("Pragma", "No-cache");
 			response.setHeader("Cache-Control", "no-cache,no-store,max-age=0");
@@ -274,10 +276,9 @@ public class DashboardServlet extends HttpServlet {
 
 		// Check for password
 		val passwordPattern = intervention.getDashboardPasswordPattern();
-		if (passwordPattern != null
-				&& !passwordPattern.equals("")
-				&& (givenPassword == null || givenPassword.equals("") || !givenPassword
-						.matches(passwordPattern))) {
+		if (passwordPattern != null && !passwordPattern.equals("")
+				&& (givenPassword == null || givenPassword.equals("")
+						|| !givenPassword.matches(passwordPattern))) {
 			log.warn("Given password '{}' does not match pattern '{}'",
 					givenPassword, passwordPattern);
 
@@ -292,9 +293,8 @@ public class DashboardServlet extends HttpServlet {
 		// different survey
 		if (session.getAttribute(GeneralSessionAttributeTypes.CURRENT_SESSION
 				.toString()) != null) {
-			val currentSurveyRegardingSession = (ObjectId) session
-					.getAttribute(GeneralSessionAttributeTypes.CURRENT_SESSION
-							.toString());
+			val currentSurveyRegardingSession = (ObjectId) session.getAttribute(
+					GeneralSessionAttributeTypes.CURRENT_SESSION.toString());
 			if (interventionId != null
 					&& !interventionId.equals(currentSurveyRegardingSession)) {
 
@@ -303,8 +303,8 @@ public class DashboardServlet extends HttpServlet {
 				val sessionAttributeNames = session.getAttributeNames();
 				while (sessionAttributeNames.hasMoreElements()) {
 					val attribute = sessionAttributeNames.nextElement();
-					if (attribute
-							.startsWith(ImplementationConstants.SURVEY_OR_FEEDBACK_SESSION_PREFIX)) {
+					if (attribute.startsWith(
+							ImplementationConstants.SURVEY_OR_FEEDBACK_SESSION_PREFIX)) {
 						session.removeAttribute(attribute);
 					}
 				}
@@ -315,7 +315,8 @@ public class DashboardServlet extends HttpServlet {
 		session.setAttribute(GeneralSessionAttributeTypes.VALIDATOR.toString(),
 				GeneralSessionAttributeValidatorTypes.DASHBOARD_ACCESS
 						.toString());
-		if (session.getAttribute(GeneralSessionAttributeTypes.TOKEN.toString()) == null) {
+		if (session.getAttribute(
+				GeneralSessionAttributeTypes.TOKEN.toString()) == null) {
 			session.setAttribute(GeneralSessionAttributeTypes.TOKEN.toString(),
 					StringHelpers.createRandomString(40));
 		}
@@ -347,26 +348,18 @@ public class DashboardServlet extends HttpServlet {
 
 		// Token
 		templateVariables.put(DashboardTemplateFields.TOKEN.toVariable(),
-				session.getAttribute(GeneralSessionAttributeTypes.TOKEN
-						.toString()));
+				session.getAttribute(
+						GeneralSessionAttributeTypes.TOKEN.toString()));
 
 		// REST API URL
-		templateVariables
-				.put(DashboardTemplateFields.REST_API_URL.toVariable(),
-						request.getRequestURL()
-								.toString()
-								.substring(
-										0,
-										request.getRequestURL()
-												.toString()
-												.indexOf(
-														request.getRequestURI()))
-								+ request.getContextPath()
-								+ "/"
-								+ ImplementationConstants.REST_API_PATH
-								+ "/"
-								+ ImplementationConstants.REST_SESSION_BASED_API_VERSION
-								+ "/");
+		templateVariables.put(DashboardTemplateFields.REST_API_URL.toVariable(),
+				request.getRequestURL().toString().substring(0,
+						request.getRequestURL().toString()
+								.indexOf(request.getRequestURI()))
+						+ request.getContextPath() + "/"
+						+ ImplementationConstants.REST_API_PATH + "/"
+						+ ImplementationConstants.REST_SESSION_BASED_API_VERSION
+						+ "/");
 
 		// Given password
 		templateVariables.put(DashboardTemplateFields.PASSWORD.toVariable(),
@@ -389,12 +382,13 @@ public class DashboardServlet extends HttpServlet {
 		Mustache mustache;
 		synchronized (mustacheFactory) {
 			try {
-				mustache = mustacheFactory.compile(templateFolder
-						+ "/dashboard.html");
+				mustache = mustacheFactory
+						.compile(templateFolder + "/dashboard.html");
 			} catch (final Exception e) {
 				log.error("There seems to be a problem with the template: {}",
 						e.getMessage());
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				response.sendError(
+						HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				return;
 			}
 		}

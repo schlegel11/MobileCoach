@@ -131,18 +131,18 @@ public class MonitoringReplyRule extends AbstractMonitoringRule {
 			} else {
 				table += wrapRow(wrapHeader(
 						"Monitoring Message Group to send from:", style)
-						+ wrapField(formatWarning("Message Group set, but not found")));
+						+ wrapField(formatWarning(
+								"Message Group set, but not found")));
 			}
 		}
 
 		// Sub Rules
-		val subReplyRules = ModelObject
-				.findSorted(
-						MonitoringReplyRule.class,
-						replyRuleCase ? Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_ANSWER
-								: Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_NO_ANSWER,
-						Queries.MONITORING_RULE__SORT_BY_ORDER_ASC,
-						monitoringRuleId, getId());
+		val subReplyRules = ModelObject.findSorted(MonitoringReplyRule.class,
+				replyRuleCase
+						? Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_ANSWER
+						: Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_NO_ANSWER,
+				Queries.MONITORING_RULE__SORT_BY_ORDER_ASC, monitoringRuleId,
+				getId());
 
 		final StringBuffer buffer = new StringBuffer();
 		for (val subReplyRule : subReplyRules) {

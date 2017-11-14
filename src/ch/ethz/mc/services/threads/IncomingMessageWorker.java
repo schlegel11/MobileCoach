@@ -55,11 +55,12 @@ public class IncomingMessageWorker extends Thread {
 	@Override
 	public void run() {
 		try {
-			TimeUnit.MILLISECONDS
-					.sleep(ImplementationConstants.INCOMING_MESSAGE_WORKER_MILLISECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
+			TimeUnit.MILLISECONDS.sleep(
+					ImplementationConstants.INCOMING_MESSAGE_WORKER_MILLISECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
 		} catch (final InterruptedException e) {
 			interrupt();
-			log.debug("Incoming message worker received signal to stop (before first run)");
+			log.debug(
+					"Incoming message worker received signal to stop (before first run)");
 		}
 
 		while (!isInterrupted() && !shouldStop) {
@@ -94,11 +95,12 @@ public class IncomingMessageWorker extends Thread {
 					System.currentTimeMillis() - startingTime);
 
 			try {
-				TimeUnit.MILLISECONDS
-						.sleep(ImplementationConstants.INCOMING_MESSAGE_WORKER_MILLISECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
+				TimeUnit.MILLISECONDS.sleep(
+						ImplementationConstants.INCOMING_MESSAGE_WORKER_MILLISECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
 			} catch (final InterruptedException e) {
 				interrupt();
-				log.debug("Incoming message worker received signal to stop (interrupted)");
+				log.debug(
+						"Incoming message worker received signal to stop (interrupted)");
 				return;
 			}
 		}

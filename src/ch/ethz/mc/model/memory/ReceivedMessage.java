@@ -1,5 +1,7 @@
 package ch.ethz.mc.model.memory;
 
+import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
+import ch.ethz.mc.services.internal.CommunicationManagerService;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -23,8 +25,6 @@ package ch.ethz.mc.model.memory;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
-import ch.ethz.mc.services.internal.CommunicationManagerService;
 
 /**
  * Contains a message as received by the {@link CommunicationManagerService}
@@ -48,6 +48,10 @@ public class ReceivedMessage {
 	@Getter
 	@Setter
 	private boolean				isIntention;
+
+	@Getter
+	@Setter
+	private int					relatedMessageIdBasedOnOrder;
 
 	@Getter
 	@Setter

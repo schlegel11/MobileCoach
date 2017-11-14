@@ -46,8 +46,8 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public abstract class MonitoringMessageGroupsTabComponent extends
-		AbstractCustomComponent {
+public abstract class MonitoringMessageGroupsTabComponent
+		extends AbstractCustomComponent {
 
 	/*- VaadinEditorProperties={"grid":"RegularGrid,20","showGrid":true,"snapToGrid":true,"snapToObject":true,"movingGuides":false,"snappingDistance":10} */
 
@@ -82,17 +82,13 @@ public abstract class MonitoringMessageGroupsTabComponent extends
 		// manually added
 		localize(newGroupButton,
 				AdminMessageStrings.MONITORING_MESSAGE_GROUP_EDITING__NEW_GROUP);
-		localize(
-				renameGroupButton,
+		localize(renameGroupButton,
 				AdminMessageStrings.MONITORING_MESSAGE_GROUP_EDITING__RENAME_GROUP);
-		localize(
-				moveGroupLeftButton,
+		localize(moveGroupLeftButton,
 				AdminMessageStrings.MONITORING_MESSAGE_GROUP_EDITING__MOVE_GROUP_LEFT);
-		localize(
-				moveGroupRightButton,
+		localize(moveGroupRightButton,
 				AdminMessageStrings.MONITORING_MESSAGE_GROUP_EDITING__MOVE_GROUP_RIGHT);
-		localize(
-				deleteGroupButton,
+		localize(deleteGroupButton,
 				AdminMessageStrings.MONITORING_MESSAGE_GROUP_EDITING__DELETE_GROUP);
 
 		// set button start state
@@ -110,13 +106,15 @@ public abstract class MonitoringMessageGroupsTabComponent extends
 		renameGroupButton.setEnabled(true);
 		deleteGroupButton.setEnabled(true);
 		val tabSheet = getMonitoringMessageGroupsTabSheet();
-		if (tabSheet.getTabPosition(tabSheet.getTab(tabSheet.getSelectedTab())) > 0) {
+		if (tabSheet.getTabPosition(
+				tabSheet.getTab(tabSheet.getSelectedTab())) > 0) {
 			moveGroupLeftButton.setEnabled(true);
 		} else {
 			moveGroupLeftButton.setEnabled(false);
 		}
-		if (tabSheet.getTabPosition(tabSheet.getTab(tabSheet.getSelectedTab())) < tabSheet
-				.getComponentCount() - 1) {
+		if (tabSheet.getTabPosition(
+				tabSheet.getTab(tabSheet.getSelectedTab())) < tabSheet
+						.getComponentCount() - 1) {
 			moveGroupRightButton.setEnabled(true);
 		} else {
 			moveGroupRightButton.setEnabled(false);
@@ -201,8 +199,8 @@ public abstract class MonitoringMessageGroupsTabComponent extends
 		// moveGroupLeftButton
 		moveGroupLeftButton = new Button();
 		moveGroupLeftButton.setCaption("!!! Move Group Left");
-		moveGroupLeftButton.setIcon(new ThemeResource(
-				"img/arrow-left-icon-small.png"));
+		moveGroupLeftButton
+				.setIcon(new ThemeResource("img/arrow-left-icon-small.png"));
 		moveGroupLeftButton.setImmediate(true);
 		moveGroupLeftButton.setWidth("150px");
 		moveGroupLeftButton.setHeight("-1px");
@@ -211,8 +209,8 @@ public abstract class MonitoringMessageGroupsTabComponent extends
 		// moveGroupRightButton
 		moveGroupRightButton = new Button();
 		moveGroupRightButton.setCaption("!!! Move Group Right");
-		moveGroupRightButton.setIcon(new ThemeResource(
-				"img/arrow-right-icon-small.png"));
+		moveGroupRightButton
+				.setIcon(new ThemeResource("img/arrow-right-icon-small.png"));
 		moveGroupRightButton.setImmediate(true);
 		moveGroupRightButton.setWidth("150px");
 		moveGroupRightButton.setHeight("-1px");

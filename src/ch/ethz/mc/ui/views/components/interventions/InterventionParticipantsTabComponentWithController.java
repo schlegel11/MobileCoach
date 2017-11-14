@@ -65,8 +65,8 @@ import com.vaadin.ui.Button.ClickEvent;
  */
 @SuppressWarnings("serial")
 @Log4j2
-public class InterventionParticipantsTabComponentWithController extends
-		InterventionParticipantsTabComponent {
+public class InterventionParticipantsTabComponentWithController
+		extends InterventionParticipantsTabComponent {
 
 	private final Intervention								intervention;
 	private boolean											isOneScreeningSurveyActive;
@@ -91,8 +91,8 @@ public class InterventionParticipantsTabComponentWithController extends
 				null);
 
 		participantsTable.setContainerDataSource(beanContainer);
-		participantsTable.setSortContainerPropertyId(UIParticipant
-				.getSortColumn());
+		participantsTable
+				.setSortContainerPropertyId(UIParticipant.getSortColumn());
 		participantsTable.setVisibleColumns(UIParticipant.getVisibleColumns());
 		participantsTable.setColumnHeaders(UIParticipant.getColumnHeaders());
 		participantsTable.setConverter(UIParticipant.CREATED,
@@ -123,24 +123,24 @@ public class InterventionParticipantsTabComponentWithController extends
 
 		// handle buttons
 		val buttonClickListener = new ButtonClickListener();
-		participantsEditComponent.getImportButton().addClickListener(
-				buttonClickListener);
-		participantsEditComponent.getExportButton().addClickListener(
-				buttonClickListener);
-		participantsEditComponent.getAssignGroupButton().addClickListener(
-				buttonClickListener);
+		participantsEditComponent.getImportButton()
+				.addClickListener(buttonClickListener);
+		participantsEditComponent.getExportButton()
+				.addClickListener(buttonClickListener);
+		participantsEditComponent.getAssignGroupButton()
+				.addClickListener(buttonClickListener);
 		participantsEditComponent.getAssignOrganizationButton()
 				.addClickListener(buttonClickListener);
-		participantsEditComponent.getAssignUnitButton().addClickListener(
-				buttonClickListener);
-		participantsEditComponent.getSwitchMessagingButton().addClickListener(
-				buttonClickListener);
-		participantsEditComponent.getSendMessageButton().addClickListener(
-				buttonClickListener);
-		participantsEditComponent.getDeleteButton().addClickListener(
-				buttonClickListener);
-		participantsEditComponent.getRefreshButton().addClickListener(
-				buttonClickListener);
+		participantsEditComponent.getAssignUnitButton()
+				.addClickListener(buttonClickListener);
+		participantsEditComponent.getSwitchMessagingButton()
+				.addClickListener(buttonClickListener);
+		participantsEditComponent.getSendMessageButton()
+				.addClickListener(buttonClickListener);
+		participantsEditComponent.getDeleteButton()
+				.addClickListener(buttonClickListener);
+		participantsEditComponent.getRefreshButton()
+				.addClickListener(buttonClickListener);
 
 		// Special handle for export button
 		val onDemandFileDownloader = new OnDemandFileDownloader(
@@ -168,19 +168,20 @@ public class InterventionParticipantsTabComponentWithController extends
 					@Override
 					public String getFilename() {
 						return "Intervention_"
-								+ intervention.getName().replaceAll(
-										"[^A-Za-z0-9_. ]+", "_")
+								+ intervention.getName()
+										.replaceAll("[^A-Za-z0-9_. ]+", "_")
 								+ "_Participants"
 								+ Constants.getFileExtension();
 					}
 				});
-		onDemandFileDownloader.extend(participantsEditComponent
-				.getExportButton());
+		onDemandFileDownloader
+				.extend(participantsEditComponent.getExportButton());
 		participantsEditComponent.getExportButton().setDisableOnClick(true);
 	}
 
 	public void adjust() {
-		log.debug("Check access rights for participants based on screening surveys");
+		log.debug(
+				"Check access rights for participants based on screening surveys");
 		isOneScreeningSurveyActive = getSurveyAdministrationManagerService()
 				.isOneScreeningSurveyOfInterventionActive(intervention.getId());
 
@@ -194,7 +195,8 @@ public class InterventionParticipantsTabComponentWithController extends
 		log.debug("Update participants");
 		refreshBeanContainer(beanContainer, UIParticipant.class,
 				getInterventionAdministrationManagerService()
-						.getAllParticipantsOfIntervention(intervention.getId()));
+						.getAllParticipantsOfIntervention(
+								intervention.getId()));
 
 		participantsTable.sort();
 	}
@@ -208,26 +210,33 @@ public class InterventionParticipantsTabComponentWithController extends
 			if (event.getButton() == interventionScreeningSurveyEditComponent
 					.getImportButton()) {
 				importParticipants();
-			} else if (event.getButton() == interventionScreeningSurveyEditComponent
-					.getAssignGroupButton()) {
+			} else if (event
+					.getButton() == interventionScreeningSurveyEditComponent
+							.getAssignGroupButton()) {
 				assignGroup();
-			} else if (event.getButton() == interventionScreeningSurveyEditComponent
-					.getAssignOrganizationButton()) {
+			} else if (event
+					.getButton() == interventionScreeningSurveyEditComponent
+							.getAssignOrganizationButton()) {
 				assignOrganization();
-			} else if (event.getButton() == interventionScreeningSurveyEditComponent
-					.getAssignUnitButton()) {
+			} else if (event
+					.getButton() == interventionScreeningSurveyEditComponent
+							.getAssignUnitButton()) {
 				assignOrganizationUnit();
-			} else if (event.getButton() == interventionScreeningSurveyEditComponent
-					.getSwitchMessagingButton()) {
+			} else if (event
+					.getButton() == interventionScreeningSurveyEditComponent
+							.getSwitchMessagingButton()) {
 				switchMessaging();
-			} else if (event.getButton() == interventionScreeningSurveyEditComponent
-					.getSendMessageButton()) {
+			} else if (event
+					.getButton() == interventionScreeningSurveyEditComponent
+							.getSendMessageButton()) {
 				sendMessage();
-			} else if (event.getButton() == interventionScreeningSurveyEditComponent
-					.getDeleteButton()) {
+			} else if (event
+					.getButton() == interventionScreeningSurveyEditComponent
+							.getDeleteButton()) {
 				deleteParticipants();
-			} else if (event.getButton() == interventionScreeningSurveyEditComponent
-					.getRefreshButton()) {
+			} else if (event
+					.getButton() == interventionScreeningSurveyEditComponent
+							.getRefreshButton()) {
 				adjust();
 			}
 		}
@@ -240,7 +249,8 @@ public class InterventionParticipantsTabComponentWithController extends
 		fileUploadComponentWithController.setListener(new UploadListener() {
 			@Override
 			public void fileUploadReceived(final File file) {
-				log.debug("File upload sucessful, starting import of screening survey");
+				log.debug(
+						"File upload sucessful, starting import of screening survey");
 
 				try {
 					val importedParticipants = getInterventionAdministrationManagerService()
@@ -262,19 +272,17 @@ public class InterventionParticipantsTabComponentWithController extends
 					}
 					for (val importedParticipant : importedParticipants) {
 						beanContainer.addItem(importedParticipant.getId(),
-								UIParticipant.class.cast(importedParticipant
-										.toUIModelObject()));
+								UIParticipant.class.cast(
+										importedParticipant.toUIModelObject()));
 						participantsTable.select(importedParticipant.getId());
 					}
 					participantsTable.sort();
 
-					getAdminUI()
-							.showInformationNotification(
-									AdminMessageStrings.NOTIFICATION__PARTICIPANTS_IMPORTED);
+					getAdminUI().showInformationNotification(
+							AdminMessageStrings.NOTIFICATION__PARTICIPANTS_IMPORTED);
 				} catch (final Exception e) {
-					getAdminUI()
-							.showWarningNotification(
-									AdminMessageStrings.NOTIFICATION__PARTICIPANTS_IMPORT_FAILED);
+					getAdminUI().showWarningNotification(
+							AdminMessageStrings.NOTIFICATION__PARTICIPANTS_IMPORT_FAILED);
 				} finally {
 					try {
 						file.delete();
@@ -314,25 +322,22 @@ public class InterventionParticipantsTabComponentWithController extends
 						for (val selectedParticipant : selectedParticipants) {
 							if (getStringValue().equals("")) {
 								getStringItemProperty(
-										beanContainer
-												.getItem(selectedParticipant
-														.getId()),
-										UIParticipant.GROUP)
-										.setValue(
-												Messages.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET));
+										beanContainer.getItem(
+												selectedParticipant.getId()),
+										UIParticipant.GROUP).setValue(
+												Messages.getAdminString(
+														AdminMessageStrings.UI_MODEL__NOT_SET));
 							} else {
 								getStringItemProperty(
-										beanContainer
-												.getItem(selectedParticipant
-														.getId()),
-										UIParticipant.GROUP).setValue(
-										getStringValue());
+										beanContainer.getItem(
+												selectedParticipant.getId()),
+										UIParticipant.GROUP)
+												.setValue(getStringValue());
 							}
 						}
 
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__PARTICIPANTS_GROUP_CHANGED);
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__PARTICIPANTS_GROUP_CHANGED);
 						closeWindow();
 					}
 				}, null);
@@ -362,15 +367,14 @@ public class InterventionParticipantsTabComponentWithController extends
 						// Adapt UI
 						for (val selectedParticipant : selectedParticipants) {
 							getStringItemProperty(
-									beanContainer.getItem(selectedParticipant
-											.getId()),
-									UIParticipant.ORGANIZATION).setValue(
-									getStringValue());
+									beanContainer.getItem(
+											selectedParticipant.getId()),
+									UIParticipant.ORGANIZATION)
+											.setValue(getStringValue());
 						}
 
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__PARTICIPANTS_ORGANIZATION_CHANGED);
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__PARTICIPANTS_ORGANIZATION_CHANGED);
 						closeWindow();
 					}
 				}, null);
@@ -400,14 +404,14 @@ public class InterventionParticipantsTabComponentWithController extends
 						// Adapt UI
 						for (val selectedParticipant : selectedParticipants) {
 							getStringItemProperty(
-									beanContainer.getItem(selectedParticipant
-											.getId()), UIParticipant.UNIT)
-									.setValue(getStringValue());
+									beanContainer.getItem(
+											selectedParticipant.getId()),
+									UIParticipant.UNIT)
+											.setValue(getStringValue());
 						}
 
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__PARTICIPANTS_ORGANIZATION_UNIT_CHANGED);
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__PARTICIPANTS_ORGANIZATION_UNIT_CHANGED);
 						closeWindow();
 					}
 				}, null);
@@ -442,9 +446,8 @@ public class InterventionParticipantsTabComponentWithController extends
 				}
 				participantsTable.sort();
 
-				getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__PARTICIPANTS_MONITORING_SWITCHED);
+				getAdminUI().showInformationNotification(
+						AdminMessageStrings.NOTIFICATION__PARTICIPANTS_MONITORING_SWITCHED);
 				closeWindow();
 			}
 		}, null);
@@ -472,11 +475,11 @@ public class InterventionParticipantsTabComponentWithController extends
 					public void buttonClick(final ClickEvent event) {
 						// Check if message contains only valid strings
 						if (!StringValidator.isValidVariableText(
-								getStringValue(), allPossibleMessageVariables)) {
+								getStringValue(),
+								allPossibleMessageVariables)) {
 
-							getAdminUI()
-									.showWarningNotification(
-											AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
+							getAdminUI().showWarningNotification(
+									AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
 
 							return;
 						} else {
@@ -492,8 +495,7 @@ public class InterventionParticipantsTabComponentWithController extends
 									.getSelectedMonitoringMessageGroup() != null) {
 								for (val participant : selectedParticipants) {
 									interventionExecutionManagerService
-											.sendManualMessage(
-													participant,
+											.sendManualMessage(participant,
 													placeholderStringEditWithMessageGroupSelectionComponent
 															.getSendToSupervisorComboBox()
 															.getValue(),
@@ -507,8 +509,7 @@ public class InterventionParticipantsTabComponentWithController extends
 							} else {
 								for (val participant : selectedParticipants) {
 									interventionExecutionManagerService
-											.sendManualMessage(
-													participant,
+											.sendManualMessage(participant,
 													placeholderStringEditWithMessageGroupSelectionComponent
 															.getSendToSupervisorComboBox()
 															.getValue(),
@@ -517,9 +518,8 @@ public class InterventionParticipantsTabComponentWithController extends
 							}
 						}
 
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__THE_MESSAGES_WILL_BE_SENT_IN_THE_NEXT_MINUTES);
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__THE_MESSAGES_WILL_BE_SENT_IN_THE_NEXT_MINUTES);
 
 						closeWindow();
 					}
@@ -546,8 +546,8 @@ public class InterventionParticipantsTabComponentWithController extends
 				// Adapt UI
 				for (val selectedParticipant : selectedParticipants) {
 					getInterventionParticipantsEditComponent()
-							.getParticipantsTable().removeItem(
-									selectedParticipant.getId());
+							.getParticipantsTable()
+							.removeItem(selectedParticipant.getId());
 				}
 
 				getAdminUI().showInformationNotification(
@@ -562,8 +562,8 @@ public class InterventionParticipantsTabComponentWithController extends
 		val selectedParticipants = new ArrayList<Participant>();
 
 		for (val selectedUIParticipantId : selectedUIParticipantsIds) {
-			val selectedUIParticipant = beanContainer.getItem(
-					selectedUIParticipantId).getBean();
+			val selectedUIParticipant = beanContainer
+					.getItem(selectedUIParticipantId).getBean();
 
 			selectedParticipants.add(selectedUIParticipant
 					.getRelatedModelObject(Participant.class));

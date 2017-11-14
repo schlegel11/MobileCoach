@@ -89,15 +89,15 @@ public class VariablesManagerService {
 	private final ConcurrentHashMap<String, Hashtable<String, ParticipantVariableWithValue>>	participantsVariablesCache;
 
 	private static SimpleDateFormat																hourOfDayFormatter	= new SimpleDateFormat(
-																															"H");
+			"H");
 	private static SimpleDateFormat																dayInWeekFormatter	= new SimpleDateFormat(
-																															"u");
+			"u");
 	private static SimpleDateFormat																dayOfMonthFormatter	= new SimpleDateFormat(
-																															"d");
+			"d");
 	private static SimpleDateFormat																monthFormatter		= new SimpleDateFormat(
-																															"M");
+			"M");
 	private static SimpleDateFormat																yearFormatter		= new SimpleDateFormat(
-																															"yyyy");
+			"yyyy");
 
 	private VariablesManagerService(
 			final DatabaseManagerService databaseManagerService)
@@ -107,7 +107,8 @@ public class VariablesManagerService {
 		this.databaseManagerService = databaseManagerService;
 
 		writeProtectedReservedVariableNames = new HashSet<String>();
-		for (val variable : SystemVariables.READ_ONLY_SYSTEM_VARIABLES.values()) {
+		for (val variable : SystemVariables.READ_ONLY_SYSTEM_VARIABLES
+				.values()) {
 			writeProtectedReservedVariableNames.add(variable.toVariableName());
 		}
 		for (val variable : SystemVariables.READ_ONLY_PARTICIPANT_VARIABLES
@@ -138,8 +139,8 @@ public class VariablesManagerService {
 				.addAll(allSystemReservedVariableNames);
 		for (val variable : SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES
 				.values()) {
-			allSystemReservedVariableNamesRelevantForSlides.remove(variable
-					.toVariableName());
+			allSystemReservedVariableNamesRelevantForSlides
+					.remove(variable.toVariableName());
 		}
 
 		externallyReadableSystemVariableNames = new HashSet<String>();
@@ -205,8 +206,8 @@ public class VariablesManagerService {
 
 		// Retrieve all stored participant variables and add them
 		synchronized (participantsVariablesCache) {
-			if (participantsVariablesCache.containsKey(participant.getId()
-					.toHexString())) {
+			if (participantsVariablesCache
+					.containsKey(participant.getId().toHexString())) {
 				// Use cache
 				val participantVariablesCache = participantsVariablesCache
 						.get(participant.getId().toHexString());
@@ -214,8 +215,8 @@ public class VariablesManagerService {
 				variablesWithValues.putAll(participantVariablesCache);
 			} else {
 				// Create cache
-				log.debug("Creating cache for participant {} ", participant
-						.getId().toHexString());
+				log.debug("Creating cache for participant {} ",
+						participant.getId().toHexString());
 
 				val participantVariablesWithValues = databaseManagerService
 						.findSortedModelObjects(
@@ -226,16 +227,17 @@ public class VariablesManagerService {
 
 				val participantVariablesCache = new Hashtable<String, ParticipantVariableWithValue>();
 				for (val participantVariableWithValue : participantVariablesWithValues) {
-					if (!participantVariablesCache
-							.containsKey(participantVariableWithValue.getName())) {
+					if (!participantVariablesCache.containsKey(
+							participantVariableWithValue.getName())) {
 						participantVariablesCache.put(
 								participantVariableWithValue.getName(),
 								participantVariableWithValue);
 					}
 				}
 
-				participantsVariablesCache.put(participant.getId()
-						.toHexString(), participantVariablesCache);
+				participantsVariablesCache.put(
+						participant.getId().toHexString(),
+						participantVariablesCache);
 
 				variablesWithValues.putAll(participantVariablesCache);
 			}
@@ -244,23 +246,22 @@ public class VariablesManagerService {
 		// Add also variables of intervention, but only if not overwritten for
 		// participant
 		val interventionVariablesWithValues = databaseManagerService
-				.findModelObjects(
-						InterventionVariableWithValue.class,
+				.findModelObjects(InterventionVariableWithValue.class,
 						Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION,
 						participant.getIntervention());
 
 		for (val interventionVariableWithValue : interventionVariablesWithValues) {
-			if (!variablesWithValues.containsKey(interventionVariableWithValue
-					.getName())) {
-				variablesWithValues.put(
-						interventionVariableWithValue.getName(),
+			if (!variablesWithValues
+					.containsKey(interventionVariableWithValue.getName())) {
+				variablesWithValues.put(interventionVariableWithValue.getName(),
 						interventionVariableWithValue);
 			}
 		}
 
 		// Add all read only system variables
 		val date = new Date(InternalDateTime.currentTimeMillis());
-		for (val variable : SystemVariables.READ_ONLY_SYSTEM_VARIABLES.values()) {
+		for (val variable : SystemVariables.READ_ONLY_SYSTEM_VARIABLES
+				.values()) {
 			val readOnlySystemVariableValue = getReadOnlySystemVariableValue(
 					date, variable, relatedMonitoringMessage);
 
@@ -294,8 +295,8 @@ public class VariablesManagerService {
 				case participantUnexpectedMessage:
 				case participantUnexpectedRawMessage:
 				case participantIntention:
-					if (!variablesWithValues.containsKey(variable
-							.toVariableName())) {
+					if (!variablesWithValues
+							.containsKey(variable.toVariableName())) {
 						addToHashtable(variablesWithValues,
 								variable.toVariableName(), "");
 					}
@@ -328,8 +329,8 @@ public class VariablesManagerService {
 		// Get relevant interventions
 		List<ObjectId> interventionsToCheck = new ArrayList<ObjectId>();
 
-		val participant = databaseManagerService.getModelObjectById(
-				Participant.class, participantId);
+		val participant = databaseManagerService
+				.getModelObjectById(Participant.class, participantId);
 
 		interventionsToCheck.add(participant.getIntervention());
 
@@ -345,10 +346,9 @@ public class VariablesManagerService {
 
 		// Check participants of relevant interventions
 		for (val interventionToCheckId : interventionsToCheck) {
-			val participantsToCheck = databaseManagerService
-					.findModelObjectIds(Participant.class,
-							Queries.PARTICIPANT__BY_INTERVENTION,
-							interventionToCheckId);
+			val participantsToCheck = databaseManagerService.findModelObjectIds(
+					Participant.class, Queries.PARTICIPANT__BY_INTERVENTION,
+					interventionToCheckId);
 
 			for (val participantToCheckId : participantsToCheck) {
 				if (!participantToCheckId.equals(participantId)) {
@@ -357,7 +357,8 @@ public class VariablesManagerService {
 							&& (participantToCheck = databaseManagerService
 									.getModelObjectById(Participant.class,
 											participantToCheckId)) != null) {
-						val variablesOfParticipantToCheck = getAllVariablesWithValuesOfParticipantAndSystem(participantToCheck);
+						val variablesOfParticipantToCheck = getAllVariablesWithValuesOfParticipantAndSystem(
+								participantToCheck);
 						if (variablesOfParticipantToCheck
 								.containsKey(variableName)
 								&& variablesOfParticipantToCheck
@@ -396,10 +397,10 @@ public class VariablesManagerService {
 				}
 				break;
 			case participantDialogOptionSMSData:
-				val dialogOptionSMS = databaseManagerService
-						.findOneModelObject(DialogOption.class,
-								Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
-								participant.getId(), DialogOptionTypes.SMS);
+				val dialogOptionSMS = databaseManagerService.findOneModelObject(
+						DialogOption.class,
+						Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
+						participant.getId(), DialogOptionTypes.SMS);
 				if (dialogOptionSMS != null) {
 					return dialogOptionSMS.getData();
 				}
@@ -472,16 +473,15 @@ public class VariablesManagerService {
 			case systemYear:
 				return yearFormatter.format(date);
 			case systemLinkedSurvey:
-				if (relatedMonitoringMessage != null
-						&& relatedMonitoringMessage
-								.getLinkedIntermediateSurvey() != null) {
+				if (relatedMonitoringMessage != null && relatedMonitoringMessage
+						.getLinkedIntermediateSurvey() != null) {
 					return ImplementationConstants.PLACEHOLDER_LINKED_SURVEY;
 				} else {
 					return "";
 				}
 			case systemLinkedMediaObject:
-				if (relatedMonitoringMessage != null
-						&& relatedMonitoringMessage.getLinkedMediaObject() != null) {
+				if (relatedMonitoringMessage != null && relatedMonitoringMessage
+						.getLinkedMediaObject() != null) {
 					return ImplementationConstants.PLACEHOLDER_LINKED_MEDIA_OBJECT;
 				} else {
 					return "";
@@ -586,36 +586,42 @@ public class VariablesManagerService {
 
 			switch (readWriteVariableName) {
 				case participantDialogOptionEmailData:
-					log.debug("Setting variable 'participantDialogOptionEmailData'");
+					log.debug(
+							"Setting variable 'participantDialogOptionEmailData'");
 					participantSetDialogOption(participantId,
 							DialogOptionTypes.EMAIL,
 							StringHelpers.cleanEmailAddress(variableValue));
 					break;
 				case participantDialogOptionSMSData:
-					log.debug("Setting variable 'participantDialogOptionSMSData'");
+					log.debug(
+							"Setting variable 'participantDialogOptionSMSData'");
 					participantSetDialogOption(participantId,
 							DialogOptionTypes.SMS,
 							StringHelpers.cleanPhoneNumber(variableValue));
 					break;
 				case participantDialogOptionExternalID:
-					log.debug("Setting variable 'participantDialogOptionDeepstreamData'");
+					log.debug(
+							"Setting variable 'participantDialogOptionDeepstreamData'");
 					participantSetDialogOption(participantId,
 							DialogOptionTypes.EXTERNAL_ID, variableValue);
 					break;
 				case participantSupervisorDialogOptionEmailData:
-					log.debug("Setting variable 'participantSupervisorDialogOptionEmailData'");
+					log.debug(
+							"Setting variable 'participantSupervisorDialogOptionEmailData'");
 					participantSetDialogOption(participantId,
 							DialogOptionTypes.SUPERVISOR_EMAIL,
 							StringHelpers.cleanEmailAddress(variableValue));
 					break;
 				case participantSupervisorDialogOptionSMSData:
-					log.debug("Setting variable 'participantSupervisorDialogOptionSMSData'");
+					log.debug(
+							"Setting variable 'participantSupervisorDialogOptionSMSData'");
 					participantSetDialogOption(participantId,
 							DialogOptionTypes.SUPERVISOR_SMS,
 							StringHelpers.cleanPhoneNumber(variableValue));
 					break;
 				case participantSupervisorDialogOptionExternalID:
-					log.debug("Setting variable 'participantSupervisorDialogOptionDeepstreamData'");
+					log.debug(
+							"Setting variable 'participantSupervisorDialogOptionDeepstreamData'");
 					participantSetDialogOption(participantId,
 							DialogOptionTypes.SUPERVISOR_EXTERNAL_ID,
 							variableValue);
@@ -646,8 +652,8 @@ public class VariablesManagerService {
 			if (participantVariableWithValue == null) {
 				newParticipantVariableWithValue = new ParticipantVariableWithValue(
 						participantId, InternalDateTime.currentTimeMillis(),
-						variableName, variableValue == null ? ""
-								: variableValue);
+						variableName,
+						variableValue == null ? "" : variableValue);
 				if (describesMediaUpload) {
 					newParticipantVariableWithValue
 							.setDescribesMediaUpload(true);
@@ -680,8 +686,8 @@ public class VariablesManagerService {
 
 			// Cache new value
 			synchronized (participantsVariablesCache) {
-				if (participantsVariablesCache.containsKey(participantId
-						.toHexString())) {
+				if (participantsVariablesCache
+						.containsKey(participantId.toHexString())) {
 					participantsVariablesCache.get(participantId.toHexString())
 							.put(variableName, newParticipantVariableWithValue);
 				}
@@ -692,8 +698,8 @@ public class VariablesManagerService {
 	@Synchronized
 	private void participantSetName(final ObjectId participantId,
 			final String participantName) {
-		val participant = databaseManagerService.getModelObjectById(
-				Participant.class, participantId);
+		val participant = databaseManagerService
+				.getModelObjectById(Participant.class, participantId);
 
 		participant.setNickname(participantName);
 
@@ -703,8 +709,8 @@ public class VariablesManagerService {
 	@Synchronized
 	private void participantSetLanguage(final ObjectId participantId,
 			final String language) {
-		val participant = databaseManagerService.getModelObjectById(
-				Participant.class, participantId);
+		val participant = databaseManagerService
+				.getModelObjectById(Participant.class, participantId);
 
 		tryLocales: try {
 			val localeParts = language.replace("-", "_").split("_");
@@ -730,8 +736,8 @@ public class VariablesManagerService {
 	@Synchronized
 	private void participantSetGroup(final ObjectId participantId,
 			final String group) {
-		val participant = databaseManagerService.getModelObjectById(
-				Participant.class, participantId);
+		val participant = databaseManagerService
+				.getModelObjectById(Participant.class, participantId);
 
 		if (group == null || group.equals("")) {
 			participant.setGroup(null);
@@ -809,22 +815,20 @@ public class VariablesManagerService {
 				Queries.SCREENING_SURVEY__BY_INTERVENTION, interventionId);
 		for (val surveyModelObject : surveyModelObjects) {
 			val surveySlideModelObjects = databaseManagerService
-					.findModelObjects(
-							ScreeningSurveySlide.class,
+					.findModelObjects(ScreeningSurveySlide.class,
 							Queries.SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY,
 							surveyModelObject.getId());
 
 			for (val surveySlideModelObject : surveySlideModelObjects) {
 				for (val question : surveySlideModelObject.getQuestions()) {
 					if (question.getStoreValueToVariableWithName() != null) {
-						variables.add(question
-								.getStoreValueToVariableWithName());
+						variables.add(
+								question.getStoreValueToVariableWithName());
 					}
 				}
 
 				val surveySlideRuleModelObjects = databaseManagerService
-						.findModelObjects(
-								ScreeningSurveySlideRule.class,
+						.findModelObjects(ScreeningSurveySlideRule.class,
 								Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE,
 								surveySlideModelObject.getId());
 
@@ -841,7 +845,8 @@ public class VariablesManagerService {
 		return variables;
 	}
 
-	public Set<String> getAllSurveyVariableNamesOfSurvey(final ObjectId surveyId) {
+	public Set<String> getAllSurveyVariableNamesOfSurvey(
+			final ObjectId surveyId) {
 		val variables = new HashSet<String>();
 
 		val surveySlideModelObjects = databaseManagerService.findModelObjects(
@@ -856,8 +861,7 @@ public class VariablesManagerService {
 			}
 
 			val surveySlideRuleModelObjects = databaseManagerService
-					.findModelObjects(
-							ScreeningSurveySlideRule.class,
+					.findModelObjects(ScreeningSurveySlideRule.class,
 							Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE,
 							surveySlideModelObject.getId());
 
@@ -884,8 +888,7 @@ public class VariablesManagerService {
 						interventionId);
 		for (val monitoringMessageGroupModelObject : monitoringMessageGroupModelObjects) {
 			val monitoringMessageModelObjects = databaseManagerService
-					.findModelObjects(
-							MonitoringMessage.class,
+					.findModelObjects(MonitoringMessage.class,
 							Queries.MONITORING_MESSAGE__BY_MONITORING_MESSAGE_GROUP,
 							monitoringMessageGroupModelObject.getId());
 
@@ -910,7 +913,8 @@ public class VariablesManagerService {
 						Queries.MONITORING_RULE__BY_INTERVENTION,
 						interventionId);
 		for (val monitoringRuleModelObject : monitoringRuleModelObjects) {
-			if (monitoringRuleModelObject.getStoreValueToVariableWithName() != null) {
+			if (monitoringRuleModelObject
+					.getStoreValueToVariableWithName() != null) {
 				variables.add(monitoringRuleModelObject
 						.getStoreValueToVariableWithName());
 			}
@@ -957,20 +961,20 @@ public class VariablesManagerService {
 			if (externallyReadableSystemVariableNames.contains(variable)) {
 				// Check privacy
 				if (!InterventionVariableWithValuePrivacyTypes.PRIVATE
-						.isAllowedAtGivenOrLessRestrictivePrivacyType(requestPrivacyType)) {
+						.isAllowedAtGivenOrLessRestrictivePrivacyType(
+								requestPrivacyType)) {
 					throw new ExternallyReadProtectedVariableException(
-							"The variable "
-									+ variable
+							"The variable " + variable
 									+ " can only be requested for the participant itself");
 				}
 
 				try {
 					return getReadOnlySystemVariableValue(
 							new Date(InternalDateTime.currentTimeMillis()),
-							READ_ONLY_SYSTEM_VARIABLES.valueOf(variable
-									.replace(
-											ImplementationConstants.VARIABLE_PREFIX,
-											"")), null);
+							READ_ONLY_SYSTEM_VARIABLES.valueOf(variable.replace(
+									ImplementationConstants.VARIABLE_PREFIX,
+									"")),
+							null);
 				} catch (final Exception e) {
 					return null;
 				}
@@ -978,15 +982,15 @@ public class VariablesManagerService {
 					.contains(variable)) {
 				// Check privacy
 				if (!InterventionVariableWithValuePrivacyTypes.PRIVATE
-						.isAllowedAtGivenOrLessRestrictivePrivacyType(requestPrivacyType)) {
+						.isAllowedAtGivenOrLessRestrictivePrivacyType(
+								requestPrivacyType)) {
 					throw new ExternallyReadProtectedVariableException(
-							"The variable "
-									+ variable
+							"The variable " + variable
 									+ " can only be requested for the participant itself");
 				}
 
-				val participant = databaseManagerService.getModelObjectById(
-						Participant.class, participantId);
+				val participant = databaseManagerService
+						.getModelObjectById(Participant.class, participantId);
 
 				if (participant == null) {
 					throw new ExternallyReadProtectedVariableException(
@@ -997,8 +1001,8 @@ public class VariablesManagerService {
 				try {
 					value = getReadWriteParticipantVariableValueForParticipant(
 							participant,
-							READ_WRITE_PARTICIPANT_VARIABLES.valueOf(variable
-									.replace(
+							READ_WRITE_PARTICIPANT_VARIABLES
+									.valueOf(variable.replace(
 											ImplementationConstants.VARIABLE_PREFIX,
 											"")));
 				} catch (final Exception e) {
@@ -1015,11 +1019,10 @@ public class VariablesManagerService {
 									Queries.DIALOG_STATUS__BY_PARTICIPANT,
 									participant.getId());
 
-					value = getReadOnlyParticipantVariableValue(
-							participant,
+					value = getReadOnlyParticipantVariableValue(participant,
 							dialogStatus,
-							READ_ONLY_PARTICIPANT_VARIABLES.valueOf(variable
-									.replace(
+							READ_ONLY_PARTICIPANT_VARIABLES
+									.valueOf(variable.replace(
 											ImplementationConstants.VARIABLE_PREFIX,
 											"")));
 				} catch (final Exception e) {
@@ -1032,8 +1035,8 @@ public class VariablesManagerService {
 			throw new ExternallyReadProtectedVariableException();
 		} else {
 			// It's a self-created variable
-			val participant = databaseManagerService.getModelObjectById(
-					Participant.class, participantId);
+			val participant = databaseManagerService
+					.getModelObjectById(Participant.class, participantId);
 
 			if (participant == null) {
 				throw new ExternallyReadProtectedVariableException(
@@ -1042,8 +1045,7 @@ public class VariablesManagerService {
 
 			// Check rights of intervention variable
 			val interventionVariable = databaseManagerService
-					.findOneModelObject(
-							InterventionVariableWithValue.class,
+					.findOneModelObject(InterventionVariableWithValue.class,
 							Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME,
 							participant.getIntervention(), variable);
 
@@ -1054,15 +1056,13 @@ public class VariablesManagerService {
 
 			// Check access
 			if (isService) {
-				if (!interventionVariable
-						.getAccessType()
+				if (!interventionVariable.getAccessType()
 						.isAllowedAtGivenOrLessRestrictiveAccessType(
 								InterventionVariableWithValueAccessTypes.MANAGEABLE_BY_SERVICE)) {
 					throw new ExternallyReadProtectedVariableException();
 				}
 			} else {
-				if (!interventionVariable
-						.getAccessType()
+				if (!interventionVariable.getAccessType()
 						.isAllowedAtGivenOrLessRestrictiveAccessType(
 								InterventionVariableWithValueAccessTypes.EXTERNALLY_READABLE)) {
 					throw new ExternallyReadProtectedVariableException();
@@ -1073,8 +1073,7 @@ public class VariablesManagerService {
 					.isAllowedAtGivenOrLessRestrictivePrivacyType(
 							requestPrivacyType)) {
 				throw new ExternallyReadProtectedVariableException(
-						"The variable " + variable
-								+ " cannot be requested for "
+						"The variable " + variable + " cannot be requested for "
 								+ requestPrivacyType.toString());
 			}
 
@@ -1109,15 +1108,16 @@ public class VariablesManagerService {
 	public void externallyWriteVariableForParticipant(
 			final ObjectId participantId, final String variable,
 			final String value, final boolean describesMediaUpload,
-			boolean isService) throws ExternallyWriteProtectedVariableException {
+			boolean isService)
+			throws ExternallyWriteProtectedVariableException {
 		if (allSystemReservedVariableNames.contains(variable)) {
 			// It's a reserved variable; these can't be written in general from
 			// external interfaces
 			throw new ExternallyWriteProtectedVariableException();
 		} else {
 			// It's a self-created variable
-			val participant = databaseManagerService.getModelObjectById(
-					Participant.class, participantId);
+			val participant = databaseManagerService
+					.getModelObjectById(Participant.class, participantId);
 
 			if (participant == null) {
 				throw new ExternallyWriteProtectedVariableException(
@@ -1138,8 +1138,7 @@ public class VariablesManagerService {
 
 			// Check rights of intervention variable
 			val interventionVariable = databaseManagerService
-					.findOneModelObject(
-							InterventionVariableWithValue.class,
+					.findOneModelObject(InterventionVariableWithValue.class,
 							Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME,
 							participant.getIntervention(), variable);
 
@@ -1148,15 +1147,13 @@ public class VariablesManagerService {
 						"This variable is not defined, so it cannot be written");
 			}
 			if (isService) {
-				if (!interventionVariable
-						.getAccessType()
+				if (!interventionVariable.getAccessType()
 						.isAllowedAtGivenOrLessRestrictiveAccessType(
 								InterventionVariableWithValueAccessTypes.MANAGEABLE_BY_SERVICE)) {
 					throw new ExternallyWriteProtectedVariableException();
 				}
 			} else {
-				if (!interventionVariable
-						.getAccessType()
+				if (!interventionVariable.getAccessType()
 						.isAllowedAtGivenOrLessRestrictiveAccessType(
 								InterventionVariableWithValueAccessTypes.EXTERNALLY_READ_AND_WRITABLE)) {
 					throw new ExternallyWriteProtectedVariableException();
@@ -1185,9 +1182,9 @@ public class VariablesManagerService {
 	 * @throws ExternallyWriteProtectedVariableException
 	 */
 	public void serviceWriteVotingFromParticipantForParticipant(
-			final ObjectId participantId,
-			final ObjectId receivingParticipantId, final String variable,
-			boolean addVote) throws ExternallyWriteProtectedVariableException {
+			final ObjectId participantId, final ObjectId receivingParticipantId,
+			final String variable, boolean addVote)
+			throws ExternallyWriteProtectedVariableException {
 		if (allSystemReservedVariableNames.contains(variable)) {
 			// It's a reserved variable; these can't be written in general from
 			// external interfaces
@@ -1200,8 +1197,8 @@ public class VariablesManagerService {
 			}
 
 			// It's a self-created variable
-			val participant = databaseManagerService.getModelObjectById(
-					Participant.class, participantId);
+			val participant = databaseManagerService
+					.getModelObjectById(Participant.class, participantId);
 
 			if (participant == null) {
 				throw new ExternallyWriteProtectedVariableException(
@@ -1244,8 +1241,7 @@ public class VariablesManagerService {
 
 			// Check rights of intervention variable
 			val interventionVariable = databaseManagerService
-					.findOneModelObject(
-							InterventionVariableWithValue.class,
+					.findOneModelObject(InterventionVariableWithValue.class,
 							Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME,
 							participant.getIntervention(), variable);
 
@@ -1253,14 +1249,12 @@ public class VariablesManagerService {
 				throw new ExternallyWriteProtectedVariableException(
 						"This voting variable is not defined, so it cannot be written");
 			}
-			if (!interventionVariable
-					.getAccessType()
+			if (!interventionVariable.getAccessType()
 					.isAllowedAtGivenOrLessRestrictiveAccessType(
 							InterventionVariableWithValueAccessTypes.MANAGEABLE_BY_SERVICE)) {
 				throw new ExternallyWriteProtectedVariableException();
 			}
-			if (interventionVariable
-					.getAccessType()
+			if (interventionVariable.getAccessType()
 					.isAllowedAtGivenOrLessRestrictiveAccessType(
 							InterventionVariableWithValueAccessTypes.EXTERNALLY_READABLE)) {
 				throw new ExternallyWriteProtectedVariableException(
@@ -1268,22 +1262,20 @@ public class VariablesManagerService {
 			}
 
 			// Check privacy (of intervention variable)
-			if (!participant.getIntervention().equals(
-					receivingParticipant.getIntervention())) {
+			if (!participant.getIntervention()
+					.equals(receivingParticipant.getIntervention())) {
 				throw new ExternallyWriteProtectedVariableException(
 						"This voting variable cannot be written because both participants involved are in different interventions");
-			} else if (!interventionVariable
-					.getPrivacyType()
+			} else if (!interventionVariable.getPrivacyType()
 					.isAllowedAtGivenOrLessRestrictivePrivacyType(
 							InterventionVariableWithValuePrivacyTypes.SHARED_WITH_GROUP)) {
 				throw new ExternallyWriteProtectedVariableException(
 						"This voting variable cannot be written by another participant because it's not shared with at least the group");
-			} else if (!interventionVariable
-					.getPrivacyType()
+			} else if (!interventionVariable.getPrivacyType()
 					.isAllowedAtGivenOrLessRestrictivePrivacyType(
 							InterventionVariableWithValuePrivacyTypes.SHARED_WITH_INTERVENTION)
-					&& !participant.getGroup().equals(
-							receivingParticipant.getGroup())) {
+					&& !participant.getGroup()
+							.equals(receivingParticipant.getGroup())) {
 				throw new ExternallyWriteProtectedVariableException(
 						"This voting variable cannot be written by another participant from a different group");
 			}
@@ -1301,14 +1293,14 @@ public class VariablesManagerService {
 				if (addVote) {
 					// ADD voting
 					if (participantVariableWithValue != null
-							&& participantVariableWithValue.getValue().length() >= ImplementationConstants.OBJECT_ID_LENGTH) {
+							&& participantVariableWithValue.getValue()
+									.length() >= ImplementationConstants.OBJECT_ID_LENGTH) {
 
 						// Check for double voting
-						if (!participantVariableWithValue.getValue().contains(
-								participantId.toHexString())) {
+						if (!participantVariableWithValue.getValue()
+								.contains(participantId.toHexString())) {
 							writeVariableValueOfParticipant(
-									receivingParticipantId,
-									variable,
+									receivingParticipantId, variable,
 									participantVariableWithValue.getValue()
 											+ "," + participantId.toHexString(),
 									false, false);
@@ -1321,12 +1313,14 @@ public class VariablesManagerService {
 				} else {
 					// REMOVE voting
 					if (participantVariableWithValue != null
-							&& participantVariableWithValue.getValue().length() >= ImplementationConstants.OBJECT_ID_LENGTH) {
+							&& participantVariableWithValue.getValue()
+									.length() >= ImplementationConstants.OBJECT_ID_LENGTH) {
 
 						// Check for existence of voting
-						if (("," + participantVariableWithValue.getValue() + ",")
-								.contains("," + participantId.toHexString()
-										+ ",")) {
+						if (("," + participantVariableWithValue.getValue()
+								+ ",").contains(
+										"," + participantId.toHexString()
+												+ ",")) {
 							String newValue = participantVariableWithValue
 									.getValue()
 									.replace(participantId.toHexString(), "")
@@ -1369,8 +1363,8 @@ public class VariablesManagerService {
 			throw new ExternallyWriteProtectedVariableException();
 		} else {
 			// It's a self-created variable
-			val participant = databaseManagerService.getModelObjectById(
-					Participant.class, participantId);
+			val participant = databaseManagerService
+					.getModelObjectById(Participant.class, participantId);
 
 			if (participant == null) {
 				throw new ExternallyWriteProtectedVariableException(
@@ -1396,18 +1390,15 @@ public class VariablesManagerService {
 					+ ImplementationConstants.REST_API_CREDITS_REMINDER_VARIABLE_POSTFIX;
 
 			val interventionVariable = databaseManagerService
-					.findOneModelObject(
-							InterventionVariableWithValue.class,
+					.findOneModelObject(InterventionVariableWithValue.class,
 							Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME,
 							participant.getIntervention(), variable);
 			val interventionCheckVariable = databaseManagerService
-					.findOneModelObject(
-							InterventionVariableWithValue.class,
+					.findOneModelObject(InterventionVariableWithValue.class,
 							Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME,
 							participant.getIntervention(), checkVariable);
 			val interventionReminderVariable = databaseManagerService
-					.findOneModelObject(
-							InterventionVariableWithValue.class,
+					.findOneModelObject(InterventionVariableWithValue.class,
 							Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME,
 							participant.getIntervention(), reminderVariable);
 
@@ -1424,53 +1415,45 @@ public class VariablesManagerService {
 			}
 			if (interventionCheckVariable == null) {
 				throw new ExternallyWriteProtectedVariableException(
-						"This credits check variable "
-								+ checkVariable
+						"This credits check variable " + checkVariable
 								+ " is not defined, so credit can not be checked/written");
 			}
 			if (interventionReminderVariable == null) {
 				throw new ExternallyWriteProtectedVariableException(
-						"This credits reminder variable "
-								+ reminderVariable
+						"This credits reminder variable " + reminderVariable
 								+ " is not defined, so credit can not be remembered/written");
 			}
-			if (!interventionVariable
-					.getAccessType()
+			if (!interventionVariable.getAccessType()
 					.isAllowedAtGivenOrLessRestrictiveAccessType(
 							InterventionVariableWithValueAccessTypes.MANAGEABLE_BY_SERVICE)) {
 				throw new ExternallyWriteProtectedVariableException(
 						"The credit variable has to be manageably by service");
 			}
-			if (interventionVariable
-					.getAccessType()
+			if (interventionVariable.getAccessType()
 					.isAllowedAtGivenOrLessRestrictiveAccessType(
 							InterventionVariableWithValueAccessTypes.EXTERNALLY_READ_AND_WRITABLE)) {
 				throw new ExternallyWriteProtectedVariableException(
 						"Security problem: The variable is directly writable from outside - allows hacking");
 			}
-			if (!interventionCheckVariable
-					.getAccessType()
+			if (!interventionCheckVariable.getAccessType()
 					.isAllowedAtGivenOrLessRestrictiveAccessType(
 							InterventionVariableWithValueAccessTypes.MANAGEABLE_BY_SERVICE)) {
 				throw new ExternallyWriteProtectedVariableException(
 						"The check variable has to be manageably by service");
 			}
-			if (interventionCheckVariable
-					.getAccessType()
+			if (interventionCheckVariable.getAccessType()
 					.isAllowedAtGivenOrLessRestrictiveAccessType(
 							InterventionVariableWithValueAccessTypes.EXTERNALLY_READABLE)) {
 				throw new ExternallyWriteProtectedVariableException(
 						"Security problem: The check variable is directly readable/writable from outside - allows hacking");
 			}
-			if (!interventionReminderVariable
-					.getAccessType()
+			if (!interventionReminderVariable.getAccessType()
 					.isAllowedAtGivenOrLessRestrictiveAccessType(
 							InterventionVariableWithValueAccessTypes.MANAGEABLE_BY_SERVICE)) {
 				throw new ExternallyWriteProtectedVariableException(
 						"The reminder variable has to be manageably by service");
 			}
-			if (interventionReminderVariable
-					.getAccessType()
+			if (interventionReminderVariable.getAccessType()
 					.isAllowedAtGivenOrLessRestrictiveAccessType(
 							InterventionVariableWithValueAccessTypes.EXTERNALLY_READABLE)) {
 				throw new ExternallyWriteProtectedVariableException(
@@ -1496,15 +1479,16 @@ public class VariablesManagerService {
 			try {
 				if (participantReminderVariableWithValue != null) {
 					// Check for double credits
-					if (("," + participantReminderVariableWithValue.getValue() + ",")
-							.contains("," + creditName + ",")) {
+					if (("," + participantReminderVariableWithValue.getValue()
+							+ ",").contains("," + creditName + ",")) {
 						// Credit has already been written, so simply return
 						return;
 					} else {
 						writeVariableValueOfParticipant(participantId,
 								reminderVariable,
 								participantReminderVariableWithValue.getValue()
-										+ "," + creditName, false, false);
+										+ "," + creditName,
+								false, false);
 					}
 				} else {
 					writeVariableValueOfParticipant(participantId,
@@ -1526,16 +1510,17 @@ public class VariablesManagerService {
 			// Write credit for participant
 			try {
 				if (participantCreditVariableWithValue != null) {
-					if (participantCreditVariableWithValue.getValue().length() > 0) {
-						writeVariableValueOfParticipant(
-								participantId,
-								variable,
-								String.valueOf(Integer
-										.parseInt(participantCreditVariableWithValue
-												.getValue()) + 1), false, false);
+					if (participantCreditVariableWithValue.getValue()
+							.length() > 0) {
+						writeVariableValueOfParticipant(participantId, variable,
+								String.valueOf(Integer.parseInt(
+										participantCreditVariableWithValue
+												.getValue())
+										+ 1),
+								false, false);
 					} else {
-						writeVariableValueOfParticipant(participantId,
-								variable, "1", false, false);
+						writeVariableValueOfParticipant(participantId, variable,
+								"1", false, false);
 					}
 				} else {
 					writeVariableValueOfParticipant(participantId, variable,
@@ -1561,8 +1546,8 @@ public class VariablesManagerService {
 			return false;
 		} else {
 			// It's a self-created variable
-			val participant = databaseManagerService.getModelObjectById(
-					Participant.class, participantId);
+			val participant = databaseManagerService
+					.getModelObjectById(Participant.class, participantId);
 
 			if (participant == null) {
 				return false;
@@ -1570,16 +1555,14 @@ public class VariablesManagerService {
 
 			// Check rights of intervention variable
 			val interventionVariable = databaseManagerService
-					.findOneModelObject(
-							InterventionVariableWithValue.class,
+					.findOneModelObject(InterventionVariableWithValue.class,
 							Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME,
 							participant.getIntervention(), variable);
 
 			if (interventionVariable == null) {
 				return false;
 			}
-			if (!interventionVariable
-					.getAccessType()
+			if (!interventionVariable.getAccessType()
 					.isAllowedAtGivenOrLessRestrictiveAccessType(
 							InterventionVariableWithValueAccessTypes.MANAGEABLE_BY_SERVICE)) {
 				return false;

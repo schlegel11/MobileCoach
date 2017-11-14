@@ -45,12 +45,12 @@ public class UIMonitoringMessageGroup extends UIModelObject {
 
 	@Override
 	public String toString() {
-		return name
-				+ " ("
-				+ (expectsAnswer ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__EXPECTS_ANSWER)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__EXPECTS_NO_ANSWER))
+		return name + " ("
+				+ (expectsAnswer
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__EXPECTS_ANSWER)
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__EXPECTS_NO_ANSWER))
 				+ ")";
 	}
 }

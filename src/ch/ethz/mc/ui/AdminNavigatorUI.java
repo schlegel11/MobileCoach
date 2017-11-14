@@ -53,10 +53,10 @@ import com.vaadin.ui.UI;
 @SuppressWarnings("serial")
 @Theme("mc")
 @Log4j2
-public class AdminNavigatorUI extends UI implements ViewChangeListener,
-		DetachListener {
+public class AdminNavigatorUI extends UI
+		implements ViewChangeListener, DetachListener {
 
-	private UISession	uiSession;
+	private UISession uiSession;
 
 	public AdminNavigatorUI() {
 		val session = VaadinSession.getCurrent().getSession();
@@ -87,18 +87,14 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener,
 		log.debug("Init admin navigator ui");
 		// Set basic settings
 		setLocale(Constants.getAdminLocale());
-		getPage()
-				.setTitle(
-						Messages.getAdminString(AdminMessageStrings.APPLICATION__NAME_LONG));
+		getPage().setTitle(Messages
+				.getAdminString(AdminMessageStrings.APPLICATION__NAME_LONG));
 
 		// Store normalized base URL
 		val servletRequest = (VaadinServletRequest) request;
 
-		final String normalizedBaseURL = servletRequest
-				.getRequestURL()
-				.toString()
-				.substring(
-						0,
+		final String normalizedBaseURL = servletRequest.getRequestURL()
+				.toString().substring(0,
 						servletRequest.getRequestURL().toString()
 								.indexOf(servletRequest.getRequestURI()))
 				+ request.getContextPath() + "/";
@@ -130,7 +126,7 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener,
 		// Inform about too small window
 		getPage().addBrowserWindowResizeListener(
 				new BrowserWindowResizeListener() {
-					long	lastNotification	= 0;
+					long lastNotification = 0;
 
 					@Override
 					public void browserWindowResized(
@@ -139,7 +135,8 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener,
 								&& System.currentTimeMillis()
 										- lastNotification > 5000) {
 							lastNotification = System.currentTimeMillis();
-							showWarningNotification(AdminMessageStrings.GENERAL__RESIZE_ERROR_MESSAGE);
+							showWarningNotification(
+									AdminMessageStrings.GENERAL__RESIZE_ERROR_MESSAGE);
 						}
 					}
 				});
@@ -200,7 +197,8 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener,
 				.authorAuthenticateAndReturn(username, password);
 
 		if (author == null) {
-			showErrorNotification(AdminMessageStrings.NOTIFICATION__WRONG_LOGIN);
+			showErrorNotification(
+					AdminMessageStrings.NOTIFICATION__WRONG_LOGIN);
 		} else {
 			final UISession uiSession = getUISession();
 			uiSession.setAdmin(author.isAdmin());
@@ -208,8 +206,8 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener,
 			uiSession.setCurrentAuthorUsername(author.getUsername());
 			uiSession.setLoggedIn(true);
 
-			getUI().getNavigator().navigateTo(
-					AdminNavigatorUI.VIEWS.MAIN.getLowerCase());
+			getUI().getNavigator()
+					.navigateTo(AdminNavigatorUI.VIEWS.MAIN.getLowerCase());
 		}
 	}
 
@@ -246,13 +244,14 @@ public class AdminNavigatorUI extends UI implements ViewChangeListener,
 		val session = getUISession();
 
 		// Check if a user has logged in
-		final boolean newViewIsLoginView = event.getNewView() instanceof LoginView;
+		final boolean newViewIsLoginView = event
+				.getNewView() instanceof LoginView;
 
 		if (!session.isLoggedIn() && !newViewIsLoginView) {
 			// Redirect to login view always if a user has not yet
 			// logged in
-			AdminNavigatorUI.this.getNavigator().navigateTo(
-					VIEWS.LOGIN.getLowerCase());
+			AdminNavigatorUI.this.getNavigator()
+					.navigateTo(VIEWS.LOGIN.getLowerCase());
 			return false;
 		} else if (session.isLoggedIn() && newViewIsLoginView) {
 			// If someone tries to access to login view while logged in,

@@ -89,7 +89,8 @@ public class StringEditComponent extends AbstractStringValueEditComponent {
 	}
 
 	@Override
-	public void registerCancelButtonListener(final ClickListener clickListener) {
+	public void registerCancelButtonListener(
+			final ClickListener clickListener) {
 		cancelButton.addClickListener(clickListener);
 	}
 

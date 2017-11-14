@@ -40,6 +40,7 @@ public class DeepstreamConstants {
 	public static final String	REST_FIELD_INTERVENTION_PASSWORD	= "intervention-password";
 
 	public static final String	STATUS_ANSWERED_BY_USER				= "ANSWERED_BY_USER";
+	public static final String	STATUS_NOT_ANSWERED_BY_USER			= "NOT_ANSWERED_BY_USER";
 	public static final String	STATUS_SENT_BY_SERVER				= "SENT_BY_SERVER";
 	public static final String	STATUS_SENT_BY_USER					= "SENT_BY_USER";
 	public static final String	TYPE_PLAIN							= "PLAIN";
@@ -61,9 +62,11 @@ public class DeepstreamConstants {
 	public static final String	INTERVENTION_PASSWORD				= "intervention-password";
 	public static final String	ID									= "id";
 	public static final String	TYPE								= "type";
+	public static final String	OPTIONS								= "options";
 	public static final String	STATUS								= "status";
 	public static final String	CONTENT								= "content";
 	public static final String	SERVER_TIMESTAMP					= "server-timestamp";
+	public static final String	RELATED_MESSAGE_ID					= "related-message-id";
 	public static final String	USER_INTENTION						= "user-intention";
 	public static final String	USER_TIMESTAMP						= "user-timestamp";
 	public static final String	USER_MESSAGE						= "user-message";
@@ -73,4 +76,5 @@ public class DeepstreamConstants {
 	public static final String	MESSAGE_TIMESTAMP					= "message-timestamp";
 	public static final String	SERVER_MESSAGE						= "server-message";
 	public static final String	CONTAINS_MEDIA						= "contains-media";
+	public static final String	ANSWER_FORMAT						= "answer-format";
 }

@@ -30,7 +30,7 @@ import com.vaadin.data.util.DefaultItemSorter;
  */
 public class CaseInsensitiveItemSorter extends DefaultItemSorter {
 
-	private static final long	serialVersionUID	= 5721695778667318753L;
+	private static final long serialVersionUID = 5721695778667318753L;
 
 	/**
 	 * Constructs a CaseInsensitiveItemSorter that uses a case-insensitive
@@ -47,10 +47,10 @@ public class CaseInsensitiveItemSorter extends DefaultItemSorter {
 	 * The <code>CaseInsensitivePropertyValueComparator</code> assumes all
 	 * objects it compares can be cast to Comparable.
 	 */
-	public static class CaseInsensitivePropertyValueComparator implements
-			Comparator<Object>, Serializable {
+	public static class CaseInsensitivePropertyValueComparator
+			implements Comparator<Object>, Serializable {
 
-		private static final long	serialVersionUID	= -8420060028457881573L;
+		private static final long serialVersionUID = -8420060028457881573L;
 
 		@Override
 		@SuppressWarnings("unchecked")

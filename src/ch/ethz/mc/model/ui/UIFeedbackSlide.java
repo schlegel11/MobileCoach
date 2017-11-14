@@ -51,7 +51,8 @@ public class UIFeedbackSlide extends UIModelObject {
 
 	public static String[] getColumnHeaders() {
 		return new String[] {
-				localize(AdminMessageStrings.UI_COLUMNS__SLIDE_TITLE_WITH_PLACEHOLDERS),
+				localize(
+						AdminMessageStrings.UI_COLUMNS__SLIDE_TITLE_WITH_PLACEHOLDERS),
 				localize(AdminMessageStrings.UI_COLUMNS__COMMENT) };
 	}
 

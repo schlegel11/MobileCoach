@@ -49,8 +49,8 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class ScreeningSurveySlideEditComponent extends
-		AbstractClosableEditComponent {
+public class ScreeningSurveySlideEditComponent
+		extends AbstractClosableEditComponent {
 
 	/*- VaadinEditorProperties={"grid":"RegularGrid,20","showGrid":true,"snapToGrid":true,"snapToObject":true,"movingGuides":false,"snappingDistance":10} */
 
@@ -181,43 +181,31 @@ public class ScreeningSurveySlideEditComponent extends
 		// manually added
 		integratedMediaObjectLabel.setContentMode(ContentMode.HTML);
 
-		localize(
-				titleWithPlaceholdersLabel,
+		localize(titleWithPlaceholdersLabel,
 				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__TITLE_WITH_PLACEHOLDERS);
 		localize(commentLabel,
 				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__COMMENT);
-		localize(
-				questionTypeLabel,
+		localize(questionTypeLabel,
 				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__QUESTION_TYPE);
-		localize(
-				optionalLayoutAttributeLabel,
+		localize(optionalLayoutAttributeLabel,
 				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__OPTIONAL_LAYOUT_ATTRIBUTE_WITH_PLACEHOLDERS);
-		localize(
-				questionTextWithPlaceholdersLabel,
+		localize(questionTextWithPlaceholdersLabel,
 				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__QUESTION_TEXT);
-		localize(
-				preselectedAnswerLabel,
+		localize(preselectedAnswerLabel,
 				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__PRESELECTED_ANSWER);
-		localize(
-				validationErrorMessageLabel,
+		localize(validationErrorMessageLabel,
 				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__VALIDATION_ERROR_MESSAGE);
-		localize(
-				defaultVariableValueLabel,
+		localize(defaultVariableValueLabel,
 				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__DEFAULT_VARIABLE_VALUE);
-		localize(
-				storeVariableLabel,
+		localize(storeVariableLabel,
 				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__STORE_RESULT_TO_VARIABLE);
-		localize(
-				integratedMediaObjectLabel,
+		localize(integratedMediaObjectLabel,
 				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__INTEGRATED_MEDIA_OBJECT);
-		localize(
-				intermediateSurveyLabel,
+		localize(intermediateSurveyLabel,
 				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__LINK_INTERMEDIATE_SURVEY);
-		localize(
-				feedbackLabel,
+		localize(feedbackLabel,
 				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__FINISH_OR_HAND_OVER_TO_FEEDBACK);
-		localize(
-				isLastSlideCheckbox,
+		localize(isLastSlideCheckbox,
 				AdminMessageStrings.SCREENING_SURVEY_SLIDE_EDITING__STOP_SCREENING_SURVEY_AFTER_THIS_SLIDE);
 
 		localize(newQuestionButton, AdminMessageStrings.GENERAL__NEW);
@@ -302,7 +290,8 @@ public class ScreeningSurveySlideEditComponent extends
 	}
 
 	@Override
-	public void registerCancelButtonListener(final ClickListener clickListener) {
+	public void registerCancelButtonListener(
+			final ClickListener clickListener) {
 		// not required
 	}
 
@@ -375,8 +364,8 @@ public class ScreeningSurveySlideEditComponent extends
 		titleWithPlaceholdersTextFieldComponent.setImmediate(false);
 		titleWithPlaceholdersTextFieldComponent.setWidth("350px");
 		titleWithPlaceholdersTextFieldComponent.setHeight("-1px");
-		switchesLayoutGroup.addComponent(
-				titleWithPlaceholdersTextFieldComponent, 1, 0);
+		switchesLayoutGroup
+				.addComponent(titleWithPlaceholdersTextFieldComponent, 1, 0);
 		switchesLayoutGroup.setComponentAlignment(
 				titleWithPlaceholdersTextFieldComponent, new Alignment(6));
 
@@ -428,8 +417,8 @@ public class ScreeningSurveySlideEditComponent extends
 		optionalLayoutAttributeTextFieldComponent.setImmediate(false);
 		optionalLayoutAttributeTextFieldComponent.setWidth("350px");
 		optionalLayoutAttributeTextFieldComponent.setHeight("-1px");
-		switchesLayoutGroup.addComponent(
-				optionalLayoutAttributeTextFieldComponent, 1, 3);
+		switchesLayoutGroup
+				.addComponent(optionalLayoutAttributeTextFieldComponent, 1, 3);
 		switchesLayoutGroup.setComponentAlignment(
 				optionalLayoutAttributeTextFieldComponent, new Alignment(6));
 
@@ -496,8 +485,8 @@ public class ScreeningSurveySlideEditComponent extends
 		// deleteQuestionButton
 		deleteQuestionButton = new Button();
 		deleteQuestionButton.setCaption("!!! Delete");
-		deleteQuestionButton.setIcon(new ThemeResource(
-				"img/delete-icon-small.png"));
+		deleteQuestionButton
+				.setIcon(new ThemeResource("img/delete-icon-small.png"));
 		deleteQuestionButton.setImmediate(true);
 		deleteQuestionButton.setWidth("150px");
 		deleteQuestionButton.setHeight("-1px");
@@ -556,8 +545,8 @@ public class ScreeningSurveySlideEditComponent extends
 		questionTextWithPlaceholdersLabel.setHeight("-1px");
 		questionTextWithPlaceholdersLabel
 				.setValue("!!! Question text (with placeholders):");
-		questionTextLayout
-				.addComponent(questionTextWithPlaceholdersLabel, 0, 0);
+		questionTextLayout.addComponent(questionTextWithPlaceholdersLabel, 0,
+				0);
 
 		// questionTextWithPlaceholdersTextField
 		questionTextWithPlaceholdersTextField = new VariableTextFieldComponent();
@@ -610,8 +599,8 @@ public class ScreeningSurveySlideEditComponent extends
 		// moveUpAnswerButton
 		moveUpAnswerButton = new Button();
 		moveUpAnswerButton.setCaption("!!! Move Up");
-		moveUpAnswerButton.setIcon(new ThemeResource(
-				"img/arrow-up-icon-small.png"));
+		moveUpAnswerButton
+				.setIcon(new ThemeResource("img/arrow-up-icon-small.png"));
 		moveUpAnswerButton.setImmediate(true);
 		moveUpAnswerButton.setWidth("120px");
 		moveUpAnswerButton.setHeight("-1px");
@@ -620,8 +609,8 @@ public class ScreeningSurveySlideEditComponent extends
 		// moveDownAnswerButton
 		moveDownAnswerButton = new Button();
 		moveDownAnswerButton.setCaption("!!! Move Down");
-		moveDownAnswerButton.setIcon(new ThemeResource(
-				"img/arrow-down-icon-small.png"));
+		moveDownAnswerButton
+				.setIcon(new ThemeResource("img/arrow-down-icon-small.png"));
 		moveDownAnswerButton.setImmediate(true);
 		moveDownAnswerButton.setWidth("120px");
 		moveDownAnswerButton.setHeight("-1px");
@@ -630,8 +619,8 @@ public class ScreeningSurveySlideEditComponent extends
 		// deleteAnswerButton
 		deleteAnswerButton = new Button();
 		deleteAnswerButton.setCaption("!!! Delete");
-		deleteAnswerButton.setIcon(new ThemeResource(
-				"img/delete-icon-small.png"));
+		deleteAnswerButton
+				.setIcon(new ThemeResource("img/delete-icon-small.png"));
 		deleteAnswerButton.setImmediate(true);
 		deleteAnswerButton.setWidth("100px");
 		deleteAnswerButton.setHeight("-1px");
@@ -702,8 +691,8 @@ public class ScreeningSurveySlideEditComponent extends
 		defaultVariableValueTextFieldComponent.setImmediate(false);
 		defaultVariableValueTextFieldComponent.setWidth("500px");
 		defaultVariableValueTextFieldComponent.setHeight("-1px");
-		questionValueLayout.addComponent(
-				defaultVariableValueTextFieldComponent, 1, 2);
+		questionValueLayout.addComponent(defaultVariableValueTextFieldComponent,
+				1, 2);
 		questionValueLayout.setComponentAlignment(
 				defaultVariableValueTextFieldComponent, new Alignment(6));
 
@@ -736,8 +725,8 @@ public class ScreeningSurveySlideEditComponent extends
 		validationErrorMessageTextFieldComponent.setImmediate(false);
 		validationErrorMessageTextFieldComponent.setWidth("500px");
 		validationErrorMessageTextFieldComponent.setHeight("-1px");
-		additionalOptionsLayout.addComponent(
-				validationErrorMessageTextFieldComponent, 1, 0);
+		additionalOptionsLayout
+				.addComponent(validationErrorMessageTextFieldComponent, 1, 0);
 		additionalOptionsLayout.setComponentAlignment(
 				validationErrorMessageTextFieldComponent, new Alignment(34));
 
@@ -786,8 +775,8 @@ public class ScreeningSurveySlideEditComponent extends
 
 		// isLastSlideCheckbox
 		isLastSlideCheckbox = new CheckBox();
-		isLastSlideCheckbox
-				.setCaption("!!! Stop screening survey after this slide (no rule execution as well)");
+		isLastSlideCheckbox.setCaption(
+				"!!! Stop screening survey after this slide (no rule execution as well)");
 		isLastSlideCheckbox.setImmediate(false);
 		isLastSlideCheckbox.setWidth("500px");
 		isLastSlideCheckbox.setHeight("-1px");
@@ -838,8 +827,8 @@ public class ScreeningSurveySlideEditComponent extends
 		// moveUpRuleButton
 		moveUpRuleButton = new Button();
 		moveUpRuleButton.setCaption("!!! Move Up");
-		moveUpRuleButton.setIcon(new ThemeResource(
-				"img/arrow-up-icon-small.png"));
+		moveUpRuleButton
+				.setIcon(new ThemeResource("img/arrow-up-icon-small.png"));
 		moveUpRuleButton.setImmediate(true);
 		moveUpRuleButton.setWidth("120px");
 		moveUpRuleButton.setHeight("-1px");
@@ -848,8 +837,8 @@ public class ScreeningSurveySlideEditComponent extends
 		// moveDownRuleButton
 		moveDownRuleButton = new Button();
 		moveDownRuleButton.setCaption("!!! Move Down");
-		moveDownRuleButton.setIcon(new ThemeResource(
-				"img/arrow-down-icon-small.png"));
+		moveDownRuleButton
+				.setIcon(new ThemeResource("img/arrow-down-icon-small.png"));
 		moveDownRuleButton.setImmediate(true);
 		moveDownRuleButton.setWidth("120px");
 		moveDownRuleButton.setHeight("-1px");
@@ -858,8 +847,8 @@ public class ScreeningSurveySlideEditComponent extends
 		// levelDownButton
 		levelDownButton = new Button();
 		levelDownButton.setCaption("!!! Make Super");
-		levelDownButton.setIcon(new ThemeResource(
-				"img/arrow-left-icon-small.png"));
+		levelDownButton
+				.setIcon(new ThemeResource("img/arrow-left-icon-small.png"));
 		levelDownButton.setImmediate(true);
 		levelDownButton.setWidth("120px");
 		levelDownButton.setHeight("-1px");
@@ -868,8 +857,8 @@ public class ScreeningSurveySlideEditComponent extends
 		// levelUpButton
 		levelUpButton = new Button();
 		levelUpButton.setCaption("!!! Make Sub");
-		levelUpButton.setIcon(new ThemeResource(
-				"img/arrow-right-icon-small.png"));
+		levelUpButton
+				.setIcon(new ThemeResource("img/arrow-right-icon-small.png"));
 		levelUpButton.setImmediate(true);
 		levelUpButton.setWidth("120px");
 		levelUpButton.setHeight("-1px");

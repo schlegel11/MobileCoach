@@ -162,6 +162,7 @@ public class Queries {
 
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT																																													= "{'participant':#}";
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_MESSAGE_TYPE																																									= "{'participant':#,'supervisorMessage':#}";
+	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_ORDER																																										= "{'participant':#,'order':#}";
 	public static final String	DIALOG_MESSAGE__BY_RELATED_MONITORING_MESSAGE_AND_SENT_AFTER_TIMESTAMP																																			= "{'relatedMonitoringMessage':#,'sentTimestamp':{$gt:#}}";
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS																																										= "{'participant':#,'status':#}";
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_NOT_AUTOMATICALLY_PROCESSABLE_AND_UNANSWERED_AFTER_TIMESTAMP_HIGHER																								= "{'participant':#,'status':#,'answerNotAutomaticallyProcessable':#,'isUnansweredAfterTimestamp':{$gt:#}}";
@@ -199,4 +200,6 @@ public class Queries {
 	public static final String	UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_4																																										= "{$set:{'textBasedMediaObjectContent':null}}";
 	public static final String	UPDATE_VERSION_16__MONITORING_MESSAGE__CHANGE_1																																									= "{$set:{'answerType':'FREE_TEXT'}}";
 	public static final String	UPDATE_VERSION_16__MONITORING_MESSAGE__CHANGE_2																																									= "{$set:{'answerOptionsWithPlaceholders':{}}}";
+	public static final String	UPDATE_VERSION_16__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'answerType':null}}";
+	public static final String	UPDATE_VERSION_16__DIALOG_MESSAGE__CHANGE_2																																										= "{$set:{'answerOptions':null}}";
 }

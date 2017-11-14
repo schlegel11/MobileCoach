@@ -48,10 +48,10 @@ public class UISessionListener implements HttpSessionListener {
 		log.debug("Session {} has been destroyed", session.getId());
 
 		// Check for VAADIN UI session
-		if (session
-				.getAttribute(ImplementationConstants.UI_SESSION_ATTRIBUTE_DETECTOR) != null
-				&& (boolean) session
-						.getAttribute(ImplementationConstants.UI_SESSION_ATTRIBUTE_DETECTOR) == true) {
+		if (session.getAttribute(
+				ImplementationConstants.UI_SESSION_ATTRIBUTE_DETECTOR) != null
+				&& (boolean) session.getAttribute(
+						ImplementationConstants.UI_SESSION_ATTRIBUTE_DETECTOR) == true) {
 			log.debug("Admin UI Session {} destroyed", session.getId());
 
 			MC.getInstance().getLockingService()

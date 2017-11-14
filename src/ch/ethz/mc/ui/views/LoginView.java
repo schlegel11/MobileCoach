@@ -44,7 +44,7 @@ import com.vaadin.ui.Window;
 @SuppressWarnings("serial")
 @Log4j2
 public class LoginView extends AbstractView implements View {
-	private LoginViewComponent	loginViewComponent;
+	private LoginViewComponent loginViewComponent;
 
 	@Override
 	public void enter(final ViewChangeEvent event) {
@@ -54,10 +54,10 @@ public class LoginView extends AbstractView implements View {
 
 		// Create view and listeners
 		loginViewComponent = new LoginViewComponent();
-		loginViewComponent.getLoginButton().addClickListener(
-				new LoginButtonClickListener());
-		loginViewComponent.getAboutButton().addClickListener(
-				new AboutButtonClickListener());
+		loginViewComponent.getLoginButton()
+				.addClickListener(new LoginButtonClickListener());
+		loginViewComponent.getAboutButton()
+				.addClickListener(new AboutButtonClickListener());
 
 		// Add enter as click shortcut for default button
 		loginViewComponent.getLoginButton().setClickShortcut(KeyCode.ENTER);
@@ -77,16 +77,14 @@ public class LoginView extends AbstractView implements View {
 				event.getButton().setEnabled(true);
 			} else {
 				if (!loginViewComponent.getUsernameField().isValid()) {
-					getAdminUI()
-							.showWarningNotification(
-									AdminMessageStrings.NOTIFICATION__NO_VALID_USERNAME);
+					getAdminUI().showWarningNotification(
+							AdminMessageStrings.NOTIFICATION__NO_VALID_USERNAME);
 					event.getButton().setEnabled(true);
 					return;
 				}
 				if (!loginViewComponent.getPasswordField().isValid()) {
-					getAdminUI()
-							.showWarningNotification(
-									AdminMessageStrings.NOTIFICATION__NO_VALID_PASSWORD);
+					getAdminUI().showWarningNotification(
+							AdminMessageStrings.NOTIFICATION__NO_VALID_PASSWORD);
 					event.getButton().setEnabled(true);
 					return;
 				}
@@ -102,8 +100,8 @@ public class LoginView extends AbstractView implements View {
 	private class AboutButtonClickListener implements ClickListener {
 		@Override
 		public void buttonClick(final ClickEvent event) {
-			val aboutWindow = new Window(
-					Messages.getAdminString(AdminMessageStrings.ABOUT_WINDOW__TITLE));
+			val aboutWindow = new Window(Messages
+					.getAdminString(AdminMessageStrings.ABOUT_WINDOW__TITLE));
 			aboutWindow.setModal(true);
 			aboutWindow.setWidth("600px");
 			aboutWindow.setHeight("400px");

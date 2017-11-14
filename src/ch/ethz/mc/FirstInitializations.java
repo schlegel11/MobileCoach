@@ -56,28 +56,27 @@ public class FirstInitializations implements ServletContextListener {
 			val serverNameElements = event.getServletContext()
 					.getVirtualServerName().split("/");
 
-			configurationsFileString = System
-					.getProperty(serverNameElements[serverNameElements.length - 1]
-							.toLowerCase()
-							+ "."
-							+ contextPath
+			configurationsFileString = System.getProperty(
+					serverNameElements[serverNameElements.length - 1]
+							.toLowerCase() + "." + contextPath
 							+ ImplementationConstants.SYSTEM_CONFIGURATION_PROPERTY_POSTFIX);
 		} catch (final Exception e) {
-			System.err
-					.println("Error at getting virtual server based configuration file: "
+			System.err.println(
+					"Error at getting virtual server based configuration file: "
 							+ e.getMessage());
 		}
 
 		if (configurationsFileString == null
 				|| !new File(configurationsFileString).exists()) {
-			configurationsFileString = System
-					.getProperty(contextPath
-							+ ImplementationConstants.SYSTEM_CONFIGURATION_PROPERTY_POSTFIX);
+			configurationsFileString = System.getProperty(contextPath
+					+ ImplementationConstants.SYSTEM_CONFIGURATION_PROPERTY_POSTFIX);
 		}
 
 		val loggingFolder = getLoggingFolder(configurationsFileString);
-		val loggingConsoleLevel = getLoggingConsoleLevel(configurationsFileString);
-		val loggingRollingFileLevel = getLoggingRollingFileLevel(configurationsFileString);
+		val loggingConsoleLevel = getLoggingConsoleLevel(
+				configurationsFileString);
+		val loggingRollingFileLevel = getLoggingRollingFileLevel(
+				configurationsFileString);
 
 		System.setProperty("mc_logging_folder", loggingFolder);
 		System.setProperty("mc_logging_console_level", loggingConsoleLevel);
@@ -138,7 +137,8 @@ public class FirstInitializations implements ServletContextListener {
 	 *            String containing the complete path to the configuration file
 	 * @return
 	 */
-	private String getLoggingConsoleLevel(final String configurationsFileString) {
+	private String getLoggingConsoleLevel(
+			final String configurationsFileString) {
 		if (configurationsFileString == null) {
 			return Constants.getLoggingConsoleLevel();
 		}

@@ -28,6 +28,6 @@ package ch.ethz.mc.ui.views.components;
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
-public abstract class AbstractClosableEditComponent extends
-		AbstractConfirmationComponent {
+public abstract class AbstractClosableEditComponent
+		extends AbstractConfirmationComponent {
 }

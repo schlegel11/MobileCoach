@@ -23,11 +23,10 @@ package ch.ethz.mc.tools;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-
 import org.bson.types.ObjectId;
 import org.jongo.Jongo;
+
+import com.mongodb.DBObject;
 
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
@@ -37,8 +36,8 @@ import ch.ethz.mc.model.persistent.outdated.InterventionV12;
 import ch.ethz.mc.model.persistent.outdated.MonitoringRuleV12;
 import ch.ethz.mc.model.persistent.types.MonitoringRuleTypes;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
-
-import com.mongodb.DBObject;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Manages the modification of the Data Model on the startup of the system
@@ -48,7 +47,7 @@ import com.mongodb.DBObject;
 @Log4j2
 public class DataModelUpdateManager {
 
-	private static Jongo	jongo;
+	private static Jongo jongo;
 
 	public static void updateDataFromVersionToVersion(final int currentVersion,
 			final int versionToBeReached, final Jongo jongo) {
@@ -105,8 +104,9 @@ public class DataModelUpdateManager {
 			// set new version
 			val configurationCollection = jongo
 					.getCollection(Constants.DATA_MODEL_CONFIGURATION);
-			val configuration = configurationCollection.findOne(
-					Queries.EVERYTHING).as(DataModelConfiguration.class);
+			val configuration = configurationCollection
+					.findOne(Queries.EVERYTHING)
+					.as(DataModelConfiguration.class);
 			configuration.setVersion(updateToVersionInThisStep);
 			configurationCollection.save(configuration);
 		}
@@ -150,10 +150,8 @@ public class DataModelUpdateManager {
 
 		val screeningSurveySlideCollection = jongo
 				.getCollection("ScreeningSurveySlide");
-		screeningSurveySlideCollection
-				.update(Queries.EVERYTHING)
-				.multi()
-				.with(Queries.UPDATE_VERSION_6__SCREENING_SURVEY_SLIDE__CHANGE_1);
+		screeningSurveySlideCollection.update(Queries.EVERYTHING).multi().with(
+				Queries.UPDATE_VERSION_6__SCREENING_SURVEY_SLIDE__CHANGE_1);
 	}
 
 	/**
@@ -166,10 +164,8 @@ public class DataModelUpdateManager {
 
 		val monitoringReplyRuleCollection = jongo
 				.getCollection("MonitoringReplyRule");
-		monitoringReplyRuleCollection
-				.update(Queries.EVERYTHING)
-				.multi()
-				.with(Queries.UPDATE_VERSION_7__MONITORING_REPLY_RULE__CHANGE_1);
+		monitoringReplyRuleCollection.update(Queries.EVERYTHING).multi().with(
+				Queries.UPDATE_VERSION_7__MONITORING_REPLY_RULE__CHANGE_1);
 
 		val dialogMessageCollection = jongo.getCollection("DialogMessage");
 		dialogMessageCollection.update(Queries.EVERYTHING).multi()
@@ -216,78 +212,48 @@ public class DataModelUpdateManager {
 				.with(Queries.UPDATE_VERSION_12__MONITORING_RULE__CHANGE_1);
 
 		val interventionCollection = jongo.getCollection("Intervention");
-		val interventions = interventionCollection.find(Queries.EVERYTHING).as(
-				InterventionV12.class);
+		val interventions = interventionCollection.find(Queries.EVERYTHING)
+				.as(InterventionV12.class);
 
 		for (val intervention : interventions) {
-			val monitoringRules = monitoringRuleCollection.find(
-					Queries.MONITORING_RULE__BY_INTERVENTION_AND_PARENT,
-					intervention.getId(), null).as(MonitoringRuleV12.class);
+			val monitoringRules = monitoringRuleCollection
+					.find(Queries.MONITORING_RULE__BY_INTERVENTION_AND_PARENT,
+							intervention.getId(), null)
+					.as(MonitoringRuleV12.class);
 
 			final List<MonitoringRuleV12> monitoringRulesToAdjust = new ArrayList<MonitoringRuleV12>();
 			for (val monitoringRule : monitoringRules) {
 				monitoringRulesToAdjust.add(monitoringRule);
 			}
 
-			val dailyMonitoringRule = new MonitoringRuleV12(
-					"",
-					RuleEquationSignTypes.CALCULATED_VALUE_EQUALS,
-					"",
-					"",
-					null,
-					0,
-					null,
-					false,
-					null,
-					MonitoringRuleTypes.DAILY,
+			val dailyMonitoringRule = new MonitoringRuleV12("",
+					RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "", "", null,
+					0, null, false, null, MonitoringRuleTypes.DAILY,
 					intervention.getId(),
 					ImplementationConstants.DEFAULT_HOUR_TO_SEND_MESSAGE,
 					ImplementationConstants.DEFAULT_HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED,
 					false);
 			monitoringRuleCollection.save(dailyMonitoringRule);
-			val periodicMonitoringRule = new MonitoringRuleV12(
-					"",
-					RuleEquationSignTypes.CALCULATED_VALUE_EQUALS,
-					"",
-					"",
-					null,
-					1,
-					null,
-					false,
-					null,
-					MonitoringRuleTypes.PERIODIC,
+			val periodicMonitoringRule = new MonitoringRuleV12("",
+					RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "", "", null,
+					1, null, false, null, MonitoringRuleTypes.PERIODIC,
 					intervention.getId(),
 					ImplementationConstants.DEFAULT_HOUR_TO_SEND_MESSAGE,
 					ImplementationConstants.DEFAULT_HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED,
 					false);
 			monitoringRuleCollection.save(periodicMonitoringRule);
-			val unexpectedMessageMonitoringRule = new MonitoringRuleV12(
-					"",
-					RuleEquationSignTypes.CALCULATED_VALUE_EQUALS,
-					"",
-					"",
-					null,
-					2,
-					null,
-					false,
-					null,
+			val unexpectedMessageMonitoringRule = new MonitoringRuleV12("",
+					RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "", "", null,
+					2, null, false, null,
 					MonitoringRuleTypes.UNEXPECTED_MESSAGE,
 					intervention.getId(),
 					ImplementationConstants.DEFAULT_HOUR_TO_SEND_MESSAGE,
 					ImplementationConstants.DEFAULT_HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED,
 					false);
 			monitoringRuleCollection.save(unexpectedMessageMonitoringRule);
-			val intentionMonitoringRule = new MonitoringRuleV12(
-					"",
-					RuleEquationSignTypes.CALCULATED_VALUE_EQUALS,
-					"",
-					"",
-					null,
-					3,
-					null,
-					false,
-					null,
-					MonitoringRuleTypes.USER_INTENTION,
+			val intentionMonitoringRule = new MonitoringRuleV12("",
+					RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "", "", null,
+					3, null, false, null, MonitoringRuleTypes.USER_INTENTION,
 					intervention.getId(),
 					ImplementationConstants.DEFAULT_HOUR_TO_SEND_MESSAGE,
 					ImplementationConstants.DEFAULT_HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED,
@@ -295,8 +261,8 @@ public class DataModelUpdateManager {
 			monitoringRuleCollection.save(intentionMonitoringRule);
 
 			for (val monitoringRule : monitoringRulesToAdjust) {
-				monitoringRule.setIsSubRuleOfMonitoringRule(dailyMonitoringRule
-						.getId());
+				monitoringRule.setIsSubRuleOfMonitoringRule(
+						dailyMonitoringRule.getId());
 				monitoringRuleCollection.save(monitoringRule);
 			}
 		}
@@ -332,13 +298,13 @@ public class DataModelUpdateManager {
 				.getCollection("DialogMessage");
 		val dialogMessageCollection = jongo.getCollection("DialogMessage");
 
-		for (final DBObject document : mongoDriverDialogMessageCollection
-				.find().snapshot()) {
+		for (final DBObject document : mongoDriverDialogMessageCollection.find()
+				.snapshot()) {
 
-			dialogMessageCollection
-					.update((ObjectId) document.get("_id"))
-					.with(Queries.UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_1_CHANGE,
-							document.get(Queries.UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_1_FIELD));
+			dialogMessageCollection.update((ObjectId) document.get("_id")).with(
+					Queries.UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_1_CHANGE,
+					document.get(
+							Queries.UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_1_FIELD));
 		}
 
 		dialogMessageCollection.update(Queries.EVERYTHING).multi()
@@ -359,5 +325,11 @@ public class DataModelUpdateManager {
 				.with(Queries.UPDATE_VERSION_16__MONITORING_MESSAGE__CHANGE_1);
 		monitoringMessageCollection.update(Queries.EVERYTHING).multi()
 				.with(Queries.UPDATE_VERSION_16__MONITORING_MESSAGE__CHANGE_2);
+
+		val dialogMessageCollection = jongo.getCollection("DialogMessage");
+		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+				.with(Queries.UPDATE_VERSION_16__DIALOG_MESSAGE__CHANGE_1);
+		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+				.with(Queries.UPDATE_VERSION_16__DIALOG_MESSAGE__CHANGE_2);
 	}
 }

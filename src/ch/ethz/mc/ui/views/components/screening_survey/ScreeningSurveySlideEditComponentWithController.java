@@ -63,9 +63,9 @@ import com.vaadin.ui.Table;
  */
 @SuppressWarnings("serial")
 @Log4j2
-public class ScreeningSurveySlideEditComponentWithController extends
-		ScreeningSurveySlideEditComponent implements
-		MediaObjectCreationOrDeleteionListener {
+public class ScreeningSurveySlideEditComponentWithController
+		extends ScreeningSurveySlideEditComponent
+		implements MediaObjectCreationOrDeleteionListener {
 
 	private final ScreeningSurveySlide									screeningSurveySlide;
 
@@ -105,11 +105,12 @@ public class ScreeningSurveySlideEditComponentWithController extends
 		val questions = screeningSurveySlide.getQuestions();
 		for (int i = 0; i < questions.size(); i++) {
 			val question = questions.get(i);
-			val uiQuestion = new UIQuestion(
-					i,
-					question.getQuestionWithPlaceholders().isEmpty() ? Messages
-							.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-							: question.getQuestionWithPlaceholders().toString());
+			val uiQuestion = new UIQuestion(i,
+					question.getQuestionWithPlaceholders().isEmpty()
+							? Messages.getAdminString(
+									AdminMessageStrings.UI_MODEL__NOT_SET)
+							: question.getQuestionWithPlaceholders()
+									.toString());
 			questionsBeanContainer.addItem(i, uiQuestion);
 
 			if (i == 0) {
@@ -147,12 +148,12 @@ public class ScreeningSurveySlideEditComponentWithController extends
 				UIScreeningSurveySlideRule.class, rulesOfScreeningSurveySlide);
 
 		rulesTable.setContainerDataSource(rulesBeanContainer);
-		rulesTable.setSortContainerPropertyId(UIScreeningSurveySlideRule
-				.getSortColumn());
-		rulesTable.setVisibleColumns(UIScreeningSurveySlideRule
-				.getVisibleColumns());
-		rulesTable.setColumnHeaders(UIScreeningSurveySlideRule
-				.getColumnHeaders());
+		rulesTable.setSortContainerPropertyId(
+				UIScreeningSurveySlideRule.getSortColumn());
+		rulesTable.setVisibleColumns(
+				UIScreeningSurveySlideRule.getVisibleColumns());
+		rulesTable.setColumnHeaders(
+				UIScreeningSurveySlideRule.getColumnHeaders());
 		rulesTable.setSortAscending(true);
 		rulesTable.setSortEnabled(false);
 
@@ -213,8 +214,8 @@ public class ScreeningSurveySlideEditComponentWithController extends
 		for (val screeningSurveySlideQuestionType : ScreeningSurveySlideQuestionTypes
 				.values()) {
 			questionTypeComboBox.addItem(screeningSurveySlideQuestionType);
-			if (screeningSurveySlide.getQuestionType().equals(
-					screeningSurveySlideQuestionType)) {
+			if (screeningSurveySlide.getQuestionType()
+					.equals(screeningSurveySlideQuestionType)) {
 				questionTypeComboBox.select(screeningSurveySlideQuestionType);
 			}
 		}
@@ -281,7 +282,8 @@ public class ScreeningSurveySlideEditComponentWithController extends
 						if (selectedUIIntermediateSurvey != null) {
 							linkedIntermediateSurvey = selectedUIIntermediateSurvey
 									.getRelatedModelObject(
-											ScreeningSurvey.class).getId();
+											ScreeningSurvey.class)
+									.getId();
 						}
 						log.debug("Adjust linked intermediate survey to {}",
 								linkedIntermediateSurvey);
@@ -303,8 +305,8 @@ public class ScreeningSurveySlideEditComponentWithController extends
 			val uiFeedback = feedback.toUIModelObject();
 			feedbackComboBox.addItem(uiFeedback);
 			if (screeningSurveySlide.getHandsOverToFeedback() != null
-					&& screeningSurveySlide.getHandsOverToFeedback().equals(
-							feedback.getId())) {
+					&& screeningSurveySlide.getHandsOverToFeedback()
+							.equals(feedback.getId())) {
 				feedbackComboBox.select(uiFeedback);
 			}
 		}
@@ -320,7 +322,8 @@ public class ScreeningSurveySlideEditComponentWithController extends
 					feedbackToHandOver = selectedUIFeedback
 							.getRelatedModelObject(Feedback.class).getId();
 				}
-				log.debug("Adjust hand over feedback to {}", feedbackToHandOver);
+				log.debug("Adjust hand over feedback to {}",
+						feedbackToHandOver);
 				getSurveyAdministrationManagerService()
 						.screeningSurveySlideChangeHandsOverToFeedback(
 								screeningSurveySlide, feedbackToHandOver);
@@ -330,8 +333,8 @@ public class ScreeningSurveySlideEditComponentWithController extends
 		});
 
 		// Handle checkbox
-		getIsLastSlideCheckbox().addValueChangeListener(
-				new ValueChangeListener() {
+		getIsLastSlideCheckbox()
+				.addValueChangeListener(new ValueChangeListener() {
 
 					@Override
 					public void valueChange(final ValueChangeEvent event) {
@@ -369,8 +372,8 @@ public class ScreeningSurveySlideEditComponentWithController extends
 
 		getTitleWithPlaceholdersTextFieldComponent().getButton()
 				.addClickListener(buttonClickListener);
-		getCommentTextFieldComponent().getButton().addClickListener(
-				buttonClickListener);
+		getCommentTextFieldComponent().getButton()
+				.addClickListener(buttonClickListener);
 		getOptionalLayoutAttributeTextFieldComponent().getButton()
 				.addClickListener(buttonClickListener);
 		getQuestionTextWithPlaceholdersTextField().getButton()
@@ -379,15 +382,16 @@ public class ScreeningSurveySlideEditComponentWithController extends
 				.addClickListener(buttonClickListener);
 		getDefaultVariableValueTextFieldComponent().getButton()
 				.addClickListener(buttonClickListener);
-		getStoreVariableTextFieldComponent().getButton().addClickListener(
-				buttonClickListener);
+		getStoreVariableTextFieldComponent().getButton()
+				.addClickListener(buttonClickListener);
 
 		// Handle media object to component
 		if (screeningSurveySlide.getLinkedMediaObject() == null) {
 			getIntegratedMediaObjectComponent().setMediaObject(null, this);
 		} else {
 			val mediaObject = getInterventionAdministrationManagerService()
-					.getMediaObject(screeningSurveySlide.getLinkedMediaObject());
+					.getMediaObject(
+							screeningSurveySlide.getLinkedMediaObject());
 			getIntegratedMediaObjectComponent().setMediaObject(mediaObject,
 					this);
 		}
@@ -423,7 +427,8 @@ public class ScreeningSurveySlideEditComponentWithController extends
 		}
 		getSurveyAdministrationManagerService()
 				.screeningSurveySlideSetAnswersWithPlaceholdersAndValues(
-						screeningSurveySlide, selectedQuestion, answers, values);
+						screeningSurveySlide, selectedQuestion, answers,
+						values);
 	}
 
 	private void adjustPreselectedAnswer() {
@@ -455,24 +460,24 @@ public class ScreeningSurveySlideEditComponentWithController extends
 
 	private void adjust(final boolean adjustAlsoAnswers) {
 		// Adjust variable text fields
-		val currentQuestion = screeningSurveySlide.getQuestions().get(
-				selectedQuestion);
+		val currentQuestion = screeningSurveySlide.getQuestions()
+				.get(selectedQuestion);
 
 		getTitleWithPlaceholdersTextFieldComponent().setValue(
 				screeningSurveySlide.getTitleWithPlaceholders().toString());
-		getCommentTextFieldComponent().setValue(
-				screeningSurveySlide.getComment());
-		getOptionalLayoutAttributeTextFieldComponent().setValue(
-				screeningSurveySlide
+		getCommentTextFieldComponent()
+				.setValue(screeningSurveySlide.getComment());
+		getOptionalLayoutAttributeTextFieldComponent()
+				.setValue(screeningSurveySlide
 						.getOptionalLayoutAttributeWithPlaceholders());
 		getQuestionTextWithPlaceholdersTextField().setValue(
 				currentQuestion.getQuestionWithPlaceholders().toString());
 		getValidationErrorMessageTextFieldComponent().setValue(
 				screeningSurveySlide.getValidationErrorMessage().toString());
-		getDefaultVariableValueTextFieldComponent().setValue(
-				currentQuestion.getDefaultValue());
-		getStoreVariableTextFieldComponent().setValue(
-				currentQuestion.getStoreValueToVariableWithName());
+		getDefaultVariableValueTextFieldComponent()
+				.setValue(currentQuestion.getDefaultValue());
+		getStoreVariableTextFieldComponent()
+				.setValue(currentQuestion.getStoreValueToVariableWithName());
 
 		if (adjustAlsoAnswers) {
 			adjustAnswersTable();
@@ -525,23 +530,28 @@ public class ScreeningSurveySlideEditComponentWithController extends
 				changeRuleLevel(false);
 			} else if (event.getButton() == getDeleteRuleButton()) {
 				deleteRule();
-			} else if (event.getButton() == getTitleWithPlaceholdersTextFieldComponent()
-					.getButton()) {
+			} else if (event
+					.getButton() == getTitleWithPlaceholdersTextFieldComponent()
+							.getButton()) {
 				changeTitleWithPlaceholders();
 			} else if (event.getButton() == getCommentTextFieldComponent()
 					.getButton()) {
 				changeComment();
-			} else if (event.getButton() == getOptionalLayoutAttributeTextFieldComponent()
-					.getButton()) {
+			} else if (event
+					.getButton() == getOptionalLayoutAttributeTextFieldComponent()
+							.getButton()) {
 				changeOptionalLayoutAttribute();
-			} else if (event.getButton() == getQuestionTextWithPlaceholdersTextField()
-					.getButton()) {
+			} else if (event
+					.getButton() == getQuestionTextWithPlaceholdersTextField()
+							.getButton()) {
 				changeQuestionWithPlaceholders();
-			} else if (event.getButton() == getValidationErrorMessageTextFieldComponent()
-					.getButton()) {
+			} else if (event
+					.getButton() == getValidationErrorMessageTextFieldComponent()
+							.getButton()) {
 				changeValidationErrorMessage();
-			} else if (event.getButton() == getDefaultVariableValueTextFieldComponent()
-					.getButton()) {
+			} else if (event
+					.getButton() == getDefaultVariableValueTextFieldComponent()
+							.getButton()) {
 				changeDefaultVariableValue();
 			} else if (event.getButton() == getStoreVariableTextFieldComponent()
 					.getButton()) {
@@ -556,16 +566,17 @@ public class ScreeningSurveySlideEditComponentWithController extends
 
 		int newId = 0;
 		if (questionsBeanContainer.size() > 0) {
-			newId = questionsBeanContainer.getItemIds().get(
-					questionsBeanContainer.size() - 1) + 1;
+			newId = questionsBeanContainer.getItemIds()
+					.get(questionsBeanContainer.size() - 1) + 1;
 		}
 
 		log.debug("New question has id {}", newId);
 		val question = getSurveyAdministrationManagerService()
 				.screeningSurveySlideAddQuestion(screeningSurveySlide);
 		val uiQuestion = new UIQuestion(newId,
-				question.getQuestionWithPlaceholders().isEmpty() ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+				question.getQuestionWithPlaceholders().isEmpty()
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NOT_SET)
 						: question.getQuestionWithPlaceholders().toString());
 
 		questionsBeanContainer.addItem(newId, uiQuestion);
@@ -577,18 +588,19 @@ public class ScreeningSurveySlideEditComponentWithController extends
 
 		int newId = 0;
 		if (questionsBeanContainer.size() > 0) {
-			newId = questionsBeanContainer.getItemIds().get(
-					questionsBeanContainer.size() - 1) + 1;
+			newId = questionsBeanContainer.getItemIds()
+					.get(questionsBeanContainer.size() - 1) + 1;
 		}
 
 		log.debug("New duplicated question has id {}", newId);
 
-		val currentQuestion = screeningSurveySlide.getQuestions().get(
-				selectedQuestion);
+		val currentQuestion = screeningSurveySlide.getQuestions()
+				.get(selectedQuestion);
 
 		val newAnswersWithPlaceholdersArray = new LString[currentQuestion
 				.getAnswersWithPlaceholders().length];
-		val newAnswerValuesArray = new String[currentQuestion.getAnswerValues().length];
+		val newAnswerValuesArray = new String[currentQuestion
+				.getAnswerValues().length];
 
 		for (int i = 0; i < newAnswersWithPlaceholdersArray.length; i++) {
 			newAnswersWithPlaceholdersArray[i] = currentQuestion
@@ -599,8 +611,8 @@ public class ScreeningSurveySlideEditComponentWithController extends
 			newAnswerValuesArray[i] = currentQuestion.getAnswerValues()[i];
 		}
 
-		val newQuestion = new ScreeningSurveySlide.Question(currentQuestion
-				.getQuestionWithPlaceholders().clone(),
+		val newQuestion = new ScreeningSurveySlide.Question(
+				currentQuestion.getQuestionWithPlaceholders().clone(),
 				newAnswersWithPlaceholdersArray, newAnswerValuesArray,
 				currentQuestion.getPreSelectedAnswer(),
 				currentQuestion.getStoreValueToVariableWithName(),
@@ -609,10 +621,10 @@ public class ScreeningSurveySlideEditComponentWithController extends
 		val createdQuestion = getSurveyAdministrationManagerService()
 				.screeningSurveySlideAddQuestion(screeningSurveySlide,
 						newQuestion);
-		val uiQuestion = new UIQuestion(
-				newId,
-				createdQuestion.getQuestionWithPlaceholders().isEmpty() ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+		val uiQuestion = new UIQuestion(newId,
+				createdQuestion.getQuestionWithPlaceholders().isEmpty()
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NOT_SET)
 						: createdQuestion.getQuestionWithPlaceholders()
 								.toString());
 
@@ -642,13 +654,13 @@ public class ScreeningSurveySlideEditComponentWithController extends
 
 		int newId = 0;
 		if (answersBeanContainer.size() > 0) {
-			newId = answersBeanContainer.getItemIds().get(
-					answersBeanContainer.size() - 1) + 1;
+			newId = answersBeanContainer.getItemIds()
+					.get(answersBeanContainer.size() - 1) + 1;
 		}
 
 		log.debug("New answer has id {}", newId);
-		val uiAnswer = new UIAnswer(newId, new LString(
-				ImplementationConstants.DEFAULT_ANSWER_NAME),
+		val uiAnswer = new UIAnswer(newId,
+				new LString(ImplementationConstants.DEFAULT_ANSWER_NAME),
 				String.valueOf(answersBeanContainer.size() + 1));
 
 		answersBeanContainer.addItem(newId, uiAnswer);
@@ -755,9 +767,8 @@ public class ScreeningSurveySlideEditComponentWithController extends
 	public void moveAnswer(final boolean moveUp) {
 		log.debug("Move answer {}", moveUp ? "up" : "down");
 
-		if (moveUp
-				&& selectedUIAnswer.getOrder() == answersBeanContainer
-						.getIdByIndex(0)) {
+		if (moveUp && selectedUIAnswer.getOrder() == answersBeanContainer
+				.getIdByIndex(0)) {
 			log.debug("Answer is already at top");
 			return;
 		} else if (!moveUp
@@ -769,15 +780,16 @@ public class ScreeningSurveySlideEditComponentWithController extends
 
 		int swapPosition;
 		if (moveUp) {
-			swapPosition = answersBeanContainer.indexOfId(selectedUIAnswer
-					.getOrder()) - 1;
+			swapPosition = answersBeanContainer
+					.indexOfId(selectedUIAnswer.getOrder()) - 1;
 		} else {
-			swapPosition = answersBeanContainer.indexOfId(selectedUIAnswer
-					.getOrder()) + 1;
+			swapPosition = answersBeanContainer
+					.indexOfId(selectedUIAnswer.getOrder()) + 1;
 		}
 
-		val uiAnswerToSwapWith = answersBeanContainer.getItem(
-				answersBeanContainer.getIdByIndex(swapPosition)).getBean();
+		val uiAnswerToSwapWith = answersBeanContainer
+				.getItem(answersBeanContainer.getIdByIndex(swapPosition))
+				.getBean();
 
 		final int positionOnHold = selectedUIAnswer.getOrder();
 		selectedUIAnswer.setOrder(uiAnswerToSwapWith.getOrder());
@@ -898,7 +910,8 @@ public class ScreeningSurveySlideEditComponentWithController extends
 		showModalLStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_QUESTION_TEXT_WITH_PLACEHOLDERS,
 				screeningSurveySlide.getQuestions().get(selectedQuestion)
-						.getQuestionWithPlaceholders(), allPossibleVariables,
+						.getQuestionWithPlaceholders(),
+				allPossibleVariables,
 				new LocalizedPlaceholderStringEditComponent(),
 				new ExtendableButtonClickListener() {
 
@@ -909,8 +922,7 @@ public class ScreeningSurveySlideEditComponentWithController extends
 							getSurveyAdministrationManagerService()
 									.screeningSurveySlideChangeQuestion(
 											screeningSurveySlide,
-											selectedQuestion,
-											getLStringValue(),
+											selectedQuestion, getLStringValue(),
 											allPossibleVariables);
 						} catch (final Exception e) {
 							handleException(e);
@@ -919,11 +931,12 @@ public class ScreeningSurveySlideEditComponentWithController extends
 
 						val newQuestion = getLStringValue();
 						if (newQuestion.isEmpty()) {
-							selectedUIQuestion.setQuestion(Messages
-									.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET));
+							selectedUIQuestion
+									.setQuestion(Messages.getAdminString(
+											AdminMessageStrings.UI_MODEL__NOT_SET));
 						} else {
-							selectedUIQuestion.setQuestion(newQuestion
-									.toString());
+							selectedUIQuestion
+									.setQuestion(newQuestion.toString());
 						}
 
 						// Adapt UI
@@ -979,8 +992,8 @@ public class ScreeningSurveySlideEditComponentWithController extends
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_DEFAULT_VARIABLE_VALUE,
 				screeningSurveySlide.getQuestions().get(selectedQuestion)
-						.getDefaultValue(), null,
-				new ShortStringEditComponent(),
+						.getDefaultValue(),
+				null, new ShortStringEditComponent(),
 				new ExtendableButtonClickListener() {
 
 					@Override
@@ -1012,8 +1025,7 @@ public class ScreeningSurveySlideEditComponentWithController extends
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_VARIABLE,
 				screeningSurveySlide.getQuestions().get(selectedQuestion)
 						.getStoreValueToVariableWithName(),
-				allPossibleVariables,
-				new ShortPlaceholderStringEditComponent(),
+				allPossibleVariables, new ShortPlaceholderStringEditComponent(),
 				new ExtendableButtonClickListener() {
 
 					@Override
@@ -1044,20 +1056,20 @@ public class ScreeningSurveySlideEditComponentWithController extends
 		showModalClosableEditWindow(
 				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__CREATE_SCREENING_SURVEY_SLIDE_RULE,
 				new ScreeningSurveySlideRuleEditComponentWithController(
-						newScreeningSurveySlideRule, screeningSurveySlide
-								.getScreeningSurvey()),
+						newScreeningSurveySlideRule,
+						screeningSurveySlide.getScreeningSurvey()),
 				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
-						rulesBeanContainer.addItem(newScreeningSurveySlideRule
-								.getId(), UIScreeningSurveySlideRule.class
-								.cast(newScreeningSurveySlideRule
-										.toUIModelObject()));
+						rulesBeanContainer.addItem(
+								newScreeningSurveySlideRule.getId(),
+								UIScreeningSurveySlideRule.class
+										.cast(newScreeningSurveySlideRule
+												.toUIModelObject()));
 						rulesTable.select(newScreeningSurveySlideRule.getId());
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_SLIDE_RULE_CREATED);
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_SLIDE_RULE_CREATED);
 
 						closeWindow();
 					}
@@ -1072,8 +1084,8 @@ public class ScreeningSurveySlideEditComponentWithController extends
 		showModalClosableEditWindow(
 				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_SCREENING_SURVEY_SLIDE_RULE,
 				new ScreeningSurveySlideRuleEditComponentWithController(
-						selectedScreeningSurveySlideRule, screeningSurveySlide
-								.getScreeningSurvey()),
+						selectedScreeningSurveySlideRule,
+						screeningSurveySlide.getScreeningSurvey()),
 				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
@@ -1082,11 +1094,10 @@ public class ScreeningSurveySlideEditComponentWithController extends
 								rulesBeanContainer,
 								selectedScreeningSurveySlideRule);
 						rulesTable.sort();
-						rulesTable.select(selectedScreeningSurveySlideRule
-								.getId());
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_SLIDE_RULE_UPDATED);
+						rulesTable.select(
+								selectedScreeningSurveySlideRule.getId());
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_SLIDE_RULE_UPDATED);
 
 						closeWindow();
 					}
@@ -1137,7 +1148,9 @@ public class ScreeningSurveySlideEditComponentWithController extends
 			@Override
 			public void buttonClick(final ClickEvent event) {
 				try {
-					val selectedScreeningSurveySlideRule = selectedUIScreeningSurveySlideRule.getRelatedModelObject(ScreeningSurveySlideRule.class);
+					val selectedScreeningSurveySlideRule = selectedUIScreeningSurveySlideRule
+							.getRelatedModelObject(
+									ScreeningSurveySlideRule.class);
 
 					// Delete rule
 					getSurveyAdministrationManagerService()
@@ -1153,9 +1166,8 @@ public class ScreeningSurveySlideEditComponentWithController extends
 				rulesTable.removeItem(selectedUIScreeningSurveySlideRule
 						.getRelatedModelObject(ScreeningSurveySlideRule.class)
 						.getId());
-				getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_SLIDE_RULE_DELETED);
+				getAdminUI().showInformationNotification(
+						AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_SLIDE_RULE_DELETED);
 
 				closeWindow();
 			}

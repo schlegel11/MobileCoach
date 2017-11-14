@@ -30,8 +30,8 @@ import java.util.List;
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
-public abstract class AbstractStringValueEditComponent extends
-		AbstractConfirmationComponent {
+public abstract class AbstractStringValueEditComponent
+		extends AbstractConfirmationComponent {
 
 	/**
 	 * Set the current {@link String} value

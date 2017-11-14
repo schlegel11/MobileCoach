@@ -63,12 +63,14 @@ public class UIScreeningSurveySlideRule extends UIModelObject {
 	}
 
 	public static String[] getColumnHeaders() {
-		return new String[] {
-				localize(AdminMessageStrings.UI_COLUMNS__RULE),
+		return new String[] { localize(AdminMessageStrings.UI_COLUMNS__RULE),
 				localize(AdminMessageStrings.UI_COLUMNS__VARIABLE),
-				localize(AdminMessageStrings.UI_COLUMNS__SHOW_SAME_SLIDE_IF_INVALID),
-				localize(AdminMessageStrings.UI_COLUMNS__JUMP_TO_SLIDE_WHEN_TRUE),
-				localize(AdminMessageStrings.UI_COLUMNS__JUMP_TO_SLIDE_WHEN_FALSE) };
+				localize(
+						AdminMessageStrings.UI_COLUMNS__SHOW_SAME_SLIDE_IF_INVALID),
+				localize(
+						AdminMessageStrings.UI_COLUMNS__JUMP_TO_SLIDE_WHEN_TRUE),
+				localize(
+						AdminMessageStrings.UI_COLUMNS__JUMP_TO_SLIDE_WHEN_FALSE) };
 	}
 
 	public static String getSortColumn() {

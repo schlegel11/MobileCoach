@@ -70,7 +70,7 @@ public class DataTable {
 	 * @author Andreas Filler
 	 */
 	public class DataEntry {
-		private final List<String>	values;
+		private final List<String> values;
 
 		public DataEntry() {
 			values = new ArrayList<String>();
@@ -127,8 +127,8 @@ public class DataTable {
 				val variable = variablesWithValuesOfParticipant
 						.get(variableHeader);
 				if (variable == null) {
-					entry.add(Messages
-							.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET));
+					entry.add(Messages.getAdminString(
+							AdminMessageStrings.UI_MODEL__NOT_SET));
 				} else {
 					entry.add(variable.getValue());
 				}
@@ -143,21 +143,18 @@ public class DataTable {
 	public DataEntry getHeaders() {
 		final val dataEntry = new DataEntry();
 
-		dataEntry
-				.add(Messages
-						.getAdminString(AdminMessageStrings.UI_COLUMNS__PARTICIPANT_ID));
-		dataEntry
-				.add(Messages
-						.getAdminString(AdminMessageStrings.UI_COLUMNS__PARTICIPANT_NAME));
+		dataEntry.add(Messages.getAdminString(
+				AdminMessageStrings.UI_COLUMNS__PARTICIPANT_ID));
+		dataEntry.add(Messages.getAdminString(
+				AdminMessageStrings.UI_COLUMNS__PARTICIPANT_NAME));
 		dataEntry.add(Messages
 				.getAdminString(AdminMessageStrings.UI_COLUMNS__LANGUAGE));
-		dataEntry.add(Messages
-				.getAdminString(AdminMessageStrings.UI_COLUMNS__GROUP));
+		dataEntry.add(
+				Messages.getAdminString(AdminMessageStrings.UI_COLUMNS__GROUP));
 		dataEntry.add(Messages
 				.getAdminString(AdminMessageStrings.UI_COLUMNS__ORGANIZATION));
-		dataEntry
-				.add(Messages
-						.getAdminString(AdminMessageStrings.UI_COLUMNS__ORGANIZATION_UNIT));
+		dataEntry.add(Messages.getAdminString(
+				AdminMessageStrings.UI_COLUMNS__ORGANIZATION_UNIT));
 
 		dataEntry.addAll(statisticValuesHeaders);
 		dataEntry.addAll(variablesHeaders);
@@ -165,8 +162,7 @@ public class DataTable {
 		return dataEntry;
 	}
 
-	public void addEntry(
-			final ObjectId participantId,
+	public void addEntry(final ObjectId participantId,
 			final Participant participant,
 			final Hashtable<String, String> statisticValuesOfParticipant,
 			final Hashtable<String, AbstractVariableWithValue> variablesWithValuesOfParticipant) {

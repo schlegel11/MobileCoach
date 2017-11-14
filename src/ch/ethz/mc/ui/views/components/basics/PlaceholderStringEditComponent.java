@@ -53,8 +53,8 @@ import com.vaadin.ui.VerticalLayout;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Log4j2
-public class PlaceholderStringEditComponent extends
-		AbstractStringValueEditComponent {
+public class PlaceholderStringEditComponent
+		extends AbstractStringValueEditComponent {
 
 	/*- VaadinEditorProperties={"grid":"RegularGrid,20","showGrid":true,"snapToGrid":true,"snapToObject":true,"movingGuides":false,"snappingDistance":10} */
 
@@ -115,17 +115,18 @@ public class PlaceholderStringEditComponent extends
 								+ stringTextArea.getValue().substring(
 										stringTextArea.getCursorPosition()));
 
-						stringTextArea.setCursorPosition(stringTextArea
-								.getCursorPosition()
-								+ selectedVariable.length());
+						stringTextArea.setCursorPosition(
+								stringTextArea.getCursorPosition()
+										+ selectedVariable.length());
 					} catch (final Exception e) {
-						log.warn("Error occured while setting variable to string text area...fixing by setting text to the beginning (Workaround for Vaadin time shift)");
+						log.warn(
+								"Error occured while setting variable to string text area...fixing by setting text to the beginning (Workaround for Vaadin time shift)");
 
-						stringTextArea.setValue(stringTextArea.getValue()
-								+ selectedVariable);
+						stringTextArea.setValue(
+								stringTextArea.getValue() + selectedVariable);
 
-						stringTextArea.setCursorPosition(stringTextArea
-								.getValue().length());
+						stringTextArea.setCursorPosition(
+								stringTextArea.getValue().length());
 					}
 
 					variableListSelect.unselect(selectedVariable);
@@ -147,7 +148,8 @@ public class PlaceholderStringEditComponent extends
 	}
 
 	@Override
-	public void registerCancelButtonListener(final ClickListener clickListener) {
+	public void registerCancelButtonListener(
+			final ClickListener clickListener) {
 		cancelButton.addClickListener(clickListener);
 	}
 
@@ -235,8 +237,8 @@ public class PlaceholderStringEditComponent extends
 		variableListSelect.setHeight("100.0%");
 		editAreaLayout.addComponent(variableListSelect);
 		editAreaLayout.setExpandRatio(variableListSelect, 0.4f);
-		editAreaLayout.setComponentAlignment(variableListSelect, new Alignment(
-				48));
+		editAreaLayout.setComponentAlignment(variableListSelect,
+				new Alignment(48));
 
 		return editAreaLayout;
 	}

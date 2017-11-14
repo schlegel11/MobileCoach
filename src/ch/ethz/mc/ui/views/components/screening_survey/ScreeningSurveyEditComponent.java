@@ -46,7 +46,8 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class ScreeningSurveyEditComponent extends AbstractClosableEditComponent {
+public class ScreeningSurveyEditComponent
+		extends AbstractClosableEditComponent {
 
 	/*- VaadinEditorProperties={"grid":"RegularGrid,20","showGrid":true,"snapToGrid":true,"snapToObject":true,"movingGuides":false,"snappingDistance":10} */
 
@@ -117,18 +118,15 @@ public class ScreeningSurveyEditComponent extends AbstractClosableEditComponent 
 		setCompositionRoot(mainLayout);
 
 		// manually added
-		localize(
-				switchScreeningSurveyButton,
+		localize(switchScreeningSurveyButton,
 				AdminMessageStrings.SCREENING_SURVEY_EDITING__SWITCH_BUTTON_INACTIVE);
 
-		localize(
-				passwordLabel,
+		localize(passwordLabel,
 				AdminMessageStrings.SCREENING_SURVEY_EDITING__PASSWORD_TO_PARTICIPATE);
 		localize(templatePathLabel,
 				AdminMessageStrings.SCREENING_SURVEY_EDITING__TEMPLATE_PATH);
 
-		localize(
-				screeningSurveySlidesLabel,
+		localize(screeningSurveySlidesLabel,
 				AdminMessageStrings.SCREENING_SURVEY_EDITING__SCREENING_SURVEY_SLIDES);
 
 		localize(feedbacksLabel,
@@ -187,7 +185,8 @@ public class ScreeningSurveyEditComponent extends AbstractClosableEditComponent 
 	}
 
 	@Override
-	public void registerCancelButtonListener(final ClickListener clickListener) {
+	public void registerCancelButtonListener(
+			final ClickListener clickListener) {
 		// not required
 	}
 
@@ -303,8 +302,8 @@ public class ScreeningSurveyEditComponent extends AbstractClosableEditComponent 
 		passwordLabel
 				.setValue("!!! Password required to participate (optional)");
 		switchesLayoutGroup.addComponent(passwordLabel, 0, 0);
-		switchesLayoutGroup.setComponentAlignment(passwordLabel, new Alignment(
-				33));
+		switchesLayoutGroup.setComponentAlignment(passwordLabel,
+				new Alignment(33));
 
 		// passwordTextFieldComponent
 		passwordTextFieldComponent = new VariableTextFieldComponent();
@@ -385,8 +384,8 @@ public class ScreeningSurveyEditComponent extends AbstractClosableEditComponent 
 		// moveDownButton
 		moveDownButton = new Button();
 		moveDownButton.setCaption("!!! Move Down");
-		moveDownButton.setIcon(new ThemeResource(
-				"img/arrow-down-icon-small.png"));
+		moveDownButton
+				.setIcon(new ThemeResource("img/arrow-down-icon-small.png"));
 		moveDownButton.setImmediate(true);
 		moveDownButton.setWidth("120px");
 		moveDownButton.setHeight("-1px");
@@ -444,8 +443,8 @@ public class ScreeningSurveyEditComponent extends AbstractClosableEditComponent 
 		// deleteFeedbackButton
 		deleteFeedbackButton = new Button();
 		deleteFeedbackButton.setCaption("!!! Delete");
-		deleteFeedbackButton.setIcon(new ThemeResource(
-				"img/delete-icon-small.png"));
+		deleteFeedbackButton
+				.setIcon(new ThemeResource("img/delete-icon-small.png"));
 		deleteFeedbackButton.setImmediate(true);
 		deleteFeedbackButton.setWidth("100px");
 		deleteFeedbackButton.setHeight("-1px");

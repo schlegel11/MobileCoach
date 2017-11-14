@@ -22,13 +22,6 @@ package ch.ethz.mc.model.persistent;
  */
 import java.util.Date;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.Setter;
-import lombok.val;
-
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
@@ -36,12 +29,19 @@ import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
+import ch.ethz.mc.model.persistent.types.AnswerTypes;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogMessageTypes;
 import ch.ethz.mc.model.ui.UIDialogMessageProblemViewWithParticipant;
 import ch.ethz.mc.model.ui.UIDialogMessageWithParticipant;
 import ch.ethz.mc.model.ui.results.UIDialogMessageWithParticipantForResults;
 import ch.ethz.mc.tools.StringHelpers;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.val;
 
 /**
  * {@link ModelObject} to represent an {@link DialogMessage}
@@ -101,6 +101,20 @@ public class DialogMessage extends ModelObject {
 	@Setter
 	@NonNull
 	private String						messageWithForcedLinks;
+
+	/**
+	 * The {@link AnswerTypes} of the message
+	 */
+	@Getter
+	@Setter
+	private AnswerTypes					answerType;
+
+	/**
+	 * The {@link AnswerTypes} of the message
+	 */
+	@Getter
+	@Setter
+	private String						answerOptions;
 
 	/**
 	 * Optional survey link contained in message
@@ -244,59 +258,62 @@ public class DialogMessage extends ModelObject {
 		String typeString = null;
 		switch (type) {
 			case COMMAND:
-				typeString = Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__COMMAND_MESSAGE);
+				typeString = Messages.getAdminString(
+						AdminMessageStrings.UI_MODEL__COMMAND_MESSAGE);
 				break;
 			case INTENTION:
-				typeString = Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__USER_INTENTION_MESSAGE);
+				typeString = Messages.getAdminString(
+						AdminMessageStrings.UI_MODEL__USER_INTENTION_MESSAGE);
 				break;
 			case PLAIN:
-				typeString = Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__PLAIN_TEXT_MESSAGE);
+				typeString = Messages.getAdminString(
+						AdminMessageStrings.UI_MODEL__PLAIN_TEXT_MESSAGE);
 				break;
 		}
 
 		final val dialogMessage = new UIDialogMessageWithParticipantForResults(
-				participantId,
-				participantName,
-				language,
-				group == null ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: group,
-				organization,
-				organizationUnit,
+				participantId, participantName, language,
+				group == null ? Messages.getAdminString(
+						AdminMessageStrings.UI_MODEL__NOT_SET) : group,
+				organization, organizationUnit,
 				StringUtils.right("0000" + String.valueOf(order + 1), 5),
 				status.toString(),
-				supervisorMessage ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__SUPERVISOR_MESSAGE)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__PARTICIPANT_MESSAGE),
+				supervisorMessage
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__SUPERVISOR_MESSAGE)
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__PARTICIPANT_MESSAGE),
 				typeString,
-				message == null || message.equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+				message == null || message.equals("")
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NOT_SET)
 						: message,
 				StringHelpers.createStringTimeStamp(shouldBeSentTimestamp),
 				StringHelpers.createStringTimeStamp(sentTimestamp),
-				answerReceived == null || answerReceived.equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+				answerReceived == null || answerReceived.equals("")
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NOT_SET)
 						: answerReceived,
-				answerReceivedRaw == null || answerReceivedRaw.equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+				answerReceivedRaw == null || answerReceivedRaw.equals("")
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NOT_SET)
 						: answerReceivedRaw,
 				StringHelpers.createStringTimeStamp(answerReceivedTimestamp),
-				manuallySent ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-				containsMediaContent ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-				mediaContentViewed ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NO));
+				manuallySent
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__YES)
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NO),
+				containsMediaContent
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__YES)
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NO),
+				mediaContentViewed
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__YES)
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NO));
 
 		dialogMessage.setRelatedModelObject(this);
 
@@ -324,61 +341,62 @@ public class DialogMessage extends ModelObject {
 		String typeString = null;
 		switch (type) {
 			case COMMAND:
-				typeString = Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__COMMAND_MESSAGE);
+				typeString = Messages.getAdminString(
+						AdminMessageStrings.UI_MODEL__COMMAND_MESSAGE);
 				break;
 			case INTENTION:
-				typeString = Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__USER_INTENTION_MESSAGE);
+				typeString = Messages.getAdminString(
+						AdminMessageStrings.UI_MODEL__USER_INTENTION_MESSAGE);
 				break;
 			case PLAIN:
-				typeString = Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__PLAIN_TEXT_MESSAGE);
+				typeString = Messages.getAdminString(
+						AdminMessageStrings.UI_MODEL__PLAIN_TEXT_MESSAGE);
 				break;
 		}
 
 		final val dialogMessage = new UIDialogMessageWithParticipant(
-				participantId,
-				participantName,
-				language,
-				group == null ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: group,
-				organization,
-				organizationUnit,
-				order + 1,
-				status.toString(),
-				supervisorMessage ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__SUPERVISOR_MESSAGE)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__PARTICIPANT_MESSAGE),
+				participantId, participantName, language,
+				group == null ? Messages.getAdminString(
+						AdminMessageStrings.UI_MODEL__NOT_SET) : group,
+				organization, organizationUnit, order + 1, status.toString(),
+				supervisorMessage
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__SUPERVISOR_MESSAGE)
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__PARTICIPANT_MESSAGE),
 				typeString,
-				message == null || message.equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+				message == null || message.equals("")
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NOT_SET)
 						: message,
-				shouldBeSentTimestamp <= 0 ? null : new Date(
-						shouldBeSentTimestamp),
+				shouldBeSentTimestamp <= 0 ? null
+						: new Date(shouldBeSentTimestamp),
 				sentTimestamp <= 0 ? null : new Date(sentTimestamp),
-				answerReceived == null || answerReceived.equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+				answerReceived == null || answerReceived.equals("")
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NOT_SET)
 						: answerReceived,
-				answerReceivedRaw == null || answerReceivedRaw.equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+				answerReceivedRaw == null || answerReceivedRaw.equals("")
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NOT_SET)
 						: answerReceivedRaw,
-				answerReceivedTimestamp <= 0 ? null : new Date(
-						answerReceivedTimestamp),
-				manuallySent ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-				containsMediaContent ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-				mediaContentViewed ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NO));
+				answerReceivedTimestamp <= 0 ? null
+						: new Date(answerReceivedTimestamp),
+				manuallySent
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__YES)
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NO),
+				containsMediaContent
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__YES)
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NO),
+				mediaContentViewed
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__YES)
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NO));
 
 		dialogMessage.setRelatedModelObject(this);
 
@@ -405,42 +423,41 @@ public class DialogMessage extends ModelObject {
 		String typeString = null;
 		switch (type) {
 			case COMMAND:
-				typeString = Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__COMMAND_MESSAGE);
+				typeString = Messages.getAdminString(
+						AdminMessageStrings.UI_MODEL__COMMAND_MESSAGE);
 				break;
 			case INTENTION:
-				typeString = Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__USER_INTENTION_MESSAGE);
+				typeString = Messages.getAdminString(
+						AdminMessageStrings.UI_MODEL__USER_INTENTION_MESSAGE);
 				break;
 			case PLAIN:
-				typeString = Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__PLAIN_TEXT_MESSAGE);
+				typeString = Messages.getAdminString(
+						AdminMessageStrings.UI_MODEL__PLAIN_TEXT_MESSAGE);
 				break;
 		}
 
 		final val dialogMessage = new UIDialogMessageProblemViewWithParticipant(
-				participantId,
-				participantName,
-				language,
-				group == null ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: group,
-				organization,
-				organizationUnit,
-				supervisorMessage ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__SUPERVISOR_MESSAGE)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__PARTICIPANT_MESSAGE),
-				typeString, message, sentTimestamp <= 0 ? null : new Date(
-						sentTimestamp), answerReceived == null
-						|| answerReceived.equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: answerReceived, answerReceivedRaw == null
-						|| answerReceivedRaw.equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+				participantId, participantName, language,
+				group == null ? Messages.getAdminString(
+						AdminMessageStrings.UI_MODEL__NOT_SET) : group,
+				organization, organizationUnit,
+				supervisorMessage
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__SUPERVISOR_MESSAGE)
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__PARTICIPANT_MESSAGE),
+				typeString, message,
+				sentTimestamp <= 0 ? null : new Date(sentTimestamp),
+				answerReceived == null || answerReceived.equals("")
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NOT_SET)
+						: answerReceived,
+				answerReceivedRaw == null || answerReceivedRaw.equals("")
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NOT_SET)
 						: answerReceivedRaw,
-				answerReceivedTimestamp <= 0 ? null : new Date(
-						answerReceivedTimestamp));
+				answerReceivedTimestamp <= 0 ? null
+						: new Date(answerReceivedTimestamp));
 
 		dialogMessage.setRelatedModelObject(this);
 

@@ -46,8 +46,8 @@ import com.vaadin.ui.TabSheet.Tab;
  */
 @SuppressWarnings("serial")
 @Log4j2
-public class MonitoringMessageGroupsTabComponentWithController extends
-		MonitoringMessageGroupsTabComponent {
+public class MonitoringMessageGroupsTabComponentWithController
+		extends MonitoringMessageGroupsTabComponent {
 
 	private final Intervention				intervention;
 
@@ -87,8 +87,8 @@ public class MonitoringMessageGroupsTabComponentWithController extends
 		}
 
 		// handle tab selection change
-		getMonitoringMessageGroupsTabSheet().addSelectedTabChangeListener(
-				new SelectedTabChangeListener() {
+		getMonitoringMessageGroupsTabSheet()
+				.addSelectedTabChangeListener(new SelectedTabChangeListener() {
 
 					@Override
 					public void selectedTabChange(
@@ -100,8 +100,8 @@ public class MonitoringMessageGroupsTabComponentWithController extends
 							setNothingSelected();
 							selectedMonitoringMessageGroup = null;
 						} else {
-							val selectedTabObject = event.getTabSheet().getTab(
-									selectedTab);
+							val selectedTabObject = event.getTabSheet()
+									.getTab(selectedTab);
 							val monitoringMessageGroupObjectId = tabsWithObjectIdsOfMessageGroup
 									.get(selectedTabObject);
 
@@ -173,11 +173,10 @@ public class MonitoringMessageGroupsTabComponentWithController extends
 
 						selectedMonitoringMessageGroup = newMonitoringMessageGroup;
 
-						getMonitoringMessageGroupsTabSheet().setSelectedTab(
-								newTab);
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_GROUP_CREATED);
+						getMonitoringMessageGroupsTabSheet()
+								.setSelectedTab(newTab);
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_GROUP_CREATED);
 
 						closeWindow();
 					}
@@ -197,8 +196,8 @@ public class MonitoringMessageGroupsTabComponentWithController extends
 		}
 
 		val tabSheet = getMonitoringMessageGroupsTabSheet();
-		val currentPosition = tabSheet.getTabPosition(tabSheet.getTab(tabSheet
-				.getSelectedTab()));
+		val currentPosition = tabSheet
+				.getTabPosition(tabSheet.getTab(tabSheet.getSelectedTab()));
 		if (moveLeft) {
 			tabSheet.setTabPosition(tabSheet.getTab(tabSheet.getSelectedTab()),
 					currentPosition - 1);
@@ -236,9 +235,8 @@ public class MonitoringMessageGroupsTabComponentWithController extends
 						tab.getTab(tab.getSelectedTab()).setCaption(
 								selectedMonitoringMessageGroup.getName());
 
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_GROUP_RENAMED);
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_GROUP_RENAMED);
 						closeWindow();
 					}
 				}, null);
@@ -265,8 +263,8 @@ public class MonitoringMessageGroupsTabComponentWithController extends
 				// Adapt UI
 				val tabSheet = getMonitoringMessageGroupsTabSheet();
 
-				tabsWithObjectIdsOfMessageGroup.remove(tabSheet.getTab(tabSheet
-						.getSelectedTab()));
+				tabsWithObjectIdsOfMessageGroup
+						.remove(tabSheet.getTab(tabSheet.getSelectedTab()));
 
 				tabSheet.removeTab(tabSheet.getTab(tabSheet.getSelectedTab()));
 
@@ -276,7 +274,8 @@ public class MonitoringMessageGroupsTabComponentWithController extends
 					selectedMonitoringMessageGroup = null;
 				} else {
 					val selectedTabObject = tabSheet.getTab(selectedTab);
-					val monitoringMessageGroupObjectId = tabsWithObjectIdsOfMessageGroup.get(selectedTabObject);
+					val monitoringMessageGroupObjectId = tabsWithObjectIdsOfMessageGroup
+							.get(selectedTabObject);
 					selectedMonitoringMessageGroup = getInterventionAdministrationManagerService()
 							.getMonitoringMessageGroup(
 									monitoringMessageGroupObjectId);
@@ -284,9 +283,8 @@ public class MonitoringMessageGroupsTabComponentWithController extends
 					setSomethingSelected();
 				}
 
-				getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_GROUP_DELETED);
+				getAdminUI().showInformationNotification(
+						AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_GROUP_DELETED);
 
 				closeWindow();
 			}

@@ -64,8 +64,8 @@ public class VariableStringReplacer {
 		}
 
 		// Adjust variables in rule to be unique for later replacement
-		val variablePreFindPattern = Pattern
-				.compile(ImplementationConstants.REGULAR_EXPRESSION_TO_MATCH_VARIABLES_IN_STRING);
+		val variablePreFindPattern = Pattern.compile(
+				ImplementationConstants.REGULAR_EXPRESSION_TO_MATCH_VARIABLES_IN_STRING);
 		Matcher variablePreFindMatcher = variablePreFindPattern
 				.matcher(stringWithVariables);
 
@@ -76,16 +76,16 @@ public class VariableStringReplacer {
 					+ variablePreFindMatcher.group().substring(1,
 							variablePreFindMatcher.group().length())
 					+ ImplementationConstants.VARIABLE_MATCH_MODIFIER
-					+ stringWithVariables.substring(variablePreFindMatcher
-							.end());
+					+ stringWithVariables
+							.substring(variablePreFindMatcher.end());
 
 			variablePreFindMatcher = variablePreFindPattern
 					.matcher(stringWithVariables);
 		}
 
 		// Find variables in rule
-		val variableFindPattern = Pattern
-				.compile(ImplementationConstants.REGULAR_EXPRESSION_TO_MATCH_MODIFIED_VARIABLES_IN_STRING);
+		val variableFindPattern = Pattern.compile(
+				ImplementationConstants.REGULAR_EXPRESSION_TO_MATCH_MODIFIED_VARIABLES_IN_STRING);
 		final Matcher variableFindMatcher = variableFindPattern
 				.matcher(stringWithVariables);
 
@@ -113,11 +113,11 @@ public class VariableStringReplacer {
 
 					// Replace variable with value in rule
 					if (value.contains(",")) {
-						stringWithVariables = stringWithVariables.replace(
-								variable, value);
+						stringWithVariables = stringWithVariables
+								.replace(variable, value);
 					} else {
-						stringWithVariables = stringWithVariables.replace(
-								variable, "(" + value + ")");
+						stringWithVariables = stringWithVariables
+								.replace(variable, "(" + value + ")");
 					}
 					log.debug("Replaced {} with {}", variable, value);
 					continue variableSearchLoop;
@@ -164,8 +164,8 @@ public class VariableStringReplacer {
 		}
 
 		// Adjust variables in rule to be unique for later replacement
-		val variablePreFindPattern = Pattern
-				.compile(ImplementationConstants.REGULAR_EXPRESSION_TO_MATCH_VARIABLES_IN_STRING);
+		val variablePreFindPattern = Pattern.compile(
+				ImplementationConstants.REGULAR_EXPRESSION_TO_MATCH_VARIABLES_IN_STRING);
 		Matcher variablePreFindMatcher = variablePreFindPattern
 				.matcher(stringWithVariables);
 
@@ -176,16 +176,16 @@ public class VariableStringReplacer {
 					+ variablePreFindMatcher.group().substring(1,
 							variablePreFindMatcher.group().length())
 					+ ImplementationConstants.VARIABLE_MATCH_MODIFIER
-					+ stringWithVariables.substring(variablePreFindMatcher
-							.end());
+					+ stringWithVariables
+							.substring(variablePreFindMatcher.end());
 
 			variablePreFindMatcher = variablePreFindPattern
 					.matcher(stringWithVariables);
 		}
 
 		// Find variables in rule
-		val variableFindPattern = Pattern
-				.compile(ImplementationConstants.REGULAR_EXPRESSION_TO_MATCH_MODIFIED_VARIABLES_IN_STRING);
+		val variableFindPattern = Pattern.compile(
+				ImplementationConstants.REGULAR_EXPRESSION_TO_MATCH_MODIFIED_VARIABLES_IN_STRING);
 		final Matcher variableFindMatcher = variableFindPattern
 				.matcher(stringWithVariables);
 
@@ -195,20 +195,18 @@ public class VariableStringReplacer {
 			variablesFoundInRule.add(variableFindMatcher.group());
 
 			// Check for modifiers
-			val variableModifierFindPattern = Pattern
-					.compile(ImplementationConstants.REGULAR_EXPRESSION_TO_MATCH_VALUE_MODIFIER);
+			val variableModifierFindPattern = Pattern.compile(
+					ImplementationConstants.REGULAR_EXPRESSION_TO_MATCH_VALUE_MODIFIER);
 			final Matcher variableModifierFindMatcher = variableModifierFindPattern
-					.matcher(stringWithVariables.substring(variableFindMatcher
-							.end()));
+					.matcher(stringWithVariables
+							.substring(variableFindMatcher.end()));
 
 			if (variableModifierFindMatcher.find()
 					&& variableModifierFindMatcher.start() == 0) {
 				variablesFoundInRuleModifiers
-						.add(variableModifierFindMatcher.group()
-								.substring(
-										1,
-										variableModifierFindMatcher.group()
-												.length() - 1));
+						.add(variableModifierFindMatcher.group().substring(1,
+								variableModifierFindMatcher.group().length()
+										- 1));
 			} else {
 				variablesFoundInRuleModifiers.add(null);
 			}
@@ -218,7 +216,8 @@ public class VariableStringReplacer {
 		}
 
 		// Find variable values and put value into rule
-		variableSearchLoop: for (int i = 0; i < variablesFoundInRule.size(); i++) {
+		variableSearchLoop: for (int i = 0; i < variablesFoundInRule
+				.size(); i++) {
 			val variable = variablesFoundInRule.get(i);
 			val modifier = variablesFoundInRuleModifiers.get(i);
 			for (val variableWithValue : variablesWithValues) {
@@ -247,22 +246,22 @@ public class VariableStringReplacer {
 								formattedValue = String.format(modifier,
 										Double.parseDouble(value));
 							} else {
-								formattedValue = String.format(locale,
-										modifier, Double.parseDouble(value));
+								formattedValue = String.format(locale, modifier,
+										Double.parseDouble(value));
 							}
-							stringWithVariables = stringWithVariables.replace(
-									formattedVariable, formattedValue);
+							stringWithVariables = stringWithVariables
+									.replace(formattedVariable, formattedValue);
 						} catch (final Exception e) {
 							log.warn(
 									"Could not modify string {} with modifier {}",
 									formattedVariable, modifier);
-							stringWithVariables = stringWithVariables.replace(
-									formattedVariable, value);
+							stringWithVariables = stringWithVariables
+									.replace(formattedVariable, value);
 						}
 					} else {
 						// Replace variable with value in rule
-						stringWithVariables = stringWithVariables.replace(
-								variable, value);
+						stringWithVariables = stringWithVariables
+								.replace(variable, value);
 					}
 
 					log.debug("Replaced {} with {}", variable, value);

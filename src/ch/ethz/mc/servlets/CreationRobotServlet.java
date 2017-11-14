@@ -33,9 +33,6 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.MC;
@@ -48,6 +45,8 @@ import ch.ethz.mc.model.persistent.MonitoringMessageRule;
 import ch.ethz.mc.model.persistent.subelements.LString;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import ch.ethz.mc.services.InterventionAdministrationManagerService;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * This servlet should NEVER be part of the public release
@@ -69,7 +68,8 @@ public class CreationRobotServlet extends HttpServlet {
 	final List<ModelObject>								createdModelObjects	= new ArrayList<ModelObject>();
 
 	@Override
-	public void init(final ServletConfig servletConfig) throws ServletException {
+	public void init(final ServletConfig servletConfig)
+			throws ServletException {
 		super.init(servletConfig);
 		if (!ACTIVE) {
 			log.debug("Creation robot servlet is disabled");
@@ -108,9 +108,8 @@ public class CreationRobotServlet extends HttpServlet {
 	 * ROBOT TASKS START HERE
 	 */
 	private void runRobotTasks() {
-		// TODO for ROBOT TASKS (OPTIONAL): Robot tasks performed at startup can
-		// be
-		// defined here
+		// TODO HACKS for ROBOT TASKS (OPTIONAL): Robot tasks performed at
+		// startup can be defined here
 
 		try {
 			// createQuiz("Emotion");
@@ -185,11 +184,11 @@ public class CreationRobotServlet extends HttpServlet {
 		val fields = new String[] { "de", "fr" };
 		val files = new String[] {
 				"import_quiz_"
-						+ quiz.toLowerCase().replace("&", "_")
-								.replace(" ", "_") + "_DE.txt",
+						+ quiz.toLowerCase().replace("&", "_").replace(" ", "_")
+						+ "_DE.txt",
 				"import_quiz_"
-						+ quiz.toLowerCase().replace("&", "_")
-								.replace(" ", "_") + "_FR.txt" };
+						+ quiz.toLowerCase().replace("&", "_").replace(" ", "_")
+						+ "_FR.txt" };
 
 		for (int i = 0; i < fields.length; i++) {
 			fillValuesTable(values, PATH, files[i], fields[i]);
@@ -223,23 +222,25 @@ public class CreationRobotServlet extends HttpServlet {
 						db.saveModelObject(monitoringMessageGroupQuiz);
 
 						monitoringMessageGroupQuizNoReply = iam
-								.monitoringMessageGroupCreate("Quiz " + quiz
-										+ " (NR)", interventionId);
+								.monitoringMessageGroupCreate(
+										"Quiz " + quiz + " (NR)",
+										interventionId);
 						db.saveModelObject(monitoringMessageGroupQuizNoReply);
 
 						monitoringMessageGroupQuizReply = iam
-								.monitoringMessageGroupCreate("Quiz " + quiz
-										+ " (R)", interventionId);
+								.monitoringMessageGroupCreate(
+										"Quiz " + quiz + " (R)",
+										interventionId);
 						db.saveModelObject(monitoringMessageGroupQuizReply);
 
 						MonitoringMessage monitoringMessage = iam
-								.monitoringMessageCreate(monitoringMessageGroupQuiz
-										.getId());
+								.monitoringMessageCreate(
+										monitoringMessageGroupQuiz.getId());
 
 						LString lString = fillLString(i, values, fields);
 						monitoringMessage.setTextWithPlaceholders(lString);
-						monitoringMessage
-								.setStoreValueToVariableWithName(quizReplyVariable);
+						monitoringMessage.setStoreValueToVariableWithName(
+								quizReplyVariable);
 
 						db.saveModelObject(monitoringMessage);
 
@@ -247,13 +248,11 @@ public class CreationRobotServlet extends HttpServlet {
 					default:
 						monitoringMessage = null;
 						if (i == 1 || i == 5) {
-							monitoringMessage = iam
-									.monitoringMessageCreate(monitoringMessageGroupQuizNoReply
-											.getId());
+							monitoringMessage = iam.monitoringMessageCreate(
+									monitoringMessageGroupQuizNoReply.getId());
 						} else if (i > 1 && i < 5 || i > 5) {
-							monitoringMessage = iam
-									.monitoringMessageCreate(monitoringMessageGroupQuizReply
-											.getId());
+							monitoringMessage = iam.monitoringMessageCreate(
+									monitoringMessageGroupQuizReply.getId());
 						}
 
 						lString = fillLString(i, values, fields);
@@ -263,15 +262,15 @@ public class CreationRobotServlet extends HttpServlet {
 
 						if (i > 1 && i < 5 || i > 5) {
 							val monitoringMessageRule = iam
-									.monitoringMessageRuleCreate(monitoringMessage
-											.getId());
+									.monitoringMessageRuleCreate(
+											monitoringMessage.getId());
 
 							monitoringMessageRule
 									.setComment("Check quiz result");
 							monitoringMessageRule
 									.setRuleWithPlaceholders(quizReplyVariable);
-							monitoringMessageRule
-									.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+							monitoringMessageRule.setRuleEquationSign(
+									RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
 							monitoringMessageRule
 									.setRuleComparisonTermWithPlaceholders("");
 
@@ -334,49 +333,45 @@ public class CreationRobotServlet extends HttpServlet {
 					db.saveModelObject(monitoringMessage);
 
 					MonitoringMessageRule monitoringMessageRule = iam
-							.monitoringMessageRuleCreate(monitoringMessage
-									.getId());
+							.monitoringMessageRuleCreate(
+									monitoringMessage.getId());
 
-					monitoringMessageRule.setComment("Participation week is "
-							+ week);
+					monitoringMessageRule
+							.setComment("Participation week is " + week);
 					monitoringMessageRule
 							.setRuleWithPlaceholders("$participationWeek");
-					monitoringMessageRule
-							.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+					monitoringMessageRule.setRuleEquationSign(
+							RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
 					monitoringMessageRule
 							.setRuleComparisonTermWithPlaceholders(week);
 
 					db.saveModelObject(monitoringMessageRule);
 
-					monitoringMessageRule = iam
-							.monitoringMessageRuleCreate(monitoringMessage
-									.getId());
+					monitoringMessageRule = iam.monitoringMessageRuleCreate(
+							monitoringMessage.getId());
 
-					monitoringMessageRule.setComment("Impin Top " + j + " is "
-							+ impin);
+					monitoringMessageRule
+							.setComment("Impin Top " + j + " is " + impin);
 					monitoringMessageRule
 							.setRuleWithPlaceholders("$impinCravTop" + j);
-					monitoringMessageRule
-							.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
-					monitoringMessageRule
-							.setRuleComparisonTermWithPlaceholders(String
-									.valueOf(impin));
+					monitoringMessageRule.setRuleEquationSign(
+							RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+					monitoringMessageRule.setRuleComparisonTermWithPlaceholders(
+							String.valueOf(impin));
 
 					db.saveModelObject(monitoringMessageRule);
 
-					monitoringMessageRule = iam
-							.monitoringMessageRuleCreate(monitoringMessage
-									.getId());
+					monitoringMessageRule = iam.monitoringMessageRuleCreate(
+							monitoringMessage.getId());
 
 					monitoringMessageRule.setComment("Impin " + impin
 							+ " value is " + impinValueCounter);
-					monitoringMessageRule.setRuleWithPlaceholders("$impin"
-							+ impin + "T0");
 					monitoringMessageRule
-							.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
-					monitoringMessageRule
-							.setRuleComparisonTermWithPlaceholders(String
-									.valueOf(impinValueCounter));
+							.setRuleWithPlaceholders("$impin" + impin + "T0");
+					monitoringMessageRule.setRuleEquationSign(
+							RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+					monitoringMessageRule.setRuleComparisonTermWithPlaceholders(
+							String.valueOf(impinValueCounter));
 
 					db.saveModelObject(monitoringMessageRule);
 
@@ -444,56 +439,50 @@ public class CreationRobotServlet extends HttpServlet {
 					db.saveModelObject(monitoringMessage);
 
 					MonitoringMessageRule monitoringMessageRule = iam
-							.monitoringMessageRuleCreate(monitoringMessage
-									.getId());
+							.monitoringMessageRuleCreate(
+									monitoringMessage.getId());
 
-					monitoringMessageRule.setComment("Participation week is "
-							+ week);
+					monitoringMessageRule
+							.setComment("Participation week is " + week);
 					monitoringMessageRule
 							.setRuleWithPlaceholders("$participationWeek");
 					if (week.equals("8")) {
-						monitoringMessageRule
-								.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+						monitoringMessageRule.setRuleEquationSign(
+								RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
 					} else {
-						monitoringMessageRule
-								.setRuleEquationSign(RuleEquationSignTypes.TEXT_VALUE_MATCHES_REGULAR_EXPRESSION);
+						monitoringMessageRule.setRuleEquationSign(
+								RuleEquationSignTypes.TEXT_VALUE_MATCHES_REGULAR_EXPRESSION);
 					}
 					monitoringMessageRule
 							.setRuleComparisonTermWithPlaceholders(week);
 
 					db.saveModelObject(monitoringMessageRule);
 
-					monitoringMessageRule = iam
-							.monitoringMessageRuleCreate(monitoringMessage
-									.getId());
+					monitoringMessageRule = iam.monitoringMessageRuleCreate(
+							monitoringMessage.getId());
 
-					monitoringMessageRule.setComment("Impin Top " + j + " is "
-							+ (impin + 1));
-					monitoringMessageRule.setRuleWithPlaceholders("$impinTop"
-							+ j);
+					monitoringMessageRule.setComment(
+							"Impin Top " + j + " is " + (impin + 1));
 					monitoringMessageRule
-							.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
-					monitoringMessageRule
-							.setRuleComparisonTermWithPlaceholders(String
-									.valueOf(impin + 1));
+							.setRuleWithPlaceholders("$impinTop" + j);
+					monitoringMessageRule.setRuleEquationSign(
+							RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+					monitoringMessageRule.setRuleComparisonTermWithPlaceholders(
+							String.valueOf(impin + 1));
 
 					db.saveModelObject(monitoringMessageRule);
 
-					monitoringMessageRule = iam
-							.monitoringMessageRuleCreate(monitoringMessage
-									.getId());
+					monitoringMessageRule = iam.monitoringMessageRuleCreate(
+							monitoringMessage.getId());
 
-					monitoringMessageRule.setComment("Impin "
-							+ impinName[impin] + " value is "
-							+ impinValueCounter);
-					monitoringMessageRule
-							.setRuleWithPlaceholders("$impin_stress"
-									+ impinName[impin] + "T0");
-					monitoringMessageRule
-							.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
-					monitoringMessageRule
-							.setRuleComparisonTermWithPlaceholders(String
-									.valueOf(impinValueCounter));
+					monitoringMessageRule.setComment("Impin " + impinName[impin]
+							+ " value is " + impinValueCounter);
+					monitoringMessageRule.setRuleWithPlaceholders(
+							"$impin_stress" + impinName[impin] + "T0");
+					monitoringMessageRule.setRuleEquationSign(
+							RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+					monitoringMessageRule.setRuleComparisonTermWithPlaceholders(
+							String.valueOf(impinValueCounter));
 
 					db.saveModelObject(monitoringMessageRule);
 
@@ -560,11 +549,10 @@ public class CreationRobotServlet extends HttpServlet {
 
 				monitoringMessageRule.setComment("$sozzTop is " + (i + 1));
 				monitoringMessageRule.setRuleWithPlaceholders("$sozzTop");
-				monitoringMessageRule
-						.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
-				monitoringMessageRule
-						.setRuleComparisonTermWithPlaceholders(String
-								.valueOf(i + 1));
+				monitoringMessageRule.setRuleEquationSign(
+						RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+				monitoringMessageRule.setRuleComparisonTermWithPlaceholders(
+						String.valueOf(i + 1));
 
 				db.saveModelObject(monitoringMessageRule);
 			}
@@ -620,30 +608,28 @@ public class CreationRobotServlet extends HttpServlet {
 				MonitoringMessageRule monitoringMessageRule = iam
 						.monitoringMessageRuleCreate(monitoringMessage.getId());
 
-				monitoringMessageRule.setComment("Current top is impin crav "
-						+ impin);
+				monitoringMessageRule
+						.setComment("Current top is impin crav " + impin);
 				monitoringMessageRule
 						.setRuleWithPlaceholders("$impinCravCurrent");
-				monitoringMessageRule
-						.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
-				monitoringMessageRule
-						.setRuleComparisonTermWithPlaceholders(String
-								.valueOf(impin));
+				monitoringMessageRule.setRuleEquationSign(
+						RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+				monitoringMessageRule.setRuleComparisonTermWithPlaceholders(
+						String.valueOf(impin));
 
 				db.saveModelObject(monitoringMessageRule);
 
 				monitoringMessageRule = iam
 						.monitoringMessageRuleCreate(monitoringMessage.getId());
 
-				monitoringMessageRule.setComment("$impin" + impin + "T0 is "
-						+ situationCounter);
-				monitoringMessageRule.setRuleWithPlaceholders("$impin" + impin
-						+ "T0");
+				monitoringMessageRule.setComment(
+						"$impin" + impin + "T0 is " + situationCounter);
 				monitoringMessageRule
-						.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
-				monitoringMessageRule
-						.setRuleComparisonTermWithPlaceholders(String
-								.valueOf(situationCounter));
+						.setRuleWithPlaceholders("$impin" + impin + "T0");
+				monitoringMessageRule.setRuleEquationSign(
+						RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+				monitoringMessageRule.setRuleComparisonTermWithPlaceholders(
+						String.valueOf(situationCounter));
 
 				db.saveModelObject(monitoringMessageRule);
 
@@ -654,11 +640,10 @@ public class CreationRobotServlet extends HttpServlet {
 						+ (ruleReplyCounter == 1 ? "yes" : "no"));
 				monitoringMessageRule
 						.setRuleWithPlaceholders("$replyImpinCrav");
-				monitoringMessageRule
-						.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
-				monitoringMessageRule
-						.setRuleComparisonTermWithPlaceholders(String
-								.valueOf(ruleReplyCounter));
+				monitoringMessageRule.setRuleEquationSign(
+						RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+				monitoringMessageRule.setRuleComparisonTermWithPlaceholders(
+						String.valueOf(ruleReplyCounter));
 
 				db.saveModelObject(monitoringMessageRule);
 			}
@@ -733,15 +718,14 @@ public class CreationRobotServlet extends HttpServlet {
 				MonitoringMessageRule monitoringMessageRule = iam
 						.monitoringMessageRuleCreate(monitoringMessage.getId());
 
-				monitoringMessageRule.setComment("Current top is impin stress "
-						+ impin);
+				monitoringMessageRule
+						.setComment("Current top is impin stress " + impin);
 				monitoringMessageRule
 						.setRuleWithPlaceholders("$impinStressCurrent");
-				monitoringMessageRule
-						.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
-				monitoringMessageRule
-						.setRuleComparisonTermWithPlaceholders(String
-								.valueOf(impin));
+				monitoringMessageRule.setRuleEquationSign(
+						RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+				monitoringMessageRule.setRuleComparisonTermWithPlaceholders(
+						String.valueOf(impin));
 
 				db.saveModelObject(monitoringMessageRule);
 
@@ -750,13 +734,12 @@ public class CreationRobotServlet extends HttpServlet {
 
 				monitoringMessageRule.setComment("$impin_stress"
 						+ impinName[impin - 1] + "T0 is " + situationCounter);
-				monitoringMessageRule.setRuleWithPlaceholders("$impin_stress"
-						+ impinName[impin - 1] + "T0");
-				monitoringMessageRule
-						.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
-				monitoringMessageRule
-						.setRuleComparisonTermWithPlaceholders(String
-								.valueOf(situationCounter));
+				monitoringMessageRule.setRuleWithPlaceholders(
+						"$impin_stress" + impinName[impin - 1] + "T0");
+				monitoringMessageRule.setRuleEquationSign(
+						RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+				monitoringMessageRule.setRuleComparisonTermWithPlaceholders(
+						String.valueOf(situationCounter));
 
 				db.saveModelObject(monitoringMessageRule);
 
@@ -767,11 +750,10 @@ public class CreationRobotServlet extends HttpServlet {
 						+ (ruleReplyCounter == 1 ? "yes" : "no"));
 				monitoringMessageRule
 						.setRuleWithPlaceholders("$replyImpinStress");
-				monitoringMessageRule
-						.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
-				monitoringMessageRule
-						.setRuleComparisonTermWithPlaceholders(String
-								.valueOf(ruleReplyCounter));
+				monitoringMessageRule.setRuleEquationSign(
+						RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+				monitoringMessageRule.setRuleComparisonTermWithPlaceholders(
+						String.valueOf(ruleReplyCounter));
 
 				db.saveModelObject(monitoringMessageRule);
 			}
@@ -845,11 +827,10 @@ public class CreationRobotServlet extends HttpServlet {
 
 				monitoringMessageRule.setComment("Top is $sozz" + impin + "T0");
 				monitoringMessageRule.setRuleWithPlaceholders("$sozzTop");
-				monitoringMessageRule
-						.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
-				monitoringMessageRule
-						.setRuleComparisonTermWithPlaceholders("$sozz" + impin
-								+ "T0");
+				monitoringMessageRule.setRuleEquationSign(
+						RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+				monitoringMessageRule.setRuleComparisonTermWithPlaceholders(
+						"$sozz" + impin + "T0");
 
 				db.saveModelObject(monitoringMessageRule);
 
@@ -860,11 +841,10 @@ public class CreationRobotServlet extends HttpServlet {
 						+ (ruleReplyCounter == 1 ? "yes" : "no"));
 				monitoringMessageRule
 						.setRuleWithPlaceholders("$replyImpinSozz");
-				monitoringMessageRule
-						.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
-				monitoringMessageRule
-						.setRuleComparisonTermWithPlaceholders(String
-								.valueOf(ruleReplyCounter));
+				monitoringMessageRule.setRuleEquationSign(
+						RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+				monitoringMessageRule.setRuleComparisonTermWithPlaceholders(
+						String.valueOf(ruleReplyCounter));
 
 				db.saveModelObject(monitoringMessageRule);
 			}
@@ -924,16 +904,15 @@ public class CreationRobotServlet extends HttpServlet {
 				val monitoringMessageRule = iam
 						.monitoringMessageRuleCreate(monitoringMessage.getId());
 
-				monitoringMessageRule
-						.setComment("Date difference to $participation_extra_goal is "
+				monitoringMessageRule.setComment(
+						"Date difference to $participation_extra_goal is "
 								+ values.get(fields[2]).get(i));
 				monitoringMessageRule
 						.setRuleWithPlaceholders("$participation_extra_goal");
-				monitoringMessageRule
-						.setRuleEquationSign(RuleEquationSignTypes.DATE_DIFFERENCE_VALUE_EQUALS);
-				monitoringMessageRule
-						.setRuleComparisonTermWithPlaceholders(values.get(
-								fields[2]).get(i));
+				monitoringMessageRule.setRuleEquationSign(
+						RuleEquationSignTypes.DATE_DIFFERENCE_VALUE_EQUALS);
+				monitoringMessageRule.setRuleComparisonTermWithPlaceholders(
+						values.get(fields[2]).get(i));
 
 				db.saveModelObject(monitoringMessageRule);
 			}
@@ -986,15 +965,14 @@ public class CreationRobotServlet extends HttpServlet {
 				val monitoringMessageRule = iam
 						.monitoringMessageRuleCreate(monitoringMessage.getId());
 
-				monitoringMessageRule.setComment("Be You only in week "
-						+ values.get(fields[2]).get(i));
+				monitoringMessageRule.setComment(
+						"Be You only in week " + values.get(fields[2]).get(i));
 				monitoringMessageRule
 						.setRuleWithPlaceholders("$participationWeek");
-				monitoringMessageRule
-						.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
-				monitoringMessageRule
-						.setRuleComparisonTermWithPlaceholders(values.get(
-								fields[2]).get(i));
+				monitoringMessageRule.setRuleEquationSign(
+						RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+				monitoringMessageRule.setRuleComparisonTermWithPlaceholders(
+						values.get(fields[2]).get(i));
 
 				db.saveModelObject(monitoringMessageRule);
 			}
@@ -1046,20 +1024,18 @@ public class CreationRobotServlet extends HttpServlet {
 				db.saveModelObject(monitoringMessage);
 
 				if (withRule) {
-					val monitoringMessageRule = iam
-							.monitoringMessageRuleCreate(monitoringMessage
-									.getId());
+					val monitoringMessageRule = iam.monitoringMessageRuleCreate(
+							monitoringMessage.getId());
 
-					monitoringMessageRule.setComment("Check if  "
-							+ values.get(fields[2]).get(i) + " is "
-							+ values.get(fields[3]).get(i));
-					monitoringMessageRule.setRuleWithPlaceholders(values.get(
-							fields[2]).get(i));
-					monitoringMessageRule
-							.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
-					monitoringMessageRule
-							.setRuleComparisonTermWithPlaceholders(values.get(
-									fields[3]).get(i));
+					monitoringMessageRule.setComment(
+							"Check if  " + values.get(fields[2]).get(i) + " is "
+									+ values.get(fields[3]).get(i));
+					monitoringMessageRule.setRuleWithPlaceholders(
+							values.get(fields[2]).get(i));
+					monitoringMessageRule.setRuleEquationSign(
+							RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+					monitoringMessageRule.setRuleComparisonTermWithPlaceholders(
+							values.get(fields[3]).get(i));
 
 					db.saveModelObject(monitoringMessageRule);
 				}
@@ -1081,9 +1057,8 @@ public class CreationRobotServlet extends HttpServlet {
 		val values = new Hashtable<String, List<String>>();
 
 		val fields = new String[] { "de", "fr", "before", "after" };
-		val files = new String[] { "import_stage_DE.txt",
-				"import_stage_FR.txt", "import_stage_before.txt",
-				"import_stage_after.txt" };
+		val files = new String[] { "import_stage_DE.txt", "import_stage_FR.txt",
+				"import_stage_before.txt", "import_stage_after.txt" };
 
 		for (int i = 0; i < fields.length; i++) {
 			fillValuesTable(values, PATH, files[i], fields[i]);
@@ -1116,11 +1091,10 @@ public class CreationRobotServlet extends HttpServlet {
 				monitoringMessageRule.setComment("Check $stageCurrent matches "
 						+ values.get(fields[2]).get(i));
 				monitoringMessageRule.setRuleWithPlaceholders("$stageCurrent");
-				monitoringMessageRule
-						.setRuleEquationSign(RuleEquationSignTypes.TEXT_VALUE_MATCHES_REGULAR_EXPRESSION);
-				monitoringMessageRule
-						.setRuleComparisonTermWithPlaceholders(values.get(
-								fields[2]).get(i));
+				monitoringMessageRule.setRuleEquationSign(
+						RuleEquationSignTypes.TEXT_VALUE_MATCHES_REGULAR_EXPRESSION);
+				monitoringMessageRule.setRuleComparisonTermWithPlaceholders(
+						values.get(fields[2]).get(i));
 
 				db.saveModelObject(monitoringMessageRule);
 
@@ -1130,11 +1104,10 @@ public class CreationRobotServlet extends HttpServlet {
 				monitoringMessageRule.setComment("Check $stageNew matches "
 						+ values.get(fields[3]).get(i));
 				monitoringMessageRule.setRuleWithPlaceholders("$stageNew");
-				monitoringMessageRule
-						.setRuleEquationSign(RuleEquationSignTypes.TEXT_VALUE_MATCHES_REGULAR_EXPRESSION);
-				monitoringMessageRule
-						.setRuleComparisonTermWithPlaceholders(values.get(
-								fields[3]).get(i));
+				monitoringMessageRule.setRuleEquationSign(
+						RuleEquationSignTypes.TEXT_VALUE_MATCHES_REGULAR_EXPRESSION);
+				monitoringMessageRule.setRuleComparisonTermWithPlaceholders(
+						values.get(fields[3]).get(i));
 
 				db.saveModelObject(monitoringMessageRule);
 			}
@@ -1191,11 +1164,10 @@ public class CreationRobotServlet extends HttpServlet {
 								+ values.get(fields[2]).get(i));
 				monitoringMessageRule
 						.setRuleWithPlaceholders("$replySmokestatusAndBinge");
-				monitoringMessageRule
-						.setRuleEquationSign(RuleEquationSignTypes.TEXT_VALUE_MATCHES_REGULAR_EXPRESSION);
-				monitoringMessageRule
-						.setRuleComparisonTermWithPlaceholders(values.get(
-								fields[2]).get(i));
+				monitoringMessageRule.setRuleEquationSign(
+						RuleEquationSignTypes.TEXT_VALUE_MATCHES_REGULAR_EXPRESSION);
+				monitoringMessageRule.setRuleComparisonTermWithPlaceholders(
+						values.get(fields[2]).get(i));
 
 				db.saveModelObject(monitoringMessageRule);
 			}
@@ -1249,17 +1221,17 @@ public class CreationRobotServlet extends HttpServlet {
 					db.saveModelObject(monitoringMessage);
 
 					MonitoringMessageRule monitoringMessageRule = iam
-							.monitoringMessageRuleCreate(monitoringMessage
-									.getId());
+							.monitoringMessageRuleCreate(
+									monitoringMessage.getId());
 
-					monitoringMessageRule.setComment("Check for week "
-							+ participationWeeks[j]);
+					monitoringMessageRule.setComment(
+							"Check for week " + participationWeeks[j]);
 					monitoringMessageRule
 							.setRuleWithPlaceholders("$participationWeek");
-					monitoringMessageRule
-							.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
-					monitoringMessageRule
-							.setRuleComparisonTermWithPlaceholders(participationWeeks[j]);
+					monitoringMessageRule.setRuleEquationSign(
+							RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+					monitoringMessageRule.setRuleComparisonTermWithPlaceholders(
+							participationWeeks[j]);
 
 					db.saveModelObject(monitoringMessageRule);
 
@@ -1269,27 +1241,23 @@ public class CreationRobotServlet extends HttpServlet {
 						case 8:
 						case 9:
 							monitoringMessageRule = iam
-									.monitoringMessageRuleCreate(monitoringMessage
-											.getId());
+									.monitoringMessageRuleCreate(
+											monitoringMessage.getId());
 
 							monitoringMessageRule.setComment("Check "
 									+ values.get("var").get(i)
 									+ "New  more than 20% smaller than "
 									+ values.get("var").get(i) + "T" + T);
+							monitoringMessageRule.setRuleWithPlaceholders(
+									values.get("var").get(i) + "New");
+							monitoringMessageRule.setRuleEquationSign(
+									RuleEquationSignTypes.CALCULATED_VALUE_IS_SMALLER_OR_EQUAL_THAN);
 							monitoringMessageRule
-									.setRuleWithPlaceholders(values.get("var")
-											.get(i) + "New");
-							monitoringMessageRule
-									.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_IS_SMALLER_OR_EQUAL_THAN);
-							monitoringMessageRule
-									.setRuleComparisonTermWithPlaceholders(values
-											.get("var").get(i)
-											+ "T"
-											+ T
-											+ "-"
-											+ values.get("var").get(i)
-											+ "T"
-											+ T + "*0.2");
+									.setRuleComparisonTermWithPlaceholders(
+											values.get("var").get(i) + "T" + T
+													+ "-"
+													+ values.get("var").get(i)
+													+ "T" + T + "*0.2");
 
 							db.saveModelObject(monitoringMessageRule);
 
@@ -1299,24 +1267,22 @@ public class CreationRobotServlet extends HttpServlet {
 						case 12:
 						case 13:
 							monitoringMessageRule = iam
-									.monitoringMessageRuleCreate(monitoringMessage
-											.getId());
+									.monitoringMessageRuleCreate(
+											monitoringMessage.getId());
 
-							monitoringMessageRule.setComment("Check "
-									+ values.get("var").get(i)
-									+ "New  more than 20% smaller than "
-									+ values.get("var").get(i) + "T0");
+							monitoringMessageRule.setComment(
+									"Check " + values.get("var").get(i)
+											+ "New  more than 20% smaller than "
+											+ values.get("var").get(i) + "T0");
+							monitoringMessageRule.setRuleWithPlaceholders(
+									values.get("var").get(i) + "New");
+							monitoringMessageRule.setRuleEquationSign(
+									RuleEquationSignTypes.CALCULATED_VALUE_IS_SMALLER_OR_EQUAL_THAN);
 							monitoringMessageRule
-									.setRuleWithPlaceholders(values.get("var")
-											.get(i) + "New");
-							monitoringMessageRule
-									.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_IS_SMALLER_OR_EQUAL_THAN);
-							monitoringMessageRule
-									.setRuleComparisonTermWithPlaceholders(values
-											.get("var").get(i)
-											+ "T0-"
-											+ values.get("var").get(i)
-											+ "T0*0.2");
+									.setRuleComparisonTermWithPlaceholders(
+											values.get("var").get(i) + "T0-"
+													+ values.get("var").get(i)
+													+ "T0*0.2");
 
 							db.saveModelObject(monitoringMessageRule);
 
@@ -1326,27 +1292,23 @@ public class CreationRobotServlet extends HttpServlet {
 						case 10:
 						case 11:
 							monitoringMessageRule = iam
-									.monitoringMessageRuleCreate(monitoringMessage
-											.getId());
+									.monitoringMessageRuleCreate(
+											monitoringMessage.getId());
 
 							monitoringMessageRule.setComment("Check "
 									+ values.get("var").get(i)
 									+ "New  more than 20% bigger than "
 									+ values.get("var").get(i) + "T" + T);
+							monitoringMessageRule.setRuleWithPlaceholders(
+									values.get("var").get(i) + "New");
+							monitoringMessageRule.setRuleEquationSign(
+									RuleEquationSignTypes.CALCULATED_VALUE_IS_BIGGER_OR_EQUAL_THAN);
 							monitoringMessageRule
-									.setRuleWithPlaceholders(values.get("var")
-											.get(i) + "New");
-							monitoringMessageRule
-									.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_IS_BIGGER_OR_EQUAL_THAN);
-							monitoringMessageRule
-									.setRuleComparisonTermWithPlaceholders(values
-											.get("var").get(i)
-											+ "T"
-											+ T
-											+ "+"
-											+ values.get("var").get(i)
-											+ "T"
-											+ T + "*0.2");
+									.setRuleComparisonTermWithPlaceholders(
+											values.get("var").get(i) + "T" + T
+													+ "+"
+													+ values.get("var").get(i)
+													+ "T" + T + "*0.2");
 
 							db.saveModelObject(monitoringMessageRule);
 
@@ -1356,24 +1318,22 @@ public class CreationRobotServlet extends HttpServlet {
 						case 14:
 						case 15:
 							monitoringMessageRule = iam
-									.monitoringMessageRuleCreate(monitoringMessage
-											.getId());
+									.monitoringMessageRuleCreate(
+											monitoringMessage.getId());
 
-							monitoringMessageRule.setComment("Check "
-									+ values.get("var").get(i)
-									+ "New  more than 20% bigger than "
-									+ values.get("var").get(i) + "T0");
+							monitoringMessageRule.setComment(
+									"Check " + values.get("var").get(i)
+											+ "New  more than 20% bigger than "
+											+ values.get("var").get(i) + "T0");
+							monitoringMessageRule.setRuleWithPlaceholders(
+									values.get("var").get(i) + "New");
+							monitoringMessageRule.setRuleEquationSign(
+									RuleEquationSignTypes.CALCULATED_VALUE_IS_BIGGER_OR_EQUAL_THAN);
 							monitoringMessageRule
-									.setRuleWithPlaceholders(values.get("var")
-											.get(i) + "New");
-							monitoringMessageRule
-									.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_IS_BIGGER_OR_EQUAL_THAN);
-							monitoringMessageRule
-									.setRuleComparisonTermWithPlaceholders(values
-											.get("var").get(i)
-											+ "T0+"
-											+ values.get("var").get(i)
-											+ "T0*0.2");
+									.setRuleComparisonTermWithPlaceholders(
+											values.get("var").get(i) + "T0+"
+													+ values.get("var").get(i)
+													+ "T0*0.2");
 
 							db.saveModelObject(monitoringMessageRule);
 
@@ -1406,10 +1366,10 @@ public class CreationRobotServlet extends HttpServlet {
 				"v2_l", "v2_h" };
 		val files = new String[] { "import_stage_emo_DE.txt",
 				"import_stage_emo_FR.txt", "import_stage_emo_variable_1.txt",
-				"import_stage_emo_lower_1.txt",
-				"import_stage_emo_higher_1.txt",
+				"import_stage_emo_lower_1.txt", "import_stage_emo_higher_1.txt",
 				"import_stage_emo_variable_2.txt",
-				"import_stage_emo_lower_2.txt", "import_stage_emo_higher_2.txt" };
+				"import_stage_emo_lower_2.txt",
+				"import_stage_emo_higher_2.txt" };
 
 		for (int i = 0; i < fields.length; i++) {
 			fillValuesTable(values, PATH, files[i], fields[i]);
@@ -1429,8 +1389,8 @@ public class CreationRobotServlet extends HttpServlet {
 
 				// Perform operation
 				if (PERFORM_CHANGE) {
-					val monitoringMessage = iam
-							.monitoringMessageCreate(monitoringMessageGroupId[j]);
+					val monitoringMessage = iam.monitoringMessageCreate(
+							monitoringMessageGroupId[j]);
 
 					val lString = fillLString(i, values, fields);
 					monitoringMessage.setTextWithPlaceholders(lString);
@@ -1438,57 +1398,55 @@ public class CreationRobotServlet extends HttpServlet {
 					db.saveModelObject(monitoringMessage);
 
 					MonitoringMessageRule monitoringMessageRule = iam
-							.monitoringMessageRuleCreate(monitoringMessage
-									.getId());
+							.monitoringMessageRuleCreate(
+									monitoringMessage.getId());
 
 					monitoringMessageRule.setComment("Check former value "
 							+ values.get("v1").get(i) + (T - 1) + " in range "
 							+ values.get("v1_h").get(i) + "-"
 							+ values.get("v1_l").get(i));
-					monitoringMessageRule.setRuleWithPlaceholders("inrange("
-							+ values.get("v1").get(i) + (T - 1) + ","
-							+ values.get("v1_h").get(i) + ","
-							+ values.get("v1_l").get(i) + ")");
-					monitoringMessageRule
-							.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
-					monitoringMessageRule
-							.setRuleComparisonTermWithPlaceholders("1");
-
-					db.saveModelObject(monitoringMessageRule);
-
-					monitoringMessageRule = iam
-							.monitoringMessageRuleCreate(monitoringMessage
-									.getId());
-
-					monitoringMessageRule.setComment("Check new value "
-							+ values.get("v1").get(i) + T + " in range "
-							+ values.get("v1_h").get(i) + "-"
-							+ values.get("v1_l").get(i));
-					monitoringMessageRule.setRuleWithPlaceholders("inrange("
-							+ values.get("v1").get(i) + T + ","
-							+ values.get("v1_h").get(i) + ","
-							+ values.get("v1_l").get(i) + ")");
-					monitoringMessageRule
-							.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+					monitoringMessageRule.setRuleWithPlaceholders(
+							"inrange(" + values.get("v1").get(i) + (T - 1) + ","
+									+ values.get("v1_h").get(i) + ","
+									+ values.get("v1_l").get(i) + ")");
+					monitoringMessageRule.setRuleEquationSign(
+							RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
 					monitoringMessageRule
 							.setRuleComparisonTermWithPlaceholders("1");
 
 					db.saveModelObject(monitoringMessageRule);
 
-					monitoringMessageRule = iam
-							.monitoringMessageRuleCreate(monitoringMessage
-									.getId());
+					monitoringMessageRule = iam.monitoringMessageRuleCreate(
+							monitoringMessage.getId());
 
-					monitoringMessageRule.setComment("Check new value "
-							+ values.get("v2").get(i) + T + " in range "
-							+ values.get("v2_h").get(i) + "-"
-							+ values.get("v2_l").get(i));
-					monitoringMessageRule.setRuleWithPlaceholders("inrange("
-							+ values.get("v2").get(i) + T + ","
-							+ values.get("v2_h").get(i) + ","
-							+ values.get("v2_l").get(i) + ")");
+					monitoringMessageRule.setComment(
+							"Check new value " + values.get("v1").get(i) + T
+									+ " in range " + values.get("v1_h").get(i)
+									+ "-" + values.get("v1_l").get(i));
+					monitoringMessageRule.setRuleWithPlaceholders(
+							"inrange(" + values.get("v1").get(i) + T + ","
+									+ values.get("v1_h").get(i) + ","
+									+ values.get("v1_l").get(i) + ")");
+					monitoringMessageRule.setRuleEquationSign(
+							RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
 					monitoringMessageRule
-							.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+							.setRuleComparisonTermWithPlaceholders("1");
+
+					db.saveModelObject(monitoringMessageRule);
+
+					monitoringMessageRule = iam.monitoringMessageRuleCreate(
+							monitoringMessage.getId());
+
+					monitoringMessageRule.setComment(
+							"Check new value " + values.get("v2").get(i) + T
+									+ " in range " + values.get("v2_h").get(i)
+									+ "-" + values.get("v2_l").get(i));
+					monitoringMessageRule.setRuleWithPlaceholders(
+							"inrange(" + values.get("v2").get(i) + T + ","
+									+ values.get("v2_h").get(i) + ","
+									+ values.get("v2_l").get(i) + ")");
+					monitoringMessageRule.setRuleEquationSign(
+							RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
 					monitoringMessageRule
 							.setRuleComparisonTermWithPlaceholders("1");
 
@@ -1521,10 +1479,10 @@ public class CreationRobotServlet extends HttpServlet {
 				"v2_l", "v2_h" };
 		val files = new String[] { "import_stage_emo_DE.txt",
 				"import_stage_emo_FR.txt", "import_stage_emo_variable_1.txt",
-				"import_stage_emo_lower_1.txt",
-				"import_stage_emo_higher_1.txt",
+				"import_stage_emo_lower_1.txt", "import_stage_emo_higher_1.txt",
 				"import_stage_emo_variable_2.txt",
-				"import_stage_emo_lower_2.txt", "import_stage_emo_higher_2.txt" };
+				"import_stage_emo_lower_2.txt",
+				"import_stage_emo_higher_2.txt" };
 
 		for (int i = 0; i < fields.length; i++) {
 			fillValuesTable(values, PATH, files[i], fields[i]);
@@ -1544,8 +1502,8 @@ public class CreationRobotServlet extends HttpServlet {
 
 				// Perform operation
 				if (PERFORM_CHANGE) {
-					val monitoringMessage = iam
-							.monitoringMessageCreate(monitoringMessageGroupId[j]);
+					val monitoringMessage = iam.monitoringMessageCreate(
+							monitoringMessageGroupId[j]);
 
 					val lString = fillLString(i, values, fields);
 					monitoringMessage.setTextWithPlaceholders(lString);
@@ -1553,38 +1511,37 @@ public class CreationRobotServlet extends HttpServlet {
 					db.saveModelObject(monitoringMessage);
 
 					MonitoringMessageRule monitoringMessageRule = iam
-							.monitoringMessageRuleCreate(monitoringMessage
-									.getId());
+							.monitoringMessageRuleCreate(
+									monitoringMessage.getId());
 
 					monitoringMessageRule.setComment("Check former value "
 							+ values.get("v1").get(i) + (T - 1) + " in range "
 							+ values.get("v1_h").get(i) + "-"
 							+ values.get("v1_l").get(i));
-					monitoringMessageRule.setRuleWithPlaceholders("inrange("
-							+ values.get("v1").get(i) + (T - 1) + ","
-							+ values.get("v1_h").get(i) + ","
-							+ values.get("v1_l").get(i) + ")");
-					monitoringMessageRule
-							.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+					monitoringMessageRule.setRuleWithPlaceholders(
+							"inrange(" + values.get("v1").get(i) + (T - 1) + ","
+									+ values.get("v1_h").get(i) + ","
+									+ values.get("v1_l").get(i) + ")");
+					monitoringMessageRule.setRuleEquationSign(
+							RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
 					monitoringMessageRule
 							.setRuleComparisonTermWithPlaceholders("1");
 
 					db.saveModelObject(monitoringMessageRule);
 
-					monitoringMessageRule = iam
-							.monitoringMessageRuleCreate(monitoringMessage
-									.getId());
+					monitoringMessageRule = iam.monitoringMessageRuleCreate(
+							monitoringMessage.getId());
 
-					monitoringMessageRule.setComment("Check new value "
-							+ values.get("v2").get(i) + T + " in range "
-							+ values.get("v2_h").get(i) + "-"
-							+ values.get("v2_l").get(i));
-					monitoringMessageRule.setRuleWithPlaceholders("inrange("
-							+ values.get("v2").get(i) + T + ","
-							+ values.get("v2_h").get(i) + ","
-							+ values.get("v2_l").get(i) + ")");
-					monitoringMessageRule
-							.setRuleEquationSign(RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
+					monitoringMessageRule.setComment(
+							"Check new value " + values.get("v2").get(i) + T
+									+ " in range " + values.get("v2_h").get(i)
+									+ "-" + values.get("v2_l").get(i));
+					monitoringMessageRule.setRuleWithPlaceholders(
+							"inrange(" + values.get("v2").get(i) + T + ","
+									+ values.get("v2_h").get(i) + ","
+									+ values.get("v2_l").get(i) + ")");
+					monitoringMessageRule.setRuleEquationSign(
+							RuleEquationSignTypes.CALCULATED_VALUE_EQUALS);
 					monitoringMessageRule
 							.setRuleComparisonTermWithPlaceholders("1");
 
@@ -1648,12 +1605,13 @@ public class CreationRobotServlet extends HttpServlet {
 	 * @return
 	 */
 	private LString fillLString(final int i,
-			final Hashtable<String, List<String>> values, final String[] fields) {
+			final Hashtable<String, List<String>> values,
+			final String[] fields) {
 		val lString = new LString();
-		lString.set(Constants.getInterventionLocales()[0], values
-				.get(fields[0]).get(i));
-		lString.set(Constants.getInterventionLocales()[1], values
-				.get(fields[1]).get(i));
+		lString.set(Constants.getInterventionLocales()[0],
+				values.get(fields[0]).get(i));
+		lString.set(Constants.getInterventionLocales()[1],
+				values.get(fields[1]).get(i));
 		return lString;
 	}
 
@@ -1667,21 +1625,21 @@ public class CreationRobotServlet extends HttpServlet {
 	 * @return
 	 */
 	private LString fillLString(final int i,
-			final Hashtable<String, List<String>> values,
-			final String[] fields, final String[] header) {
+			final Hashtable<String, List<String>> values, final String[] fields,
+			final String[] header) {
 		val lString = new LString();
-		lString.set(Constants.getInterventionLocales()[0], header[0]
-				+ values.get(fields[0]).get(i));
-		lString.set(Constants.getInterventionLocales()[1], header[1]
-				+ values.get(fields[1]).get(i));
+		lString.set(Constants.getInterventionLocales()[0],
+				header[0] + values.get(fields[0]).get(i));
+		lString.set(Constants.getInterventionLocales()[1],
+				header[1] + values.get(fields[1]).get(i));
 		return lString;
 	}
 
 	/*
 	 * Private class for hacking database manager service
 	 */
-	private class CreationRobotDatabaseManager extends
-			AbstractModelObjectAccessService {
+	private class CreationRobotDatabaseManager
+			extends AbstractModelObjectAccessService {
 
 		@Override
 		public void saveModelObject(final ModelObject modelObject) {

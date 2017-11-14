@@ -33,13 +33,14 @@ import ch.ethz.mc.ui.views.components.basics.AbstractMonitoringRulesEditComponen
  */
 @SuppressWarnings("serial")
 @Log4j2
-public class MonitoringRulesEditComponentWithController extends
-		AbstractMonitoringRulesEditComponentWithController {
+public class MonitoringRulesEditComponentWithController
+		extends AbstractMonitoringRulesEditComponentWithController {
 
 	public MonitoringRulesEditComponentWithController(
 			final Intervention intervention) {
 		super();
-		log.debug("Init monitoring rules edit component with controller for monitoring rules");
+		log.debug(
+				"Init monitoring rules edit component with controller for monitoring rules");
 
 		init(intervention);
 	}

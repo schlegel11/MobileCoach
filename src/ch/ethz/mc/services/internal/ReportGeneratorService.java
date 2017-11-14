@@ -64,7 +64,7 @@ public class ReportGeneratorService {
 	private final DefaultMustacheFactory	mustacheFactory;
 
 	private final SimpleDateFormat			longDateFormat	= new SimpleDateFormat(
-																	"yyyy-MM-dd HH:mm:ss");
+			"yyyy-MM-dd HH:mm:ss");
 
 	private ReportGeneratorService(
 			final DatabaseManagerService databaseManagerService) {
@@ -136,10 +136,10 @@ public class ReportGeneratorService {
 		templateVariables.put("intervention", intervention);
 
 		// Surveys
-		val surveys = databaseManagerService
-				.findModelObjects(ScreeningSurvey.class,
-						Queries.SCREENING_SURVEY__BY_INTERVENTION,
-						intervention.getId());
+		val surveys = databaseManagerService.findModelObjects(
+				ScreeningSurvey.class,
+				Queries.SCREENING_SURVEY__BY_INTERVENTION,
+				intervention.getId());
 
 		val screeningSurveys = new ArrayList<ScreeningSurvey>();
 		val intermediateSurveys = new ArrayList<ScreeningSurvey>();

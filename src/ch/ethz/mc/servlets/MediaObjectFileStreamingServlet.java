@@ -60,7 +60,8 @@ import ch.ethz.mc.services.internal.ImageCachingService;
  */
 @SuppressWarnings("serial")
 @WebServlet(displayName = "Media Object File Streaming", urlPatterns = "/"
-		+ ImplementationConstants.FILE_STREAMING_SERVLET_PATH + "/*", asyncSupported = true, loadOnStartup = 1)
+		+ ImplementationConstants.FILE_STREAMING_SERVLET_PATH
+		+ "/*", asyncSupported = true, loadOnStartup = 1)
 @Log4j2
 public class MediaObjectFileStreamingServlet extends HttpServlet {
 	private InterventionAdministrationManagerService	interventionAdministrationManagerService;
@@ -94,8 +95,8 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 	 * @throws IOException
 	 */
 	private HttpServletRequest createWrappedReqest(
-			final HttpServletRequest request, final HttpServletResponse response)
-			throws IOException {
+			final HttpServletRequest request,
+			final HttpServletResponse response) throws IOException {
 
 		// Determine request type
 		String requestedElement;
@@ -145,7 +146,8 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 					.contains(fileExtension) && width > 0 && height > 0) {
 				if (width > ImplementationConstants.IMAGE_MAX_WIDTH
 						|| height > ImplementationConstants.IMAGE_MAX_HEIGHT) {
-					log.debug("Image is requested in a bigger size than the allowed maximum size");
+					log.debug(
+							"Image is requested in a bigger size than the allowed maximum size");
 					response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 					return null;
 				}
@@ -156,7 +158,8 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 				} catch (final Exception e) {
 					log.warn("Error at requesting cached image: {}",
 							e.getMessage());
-					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+					response.sendError(
+							HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 					return null;
 				}
 			}
@@ -166,7 +169,8 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 			try {
 				mediaObjectId = new ObjectId(requestedElement);
 			} catch (final Exception e) {
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				response.sendError(
+						HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				return null;
 			}
 			log.debug("Requested media object {}", mediaObjectId);
@@ -214,8 +218,8 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 	 */
 	@Override
 	protected void doHead(final HttpServletRequest request,
-			final HttpServletResponse response) throws ServletException,
-			IOException {
+			final HttpServletResponse response)
+			throws ServletException, IOException {
 		log.debug("Serving dynamic {}", request.getPathInfo());
 
 		val wrapped = createWrappedReqest(request, response);
@@ -234,8 +238,8 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 	 */
 	@Override
 	protected void doGet(final HttpServletRequest request,
-			final HttpServletResponse response) throws ServletException,
-			IOException {
+			final HttpServletResponse response)
+			throws ServletException, IOException {
 		log.debug("Serving dynamic {}", request.getPathInfo());
 
 		val wrapped = createWrappedReqest(request, response);

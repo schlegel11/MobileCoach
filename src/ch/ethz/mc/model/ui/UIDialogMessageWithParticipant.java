@@ -116,11 +116,11 @@ public class UIDialogMessageWithParticipant extends UIModelObject {
 	private String				mediaContentViewed;
 
 	public static Object[] getVisibleColumns() {
-		return new Object[] { PARTICIPANT_ID, PARTICIPANT_NAME, LANGUAGE,
-				GROUP, ORGANIZATION, ORGANIZATION_UNIT, ORDER, STATUS,
-				SENDER_TYPE, TYPE, MESSAGE, SHOULD_BE_SENT_TIMESTAMP,
-				SENT_TIMESTAMP, ANSWER, RAW_ANSWER, ANSWER_RECEIVED_TIMESTAMP,
-				MANUALLY_SENT, CONTAINS_MEDIA_CONTENT, MEDIA_CONTENT_VIEWED };
+		return new Object[] { PARTICIPANT_ID, PARTICIPANT_NAME, LANGUAGE, GROUP,
+				ORGANIZATION, ORGANIZATION_UNIT, ORDER, STATUS, SENDER_TYPE,
+				TYPE, MESSAGE, SHOULD_BE_SENT_TIMESTAMP, SENT_TIMESTAMP, ANSWER,
+				RAW_ANSWER, ANSWER_RECEIVED_TIMESTAMP, MANUALLY_SENT,
+				CONTAINS_MEDIA_CONTENT, MEDIA_CONTENT_VIEWED };
 	}
 
 	public static String[] getColumnHeaders() {
@@ -136,14 +136,18 @@ public class UIDialogMessageWithParticipant extends UIModelObject {
 				localize(AdminMessageStrings.UI_COLUMNS__SENDER_TYPE),
 				localize(AdminMessageStrings.UI_COLUMNS__TYPE),
 				localize(AdminMessageStrings.UI_COLUMNS__MESSAGE),
-				localize(AdminMessageStrings.UI_COLUMNS__SHOULD_BE_SENT_TIMESTAMP),
+				localize(
+						AdminMessageStrings.UI_COLUMNS__SHOULD_BE_SENT_TIMESTAMP),
 				localize(AdminMessageStrings.UI_COLUMNS__SENT_TIMESTAMP),
 				localize(AdminMessageStrings.UI_COLUMNS__ANSWER),
 				localize(AdminMessageStrings.UI_COLUMNS__RAW_ANSWER),
-				localize(AdminMessageStrings.UI_COLUMNS__ANSWER_RECEIVED_TIMESTAMP),
+				localize(
+						AdminMessageStrings.UI_COLUMNS__ANSWER_RECEIVED_TIMESTAMP),
 				localize(AdminMessageStrings.UI_COLUMNS__MANUALLY_SENT),
-				localize(AdminMessageStrings.UI_COLUMNS__CONTAINS_MEDIA_CONTENT),
-				localize(AdminMessageStrings.UI_COLUMNS__MEDIA_CONTENT_VIEWED) };
+				localize(
+						AdminMessageStrings.UI_COLUMNS__CONTAINS_MEDIA_CONTENT),
+				localize(
+						AdminMessageStrings.UI_COLUMNS__MEDIA_CONTENT_VIEWED) };
 	}
 
 	public static String getSortColumn() {

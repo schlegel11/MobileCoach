@@ -44,8 +44,8 @@ import com.vaadin.ui.ComboBox;
  */
 @SuppressWarnings("serial")
 @Log4j2
-public class AbstractRuleEditComponentWithController extends
-		AbstractRuleEditComponent implements ValueChangeListener {
+public class AbstractRuleEditComponentWithController
+		extends AbstractRuleEditComponent implements ValueChangeListener {
 
 	public enum TYPES {
 		MONITORING_RULES, SCREENING_SURVEY_RULES, FEEDBACK_RULES, MONITORING_MESSAGE_RULES
@@ -88,13 +88,14 @@ public class AbstractRuleEditComponentWithController extends
 		val buttonClickListener = new ButtonClickListener();
 		commentComponent.getButton().addClickListener(buttonClickListener);
 		ruleComponent.getButton().addClickListener(buttonClickListener);
-		ruleComparisonTermComponent.getButton().addClickListener(
-				buttonClickListener);
+		ruleComparisonTermComponent.getButton()
+				.addClickListener(buttonClickListener);
 
 		setEnabled(false);
 	}
 
-	public void init(final ObjectId rulesRelatedModelObjectId, final TYPES type) {
+	public void init(final ObjectId rulesRelatedModelObjectId,
+			final TYPES type) {
 		this.rulesRelatedModelObjectId = rulesRelatedModelObjectId;
 		this.type = type;
 
@@ -121,8 +122,8 @@ public class AbstractRuleEditComponentWithController extends
 		}
 
 		ruleComponent.setValue(rule.getRuleWithPlaceholders());
-		ruleComparisonTermComponent.setValue(rule
-				.getRuleComparisonTermWithPlaceholders());
+		ruleComparisonTermComponent
+				.setValue(rule.getRuleComparisonTermWithPlaceholders());
 
 		commentComponent.setValue(rule.getComment());
 
@@ -150,8 +151,8 @@ public class AbstractRuleEditComponentWithController extends
 
 	@Override
 	public void valueChange(final ValueChangeEvent event) {
-		log.debug("Changing rule equation sign to {}", event.getProperty()
-				.getValue());
+		log.debug("Changing rule equation sign to {}",
+				event.getProperty().getValue());
 		getInterventionAdministrationManagerService()
 				.abstractRuleChangeEquationSign(rule,
 						(RuleEquationSignTypes) event.getProperty().getValue());

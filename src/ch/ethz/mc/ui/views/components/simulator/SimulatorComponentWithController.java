@@ -45,7 +45,7 @@ import com.vaadin.ui.Button.ClickEvent;
 @Log4j2
 public class SimulatorComponentWithController extends SimulatorComponent {
 
-	private final DateFormat	dateFormat;
+	private final DateFormat dateFormat;
 
 	public SimulatorComponentWithController() {
 		super();
@@ -67,8 +67,8 @@ public class SimulatorComponentWithController extends SimulatorComponent {
 					}
 
 					try {
-						TimeUnit.SECONDS
-								.sleep(ImplementationConstants.SIMULATOR_TIME_UPDATE_INTERVAL_IN_SECONDS);
+						TimeUnit.SECONDS.sleep(
+								ImplementationConstants.SIMULATOR_TIME_UPDATE_INTERVAL_IN_SECONDS);
 					} catch (final InterruptedException e) {
 						interrupt();
 					}
@@ -80,8 +80,8 @@ public class SimulatorComponentWithController extends SimulatorComponent {
 		// handle buttons
 		val buttonClickListener = new ButtonClickListener();
 		getActivateFastForwadModeButton().addClickListener(buttonClickListener);
-		getDeactivateFastForwardModeButton().addClickListener(
-				buttonClickListener);
+		getDeactivateFastForwardModeButton()
+				.addClickListener(buttonClickListener);
 		getNextHourButton().addClickListener(buttonClickListener);
 		getNextDayButton().addClickListener(buttonClickListener);
 
@@ -104,13 +104,11 @@ public class SimulatorComponentWithController extends SimulatorComponent {
 
 	@Synchronized
 	protected void updateTime() {
-		getCurrentTimeLabel()
-				.setValue(
-						Messages.getAdminString(
-								AdminMessageStrings.SIMULATOR_COMPONENT__THE_CURRENT_SIMULATED_TIME_IS_X,
-								dateFormat.format(new Date(InternalDateTime
-										.currentTimeMillis())),
-								InternalDateTime.isFastForwardMode()));
+		getCurrentTimeLabel().setValue(Messages.getAdminString(
+				AdminMessageStrings.SIMULATOR_COMPONENT__THE_CURRENT_SIMULATED_TIME_IS_X,
+				dateFormat
+						.format(new Date(InternalDateTime.currentTimeMillis())),
+				InternalDateTime.isFastForwardMode()));
 
 		getAdminUI().push();
 	}
@@ -125,7 +123,8 @@ public class SimulatorComponentWithController extends SimulatorComponent {
 				jumpToNextDay();
 			} else if (event.getButton() == getActivateFastForwadModeButton()) {
 				setFastForwardMode(true);
-			} else if (event.getButton() == getDeactivateFastForwardModeButton()) {
+			} else if (event
+					.getButton() == getDeactivateFastForwardModeButton()) {
 				setFastForwardMode(false);
 			}
 		}

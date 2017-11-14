@@ -46,8 +46,8 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class AbstractMonitoringRulesEditComponent extends
-		AbstractCustomComponent {
+public class AbstractMonitoringRulesEditComponent
+		extends AbstractCustomComponent {
 
 	/*- VaadinEditorProperties={"grid":"RegularGrid,20","showGrid":true,"snapToGrid":true,"snapToObject":true,"movingGuides":false,"snappingDistance":10} */
 
@@ -107,17 +107,14 @@ public class AbstractMonitoringRulesEditComponent extends
 		localize(duplicateButton, AdminMessageStrings.GENERAL__DUPLICATE);
 		localize(deleteButton, AdminMessageStrings.GENERAL__DELETE);
 
-		localize(
-				resultVariableLabel,
+		localize(resultVariableLabel,
 				AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__RESULT_VARIABLE_OF_SELECTED_RULE);
-		localize(
-				sendMessageLabel,
+		localize(sendMessageLabel,
 				AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_MESSAGE_AFTER_EXECUTION_OF_SELECTED_RULE);
 
 		monitoringRuleInfoLabel.setContentMode(ContentMode.HTML);
 
-		localize(
-				monitoringRuleInfoLabel,
+		localize(monitoringRuleInfoLabel,
 				AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__RULE_INFO_LABEL);
 
 		// adjust rules tree

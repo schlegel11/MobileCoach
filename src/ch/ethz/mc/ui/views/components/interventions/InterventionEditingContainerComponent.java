@@ -41,8 +41,8 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class InterventionEditingContainerComponent extends
-		AbstractCustomComponent {
+public class InterventionEditingContainerComponent
+		extends AbstractCustomComponent {
 
 	/*- VaadinEditorProperties={"grid":"RegularGrid,20","showGrid":true,"snapToGrid":true,"snapToObject":true,"movingGuides":false,"snappingDistance":10} */
 
@@ -69,8 +69,7 @@ public class InterventionEditingContainerComponent extends
 		setCompositionRoot(mainLayout);
 
 		// manually added
-		localize(
-				listAllInterventionsButton,
+		localize(listAllInterventionsButton,
 				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__LIST_ALL_INTERVENTIONS_BUTTON);
 	}
 

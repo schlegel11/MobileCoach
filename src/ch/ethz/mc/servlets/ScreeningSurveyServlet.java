@@ -80,7 +80,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 	 * @see Servlet#init(ServletConfig)
 	 */
 	@Override
-	public void init(final ServletConfig servletConfig) throws ServletException {
+	public void init(final ServletConfig servletConfig)
+			throws ServletException {
 		super.init(servletConfig);
 		// Only start servlet if context is ready
 		if (!MC.getInstance().isReady()) {
@@ -105,8 +106,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 	 */
 	@Override
 	protected void doGet(final HttpServletRequest request,
-			final HttpServletResponse response) throws ServletException,
-			IOException {
+			final HttpServletResponse response)
+			throws ServletException, IOException {
 		log.debug("Screening survey servlet call");
 
 		request.setCharacterEncoding("UTF-8");
@@ -144,8 +145,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				default:
 					// Object id and file request
 					if (ObjectId.isValid(pathParts[0])) {
-						handleFileRequest(request, response, new ObjectId(
-								pathParts[0]),
+						handleFileRequest(request, response,
+								new ObjectId(pathParts[0]),
 								path.substring(path.indexOf("/") + 1));
 						return;
 					} else {
@@ -165,8 +166,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 	 */
 	@Override
 	protected void doPost(final HttpServletRequest request,
-			final HttpServletResponse response) throws ServletException,
-			IOException {
+			final HttpServletResponse response)
+			throws ServletException, IOException {
 		log.debug("Redirecting POST request to GET request");
 		doGet(request, response);
 	}
@@ -199,10 +200,11 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				screeningSurvey.getTemplatePath());
 		final File requestedFile = new File(basicTemplateFolder, fileRequest);
 
-		if (!requestedFile.getAbsolutePath().startsWith(
-				basicTemplateFolder.getAbsolutePath())
+		if (!requestedFile.getAbsolutePath()
+				.startsWith(basicTemplateFolder.getAbsolutePath())
 				|| !requestedFile.exists()) {
-			log.warn("Requested a file outside the 'sandbox' of the template folder or a file that does not exist");
+			log.warn(
+					"Requested a file outside the 'sandbox' of the template folder or a file that does not exist");
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
@@ -210,8 +212,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		log.debug("Requested file is '{}'", requestedFile.getAbsolutePath());
 
 		// Get the MIME type of the requested file
-		final String mimeType = getServletContext().getMimeType(
-				requestedFile.getAbsolutePath());
+		final String mimeType = getServletContext()
+				.getMimeType(requestedFile.getAbsolutePath());
 		if (mimeType == null) {
 			log.warn("Could not get MIME type of file '{}'",
 					requestedFile.getAbsolutePath());
@@ -228,17 +230,18 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		response.setContentLength((int) requestedFile.length());
 
 		// Set name
-		response.setHeader("Content-Disposition", "inline; filename=\""
-				+ requestedFile.getName() + "\"");
+		response.setHeader("Content-Disposition",
+				"inline; filename=\"" + requestedFile.getName() + "\"");
 
 		// Allow caching
 		if (Constants.isCachingActive()) {
 			response.setHeader("Pragma", "cache");
 			response.setHeader("Cache-Control", "max-age="
 					+ ImplementationConstants.SURVEY_FILE_CACHE_IN_MINUTES);
-			response.setDateHeader("Expires", System.currentTimeMillis()
-					+ ImplementationConstants.SURVEY_FILE_CACHE_IN_MINUTES
-					* 1000);
+			response.setDateHeader("Expires",
+					System.currentTimeMillis()
+							+ ImplementationConstants.SURVEY_FILE_CACHE_IN_MINUTES
+									* 1000);
 		} else {
 			response.setHeader("Pragma", "No-cache");
 			response.setHeader("Cache-Control", "no-cache,no-store,max-age=0");
@@ -264,8 +267,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 	 * @throws IOException
 	 */
 	private void listActiveScreeningSurveys(final HttpServletRequest request,
-			final HttpServletResponse response) throws ServletException,
-			IOException {
+			final HttpServletResponse response)
+			throws ServletException, IOException {
 		log.debug("Handling request for all open screening surveys");
 
 		log.debug("Clearing session");
@@ -273,8 +276,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		val sessionAttributeNames = session.getAttributeNames();
 		while (sessionAttributeNames.hasMoreElements()) {
 			val attribute = (String) sessionAttributeNames.nextElement();
-			if (attribute
-					.startsWith(ImplementationConstants.SURVEY_OR_FEEDBACK_SESSION_PREFIX)) {
+			if (attribute.startsWith(
+					ImplementationConstants.SURVEY_OR_FEEDBACK_SESSION_PREFIX)) {
 				session.removeAttribute(attribute);
 			}
 		}
@@ -306,8 +309,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 
 				for (val screeningSurvey : activeScreeningSurveys) {
 					val screeningSurveyData = new HashMap<String, String>();
-					screeningSurveyData.put("name", screeningSurvey.getName()
-							.toString());
+					screeningSurveyData.put("name",
+							screeningSurvey.getName().toString());
 					screeningSurveyData.put("url",
 							baseURL + screeningSurvey.getId() + "/");
 					surveysData.add(screeningSurveyData);
@@ -348,7 +351,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 	 * @throws IOException
 	 */
 	private void handleTemplateRequest(final HttpServletRequest request,
-			final HttpServletResponse response, final ObjectId screeningSurveyId)
+			final HttpServletResponse response,
+			final ObjectId screeningSurveyId)
 			throws ServletException, IOException {
 		log.debug("Handling template request for screening survey {}",
 				screeningSurveyId);
@@ -360,11 +364,10 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		// different survey
 		if (session.getAttribute(GeneralSessionAttributeTypes.CURRENT_SESSION
 				.toString()) != null) {
-			val currentSurveyRegardingSession = (ObjectId) session
-					.getAttribute(GeneralSessionAttributeTypes.CURRENT_SESSION
-							.toString());
-			if (screeningSurveyId != null
-					&& !screeningSurveyId.equals(currentSurveyRegardingSession)) {
+			val currentSurveyRegardingSession = (ObjectId) session.getAttribute(
+					GeneralSessionAttributeTypes.CURRENT_SESSION.toString());
+			if (screeningSurveyId != null && !screeningSurveyId
+					.equals(currentSurveyRegardingSession)) {
 
 				// Session needs to be reset
 				log.debug("Session needs to be reset due to different survey");
@@ -372,8 +375,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 				while (sessionAttributeNames.hasMoreElements()) {
 					val attribute = (String) sessionAttributeNames
 							.nextElement();
-					if (attribute
-							.startsWith(ImplementationConstants.SURVEY_OR_FEEDBACK_SESSION_PREFIX)
+					if (attribute.startsWith(
+							ImplementationConstants.SURVEY_OR_FEEDBACK_SESSION_PREFIX)
 							&& !attribute
 									.equals(SurveySessionAttributeTypes.SURVEY_FROM_URL
 											.toString()))
@@ -386,21 +389,22 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		// different participant
 		ObjectId participantId;
 		try {
-			participantId = (ObjectId) session
-					.getAttribute(GeneralSessionAttributeTypes.CURRENT_PARTICIPANT
+			participantId = (ObjectId) session.getAttribute(
+					GeneralSessionAttributeTypes.CURRENT_PARTICIPANT
 							.toString());
 		} catch (final Exception e) {
 			participantId = null;
 		}
 
 		if ((participantId != null
-				&& session
-						.getAttribute(GeneralSessionAttributeTypes.CURRENT_PARTICIPANT
-								.toString()) != null && !((ObjectId) session
-					.getAttribute(GeneralSessionAttributeTypes.CURRENT_PARTICIPANT
-							.toString())).equals(participantId))
-				|| (participantId == null && session
-						.getAttribute(GeneralSessionAttributeTypes.CURRENT_PARTICIPANT
+				&& session.getAttribute(
+						GeneralSessionAttributeTypes.CURRENT_PARTICIPANT
+								.toString()) != null
+				&& !((ObjectId) session.getAttribute(
+						GeneralSessionAttributeTypes.CURRENT_PARTICIPANT
+								.toString())).equals(participantId))
+				|| (participantId == null && session.getAttribute(
+						GeneralSessionAttributeTypes.CURRENT_PARTICIPANT
 								.toString()) != null)) {
 
 			// Session needs to be reset
@@ -408,8 +412,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 			val sessionAttributeNames = session.getAttributeNames();
 			while (sessionAttributeNames.hasMoreElements()) {
 				val attribute = (String) sessionAttributeNames.nextElement();
-				if (attribute
-						.startsWith(ImplementationConstants.SURVEY_OR_FEEDBACK_SESSION_PREFIX)) {
+				if (attribute.startsWith(
+						ImplementationConstants.SURVEY_OR_FEEDBACK_SESSION_PREFIX)) {
 					session.removeAttribute(attribute);
 				}
 			}
@@ -419,7 +423,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		session.setAttribute(GeneralSessionAttributeTypes.VALIDATOR.toString(),
 				GeneralSessionAttributeValidatorTypes.PARTICIPANT_RELATED
 						.toString());
-		if (session.getAttribute(GeneralSessionAttributeTypes.TOKEN.toString()) == null) {
+		if (session.getAttribute(
+				GeneralSessionAttributeTypes.TOKEN.toString()) == null) {
 			session.setAttribute(GeneralSessionAttributeTypes.TOKEN.toString(),
 					StringHelpers.createRandomString(40));
 		}
@@ -430,8 +435,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		// Get information from session
 		boolean accessGranted;
 		try {
-			accessGranted = (boolean) session
-					.getAttribute(SurveySessionAttributeTypes.SURVEY_PARTICIPANT_ACCESS_GRANTED
+			accessGranted = (boolean) session.getAttribute(
+					SurveySessionAttributeTypes.SURVEY_PARTICIPANT_ACCESS_GRANTED
 							.toString());
 		} catch (final Exception e) {
 			accessGranted = false;
@@ -442,8 +447,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		int i = 0;
 		String resultValue = null;
 		do {
-			resultValue = request
-					.getParameter(ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLES
+			resultValue = request.getParameter(
+					ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLES
 							+ i);
 
 			if (resultValue != null) {
@@ -458,8 +463,8 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		// Get consistency check value if available
 		String checkValue;
 		try {
-			checkValue = request
-					.getParameter(ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE);
+			checkValue = request.getParameter(
+					ImplementationConstants.SCREENING_SURVEY_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE);
 		} catch (final Exception e) {
 			checkValue = null;
 		}
@@ -481,10 +486,9 @@ public class ScreeningSurveyServlet extends HttpServlet {
 							accessGranted, true, screeningSurveyId,
 							resultValues, checkValue, session);
 
-			if (templateVariables == null
-					|| !templateVariables
-							.containsKey(GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER
-									.toVariable())) {
+			if (templateVariables == null || !templateVariables
+					.containsKey(GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER
+							.toVariable())) {
 				throw new NullPointerException();
 			}
 		} catch (final Exception e) {
@@ -511,68 +515,55 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		if (!baseURL.endsWith("/")) {
 			baseURL += "/";
 		}
-		final String normalizedBaseURL = baseURL
-				.replaceAll(
-						"/"
-								+ ImplementationConstants.REGULAR_EXPRESSION_TO_MATCH_ONE_OBJECT_ID
-								+ "/$", "/");
+		final String normalizedBaseURL = baseURL.replaceAll(
+				"/" + ImplementationConstants.REGULAR_EXPRESSION_TO_MATCH_ONE_OBJECT_ID
+						+ "/$",
+				"/");
 
 		templateVariables.put(
 				GeneralSlideTemplateFieldTypes.BASE_URL.toVariable(), baseURL);
 
 		// Token
-		templateVariables.put(
-				GeneralSlideTemplateFieldTypes.TOKEN.toVariable(), session
-						.getAttribute(GeneralSessionAttributeTypes.TOKEN
-								.toString()));
+		templateVariables.put(GeneralSlideTemplateFieldTypes.TOKEN.toVariable(),
+				session.getAttribute(
+						GeneralSessionAttributeTypes.TOKEN.toString()));
 
 		// REST API URL
-		templateVariables
-				.put(GeneralSlideTemplateFieldTypes.REST_API_URL.toVariable(),
-						request.getRequestURL()
-								.toString()
-								.substring(
-										0,
-										request.getRequestURL()
-												.toString()
-												.indexOf(
-														request.getRequestURI()))
-								+ request.getContextPath()
-								+ "/"
-								+ ImplementationConstants.REST_API_PATH
-								+ "/"
-								+ ImplementationConstants.REST_SESSION_BASED_API_VERSION
-								+ "/");
+		templateVariables.put(
+				GeneralSlideTemplateFieldTypes.REST_API_URL.toVariable(),
+				request.getRequestURL().toString().substring(0,
+						request.getRequestURL().toString()
+								.indexOf(request.getRequestURI()))
+						+ request.getContextPath() + "/"
+						+ ImplementationConstants.REST_API_PATH + "/"
+						+ ImplementationConstants.REST_SESSION_BASED_API_VERSION
+						+ "/");
 
 		// Uploaded media content URL
 		templateVariables.put(
 				GeneralSlideTemplateFieldTypes.UPLOADED_MEDIA_CONTENT_URL
 						.toVariable(),
-				request.getRequestURL()
-						.toString()
-						.substring(
-								0,
-								request.getRequestURL().toString()
-										.indexOf(request.getRequestURI()))
-						+ request.getContextPath()
-						+ "/"
+				request.getRequestURL().toString().substring(0,
+						request.getRequestURL().toString()
+								.indexOf(request.getRequestURI()))
+						+ request.getContextPath() + "/"
 						+ ImplementationConstants.FILE_STREAMING_SERVLET_PATH
 						+ "/");
 		// Slide type
 		templateVariables.put(
 				SurveySlideTemplateFieldTypes.IS_SURVEY.toVariable(), true);
-		templateVariables.put(
-				SurveySlideTemplateFieldTypes.IS_INTERMEDIATE_SURVEY
+		templateVariables
+				.put(SurveySlideTemplateFieldTypes.IS_INTERMEDIATE_SURVEY
 						.toVariable(), false);
 
 		// Adjust feedback URL
-		if (session
-				.getAttribute(SurveySessionAttributeTypes.SURVEY_PARTICIPANT_FEEDBACK_URL
+		if (session.getAttribute(
+				SurveySessionAttributeTypes.SURVEY_PARTICIPANT_FEEDBACK_URL
 						.toString()) != null) {
-			templateVariables
-					.put(GeneralSlideTemplateFieldTypes.FEEDBACK_URL
-							.toVariable(),
-							session.getAttribute(SurveySessionAttributeTypes.SURVEY_PARTICIPANT_FEEDBACK_URL
+			templateVariables.put(
+					GeneralSlideTemplateFieldTypes.FEEDBACK_URL.toVariable(),
+					session.getAttribute(
+							SurveySessionAttributeTypes.SURVEY_PARTICIPANT_FEEDBACK_URL
 									.toString()));
 		}
 
@@ -589,15 +580,15 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		if (templateVariables
 				.get(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL
 						.toVariable()) != null) {
-			templateVariables
-					.put(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL
+			templateVariables.put(
+					GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL
 							.toVariable(),
-							normalizedBaseURL
-									+ ImplementationConstants.FILE_STREAMING_SERVLET_PATH
-									+ "/"
-									+ templateVariables
-											.get(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL
-													.toVariable()));
+					normalizedBaseURL
+							+ ImplementationConstants.FILE_STREAMING_SERVLET_PATH
+							+ "/"
+							+ templateVariables
+									.get(GeneralSlideTemplateFieldTypes.MEDIA_OBJECT_URL
+											.toVariable()));
 		}
 
 		// Create new Mustache template factory on non-production system
@@ -609,11 +600,10 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		}
 
 		// Get template folder
-		final String templateFolder = (String) templateVariables
-				.get(GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER
-						.toVariable());
-		templateVariables.remove(GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER
-				.toVariable());
+		final String templateFolder = (String) templateVariables.get(
+				GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER.toVariable());
+		templateVariables.remove(
+				GeneralSlideTemplateFieldTypes.TEMPLATE_FOLDER.toVariable());
 
 		// Fill template
 		log.debug("Filling template in folder {}", templateFolder);
@@ -621,12 +611,13 @@ public class ScreeningSurveyServlet extends HttpServlet {
 		Mustache mustache;
 		synchronized (mustacheFactory) {
 			try {
-				mustache = mustacheFactory.compile(templateFolder
-						+ "/index.html");
+				mustache = mustacheFactory
+						.compile(templateFolder + "/index.html");
 			} catch (final Exception e) {
 				log.error("There seems to be a problem with the template: {}",
 						e.getMessage());
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				response.sendError(
+						HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				return;
 			}
 		}

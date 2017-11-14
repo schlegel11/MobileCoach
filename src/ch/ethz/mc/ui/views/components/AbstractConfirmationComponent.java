@@ -29,8 +29,8 @@ import com.vaadin.ui.Button;
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
-public abstract class AbstractConfirmationComponent extends
-		AbstractCustomComponent {
+public abstract class AbstractConfirmationComponent
+		extends AbstractCustomComponent {
 	/**
 	 * Register the listener which is called when the OK button has been clicked
 	 * 

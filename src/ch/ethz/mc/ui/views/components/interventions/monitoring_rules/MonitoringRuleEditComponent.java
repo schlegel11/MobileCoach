@@ -142,7 +142,8 @@ public class MonitoringRuleEditComponent extends AbstractClosableEditComponent {
 	}
 
 	@Override
-	public void registerCancelButtonListener(final ClickListener clickListener) {
+	public void registerCancelButtonListener(
+			final ClickListener clickListener) {
 		// not required
 	}
 
@@ -158,45 +159,32 @@ public class MonitoringRuleEditComponent extends AbstractClosableEditComponent {
 		setCompositionRoot(mainLayout);
 
 		// manually added
-		localize(
-				storeVariableLabel,
+		localize(storeVariableLabel,
 				AdminMessageStrings.MONITORING_MESSAGE_EDITING__STORE_RESULT_TO_VARIABLE);
-		localize(
-				sendMessageIfTrueCheckBox,
+		localize(sendMessageIfTrueCheckBox,
 				AdminMessageStrings.MONITORING_RULE_EDITING__SEND_MESSAGE_IF_TRUE);
 		localize(sendToSupervisorCheckBox,
 				AdminMessageStrings.MONITORING_RULE_EDITING__SEND_TO_SUPERVISOR);
-		localize(
-				markCaseAsSolvedWhenTrueCheckBox,
+		localize(markCaseAsSolvedWhenTrueCheckBox,
 				AdminMessageStrings.MONITORING_RULE_EDITING__MARK_CASE_AS_SOLVED_IF_TRUE);
-		localize(
-				stopRuleExecutionAndFinishInterventionIfTrueCheckBox,
+		localize(stopRuleExecutionAndFinishInterventionIfTrueCheckBox,
 				AdminMessageStrings.MONITORING_RULE_EDITING__STOP_RULE_EXECUTION_AND_FINISH_INTERVENTION_IF_TRUE);
-		localize(
-				messageGroupLabel,
+		localize(messageGroupLabel,
 				AdminMessageStrings.MONITORING_RULE_EDITING__MESSAGE_GROUP_TO_SEND_MESSAGES_FROM);
-		localize(
-				hourToSendMessageLabel,
+		localize(hourToSendMessageLabel,
 				AdminMessageStrings.MONITORING_RULE_EDITING__HOUR_TO_SEND_MESSAGE);
-		localize(
-				hoursUntilHandledAsNotAnsweredLabel,
+		localize(hoursUntilHandledAsNotAnsweredLabel,
 				AdminMessageStrings.MONITORING_RULE_EDITING__HOURS_AFTER_SENDING_UNTIL_HANDLED_AS_NOT_ANSWERED);
-		localize(
-				replyRulesIfAnswerLabel,
+		localize(replyRulesIfAnswerLabel,
 				AdminMessageStrings.MONITORING_RULE_EDITING__EXECUTE_RULES_IF_ANSWER);
-		localize(
-				replyRulesIfNoAnswerLabel,
+		localize(replyRulesIfNoAnswerLabel,
 				AdminMessageStrings.MONITORING_RULE_EDITING__EXECUTE_RULES_IF_NO_ANSWER);
 		localize(closeButton, AdminMessageStrings.GENERAL__CLOSE);
 
-		replyRulesTabSheet
-				.getTab(0)
-				.setCaption(
-						Messages.getAdminString(AdminMessageStrings.MONITORING_RULE_EDITING__EXECUTE_RULES_IF_ANSWER_SHORT));
-		replyRulesTabSheet
-				.getTab(1)
-				.setCaption(
-						Messages.getAdminString(AdminMessageStrings.MONITORING_RULE_EDITING__EXECUTE_RULES_IF_NO_ANSWER_SHORT));
+		replyRulesTabSheet.getTab(0).setCaption(Messages.getAdminString(
+				AdminMessageStrings.MONITORING_RULE_EDITING__EXECUTE_RULES_IF_ANSWER_SHORT));
+		replyRulesTabSheet.getTab(1).setCaption(Messages.getAdminString(
+				AdminMessageStrings.MONITORING_RULE_EDITING__EXECUTE_RULES_IF_NO_ANSWER_SHORT));
 
 		sendMessageIfTrueCheckBox.setImmediate(true);
 		sendToSupervisorCheckBox.setImmediate(true);
@@ -286,8 +274,8 @@ public class MonitoringRuleEditComponent extends AbstractClosableEditComponent {
 		// sendToSupervisorCheckBox
 		sendToSupervisorCheckBox = new CheckBox();
 		sendToSupervisorCheckBox.setStyleName("bold");
-		sendToSupervisorCheckBox
-				.setCaption("!!! Send message to supervisor (NOT to participant)");
+		sendToSupervisorCheckBox.setCaption(
+				"!!! Send message to supervisor (NOT to participant)");
 		sendToSupervisorCheckBox.setImmediate(false);
 		sendToSupervisorCheckBox.setWidth("100.0%");
 		sendToSupervisorCheckBox.setHeight("-1px");
@@ -296,8 +284,8 @@ public class MonitoringRuleEditComponent extends AbstractClosableEditComponent {
 		// markCaseAsSolvedWhenTrueCheckBox
 		markCaseAsSolvedWhenTrueCheckBox = new CheckBox();
 		markCaseAsSolvedWhenTrueCheckBox.setStyleName("bold");
-		markCaseAsSolvedWhenTrueCheckBox
-				.setCaption("!!! Mark case as solved (unexpected message) and stop the current rule execution run if result is TRUE");
+		markCaseAsSolvedWhenTrueCheckBox.setCaption(
+				"!!! Mark case as solved (unexpected message) and stop the current rule execution run if result is TRUE");
 		markCaseAsSolvedWhenTrueCheckBox.setImmediate(false);
 		markCaseAsSolvedWhenTrueCheckBox.setWidth("100.0%");
 		markCaseAsSolvedWhenTrueCheckBox.setHeight("-1px");
@@ -307,14 +295,14 @@ public class MonitoringRuleEditComponent extends AbstractClosableEditComponent {
 		stopRuleExecutionAndFinishInterventionIfTrueCheckBox = new CheckBox();
 		stopRuleExecutionAndFinishInterventionIfTrueCheckBox
 				.setStyleName("bold");
-		stopRuleExecutionAndFinishInterventionIfTrueCheckBox
-				.setCaption("!!! Stop rule execution and finish intervention for this participant if rule result is TRUE");
+		stopRuleExecutionAndFinishInterventionIfTrueCheckBox.setCaption(
+				"!!! Stop rule execution and finish intervention for this participant if rule result is TRUE");
 		stopRuleExecutionAndFinishInterventionIfTrueCheckBox
 				.setImmediate(false);
 		stopRuleExecutionAndFinishInterventionIfTrueCheckBox.setWidth("100.0%");
 		stopRuleExecutionAndFinishInterventionIfTrueCheckBox.setHeight("-1px");
-		switchesGroupLayout
-				.addComponent(stopRuleExecutionAndFinishInterventionIfTrueCheckBox);
+		switchesGroupLayout.addComponent(
+				stopRuleExecutionAndFinishInterventionIfTrueCheckBox);
 
 		// gridLayout2
 		gridLayout2 = buildGridLayout2();
@@ -381,8 +369,8 @@ public class MonitoringRuleEditComponent extends AbstractClosableEditComponent {
 		messageGroupComboBox.setWidth("350px");
 		messageGroupComboBox.setHeight("-1px");
 		gridLayout2.addComponent(messageGroupComboBox, 1, 0);
-		gridLayout2.setComponentAlignment(messageGroupComboBox, new Alignment(
-				34));
+		gridLayout2.setComponentAlignment(messageGroupComboBox,
+				new Alignment(34));
 
 		// hourToSendMessageLabel
 		hourToSendMessageLabel = new Label();
@@ -459,8 +447,8 @@ public class MonitoringRuleEditComponent extends AbstractClosableEditComponent {
 		replyRulesIfAnswerLabel.setImmediate(false);
 		replyRulesIfAnswerLabel.setWidth("-1px");
 		replyRulesIfAnswerLabel.setHeight("-1px");
-		replyRulesIfAnswerLabel
-				.setValue("!!! Execute these rules if participant does answer:");
+		replyRulesIfAnswerLabel.setValue(
+				"!!! Execute these rules if participant does answer:");
 		replyRulesIfAnswerLayout.addComponent(replyRulesIfAnswerLabel);
 
 		// monitoringReplyRulesEditComponentWithControllerIfAnswer
@@ -471,8 +459,8 @@ public class MonitoringRuleEditComponent extends AbstractClosableEditComponent {
 				.setWidth("100.0%");
 		monitoringReplyRulesEditComponentWithControllerIfAnswer
 				.setHeight("-1px");
-		replyRulesIfAnswerLayout
-				.addComponent(monitoringReplyRulesEditComponentWithControllerIfAnswer);
+		replyRulesIfAnswerLayout.addComponent(
+				monitoringReplyRulesEditComponentWithControllerIfAnswer);
 
 		return replyRulesIfAnswerLayout;
 	}
@@ -492,8 +480,8 @@ public class MonitoringRuleEditComponent extends AbstractClosableEditComponent {
 		replyRulesIfNoAnswerLabel.setImmediate(false);
 		replyRulesIfNoAnswerLabel.setWidth("-1px");
 		replyRulesIfNoAnswerLabel.setHeight("-1px");
-		replyRulesIfNoAnswerLabel
-				.setValue("!!! Execute these rules if participant does NOT answer:");
+		replyRulesIfNoAnswerLabel.setValue(
+				"!!! Execute these rules if participant does NOT answer:");
 		replyRulesIfNoAnswerLayout.addComponent(replyRulesIfNoAnswerLabel);
 
 		// monitoringReplyRulesEditComponentWithControllerIfNoAnswer
@@ -504,8 +492,8 @@ public class MonitoringRuleEditComponent extends AbstractClosableEditComponent {
 				.setWidth("100.0%");
 		monitoringReplyRulesEditComponentWithControllerIfNoAnswer
 				.setHeight("-1px");
-		replyRulesIfNoAnswerLayout
-				.addComponent(monitoringReplyRulesEditComponentWithControllerIfNoAnswer);
+		replyRulesIfNoAnswerLayout.addComponent(
+				monitoringReplyRulesEditComponentWithControllerIfNoAnswer);
 
 		return replyRulesIfNoAnswerLayout;
 	}

@@ -55,8 +55,8 @@ import com.vaadin.ui.Video;
 @SuppressWarnings("serial")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public abstract class MediaObjectIntegrationComponent extends
-		AbstractCustomComponent {
+public abstract class MediaObjectIntegrationComponent
+		extends AbstractCustomComponent {
 
 	/*- VaadinEditorProperties={"grid":"RegularGrid,20","showGrid":true,"snapToGrid":true,"snapToObject":true,"movingGuides":false,"snappingDistance":10} */
 
@@ -97,15 +97,13 @@ public abstract class MediaObjectIntegrationComponent extends
 		setCompositionRoot(mainLayout);
 
 		// manually added
-		uploadComponent.setButtonCaption(Messages
-				.getAdminString(AdminMessageStrings.GENERAL__UPLOAD));
-		localize(
-				createHTMLButton,
+		uploadComponent.setButtonCaption(
+				Messages.getAdminString(AdminMessageStrings.GENERAL__UPLOAD));
+		localize(createHTMLButton,
 				AdminMessageStrings.MEDIA_OBJECT_INTEGRATION_COMPONENT__CREATE_HTML);
 		localize(setURLButton, AdminMessageStrings.GENERAL__SET_URL);
 		localize(deleteButton, AdminMessageStrings.GENERAL__DELETE);
-		localize(
-				contentObjectLabel,
+		localize(contentObjectLabel,
 				AdminMessageStrings.MEDIA_OBJECT_INTEGRATION_COMPONENT__NO_MEDIA_SET);
 
 		uploadComponent.setEnabled(false);
@@ -119,8 +117,7 @@ public abstract class MediaObjectIntegrationComponent extends
 
 		if (type == null) {
 			mediaComponent = new Image(null, resource);
-			localize(
-					contentObjectLabel,
+			localize(contentObjectLabel,
 					AdminMessageStrings.MEDIA_OBJECT_INTEGRATION_COMPONENT__NO_MEDIA_SET);
 			saveButton = null;
 			textArea = null;

@@ -90,8 +90,8 @@ public class MainViewComponent extends AbstractCustomComponent {
 		setCompositionRoot(mainLayout);
 
 		// manually added
-		titleLabel.setValue(Messages
-				.getAdminString(AdminMessageStrings.APPLICATION__NAME));
+		titleLabel.setValue(
+				Messages.getAdminString(AdminMessageStrings.APPLICATION__NAME));
 		logoutButton.setCaption(Messages
 				.getAdminString(AdminMessageStrings.MAIN_VIEW__LOGOUT_BUTTON));
 
@@ -100,14 +100,14 @@ public class MainViewComponent extends AbstractCustomComponent {
 		logoutButton.setDisableOnClick(true);
 
 		// Create menu buttons
-		welcomeButton.getButtonIcon().setSource(
-				new ThemeResource("img/welcome-icon.png"));
-		interventionsButton.getButtonIcon().setSource(
-				new ThemeResource("img/interventions-icon.png"));
-		accessControlButton.getButtonIcon().setSource(
-				new ThemeResource("img/access-control-icon.png"));
-		accountButton.getButtonIcon().setSource(
-				new ThemeResource("img/account-icon.png"));
+		welcomeButton.getButtonIcon()
+				.setSource(new ThemeResource("img/welcome-icon.png"));
+		interventionsButton.getButtonIcon()
+				.setSource(new ThemeResource("img/interventions-icon.png"));
+		accessControlButton.getButtonIcon()
+				.setSource(new ThemeResource("img/access-control-icon.png"));
+		accountButton.getButtonIcon()
+				.setSource(new ThemeResource("img/account-icon.png"));
 
 		localize(welcomeButton.getButtonLabel(),
 				AdminMessageStrings.MAIN_VIEW__WELCOME_BUTTON);
@@ -189,14 +189,14 @@ public class MainViewComponent extends AbstractCustomComponent {
 		menuButtonsLayout = buildMenuButtonsLayout();
 		menuPanelLayout.addComponent(menuButtonsLayout);
 		menuPanelLayout.setExpandRatio(menuButtonsLayout, 1.0f);
-		menuPanelLayout.setComponentAlignment(menuButtonsLayout, new Alignment(
-				20));
+		menuPanelLayout.setComponentAlignment(menuButtonsLayout,
+				new Alignment(20));
 
 		// buttonsGridLayout
 		buttonsGridLayout = buildButtonsGridLayout();
 		menuPanelLayout.addComponent(buttonsGridLayout);
-		menuPanelLayout.setComponentAlignment(buttonsGridLayout, new Alignment(
-				24));
+		menuPanelLayout.setComponentAlignment(buttonsGridLayout,
+				new Alignment(24));
 
 		return menuPanelLayout;
 	}
@@ -279,8 +279,8 @@ public class MainViewComponent extends AbstractCustomComponent {
 		logoutButton.setHeight("-1px");
 		logoutButton.setTabIndex(2);
 		buttonsGridLayout.addComponent(logoutButton, 0, 1);
-		buttonsGridLayout
-				.setComponentAlignment(logoutButton, new Alignment(20));
+		buttonsGridLayout.setComponentAlignment(logoutButton,
+				new Alignment(20));
 
 		return buttonsGridLayout;
 	}

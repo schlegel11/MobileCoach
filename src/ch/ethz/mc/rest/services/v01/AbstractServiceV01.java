@@ -44,7 +44,7 @@ import ch.ethz.mc.services.types.GeneralSessionAttributeValidatorTypes;
 public abstract class AbstractServiceV01 {
 
 	@Getter
-	RESTManagerService	restManagerService;
+	RESTManagerService restManagerService;
 
 	public AbstractServiceV01(final RESTManagerService restManagerService) {
 		this.restManagerService = restManagerService;
@@ -68,24 +68,26 @@ public abstract class AbstractServiceV01 {
 			throw new WebApplicationException(Response.notAcceptable(null)
 					.entity("Access token missing").build());
 		}
-		if (session.getAttribute(GeneralSessionAttributeTypes.VALIDATOR
-				.toString()) == null
+		if (session
+				.getAttribute(GeneralSessionAttributeTypes.VALIDATOR
+						.toString()) == null
 				|| !session
-						.getAttribute(
-								GeneralSessionAttributeTypes.VALIDATOR
-										.toString())
+						.getAttribute(GeneralSessionAttributeTypes.VALIDATOR
+								.toString())
 						.toString()
 						.equals(GeneralSessionAttributeValidatorTypes.PARTICIPANT_RELATED
 								.toString())) {
-			log.debug("REST access denied: Session timed out or is no survey/feedback session");
+			log.debug(
+					"REST access denied: Session timed out or is no survey/feedback session");
 			throw new WebApplicationException(Response.notAcceptable(null)
 					.entity("Session timed out").build());
 		}
-		if (session.getAttribute(GeneralSessionAttributeTypes.TOKEN.toString()) == null
-				|| !token.equals(session
-						.getAttribute(GeneralSessionAttributeTypes.TOKEN
-								.toString()))) {
-			log.debug("REST access denied: Given token does not match token in session");
+		if (session.getAttribute(
+				GeneralSessionAttributeTypes.TOKEN.toString()) == null
+				|| !token.equals(session.getAttribute(
+						GeneralSessionAttributeTypes.TOKEN.toString()))) {
+			log.debug(
+					"REST access denied: Given token does not match token in session");
 			throw new WebApplicationException(Response.notAcceptable(null)
 					.entity("Wrong access token").build());
 		}
@@ -94,8 +96,8 @@ public abstract class AbstractServiceV01 {
 
 		ObjectId participantId;
 		try {
-			participantId = (ObjectId) session
-					.getAttribute(GeneralSessionAttributeTypes.CURRENT_PARTICIPANT
+			participantId = (ObjectId) session.getAttribute(
+					GeneralSessionAttributeTypes.CURRENT_PARTICIPANT
 							.toString());
 		} catch (final Exception e) {
 			participantId = null;
@@ -105,10 +107,9 @@ public abstract class AbstractServiceV01 {
 			log.debug("Partipant {} fits to token {}", participantId, token);
 			return participantId;
 		} else {
-			throw new WebApplicationException(
-					Response.notAcceptable(null)
-							.entity("The current session is not yet bound to a participant")
-							.build());
+			throw new WebApplicationException(Response.notAcceptable(null)
+					.entity("The current session is not yet bound to a participant")
+					.build());
 		}
 	}
 
@@ -130,24 +131,26 @@ public abstract class AbstractServiceV01 {
 			throw new WebApplicationException(Response.notAcceptable(null)
 					.entity("Access token missing").build());
 		}
-		if (session.getAttribute(GeneralSessionAttributeTypes.VALIDATOR
-				.toString()) == null
+		if (session
+				.getAttribute(GeneralSessionAttributeTypes.VALIDATOR
+						.toString()) == null
 				|| !session
-						.getAttribute(
-								GeneralSessionAttributeTypes.VALIDATOR
-										.toString())
+						.getAttribute(GeneralSessionAttributeTypes.VALIDATOR
+								.toString())
 						.toString()
 						.equals(GeneralSessionAttributeValidatorTypes.DASHBOARD_ACCESS
 								.toString())) {
-			log.debug("REST access denied: Session timed out or is no dashboard session");
+			log.debug(
+					"REST access denied: Session timed out or is no dashboard session");
 			throw new WebApplicationException(Response.notAcceptable(null)
 					.entity("Session timed out").build());
 		}
-		if (session.getAttribute(GeneralSessionAttributeTypes.TOKEN.toString()) == null
-				|| !token.equals(session
-						.getAttribute(GeneralSessionAttributeTypes.TOKEN
-								.toString()))) {
-			log.debug("REST access denied: Given token does not match token in session");
+		if (session.getAttribute(
+				GeneralSessionAttributeTypes.TOKEN.toString()) == null
+				|| !token.equals(session.getAttribute(
+						GeneralSessionAttributeTypes.TOKEN.toString()))) {
+			log.debug(
+					"REST access denied: Given token does not match token in session");
 			throw new WebApplicationException(Response.notAcceptable(null)
 					.entity("Wrong access token").build());
 		}
@@ -156,21 +159,20 @@ public abstract class AbstractServiceV01 {
 
 		ObjectId interventionId;
 		try {
-			interventionId = (ObjectId) session
-					.getAttribute(GeneralSessionAttributeTypes.CURRENT_SESSION
-							.toString());
+			interventionId = (ObjectId) session.getAttribute(
+					GeneralSessionAttributeTypes.CURRENT_SESSION.toString());
 		} catch (final Exception e) {
 			interventionId = null;
 		}
 
 		if (interventionId != null) {
-			log.debug("Intervention {} fits to token {}", interventionId, token);
+			log.debug("Intervention {} fits to token {}", interventionId,
+					token);
 			return interventionId;
 		} else {
-			throw new WebApplicationException(
-					Response.notAcceptable(null)
-							.entity("The current session is not bound to an intervention")
-							.build());
+			throw new WebApplicationException(Response.notAcceptable(null)
+					.entity("The current session is not bound to an intervention")
+					.build());
 		}
 	}
 

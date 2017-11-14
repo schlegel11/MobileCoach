@@ -101,15 +101,17 @@ public class DialogOption extends ModelObject {
 				break;
 			case EXTERNAL_ID:
 			case SUPERVISOR_EXTERNAL_ID:
-				if (data.startsWith(ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM)) {
+				if (data.startsWith(
+						ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM)) {
 					val deepstreamCommunicationService = DeepstreamCommunicationService
 							.getInstance();
 
 					if (deepstreamCommunicationService != null) {
 						deepstreamCommunicationService
-								.cleanupForParticipantOrSupervisor(data
-										.substring(ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
-												.length()));
+								.cleanupForParticipantOrSupervisor(
+										data.substring(
+												ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+														.length()));
 					}
 				}
 				break;

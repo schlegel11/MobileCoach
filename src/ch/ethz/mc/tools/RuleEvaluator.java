@@ -59,7 +59,7 @@ import com.fathzer.soft.javaluator.Function;
 public class RuleEvaluator {
 	@Setter
 	@Getter(value = AccessLevel.PRIVATE)
-	private static VariablesManagerService	variablesManagerService;
+	private static VariablesManagerService variablesManagerService;
 
 	/**
 	 * Evaluates an {@link AbstractRule} including the given
@@ -96,11 +96,12 @@ public class RuleEvaluator {
 				final double ruleResult;
 				try {
 					ruleResult = evaluateCalculatedRuleTerm(
-							rule.getRuleWithPlaceholders(), variablesWithValues);
+							rule.getRuleWithPlaceholders(),
+							variablesWithValues);
 					ruleEvaluationResult.setCalculatedRuleValue(ruleResult);
 				} catch (final Exception e) {
-					throw new Exception("Could not parse rule: "
-							+ e.getMessage());
+					throw new Exception(
+							"Could not parse rule: " + e.getMessage());
 				}
 
 				// Evaluate rule comparison term
@@ -109,28 +110,29 @@ public class RuleEvaluator {
 					ruleComparisonTermResult = evaluateCalculatedRuleTerm(
 							rule.getRuleComparisonTermWithPlaceholders(),
 							variablesWithValues);
-					ruleEvaluationResult
-							.setCalculatedRuleComparisonTermValue(ruleComparisonTermResult);
+					ruleEvaluationResult.setCalculatedRuleComparisonTermValue(
+							ruleComparisonTermResult);
 				} catch (final Exception e) {
 					throw new Exception(
 							"Could not parse rule comparision term: "
 									+ e.getMessage());
 				}
-			} else if (rule
-					.getRuleEquationSign()
+			} else if (rule.getRuleEquationSign()
 					.isACrossInterventionVariableComparisionBasedEquationSignType()) {
-				log.debug("It's a cross intervention variable comparision based rule");
+				log.debug(
+						"It's a cross intervention variable comparision based rule");
 				ruleEvaluationResult.setCalculatedRule(false);
 
 				// Evaluate rule
 				final String ruleResult;
 				try {
 					ruleResult = evaluateTextRuleTerm(locale,
-							rule.getRuleWithPlaceholders(), variablesWithValues);
+							rule.getRuleWithPlaceholders(),
+							variablesWithValues);
 					ruleEvaluationResult.setTextRuleValue(ruleResult);
 				} catch (final Exception e) {
-					throw new Exception("Could not parse rule: "
-							+ e.getMessage());
+					throw new Exception(
+							"Could not parse rule: " + e.getMessage());
 				}
 
 				// Clean and evaluate rule comparison term
@@ -138,8 +140,8 @@ public class RuleEvaluator {
 						.getRuleComparisonTermWithPlaceholders().trim();
 				if (StringValidator
 						.isValidVariableName(ruleComparisonTermResult)) {
-					ruleEvaluationResult
-							.setTextRuleComparisonTermValue(ruleComparisonTermResult);
+					ruleEvaluationResult.setTextRuleComparisonTermValue(
+							ruleComparisonTermResult);
 				} else {
 					throw new Exception(
 							"Could not parse rule comparision term: It's not a valid variable name");
@@ -152,11 +154,12 @@ public class RuleEvaluator {
 				final String ruleResult;
 				try {
 					ruleResult = evaluateTextRuleTerm(locale,
-							rule.getRuleWithPlaceholders(), variablesWithValues);
+							rule.getRuleWithPlaceholders(),
+							variablesWithValues);
 					ruleEvaluationResult.setTextRuleValue(ruleResult);
 				} catch (final Exception e) {
-					throw new Exception("Could not parse rule: "
-							+ e.getMessage());
+					throw new Exception(
+							"Could not parse rule: " + e.getMessage());
 				}
 
 				// Evaluate rule comparison term
@@ -165,8 +168,8 @@ public class RuleEvaluator {
 					ruleComparisonTermResult = evaluateTextRuleTerm(locale,
 							rule.getRuleComparisonTermWithPlaceholders(),
 							variablesWithValues);
-					ruleEvaluationResult
-							.setTextRuleComparisonTermValue(ruleComparisonTermResult);
+					ruleEvaluationResult.setTextRuleComparisonTermValue(
+							ruleComparisonTermResult);
 				} catch (final Exception e) {
 					throw new Exception(
 							"Could not parse rule comparision term: "
@@ -184,32 +187,37 @@ public class RuleEvaluator {
 					ruleEvaluationResult.setRuleMatchesEquationSign(false);
 					break;
 				case CALCULATED_VALUE_IS_SMALLER_THAN:
-					if (ruleEvaluationResult.getCalculatedRuleValue() < ruleEvaluationResult
-							.getCalculatedRuleComparisonTermValue()) {
+					if (ruleEvaluationResult
+							.getCalculatedRuleValue() < ruleEvaluationResult
+									.getCalculatedRuleComparisonTermValue()) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
 				case CALCULATED_VALUE_IS_SMALLER_OR_EQUAL_THAN:
-					if (ruleEvaluationResult.getCalculatedRuleValue() <= ruleEvaluationResult
-							.getCalculatedRuleComparisonTermValue()) {
+					if (ruleEvaluationResult
+							.getCalculatedRuleValue() <= ruleEvaluationResult
+									.getCalculatedRuleComparisonTermValue()) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
 				case CALCULATED_VALUE_EQUALS:
-					if (ruleEvaluationResult.getCalculatedRuleValue() == ruleEvaluationResult
-							.getCalculatedRuleComparisonTermValue()) {
+					if (ruleEvaluationResult
+							.getCalculatedRuleValue() == ruleEvaluationResult
+									.getCalculatedRuleComparisonTermValue()) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
 				case CALCULATED_VALUE_IS_BIGGER_OR_EQUAL_THAN:
-					if (ruleEvaluationResult.getCalculatedRuleValue() >= ruleEvaluationResult
-							.getCalculatedRuleComparisonTermValue()) {
+					if (ruleEvaluationResult
+							.getCalculatedRuleValue() >= ruleEvaluationResult
+									.getCalculatedRuleComparisonTermValue()) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
 				case CALCULATED_VALUE_IS_BIGGER_THAN:
-					if (ruleEvaluationResult.getCalculatedRuleValue() > ruleEvaluationResult
-							.getCalculatedRuleComparisonTermValue()) {
+					if (ruleEvaluationResult
+							.getCalculatedRuleValue() > ruleEvaluationResult
+									.getCalculatedRuleComparisonTermValue()) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
@@ -222,18 +230,15 @@ public class RuleEvaluator {
 				case CALCULATE_AMOUNT_OF_SELECT_MANY_VALUES:
 					ruleEvaluationResult.setRuleMatchesEquationSign(true);
 
-					String[] parts = ruleEvaluationResult
-							.getTextRuleValue()
+					String[] parts = ruleEvaluationResult.getTextRuleValue()
 							.split(ImplementationConstants.SELECT_MANY_SEPARATOR);
 
 					ruleEvaluationResult.setCalculatedRuleValue(parts.length);
-					ruleEvaluationResult.setTextRuleValue(String
-							.valueOf(parts.length));
+					ruleEvaluationResult
+							.setTextRuleValue(String.valueOf(parts.length));
 					break;
 				case TEXT_VALUE_EQUALS:
-					if (ruleEvaluationResult
-							.getTextRuleValue()
-							.trim()
+					if (ruleEvaluationResult.getTextRuleValue().trim()
 							.toLowerCase()
 							.equals(ruleEvaluationResult
 									.getTextRuleComparisonTermValue().trim()
@@ -242,9 +247,7 @@ public class RuleEvaluator {
 					}
 					break;
 				case TEXT_VALUE_NOT_EQUALS:
-					if (!ruleEvaluationResult
-							.getTextRuleValue()
-							.trim()
+					if (!ruleEvaluationResult.getTextRuleValue().trim()
 							.toLowerCase()
 							.equals(ruleEvaluationResult
 									.getTextRuleComparisonTermValue().trim()
@@ -253,28 +256,20 @@ public class RuleEvaluator {
 					}
 					break;
 				case TEXT_VALUE_MATCHES_REGULAR_EXPRESSION:
-					if (ruleEvaluationResult
-							.getTextRuleValue()
-							.trim()
+					if (ruleEvaluationResult.getTextRuleValue().trim()
 							.toLowerCase()
-							.matches(
-									"^"
-											+ ruleEvaluationResult
-													.getTextRuleComparisonTermValue()
-													.trim().toLowerCase() + "$")) {
+							.matches("^" + ruleEvaluationResult
+									.getTextRuleComparisonTermValue().trim()
+									.toLowerCase() + "$")) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
 				case TEXT_VALUE_NOT_MATCHES_REGULAR_EXPRESSION:
-					if (!ruleEvaluationResult
-							.getTextRuleValue()
-							.trim()
+					if (!ruleEvaluationResult.getTextRuleValue().trim()
 							.toLowerCase()
-							.matches(
-									"^"
-											+ ruleEvaluationResult
-													.getTextRuleComparisonTermValue()
-													.trim().toLowerCase() + "$")) {
+							.matches("^" + ruleEvaluationResult
+									.getTextRuleComparisonTermValue().trim()
+									.toLowerCase() + "$")) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
@@ -324,8 +319,8 @@ public class RuleEvaluator {
 					val dateParts = ruleEvaluationResult.getTextRuleValue()
 							.trim().split("\\.");
 					val calendar2 = Calendar.getInstance();
-					calendar2.setTimeInMillis(InternalDateTime
-							.currentTimeMillis());
+					calendar2.setTimeInMillis(
+							InternalDateTime.currentTimeMillis());
 					if (dateParts.length > 2 && dateParts[2].length() > 2) {
 						calendarDiff.set(Integer.parseInt(dateParts[2]),
 								Integer.parseInt(dateParts[1]) - 1,
@@ -419,13 +414,14 @@ public class RuleEvaluator {
 
 					if (calcDaysDiff == 0) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
-					} else if (rule.getRuleEquationSign() == RuleEquationSignTypes.CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_ALWAYS_TRUE) {
+					} else if (rule
+							.getRuleEquationSign() == RuleEquationSignTypes.CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_ALWAYS_TRUE) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 
 					ruleEvaluationResult.setCalculatedRuleValue(calcDaysDiff);
-					ruleEvaluationResult.setTextRuleValue(String
-							.valueOf(calcDaysDiff));
+					ruleEvaluationResult
+							.setTextRuleValue(String.valueOf(calcDaysDiff));
 					break;
 				case CHECK_VALUE_IN_VARIABLE_ACROSS_INVTERVENTIONS_AND_TRUE_IF_DUPLICATE_FOUND:
 					val duplicateFound = checkValueInVariableForDuplicates(
@@ -444,8 +440,8 @@ public class RuleEvaluator {
 			ruleEvaluationResult.setEvaluatedSuccessful(true);
 		} catch (final Exception e) {
 			ruleEvaluationResult.setEvaluatedSuccessful(false);
-			ruleEvaluationResult.setErrorMessage("Could not evaluate rule: "
-					+ e.getMessage());
+			ruleEvaluationResult.setErrorMessage(
+					"Could not evaluate rule: " + e.getMessage());
 			log.warn("Error when evaluation rule: {}", e.getMessage());
 		}
 
@@ -479,7 +475,8 @@ public class RuleEvaluator {
 
 			final int dayOfYear1 = calendar1.get(Calendar.DAY_OF_YEAR);
 
-			while (calendar1.get(Calendar.YEAR) > calendar2.get(Calendar.YEAR)) {
+			while (calendar1.get(Calendar.YEAR) > calendar2
+					.get(Calendar.YEAR)) {
 				calendar1.add(Calendar.YEAR, -1);
 
 				additonalDays += calendar1
@@ -487,8 +484,8 @@ public class RuleEvaluator {
 			}
 
 			if (!swapped) {
-				return -1
-						* (additonalDays - calendar2.get(Calendar.DAY_OF_YEAR) + dayOfYear1);
+				return -1 * (additonalDays - calendar2.get(Calendar.DAY_OF_YEAR)
+						+ dayOfYear1);
 			} else {
 				return additonalDays - calendar2.get(Calendar.DAY_OF_YEAR)
 						+ dayOfYear1;
@@ -520,9 +517,11 @@ public class RuleEvaluator {
 						variableName);
 
 		if (duplicatesAvailable) {
-			log.debug("At least one duplicate has been found in the mentioned interventions");
+			log.debug(
+					"At least one duplicate has been found in the mentioned interventions");
 		} else {
-			log.debug("No duplicates have been found in the mentioned interventions");
+			log.debug(
+					"No duplicates have been found in the mentioned interventions");
 		}
 
 		return duplicatesAvailable;
@@ -580,8 +579,9 @@ public class RuleEvaluator {
 		params.add(digitAtPosition);
 		params.add(inRangeCheck);
 
-		final AbstractEvaluator<Double> evaluator = new DoubleEvaluator(params) {
-			private Double[]	argumentsArrays;
+		final AbstractEvaluator<Double> evaluator = new DoubleEvaluator(
+				params) {
+			private Double[] argumentsArrays;
 
 			@Override
 			protected Double evaluate(final Function function,
@@ -687,7 +687,8 @@ public class RuleEvaluator {
 				val position = positionDouble.intValue();
 				val number = (int) Math.floor(numberDouble);
 
-				return (double) (int) (number / Math.pow(10, position - 1) % 10);
+				return (double) (int) (number / Math.pow(10, position - 1)
+						% 10);
 			}
 
 			/**
@@ -713,7 +714,8 @@ public class RuleEvaluator {
 			 *
 			 * @param positionItems
 			 */
-			public void fakeShuffe(final ArrayList<PositionItem> positionItems) {
+			public void fakeShuffe(
+					final ArrayList<PositionItem> positionItems) {
 				val items = positionItems.size();
 
 				for (int i = 0; i < items; i++) {

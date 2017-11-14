@@ -59,7 +59,7 @@ public class Constants {
 	 * 
 	 * CAUTION: Can NOT be defined in configuration file
 	 */
-	// TODO for RELEASE Switch always to "true" before release
+	// TODO RELEASE Switch always to "true" before release
 	public static final boolean	VAADIN_PRODUCTION_MODE				= true;
 
 	/**
@@ -67,7 +67,7 @@ public class Constants {
 	 * 
 	 * CAUTION: Can NOT be defined in configuration file
 	 */
-	// TODO for RELEASE Switch always to "false" before release
+	// TODO RELEASE Switch always to "false" before release
 	public static final boolean	RUN_TESTS_AT_STARTUP				= false;
 
 	/**
@@ -125,12 +125,11 @@ public class Constants {
 
 	@Getter
 	private static Locale		adminLocale							= new Locale(
-																			"en",
-																			"GB");
+			"en", "GB");
 
 	@Getter
 	private static Locale[]		interventionLocales					= new Locale[] {
-			new Locale("de", "CH"), new Locale("fr", "CH")			};
+			new Locale("de", "CH"), new Locale("fr", "CH") };
 
 	@Getter
 	private static String		loggingFolder						= "/mc_data/logs";
@@ -257,7 +256,7 @@ public class Constants {
 
 	@Getter
 	private static final String	deepstreamServerPassword			= RandomStringUtils
-																			.randomAlphanumeric(64);
+			.randomAlphanumeric(64);
 
 	/**
 	 * Get all accepted country codes for SMS phone numbers
@@ -373,39 +372,40 @@ public class Constants {
 					val fieldType = field.getType();
 
 					if (properties.containsKey(fieldName)) {
-						log.debug("Overwriting '{}' with value '{}'",
-								fieldName, properties.getProperty(fieldName));
+						log.debug("Overwriting '{}' with value '{}'", fieldName,
+								properties.getProperty(fieldName));
 
 						try {
 							if (fieldType == String.class) {
 								field.set(null,
 										properties.getProperty(fieldName));
 							} else if (fieldType == Boolean.TYPE) {
-								field.set(null, Boolean.parseBoolean(properties
-										.getProperty(fieldName)));
+								field.set(null, Boolean.parseBoolean(
+										properties.getProperty(fieldName)));
 							} else if (fieldType == Integer.TYPE) {
-								field.set(null, Integer.parseInt(properties
-										.getProperty(fieldName)));
+								field.set(null, Integer.parseInt(
+										properties.getProperty(fieldName)));
 							} else if (fieldType == Locale.class) {
-								val localeProperty = properties.getProperty(
-										fieldName).replace(" ", "");
+								val localeProperty = properties
+										.getProperty(fieldName)
+										.replace(" ", "");
 								if (localeProperty.contains("-")) {
 									val localePropertyParts = localeProperty
 											.split("-");
-									field.set(null, new Locale(
-											localePropertyParts[0],
-											localePropertyParts[1]));
+									field.set(null,
+											new Locale(localePropertyParts[0],
+													localePropertyParts[1]));
 								} else if (localeProperty.contains("_")) {
 									val localePropertyParts = localeProperty
 											.split("_");
-									field.set(null, new Locale(
-											localePropertyParts[0],
-											localePropertyParts[1]));
+									field.set(null,
+											new Locale(localePropertyParts[0],
+													localePropertyParts[1]));
 								} else {
 									field.set(null, new Locale(localeProperty));
 								}
-							} else if (fieldType.isArray()
-									&& fieldType.getComponentType() == Locale.class) {
+							} else if (fieldType.isArray() && fieldType
+									.getComponentType() == Locale.class) {
 								val localeList = new ArrayList<Locale>();
 								val localeProperties = properties
 										.getProperty(fieldName);
@@ -426,8 +426,8 @@ public class Constants {
 												localePropertyParts[0],
 												localePropertyParts[1]));
 									} else {
-										localeList.add(new Locale(
-												localeProperty));
+										localeList.add(
+												new Locale(localeProperty));
 									}
 								}
 								field.set(null,

@@ -46,11 +46,6 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
-import lombok.Getter;
-import lombok.Synchronized;
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-
 import org.bson.types.ObjectId;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -65,6 +60,10 @@ import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
 import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mc.tools.StringHelpers;
+import lombok.Getter;
+import lombok.Synchronized;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Handles communication with the message gateways
@@ -291,19 +290,20 @@ public class CommunicationManagerService {
 				break;
 			case EXTERNAL_ID:
 			case SUPERVISOR_EXTERNAL_ID:
-				if (dialogOption
-						.getData()
-						.startsWith(
-								ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM)
+				if (dialogOption.getData().startsWith(
+						ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM)
 						&& deepstreamActive) {
 					try {
-						deepstreamCommunicationService.asyncSendMessage(
-								dialogOption, dialogMessage.getId(),
-								messageOrder, message,
-								dialogMessage.getTextBasedMediaObjectContent(),
-								dialogMessage.getSurveyLink(),
-								dialogMessage.getMediaObjectLink(),
-								messageExpectsAnswer);
+						deepstreamCommunicationService
+								.asyncSendMessage(dialogOption,
+										dialogMessage.getId(), messageOrder,
+										message, dialogMessage.getAnswerType(),
+										dialogMessage.getAnswerOptions(),
+										dialogMessage
+												.getTextBasedMediaObjectContent(),
+										dialogMessage.getSurveyLink(),
+										dialogMessage.getMediaObjectLink(),
+										messageExpectsAnswer);
 					} catch (final Exception e) {
 						log.warn("Could not send message using deepstream: {}",
 								e.getMessage());
@@ -327,23 +327,23 @@ public class CommunicationManagerService {
 
 		// Add Email messages (every x minutes only)
 		if (emailActive
-				& System.currentTimeMillis() > lastEmailCheck
-						+ (simulatorActive ? ImplementationConstants.SMS_AND_EMAIL_RETRIEVAL_INTERVAL_IN_SECONDS_WITH_SIMULATOR
-								: ImplementationConstants.SMS_AND_EMAIL_RETRIEVAL_INTERVAL_IN_SECONDS_WITHOUT_SIMULATOR)
+				& System.currentTimeMillis() > lastEmailCheck + (simulatorActive
+						? ImplementationConstants.SMS_AND_EMAIL_RETRIEVAL_INTERVAL_IN_SECONDS_WITH_SIMULATOR
+						: ImplementationConstants.SMS_AND_EMAIL_RETRIEVAL_INTERVAL_IN_SECONDS_WITHOUT_SIMULATOR)
 						* 1000) {
 			lastEmailCheck = System.currentTimeMillis();
 
-			// Emails are currently not handled, but it could be implemented
-			// here.
+			// TODO LONGTERM Emails are currently not handled, but it could be
+			// implemented here.
 		}
 
 		// Add SMS messages (every x minutes only)
 		Store store = null;
 		Folder folder = null;
 		if (smsActive
-				& System.currentTimeMillis() > lastSMSCheck
-						+ (simulatorActive ? ImplementationConstants.SMS_AND_EMAIL_RETRIEVAL_INTERVAL_IN_SECONDS_WITH_SIMULATOR
-								: ImplementationConstants.SMS_AND_EMAIL_RETRIEVAL_INTERVAL_IN_SECONDS_WITHOUT_SIMULATOR)
+				& System.currentTimeMillis() > lastSMSCheck + (simulatorActive
+						? ImplementationConstants.SMS_AND_EMAIL_RETRIEVAL_INTERVAL_IN_SECONDS_WITH_SIMULATOR
+						: ImplementationConstants.SMS_AND_EMAIL_RETRIEVAL_INTERVAL_IN_SECONDS_WITHOUT_SIMULATOR)
 						* 1000) {
 			lastSMSCheck = System.currentTimeMillis();
 
@@ -356,8 +356,8 @@ public class CommunicationManagerService {
 
 				for (val message : folder.getMessages()) {
 					// Only handle messages who match the subject pattern
-					if (message.getSubject().startsWith(
-							smsMailSubjectStartsWith)) {
+					if (message.getSubject()
+							.startsWith(smsMailSubjectStartsWith)) {
 						try {
 
 							log.debug("Mail received with subject '{}'",
@@ -365,6 +365,7 @@ public class CommunicationManagerService {
 							val receivedMessage = new ReceivedMessage();
 							receivedMessage.setType(DialogOptionTypes.SMS);
 							receivedMessage.setIntention(false);
+							receivedMessage.setRelatedMessageIdBasedOnOrder(-1);
 
 							// Parse message content
 							val documentBuilder = documentBuilderFactory
@@ -380,37 +381,36 @@ public class CommunicationManagerService {
 									"/aspsms/Originator/PhoneNumber",
 									document.getDocumentElement(),
 									XPathConstants.NODESET)).item(0)
-									.getTextContent();
+											.getTextContent();
 
-							receivedMessage.setSender(StringHelpers
-									.cleanPhoneNumber(sender));
+							receivedMessage.setSender(
+									StringHelpers.cleanPhoneNumber(sender));
 
 							val receivedTimestampString = ((NodeList) xPath
 									.evaluate("/aspsms/DateReceived",
 											document.getDocumentElement(),
 											XPathConstants.NODESET)).item(0)
-									.getTextContent();
+													.getTextContent();
 
-							val receivedTimestamp = receiverDateFormat.parse(
-									receivedTimestampString).getTime();
+							val receivedTimestamp = receiverDateFormat
+									.parse(receivedTimestampString).getTime();
 
 							// Abjust for simulated date and time
 							if (simulatorActive) {
-								receivedMessage
-										.setReceivedTimestamp(InternalDateTime
-												.currentTimeMillis());
+								receivedMessage.setReceivedTimestamp(
+										InternalDateTime.currentTimeMillis());
 							} else {
-								receivedMessage
-										.setReceivedTimestamp(receivedTimestamp);
+								receivedMessage.setReceivedTimestamp(
+										receivedTimestamp);
 							}
 
 							val messageStringEncoded = ((NodeList) xPath
 									.evaluate("/aspsms/MessageData",
 											document.getDocumentElement(),
 											XPathConstants.NODESET)).item(0)
-									.getTextContent();
-							val messageString = URLDecoder.decode(
-									messageStringEncoded, "ISO-8859-1");
+													.getTextContent();
+							val messageString = URLDecoder
+									.decode(messageStringEncoded, "ISO-8859-1");
 
 							receivedMessage.setMessage(messageString);
 
@@ -429,7 +429,8 @@ public class CommunicationManagerService {
 					message.setFlag(Flags.Flag.DELETED, true);
 				}
 			} catch (final Exception e) {
-				log.error("Could not retrieve SMS messages: {}", e.getMessage());
+				log.error("Could not retrieve SMS messages: {}",
+						e.getMessage());
 			} finally {
 				try {
 					folder.close(true);
@@ -495,6 +496,38 @@ public class CommunicationManagerService {
 	}
 
 	/**
+	 * Inform about answering timeout of a message
+	 * 
+	 * @param dialogOption
+	 * @param dialogMessage
+	 */
+	public void informAboutAnsweringTimeout(final DialogOption dialogOption,
+			final DialogMessage dialogMessage) {
+		switch (dialogOption.getType()) {
+			case SMS:
+			case SUPERVISOR_SMS:
+				if (smsActive) {
+					// Not necessary for SMS
+				}
+				break;
+			case EMAIL:
+			case SUPERVISOR_EMAIL:
+				if (emailActive) {
+					// Not necessary for Email
+				}
+				break;
+			case EXTERNAL_ID:
+			case SUPERVISOR_EXTERNAL_ID:
+				if (deepstreamActive) {
+					deepstreamCommunicationService
+							.asyncInformAboutAnsweringTimeout(dialogOption,
+									dialogMessage);
+				}
+				break;
+		}
+	}
+
+	/**
 	 * Password authenticator for mail accounts with authentication
 	 *
 	 * @author Andreas Filler
@@ -528,9 +561,8 @@ public class CommunicationManagerService {
 		private final boolean		messageExpectsAnswer;
 
 		public MailingThread(final DialogOption dialogOption,
-				final ObjectId dialogMessageId,
-				final String smsPhoneNumberFrom, final String message,
-				final boolean messageExpectsAnswer) {
+				final ObjectId dialogMessageId, final String smsPhoneNumberFrom,
+				final String message, final boolean messageExpectsAnswer) {
 			setName("Mailing Thread " + dialogOption.getData());
 			this.dialogOption = dialogOption;
 			this.dialogMessageId = dialogMessageId;
@@ -576,8 +608,8 @@ public class CommunicationManagerService {
 
 			for (int i = 0; i < ImplementationConstants.EMAIL_SENDING_RETRIES; i++) {
 				try {
-					TimeUnit.SECONDS
-							.sleep(ImplementationConstants.EMAIL_SENDING_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS);
+					TimeUnit.SECONDS.sleep(
+							ImplementationConstants.EMAIL_SENDING_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS);
 				} catch (final InterruptedException e) {
 					log.warn("Interrupted messaging sending approach {}", i);
 
@@ -682,7 +714,8 @@ public class CommunicationManagerService {
 					break;
 				case EXTERNAL_ID:
 				case SUPERVISOR_EXTERNAL_ID:
-					log.error("An external ID message was tried to be sent by a mailing thread. This should never happen!");
+					log.error(
+							"An external ID message was tried to be sent by a mailing thread. This should never happen!");
 					break;
 			}
 

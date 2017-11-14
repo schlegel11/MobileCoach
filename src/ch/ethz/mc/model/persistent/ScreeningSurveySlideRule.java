@@ -174,11 +174,12 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 					.getScreeningSurveySlide(nextScreeningSurveySlideWhenTrue);
 			if (slideWhenTrue != null) {
 				slideNameWhenTrue = (slideWhenTrue.getTitleWithPlaceholders()
-						.toString().equals("") ? ImplementationConstants.DEFAULT_OBJECT_NAME
-						: slideWhenTrue.getTitleWithPlaceholders()
-								.toShortenedString(20))
-						+ (!slideWhenTrue.getComment().equals("") ? " ("
-								+ slideWhenTrue.getComment() + ")" : "");
+						.toString().equals("")
+								? ImplementationConstants.DEFAULT_OBJECT_NAME
+								: slideWhenTrue.getTitleWithPlaceholders()
+										.toShortenedString(20))
+						+ (!slideWhenTrue.getComment().equals("")
+								? " (" + slideWhenTrue.getComment() + ")" : "");
 			}
 		}
 		if (nextScreeningSurveySlideWhenFalse != null) {
@@ -187,37 +188,43 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 					.getScreeningSurveySlide(nextScreeningSurveySlideWhenFalse);
 			if (slideWhenFalse != null) {
 				slideNameWhenFalse = (slideWhenFalse.getTitleWithPlaceholders()
-						.toString().equals("") ? ImplementationConstants.DEFAULT_OBJECT_NAME
-						: slideWhenFalse.getTitleWithPlaceholders()
-								.toShortenedString(20))
-						+ (!slideWhenFalse.getComment().equals("") ? " ("
-								+ slideWhenFalse.getComment() + ")" : "");
+						.toString().equals("")
+								? ImplementationConstants.DEFAULT_OBJECT_NAME
+								: slideWhenFalse.getTitleWithPlaceholders()
+										.toShortenedString(20))
+						+ (!slideWhenFalse.getComment().equals("")
+								? " (" + slideWhenFalse.getComment() + ")"
+								: "");
 			}
 		}
 
-		val screeningSurveySlide = new UIScreeningSurveySlideRule(
-				order,
+		val screeningSurveySlide = new UIScreeningSurveySlideRule(order,
 				StringUtils.repeat(" → ", level)
 						+ StringHelpers.createRuleName(this, true),
-				storeValueToVariableWithName == null ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
-						: Messages
-								.getAdminString(
-										AdminMessageStrings.SCREENING_SURVEY_SLIDE_RULE_EDITING__VALUE_TO_VARIABLE,
-										valueToStoreToVariable,
-										storeValueToVariableWithName),
-				isShowSameSlideBecauseValueNotValidWhenTrue() ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-				nextScreeningSurveySlideWhenTrue != null ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-						+ ": " + slideNameWhenTrue : Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NO),
-				nextScreeningSurveySlideWhenFalse != null ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
-						+ ": " + slideNameWhenFalse : Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NO));
+				storeValueToVariableWithName == null
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NOT_SET)
+						: Messages.getAdminString(
+								AdminMessageStrings.SCREENING_SURVEY_SLIDE_RULE_EDITING__VALUE_TO_VARIABLE,
+								valueToStoreToVariable,
+								storeValueToVariableWithName),
+				isShowSameSlideBecauseValueNotValidWhenTrue()
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__YES)
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NO),
+				nextScreeningSurveySlideWhenTrue != null
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__YES) + ": "
+								+ slideNameWhenTrue
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NO),
+				nextScreeningSurveySlideWhenFalse != null
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__YES) + ": "
+								+ slideNameWhenFalse
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NO));
 
 		screeningSurveySlide.setRelatedModelObject(this);
 
@@ -261,8 +268,9 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 			if (slide != null) {
 				table += wrapRow(wrapHeader("Slide to go when TRUE:", style)
 						+ wrapField(escape(slide.getTitleWithPlaceholders())
-								+ escape(!slide.getComment().equals("") ? " ("
-										+ slide.getComment() + ")" : "")));
+								+ escape(!slide.getComment().equals("")
+										? " (" + slide.getComment() + ")"
+										: "")));
 			} else {
 				table += wrapRow(wrapHeader("Slide to go when TRUE:", style)
 						+ wrapField(formatWarning("Slide set, but not found")));
@@ -274,16 +282,18 @@ public class ScreeningSurveySlideRule extends AbstractRule {
 			if (slide != null) {
 				table += wrapRow(wrapHeader("Slide to go when FALSE:", style)
 						+ wrapField(escape(slide.getTitleWithPlaceholders())
-								+ escape(!slide.getComment().equals("") ? " ("
-										+ slide.getComment() + ")" : "")));
+								+ escape(!slide.getComment().equals("")
+										? " (" + slide.getComment() + ")"
+										: "")));
 			} else {
 				table += wrapRow(wrapHeader("Slide to go when FALSE:", style)
 						+ wrapField(formatWarning("Slide set, but not found")));
 			}
 		}
-		table += wrapRow(wrapHeader("Show same slide when TRUE (Validation):",
-				style)
-				+ wrapField(formatYesNo(showSameSlideBecauseValueNotValidWhenTrue)));
+		table += wrapRow(
+				wrapHeader("Show same slide when TRUE (Validation):", style)
+						+ wrapField(formatYesNo(
+								showSameSlideBecauseValueNotValidWhenTrue)));
 
 		return wrapTable(table);
 	}

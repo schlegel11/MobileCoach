@@ -40,7 +40,8 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class InterventionVariablesEditComponent extends AbstractCustomComponent {
+public class InterventionVariablesEditComponent
+		extends AbstractCustomComponent {
 
 	/*- VaadinEditorProperties={"grid":"RegularGrid,20","showGrid":true,"snapToGrid":true,"snapToObject":true,"movingGuides":false,"snappingDistance":10} */
 
@@ -78,11 +79,9 @@ public class InterventionVariablesEditComponent extends AbstractCustomComponent 
 		localize(newButton, AdminMessageStrings.GENERAL__NEW);
 		localize(renameButton, AdminMessageStrings.GENERAL__RENAME);
 		localize(editButton, AdminMessageStrings.GENERAL__EDIT);
-		localize(
-				switchPrivacyButton,
+		localize(switchPrivacyButton,
 				AdminMessageStrings.INTERVENTION_VARIABLES_EDITING__SWITCH_PRIVACY_BUTTON);
-		localize(
-				switchAccessButton,
+		localize(switchAccessButton,
 				AdminMessageStrings.INTERVENTION_VARIABLES_EDITING__SWITCH_ACCESS_BUTTON);
 		localize(deleteButton, AdminMessageStrings.GENERAL__DELETE);
 

@@ -46,7 +46,7 @@ import com.google.gson.JsonObject;
 @Path("/v02/deepstream")
 @Log4j2
 public class DeepstreamServiceV02 extends AbstractServiceV02 {
-	private final Gson	gson;
+	private final Gson gson;
 
 	public DeepstreamServiceV02(final RESTManagerService restManagerService) {
 		super(restManagerService);
@@ -90,8 +90,8 @@ public class DeepstreamServiceV02 extends AbstractServiceV02 {
 					.getAsString();
 			val role = authData.get(DeepstreamConstants.REST_FIELD_ROLE)
 					.getAsString();
-			val interventionPassword = authData.get(
-					DeepstreamConstants.REST_FIELD_INTERVENTION_PASSWORD)
+			val interventionPassword = authData
+					.get(DeepstreamConstants.REST_FIELD_INTERVENTION_PASSWORD)
 					.getAsString();
 
 			// Check access
@@ -122,10 +122,10 @@ public class DeepstreamServiceV02 extends AbstractServiceV02 {
 			return Response.status(Status.OK).entity(gson.toJson(responseData))
 					.build();
 		} catch (final Exception e) {
-			throw new WebApplicationException(
-					Response.status(Status.FORBIDDEN)
-							.entity("Could not authorize server/participant/supervisor for deepstream access: "
-									+ e.getMessage()).build());
+			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
+					.entity("Could not authorize server/participant/supervisor for deepstream access: "
+							+ e.getMessage())
+					.build());
 		}
 	}
 
@@ -142,23 +142,24 @@ public class DeepstreamServiceV02 extends AbstractServiceV02 {
 
 			String nickname = null;
 			if (jsonPayload.has(DeepstreamConstants.REST_FIELD_NICKNAME)) {
-				nickname = jsonPayload.get(
-						DeepstreamConstants.REST_FIELD_NICKNAME).getAsString();
+				nickname = jsonPayload
+						.get(DeepstreamConstants.REST_FIELD_NICKNAME)
+						.getAsString();
 			}
 			String relatedParticipant = null;
 			if (jsonPayload.has(DeepstreamConstants.REST_FIELD_PARTICIPANT)) {
-				relatedParticipant = jsonPayload.get(
-						DeepstreamConstants.REST_FIELD_PARTICIPANT)
+				relatedParticipant = jsonPayload
+						.get(DeepstreamConstants.REST_FIELD_PARTICIPANT)
 						.getAsString();
 			}
-			val interventionPattern = jsonPayload.get(
-					DeepstreamConstants.REST_FIELD_INTERVENTION_PATTERN)
+			val interventionPattern = jsonPayload
+					.get(DeepstreamConstants.REST_FIELD_INTERVENTION_PATTERN)
 					.getAsString();
-			val interventionPassword = jsonPayload.get(
-					DeepstreamConstants.REST_FIELD_INTERVENTION_PASSWORD)
+			val interventionPassword = jsonPayload
+					.get(DeepstreamConstants.REST_FIELD_INTERVENTION_PASSWORD)
 					.getAsString();
-			val requestedRole = jsonPayload.get(
-					DeepstreamConstants.REST_FIELD_ROLE).getAsString();
+			val requestedRole = jsonPayload
+					.get(DeepstreamConstants.REST_FIELD_ROLE).getAsString();
 
 			// Create participant or supervisor
 			val externalRegistration = restManagerService.createDeepstreamUser(
@@ -182,10 +183,10 @@ public class DeepstreamServiceV02 extends AbstractServiceV02 {
 			return Response.status(Status.OK).entity(gson.toJson(responseData))
 					.build();
 		} catch (final Exception e) {
-			throw new WebApplicationException(
-					Response.status(Status.FORBIDDEN)
-							.entity("Could not create participant/supervisor for deepstream access: "
-									+ e.getMessage()).build());
+			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
+					.entity("Could not create participant/supervisor for deepstream access: "
+							+ e.getMessage())
+					.build());
 		}
 	}
 }

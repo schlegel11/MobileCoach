@@ -171,8 +171,9 @@ public class MonitoringMessageGroup extends ModelObject {
 				+ wrapField(formatYesNo(messagesExpectAnswer)));
 		table += wrapRow(wrapHeader("Send in random order:")
 				+ wrapField(formatYesNo(sendInRandomOrder)));
-		table += wrapRow(wrapHeader("Send from same position if sending as reply:")
-				+ wrapField(formatYesNo(sendInRandomOrder)));
+		table += wrapRow(
+				wrapHeader("Send from same position if sending as reply:")
+						+ wrapField(formatYesNo(sendInRandomOrder)));
 		table += wrapRow(wrapHeader("Validation Expression:")
 				+ wrapField(escape(validationExpression)));
 
@@ -187,8 +188,8 @@ public class MonitoringMessageGroup extends ModelObject {
 		}
 
 		if (buffer.length() > 0) {
-			table += wrapRow(wrapHeader("Messages:")
-					+ wrapField(buffer.toString()));
+			table += wrapRow(
+					wrapHeader("Messages:") + wrapField(buffer.toString()));
 		}
 
 		return wrapTable(table);

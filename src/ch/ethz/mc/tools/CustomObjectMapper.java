@@ -62,8 +62,8 @@ public class CustomObjectMapper extends ObjectMapper {
 		 */
 		@Override
 		public void serialize(final ObjectId value, final JsonGenerator jgen,
-				final SerializerProvider provider) throws IOException,
-				JsonProcessingException {
+				final SerializerProvider provider)
+				throws IOException, JsonProcessingException {
 			jgen.writeString(value.toString());
 		}
 	}

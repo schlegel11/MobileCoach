@@ -42,7 +42,8 @@ public class UIFeedback extends UIModelObject {
 	}
 
 	public static String[] getColumnHeaders() {
-		return new String[] { localize(AdminMessageStrings.UI_COLUMNS__FEEDBACK) };
+		return new String[] {
+				localize(AdminMessageStrings.UI_COLUMNS__FEEDBACK) };
 	}
 
 	public static String getSortColumn() {

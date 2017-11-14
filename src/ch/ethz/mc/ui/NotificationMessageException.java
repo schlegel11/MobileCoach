@@ -27,7 +27,7 @@ import ch.ethz.mc.conf.Messages;
 @SuppressWarnings("serial")
 public class NotificationMessageException extends Exception {
 	@Getter
-	private final AdminMessageStrings	notificationMessage;
+	private final AdminMessageStrings notificationMessage;
 
 	public NotificationMessageException(
 			final AdminMessageStrings notificationMessage) {

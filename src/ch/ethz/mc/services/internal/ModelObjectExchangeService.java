@@ -114,17 +114,17 @@ public class ModelObjectExchangeService {
 			log.debug("Exporting model object {}", modelObject);
 
 			final ExchangeModelObject exchangeModelObject = new ExchangeModelObject(
-					modelObject.getClass().getSimpleName(), modelObject
-							.getClass().getName(), modelObject.getId()
-							.toString(), modelObject.toJSONString());
+					modelObject.getClass().getSimpleName(),
+					modelObject.getClass().getName(),
+					modelObject.getId().toString(), modelObject.toJSONString());
 
 			// Determine if the model object contains also files that need to be
 			// exported
 			if (modelObject instanceof MediaObject) {
 				final MediaObject mediaObject = (MediaObject) modelObject;
 				if (mediaObject.getFileReference() != null) {
-					exchangeModelObject.setFileReference(mediaObject
-							.getFileReference());
+					exchangeModelObject
+							.setFileReference(mediaObject.getFileReference());
 					exchangeModelObject
 							.setFileReferenceSetMethod("setFileReference");
 				}
@@ -135,15 +135,13 @@ public class ModelObjectExchangeService {
 			for (val method : modelObject.getClass().getMethods()) {
 				if (method.getName().startsWith("set")
 						&& method.getParameterTypes().length == 1
-						&& method.getParameterTypes()[0].getName().equals(
-								ObjectId.class.getName())) {
+						&& method.getParameterTypes()[0].getName()
+								.equals(ObjectId.class.getName())) {
 					Method appropriateGetMethod;
 					final String objectIdString;
 					try {
-						appropriateGetMethod = modelObject.getClass()
-								.getMethod(
-										method.getName().replaceFirst("set",
-												"get"));
+						appropriateGetMethod = modelObject.getClass().getMethod(
+								method.getName().replaceFirst("set", "get"));
 						final ObjectId objectId = (ObjectId) appropriateGetMethod
 								.invoke(modelObject);
 
@@ -160,12 +158,12 @@ public class ModelObjectExchangeService {
 					}
 					log.debug(
 							"Method {} contains object id {} in model object {} with object id {}",
-							method.getName(), objectIdString, modelObject
-									.getClass().getSimpleName(), modelObject
-									.getId());
+							method.getName(), objectIdString,
+							modelObject.getClass().getSimpleName(),
+							modelObject.getId());
 					exchangeModelObject
-							.getObjectIdSetMethodsWithAppropriateValues().put(
-									method.getName(), objectIdString);
+							.getObjectIdSetMethodsWithAppropriateValues()
+							.put(method.getName(), objectIdString);
 				}
 			}
 
@@ -210,7 +208,8 @@ public class ModelObjectExchangeService {
 				try {
 					log.debug(
 							"Setting new file reference {} to model object {}",
-							exchangeModelObject.getFileReference(), modelObject);
+							exchangeModelObject.getFileReference(),
+							modelObject);
 					final Method method = modelObject.getClass().getMethod(
 							exchangeModelObject.getFileReferenceSetMethod(),
 							String.class);
@@ -219,7 +218,8 @@ public class ModelObjectExchangeService {
 				} catch (final Exception e) {
 					log.error(
 							"Could not set new file reference {} to model object {}",
-							exchangeModelObject.getFileReference(), modelObject);
+							exchangeModelObject.getFileReference(),
+							modelObject);
 				}
 			}
 
@@ -244,7 +244,8 @@ public class ModelObjectExchangeService {
 			final ObjectId modelObjectToCheckIfIsReferencedNewObjectId = modelObjectToCheckIfIsReferenced
 					.getId();
 			final ExchangeModelObject exchangeModelObjectOfModelObjectToCheckIfIsReferenced = exchangeModelObjects
-					.get(modelObjects.indexOf(modelObjectToCheckIfIsReferenced));
+					.get(modelObjects
+							.indexOf(modelObjectToCheckIfIsReferenced));
 			final String modelObjectToCheckIfIsReferencedOldObjectId = exchangeModelObjectOfModelObjectToCheckIfIsReferenced
 					.getObjectId();
 
@@ -252,14 +253,14 @@ public class ModelObjectExchangeService {
 			for (val toCheckExchangeModelObject : exchangeModelObjects) {
 				log.debug("Checking {}", toCheckExchangeModelObject);
 				for (val methodName : toCheckExchangeModelObject
-						.getObjectIdSetMethodsWithAppropriateValues().keySet()) {
+						.getObjectIdSetMethodsWithAppropriateValues()
+						.keySet()) {
 					log.debug("Checking method {}", methodName);
 					final String oldObjectId = toCheckExchangeModelObject
-							.getObjectIdSetMethodsWithAppropriateValues().get(
-									methodName);
-					if (!oldObjectId.equals("")
-							&& oldObjectId
-									.equals(modelObjectToCheckIfIsReferencedOldObjectId)) {
+							.getObjectIdSetMethodsWithAppropriateValues()
+							.get(methodName);
+					if (!oldObjectId.equals("") && oldObjectId.equals(
+							modelObjectToCheckIfIsReferencedOldObjectId)) {
 						toCheckExchangeModelObject
 								.getObjectIdSetMethodsWithAppropriateValues()
 								.put(methodName, "");
@@ -273,14 +274,14 @@ public class ModelObjectExchangeService {
 						final Method methodToAdjustObjectIdReference;
 						try {
 							methodToAdjustObjectIdReference = modelObjectToAdjust
-									.getClass().getMethod(methodName,
-											ObjectId.class);
+									.getClass()
+									.getMethod(methodName, ObjectId.class);
 						} catch (final Exception e) {
 							log.error(
 									"Could not find method to adapt reference on object {}: {}",
 									toCheckExchangeModelObject
-											.getPackageAndClazz(), e
-											.getMessage());
+											.getPackageAndClazz(),
+									e.getMessage());
 							continue;
 						}
 
@@ -290,15 +291,15 @@ public class ModelObjectExchangeService {
 									modelObjectToAdjust.getId(),
 									methodToAdjustObjectIdReference.getName(),
 									modelObjectToCheckIfIsReferencedNewObjectId);
-							methodToAdjustObjectIdReference
-									.invoke(modelObjectToAdjust,
-											modelObjectToCheckIfIsReferencedNewObjectId);
+							methodToAdjustObjectIdReference.invoke(
+									modelObjectToAdjust,
+									modelObjectToCheckIfIsReferencedNewObjectId);
 						} catch (final Exception e) {
 							log.error(
 									"Could not adjust referenced object id on object {}: {}",
 									toCheckExchangeModelObject
-											.getPackageAndClazz(), e
-											.getMessage());
+											.getPackageAndClazz(),
+									e.getMessage());
 							continue;
 						}
 
@@ -347,8 +348,8 @@ public class ModelObjectExchangeService {
 		val fileOutputStream = new FileOutputStream(zipFile);
 		@Cleanup
 		val zipOutputStream = new ZipOutputStream(fileOutputStream);
-		zipOutputStream.setComment(exchangeFormat.toString() + ","
-				+ Constants.DATA_MODEL_VERSION);
+		zipOutputStream.setComment(
+				exchangeFormat.toString() + "," + Constants.DATA_MODEL_VERSION);
 
 		for (val exchangeModelObject : exchangeModelObjects) {
 			// Care for linked files
@@ -424,12 +425,11 @@ public class ModelObjectExchangeService {
 		log.debug("File is {} in version {}", exchangeFormat, dataModelVersion);
 
 		if (!exchangeFormat.equals(expectedExchangeFormat.toString())) {
-			log.warn(
-					"Wrong exchange format provided: {} expected, {} received",
+			log.warn("Wrong exchange format provided: {} expected, {} received",
 					expectedExchangeFormat, exchangeFormat);
-			throw new IOException("Wrong exchange format provided: "
-					+ expectedExchangeFormat + " expected, " + exchangeFormat
-					+ " received");
+			throw new IOException(
+					"Wrong exchange format provided: " + expectedExchangeFormat
+							+ " expected, " + exchangeFormat + " received");
 		}
 
 		if (dataModelVersion != -1
@@ -453,15 +453,15 @@ public class ModelObjectExchangeService {
 				// Extracting file
 				String fileExtension;
 				if (zipEntry.getName().lastIndexOf(".") > -1) {
-					fileExtension = zipEntry.getName().substring(
-							zipEntry.getName().lastIndexOf("."));
+					fileExtension = zipEntry.getName()
+							.substring(zipEntry.getName().lastIndexOf("."));
 				} else {
 					fileExtension = ".unknown";
 				}
 
 				@Cleanup("delete")
-				final File temporaryFile = File.createTempFile("MC_", ".temp"
-						+ fileExtension);
+				final File temporaryFile = File.createTempFile("MC_",
+						".temp" + fileExtension);
 				@Cleanup
 				final FileOutputStream fileOutputStream = new FileOutputStream(
 						temporaryFile);
@@ -473,7 +473,8 @@ public class ModelObjectExchangeService {
 				final String newFileReference = fileStorageManagerService
 						.storeFile(temporaryFile, FILE_STORES.STORAGE);
 
-				final String oldFileReference = zipEntry.getName().split(" ")[1];
+				final String oldFileReference = zipEntry.getName()
+						.split(" ")[1];
 
 				oldToNewFileReferencesHashtable.put(oldFileReference,
 						newFileReference);
@@ -488,14 +489,14 @@ public class ModelObjectExchangeService {
 				zipEntryInputStream.read(exchangeModelObjectBytes);
 
 				final ExchangeModelObject exchangeModelObject = ExchangeModelObject
-						.fromJSONString(new String(exchangeModelObjectBytes,
-								"UTF-8"));
+						.fromJSONString(
+								new String(exchangeModelObjectBytes, "UTF-8"));
 
 				// Adjusting file reference from old to new
 				if (exchangeModelObject.getFileReference() != null) {
-					exchangeModelObject
-							.setFileReference(oldToNewFileReferencesHashtable
-									.get(exchangeModelObject.getFileReference()));
+					exchangeModelObject.setFileReference(
+							oldToNewFileReferencesHashtable.get(
+									exchangeModelObject.getFileReference()));
 				}
 
 				exchangeModelObjects.add(exchangeModelObject);

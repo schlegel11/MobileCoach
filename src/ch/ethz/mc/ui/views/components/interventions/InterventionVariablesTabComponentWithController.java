@@ -48,8 +48,8 @@ import com.vaadin.ui.Button.ClickEvent;
  */
 @SuppressWarnings("serial")
 @Log4j2
-public class InterventionVariablesTabComponentWithController extends
-		InterventionVariablesTabComponent {
+public class InterventionVariablesTabComponentWithController
+		extends InterventionVariablesTabComponent {
 
 	private final Intervention										intervention;
 
@@ -71,18 +71,19 @@ public class InterventionVariablesTabComponentWithController extends
 
 		// table content
 		val variablesOfIntervention = getInterventionAdministrationManagerService()
-				.getAllInterventionVariablesOfIntervention(intervention.getId());
+				.getAllInterventionVariablesOfIntervention(
+						intervention.getId());
 
 		beanContainer = createBeanContainerForModelObjects(
 				UIInterventionVariable.class, variablesOfIntervention);
 
 		variablesTable.setContainerDataSource(beanContainer);
-		variablesTable.setSortContainerPropertyId(UIInterventionVariable
-				.getSortColumn());
-		variablesTable.setVisibleColumns(UIInterventionVariable
-				.getVisibleColumns());
-		variablesTable.setColumnHeaders(UIInterventionVariable
-				.getColumnHeaders());
+		variablesTable.setSortContainerPropertyId(
+				UIInterventionVariable.getSortColumn());
+		variablesTable
+				.setVisibleColumns(UIInterventionVariable.getVisibleColumns());
+		variablesTable
+				.setColumnHeaders(UIInterventionVariable.getColumnHeaders());
 
 		// handle table selection change
 		variablesTable.addValueChangeListener(new ValueChangeListener() {
@@ -108,18 +109,18 @@ public class InterventionVariablesTabComponentWithController extends
 
 		// handle buttons
 		val buttonClickListener = new ButtonClickListener();
-		interventionVariablesEditComponent.getNewButton().addClickListener(
-				buttonClickListener);
-		interventionVariablesEditComponent.getRenameButton().addClickListener(
-				buttonClickListener);
-		interventionVariablesEditComponent.getEditButton().addClickListener(
-				buttonClickListener);
+		interventionVariablesEditComponent.getNewButton()
+				.addClickListener(buttonClickListener);
+		interventionVariablesEditComponent.getRenameButton()
+				.addClickListener(buttonClickListener);
+		interventionVariablesEditComponent.getEditButton()
+				.addClickListener(buttonClickListener);
 		interventionVariablesEditComponent.getSwitchPrivacyButton()
 				.addClickListener(buttonClickListener);
 		interventionVariablesEditComponent.getSwitchAccessButton()
 				.addClickListener(buttonClickListener);
-		interventionVariablesEditComponent.getDeleteButton().addClickListener(
-				buttonClickListener);
+		interventionVariablesEditComponent.getDeleteButton()
+				.addClickListener(buttonClickListener);
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
@@ -127,7 +128,8 @@ public class InterventionVariablesTabComponentWithController extends
 		public void buttonClick(final ClickEvent event) {
 			val accessControlEditComponent = getInterventionVariablesEditComponent();
 
-			if (event.getButton() == accessControlEditComponent.getNewButton()) {
+			if (event.getButton() == accessControlEditComponent
+					.getNewButton()) {
 				createVariable();
 			} else if (event.getButton() == accessControlEditComponent
 					.getRenameButton()) {
@@ -170,14 +172,13 @@ public class InterventionVariablesTabComponentWithController extends
 
 						// Adapt UI
 						beanContainer.addItem(newVariable.getId(),
-								UIInterventionVariable.class.cast(newVariable
-										.toUIModelObject()));
+								UIInterventionVariable.class
+										.cast(newVariable.toUIModelObject()));
 						getInterventionVariablesEditComponent()
 								.getVariablesTable()
 								.select(newVariable.getId());
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__VARIABLE_CREATED);
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__VARIABLE_CREATED);
 
 						closeWindow();
 					}
@@ -190,14 +191,15 @@ public class InterventionVariablesTabComponentWithController extends
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_NAME_FOR_VARIABLE,
 				selectedUIVariable.getRelatedModelObject(
-						InterventionVariableWithValue.class).getName(), null,
-				new ShortStringEditComponent(),
+						InterventionVariableWithValue.class).getName(),
+				null, new ShortStringEditComponent(),
 				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						try {
 							val selectedVariable = selectedUIVariable
-									.getRelatedModelObject(InterventionVariableWithValue.class);
+									.getRelatedModelObject(
+											InterventionVariableWithValue.class);
 
 							// Change name
 							getInterventionAdministrationManagerService()
@@ -210,14 +212,14 @@ public class InterventionVariablesTabComponentWithController extends
 
 						// Adapt UI
 						getStringItemProperty(selectedUIVariableBeanItem,
-								UIInterventionVariable.NAME).setValue(
-								selectedUIVariable.getRelatedModelObject(
-										InterventionVariableWithValue.class)
-										.getName());
+								UIInterventionVariable.NAME)
+										.setValue(selectedUIVariable
+												.getRelatedModelObject(
+														InterventionVariableWithValue.class)
+												.getName());
 
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__VARIABLE_RENAMED);
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__VARIABLE_RENAMED);
 						closeWindow();
 					}
 				}, null);
@@ -252,11 +254,11 @@ public class InterventionVariablesTabComponentWithController extends
 
 			// Adapt UI
 			getStringItemProperty(selectedUIVariableBeanItem,
-					UIInterventionVariable.PRIVACY_TYPE).setValue(
-					selectedUIVariable
-							.getRelatedModelObject(
-									InterventionVariableWithValue.class)
-							.getPrivacyType().toString());
+					UIInterventionVariable.PRIVACY_TYPE)
+							.setValue(selectedUIVariable
+									.getRelatedModelObject(
+											InterventionVariableWithValue.class)
+									.getPrivacyType().toString());
 
 			getAdminUI().showInformationNotification(
 					AdminMessageStrings.NOTIFICATION__VARIABLE_SETTING_CHANGED);
@@ -296,11 +298,11 @@ public class InterventionVariablesTabComponentWithController extends
 
 			// Adapt UI
 			getStringItemProperty(selectedUIVariableBeanItem,
-					UIInterventionVariable.ACCESS_TYPE).setValue(
-					selectedUIVariable
-							.getRelatedModelObject(
-									InterventionVariableWithValue.class)
-							.getAccessType().toString());
+					UIInterventionVariable.ACCESS_TYPE)
+							.setValue(selectedUIVariable
+									.getRelatedModelObject(
+											InterventionVariableWithValue.class)
+									.getAccessType().toString());
 
 			getAdminUI().showInformationNotification(
 					AdminMessageStrings.NOTIFICATION__VARIABLE_SETTING_CHANGED);
@@ -315,14 +317,15 @@ public class InterventionVariablesTabComponentWithController extends
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_VALUE_FOR_VARIABLE,
 				selectedUIVariable.getRelatedModelObject(
-						InterventionVariableWithValue.class).getValue(), null,
-				new ShortStringEditComponent(),
+						InterventionVariableWithValue.class).getValue(),
+				null, new ShortStringEditComponent(),
 				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						try {
 							val selectedVariable = selectedUIVariable
-									.getRelatedModelObject(InterventionVariableWithValue.class);
+									.getRelatedModelObject(
+											InterventionVariableWithValue.class);
 
 							// Change name
 							getInterventionAdministrationManagerService()
@@ -335,14 +338,14 @@ public class InterventionVariablesTabComponentWithController extends
 
 						// Adapt UI
 						getStringItemProperty(selectedUIVariableBeanItem,
-								UIInterventionVariable.VALUE).setValue(
-								selectedUIVariable.getRelatedModelObject(
-										InterventionVariableWithValue.class)
-										.getValue());
+								UIInterventionVariable.VALUE)
+										.setValue(selectedUIVariable
+												.getRelatedModelObject(
+														InterventionVariableWithValue.class)
+												.getValue());
 
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__VARIABLE_VALUE_CHANGED);
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__VARIABLE_VALUE_CHANGED);
 						closeWindow();
 					}
 				}, null);
@@ -355,7 +358,9 @@ public class InterventionVariablesTabComponentWithController extends
 			@Override
 			public void buttonClick(final ClickEvent event) {
 				try {
-					val selectedVariable = selectedUIVariable.getRelatedModelObject(InterventionVariableWithValue.class);
+					val selectedVariable = selectedUIVariable
+							.getRelatedModelObject(
+									InterventionVariableWithValue.class);
 
 					// Delete variable
 					getInterventionAdministrationManagerService()
@@ -369,10 +374,10 @@ public class InterventionVariablesTabComponentWithController extends
 
 				// Adapt UI
 				getInterventionVariablesEditComponent().getVariablesTable()
-						.removeItem(
-								selectedUIVariable.getRelatedModelObject(
+						.removeItem(selectedUIVariable
+								.getRelatedModelObject(
 										InterventionVariableWithValue.class)
-										.getId());
+								.getId());
 				getAdminUI().showInformationNotification(
 						AdminMessageStrings.NOTIFICATION__VARIABLE_DELETED);
 

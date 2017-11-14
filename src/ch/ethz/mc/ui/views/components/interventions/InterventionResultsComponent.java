@@ -50,7 +50,8 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class InterventionResultsComponent extends AbstractClosableEditComponent {
+public class InterventionResultsComponent
+		extends AbstractClosableEditComponent {
 
 	/*- VaadinEditorProperties={"grid":"RegularGrid,20","showGrid":true,"snapToGrid":true,"snapToObject":true,"movingGuides":false,"snappingDistance":10} */
 
@@ -103,13 +104,15 @@ public class InterventionResultsComponent extends AbstractClosableEditComponent 
 		// manually added
 		localize(refreshButton, AdminMessageStrings.GENERAL__REFRESH);
 		localize(sendMessageButton, AdminMessageStrings.RESULTS__SEND_MESSAGE);
-		localize(exportDataButton, AdminMessageStrings.RESULTS__EXPORT_ALL_DATA);
+		localize(exportDataButton,
+				AdminMessageStrings.RESULTS__EXPORT_ALL_DATA);
 		localize(variablesLabel, AdminMessageStrings.RESULTS__VARIABLES_LABEL);
 		localize(editButton, AdminMessageStrings.GENERAL__EDIT);
 		localize(variablesExportButton, AdminMessageStrings.GENERAL__EXPORT);
 		localize(messageDialogLabel,
 				AdminMessageStrings.RESULTS__MESSAGE_DIALOG_LABEL);
-		localize(messageDialogExportButton, AdminMessageStrings.GENERAL__EXPORT);
+		localize(messageDialogExportButton,
+				AdminMessageStrings.GENERAL__EXPORT);
 		localize(closeButton, AdminMessageStrings.GENERAL__CLOSE);
 
 		// set button start state
@@ -138,11 +141,12 @@ public class InterventionResultsComponent extends AbstractClosableEditComponent 
 						} else {
 							return "inactive";
 						}
-					} else if (propertyId
-							.equals(UIParticipant.DATA_FOR_MONITORING_AVAILABLE)) {
+					} else if (propertyId.equals(
+							UIParticipant.DATA_FOR_MONITORING_AVAILABLE)) {
 						val uiParticipant = getUIModelObjectFromTableByObjectId(
 								source, UIParticipant.class, itemId);
-						if (uiParticipant.isBooleanDataForMonitoringAvailable()) {
+						if (uiParticipant
+								.isBooleanDataForMonitoringAvailable()) {
 							return "active";
 						} else {
 							return "inactive";
@@ -170,7 +174,8 @@ public class InterventionResultsComponent extends AbstractClosableEditComponent 
 	}
 
 	@Override
-	public void registerCancelButtonListener(final ClickListener clickListener) {
+	public void registerCancelButtonListener(
+			final ClickListener clickListener) {
 		// Not required
 	}
 
@@ -251,8 +256,8 @@ public class InterventionResultsComponent extends AbstractClosableEditComponent 
 		variablesLabel.setImmediate(false);
 		variablesLabel.setWidth("-1px");
 		variablesLabel.setHeight("-1px");
-		variablesLabel
-				.setValue("!!! Variables with values of selected participants:");
+		variablesLabel.setValue(
+				"!!! Variables with values of selected participants:");
 		mainLayout.addComponent(variablesLabel);
 
 		// variablesTable
@@ -317,8 +322,8 @@ public class InterventionResultsComponent extends AbstractClosableEditComponent 
 		// sendMessageButton
 		sendMessageButton = new Button();
 		sendMessageButton.setCaption("!!! Send Message");
-		sendMessageButton.setIcon(new ThemeResource(
-				"img/message-icon-small.png"));
+		sendMessageButton
+				.setIcon(new ThemeResource("img/message-icon-small.png"));
 		sendMessageButton.setImmediate(true);
 		sendMessageButton.setWidth("150px");
 		sendMessageButton.setHeight("-1px");

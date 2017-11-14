@@ -113,15 +113,8 @@ public class ImageCachingService {
 			final int height, final boolean withWatermark,
 			final boolean withCropping) {
 		final String key = sourceImageFile.getAbsoluteFile().getParentFile()
-				.getName()
-				+ "-"
-				+ width
-				+ "-"
-				+ height
-				+ "-"
-				+ withWatermark
-				+ "-"
-				+ withCropping;
+				.getName() + "-" + width + "-" + height + "-" + withWatermark
+				+ "-" + withCropping;
 
 		log.debug("Requesting image with key '{}'", key);
 
@@ -177,7 +170,8 @@ public class ImageCachingService {
 					.asBufferedImage();
 
 			// Handle transparent images
-			if (readImage.getColorModel().getTransparency() != Transparency.OPAQUE) {
+			if (readImage.getColorModel()
+					.getTransparency() != Transparency.OPAQUE) {
 				readImage = redrawWithHandlingOfTransparentPixels(readImage,
 						Color.WHITE);
 			}
@@ -226,7 +220,8 @@ public class ImageCachingService {
 	 */
 	private void resizeAndWriteFile(BufferedImage image, final int width,
 			final int height, final boolean withWatermark,
-			final File outputFile, final boolean withCropping) throws Exception {
+			final File outputFile, final boolean withCropping)
+			throws Exception {
 		log.debug("Resizing image...");
 
 		// Resize (maintaining ratio)
@@ -263,8 +258,8 @@ public class ImageCachingService {
 		if (withWatermark) {
 			final Graphics2D g2d = (Graphics2D) image.getGraphics();
 			// g2d.drawImage(icon.getImage(), 0, 0, null);
-			final AlphaComposite alpha = AlphaComposite.getInstance(
-					AlphaComposite.SRC_OVER, 0.5f);
+			final AlphaComposite alpha = AlphaComposite
+					.getInstance(AlphaComposite.SRC_OVER, 0.5f);
 			g2d.setComposite(alpha);
 			g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
 					RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
@@ -331,8 +326,8 @@ public class ImageCachingService {
 		log.debug("Writing image...");
 
 		// Encodes image as a JPEG data stream
-		final ImageWriter jpgWriter = ImageIO
-				.getImageWritersByFormatName("jpg").next();
+		final ImageWriter jpgWriter = ImageIO.getImageWritersByFormatName("jpg")
+				.next();
 		final ImageWriteParam jpgWriteParam = jpgWriter.getDefaultWriteParam();
 		jpgWriteParam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
 		jpgWriteParam.setCompressionQuality(quality);

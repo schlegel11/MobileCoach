@@ -30,38 +30,38 @@ public class ThemeImageStrings {
 	private static final String	IMAGE_PATH				= "img/";
 	// IMAGES
 	public static final String	WELCOME_ICON			= IMAGE_PATH
-																+ "welcome-icon.png";
+			+ "welcome-icon.png";
 	public static final String	INTERVENTIONS_ICON		= IMAGE_PATH
-																+ "interventions-icon.png";
+			+ "interventions-icon.png";
 	public static final String	ACCESS_CONTROL_ICON		= IMAGE_PATH
-																+ "access-control-icon.png";
+			+ "access-control-icon.png";
 	public static final String	ACCOUNT_ICON			= IMAGE_PATH
-																+ "account-icon.png";
+			+ "account-icon.png";
 	public static final String	COMPONENT_ICON			= IMAGE_PATH
-																+ "component-icon.png";
+			+ "component-icon.png";
 	public static final String	BLANK_MEDIA_OBJECT		= IMAGE_PATH
-																+ "blank-media-object.png";
+			+ "blank-media-object.png";
 	public static final String	ACTIVE_ICON_SMALL		= IMAGE_PATH
-																+ "active-icon-small.png";
+			+ "active-icon-small.png";
 	public static final String	INACTIVE_ICON_SMALL		= IMAGE_PATH
-																+ "inactive-icon-small.png";
+			+ "inactive-icon-small.png";
 
 	public static final String	MESSAGE_ICON_SMALL		= IMAGE_PATH
-																+ "message-icon-small.png";
+			+ "message-icon-small.png";
 	public static final String	SUPERVISOR_ICON_SMALL	= IMAGE_PATH
-																+ "supervisor-icon-small.png";
+			+ "supervisor-icon-small.png";
 	public static final String	RULE_ICON_SMALL			= IMAGE_PATH
-																+ "rule-icon-small.png";
+			+ "rule-icon-small.png";
 	public static final String	OK_ICON_SMALL			= IMAGE_PATH
-																+ "ok-icon-small.png";
+			+ "ok-icon-small.png";
 	public static final String	CALENDAR_ICON_SMALL		= IMAGE_PATH
-																+ "calendar-icon-small.png";
+			+ "calendar-icon-small.png";
 	public static final String	WATCH_ICON_SMALL		= IMAGE_PATH
-																+ "watch-icon-small.png";
+			+ "watch-icon-small.png";
 	public static final String	BUBBLE_ICON_SMALL		= IMAGE_PATH
-																+ "bubble-icon-small.png";
+			+ "bubble-icon-small.png";
 	public static final String	SIGNS_ICON_SMALL		= IMAGE_PATH
-																+ "signs-icon-small.png";
+			+ "signs-icon-small.png";
 	public static final String	STOP_ICON_SMALL			= IMAGE_PATH
-																+ "stop-icon-small.png";
+			+ "stop-icon-small.png";
 }

@@ -87,8 +87,8 @@ public class LocalizedTextArea extends CustomComponent {
 						currentButton = button;
 
 						if (value != null) {
-							textArea.setValue(value.get((Locale) currentButton
-									.getData()));
+							textArea.setValue(value
+									.get((Locale) currentButton.getData()));
 							textArea.setCursorPosition(0);
 							textArea.setSelectionRange(0, 0);
 						}
@@ -164,15 +164,15 @@ public class LocalizedTextArea extends CustomComponent {
 				textArea.getValue(), textArea.getCursorPosition());
 		try {
 			textArea.setValue(textArea.getValue().substring(0,
-					textArea.getCursorPosition())
-					+ selectedVariable
-					+ textArea.getValue().substring(
-							textArea.getCursorPosition()));
+					textArea.getCursorPosition()) + selectedVariable
+					+ textArea.getValue()
+							.substring(textArea.getCursorPosition()));
 
-			textArea.setCursorPosition(textArea.getCursorPosition()
-					+ selectedVariable.length());
+			textArea.setCursorPosition(
+					textArea.getCursorPosition() + selectedVariable.length());
 		} catch (final Exception e) {
-			log.warn("Error occured while setting variable to string text area...fixing by setting text to the beginning (Workaround for Vaadin time shift)");
+			log.warn(
+					"Error occured while setting variable to string text area...fixing by setting text to the beginning (Workaround for Vaadin time shift)");
 
 			textArea.setValue(textArea.getValue() + selectedVariable);
 

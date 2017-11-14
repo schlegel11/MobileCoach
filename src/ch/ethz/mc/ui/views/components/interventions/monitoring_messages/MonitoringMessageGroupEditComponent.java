@@ -44,8 +44,8 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class MonitoringMessageGroupEditComponent extends
-		AbstractCustomComponent {
+public class MonitoringMessageGroupEditComponent
+		extends AbstractCustomComponent {
 
 	/*- VaadinEditorProperties={"grid":"RegularGrid,20","showGrid":true,"snapToGrid":true,"snapToObject":true,"movingGuides":false,"snappingDistance":10} */
 
@@ -92,18 +92,14 @@ public class MonitoringMessageGroupEditComponent extends
 		setCompositionRoot(mainLayout);
 
 		// manually added
-		localize(
-				messagesExpectAnswerCheckBox,
+		localize(messagesExpectAnswerCheckBox,
 				AdminMessageStrings.MONITORING_MESSAGE_GROUP_EDITING__MESSAGES_EXPECT_TO_BE_ANSWERED_BY_PARTICIPANT);
-		localize(
-				randomOrderCheckBox,
+		localize(randomOrderCheckBox,
 				AdminMessageStrings.MONITORING_MESSAGE_GROUP_EDITING__SEND_MESSAGE_IN_RANDOM_ORDER);
-		localize(
-				sendSamePositionIfSendingAsReplyCheckBox,
+		localize(sendSamePositionIfSendingAsReplyCheckBox,
 				AdminMessageStrings.MONITORING_MESSAGE_GROUP_EDITING__SEND_SAME_POSITION_IF_SENDING_AS_REPLY);
 
-		localize(
-				validationExpressionLabel,
+		localize(validationExpressionLabel,
 				AdminMessageStrings.MONITORING_MESSAGE_GROUP_EDITING__VALIDATION_EXPRESSION_LABEL);
 
 		localize(newButton, AdminMessageStrings.GENERAL__NEW);
@@ -153,8 +149,8 @@ public class MonitoringMessageGroupEditComponent extends
 
 		// messagesExpectAnswerCheckBox
 		messagesExpectAnswerCheckBox = new CheckBox();
-		messagesExpectAnswerCheckBox
-				.setCaption("!!! The messages in this group expect to be answered by the participant");
+		messagesExpectAnswerCheckBox.setCaption(
+				"!!! The messages in this group expect to be answered by the participant");
 		messagesExpectAnswerCheckBox.setImmediate(false);
 		messagesExpectAnswerCheckBox.setWidth("100.0%");
 		messagesExpectAnswerCheckBox.setHeight("-1px");
@@ -170,8 +166,8 @@ public class MonitoringMessageGroupEditComponent extends
 
 		// sendSamePositionIfSendingAsReplyCheckBox
 		sendSamePositionIfSendingAsReplyCheckBox = new CheckBox();
-		sendSamePositionIfSendingAsReplyCheckBox
-				.setCaption("!!! Send message from same position if sending as reply to former message and answer");
+		sendSamePositionIfSendingAsReplyCheckBox.setCaption(
+				"!!! Send message from same position if sending as reply to former message and answer");
 		sendSamePositionIfSendingAsReplyCheckBox.setImmediate(false);
 		sendSamePositionIfSendingAsReplyCheckBox.setWidth("100.0%");
 		sendSamePositionIfSendingAsReplyCheckBox.setHeight("-1px");
@@ -209,8 +205,8 @@ public class MonitoringMessageGroupEditComponent extends
 		validationExpressionLabel.setImmediate(false);
 		validationExpressionLabel.setWidth("-1px");
 		validationExpressionLabel.setHeight("-1px");
-		validationExpressionLabel
-				.setValue("!!! Expression to validate result as correct (optional):");
+		validationExpressionLabel.setValue(
+				"!!! Expression to validate result as correct (optional):");
 		validationExpresionLayout.addComponent(validationExpressionLabel);
 
 		// validationExpressionTextFieldComponent
@@ -274,8 +270,8 @@ public class MonitoringMessageGroupEditComponent extends
 		// moveDownButton
 		moveDownButton = new Button();
 		moveDownButton.setCaption("!!! Move Down");
-		moveDownButton.setIcon(new ThemeResource(
-				"img/arrow-down-icon-small.png"));
+		moveDownButton
+				.setIcon(new ThemeResource("img/arrow-down-icon-small.png"));
 		moveDownButton.setImmediate(true);
 		moveDownButton.setWidth("120px");
 		moveDownButton.setHeight("-1px");

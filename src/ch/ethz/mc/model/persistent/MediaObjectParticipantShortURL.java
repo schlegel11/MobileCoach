@@ -93,13 +93,14 @@ public class MediaObjectParticipantShortURL extends ModelObject {
 	public static long validateURLIdPartAndReturnShortId(final String idPart)
 			throws Exception {
 
-		final String checksum = calculateChecksum(String.valueOf(Long.valueOf(
-				idPart.substring(1), 36)));
+		final String checksum = calculateChecksum(
+				String.valueOf(Long.valueOf(idPart.substring(1), 36)));
 
 		if (checksum.equals(idPart.substring(0, 1))) {
 			return Long.valueOf(idPart.substring(1), 36);
 		} else {
-			throw new Exception("The following id part is not valid: " + idPart);
+			throw new Exception(
+					"The following id part is not valid: " + idPart);
 		}
 	}
 

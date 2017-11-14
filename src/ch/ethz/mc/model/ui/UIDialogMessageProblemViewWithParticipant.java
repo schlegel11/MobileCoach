@@ -91,10 +91,9 @@ public class UIDialogMessageProblemViewWithParticipant extends UIModelObject {
 	private Date				answerReceivedTimestamp;
 
 	public static Object[] getVisibleColumns() {
-		return new Object[] { PARTICIPANT_ID, PARTICIPANT_NAME, LANGUAGE,
-				GROUP, ORGANIZATION, ORGANIZATION_UNIT, SENDER_TYPE, TYPE,
-				MESSAGE, SENT_TIMESTAMP, ANSWER, RAW_ANSWER,
-				ANSWER_RECEIVED_TIMESTAMP };
+		return new Object[] { PARTICIPANT_ID, PARTICIPANT_NAME, LANGUAGE, GROUP,
+				ORGANIZATION, ORGANIZATION_UNIT, SENDER_TYPE, TYPE, MESSAGE,
+				SENT_TIMESTAMP, ANSWER, RAW_ANSWER, ANSWER_RECEIVED_TIMESTAMP };
 	}
 
 	public static String[] getColumnHeaders() {
@@ -110,8 +109,8 @@ public class UIDialogMessageProblemViewWithParticipant extends UIModelObject {
 				localize(AdminMessageStrings.UI_COLUMNS__MESSAGE),
 				localize(AdminMessageStrings.UI_COLUMNS__SENT_TIMESTAMP),
 				localize(AdminMessageStrings.UI_COLUMNS__ANSWER),
-				localize(AdminMessageStrings.UI_COLUMNS__RAW_ANSWER),
-				localize(AdminMessageStrings.UI_COLUMNS__ANSWER_RECEIVED_TIMESTAMP) };
+				localize(AdminMessageStrings.UI_COLUMNS__RAW_ANSWER), localize(
+						AdminMessageStrings.UI_COLUMNS__ANSWER_RECEIVED_TIMESTAMP) };
 	}
 
 	public static String getSortColumn() {

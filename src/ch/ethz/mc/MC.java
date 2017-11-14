@@ -110,8 +110,8 @@ public class MC implements ServletContextListener {
 					.start(fileStorageManagerService.getMediaCacheFolder());
 			variablesManagerService = VariablesManagerService
 					.start(databaseManagerService);
-			modelObjectExchangeService = ModelObjectExchangeService.start(
-					databaseManagerService, fileStorageManagerService);
+			modelObjectExchangeService = ModelObjectExchangeService
+					.start(databaseManagerService, fileStorageManagerService);
 			reportGeneratorService = ReportGeneratorService
 					.start(databaseManagerService);
 			lockingService = LockingService.start();
@@ -123,16 +123,16 @@ public class MC implements ServletContextListener {
 			// Controller services
 			surveyAdministrationManagerService = SurveyAdministrationManagerService
 					.start(databaseManagerService, fileStorageManagerService,
-							variablesManagerService, modelObjectExchangeService);
+							variablesManagerService,
+							modelObjectExchangeService);
 			interventionAdministrationManagerService = InterventionAdministrationManagerService
 					.start(databaseManagerService, fileStorageManagerService,
-							variablesManagerService,
-							modelObjectExchangeService,
+							variablesManagerService, modelObjectExchangeService,
 							surveyAdministrationManagerService);
-			surveyExecutionManagerService = SurveyExecutionManagerService
-					.start(databaseManagerService, fileStorageManagerService,
-							variablesManagerService,
-							interventionAdministrationManagerService);
+			surveyExecutionManagerService = SurveyExecutionManagerService.start(
+					databaseManagerService, fileStorageManagerService,
+					variablesManagerService,
+					interventionAdministrationManagerService);
 			interventionExecutionManagerService = InterventionExecutionManagerService
 					.start(databaseManagerService, variablesManagerService,
 							communicationManagerService,

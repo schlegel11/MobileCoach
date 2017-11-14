@@ -52,7 +52,7 @@ import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
  */
 @Log4j2
 public abstract class AbstractFileUploadServiceV02 extends AbstractServiceV02 {
-	private final FileStorageManagerService	fileStorageManagerService;
+	private final FileStorageManagerService fileStorageManagerService;
 
 	public AbstractFileUploadServiceV02(
 			final RESTManagerService restManagerService) {
@@ -129,8 +129,8 @@ public abstract class AbstractFileUploadServiceV02 extends AbstractServiceV02 {
 				val temporaryFileName = filename.replaceAll("[^A-Za-z0-9_. ]+",
 						"_");
 				if (filename.lastIndexOf(".") > -1) {
-					temporaryFileExtension = filename.substring(
-							filename.lastIndexOf(".")).toLowerCase();
+					temporaryFileExtension = filename
+							.substring(filename.lastIndexOf(".")).toLowerCase();
 				} else {
 					throw new Exception("File has no file extension");
 				}
@@ -177,16 +177,16 @@ public abstract class AbstractFileUploadServiceV02 extends AbstractServiceV02 {
 	}
 
 	private String getFileName(final MultivaluedMap<String, String> header) {
-		final String[] contentDisposition = header.getFirst(
-				"Content-Disposition").split(";");
+		final String[] contentDisposition = header
+				.getFirst("Content-Disposition").split(";");
 
 		for (final String filename : contentDisposition) {
 			if (filename.trim().startsWith("filename")) {
 
 				final String[] name = filename.split("=");
 
-				final String finalFileName = name[1].trim()
-						.replaceAll("\"", "");
+				final String finalFileName = name[1].trim().replaceAll("\"",
+						"");
 				return finalFileName;
 			}
 		}

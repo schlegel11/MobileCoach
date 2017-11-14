@@ -99,7 +99,8 @@ public class PasswordEditComponent extends AbstractStringValueEditComponent
 	}
 
 	@Override
-	public void registerCancelButtonListener(final ClickListener clickListener) {
+	public void registerCancelButtonListener(
+			final ClickListener clickListener) {
 		cancelButton.addClickListener(clickListener);
 	}
 
@@ -161,8 +162,8 @@ public class PasswordEditComponent extends AbstractStringValueEditComponent
 		stringPasswordField.setWidth("100.0%");
 		stringPasswordField.setHeight("-1px");
 		mainLayout.addComponent(stringPasswordField);
-		mainLayout
-				.setComponentAlignment(stringPasswordField, new Alignment(48));
+		mainLayout.setComponentAlignment(stringPasswordField,
+				new Alignment(48));
 
 		// stringPasswordFieldCheck
 		stringPasswordFieldCheck = new PasswordField();

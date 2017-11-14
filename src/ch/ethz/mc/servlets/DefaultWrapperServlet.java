@@ -48,7 +48,8 @@ public class DefaultWrapperServlet extends HttpServlet {
 	 * @see Servlet#init(ServletConfig)
 	 */
 	@Override
-	public void init(final ServletConfig servletConfig) throws ServletException {
+	public void init(final ServletConfig servletConfig)
+			throws ServletException {
 		super.init(servletConfig);
 		// Only start servlet if context is ready
 		if (!MC.getInstance().isReady()) {
@@ -66,13 +67,14 @@ public class DefaultWrapperServlet extends HttpServlet {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest
+	 * javax.servlet.http.HttpServlet#doGet(javax.servlet.http.
+	 * HttpServletRequest
 	 * , javax.servlet.http.HttpServletResponse)
 	 */
 	@Override
 	public void doGet(final HttpServletRequest request,
-			final HttpServletResponse response) throws ServletException,
-			IOException {
+			final HttpServletResponse response)
+			throws ServletException, IOException {
 		log.debug("Serving static {}", request.getPathInfo());
 
 		final RequestDispatcher requestDispatcher = getServletContext()

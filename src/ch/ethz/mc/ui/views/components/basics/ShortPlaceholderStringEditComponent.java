@@ -53,8 +53,8 @@ import com.vaadin.ui.VerticalLayout;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Log4j2
-public class ShortPlaceholderStringEditComponent extends
-		AbstractStringValueEditComponent {
+public class ShortPlaceholderStringEditComponent
+		extends AbstractStringValueEditComponent {
 
 	/*- VaadinEditorProperties={"grid":"RegularGrid,20","showGrid":true,"snapToGrid":true,"snapToObject":true,"movingGuides":false,"snappingDistance":10} */
 
@@ -89,8 +89,7 @@ public class ShortPlaceholderStringEditComponent extends
 		// manually added
 		localize(okButton, AdminMessageStrings.GENERAL__OK);
 		localize(cancelButton, AdminMessageStrings.GENERAL__CANCEL);
-		localize(
-				variableListSelect,
+		localize(variableListSelect,
 				AdminMessageStrings.SHORT_PLACEHOLDER_STRING_EDITOR__OPTIONAL_SELECT_VARIABLE);
 
 		stringTextField.setImmediate(true);
@@ -116,17 +115,18 @@ public class ShortPlaceholderStringEditComponent extends
 								+ stringTextField.getValue().substring(
 										stringTextField.getCursorPosition()));
 
-						stringTextField.setCursorPosition(stringTextField
-								.getCursorPosition()
-								+ selectedVariable.length());
+						stringTextField.setCursorPosition(
+								stringTextField.getCursorPosition()
+										+ selectedVariable.length());
 					} catch (final Exception e) {
-						log.warn("Error occured while setting variable to string text area...fixing by setting text to the beginning (Workaround for Vaadin time shift)");
+						log.warn(
+								"Error occured while setting variable to string text area...fixing by setting text to the beginning (Workaround for Vaadin time shift)");
 
-						stringTextField.setValue(stringTextField.getValue()
-								+ selectedVariable);
+						stringTextField.setValue(
+								stringTextField.getValue() + selectedVariable);
 
-						stringTextField.setCursorPosition(stringTextField
-								.getValue().length());
+						stringTextField.setCursorPosition(
+								stringTextField.getValue().length());
 					}
 
 					variableListSelect.unselect(selectedVariable);
@@ -148,7 +148,8 @@ public class ShortPlaceholderStringEditComponent extends
 	}
 
 	@Override
-	public void registerCancelButtonListener(final ClickListener clickListener) {
+	public void registerCancelButtonListener(
+			final ClickListener clickListener) {
 		cancelButton.addClickListener(clickListener);
 	}
 
@@ -212,8 +213,8 @@ public class ShortPlaceholderStringEditComponent extends
 		stringTextField.setWidth("250px");
 		stringTextField.setHeight("-1px");
 		editAreaLayout.addComponent(stringTextField);
-		editAreaLayout
-				.setComponentAlignment(stringTextField, new Alignment(48));
+		editAreaLayout.setComponentAlignment(stringTextField,
+				new Alignment(48));
 
 		// arrowLeftIcon
 		arrowLeftIcon = new Embedded();
@@ -235,8 +236,8 @@ public class ShortPlaceholderStringEditComponent extends
 		variableListSelect.setHeight("100.0%");
 		editAreaLayout.addComponent(variableListSelect);
 		editAreaLayout.setExpandRatio(variableListSelect, 0.4f);
-		editAreaLayout.setComponentAlignment(variableListSelect, new Alignment(
-				48));
+		editAreaLayout.setComponentAlignment(variableListSelect,
+				new Alignment(48));
 
 		return editAreaLayout;
 	}

@@ -57,7 +57,8 @@ import ch.ethz.mc.tools.StringValidator;
 @Log4j2
 public class VariableAccessServiceV02 extends AbstractServiceV02 {
 
-	public VariableAccessServiceV02(final RESTManagerService restManagerService) {
+	public VariableAccessServiceV02(
+			final RESTManagerService restManagerService) {
 		super(restManagerService);
 	}
 
@@ -118,14 +119,14 @@ public class VariableAccessServiceV02 extends AbstractServiceV02 {
 			val resultVariables = collectionOfVariables.getVariables();
 
 			for (val variable : variableArray) {
-				if (!StringValidator
-						.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
+				if (!StringValidator.isValidVariableName(
+						ImplementationConstants.VARIABLE_PREFIX
 								+ variable.trim())) {
 					throw new Exception("The variable name is not valid");
 				}
 
-				resultVariables.add(restManagerService.readVariable(
-						participantId, variable.trim(), false));
+				resultVariables.add(restManagerService
+						.readVariable(participantId, variable.trim(), false));
 			}
 
 			collectionOfVariables.setSize(resultVariables.size());
@@ -197,8 +198,8 @@ public class VariableAccessServiceV02 extends AbstractServiceV02 {
 			val cleanedVariableList = new ArrayList<String>();
 
 			for (val variable : variables.split(",")) {
-				if (!StringValidator
-						.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
+				if (!StringValidator.isValidVariableName(
+						ImplementationConstants.VARIABLE_PREFIX
 								+ variable.trim())) {
 					throw new Exception("The variable name is not valid");
 				}
@@ -276,8 +277,8 @@ public class VariableAccessServiceV02 extends AbstractServiceV02 {
 			val cleanedVariableList = new ArrayList<String>();
 
 			for (val variable : variables.split(",")) {
-				if (!StringValidator
-						.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
+				if (!StringValidator.isValidVariableName(
+						ImplementationConstants.VARIABLE_PREFIX
 								+ variable.trim())) {
 					throw new Exception("The variable name is not valid");
 				}
@@ -327,10 +328,10 @@ public class VariableAccessServiceV02 extends AbstractServiceV02 {
 
 			return variableAverage;
 		} catch (final Exception e) {
-			throw new WebApplicationException(Response
-					.status(Status.FORBIDDEN)
+			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
 					.entity("Could not calculate average of variable: "
-							+ e.getMessage()).build());
+							+ e.getMessage())
+					.build());
 		}
 	}
 
@@ -365,10 +366,10 @@ public class VariableAccessServiceV02 extends AbstractServiceV02 {
 
 			return variableAverage;
 		} catch (final Exception e) {
-			throw new WebApplicationException(Response
-					.status(Status.FORBIDDEN)
+			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
 					.entity("Could not calculate average of variable: "
-							+ e.getMessage()).build());
+							+ e.getMessage())
+					.build());
 		}
 	}
 

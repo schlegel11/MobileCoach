@@ -32,10 +32,10 @@ import ch.ethz.mc.ui.views.components.basics.AbstractRuleEditComponentWithContro
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
-public class MonitoringMessageRuleEditComponentWithController extends
-		MonitoringMessageRuleEditComponent {
+public class MonitoringMessageRuleEditComponentWithController
+		extends MonitoringMessageRuleEditComponent {
 
-	private final AbstractRuleEditComponentWithController	ruleEditComponent;
+	private final AbstractRuleEditComponentWithController ruleEditComponent;
 
 	public MonitoringMessageRuleEditComponentWithController(
 			final MonitoringMessageRule monitoringMessageRule,

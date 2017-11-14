@@ -42,8 +42,8 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class InterventionScreeningSurveysEditComponent extends
-		AbstractCustomComponent {
+public class InterventionScreeningSurveysEditComponent
+		extends AbstractCustomComponent {
 
 	/*- VaadinEditorProperties={"grid":"RegularGrid,20","showGrid":true,"snapToGrid":true,"snapToObject":true,"movingGuides":false,"snappingDistance":10} */
 
@@ -92,7 +92,8 @@ public class InterventionScreeningSurveysEditComponent extends
 		localize(importButton, AdminMessageStrings.GENERAL__IMPORT);
 		localize(exportButton, AdminMessageStrings.GENERAL__EXPORT);
 		localize(switchTypeButton, AdminMessageStrings.GENERAL__SWITCH_TYPE);
-		localize(switchStatusButton, AdminMessageStrings.GENERAL__SWITCH_STATUS);
+		localize(switchStatusButton,
+				AdminMessageStrings.GENERAL__SWITCH_STATUS);
 		localize(renameButton, AdminMessageStrings.GENERAL__RENAME);
 		localize(editButton, AdminMessageStrings.GENERAL__EDIT);
 		localize(duplicateButton, AdminMessageStrings.GENERAL__DUPLICATE);
@@ -110,10 +111,11 @@ public class InterventionScreeningSurveysEditComponent extends
 					public String getStyle(final Table source,
 							final Object itemId, final Object propertyId) {
 						if (propertyId != null) {
-							if (propertyId
-									.equals(UIScreeningSurvey.SCREENING_SURVEY_STATUS)) {
+							if (propertyId.equals(
+									UIScreeningSurvey.SCREENING_SURVEY_STATUS)) {
 								val uiScreeningSurvey = getUIModelObjectFromTableByObjectId(
-										source, UIScreeningSurvey.class, itemId);
+										source, UIScreeningSurvey.class,
+										itemId);
 								if (uiScreeningSurvey
 										.isBooleanScreeningSurveyStatus()) {
 									return "active";

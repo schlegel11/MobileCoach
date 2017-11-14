@@ -121,18 +121,17 @@ public class ScreeningSurvey extends ModelObject {
 	 */
 	@Override
 	public UIModelObject toUIModelObject() {
-		val screeningSurvey = new UIScreeningSurvey(
-				name.toString(),
-				intermediateSurvey ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__SURVEY__INTERMEDIATE)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__SURVEY__SCREENING),
-				password,
-				active,
+		val screeningSurvey = new UIScreeningSurvey(name.toString(),
+				intermediateSurvey
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__SURVEY__INTERMEDIATE)
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__SURVEY__SCREENING),
+				password, active,
 				active ? Messages
 						.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE));
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__INACTIVE));
 
 		screeningSurvey.setRelatedModelObject(this);
 
@@ -189,8 +188,8 @@ public class ScreeningSurvey extends ModelObject {
 					.find(IntermediateSurveyAndFeedbackParticipantShortURL.class,
 							Queries.INTERMEDIATE_SURVEY_AND_FEEDBACK_PARTICIPANT_SHORT_URL__BY_SURVEY,
 							getId());
-			ModelObject
-					.delete(intermediateSurveysAndFeedbackParticipantShortURLsToDelete);
+			ModelObject.delete(
+					intermediateSurveysAndFeedbackParticipantShortURLsToDelete);
 		}
 	}
 
@@ -203,12 +202,11 @@ public class ScreeningSurvey extends ModelObject {
 	@JsonIgnore
 	public String toTable() {
 		String table = wrapRow(wrapHeader("Name:") + wrapField(escape(name)));
-		table += wrapRow(wrapHeader("Template:")
-				+ wrapField(escape(templatePath)));
+		table += wrapRow(
+				wrapHeader("Template:") + wrapField(escape(templatePath)));
 		table += wrapRow(wrapHeader("Password:") + wrapField(escape(password)));
-		table += wrapRow(wrapHeader("Type:")
-				+ wrapField(intermediateSurvey ? "Intermediate Survey"
-						: "Screening Survey"));
+		table += wrapRow(wrapHeader("Type:") + wrapField(intermediateSurvey
+				? "Intermediate Survey" : "Screening Survey"));
 		table += wrapRow(wrapHeader("Activation Status:")
 				+ wrapField(formatStatus(active)));
 
@@ -223,8 +221,8 @@ public class ScreeningSurvey extends ModelObject {
 		}
 
 		if (buffer.length() > 0) {
-			table += wrapRow(wrapHeader("Slides:")
-					+ wrapField(buffer.toString()));
+			table += wrapRow(
+					wrapHeader("Slides:") + wrapField(buffer.toString()));
 		}
 
 		// Feedbacks
@@ -238,8 +236,8 @@ public class ScreeningSurvey extends ModelObject {
 		}
 
 		if (buffer.length() > 0) {
-			table += wrapRow(wrapHeader("Feedbacks:")
-					+ wrapField(buffer.toString()));
+			table += wrapRow(
+					wrapHeader("Feedbacks:") + wrapField(buffer.toString()));
 		}
 
 		return wrapTable(table);

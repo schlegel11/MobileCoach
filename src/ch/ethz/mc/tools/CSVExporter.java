@@ -51,7 +51,7 @@ public class CSVExporter {
 
 		final CSVWriter<DataTable.DataEntry> csvWriter = new CSVWriterBuilder<DataTable.DataEntry>(
 				stringWriter).entryConverter(new CSVDataTableEntryConverter())
-				.build();
+						.build();
 
 		csvWriter.write(dataTable.getHeaders());
 
@@ -74,8 +74,10 @@ public class CSVExporter {
 		final StringWriter stringWriter = new StringWriter();
 
 		final CSVWriter<UIVariableWithParticipantForResults> csvWriter = new CSVWriterBuilder<UIVariableWithParticipantForResults>(
-				stringWriter).entryConverter(
-				new CSVUIParticipantVariableEntryConverter()).build();
+				stringWriter)
+						.entryConverter(
+								new CSVUIParticipantVariableEntryConverter())
+						.build();
 
 		csvWriter.write(CSVUIParticipantVariableEntryConverter.getHeaders());
 
@@ -98,8 +100,9 @@ public class CSVExporter {
 		final StringWriter stringWriter = new StringWriter();
 
 		final CSVWriter<UIDialogMessageWithParticipantForResults> csvWriter = new CSVWriterBuilder<UIDialogMessageWithParticipantForResults>(
-				stringWriter).entryConverter(
-				new CSVUIPDialogMessageEntryConverter()).build();
+				stringWriter)
+						.entryConverter(new CSVUIPDialogMessageEntryConverter())
+						.build();
 
 		csvWriter.write(CSVUIPDialogMessageEntryConverter.getHeaders());
 

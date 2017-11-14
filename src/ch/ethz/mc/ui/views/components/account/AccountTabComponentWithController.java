@@ -42,7 +42,7 @@ import com.vaadin.ui.Button.ClickEvent;
 @Log4j2
 public class AccountTabComponentWithController extends AccountTabComponent {
 
-	private final Author	currentAccountAuthor;
+	private final Author currentAccountAuthor;
 
 	public AccountTabComponentWithController(final ObjectId accountObjectId) {
 		super();
@@ -55,10 +55,10 @@ public class AccountTabComponentWithController extends AccountTabComponent {
 				currentAccountAuthor.isAdmin());
 
 		val buttonClickListener = new ButtonClickListener();
-		getAccountEditComponent().getSetPasswordButton().addClickListener(
-				buttonClickListener);
-		getAccountEditComponent().getResetAllLocksButton().addClickListener(
-				buttonClickListener);
+		getAccountEditComponent().getSetPasswordButton()
+				.addClickListener(buttonClickListener);
+		getAccountEditComponent().getResetAllLocksButton()
+				.addClickListener(buttonClickListener);
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
@@ -93,9 +93,8 @@ public class AccountTabComponentWithController extends AccountTabComponent {
 							return;
 						}
 
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__PASSWORD_CHANGED);
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__PASSWORD_CHANGED);
 						closeWindow();
 					}
 				}, null);

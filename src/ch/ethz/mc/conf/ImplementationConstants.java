@@ -42,8 +42,10 @@ public class ImplementationConstants {
 	public static final int		HOUR_TO_SEND_MESSAGE_MAX															= 23;
 	public static final int		DEFAULT_HOUR_TO_SEND_MESSAGE														= 0;
 
-	public static final long	HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR												= 60 * 60 * 1000;
-	public static final long	DAYS_TO_TIME_IN_MILLIS_MULTIPLICATOR												= 24 * 60 * 60 * 1000;
+	public static final long	HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR												= 60
+			* 60 * 1000;
+	public static final long	DAYS_TO_TIME_IN_MILLIS_MULTIPLICATOR												= 24
+			* 60 * 60 * 1000;
 
 	public static final long	MASTER_RULE_EVALUTION_WORKER_MILLISECONDS_SLEEP_BETWEEN_CHECK_CYCLES				= 200;
 
@@ -59,7 +61,8 @@ public class ImplementationConstants {
 	public static final long	SMS_AND_EMAIL_RETRIEVAL_INTERVAL_IN_SECONDS_WITH_SIMULATOR							= 5;
 
 	public static final long	EMAIL_SENDING_RETRIES																= 2;
-	public static final long	EMAIL_SENDING_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS								= 2 * 60;
+	public static final long	EMAIL_SENDING_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS								= 2
+			* 60;
 	public static final int		EMAIL_SENDING_MAXIMUM_THREAD_COUNT													= 25;
 
 	public static final long	SIMULATOR_TIME_UPDATE_INTERVAL_IN_SECONDS											= 5;
@@ -123,16 +126,14 @@ public class ImplementationConstants {
 	public static final int		OBJECT_ID_LENGTH													= 24;
 
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_ONE_OBJECT_ID							= "[a-f0-9]{"
-																											+ OBJECT_ID_LENGTH
-																											+ "}";
+			+ OBJECT_ID_LENGTH + "}";
 	public static final String	REGULAR_EXPRESSION_TO_VALIDATE_CALCULATED_RULE						= "^[\\$a-zA-Z0-9_\\+\\-%*/^().,]*$";
 	public static final String	REGULAR_EXPRESSION_TO_VALIDATE_VARIABLE_NAME						= "^\\$[a-zA-Z0-9_]*$";
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_VARIABLES_IN_STRING						= "\\$[a-zA-Z0-9_]+";
 	public static final String	SELECT_MANY_SEPARATOR												= ",";
 	public static final String	VARIABLE_MATCH_MODIFIER												= "#";
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_MODIFIED_VARIABLES_IN_STRING			= VARIABLE_MATCH_MODIFIER
-																											+ "[a-zA-Z0-9_]+"
-																											+ VARIABLE_MATCH_MODIFIER;
+			+ "[a-zA-Z0-9_]+" + VARIABLE_MATCH_MODIFIER;
 	public static final String	VARIABLE_VALUE_MODIFIER_START										= "{";
 	public static final String	VARIABLE_VALUE_MODIFIER_END											= "}";
 	public static final String	REGULAR_EXPRESSION_TO_MATCH_VALUE_MODIFIER							= "\\{[^\\}]+\\}";

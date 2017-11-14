@@ -56,8 +56,8 @@ import com.vaadin.ui.Table;
  */
 @SuppressWarnings("serial")
 @Log4j2
-public class ScreeningSurveyEditComponentWithController extends
-		ScreeningSurveyEditComponent {
+public class ScreeningSurveyEditComponentWithController
+		extends ScreeningSurveyEditComponent {
 
 	private final ScreeningSurvey									screeningSurvey;
 
@@ -91,10 +91,10 @@ public class ScreeningSurveyEditComponentWithController extends
 				UIScreeningSurveySlide.class, slidesOfScreeningSurvey);
 
 		slidesTable.setContainerDataSource(slidesBeanContainer);
-		slidesTable.setSortContainerPropertyId(UIScreeningSurveySlide
-				.getSortColumn());
-		slidesTable.setVisibleColumns(UIScreeningSurveySlide
-				.getVisibleColumns());
+		slidesTable.setSortContainerPropertyId(
+				UIScreeningSurveySlide.getSortColumn());
+		slidesTable
+				.setVisibleColumns(UIScreeningSurveySlide.getVisibleColumns());
 		slidesTable.setColumnHeaders(UIScreeningSurveySlide.getColumnHeaders());
 		slidesTable.setSortAscending(true);
 		slidesTable.setSortEnabled(false);
@@ -128,7 +128,8 @@ public class ScreeningSurveyEditComponentWithController extends
 					selectedUIScreeningSurveySlide = null;
 				} else {
 					selectedUIScreeningSurveySlide = getUIModelObjectFromTableByObjectId(
-							slidesTable, UIScreeningSurveySlide.class, objectId);
+							slidesTable, UIScreeningSurveySlide.class,
+							objectId);
 					setSlideSelected(true);
 				}
 			}
@@ -195,8 +196,8 @@ public class ScreeningSurveyEditComponentWithController extends
 
 		getSwitchScreeningSurveyButton().addClickListener(buttonClickListener);
 
-		getPasswordTextFieldComponent().getButton().addClickListener(
-				buttonClickListener);
+		getPasswordTextFieldComponent().getButton()
+				.addClickListener(buttonClickListener);
 
 		adjustActiveOrInactive();
 
@@ -211,20 +212,18 @@ public class ScreeningSurveyEditComponentWithController extends
 	private void adjustActiveOrInactive() {
 		val switchScreeningSurveyButton = getSwitchScreeningSurveyButton();
 		if (screeningSurvey.isActive()) {
-			switchScreeningSurveyButton.setIcon(new ThemeResource(
-					ThemeImageStrings.ACTIVE_ICON_SMALL));
-			localize(
-					switchScreeningSurveyButton,
+			switchScreeningSurveyButton.setIcon(
+					new ThemeResource(ThemeImageStrings.ACTIVE_ICON_SMALL));
+			localize(switchScreeningSurveyButton,
 					AdminMessageStrings.SCREENING_SURVEY_EDITING__SWITCH_BUTTON_ACTIVE);
 
 			slidesTable.setEnabled(false);
 			feedbacksTable.setEnabled(false);
 			getActiveOrInactiveLayout().setEnabled(false);
 		} else {
-			switchScreeningSurveyButton.setIcon(new ThemeResource(
-					ThemeImageStrings.INACTIVE_ICON_SMALL));
-			localize(
-					switchScreeningSurveyButton,
+			switchScreeningSurveyButton.setIcon(
+					new ThemeResource(ThemeImageStrings.INACTIVE_ICON_SMALL));
+			localize(switchScreeningSurveyButton,
 					AdminMessageStrings.SCREENING_SURVEY_EDITING__SWITCH_BUTTON_INACTIVE);
 
 			getActiveOrInactiveLayout().setEnabled(true);
@@ -309,15 +308,14 @@ public class ScreeningSurveyEditComponentWithController extends
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
-						slidesBeanContainer.addItem(newScreeningSurveySlide
-								.getId(),
+						slidesBeanContainer.addItem(
+								newScreeningSurveySlide.getId(),
 								UIScreeningSurveySlide.class
 										.cast(newScreeningSurveySlide
 												.toUIModelObject()));
 						slidesTable.select(newScreeningSurveySlide.getId());
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_SLIDE_CREATED);
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_SLIDE_CREATED);
 
 						closeWindow();
 					}
@@ -339,9 +337,8 @@ public class ScreeningSurveyEditComponentWithController extends
 		// Adapt UI
 		adjustActiveOrInactive();
 
-		getAdminUI()
-				.showInformationNotification(
-						AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_STATUS_CHANGED);
+		getAdminUI().showInformationNotification(
+				AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_STATUS_CHANGED);
 	}
 
 	public void editSlide() {
@@ -362,10 +359,10 @@ public class ScreeningSurveyEditComponentWithController extends
 								slidesBeanContainer,
 								selectedScreeningSurveySlide);
 						slidesTable.sort();
-						slidesTable.select(selectedScreeningSurveySlide.getId());
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_SLIDE_UPDATED);
+						slidesTable
+								.select(selectedScreeningSurveySlide.getId());
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_SLIDE_UPDATED);
 
 						closeWindow();
 					}
@@ -376,9 +373,8 @@ public class ScreeningSurveyEditComponentWithController extends
 		log.debug("Duplicate slide");
 
 		final File temporaryBackupFile = getSurveyAdministrationManagerService()
-				.screeningSurveySlideExport(
-						selectedUIScreeningSurveySlide
-								.getRelatedModelObject(ScreeningSurveySlide.class));
+				.screeningSurveySlideExport(selectedUIScreeningSurveySlide
+						.getRelatedModelObject(ScreeningSurveySlide.class));
 
 		try {
 			final ScreeningSurveySlide importedScreeningSurveySlide = getSurveyAdministrationManagerService()
@@ -390,9 +386,8 @@ public class ScreeningSurveyEditComponentWithController extends
 
 			// Adapt UI
 			slidesBeanContainer.addItem(importedScreeningSurveySlide.getId(),
-					UIScreeningSurveySlide.class
-							.cast(importedScreeningSurveySlide
-									.toUIModelObject()));
+					UIScreeningSurveySlide.class.cast(
+							importedScreeningSurveySlide.toUIModelObject()));
 			slidesTable.select(importedScreeningSurveySlide.getId());
 
 			getAdminUI().showInformationNotification(
@@ -436,7 +431,8 @@ public class ScreeningSurveyEditComponentWithController extends
 			@Override
 			public void buttonClick(final ClickEvent event) {
 				try {
-					val selectedScreeningSurveySlide = selectedUIScreeningSurveySlide.getRelatedModelObject(ScreeningSurveySlide.class);
+					val selectedScreeningSurveySlide = selectedUIScreeningSurveySlide
+							.getRelatedModelObject(ScreeningSurveySlide.class);
 
 					// Delete variable
 					getSurveyAdministrationManagerService()
@@ -452,9 +448,8 @@ public class ScreeningSurveyEditComponentWithController extends
 				slidesTable.removeItem(selectedUIScreeningSurveySlide
 						.getRelatedModelObject(ScreeningSurveySlide.class)
 						.getId());
-				getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_SLIDE_DELETED);
+				getAdminUI().showInformationNotification(
+						AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_SLIDE_DELETED);
 
 				closeWindow();
 			}
@@ -484,13 +479,12 @@ public class ScreeningSurveyEditComponentWithController extends
 
 						// Adapt UI
 						feedbacksBeanContainer.addItem(newFeedback.getId(),
-								UIFeedback.class.cast(newFeedback
-										.toUIModelObject()));
+								UIFeedback.class
+										.cast(newFeedback.toUIModelObject()));
 						feedbacksTable.sort();
 						feedbacksTable.select(newFeedback.getId());
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_CREATED);
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_CREATED);
 
 						closeWindow();
 					}
@@ -503,8 +497,8 @@ public class ScreeningSurveyEditComponentWithController extends
 		showModalLStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_NAME_FOR_FEEDBACK,
 				selectedUIFeedback.getRelatedModelObject(Feedback.class)
-						.getName(), null,
-				new LocalizedShortStringEditComponent(),
+						.getName(),
+				null, new LocalizedShortStringEditComponent(),
 				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
@@ -528,15 +522,15 @@ public class ScreeningSurveyEditComponentWithController extends
 
 						// Adapt UI
 						getStringItemProperty(beanItem,
-								UIFeedback.FEEDBACK_NAME).setValue(
-								selectedUIFeedback
-										.getRelatedModelObject(Feedback.class)
-										.getName().toString());
+								UIFeedback.FEEDBACK_NAME)
+										.setValue(selectedUIFeedback
+												.getRelatedModelObject(
+														Feedback.class)
+												.getName().toString());
 						feedbacksTable.sort();
 
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__FEEDBACK_RENAMED);
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__FEEDBACK_RENAMED);
 						closeWindow();
 					}
 				}, null);
@@ -558,9 +552,8 @@ public class ScreeningSurveyEditComponentWithController extends
 								feedbacksBeanContainer, selectedFeedback);
 						feedbacksTable.sort();
 						feedbacksTable.select(selectedFeedback.getId());
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__FEEDBACK_UPDATED);
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__FEEDBACK_UPDATED);
 
 						closeWindow();
 					}
@@ -577,9 +570,8 @@ public class ScreeningSurveyEditComponentWithController extends
 				.getCurrentAuthorParticipantId();
 
 		if (participantId == null) {
-			getAdminUI()
-					.showWarningNotification(
-							AdminMessageStrings.NOTIFICATION__SURVEY_PARTICIPATION_REQUIRED);
+			getAdminUI().showWarningNotification(
+					AdminMessageStrings.NOTIFICATION__SURVEY_PARTICIPATION_REQUIRED);
 			return;
 		}
 
@@ -587,16 +579,14 @@ public class ScreeningSurveyEditComponentWithController extends
 				.getParticipant(participantId);
 
 		if (participant == null) {
-			getAdminUI()
-					.showWarningNotification(
-							AdminMessageStrings.NOTIFICATION__SURVEY_PARTICIPATION_REQUIRED);
+			getAdminUI().showWarningNotification(
+					AdminMessageStrings.NOTIFICATION__SURVEY_PARTICIPATION_REQUIRED);
 			return;
 		}
 
 		IntermediateSurveyAndFeedbackParticipantShortURL shortURL = null;
-		if (participant.getAssignedFeedback() == null
-				|| !participant.getAssignedFeedback().equals(
-						selectedFeedback.getId())) {
+		if (participant.getAssignedFeedback() == null || !participant
+				.getAssignedFeedback().equals(selectedFeedback.getId())) {
 			shortURL = getSurveyExecutionManagerService()
 					.participantSetFeedback(participant,
 							selectedFeedback.getId());
@@ -608,12 +598,8 @@ public class ScreeningSurveyEditComponentWithController extends
 							selectedFeedback.getId());
 		}
 
-		final String url = getAdminUI()
-				.getPage()
-				.getLocation()
-				.toString()
-				.substring(
-						0,
+		final String url = getAdminUI().getPage().getLocation().toString()
+				.substring(0,
 						getAdminUI().getPage().getLocation().toString()
 								.lastIndexOf("/") + 1)
 				+ ImplementationConstants.SHORT_ID_SCREEN_SURVEY_AND_FEEDBACK_SERVLET_PATH
@@ -628,11 +614,12 @@ public class ScreeningSurveyEditComponentWithController extends
 			@Override
 			public void buttonClick(final ClickEvent event) {
 				try {
-					val selectedFeedback = selectedUIFeedback.getRelatedModelObject(Feedback.class);
+					val selectedFeedback = selectedUIFeedback
+							.getRelatedModelObject(Feedback.class);
 
 					// Delete variable
-					getSurveyAdministrationManagerService().feedbackDelete(
-							selectedFeedback);
+					getSurveyAdministrationManagerService()
+							.feedbackDelete(selectedFeedback);
 				} catch (final Exception e) {
 					closeWindow();
 					handleException(e);

@@ -92,8 +92,8 @@ public class UIParticipant extends UIModelObject {
 	private boolean				booleanMonitoringStatus;
 
 	public static Object[] getVisibleColumns() {
-		return new Object[] { PARTICIPANT_ID, PARTICIPANT_NAME, LANGUAGE,
-				GROUP, ORGANIZATION, UNIT, CREATED, SCREENING_SURVEY_NAME,
+		return new Object[] { PARTICIPANT_ID, PARTICIPANT_NAME, LANGUAGE, GROUP,
+				ORGANIZATION, UNIT, CREATED, SCREENING_SURVEY_NAME,
 				SCREENING_SURVEY_STATUS, DATA_FOR_MONITORING_AVAILABLE,
 				INTERVENTION_STATUS, MONITORING_STATUS };
 	}
@@ -108,9 +108,12 @@ public class UIParticipant extends UIModelObject {
 				localize(AdminMessageStrings.UI_COLUMNS__ORGANIZATION_UNIT),
 				localize(AdminMessageStrings.UI_COLUMNS__CREATED),
 				localize(AdminMessageStrings.UI_COLUMNS__SCREENING_SURVEY_NAME),
-				localize(AdminMessageStrings.UI_COLUMNS__PARTICIPANT_SCREENING_SURVEY_STATUS),
-				localize(AdminMessageStrings.UI_COLUMNS__PARTICIPANT_DATA_FOR_MONITORING_AVAILABLE),
-				localize(AdminMessageStrings.UI_COLUMNS__PARTICIPANT_INTERVENTION_STATUS),
+				localize(
+						AdminMessageStrings.UI_COLUMNS__PARTICIPANT_SCREENING_SURVEY_STATUS),
+				localize(
+						AdminMessageStrings.UI_COLUMNS__PARTICIPANT_DATA_FOR_MONITORING_AVAILABLE),
+				localize(
+						AdminMessageStrings.UI_COLUMNS__PARTICIPANT_INTERVENTION_STATUS),
 				localize(AdminMessageStrings.UI_COLUMNS__MONITORING_STATUS) };
 	}
 

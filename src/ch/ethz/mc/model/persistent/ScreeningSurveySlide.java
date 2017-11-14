@@ -138,8 +138,8 @@ public class ScreeningSurveySlide extends ModelObject {
 			}
 
 			if (preSelectedAnswer >= 0) {
-				table += wrapRow(wrapHeader("Preselected Answer:")
-						+ wrapField(escape(answersWithPlaceholders[preSelectedAnswer])));
+				table += wrapRow(wrapHeader("Preselected Answer:") + wrapField(
+						escape(answersWithPlaceholders[preSelectedAnswer])));
 			}
 			table += wrapRow(wrapHeader("Store value to variable:")
 					+ wrapField(escape(storeValueToVariableWithName)));
@@ -292,23 +292,25 @@ public class ScreeningSurveySlide extends ModelObject {
 					storeValueToVariableWithNames.append(", ");
 				}
 
-				storeValueToVariableWithNames.append(question
-						.getStoreValueToVariableWithName());
+				storeValueToVariableWithNames
+						.append(question.getStoreValueToVariableWithName());
 			}
 		}
 
-		val screeningSurveySlide = new UIScreeningSurveySlide(
-				order,
-				titleWithPlaceholders.toString().equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+		val screeningSurveySlide = new UIScreeningSurveySlide(order,
+				titleWithPlaceholders.toString().equals("")
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NOT_SET)
 						: titleWithPlaceholders.toShortenedString(40),
-				comment.equals("") ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET)
+				comment.equals("")
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NOT_SET)
 						: comment,
 				questionType.toString(),
-				storeValueToVariableWithNames.length() > 0 ? storeValueToVariableWithNames
-						.toString() : Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET),
+				storeValueToVariableWithNames.length() > 0
+						? storeValueToVariableWithNames.toString()
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NOT_SET),
 				slideRules);
 
 		screeningSurveySlide.setRelatedModelObject(this);
@@ -330,8 +332,8 @@ public class ScreeningSurveySlide extends ModelObject {
 
 		// Linked media object
 		if (linkedMediaObject != null) {
-			exportList.add(ModelObject
-					.get(MediaObject.class, linkedMediaObject));
+			exportList
+					.add(ModelObject.get(MediaObject.class, linkedMediaObject));
 		}
 
 		// Add screening survey slide rule
@@ -390,8 +392,8 @@ public class ScreeningSurveySlide extends ModelObject {
 		}
 
 		if (buffer.length() > 0) {
-			table += wrapRow(wrapHeader("Questions:")
-					+ wrapField(buffer.toString()));
+			table += wrapRow(
+					wrapHeader("Questions:") + wrapField(buffer.toString()));
 		}
 
 		if (linkedMediaObject != null) {
@@ -401,20 +403,18 @@ public class ScreeningSurveySlide extends ModelObject {
 				String externalReference;
 				if (mediaObject.getFileReference() != null) {
 					externalReference = "javascript:showMediaObject('"
-							+ mediaObject.getId()
-							+ "/"
-							+ StringHelpers.cleanFilenameString(mediaObject
-									.getName()) + "')";
+							+ mediaObject.getId() + "/" + StringHelpers
+									.cleanFilenameString(mediaObject.getName())
+							+ "')";
 				} else {
 					externalReference = mediaObject.getUrlReference();
 				}
 
-				table += wrapRow(wrapHeader("Linked Media Object:")
-						+ wrapField(createLink(externalReference,
-								mediaObject.getName())));
+				table += wrapRow(wrapHeader("Linked Media Object:") + wrapField(
+						createLink(externalReference, mediaObject.getName())));
 			} else {
-				table += wrapRow(wrapHeader("Linked Media Object:")
-						+ wrapField(formatWarning("Media Object set, but not found")));
+				table += wrapRow(wrapHeader("Linked Media Object:") + wrapField(
+						formatWarning("Media Object set, but not found")));
 			}
 		}
 
@@ -427,27 +427,26 @@ public class ScreeningSurveySlide extends ModelObject {
 				table += wrapRow(wrapHeader("Hands over to Feedback:")
 						+ wrapField(escape(feedback.getName())));
 			} else {
-				table += wrapRow(wrapHeader("Hands over to Feedback:")
-						+ wrapField(formatWarning("Feedback set, but not found")));
+				table += wrapRow(
+						wrapHeader("Hands over to Feedback:") + wrapField(
+								formatWarning("Feedback set, but not found")));
 			}
 		}
 
 		// Slide Rules
 		buffer = new StringBuffer();
-		val rules = ModelObject
-				.findSorted(
-						ScreeningSurveySlideRule.class,
-						Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE,
-						Queries.SCREENING_SURVEY_SLIDE_RULE__SORT_BY_ORDER_ASC,
-						getId());
+		val rules = ModelObject.findSorted(ScreeningSurveySlideRule.class,
+				Queries.SCREENING_SURVEY_SLIDE_RULE__BY_SCREENING_SURVEY_SLIDE,
+				Queries.SCREENING_SURVEY_SLIDE_RULE__SORT_BY_ORDER_ASC,
+				getId());
 
 		for (val rule : rules) {
 			buffer.append(rule.toTable());
 		}
 
 		if (buffer.length() > 0) {
-			table += wrapRow(wrapHeader("Rules:")
-					+ wrapField(buffer.toString()));
+			table += wrapRow(
+					wrapHeader("Rules:") + wrapField(buffer.toString()));
 		}
 
 		return wrapTable(table);

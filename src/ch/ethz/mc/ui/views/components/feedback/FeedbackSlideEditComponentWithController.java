@@ -48,9 +48,9 @@ import com.vaadin.ui.Table;
  */
 @SuppressWarnings("serial")
 @Log4j2
-public class FeedbackSlideEditComponentWithController extends
-		FeedbackSlideEditComponent implements
-		MediaObjectCreationOrDeleteionListener {
+public class FeedbackSlideEditComponentWithController
+		extends FeedbackSlideEditComponent
+		implements MediaObjectCreationOrDeleteionListener {
 
 	private final FeedbackSlide									feedbackSlide;
 	private final ObjectId										relatedScreeningSurveyId;
@@ -80,8 +80,8 @@ public class FeedbackSlideEditComponentWithController extends
 				UIFeedbackSlideRule.class, rulesOfFeedbackSlide);
 
 		rulesTable.setContainerDataSource(rulesBeanContainer);
-		rulesTable.setSortContainerPropertyId(UIFeedbackSlideRule
-				.getSortColumn());
+		rulesTable.setSortContainerPropertyId(
+				UIFeedbackSlideRule.getSortColumn());
 		rulesTable.setVisibleColumns(UIFeedbackSlideRule.getVisibleColumns());
 		rulesTable.setColumnHeaders(UIFeedbackSlideRule.getColumnHeaders());
 		rulesTable.setSortAscending(true);
@@ -114,8 +114,8 @@ public class FeedbackSlideEditComponentWithController extends
 
 		getTitleWithPlaceholdersTextFieldComponent().getButton()
 				.addClickListener(buttonClickListener);
-		getCommentTextFieldComponent().getButton().addClickListener(
-				buttonClickListener);
+		getCommentTextFieldComponent().getButton()
+				.addClickListener(buttonClickListener);
 		getOptionalLayoutAttributeTextFieldComponent().getButton()
 				.addClickListener(buttonClickListener);
 		getFeedbackTextWithPlaceholdersTextField().getButton()
@@ -136,13 +136,13 @@ public class FeedbackSlideEditComponentWithController extends
 
 	private void adjust() {
 		// Adjust variable text fields
-		getTitleWithPlaceholdersTextFieldComponent().setValue(
-				feedbackSlide.getTitleWithPlaceholders().toString());
+		getTitleWithPlaceholdersTextFieldComponent()
+				.setValue(feedbackSlide.getTitleWithPlaceholders().toString());
 		getCommentTextFieldComponent().setValue(feedbackSlide.getComment());
 		getOptionalLayoutAttributeTextFieldComponent().setValue(
 				feedbackSlide.getOptionalLayoutAttributeWithPlaceholders());
-		getFeedbackTextWithPlaceholdersTextField().setValue(
-				feedbackSlide.getTextWithPlaceholders().toString());
+		getFeedbackTextWithPlaceholdersTextField()
+				.setValue(feedbackSlide.getTextWithPlaceholders().toString());
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
@@ -158,17 +158,20 @@ public class FeedbackSlideEditComponentWithController extends
 				moveRule(false);
 			} else if (event.getButton() == getDeleteRuleButton()) {
 				deleteRule();
-			} else if (event.getButton() == getTitleWithPlaceholdersTextFieldComponent()
-					.getButton()) {
+			} else if (event
+					.getButton() == getTitleWithPlaceholdersTextFieldComponent()
+							.getButton()) {
 				changeTitleWithPlaceholders();
 			} else if (event.getButton() == getCommentTextFieldComponent()
 					.getButton()) {
 				changeComment();
-			} else if (event.getButton() == getOptionalLayoutAttributeTextFieldComponent()
-					.getButton()) {
+			} else if (event
+					.getButton() == getOptionalLayoutAttributeTextFieldComponent()
+							.getButton()) {
 				changeOptionalLayoutAttributeWithPlaceholders();
-			} else if (event.getButton() == getFeedbackTextWithPlaceholdersTextField()
-					.getButton()) {
+			} else if (event
+					.getButton() == getFeedbackTextWithPlaceholdersTextField()
+							.getButton()) {
 				changeFeedbackTextWithPlaceholders();
 			}
 			event.getButton().setEnabled(true);
@@ -307,15 +310,13 @@ public class FeedbackSlideEditComponentWithController extends
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
-						rulesBeanContainer.addItem(
-								newFeedbackSlideRule.getId(),
+						rulesBeanContainer.addItem(newFeedbackSlideRule.getId(),
 								UIFeedbackSlideRule.class
 										.cast(newFeedbackSlideRule
 												.toUIModelObject()));
 						rulesTable.select(newFeedbackSlideRule.getId());
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__FEEDBACK_SLIDE_RULE_CREATED);
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__FEEDBACK_SLIDE_RULE_CREATED);
 
 						closeWindow();
 					}
@@ -339,9 +340,8 @@ public class FeedbackSlideEditComponentWithController extends
 								rulesBeanContainer, selectedFeedbackSlideRule);
 						rulesTable.sort();
 						rulesTable.select(selectedFeedbackSlideRule.getId());
-						getAdminUI()
-								.showInformationNotification(
-										AdminMessageStrings.NOTIFICATION__FEEDBACK_SLIDE_RULE_UPDATED);
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__FEEDBACK_SLIDE_RULE_UPDATED);
 
 						closeWindow();
 					}
@@ -375,7 +375,8 @@ public class FeedbackSlideEditComponentWithController extends
 			@Override
 			public void buttonClick(final ClickEvent event) {
 				try {
-					val selectedFeedbackSlideRule = selectedUIFeedbackSlideRule.getRelatedModelObject(FeedbackSlideRule.class);
+					val selectedFeedbackSlideRule = selectedUIFeedbackSlideRule
+							.getRelatedModelObject(FeedbackSlideRule.class);
 
 					// Delete rule
 					getSurveyAdministrationManagerService()
@@ -387,13 +388,11 @@ public class FeedbackSlideEditComponentWithController extends
 				}
 
 				// Adapt UI
-				rulesTable
-						.removeItem(selectedUIFeedbackSlideRule
-								.getRelatedModelObject(FeedbackSlideRule.class)
-								.getId());
-				getAdminUI()
-						.showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__FEEDBACK_SLIDE_RULE_DELETED);
+				rulesTable.removeItem(selectedUIFeedbackSlideRule
+						.getRelatedModelObject(FeedbackSlideRule.class)
+						.getId());
+				getAdminUI().showInformationNotification(
+						AdminMessageStrings.NOTIFICATION__FEEDBACK_SLIDE_RULE_DELETED);
 
 				closeWindow();
 			}

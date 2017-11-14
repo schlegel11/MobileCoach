@@ -73,14 +73,13 @@ public class AccountEditComponent extends AbstractCustomComponent {
 	}
 
 	public void adjust(final String username, final boolean isAdministrator) {
-		localize(
-				accountInformationLabel,
-				AdminMessageStrings.ACCOUNT_TAB__ACCOUNT_INFORMATION,
-				username,
-				isAdministrator ? Messages
-						.getAdminString(AdminMessageStrings.UI_MODEL__ADMINISTRATOR)
-						: Messages
-								.getAdminString(AdminMessageStrings.UI_MODEL__AUTHOR));
+		localize(accountInformationLabel,
+				AdminMessageStrings.ACCOUNT_TAB__ACCOUNT_INFORMATION, username,
+				isAdministrator
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__ADMINISTRATOR)
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__AUTHOR));
 
 		if (isAdministrator) {
 			resetAllLocksButton.setVisible(true);

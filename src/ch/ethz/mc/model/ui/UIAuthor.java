@@ -47,8 +47,7 @@ public class UIAuthor extends UIModelObject {
 	}
 
 	public static String[] getColumnHeaders() {
-		return new String[] {
-				localize(AdminMessageStrings.UI_COLUMNS__ACCOUNT),
+		return new String[] { localize(AdminMessageStrings.UI_COLUMNS__ACCOUNT),
 				localize(AdminMessageStrings.UI_COLUMNS__ACCOUNT_TYPE) };
 	}
 

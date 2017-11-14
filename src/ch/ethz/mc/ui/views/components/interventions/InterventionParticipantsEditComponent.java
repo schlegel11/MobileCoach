@@ -47,8 +47,8 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class InterventionParticipantsEditComponent extends
-		AbstractCustomComponent {
+public class InterventionParticipantsEditComponent
+		extends AbstractCustomComponent {
 
 	/*- VaadinEditorProperties={"grid":"RegularGrid,20","showGrid":true,"snapToGrid":true,"snapToObject":true,"movingGuides":false,"snappingDistance":10} */
 
@@ -93,20 +93,15 @@ public class InterventionParticipantsEditComponent extends
 		// manually added
 		localize(importButton, AdminMessageStrings.GENERAL__IMPORT);
 		localize(exportButton, AdminMessageStrings.GENERAL__EXPORT);
-		localize(
-				assignGroupButton,
+		localize(assignGroupButton,
 				AdminMessageStrings.INTERVENTION_PARTICIPANTS_EDITING__ASSIGN_GROUP);
-		localize(
-				assignOrganizationButton,
+		localize(assignOrganizationButton,
 				AdminMessageStrings.INTERVENTION_PARTICIPANTS_EDITING__ASSIGN_ORGANIZATION);
-		localize(
-				assignUnitButton,
+		localize(assignUnitButton,
 				AdminMessageStrings.INTERVENTION_PARTICIPANTS_EDITING__ASSIGN_UNIT);
-		localize(
-				switchMessagingButton,
+		localize(switchMessagingButton,
 				AdminMessageStrings.INTERVENTION_PARTICIPANTS_EDITING__SWITCH_MONITORING);
-		localize(
-				sendMessageButton,
+		localize(sendMessageButton,
 				AdminMessageStrings.INTERVENTION_PARTICIPANTS_EDITING__SEND_MESSAGE);
 		localize(deleteButton, AdminMessageStrings.GENERAL__DELETE);
 		localize(refreshButton, AdminMessageStrings.GENERAL__REFRESH);
@@ -137,11 +132,12 @@ public class InterventionParticipantsEditComponent extends
 						} else {
 							return "inactive";
 						}
-					} else if (propertyId
-							.equals(UIParticipant.DATA_FOR_MONITORING_AVAILABLE)) {
+					} else if (propertyId.equals(
+							UIParticipant.DATA_FOR_MONITORING_AVAILABLE)) {
 						val uiParticipant = getUIModelObjectFromTableByObjectId(
 								source, UIParticipant.class, itemId);
-						if (uiParticipant.isBooleanDataForMonitoringAvailable()) {
+						if (uiParticipant
+								.isBooleanDataForMonitoringAvailable()) {
 							return "active";
 						} else {
 							return "inactive";
@@ -329,8 +325,8 @@ public class InterventionParticipantsEditComponent extends
 		// sendMessageButton
 		sendMessageButton = new Button();
 		sendMessageButton.setCaption("!!! Send Message");
-		sendMessageButton.setIcon(new ThemeResource(
-				"img/message-icon-small.png"));
+		sendMessageButton
+				.setIcon(new ThemeResource("img/message-icon-small.png"));
 		sendMessageButton.setImmediate(true);
 		sendMessageButton.setWidth("150px");
 		sendMessageButton.setHeight("-1px");
