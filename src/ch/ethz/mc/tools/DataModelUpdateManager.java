@@ -95,6 +95,9 @@ public class DataModelUpdateManager {
 				case 15:
 					updateToVersion15();
 					break;
+				case 16:
+					updateToVersion16();
+					break;
 			}
 
 			log.info("Update to version {} done", updateToVersionInThisStep);
@@ -322,7 +325,7 @@ public class DataModelUpdateManager {
 	}
 
 	/**
-	 * Changes for version 14:
+	 * Changes for version 15:
 	 */
 	private static void updateToVersion15() {
 		val mongoDriverDialogMessageCollection = jongo.getDatabase()
@@ -344,5 +347,17 @@ public class DataModelUpdateManager {
 				.with(Queries.UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_3);
 		dialogMessageCollection.update(Queries.EVERYTHING).multi()
 				.with(Queries.UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_4);
+	}
+
+	/**
+	 * Changes for version 16:
+	 */
+	private static void updateToVersion16() {
+		val monitoringMessageCollection = jongo
+				.getCollection("MonitoringMessage");
+		monitoringMessageCollection.update(Queries.EVERYTHING).multi()
+				.with(Queries.UPDATE_VERSION_16__MONITORING_MESSAGE__CHANGE_1);
+		monitoringMessageCollection.update(Queries.EVERYTHING).multi()
+				.with(Queries.UPDATE_VERSION_16__MONITORING_MESSAGE__CHANGE_2);
 	}
 }

@@ -29,6 +29,7 @@ import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.model.persistent.MonitoringMessage;
 import ch.ethz.mc.model.persistent.MonitoringMessageRule;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
+import ch.ethz.mc.model.persistent.types.AnswerTypes;
 import ch.ethz.mc.model.ui.UIMonitoringMessageRule;
 import ch.ethz.mc.model.ui.UIScreeningSurvey;
 import ch.ethz.mc.ui.views.components.basics.LocalizedPlaceholderStringEditComponent;
@@ -120,6 +121,8 @@ public class MonitoringMessageEditComponentWithController extends
 				.addClickListener(buttonClickListener);
 		getStoreVariableTextFieldComponent().getButton().addClickListener(
 				buttonClickListener);
+		getAnswerOptionsTextFieldComponent().getButton().addClickListener(
+				buttonClickListener);
 
 		// Handle media object to component
 		if (monitoringMessage.getLinkedMediaObject() == null) {
@@ -171,6 +174,27 @@ public class MonitoringMessageEditComponentWithController extends
 					}
 				});
 
+		val answerTypeComboBox = getAnswerTypeComboBox();
+		for (val answerType : AnswerTypes.values()) {
+			answerTypeComboBox.addItem(answerType);
+			if (monitoringMessage.getAnswerType() == answerType) {
+				answerTypeComboBox.select(answerType);
+			}
+		}
+		answerTypeComboBox.addValueChangeListener(new ValueChangeListener() {
+
+			@Override
+			public void valueChange(final ValueChangeEvent event) {
+				val selectedAnswerType = (AnswerTypes) event.getProperty()
+						.getValue();
+
+				log.debug("Adjust answer type to {}", selectedAnswerType);
+				getInterventionAdministrationManagerService()
+						.monitoringMessageSetAnswerType(monitoringMessage,
+								selectedAnswerType);
+			}
+		});
+
 		// Handle check box
 		val isCommandMessagCheckBox = getIsCommandCheckbox();
 		isCommandMessagCheckBox.setValue(monitoringMessage.isCommandMessage());
@@ -194,6 +218,10 @@ public class MonitoringMessageEditComponentWithController extends
 				monitoringMessage.getTextWithPlaceholders().toString());
 		getStoreVariableTextFieldComponent().setValue(
 				monitoringMessage.getStoreValueToVariableWithName());
+		getAnswerOptionsTextFieldComponent()
+				.setValue(
+						monitoringMessage.getAnswerOptionsWithPlaceholders()
+								.toString());
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
@@ -215,6 +243,9 @@ public class MonitoringMessageEditComponentWithController extends
 			} else if (event.getButton() == getStoreVariableTextFieldComponent()
 					.getButton()) {
 				editStoreResultToVariable();
+			} else if (event.getButton() == getAnswerOptionsTextFieldComponent()
+					.getButton()) {
+				editAnswerOptionsWithPlaceholder();
 			}
 			event.getButton().setEnabled(true);
 		}
@@ -270,6 +301,38 @@ public class MonitoringMessageEditComponentWithController extends
 							getInterventionAdministrationManagerService()
 									.monitoringMessageSetStoreResultToVariable(
 											monitoringMessage, getStringValue());
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						adjust();
+
+						closeWindow();
+					}
+				}, null);
+	}
+
+	public void editAnswerOptionsWithPlaceholder() {
+		log.debug("Edit answer options with placeholder");
+		val allPossibleMessageVariables = getInterventionAdministrationManagerService()
+				.getAllPossibleMessageVariablesOfIntervention(interventionId);
+		showModalLStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_TEXT_WITH_PLACEHOLDERS,
+				monitoringMessage.getAnswerOptionsWithPlaceholders(),
+				allPossibleMessageVariables,
+				new LocalizedPlaceholderStringEditComponent(),
+				new ExtendableButtonClickListener() {
+
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Change text with placeholders
+							getInterventionAdministrationManagerService()
+									.monitoringMessageSetAnswerOptionsWithPlaceholders(
+											monitoringMessage,
+											getLStringValue(),
+											allPossibleMessageVariables);
 						} catch (final Exception e) {
 							handleException(e);
 							return;

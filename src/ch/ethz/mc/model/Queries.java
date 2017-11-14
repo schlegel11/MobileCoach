@@ -197,4 +197,6 @@ public class Queries {
 	public static final String	UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_2																																										= "{$set:{'surveyLink':null}}";
 	public static final String	UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_3																																										= "{$set:{'mediaObjectLink':null}}";
 	public static final String	UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_4																																										= "{$set:{'textBasedMediaObjectContent':null}}";
+	public static final String	UPDATE_VERSION_16__MONITORING_MESSAGE__CHANGE_1																																									= "{$set:{'answerType':'FREE_TEXT'}}";
+	public static final String	UPDATE_VERSION_16__MONITORING_MESSAGE__CHANGE_2																																									= "{$set:{'answerOptionsWithPlaceholders':{}}}";
 }

@@ -37,6 +37,7 @@ import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.subelements.LString;
+import ch.ethz.mc.model.persistent.types.AnswerTypes;
 import ch.ethz.mc.model.ui.UIModelObject;
 import ch.ethz.mc.model.ui.UIMonitoringMessage;
 import ch.ethz.mc.tools.StringHelpers;
@@ -112,6 +113,39 @@ public class MonitoringMessage extends ModelObject {
 	@Setter
 	private String		storeValueToVariableWithName;
 
+	/**
+	 * The type the answer (if required) should have.
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private AnswerTypes	answerType;
+
+	/**
+	 * The answer options required to display the answer selection properly; the
+	 * options should be given one per line and with a colon as separator
+	 * between key and value, e.g.:
+	 * 
+	 * <pre>
+	 * great:1<br/>normal:0<br/>terrible:-1
+	 * </pre>
+	 * 
+	 * For custom answer types the key value system can be used to create own
+	 * key value pairs, e.g.:
+	 * 
+	 * <pre>
+	 * type:currency-selection<br/>symbol:$currencySymbol<br/>terrible:-1
+	 * </pre>
+	 * 
+	 * These options will be automatically parsed to JSON; if a line contains
+	 * more than one colon the last one will be taken.
+	 * 
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private LString		answerOptionsWithPlaceholders;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -148,6 +182,7 @@ public class MonitoringMessage extends ModelObject {
 						.getAdminString(AdminMessageStrings.UI_MODEL__YES)
 						: Messages
 								.getAdminString(AdminMessageStrings.UI_MODEL__NO),
+				answerType.toString(),
 				storeValueToVariableWithName != null ? storeValueToVariableWithName
 						: "", messageRules);
 

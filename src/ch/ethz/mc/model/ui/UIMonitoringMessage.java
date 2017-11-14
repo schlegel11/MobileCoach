@@ -37,6 +37,7 @@ public class UIMonitoringMessage extends UIModelObject {
 	public static final String	IS_COMMAND_MESSAGE						= "isCommandMessage";
 	public static final String	CONTAINS_MEDIA_CONTENT					= "containsMediaContent";
 	public static final String	CONTAINS_LINK_TO_INTERMEDIATE_SURVEY	= "containsLinkToIntermediateSurvey";
+	public static final String	ANSWER_TYPE								= "answerType";
 	public static final String	RESULT_VARIABLE							= "resultVariable";
 	public static final String	CONTAINS_RULES							= "containsRules";
 
@@ -55,6 +56,9 @@ public class UIMonitoringMessage extends UIModelObject {
 	@PropertyId(CONTAINS_LINK_TO_INTERMEDIATE_SURVEY)
 	private String				containsLinkToIntermediateSurvey;
 
+	@PropertyId(ANSWER_TYPE)
+	private String				answerType;
+
 	@PropertyId(RESULT_VARIABLE)
 	private String				resultVariable;
 
@@ -64,7 +68,7 @@ public class UIMonitoringMessage extends UIModelObject {
 	public static Object[] getVisibleColumns() {
 		return new Object[] { TEXT_WITH_PLACEHOLDERS, IS_COMMAND_MESSAGE,
 				CONTAINS_MEDIA_CONTENT, CONTAINS_LINK_TO_INTERMEDIATE_SURVEY,
-				RESULT_VARIABLE, CONTAINS_RULES };
+				ANSWER_TYPE, RESULT_VARIABLE, CONTAINS_RULES };
 	}
 
 	public static String[] getColumnHeaders() {
@@ -73,6 +77,7 @@ public class UIMonitoringMessage extends UIModelObject {
 				localize(AdminMessageStrings.UI_COLUMNS__COMMAND_MESSAGE),
 				localize(AdminMessageStrings.UI_COLUMNS__CONTAINS_MEDIA_CONTENT),
 				localize(AdminMessageStrings.UI_COLUMNS__CONTAINS_LINK_TO_INTERMEDIATE_SURVEY),
+				localize(AdminMessageStrings.UI_COLUMNS__ANSWER_TYPE),
 				localize(AdminMessageStrings.UI_COLUMNS__RESULT_VARIABLE),
 				localize(AdminMessageStrings.UI_COLUMNS__CONTAINS_RULES) };
 	}

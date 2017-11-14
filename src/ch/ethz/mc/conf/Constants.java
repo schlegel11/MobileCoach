@@ -75,7 +75,7 @@ public class Constants {
 	 * 
 	 * CAUTION: Can NOT be defined in configuration file
 	 */
-	public static final int		DATA_MODEL_VERSION					= 15;
+	public static final int		DATA_MODEL_VERSION					= 16;
 	/**
 	 * Data model configuration collection
 	 * 

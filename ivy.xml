@@ -17,7 +17,7 @@
 	<!ENTITY java.mail.version "1.4.7">
 	<!ENTITY java-image-scaling.version "0.8.6">
 	<!ENTITY thumbnailator.version "0.4.8">
-	<!ENTITY resteasy.version "3.0.17.Final">
+	<!ENTITY resteasy.version "3.0.19.Final">
 	<!ENTITY jcsv.version "1.4.0">
 	<!ENTITY deepstream.version "2.2.2">
 ]>

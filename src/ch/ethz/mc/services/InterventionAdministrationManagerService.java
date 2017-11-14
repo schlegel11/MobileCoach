@@ -68,6 +68,7 @@ import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.persistent.concepts.AbstractRule;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 import ch.ethz.mc.model.persistent.subelements.LString;
+import ch.ethz.mc.model.persistent.types.AnswerTypes;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValueAccessTypes;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValuePrivacyTypes;
@@ -761,7 +762,8 @@ public class InterventionAdministrationManagerService {
 	public MonitoringMessage monitoringMessageCreate(
 			final ObjectId monitoringMessageGroupId) {
 		val monitoringMessage = new MonitoringMessage(monitoringMessageGroupId,
-				new LString(), false, 0, null, null, null);
+				new LString(), false, 0, null, null, null,
+				AnswerTypes.FREE_TEXT, new LString());
 
 		val highestOrderMessage = databaseManagerService
 				.findOneSortedModelObject(
@@ -881,6 +883,36 @@ public class InterventionAdministrationManagerService {
 
 			databaseManagerService.saveModelObject(monitoringMessage);
 		}
+	}
+
+	@Synchronized
+	public void monitoringMessageSetAnswerType(
+			final MonitoringMessage monitoringMessage,
+			final AnswerTypes answerType) {
+		monitoringMessage.setAnswerType(answerType);
+
+		databaseManagerService.saveModelObject(monitoringMessage);
+	}
+
+	@Synchronized
+	public void monitoringMessageSetAnswerOptionsWithPlaceholders(
+			final MonitoringMessage monitoringMessage,
+			final LString answerOptions,
+			final List<String> allPossibleMessageVariables)
+			throws NotificationMessageException {
+		if (answerOptions == null) {
+			monitoringMessage.setAnswerOptionsWithPlaceholders(new LString());
+		} else {
+			if (!StringValidator.isValidVariableText(answerOptions,
+					allPossibleMessageVariables)) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
+			}
+
+			monitoringMessage.setAnswerOptionsWithPlaceholders(answerOptions);
+		}
+
+		databaseManagerService.saveModelObject(monitoringMessage);
 	}
 
 	@Synchronized
