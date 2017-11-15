@@ -22,13 +22,9 @@ package ch.ethz.mc.model.persistent;
  */
 import java.util.List;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.Setter;
-import lombok.val;
-
 import org.bson.types.ObjectId;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
@@ -36,8 +32,11 @@ import ch.ethz.mc.model.persistent.concepts.AbstractMonitoringRule;
 import ch.ethz.mc.model.persistent.types.MonitoringRuleTypes;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import ch.ethz.mc.tools.StringHelpers;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.val;
 
 /**
  * {@link ModelObject} to represent an {@link MonitoringRule}
@@ -67,7 +66,7 @@ public class MonitoringRule extends AbstractMonitoringRule {
 			final ObjectId relatedMonitoringMessageGroup,
 			final MonitoringRuleTypes type, final ObjectId intervention,
 			final int hourToSendMessage,
-			final int hoursUntilMessageIsHandledAsUnanswered,
+			final int minutesUntilMessageIsHandledAsUnanswered,
 			final boolean stopInterventionWhenTrue,
 			final boolean markCaseAsSolvedWhenTrue) {
 		super(ruleWithPlaceholders, ruleEquationSign,
@@ -78,7 +77,7 @@ public class MonitoringRule extends AbstractMonitoringRule {
 		this.type = type;
 		this.intervention = intervention;
 		this.hourToSendMessage = hourToSendMessage;
-		this.hoursUntilMessageIsHandledAsUnanswered = hoursUntilMessageIsHandledAsUnanswered;
+		this.minutesUntilMessageIsHandledAsUnanswered = minutesUntilMessageIsHandledAsUnanswered;
 		this.stopInterventionWhenTrue = stopInterventionWhenTrue;
 		this.markCaseAsSolvedWhenTrue = markCaseAsSolvedWhenTrue;
 	}
@@ -108,13 +107,13 @@ public class MonitoringRule extends AbstractMonitoringRule {
 	private int					hourToSendMessage;
 
 	/**
-	 * <strong>OPTIONAL if sendMessageIfTrue is false:</strong> The hours a
+	 * <strong>OPTIONAL if sendMessageIfTrue is false:</strong> The minutes a
 	 * {@link Participant} has to answer the message before it's handled as
 	 * unanswered
 	 */
 	@Getter
 	@Setter
-	private int					hoursUntilMessageIsHandledAsUnanswered;
+	private int					minutesUntilMessageIsHandledAsUnanswered;
 
 	/**
 	 * <strong>OPTIONAL:</strong> The intervention will be set to finished for
@@ -217,19 +216,27 @@ public class MonitoringRule extends AbstractMonitoringRule {
 
 				if (messageGroup.isMessagesExpectAnswer()) {
 					final int daysUntilMessageIsHandledAsUnanswered = (int) Math
-							.floor(getHoursUntilMessageIsHandledAsUnanswered()
-									/ 24);
-					final int hoursWithoutDaysUntilMessageIsHandledAsUnanswered = getHoursUntilMessageIsHandledAsUnanswered()
+							.floor(getMinutesUntilMessageIsHandledAsUnanswered()
+									/ 60 / 24);
+					final int hoursWithoutDaysUntilMessageIsHandledAsUnanswered = (int) Math
+							.floor(getMinutesUntilMessageIsHandledAsUnanswered()
+									/ 60)
 							- daysUntilMessageIsHandledAsUnanswered * 24;
+					final int minutesWithoutHoursAndDaysUntilMessageIsHandledAsUnanswered = getMinutesUntilMessageIsHandledAsUnanswered()
+							- daysUntilMessageIsHandledAsUnanswered * 24 * 60
+							- hoursWithoutDaysUntilMessageIsHandledAsUnanswered
+									* 60;
 
 					table += wrapRow(wrapHeader(
-							"Hours until message is handled as unanswered:",
+							"Time until message is handled as unanswered:",
 							style)
 							+ wrapField(
 									escape(daysUntilMessageIsHandledAsUnanswered
 											+ " day(s), "
 											+ hoursWithoutDaysUntilMessageIsHandledAsUnanswered
-											+ " hour(s)")));
+											+ " hour(s), "
+											+ minutesWithoutHoursAndDaysUntilMessageIsHandledAsUnanswered
+											+ " minute(s)")));
 
 					/*
 					 * Reply Rules

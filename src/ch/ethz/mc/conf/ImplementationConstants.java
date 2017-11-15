@@ -34,14 +34,17 @@ public class ImplementationConstants {
 	public static final String	DEFAULT_OBJECT_NAME																	= "---";
 	public static final String	DEFAULT_ANSWER_NAME																	= "";
 
-	public static final int		HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MIN									= 1;
-	public static final int		HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX									= 96;
-	public static final int		DEFAULT_HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED								= 4;
+	public static final int		MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MIN									= 1;
+	public static final int		MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX									= 5760;
+	public static final int		MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX_MANUAL							= 2160;
+	public static final int		DEFAULT_MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED								= 240;
 
 	public static final int		HOUR_TO_SEND_MESSAGE_MIN															= 0;
 	public static final int		HOUR_TO_SEND_MESSAGE_MAX															= 23;
 	public static final int		DEFAULT_HOUR_TO_SEND_MESSAGE														= 0;
 
+	public static final long	MINUTES_TO_TIME_IN_MILLIS_MULTIPLICATOR												= 60
+			* 1000;
 	public static final long	HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR												= 60
 			* 60 * 1000;
 	public static final long	DAYS_TO_TIME_IN_MILLIS_MULTIPLICATOR												= 24

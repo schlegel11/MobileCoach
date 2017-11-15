@@ -29,7 +29,6 @@ import org.jongo.Jongo;
 import com.mongodb.DBObject;
 
 import ch.ethz.mc.conf.Constants;
-import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.consistency.DataModelConfiguration;
 import ch.ethz.mc.model.persistent.outdated.InterventionV12;
@@ -229,35 +228,23 @@ public class DataModelUpdateManager {
 			val dailyMonitoringRule = new MonitoringRuleV12("",
 					RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "", "", null,
 					0, null, false, null, MonitoringRuleTypes.DAILY,
-					intervention.getId(),
-					ImplementationConstants.DEFAULT_HOUR_TO_SEND_MESSAGE,
-					ImplementationConstants.DEFAULT_HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED,
-					false);
+					intervention.getId(), 0, 0, false);
 			monitoringRuleCollection.save(dailyMonitoringRule);
 			val periodicMonitoringRule = new MonitoringRuleV12("",
 					RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "", "", null,
 					1, null, false, null, MonitoringRuleTypes.PERIODIC,
-					intervention.getId(),
-					ImplementationConstants.DEFAULT_HOUR_TO_SEND_MESSAGE,
-					ImplementationConstants.DEFAULT_HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED,
-					false);
+					intervention.getId(), 0, 0, false);
 			monitoringRuleCollection.save(periodicMonitoringRule);
 			val unexpectedMessageMonitoringRule = new MonitoringRuleV12("",
 					RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "", "", null,
 					2, null, false, null,
 					MonitoringRuleTypes.UNEXPECTED_MESSAGE,
-					intervention.getId(),
-					ImplementationConstants.DEFAULT_HOUR_TO_SEND_MESSAGE,
-					ImplementationConstants.DEFAULT_HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED,
-					false);
+					intervention.getId(), 0, 0, false);
 			monitoringRuleCollection.save(unexpectedMessageMonitoringRule);
 			val intentionMonitoringRule = new MonitoringRuleV12("",
 					RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "", "", null,
 					3, null, false, null, MonitoringRuleTypes.USER_INTENTION,
-					intervention.getId(),
-					ImplementationConstants.DEFAULT_HOUR_TO_SEND_MESSAGE,
-					ImplementationConstants.DEFAULT_HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED,
-					false);
+					intervention.getId(), 0, 0, false);
 			monitoringRuleCollection.save(intentionMonitoringRule);
 
 			for (val monitoringRule : monitoringRulesToAdjust) {
@@ -331,5 +318,21 @@ public class DataModelUpdateManager {
 				.with(Queries.UPDATE_VERSION_16__DIALOG_MESSAGE__CHANGE_1);
 		dialogMessageCollection.update(Queries.EVERYTHING).multi()
 				.with(Queries.UPDATE_VERSION_16__DIALOG_MESSAGE__CHANGE_2);
+
+		val mongoDriverMonitoringRuleCollection = jongo.getDatabase()
+				.getCollection("MonitoringRule");
+		val monitoringRuleCollection = jongo.getCollection("MonitoringRule");
+
+		for (final DBObject document : mongoDriverMonitoringRuleCollection
+				.find().snapshot()) {
+
+			monitoringRuleCollection.update((ObjectId) document.get("_id"))
+					.with(Queries.UPDATE_VERSION_16__MONITORING_RULE__CHANGE_1_CHANGE,
+							Integer.parseInt(document
+									.get(Queries.UPDATE_VERSION_16__MONITORING_RULE__CHANGE_1_FIELD)
+									.toString()) * 60);
+			monitoringRuleCollection.update((ObjectId) document.get("_id"))
+					.with(Queries.UPDATE_VERSION_16__MONITORING_RULE__CHANGE_1_REMOVE);
+		}
 	}
 }

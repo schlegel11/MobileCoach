@@ -202,4 +202,8 @@ public class Queries {
 	public static final String	UPDATE_VERSION_16__MONITORING_MESSAGE__CHANGE_2																																									= "{$set:{'answerOptionsWithPlaceholders':{}}}";
 	public static final String	UPDATE_VERSION_16__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'answerType':null}}";
 	public static final String	UPDATE_VERSION_16__DIALOG_MESSAGE__CHANGE_2																																										= "{$set:{'answerOptions':null}}";
+	public static final String	UPDATE_VERSION_16__MONITORING_RULE__CHANGE_1_FIELD																																								= "hoursUntilMessageIsHandledAsUnanswered";
+	public static final String	UPDATE_VERSION_16__MONITORING_RULE__CHANGE_1_CHANGE																																								= "{$set:{'minutesUntilMessageIsHandledAsUnanswered':#}}";
+	public static final String	UPDATE_VERSION_16__MONITORING_RULE__CHANGE_1_REMOVE																																								= "{$unset:{'"
+			+ UPDATE_VERSION_16__MONITORING_RULE__CHANGE_1_FIELD + "':1}}";
 }

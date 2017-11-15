@@ -30,11 +30,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-
 import org.bson.types.ObjectId;
+
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.BeanContainer;
+import com.vaadin.data.util.converter.StringToDateConverter;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
@@ -50,13 +53,9 @@ import ch.ethz.mc.ui.views.components.basics.FileUploadComponentWithController;
 import ch.ethz.mc.ui.views.components.basics.FileUploadComponentWithController.UploadListener;
 import ch.ethz.mc.ui.views.components.basics.PlaceholderStringEditWithMessageGroupSelectionComponent;
 import ch.ethz.mc.ui.views.components.basics.ShortStringEditComponent;
-
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.BeanContainer;
-import com.vaadin.data.util.converter.StringToDateConverter;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Extends the intervention participants tab component with a controller
@@ -502,7 +501,7 @@ public class InterventionParticipantsTabComponentWithController
 													placeholderStringEditWithMessageGroupSelectionComponent
 															.getSelectedMonitoringMessageGroup(),
 													placeholderStringEditWithMessageGroupSelectionComponent
-															.getHoursUntilHandledAsNotAnsweredSlider()
+															.getMinutesUntilHandledAsNotAnsweredSlider()
 															.getValue()
 															.intValue());
 								}

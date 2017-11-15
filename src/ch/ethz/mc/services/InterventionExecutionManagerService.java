@@ -292,7 +292,7 @@ public class InterventionExecutionManagerService {
 			final MonitoringRule relatedMonitoringRule,
 			final MonitoringMessage relatedMonitoringMessage,
 			final boolean supervisorMessage, final boolean answerExpected,
-			final int hoursUntilHandledAsNotAnswered) {
+			final int minutesUntilHandledAsNotAnswered) {
 		log.debug("Create message and prepare for sending");
 		val dialogMessage = new DialogMessage(participant.getId(), 0,
 				DialogMessageStatusTypes.PREPARED_FOR_SENDING, type, message,
@@ -350,8 +350,8 @@ public class InterventionExecutionManagerService {
 		// Remember accepted reply time for manual message
 		if (manuallySent && answerExpected) {
 			final long isUnansweredAfterTimestamp = timestampToSendMessage
-					+ hoursUntilHandledAsNotAnswered
-							* ImplementationConstants.HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR;
+					+ minutesUntilHandledAsNotAnswered
+							* ImplementationConstants.MINUTES_TO_TIME_IN_MILLIS_MULTIPLICATOR;
 
 			dialogMessage
 					.setIsUnansweredAfterTimestamp(isUnansweredAfterTimestamp);
@@ -513,8 +513,8 @@ public class InterventionExecutionManagerService {
 				if (monitoringRule != null) {
 					final long isUnansweredAfterTimestamp = timeStampOfEvent
 							+ monitoringRule
-									.getHoursUntilMessageIsHandledAsUnanswered()
-									* ImplementationConstants.HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR;
+									.getMinutesUntilMessageIsHandledAsUnanswered()
+									* ImplementationConstants.MINUTES_TO_TIME_IN_MILLIS_MULTIPLICATOR;
 
 					dialogMessage.setIsUnansweredAfterTimestamp(
 							isUnansweredAfterTimestamp);
@@ -1710,13 +1710,13 @@ public class InterventionExecutionManagerService {
 	 * @param participant
 	 * @param advisorMessage
 	 * @param monitoringMessageGroup
-	 * @param hoursUntilHandledAsNotAnswered
+	 * @param minutesUntilHandledAsNotAnswered
 	 */
 	@Synchronized
 	public void sendManualMessage(final Participant participant,
 			final boolean advisorMessage,
 			final MonitoringMessageGroup monitoringMessageGroup,
-			final int hoursUntilHandledAsNotAnswered) {
+			final int minutesUntilHandledAsNotAnswered) {
 
 		val determinedMonitoringMessageToSend = determineMessageOfMessageGroupToSend(
 				participant, monitoringMessageGroup, null, true);
@@ -1762,7 +1762,7 @@ public class InterventionExecutionManagerService {
 				InternalDateTime.currentTimeMillis(), null,
 				determinedMonitoringMessageToSend, advisorMessage,
 				monitoringMessageGroup.isMessagesExpectAnswer(),
-				hoursUntilHandledAsNotAnswered);
+				minutesUntilHandledAsNotAnswered);
 	}
 
 	/**

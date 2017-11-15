@@ -1,5 +1,21 @@
 package ch.ethz.mc.ui.views.components.interventions.monitoring_rules;
 
+import org.bson.types.ObjectId;
+
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+
+import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.model.persistent.Intervention;
+import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
+import ch.ethz.mc.model.persistent.MonitoringRule;
+import ch.ethz.mc.model.ui.UIMonitoringMessageGroup;
+import ch.ethz.mc.ui.views.components.basics.AbstractRuleEditComponentWithController;
+import ch.ethz.mc.ui.views.components.basics.AbstractRuleEditComponentWithController.TYPES;
+import ch.ethz.mc.ui.views.components.basics.ShortPlaceholderStringEditComponent;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -22,23 +38,6 @@ package ch.ethz.mc.ui.views.components.interventions.monitoring_rules;
  */
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
-
-import org.bson.types.ObjectId;
-
-import ch.ethz.mc.conf.AdminMessageStrings;
-import ch.ethz.mc.conf.ImplementationConstants;
-import ch.ethz.mc.model.persistent.Intervention;
-import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
-import ch.ethz.mc.model.persistent.MonitoringRule;
-import ch.ethz.mc.model.ui.UIMonitoringMessageGroup;
-import ch.ethz.mc.ui.views.components.basics.AbstractRuleEditComponentWithController;
-import ch.ethz.mc.ui.views.components.basics.AbstractRuleEditComponentWithController.TYPES;
-import ch.ethz.mc.ui.views.components.basics.ShortPlaceholderStringEditComponent;
-
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
 
 /**
  * Extends the monitoring rule edit component with a controller
@@ -159,19 +158,24 @@ public class MonitoringRuleEditComponentWithController
 				.setMax(ImplementationConstants.HOUR_TO_SEND_MESSAGE_MAX);
 		hourToSendSlider.addValueChangeListener(valueChangeListener);
 
-		val hoursUntilHandledAsNotAnsweredSlider = getHoursUntilHandledAsNotAnsweredSlider();
-		hoursUntilHandledAsNotAnsweredSlider.setImmediate(true);
-		hoursUntilHandledAsNotAnsweredSlider.setMin(
-				ImplementationConstants.HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MIN);
-		hoursUntilHandledAsNotAnsweredSlider.setMax(
-				ImplementationConstants.HOURS_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX);
-		hoursUntilHandledAsNotAnsweredSlider
+		val minutesUntilHandledAsNotAnsweredSlider = getMinutesUntilHandledAsNotAnsweredSlider();
+		minutesUntilHandledAsNotAnsweredSlider.setImmediate(true);
+		minutesUntilHandledAsNotAnsweredSlider.setMin(
+				ImplementationConstants.MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MIN);
+		minutesUntilHandledAsNotAnsweredSlider.setMax(
+				ImplementationConstants.MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX);
+		minutesUntilHandledAsNotAnsweredSlider
 				.addValueChangeListener(valueChangeListener);
 
 		// Add button listeners
 		val buttonClickListener = new ButtonClickListener();
 		getStoreVariableTextFieldComponent().getButton()
 				.addClickListener(buttonClickListener);
+		getMinutesButton1().addClickListener(buttonClickListener);
+		getMinutesButton5().addClickListener(buttonClickListener);
+		getMinutesButton10().addClickListener(buttonClickListener);
+		getMinutesButton30().addClickListener(buttonClickListener);
+		getMinutesButton60().addClickListener(buttonClickListener);
 
 		// Add other listeners
 		getSendMessageIfTrueCheckBox()
@@ -317,6 +321,16 @@ public class MonitoringRuleEditComponentWithController
 			if (event.getButton() == getStoreVariableTextFieldComponent()
 					.getButton()) {
 				editStoreResultVariable();
+			} else if (event.getButton() == getMinutesButton1()) {
+				getMinutesUntilHandledAsNotAnsweredSlider().setValue(1d);
+			} else if (event.getButton() == getMinutesButton5()) {
+				getMinutesUntilHandledAsNotAnsweredSlider().setValue(5d);
+			} else if (event.getButton() == getMinutesButton10()) {
+				getMinutesUntilHandledAsNotAnsweredSlider().setValue(10d);
+			} else if (event.getButton() == getMinutesButton30()) {
+				getMinutesUntilHandledAsNotAnsweredSlider().setValue(30d);
+			} else if (event.getButton() == getMinutesButton60()) {
+				getMinutesUntilHandledAsNotAnsweredSlider().setValue(60d);
 			}
 			event.getButton().setEnabled(true);
 		}
@@ -337,8 +351,13 @@ public class MonitoringRuleEditComponentWithController
 			if (currentMonitoringMessageGroup != null
 					&& !currentMonitoringMessageGroup
 							.isMessagesExpectAnswer()) {
-				getHoursUntilHandledAsNotAnsweredLabel().setEnabled(false);
-				getHoursUntilHandledAsNotAnsweredSlider().setEnabled(false);
+				getMinutesButton1().setEnabled(false);
+				getMinutesButton5().setEnabled(false);
+				getMinutesButton10().setEnabled(false);
+				getMinutesButton30().setEnabled(false);
+				getMinutesButton60().setEnabled(false);
+				getMinutesUntilHandledAsNotAnsweredLabel().setEnabled(false);
+				getMinutesUntilHandledAsNotAnsweredSlider().setEnabled(false);
 
 				getReplyRulesTabSheet().setEnabled(false);
 
@@ -354,8 +373,13 @@ public class MonitoringRuleEditComponentWithController
 				getMonitoringReplyRulesEditComponentWithControllerIfNoAnswer()
 						.getRulesTree().setEnabled(false);
 			} else {
-				getHoursUntilHandledAsNotAnsweredLabel().setEnabled(true);
-				getHoursUntilHandledAsNotAnsweredSlider().setEnabled(true);
+				getMinutesButton1().setEnabled(true);
+				getMinutesButton5().setEnabled(true);
+				getMinutesButton10().setEnabled(true);
+				getMinutesButton30().setEnabled(true);
+				getMinutesButton60().setEnabled(true);
+				getMinutesUntilHandledAsNotAnsweredLabel().setEnabled(true);
+				getMinutesUntilHandledAsNotAnsweredSlider().setEnabled(true);
 
 				getReplyRulesTabSheet().setEnabled(true);
 
@@ -378,8 +402,13 @@ public class MonitoringRuleEditComponentWithController
 			getHourToSendMessageLabel().setEnabled(false);
 			getHourToSendMessageSlider().setEnabled(false);
 
-			getHoursUntilHandledAsNotAnsweredLabel().setEnabled(false);
-			getHoursUntilHandledAsNotAnsweredSlider().setEnabled(false);
+			getMinutesButton1().setEnabled(false);
+			getMinutesButton5().setEnabled(false);
+			getMinutesButton10().setEnabled(false);
+			getMinutesButton30().setEnabled(false);
+			getMinutesButton60().setEnabled(false);
+			getMinutesUntilHandledAsNotAnsweredLabel().setEnabled(false);
+			getMinutesUntilHandledAsNotAnsweredSlider().setEnabled(false);
 
 			getReplyRulesTabSheet().setEnabled(false);
 
@@ -407,20 +436,26 @@ public class MonitoringRuleEditComponentWithController
 			// Do nothing
 		}
 		final int daysUntilMessageIsHandledAsUnanswered = (int) Math.floor(
-				monitoringRule.getHoursUntilMessageIsHandledAsUnanswered()
-						/ 24);
-		final int hoursWithoutDaysUntilMessageIsHandledAsUnanswered = monitoringRule
-				.getHoursUntilMessageIsHandledAsUnanswered()
+				monitoringRule.getMinutesUntilMessageIsHandledAsUnanswered()
+						/ 60 / 24);
+		final int hoursWithoutDaysUntilMessageIsHandledAsUnanswered = (int) Math
+				.floor(monitoringRule
+						.getMinutesUntilMessageIsHandledAsUnanswered() / 60)
 				- daysUntilMessageIsHandledAsUnanswered * 24;
+		final int minutesWithoutHoursAndDaysUntilMessageIsHandledAsUnanswered = monitoringRule
+				.getMinutesUntilMessageIsHandledAsUnanswered()
+				- daysUntilMessageIsHandledAsUnanswered * 24 * 60
+				- hoursWithoutDaysUntilMessageIsHandledAsUnanswered * 60;
 
-		localize(getHoursUntilHandledAsNotAnsweredSlider(),
-				AdminMessageStrings.MONITORING_RULE_EDITING__DAYS_AND_HOURS_AFTER_SENDING_UNTIL_HANDLED_AS_NOT_ANSWERED_VALUE,
+		localize(getMinutesUntilHandledAsNotAnsweredSlider(),
+				AdminMessageStrings.MONITORING_RULE_EDITING__TIMEFRAME_AFTER_SENDING_UNTIL_HANDLED_AS_NOT_ANSWERED_VALUE,
 				daysUntilMessageIsHandledAsUnanswered,
-				hoursWithoutDaysUntilMessageIsHandledAsUnanswered);
+				hoursWithoutDaysUntilMessageIsHandledAsUnanswered,
+				minutesWithoutHoursAndDaysUntilMessageIsHandledAsUnanswered);
 		try {
-			getHoursUntilHandledAsNotAnsweredSlider()
+			getMinutesUntilHandledAsNotAnsweredSlider()
 					.setValue((double) monitoringRule
-							.getHoursUntilMessageIsHandledAsUnanswered());
+							.getMinutesUntilMessageIsHandledAsUnanswered());
 		} catch (final Exception e) {
 			// Do nothing
 		}
@@ -466,9 +501,9 @@ public class MonitoringRuleEditComponentWithController
 								((Double) event.getProperty().getValue())
 										.intValue());
 			} else if (event
-					.getProperty() == getHoursUntilHandledAsNotAnsweredSlider()) {
+					.getProperty() == getMinutesUntilHandledAsNotAnsweredSlider()) {
 				getInterventionAdministrationManagerService()
-						.monitoringRuleChangeHoursUntilMessageIsHandledAsUnanswered(
+						.monitoringRuleChangeMinutesUntilMessageIsHandledAsUnanswered(
 								monitoringRule,
 								((Double) event.getProperty().getValue())
 										.intValue());
