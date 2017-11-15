@@ -31,7 +31,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
@@ -269,11 +268,11 @@ public class StringHelpers {
 			final LString text, final Locale language,
 			final Collection<AbstractVariableWithValue> variablesWithValues) {
 
-		val jsonArray = new JsonArray();
+		val jsonOuterArray = new JsonArray();
 
 		for (val line : text.get(language).split("\n")) {
 			if (!StringUtils.isBlank(line)) {
-				val jsonObject = new JsonObject();
+				val jsonArray = new JsonArray();
 
 				final int indexOfColon = line.lastIndexOf(":");
 				if (indexOfColon > -1) {
@@ -286,7 +285,7 @@ public class StringHelpers {
 								.findVariablesAndReplaceWithTextValues(language,
 										name, variablesWithValues, "");
 					}
-					jsonObject.addProperty("name", name);
+					jsonArray.add(name);
 
 					if (value.contains(
 							ImplementationConstants.VARIABLE_PREFIX)) {
@@ -294,23 +293,24 @@ public class StringHelpers {
 								.findVariablesAndReplaceWithTextValues(language,
 										value, variablesWithValues, "");
 					}
-					jsonObject.addProperty("value", value);
+					jsonArray.add(value);
 				} else {
 					if (line.contains(
 							ImplementationConstants.VARIABLE_PREFIX)) {
-						jsonObject.addProperty("name", VariableStringReplacer
+						jsonArray.add(VariableStringReplacer
 								.findVariablesAndReplaceWithTextValues(language,
 										line, variablesWithValues, ""));
 					} else {
-						jsonObject.addProperty("name", line);
+						jsonArray.add(line);
 					}
+					jsonArray.add("");
 				}
 
-				jsonArray.add(jsonObject);
+				jsonOuterArray.add(jsonArray);
 			}
 		}
 
-		return gson.toJson(jsonArray);
+		return gson.toJson(jsonOuterArray);
 	}
 
 	/**
