@@ -70,6 +70,24 @@ public class Queries {
 	public static final String	MONITORING_MESSAGE_RULE__SORT_BY_ORDER_ASC																																										= "{'order':1}";
 	public static final String	MONITORING_MESSAGE_RULE__SORT_BY_ORDER_DESC																																										= "{'order':-1}";
 
+	public static final String	MICRO_DIALOG__BY_INTERVENTION																																													= "{'intervention':#}";
+	public static final String	MICRO_DIALOG__BY_INTERVENTION_AND_ORDER_LOWER																																									= "{'intervention':#,'order':{$lt:#}}";
+	public static final String	MICRO_DIALOG__BY_INTERVENTION_AND_ORDER_HIGHER																																									= "{'intervention':#,'order':{$gt:#}}";
+	public static final String	MICRO_DIALOG__SORT_BY_ORDER_ASC																																													= "{'order':1}";
+	public static final String	MICRO_DIALOG__SORT_BY_ORDER_DESC																																												= "{'order':-1}";
+
+	public static final String	MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG																																											= "{'microDialog':#}";
+	public static final String	MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG_AND_ORDER_LOWER																																							= "{'microDialog':#,'order':{$lt:#}}";
+	public static final String	MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG_AND_ORDER_HIGHER																																							= "{'microDialog':#,'order':{$gt:#}}";
+	public static final String	MICRO_DIALOG_MESSAGE__SORT_BY_ORDER_ASC																																											= "{'order':1}";
+	public static final String	MICRO_DIALOG_MESSAGE__SORT_BY_ORDER_DESC																																										= "{'order':-1}";
+
+	public static final String	MICRO_DIALOG_MESSAGE_RULE__BY_MICRO_DIALOG_MESSAGE																																								= "{'belongingMicroDialogMessage':#}";
+	public static final String	MICRO_DIALOG_MESSAGE_RULE__BY_MICRO_DIALOG_MESSAGE_AND_ORDER_LOWER																																				= "{'belongingMicroDialogMessage':#,'order':{$lt:#}}";
+	public static final String	MICRO_DIALOG_MESSAGE_RULE__BY_MICRO_DIALOG_MESSAGE_AND_ORDER_HIGHER																																				= "{'belongingMicroDialogMessage':#,'order':{$gt:#}}";
+	public static final String	MICRO_DIALOG_MESSAGE_RULE__SORT_BY_ORDER_ASC																																									= "{'order':1}";
+	public static final String	MICRO_DIALOG_MESSAGE_RULE__SORT_BY_ORDER_DESC																																									= "{'order':-1}";
+
 	public static final String	SCREENING_SURVEY__BY_INTERVENTION																																												= "{'intervention':#}";
 
 	public static final String	SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY																																										= "{'screeningSurvey':#}";

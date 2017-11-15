@@ -32,6 +32,7 @@ import com.vaadin.ui.TabSheet.Tab;
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.ThemeImageStrings;
 import ch.ethz.mc.model.persistent.Intervention;
+import ch.ethz.mc.ui.views.components.interventions.micro_dialogs.MicroDialogsTabComponentWithController;
 import ch.ethz.mc.ui.views.components.interventions.monitoring_messages.MonitoringMessageGroupsTabComponentWithController;
 import ch.ethz.mc.ui.views.components.interventions.monitoring_rules.MonitoringRulesEditComponentWithController;
 import lombok.val;
@@ -111,7 +112,7 @@ public class InterventionEditingContainerComponentWithController
 				addPointableTab(getContentTabSheet(),
 						new MonitoringRulesEditComponentWithController(
 								intervention),
-						AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__MONITORING_RULES_TAB,
+						AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__RULES_TAB,
 						ThemeImageStrings.COMPONENT_ICON));
 
 		// Add monitoring message groups tab
@@ -122,7 +123,13 @@ public class InterventionEditingContainerComponentWithController
 						AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__MESSAGE_GROUPS_TAB,
 						ThemeImageStrings.COMPONENT_ICON));
 
-		// TODO Micro Dialogs can be added here
+		// Add micro dialogs tab
+		registerToSetEditingDependingOnMessaging(
+				addPointableTab(getContentTabSheet(),
+						new MicroDialogsTabComponentWithController(
+								intervention),
+						AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__MICRO_DIALOGS_TAB,
+						ThemeImageStrings.COMPONENT_ICON));
 
 		if (getUISession().isAdmin()) {
 			// Add intervention access tab

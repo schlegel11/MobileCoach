@@ -1,4 +1,6 @@
-package ch.ethz.mc.services.types;
+package ch.ethz.mc.model.ui;
+
+import com.vaadin.data.fieldgroup.PropertyId;
 
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
@@ -20,13 +22,22 @@ package ch.ethz.mc.services.types;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import ch.ethz.mc.model.ModelObject;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-/**
- * Contains all available exchange formats for {@link ModelObject}s
- *
- * @author Andreas Filler
- */
-public enum ModelObjectExchangeFormatTypes {
-	INTERVENTION, SURVEY, PARTICIPANTS, SCREENING_SURVEY_SLIDE, FEEDBACK_SLIDE, MONITORING_MESSAGE, MICRO_DIALOG_MESSAGE, MONITORING_RULE, MONITORING_REPLY_RULE;
+@AllArgsConstructor
+@Data
+@EqualsAndHashCode(callSuper = false)
+public class UIMicroDialog extends UIModelObject {
+	// NOTE: The String values have to fit the name of the variables
+	public static final String	NAME	= "name";
+
+	@PropertyId(NAME)
+	private String				name;
+
+	@Override
+	public String toString() {
+		return name;
+	}
 }

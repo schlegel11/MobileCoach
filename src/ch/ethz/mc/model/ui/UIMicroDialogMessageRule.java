@@ -1,4 +1,4 @@
-package ch.ethz.mc.services.types;
+package ch.ethz.mc.model.ui;
 
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
@@ -20,13 +20,36 @@ package ch.ethz.mc.services.types;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import ch.ethz.mc.model.ModelObject;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import ch.ethz.mc.conf.AdminMessageStrings;
 
-/**
- * Contains all available exchange formats for {@link ModelObject}s
- *
- * @author Andreas Filler
- */
-public enum ModelObjectExchangeFormatTypes {
-	INTERVENTION, SURVEY, PARTICIPANTS, SCREENING_SURVEY_SLIDE, FEEDBACK_SLIDE, MONITORING_MESSAGE, MICRO_DIALOG_MESSAGE, MONITORING_RULE, MONITORING_REPLY_RULE;
+import com.vaadin.data.fieldgroup.PropertyId;
+
+@AllArgsConstructor
+@Data
+@EqualsAndHashCode(callSuper = false)
+public class UIMicroDialogMessageRule extends UIModelObject {
+	// NOTE: The String values have to fit the name of the variables
+	public static final String	ORDER	= "order";
+	public static final String	RULE	= "rule";
+
+	@PropertyId(ORDER)
+	private int					order;
+
+	@PropertyId(RULE)
+	private String				rule;
+
+	public static Object[] getVisibleColumns() {
+		return new Object[] { RULE };
+	}
+
+	public static String[] getColumnHeaders() {
+		return new String[] { localize(AdminMessageStrings.UI_COLUMNS__RULE) };
+	}
+
+	public static String getSortColumn() {
+		return ORDER;
+	}
 }

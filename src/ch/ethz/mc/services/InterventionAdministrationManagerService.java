@@ -53,6 +53,9 @@ import ch.ethz.mc.model.persistent.IntermediateSurveyAndFeedbackParticipantShort
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.InterventionVariableWithValue;
 import ch.ethz.mc.model.persistent.MediaObject;
+import ch.ethz.mc.model.persistent.MicroDialog;
+import ch.ethz.mc.model.persistent.MicroDialogMessage;
+import ch.ethz.mc.model.persistent.MicroDialogMessageRule;
 import ch.ethz.mc.model.persistent.MonitoringMessage;
 import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
 import ch.ethz.mc.model.persistent.MonitoringMessageRule;
@@ -919,15 +922,15 @@ public class InterventionAdministrationManagerService {
 				// Adjust order
 				monitoringMessage.setOrder(0);
 
-				val highestOrderSlide = databaseManagerService
+				val highestOrderMessage = databaseManagerService
 						.findOneSortedModelObject(MonitoringMessage.class,
 								Queries.MONITORING_MESSAGE__BY_MONITORING_MESSAGE_GROUP,
 								Queries.MONITORING_MESSAGE__SORT_BY_ORDER_DESC,
 								monitoringMessage.getMonitoringMessageGroup());
 
-				if (highestOrderSlide != null) {
+				if (highestOrderMessage != null) {
 					monitoringMessage
-							.setOrder(highestOrderSlide.getOrder() + 1);
+							.setOrder(highestOrderMessage.getOrder() + 1);
 				}
 
 				databaseManagerService.saveModelObject(monitoringMessage);
@@ -969,15 +972,14 @@ public class InterventionAdministrationManagerService {
 				monitoringMessageId, 0, "",
 				RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "", "");
 
-		val highestOrderSlideRule = databaseManagerService
-				.findOneSortedModelObject(MonitoringMessageRule.class,
-						Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE,
-						Queries.MONITORING_MESSAGE_RULE__SORT_BY_ORDER_DESC,
-						monitoringMessageId);
+		val highestOrderRule = databaseManagerService.findOneSortedModelObject(
+				MonitoringMessageRule.class,
+				Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE,
+				Queries.MONITORING_MESSAGE_RULE__SORT_BY_ORDER_DESC,
+				monitoringMessageId);
 
-		if (highestOrderSlideRule != null) {
-			monitoringMessageRule
-					.setOrder(highestOrderSlideRule.getOrder() + 1);
+		if (highestOrderRule != null) {
+			monitoringMessageRule.setOrder(highestOrderRule.getOrder() + 1);
 		}
 
 		databaseManagerService.saveModelObject(monitoringMessageRule);
@@ -1019,6 +1021,348 @@ public class InterventionAdministrationManagerService {
 	public void monitoringMessageRuleDelete(
 			final MonitoringMessageRule monitoringMessageRule) {
 		databaseManagerService.deleteModelObject(monitoringMessageRule);
+	}
+
+	// Micro Dialog
+	@Synchronized
+	public MicroDialog microDialogCreate(final String microDialogName,
+			final ObjectId interventionId) {
+		val microDialog = new MicroDialog(interventionId, microDialogName, 0);
+
+		if (microDialog.getName().equals("")) {
+			microDialog.setName(ImplementationConstants.DEFAULT_OBJECT_NAME);
+		}
+
+		val highestOrderMicroDialog = databaseManagerService
+				.findOneSortedModelObject(MicroDialog.class,
+						Queries.MICRO_DIALOG__BY_INTERVENTION,
+						Queries.MICRO_DIALOG__SORT_BY_ORDER_DESC,
+						interventionId);
+
+		if (highestOrderMicroDialog != null) {
+			microDialog.setOrder(highestOrderMicroDialog.getOrder() + 1);
+		}
+
+		databaseManagerService.saveModelObject(microDialog);
+
+		return microDialog;
+	}
+
+	@Synchronized
+	public MicroDialog microDialogMove(final MicroDialog microDialog,
+			final boolean moveLeft) {
+		// Find micro dialog to swap with
+		val microDialogToSwapWith = databaseManagerService
+				.findOneSortedModelObject(MicroDialog.class,
+						moveLeft ? Queries.MICRO_DIALOG__BY_INTERVENTION_AND_ORDER_LOWER
+								: Queries.MICRO_DIALOG__BY_INTERVENTION_AND_ORDER_HIGHER,
+						moveLeft ? Queries.MICRO_DIALOG__SORT_BY_ORDER_DESC
+								: Queries.MICRO_DIALOG__SORT_BY_ORDER_ASC,
+						microDialog.getIntervention(), microDialog.getOrder());
+
+		if (microDialogToSwapWith == null) {
+			return null;
+		}
+
+		// Swap order
+		final int order = microDialog.getOrder();
+		microDialog.setOrder(microDialogToSwapWith.getOrder());
+		microDialogToSwapWith.setOrder(order);
+
+		databaseManagerService.saveModelObject(microDialog);
+		databaseManagerService.saveModelObject(microDialogToSwapWith);
+
+		return microDialogToSwapWith;
+	}
+
+	@Synchronized
+	public void microDialogChangeName(final MicroDialog microDialog,
+			final String newName) {
+		if (newName.equals("")) {
+			microDialog.setName(ImplementationConstants.DEFAULT_OBJECT_NAME);
+		} else {
+			microDialog.setName(newName);
+		}
+
+		databaseManagerService.saveModelObject(microDialog);
+	}
+
+	@Synchronized
+	public void microDialogDelete(final MicroDialog microDialogToDelete) {
+
+		databaseManagerService.deleteModelObject(microDialogToDelete);
+	}
+
+	// Micro Dialog Message
+	@Synchronized
+	public MicroDialogMessage microDialogMessageCreate(
+			final ObjectId microDialogId) {
+		val microDialogMessage = new MicroDialogMessage(microDialogId,
+				new LString(), false, 0, null, null, null,
+				AnswerTypes.FREE_TEXT, new LString());
+
+		val highestOrderMessage = databaseManagerService
+				.findOneSortedModelObject(MicroDialogMessage.class,
+						Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG,
+						Queries.MICRO_DIALOG__SORT_BY_ORDER_DESC,
+						microDialogId);
+
+		if (highestOrderMessage != null) {
+			microDialogMessage.setOrder(highestOrderMessage.getOrder() + 1);
+		}
+
+		databaseManagerService.saveModelObject(microDialogMessage);
+
+		return microDialogMessage;
+	}
+
+	@Synchronized
+	public MicroDialogMessage microDialogMessageMove(
+			final MicroDialogMessage microDialogMessage, final boolean moveUp) {
+		// Find micro dialog message to swap with
+		val microDialogMessageToSwapWith = databaseManagerService
+				.findOneSortedModelObject(MicroDialogMessage.class,
+						moveUp ? Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG_AND_ORDER_LOWER
+								: Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG_AND_ORDER_HIGHER,
+						moveUp ? Queries.MONITORING_MESSAGE__SORT_BY_ORDER_DESC
+								: Queries.MONITORING_MESSAGE__SORT_BY_ORDER_ASC,
+						microDialogMessage.getMicroDialog(),
+						microDialogMessage.getOrder());
+
+		if (microDialogMessageToSwapWith == null) {
+			return null;
+		}
+
+		// Swap order
+		final int order = microDialogMessage.getOrder();
+		microDialogMessage.setOrder(microDialogMessageToSwapWith.getOrder());
+		microDialogMessageToSwapWith.setOrder(order);
+
+		databaseManagerService.saveModelObject(microDialogMessage);
+		databaseManagerService.saveModelObject(microDialogMessageToSwapWith);
+
+		return microDialogMessageToSwapWith;
+	}
+
+	@Synchronized
+	public void microDialogMessageSetLinkedMediaObject(
+			final MicroDialogMessage microDialogMessage,
+			final ObjectId linkedMediaObjectId) {
+		microDialogMessage.setLinkedMediaObject(linkedMediaObjectId);
+
+		databaseManagerService.saveModelObject(microDialogMessage);
+	}
+
+	@Synchronized
+	public void microDialogMessageSetLinkedIntermediateSurvey(
+			final MicroDialogMessage microDialogMessage,
+			final ObjectId screeningSurveyId) {
+		microDialogMessage.setLinkedIntermediateSurvey(screeningSurveyId);
+
+		databaseManagerService.saveModelObject(microDialogMessage);
+	}
+
+	@Synchronized
+	public void microDialogMessageSetIsCommandMessage(
+			final MicroDialogMessage microDialogMessage,
+			final boolean isCommandMessage) {
+		microDialogMessage.setCommandMessage(isCommandMessage);
+
+		databaseManagerService.saveModelObject(microDialogMessage);
+	}
+
+	@Synchronized
+	public void microDialogMessageSetTextWithPlaceholders(
+			final MicroDialogMessage microDialogMessage,
+			final LString textWithPlaceholders,
+			final List<String> allPossibleMessageVariables)
+			throws NotificationMessageException {
+		if (textWithPlaceholders == null) {
+			microDialogMessage.setTextWithPlaceholders(new LString());
+		} else {
+			if (!StringValidator.isValidVariableText(textWithPlaceholders,
+					allPossibleMessageVariables)) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
+			}
+
+			microDialogMessage.setTextWithPlaceholders(textWithPlaceholders);
+		}
+
+		databaseManagerService.saveModelObject(microDialogMessage);
+	}
+
+	@Synchronized
+	public void microDialogMessageSetStoreResultToVariable(
+			final MicroDialogMessage microDialogMessage,
+			final String variableName) throws NotificationMessageException {
+		if (variableName == null || variableName.equals("")) {
+			microDialogMessage.setStoreValueToVariableWithName(null);
+
+			databaseManagerService.saveModelObject(microDialogMessage);
+
+		} else {
+			if (!StringValidator.isValidVariableName(variableName)) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_NOT_VALID);
+			}
+
+			if (variablesManagerService
+					.isWriteProtectedReservedVariableName(variableName)) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
+			}
+
+			microDialogMessage.setStoreValueToVariableWithName(variableName);
+
+			databaseManagerService.saveModelObject(microDialogMessage);
+		}
+	}
+
+	@Synchronized
+	public void microDialogMessageSetAnswerType(
+			final MicroDialogMessage microDialogMessage,
+			final AnswerTypes answerType) {
+		microDialogMessage.setAnswerType(answerType);
+
+		databaseManagerService.saveModelObject(microDialogMessage);
+	}
+
+	@Synchronized
+	public void microDialogMessageSetAnswerOptionsWithPlaceholders(
+			final MicroDialogMessage microDialogMessage,
+			final LString answerOptions,
+			final List<String> allPossibleMessageVariables)
+			throws NotificationMessageException {
+		if (answerOptions == null) {
+			microDialogMessage.setAnswerOptionsWithPlaceholders(new LString());
+		} else {
+			if (!StringValidator.isValidVariableText(answerOptions,
+					allPossibleMessageVariables)) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__THE_TEXT_CONTAINS_UNKNOWN_VARIABLES);
+			}
+
+			microDialogMessage.setAnswerOptionsWithPlaceholders(answerOptions);
+		}
+
+		databaseManagerService.saveModelObject(microDialogMessage);
+	}
+
+	@Synchronized
+	public MicroDialogMessage microDialogMessageImport(final File file)
+			throws FileNotFoundException, IOException {
+		val importedModelObjects = modelObjectExchangeService
+				.importModelObjects(file,
+						ModelObjectExchangeFormatTypes.MICRO_DIALOG_MESSAGE);
+
+		for (val modelObject : importedModelObjects) {
+			if (modelObject instanceof MicroDialogMessage) {
+				val microDialogMessage = (MicroDialogMessage) modelObject;
+
+				// Adjust order
+				microDialogMessage.setOrder(0);
+
+				val highestOrderMessage = databaseManagerService
+						.findOneSortedModelObject(MicroDialogMessage.class,
+								Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG,
+								Queries.MICRO_DIALOG_MESSAGE__SORT_BY_ORDER_DESC,
+								microDialogMessage.getMicroDialog());
+
+				if (highestOrderMessage != null) {
+					microDialogMessage
+							.setOrder(highestOrderMessage.getOrder() + 1);
+				}
+
+				databaseManagerService.saveModelObject(microDialogMessage);
+
+				return microDialogMessage;
+			}
+		}
+
+		return null;
+	}
+
+	@Synchronized
+	public File microDialogMessageExport(
+			final MicroDialogMessage microDialogMessage) {
+		final List<ModelObject> modelObjectsToExport = new ArrayList<ModelObject>();
+
+		log.debug(
+				"Recursively collect all model objects related to the micro dialog message");
+		microDialogMessage.collectThisAndRelatedModelObjectsForExport(
+				modelObjectsToExport);
+
+		log.debug("Export micro dialog message");
+		return modelObjectExchangeService.exportModelObjects(
+				modelObjectsToExport,
+				ModelObjectExchangeFormatTypes.MICRO_DIALOG_MESSAGE);
+	}
+
+	@Synchronized
+	public void microDialogMessageDelete(
+			final MicroDialogMessage microDialogMessage) {
+		databaseManagerService.deleteModelObject(microDialogMessage);
+	}
+
+	// Micro Dialog Message Rule
+	@Synchronized
+	public MicroDialogMessageRule microDialogMessageRuleCreate(
+			final ObjectId microDialogMessageId) {
+		val microDialogMessageRule = new MicroDialogMessageRule(
+				microDialogMessageId, 0, "",
+				RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "", "");
+
+		val highestOrderRule = databaseManagerService.findOneSortedModelObject(
+				MicroDialogMessageRule.class,
+				Queries.MICRO_DIALOG_MESSAGE_RULE__BY_MICRO_DIALOG_MESSAGE,
+				Queries.MICRO_DIALOG_MESSAGE_RULE__SORT_BY_ORDER_DESC,
+				microDialogMessageId);
+
+		if (highestOrderRule != null) {
+			microDialogMessageRule.setOrder(highestOrderRule.getOrder() + 1);
+		}
+
+		databaseManagerService.saveModelObject(microDialogMessageRule);
+
+		return microDialogMessageRule;
+	}
+
+	@Synchronized
+	public MicroDialogMessageRule microDialogMessageRuleMove(
+			final MicroDialogMessageRule microDialogMessageRule,
+			final boolean moveUp) {
+		// Find feedback slide rule to swap with
+		val microDialogMessageRuleToSwapWith = databaseManagerService
+				.findOneSortedModelObject(MicroDialogMessageRule.class,
+						moveUp ? Queries.MICRO_DIALOG_MESSAGE_RULE__BY_MICRO_DIALOG_MESSAGE_AND_ORDER_LOWER
+								: Queries.MICRO_DIALOG_MESSAGE_RULE__BY_MICRO_DIALOG_MESSAGE_AND_ORDER_HIGHER,
+						moveUp ? Queries.MICRO_DIALOG_MESSAGE_RULE__SORT_BY_ORDER_DESC
+								: Queries.MICRO_DIALOG_MESSAGE_RULE__SORT_BY_ORDER_ASC,
+						microDialogMessageRule.getBelongingMicroDialogMessage(),
+						microDialogMessageRule.getOrder());
+
+		if (microDialogMessageRuleToSwapWith == null) {
+			return null;
+		}
+
+		// Swap order
+		final int order = microDialogMessageRule.getOrder();
+		microDialogMessageRule
+				.setOrder(microDialogMessageRuleToSwapWith.getOrder());
+		microDialogMessageRuleToSwapWith.setOrder(order);
+
+		databaseManagerService.saveModelObject(microDialogMessageRule);
+		databaseManagerService
+				.saveModelObject(microDialogMessageRuleToSwapWith);
+
+		return microDialogMessageRuleToSwapWith;
+	}
+
+	@Synchronized
+	public void microDialogMessageRuleDelete(
+			final MicroDialogMessageRule microDialogMessageRule) {
+		databaseManagerService.deleteModelObject(microDialogMessageRule);
 	}
 
 	// Media Object
@@ -1941,6 +2285,16 @@ public class InterventionAdministrationManagerService {
 				MonitoringMessageRule.class,
 				Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE,
 				Queries.MONITORING_MESSAGE_RULE__SORT_BY_ORDER_ASC,
+				monitoringMessageId);
+	}
+
+	@Synchronized
+	public Iterable<MicroDialogMessageRule> getAllMicroDialogMessageRulesOfMicroDialogMessage(
+			final ObjectId monitoringMessageId) {
+		return databaseManagerService.findSortedModelObjects(
+				MicroDialogMessageRule.class,
+				Queries.MICRO_DIALOG_MESSAGE_RULE__BY_MICRO_DIALOG_MESSAGE,
+				Queries.MICRO_DIALOG_MESSAGE_RULE__SORT_BY_ORDER_ASC,
 				monitoringMessageId);
 	}
 

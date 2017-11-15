@@ -31,10 +31,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import lombok.Cleanup;
-import lombok.Synchronized;
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.reflect.ReflectionObjectHandler;
+
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
@@ -44,9 +43,10 @@ import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
 import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
-
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.reflect.ReflectionObjectHandler;
+import lombok.Cleanup;
+import lombok.Synchronized;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Creates a HTML-based report of an intervention
@@ -182,6 +182,20 @@ public class ReportGeneratorService {
 
 		templateVariables.put("monitoringMessageGroups",
 				monitoringMessageGroups);
+
+		// Micro Dialogs
+		val microDialogsIterable = databaseManagerService
+				.findSortedModelObjects(MonitoringMessageGroup.class,
+						Queries.MICRO_DIALOG__BY_INTERVENTION,
+						Queries.MICRO_DIALOG__SORT_BY_ORDER_ASC,
+						intervention.getId());
+
+		val microDialogs = new ArrayList<MonitoringMessageGroup>();
+		for (val microDialog : microDialogsIterable) {
+			microDialogs.add(microDialog);
+		}
+
+		templateVariables.put("microDialogs", microDialogs);
 
 		// Fill template
 		try {

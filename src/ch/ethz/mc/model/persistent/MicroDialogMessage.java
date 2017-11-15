@@ -22,14 +22,9 @@ package ch.ethz.mc.model.persistent;
  */
 import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.Setter;
-import lombok.val;
-
 import org.bson.types.ObjectId;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
@@ -38,32 +33,35 @@ import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.subelements.LString;
 import ch.ethz.mc.model.persistent.types.AnswerTypes;
+import ch.ethz.mc.model.ui.UIMicroDialogMessage;
 import ch.ethz.mc.model.ui.UIModelObject;
-import ch.ethz.mc.model.ui.UIMonitoringMessage;
 import ch.ethz.mc.tools.StringHelpers;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.val;
 
 /**
- * {@link ModelObject} to represent an {@link MonitoringMessage}
+ * {@link ModelObject} to represent an {@link MicroDialogMessage}
  *
- * {@link MonitoringMessage}s will be sent to the {@link Participant} during
- * an {@link Intervention}. {@link MonitoringMessage}s are grouped in
- * {@link MonitoringMessageGroup}s.
+ * {@link MicroDialogMessage}s will be sent to the {@link Participant} during
+ * an {@link Intervention}. {@link MicroDialogMessage}s are part of
+ * {@link MicroDialog}s
  *
  * @author Andreas Filler
  */
 @NoArgsConstructor
 @AllArgsConstructor
-public class MonitoringMessage extends ModelObject {
+public class MicroDialogMessage extends ModelObject {
 	/**
-	 * The {@link MonitoringMessageGroup} this {@link MonitoringMessage} belongs
-	 * to
+	 * The {@link MicroDialog} this {@link MicroDialogMessage} belongs to
 	 */
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId	monitoringMessageGroup;
+	private ObjectId	microDialog;
 
 	/**
 	 * The message text containing placeholders for variables
@@ -81,8 +79,8 @@ public class MonitoringMessage extends ModelObject {
 	private boolean		isCommandMessage;
 
 	/**
-	 * The position of the {@link MonitoringMessage} compared to all other
-	 * {@link MonitoringMessage}s in the same {@link MonitoringMessageGroup}
+	 * The position of the {@link MicroDialogMessage} compared to all other
+	 * {@link MicroDialogMessage}s in the same {@link MonitoringMessageGroup}
 	 */
 	@Getter
 	@Setter
@@ -90,7 +88,7 @@ public class MonitoringMessage extends ModelObject {
 
 	/**
 	 * <strong>OPTIONAL:</strong> The {@link MediaObject} used/presented in this
-	 * {@link MonitoringMessage}
+	 * {@link MicroDialogMessage}
 	 */
 	@Getter
 	@Setter
@@ -98,14 +96,15 @@ public class MonitoringMessage extends ModelObject {
 
 	/**
 	 * <strong>OPTIONAL:</strong> The intermediate {@link ScreeningSurvey}
-	 * used/presented in this {@link MonitoringMessage}
+	 * used/presented in this {@link MicroDialogMessage}
 	 */
 	@Getter
 	@Setter
 	private ObjectId	linkedIntermediateSurvey;
 
 	/**
-	 * <strong>OPTIONAL:</strong> If the result of the {@link MonitoringMessage}
+	 * <strong>OPTIONAL:</strong> If the result of the
+	 * {@link MicroDialogMessage}
 	 * should be
 	 * stored, the name of the appropriate variable can be set here.
 	 */
@@ -154,20 +153,21 @@ public class MonitoringMessage extends ModelObject {
 	@Override
 	public UIModelObject toUIModelObject() {
 		int messageRules = 0;
-		val monitoringMessageRules = MC.getInstance()
+		val microDialogMessageRules = MC.getInstance()
 				.getInterventionAdministrationManagerService()
-				.getAllMonitoringMessageRulesOfMonitoringMessage(getId());
+				.getAllMicroDialogMessageRulesOfMicroDialogMessage(getId());
 
-		if (monitoringMessageRules != null) {
-			val monitoringMessageRulesIterator = monitoringMessageRules.iterator();
+		if (microDialogMessageRules != null) {
+			val microDialogMessageRulesIterator = microDialogMessageRules
+					.iterator();
 
-			while (monitoringMessageRulesIterator.hasNext()) {
-				monitoringMessageRulesIterator.next();
+			while (microDialogMessageRulesIterator.hasNext()) {
+				microDialogMessageRulesIterator.next();
 				messageRules++;
 			}
 		}
 
-		final val monitoringMessage = new UIMonitoringMessage(order,
+		final val microDialogMessage = new UIMicroDialogMessage(order,
 				textWithPlaceholders.toShortenedString(80),
 				isCommandMessage
 						? Messages.getAdminString(
@@ -188,9 +188,9 @@ public class MonitoringMessage extends ModelObject {
 						? storeValueToVariableWithName : "",
 				messageRules);
 
-		monitoringMessage.setRelatedModelObject(this);
+		microDialogMessage.setRelatedModelObject(this);
 
-		return monitoringMessage;
+		return microDialogMessage;
 	}
 
 	/*
@@ -211,12 +211,12 @@ public class MonitoringMessage extends ModelObject {
 					.add(ModelObject.get(MediaObject.class, linkedMediaObject));
 		}
 
-		// Add monitoring message rule
-		for (val monitoringMessageRule : ModelObject.find(
-				MonitoringMessageRule.class,
-				Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE,
+		// Add micro dialog message rule
+		for (val microDialogMessageRule : ModelObject.find(
+				MicroDialogMessageRule.class,
+				Queries.MICRO_DIALOG_MESSAGE_RULE__BY_MICRO_DIALOG_MESSAGE,
 				getId())) {
-			monitoringMessageRule
+			microDialogMessageRule
 					.collectThisAndRelatedModelObjectsForExport(exportList);
 		}
 	}
@@ -238,8 +238,8 @@ public class MonitoringMessage extends ModelObject {
 		}
 
 		// Delete sub rules
-		val rulesToDelete = ModelObject.find(MonitoringMessageRule.class,
-				Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE,
+		val rulesToDelete = ModelObject.find(MicroDialogMessageRule.class,
+				Queries.MICRO_DIALOG_MESSAGE_RULE__BY_MICRO_DIALOG_MESSAGE,
 				getId());
 		ModelObject.delete(rulesToDelete);
 	}
