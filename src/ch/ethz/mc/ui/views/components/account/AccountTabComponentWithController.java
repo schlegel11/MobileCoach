@@ -86,7 +86,7 @@ public class AccountTabComponentWithController extends AccountTabComponent {
 						try {
 							// Change password
 							getInterventionAdministrationManagerService()
-									.authorChangePassword(currentAccountAuthor,
+									.authorSetPassword(currentAccountAuthor,
 											getStringValue());
 						} catch (final Exception e) {
 							handleException(e);

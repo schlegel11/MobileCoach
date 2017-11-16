@@ -10,11 +10,11 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Table;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
-import ch.ethz.mc.model.persistent.MonitoringMessage;
-import ch.ethz.mc.model.persistent.MonitoringMessageRule;
+import ch.ethz.mc.model.persistent.MicroDialogMessage;
+import ch.ethz.mc.model.persistent.MicroDialogMessageRule;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.types.AnswerTypes;
-import ch.ethz.mc.model.ui.UIMonitoringMessageRule;
+import ch.ethz.mc.model.ui.UIMicroDialogMessageRule;
 import ch.ethz.mc.model.ui.UIScreeningSurvey;
 import ch.ethz.mc.ui.views.components.basics.LocalizedPlaceholderStringEditComponent;
 import ch.ethz.mc.ui.views.components.basics.MediaObjectIntegrationComponentWithController.MediaObjectCreationOrDeleteionListener;
@@ -53,22 +53,22 @@ public class MicroDialogMessageEditComponentWithController
 		extends MicroDialogMessageEditComponent
 		implements MediaObjectCreationOrDeleteionListener {
 
-	private final MonitoringMessage									monitoringMessage;
+	private final MicroDialogMessage								microDialogMessage;
 
 	private final ObjectId											interventionId;
 
 	private final Table												rulesTable;
 
-	private UIMonitoringMessageRule									selectedUIMonitoringMessageRule	= null;
+	private UIMicroDialogMessageRule								selectedUIMicroDialogMessageRule	= null;
 
-	private final BeanContainer<ObjectId, UIMonitoringMessageRule>	rulesBeanContainer;
+	private final BeanContainer<ObjectId, UIMicroDialogMessageRule>	rulesBeanContainer;
 
 	public MicroDialogMessageEditComponentWithController(
-			final MonitoringMessage monitoringMessage,
+			final MicroDialogMessage microDialogMessage,
 			final ObjectId interventionId) {
 		super();
 
-		this.monitoringMessage = monitoringMessage;
+		this.microDialogMessage = microDialogMessage;
 		this.interventionId = interventionId;
 
 		// table options
@@ -76,18 +76,19 @@ public class MicroDialogMessageEditComponentWithController
 
 		// table content
 		val rules = getInterventionAdministrationManagerService()
-				.getAllMonitoringMessageRulesOfMonitoringMessage(
-						monitoringMessage.getId());
+				.getAllMicroDialogMessageRulesOfMicroDialogMessage(
+						microDialogMessage.getId());
 
 		rulesBeanContainer = createBeanContainerForModelObjects(
-				UIMonitoringMessageRule.class, rules);
+				UIMicroDialogMessageRule.class, rules);
 
 		rulesTable.setContainerDataSource(rulesBeanContainer);
 		rulesTable.setSortContainerPropertyId(
-				UIMonitoringMessageRule.getSortColumn());
+				UIMicroDialogMessageRule.getSortColumn());
+		rulesTable.setVisibleColumns(
+				UIMicroDialogMessageRule.getVisibleColumns());
 		rulesTable
-				.setVisibleColumns(UIMonitoringMessageRule.getVisibleColumns());
-		rulesTable.setColumnHeaders(UIMonitoringMessageRule.getColumnHeaders());
+				.setColumnHeaders(UIMicroDialogMessageRule.getColumnHeaders());
 		rulesTable.setSortAscending(true);
 		rulesTable.setSortEnabled(false);
 
@@ -99,10 +100,10 @@ public class MicroDialogMessageEditComponentWithController
 				val objectId = rulesTable.getValue();
 				if (objectId == null) {
 					setRuleSelected(false);
-					selectedUIMonitoringMessageRule = null;
+					selectedUIMicroDialogMessageRule = null;
 				} else {
-					selectedUIMonitoringMessageRule = getUIModelObjectFromTableByObjectId(
-							rulesTable, UIMonitoringMessageRule.class,
+					selectedUIMicroDialogMessageRule = getUIModelObjectFromTableByObjectId(
+							rulesTable, UIMicroDialogMessageRule.class,
 							objectId);
 					setRuleSelected(true);
 				}
@@ -125,11 +126,11 @@ public class MicroDialogMessageEditComponentWithController
 				.addClickListener(buttonClickListener);
 
 		// Handle media object to component
-		if (monitoringMessage.getLinkedMediaObject() == null) {
+		if (microDialogMessage.getLinkedMediaObject() == null) {
 			getIntegratedMediaObjectComponent().setMediaObject(null, this);
 		} else {
 			val mediaObject = getInterventionAdministrationManagerService()
-					.getMediaObject(monitoringMessage.getLinkedMediaObject());
+					.getMediaObject(microDialogMessage.getLinkedMediaObject());
 			getIntegratedMediaObjectComponent().setMediaObject(mediaObject,
 					this);
 		}
@@ -145,8 +146,8 @@ public class MicroDialogMessageEditComponentWithController
 		for (val intermediateSurvey : intermediateSurveys) {
 			val uiIntermediateSurvey = intermediateSurvey.toUIModelObject();
 			intermediateSurveyComboBox.addItem(uiIntermediateSurvey);
-			if (monitoringMessage.getLinkedIntermediateSurvey() != null
-					&& monitoringMessage.getLinkedIntermediateSurvey()
+			if (microDialogMessage.getLinkedIntermediateSurvey() != null
+					&& microDialogMessage.getLinkedIntermediateSurvey()
 							.equals(intermediateSurvey.getId())) {
 				intermediateSurveyComboBox.select(uiIntermediateSurvey);
 			}
@@ -169,8 +170,8 @@ public class MicroDialogMessageEditComponentWithController
 						log.debug("Adjust intermediate survey to {}",
 								intermediateSurveyToSet);
 						getInterventionAdministrationManagerService()
-								.monitoringMessageSetLinkedIntermediateSurvey(
-										monitoringMessage,
+								.microDialogMessageSetLinkedIntermediateSurvey(
+										microDialogMessage,
 										intermediateSurveyToSet);
 					}
 				});
@@ -178,7 +179,7 @@ public class MicroDialogMessageEditComponentWithController
 		val answerTypeComboBox = getAnswerTypeComboBox();
 		for (val answerType : AnswerTypes.values()) {
 			answerTypeComboBox.addItem(answerType);
-			if (monitoringMessage.getAnswerType() == answerType) {
+			if (microDialogMessage.getAnswerType() == answerType) {
 				answerTypeComboBox.select(answerType);
 			}
 		}
@@ -191,14 +192,14 @@ public class MicroDialogMessageEditComponentWithController
 
 				log.debug("Adjust answer type to {}", selectedAnswerType);
 				getInterventionAdministrationManagerService()
-						.monitoringMessageSetAnswerType(monitoringMessage,
+						.microDialogMessageSetAnswerType(microDialogMessage,
 								selectedAnswerType);
 			}
 		});
 
 		// Handle check box
 		val isCommandMessagCheckBox = getIsCommandCheckbox();
-		isCommandMessagCheckBox.setValue(monitoringMessage.isCommandMessage());
+		isCommandMessagCheckBox.setValue(microDialogMessage.isCommandMessage());
 
 		isCommandMessagCheckBox
 				.addValueChangeListener(new ValueChangeListener() {
@@ -206,8 +207,8 @@ public class MicroDialogMessageEditComponentWithController
 					@Override
 					public void valueChange(final ValueChangeEvent event) {
 						getInterventionAdministrationManagerService()
-								.monitoringMessageSetIsCommandMessage(
-										monitoringMessage, (boolean) event
+								.microDialogMessageSetIsCommandMessage(
+										microDialogMessage, (boolean) event
 												.getProperty().getValue());
 					}
 				});
@@ -215,10 +216,10 @@ public class MicroDialogMessageEditComponentWithController
 
 	private void adjust() {
 		getTextWithPlaceholdersTextFieldComponent().setValue(
-				monitoringMessage.getTextWithPlaceholders().toString());
+				microDialogMessage.getTextWithPlaceholders().toString());
 		getStoreVariableTextFieldComponent()
-				.setValue(monitoringMessage.getStoreValueToVariableWithName());
-		getAnswerOptionsTextFieldComponent().setValue(monitoringMessage
+				.setValue(microDialogMessage.getStoreValueToVariableWithName());
+		getAnswerOptionsTextFieldComponent().setValue(microDialogMessage
 				.getAnswerOptionsWithPlaceholders().toString());
 	}
 
@@ -256,7 +257,7 @@ public class MicroDialogMessageEditComponentWithController
 				.getAllPossibleMessageVariablesOfIntervention(interventionId);
 		showModalLStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_TEXT_WITH_PLACEHOLDERS,
-				monitoringMessage.getTextWithPlaceholders(),
+				microDialogMessage.getTextWithPlaceholders(),
 				allPossibleMessageVariables,
 				new LocalizedPlaceholderStringEditComponent(),
 				new ExtendableButtonClickListener() {
@@ -266,8 +267,8 @@ public class MicroDialogMessageEditComponentWithController
 						try {
 							// Change text with placeholders
 							getInterventionAdministrationManagerService()
-									.monitoringMessageSetTextWithPlaceholders(
-											monitoringMessage,
+									.microDialogMessageSetTextWithPlaceholders(
+											microDialogMessage,
 											getLStringValue(),
 											allPossibleMessageVariables);
 						} catch (final Exception e) {
@@ -288,7 +289,7 @@ public class MicroDialogMessageEditComponentWithController
 				.getAllWritableMessageVariablesOfIntervention(interventionId);
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_VARIABLE,
-				monitoringMessage.getStoreValueToVariableWithName(),
+				microDialogMessage.getStoreValueToVariableWithName(),
 				allPossibleMessageVariables,
 				new ShortPlaceholderStringEditComponent(),
 				new ExtendableButtonClickListener() {
@@ -298,8 +299,8 @@ public class MicroDialogMessageEditComponentWithController
 						try {
 							// Change store result to variable
 							getInterventionAdministrationManagerService()
-									.monitoringMessageSetStoreResultToVariable(
-											monitoringMessage,
+									.microDialogMessageSetStoreResultToVariable(
+											microDialogMessage,
 											getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
@@ -319,7 +320,7 @@ public class MicroDialogMessageEditComponentWithController
 				.getAllPossibleMessageVariablesOfIntervention(interventionId);
 		showModalLStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_TEXT_WITH_PLACEHOLDERS,
-				monitoringMessage.getAnswerOptionsWithPlaceholders(),
+				microDialogMessage.getAnswerOptionsWithPlaceholders(),
 				allPossibleMessageVariables,
 				new LocalizedPlaceholderStringEditComponent(),
 				new ExtendableButtonClickListener() {
@@ -329,8 +330,8 @@ public class MicroDialogMessageEditComponentWithController
 						try {
 							// Change text with placeholders
 							getInterventionAdministrationManagerService()
-									.monitoringMessageSetAnswerOptionsWithPlaceholders(
-											monitoringMessage,
+									.microDialogMessageSetAnswerOptionsWithPlaceholders(
+											microDialogMessage,
 											getLStringValue(),
 											allPossibleMessageVariables);
 						} catch (final Exception e) {
@@ -347,25 +348,25 @@ public class MicroDialogMessageEditComponentWithController
 
 	public void createRule() {
 		log.debug("Create rule");
-		val newMonitoringMessageRule = getInterventionAdministrationManagerService()
-				.monitoringMessageRuleCreate(monitoringMessage.getId());
+		val newMicroDialogMessageRule = getInterventionAdministrationManagerService()
+				.microDialogMessageRuleCreate(microDialogMessage.getId());
 
 		showModalClosableEditWindow(
-				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__CREATE_MONITORING_MESSAGE_RULE,
+				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__CREATE_MICRO_DIALOG_MESSAGE_RULE,
 				new MicroDialogMessageRuleEditComponentWithController(
-						newMonitoringMessageRule, interventionId),
+						newMicroDialogMessageRule, interventionId),
 				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
 						rulesBeanContainer.addItem(
-								newMonitoringMessageRule.getId(),
-								UIMonitoringMessageRule.class
-										.cast(newMonitoringMessageRule
+								newMicroDialogMessageRule.getId(),
+								UIMicroDialogMessageRule.class
+										.cast(newMicroDialogMessageRule
 												.toUIModelObject()));
-						rulesTable.select(newMonitoringMessageRule.getId());
+						rulesTable.select(newMicroDialogMessageRule.getId());
 						getAdminUI().showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_RULE_CREATED);
+								AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_MESSAGE_RULE_CREATED);
 
 						closeWindow();
 					}
@@ -374,25 +375,25 @@ public class MicroDialogMessageEditComponentWithController
 
 	public void editRule() {
 		log.debug("Edit rule");
-		val selectedMonitoringMessageRule = selectedUIMonitoringMessageRule
-				.getRelatedModelObject(MonitoringMessageRule.class);
+		val selectedMicroDialogMessageRule = selectedUIMicroDialogMessageRule
+				.getRelatedModelObject(MicroDialogMessageRule.class);
 
 		showModalClosableEditWindow(
-				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_MONITORING_MESSAGE_RULE,
+				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_MICRO_DIALOG_MESSAGE_RULE,
 				new MicroDialogMessageRuleEditComponentWithController(
-						selectedMonitoringMessageRule, interventionId),
+						selectedMicroDialogMessageRule, interventionId),
 				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
 						removeAndAddModelObjectToBeanContainer(
 								rulesBeanContainer,
-								selectedMonitoringMessageRule);
+								selectedMicroDialogMessageRule);
 						rulesTable.sort();
 						rulesTable
-								.select(selectedMonitoringMessageRule.getId());
+								.select(selectedMicroDialogMessageRule.getId());
 						getAdminUI().showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_RULE_UPDATED);
+								AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_MESSAGE_RULE_UPDATED);
 
 						closeWindow();
 					}
@@ -402,23 +403,23 @@ public class MicroDialogMessageEditComponentWithController
 	public void moveRule(final boolean moveUp) {
 		log.debug("Move rule {}", moveUp ? "up" : "down");
 
-		val selectedMonitoringMessageRule = selectedUIMonitoringMessageRule
-				.getRelatedModelObject(MonitoringMessageRule.class);
-		val swappedMonitoringMessageRule = getInterventionAdministrationManagerService()
-				.monitoringMessageRuleMove(selectedMonitoringMessageRule,
+		val selectedMicroDialogMessageRule = selectedUIMicroDialogMessageRule
+				.getRelatedModelObject(MicroDialogMessageRule.class);
+		val swappedMicroDialogMessageRule = getInterventionAdministrationManagerService()
+				.microDialogMessageRuleMove(selectedMicroDialogMessageRule,
 						moveUp);
 
-		if (swappedMonitoringMessageRule == null) {
+		if (swappedMicroDialogMessageRule == null) {
 			log.debug("Rule is already at top/end of list");
 			return;
 		}
 
 		removeAndAddModelObjectToBeanContainer(rulesBeanContainer,
-				swappedMonitoringMessageRule);
+				swappedMicroDialogMessageRule);
 		removeAndAddModelObjectToBeanContainer(rulesBeanContainer,
-				selectedMonitoringMessageRule);
+				selectedMicroDialogMessageRule);
 		rulesTable.sort();
-		rulesTable.select(selectedMonitoringMessageRule.getId());
+		rulesTable.select(selectedMicroDialogMessageRule.getId());
 	}
 
 	public void deleteRule() {
@@ -427,13 +428,14 @@ public class MicroDialogMessageEditComponentWithController
 			@Override
 			public void buttonClick(final ClickEvent event) {
 				try {
-					val selectedMonitoringMessageRule = selectedUIMonitoringMessageRule
-							.getRelatedModelObject(MonitoringMessageRule.class);
+					val selectedMicroDialogMessageRule = selectedUIMicroDialogMessageRule
+							.getRelatedModelObject(
+									MicroDialogMessageRule.class);
 
 					// Delete rule
 					getInterventionAdministrationManagerService()
-							.monitoringMessageRuleDelete(
-									selectedMonitoringMessageRule);
+							.microDialogMessageRuleDelete(
+									selectedMicroDialogMessageRule);
 				} catch (final Exception e) {
 					closeWindow();
 					handleException(e);
@@ -441,11 +443,11 @@ public class MicroDialogMessageEditComponentWithController
 				}
 
 				// Adapt UI
-				rulesTable.removeItem(selectedUIMonitoringMessageRule
-						.getRelatedModelObject(MonitoringMessageRule.class)
+				rulesTable.removeItem(selectedUIMicroDialogMessageRule
+						.getRelatedModelObject(MicroDialogMessageRule.class)
 						.getId());
 				getAdminUI().showInformationNotification(
-						AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_RULE_DELETED);
+						AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_MESSAGE_RULE_DELETED);
 
 				closeWindow();
 			}
@@ -455,7 +457,7 @@ public class MicroDialogMessageEditComponentWithController
 	@Override
 	public void updateLinkedMediaObjectId(final ObjectId mediaObjectId) {
 		getInterventionAdministrationManagerService()
-				.monitoringMessageSetLinkedMediaObject(monitoringMessage,
+				.microDialogMessageSetLinkedMediaObject(microDialogMessage,
 						mediaObjectId);
 	}
 }

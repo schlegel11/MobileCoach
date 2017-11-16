@@ -31,9 +31,10 @@ import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
+import ch.ethz.mc.model.persistent.concepts.MicroDialogElementInterface;
 import ch.ethz.mc.model.persistent.subelements.LString;
 import ch.ethz.mc.model.persistent.types.AnswerTypes;
-import ch.ethz.mc.model.ui.UIMicroDialogMessage;
+import ch.ethz.mc.model.ui.UIAbstractMicroDialogElement;
 import ch.ethz.mc.model.ui.UIModelObject;
 import ch.ethz.mc.tools.StringHelpers;
 import lombok.AllArgsConstructor;
@@ -54,14 +55,25 @@ import lombok.val;
  */
 @NoArgsConstructor
 @AllArgsConstructor
-public class MicroDialogMessage extends ModelObject {
+public class MicroDialogMessage extends ModelObject
+		implements MicroDialogElementInterface {
 	/**
-	 * The {@link MicroDialog} this {@link MicroDialogMessage} belongs to
+	 * The {@link MicroDialog} this {@link MicroDialogMessage} belongs
+	 * to
 	 */
 	@Getter
 	@Setter
 	@NonNull
 	private ObjectId	microDialog;
+
+	/**
+	 * The position of the {@link MicroDialogMessage} compared to all
+	 * other {@link MicroDialogElementInterface}s in the same
+	 * {@link MicroDialog}
+	 */
+	@Getter
+	@Setter
+	private int			order;
 
 	/**
 	 * The message text containing placeholders for variables
@@ -77,14 +89,6 @@ public class MicroDialogMessage extends ModelObject {
 	@Getter
 	@Setter
 	private boolean		isCommandMessage;
-
-	/**
-	 * The position of the {@link MicroDialogMessage} compared to all other
-	 * {@link MicroDialogMessage}s in the same {@link MonitoringMessageGroup}
-	 */
-	@Getter
-	@Setter
-	private int			order;
 
 	/**
 	 * <strong>OPTIONAL:</strong> The {@link MediaObject} used/presented in this
@@ -103,6 +107,15 @@ public class MicroDialogMessage extends ModelObject {
 	private ObjectId	linkedIntermediateSurvey;
 
 	/**
+	 * Defines if the {@link MicroDialogMessage} expects to be
+	 * answered by the {@link Participant}
+	 *
+	 */
+	@Getter
+	@Setter
+	private boolean		messageExpectsAnswer;
+
+	/**
 	 * <strong>OPTIONAL:</strong> If the result of the
 	 * {@link MicroDialogMessage}
 	 * should be
@@ -113,12 +126,38 @@ public class MicroDialogMessage extends ModelObject {
 	private String		storeValueToVariableWithName;
 
 	/**
+	 * <strong>OPTIONAL:</strong> The value the variable should have if the
+	 * user does not reply
+	 */
+	@Getter
+	@Setter
+	private String		noReplyValue;
+
+	/**
 	 * The type the answer (if required) should have.
 	 */
 	@Getter
 	@Setter
 	@NonNull
 	private AnswerTypes	answerType;
+
+	/**
+	 * Defines if the {@link MicroDialogMessage}s in the group expect to be
+	 * answeres by the {@link Participant}
+	 *
+	 */
+	@Getter
+	@Setter
+	private boolean		messageBlocksMicroDialogUntilAnswered;
+
+	/**
+	 * <strong>OPTIONAL if sendMessageIfTrue is false:</strong> The minutes a
+	 * {@link Participant} has to answer the message before it's handled as
+	 * unanswered
+	 */
+	@Getter
+	@Setter
+	private int			minutesUntilMessageIsHandledAsUnanswered;
 
 	/**
 	 * The answer options required to display the answer selection properly; the
@@ -167,8 +206,10 @@ public class MicroDialogMessage extends ModelObject {
 			}
 		}
 
-		final val microDialogMessage = new UIMicroDialogMessage(order,
-				textWithPlaceholders.toShortenedString(80),
+		final val microDialogMessage = new UIAbstractMicroDialogElement(
+				getOrder(),
+				Messages.getAdminString(AdminMessageStrings.UI_MODEL__MESSAGE),
+				true, textWithPlaceholders.toShortenedString(80),
 				isCommandMessage
 						? Messages.getAdminString(
 								AdminMessageStrings.UI_MODEL__YES)
@@ -184,7 +225,11 @@ public class MicroDialogMessage extends ModelObject {
 								AdminMessageStrings.UI_MODEL__YES)
 						: Messages.getAdminString(
 								AdminMessageStrings.UI_MODEL__NO),
-				answerType.toString(), storeValueToVariableWithName != null
+				messageExpectsAnswer
+						? Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__NO)
+						: answerType.toString(),
+				storeValueToVariableWithName != null
 						? storeValueToVariableWithName : "",
 				messageRules);
 
@@ -293,11 +338,11 @@ public class MicroDialogMessage extends ModelObject {
 		table += wrapRow(wrapHeader("Store value to variable:")
 				+ wrapField(escape(storeValueToVariableWithName)));
 
-		// Monitoring Message Rules
+		// Micro Dialog Message Rules
 		final StringBuffer buffer = new StringBuffer();
-		val rules = ModelObject.findSorted(MonitoringMessageRule.class,
-				Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE,
-				Queries.MONITORING_MESSAGE_RULE__SORT_BY_ORDER_ASC, getId());
+		val rules = ModelObject.findSorted(MicroDialogMessageRule.class,
+				Queries.MICRO_DIALOG_MESSAGE_RULE__BY_MICRO_DIALOG_MESSAGE,
+				Queries.MICRO_DIALOG_MESSAGE_RULE__SORT_BY_ORDER_ASC, getId());
 
 		for (val rule : rules) {
 			buffer.append(rule.toTable());

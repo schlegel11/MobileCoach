@@ -1,5 +1,8 @@
 package ch.ethz.mc.model.ui;
 
+import com.vaadin.data.fieldgroup.PropertyId;
+
+import ch.ethz.mc.conf.AdminMessageStrings;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -23,16 +26,16 @@ package ch.ethz.mc.model.ui;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import ch.ethz.mc.conf.AdminMessageStrings;
-
-import com.vaadin.data.fieldgroup.PropertyId;
+import lombok.Getter;
+import lombok.Setter;
 
 @AllArgsConstructor
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class UIMicroDialogMessage extends UIModelObject {
+public class UIAbstractMicroDialogElement extends UIModelObject {
 	// NOTE: The String values have to fit the name of the variables
 	public static final String	ORDER									= "order";
+	public static final String	TYPE									= "type";
 	public static final String	TEXT_WITH_PLACEHOLDERS					= "textWithPlaceholders";
 	public static final String	IS_COMMAND_MESSAGE						= "isCommandMessage";
 	public static final String	CONTAINS_MEDIA_CONTENT					= "containsMediaContent";
@@ -43,6 +46,13 @@ public class UIMicroDialogMessage extends UIModelObject {
 
 	@PropertyId(ORDER)
 	private int					order;
+
+	@PropertyId(TYPE)
+	private String				type;
+
+	@Getter
+	@Setter
+	private boolean				isMessage								= false;
 
 	@PropertyId(TEXT_WITH_PLACEHOLDERS)
 	private String				textWithPlaceholders;
@@ -66,13 +76,13 @@ public class UIMicroDialogMessage extends UIModelObject {
 	private int					containsRules;
 
 	public static Object[] getVisibleColumns() {
-		return new Object[] { TEXT_WITH_PLACEHOLDERS, IS_COMMAND_MESSAGE,
+		return new Object[] { TYPE, TEXT_WITH_PLACEHOLDERS, IS_COMMAND_MESSAGE,
 				CONTAINS_MEDIA_CONTENT, CONTAINS_LINK_TO_INTERMEDIATE_SURVEY,
 				ANSWER_TYPE, RESULT_VARIABLE, CONTAINS_RULES };
 	}
 
 	public static String[] getColumnHeaders() {
-		return new String[] {
+		return new String[] { localize(AdminMessageStrings.UI_COLUMNS__TYPE),
 				localize(AdminMessageStrings.UI_COLUMNS__MESSAGE_TEXT),
 				localize(AdminMessageStrings.UI_COLUMNS__COMMAND_MESSAGE),
 				localize(

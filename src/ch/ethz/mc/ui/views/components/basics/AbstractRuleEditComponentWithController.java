@@ -22,20 +22,19 @@ package ch.ethz.mc.ui.views.components.basics;
  */
 import java.util.List;
 
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-
 import org.bson.types.ObjectId;
-
-import ch.ethz.mc.conf.AdminMessageStrings;
-import ch.ethz.mc.model.persistent.concepts.AbstractRule;
-import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
+
+import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.model.persistent.concepts.AbstractRule;
+import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Extends the abstract rule edit component with a controller
@@ -48,7 +47,7 @@ public class AbstractRuleEditComponentWithController
 		extends AbstractRuleEditComponent implements ValueChangeListener {
 
 	public enum TYPES {
-		MONITORING_RULES, SCREENING_SURVEY_RULES, FEEDBACK_RULES, MONITORING_MESSAGE_RULES
+		MONITORING_RULES, SCREENING_SURVEY_RULES, FEEDBACK_RULES, MONITORING_MESSAGE_RULES, MICRO_DIALOG_MESSAGE_RULES
 	};
 
 	private TYPES								type;
@@ -154,7 +153,7 @@ public class AbstractRuleEditComponentWithController
 		log.debug("Changing rule equation sign to {}",
 				event.getProperty().getValue());
 		getInterventionAdministrationManagerService()
-				.abstractRuleChangeEquationSign(rule,
+				.abstractRuleSetEquationSign(rule,
 						(RuleEquationSignTypes) event.getProperty().getValue());
 	}
 
@@ -170,7 +169,7 @@ public class AbstractRuleEditComponentWithController
 						try {
 							// Change comment
 							getInterventionAdministrationManagerService()
-									.abstractRuleChangeComment(rule,
+									.abstractRuleSetComment(rule,
 											getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
@@ -190,6 +189,7 @@ public class AbstractRuleEditComponentWithController
 		switch (type) {
 			case MONITORING_RULES:
 			case MONITORING_MESSAGE_RULES:
+			case MICRO_DIALOG_MESSAGE_RULES:
 				allPossibleVariables = getInterventionAdministrationManagerService()
 						.getAllPossibleMonitoringRuleVariablesOfIntervention(
 								rulesRelatedModelObjectId);
@@ -214,7 +214,7 @@ public class AbstractRuleEditComponentWithController
 						try {
 							// Change rule text with placeholders
 							getInterventionAdministrationManagerService()
-									.abstractRuleChangeRuleWithPlaceholders(
+									.abstractRuleSetRuleWithPlaceholders(
 											rule, getStringValue(),
 											allPossibleVariables);
 						} catch (final Exception e) {
@@ -235,6 +235,7 @@ public class AbstractRuleEditComponentWithController
 		switch (type) {
 			case MONITORING_RULES:
 			case MONITORING_MESSAGE_RULES:
+			case MICRO_DIALOG_MESSAGE_RULES:
 				allPossibleVariables = getInterventionAdministrationManagerService()
 						.getAllPossibleMonitoringRuleVariablesOfIntervention(
 								rulesRelatedModelObjectId);
@@ -259,7 +260,7 @@ public class AbstractRuleEditComponentWithController
 						try {
 							// Change rule comparison text with placeholders
 							getInterventionAdministrationManagerService()
-									.abstractRuleChangeRuleComparisonTermWithPlaceholders(
+									.abstractRuleSetRuleComparisonTermWithPlaceholders(
 											rule, getStringValue(),
 											allPossibleVariables);
 						} catch (final Exception e) {

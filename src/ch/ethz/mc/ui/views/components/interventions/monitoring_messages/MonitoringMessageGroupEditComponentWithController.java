@@ -360,7 +360,7 @@ public class MonitoringMessageGroupEditComponentWithController
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
 						getInterventionAdministrationManagerService()
-								.monitoringMessageGroupChangeValidationExpression(
+								.monitoringMessageGroupSetValidationExpression(
 										monitoringMessageGroup,
 										getStringValue());
 

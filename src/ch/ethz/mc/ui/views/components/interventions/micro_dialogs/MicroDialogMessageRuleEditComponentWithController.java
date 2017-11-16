@@ -22,7 +22,7 @@ package ch.ethz.mc.ui.views.components.interventions.micro_dialogs;
  */
 import org.bson.types.ObjectId;
 
-import ch.ethz.mc.model.persistent.MonitoringMessageRule;
+import ch.ethz.mc.model.persistent.MicroDialogMessageRule;
 import ch.ethz.mc.ui.views.components.basics.AbstractRuleEditComponentWithController;
 import ch.ethz.mc.ui.views.components.basics.AbstractRuleEditComponentWithController.TYPES;
 
@@ -38,14 +38,15 @@ public class MicroDialogMessageRuleEditComponentWithController
 	private final AbstractRuleEditComponentWithController ruleEditComponent;
 
 	public MicroDialogMessageRuleEditComponentWithController(
-			final MonitoringMessageRule monitoringMessageRule,
+			final MicroDialogMessageRule microDialogMessageRule,
 			final ObjectId interventionId) {
 		super();
 
 		// Configure integrated components
 		ruleEditComponent = getAbstractRuleEditComponentWithController();
-		ruleEditComponent.init(interventionId, TYPES.MONITORING_MESSAGE_RULES);
-		ruleEditComponent.adjust(monitoringMessageRule);
+		ruleEditComponent.init(interventionId,
+				TYPES.MICRO_DIALOG_MESSAGE_RULES);
+		ruleEditComponent.adjust(microDialogMessageRule);
 
 		/*
 		 * Adjust own components

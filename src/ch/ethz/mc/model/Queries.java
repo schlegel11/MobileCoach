@@ -88,6 +88,18 @@ public class Queries {
 	public static final String	MICRO_DIALOG_MESSAGE_RULE__SORT_BY_ORDER_ASC																																									= "{'order':1}";
 	public static final String	MICRO_DIALOG_MESSAGE_RULE__SORT_BY_ORDER_DESC																																									= "{'order':-1}";
 
+	public static final String	MICRO_DIALOG_DECISION_POINT__BY_MICRO_DIALOG																																									= "{'microDialog':#}";
+	public static final String	MICRO_DIALOG_DECISION_POINT__BY_MICRO_DIALOG_AND_ORDER_LOWER																																					= "{'microDialog':#,'order':{$lt:#}}";
+	public static final String	MICRO_DIALOG_DECISION_POINT__BY_MICRO_DIALOG_AND_ORDER_HIGHER																																					= "{'microDialog':#,'order':{$gt:#}}";
+	public static final String	MICRO_DIALOG_DECISION_POINT__SORT_BY_ORDER_ASC																																									= "{'order':1}";
+	public static final String	MICRO_DIALOG_DECISION_POINT__SORT_BY_ORDER_DESC																																									= "{'order':-1}";
+
+	public static final String	MICRO_DIALOG_RULE__BY_MICRO_DIALOG_DECISION_POINT																																								= "{'microDialogDecisionPoint':#}";
+	public static final String	MICRO_DIALOG_RULE__BY_MICRO_DIALOG_DECISION_POINT_AND_PARENT																																					= "{'microDialogDecisionPoint':#,'isSubRuleOfMonitoringRule':#}";
+	public static final String	MICRO_DIALOG_RULE__SORT_BY_ORDER_ASC																																											= "{'order':1}";
+	public static final String	MICRO_DIALOG_RULE__SORT_BY_ORDER_DESC																																											= "{'order':-1}";
+	public static final String	MICRO_DIALOG_RULE__BY_MICRO_DIALOG_DECISION_POINT_AND_PARENT_AND_ORDER_HIGHER																																	= "{'microDialogDecisionPoint':#,'isSubRuleOfMonitoringRule':#,'order':{$gt:#}}";
+
 	public static final String	SCREENING_SURVEY__BY_INTERVENTION																																												= "{'intervention':#}";
 
 	public static final String	SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY																																										= "{'screeningSurvey':#}";

@@ -114,7 +114,7 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 						log.debug("Adjust sender identification to {}",
 								senderIdentification);
 						getInterventionAdministrationManagerService()
-								.interventionChangeSenderIdentification(
+								.interventionSetSenderIdentification(
 										intervention, senderIdentification);
 
 						adjust();
@@ -142,7 +142,7 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 
 				log.debug("Adjust dashboard template path to {}", templatePath);
 				getInterventionAdministrationManagerService()
-						.interventionChangeDashboardTemplatePath(intervention,
+						.interventionSetDashboardTemplatePath(intervention,
 								templatePath);
 
 				adjust();
@@ -454,7 +454,7 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 						try {
 							// Change password
 							getInterventionAdministrationManagerService()
-									.interventionChangeDashboardPasswordPattern(
+									.interventionSetDashboardPasswordPattern(
 											intervention, getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
@@ -481,7 +481,7 @@ public class InterventionBasicSettingsAndModulesTabComponentWithController
 						try {
 							// Change password
 							getInterventionAdministrationManagerService()
-									.interventionChangeDeepstreamPassword(
+									.interventionSetDeepstreamPassword(
 											intervention, getStringValue());
 						} catch (final Exception e) {
 							handleException(e);

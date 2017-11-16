@@ -203,7 +203,7 @@ public class InterventionVariablesTabComponentWithController
 
 							// Change name
 							getInterventionAdministrationManagerService()
-									.interventionVariableWithValueChangeName(
+									.interventionVariableWithValueSetName(
 											selectedVariable, getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
@@ -249,7 +249,7 @@ public class InterventionVariablesTabComponentWithController
 
 		try {
 			getInterventionAdministrationManagerService()
-					.interventionVariableWithValueChangePrivacyType(
+					.interventionVariableWithValueSetPrivacyType(
 							selectedVariable, newTypeValue);
 
 			// Adapt UI
@@ -293,7 +293,7 @@ public class InterventionVariablesTabComponentWithController
 
 		try {
 			getInterventionAdministrationManagerService()
-					.interventionVariableWithValueChangeAccessType(
+					.interventionVariableWithValueSetAccessType(
 							selectedVariable, newTypeValue);
 
 			// Adapt UI
@@ -329,7 +329,7 @@ public class InterventionVariablesTabComponentWithController
 
 							// Change name
 							getInterventionAdministrationManagerService()
-									.interventionVariableWithValueChangeValue(
+									.interventionVariableWithValueSetValue(
 											selectedVariable, getStringValue());
 						} catch (final Exception e) {
 							handleException(e);

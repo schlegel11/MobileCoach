@@ -54,8 +54,10 @@ import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.InterventionVariableWithValue;
 import ch.ethz.mc.model.persistent.MediaObject;
 import ch.ethz.mc.model.persistent.MicroDialog;
+import ch.ethz.mc.model.persistent.MicroDialogDecisionPoint;
 import ch.ethz.mc.model.persistent.MicroDialogMessage;
 import ch.ethz.mc.model.persistent.MicroDialogMessageRule;
+import ch.ethz.mc.model.persistent.MicroDialogRule;
 import ch.ethz.mc.model.persistent.MonitoringMessage;
 import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
 import ch.ethz.mc.model.persistent.MonitoringMessageRule;
@@ -66,6 +68,7 @@ import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.persistent.concepts.AbstractRule;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
+import ch.ethz.mc.model.persistent.concepts.MicroDialogElementInterface;
 import ch.ethz.mc.model.persistent.subelements.LString;
 import ch.ethz.mc.model.persistent.types.AnswerTypes;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
@@ -83,6 +86,7 @@ import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.services.types.ModelObjectExchangeFormatTypes;
 import ch.ethz.mc.tools.BCrypt;
 import ch.ethz.mc.tools.InternalDateTime;
+import ch.ethz.mc.tools.ListMerger;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.tools.StringValidator;
 import ch.ethz.mc.ui.NotificationMessageException;
@@ -251,7 +255,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void authorChangePassword(final Author author,
+	public void authorSetPassword(final Author author,
 			final String newPassword) throws NotificationMessageException {
 		if (newPassword.length() < 5) {
 			throw new NotificationMessageException(
@@ -335,7 +339,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void interventionChangeName(final Intervention intervention,
+	public void interventionSetName(final Intervention intervention,
 			final String newName) {
 		if (newName.equals("")) {
 			intervention.setName(ImplementationConstants.DEFAULT_OBJECT_NAME);
@@ -347,7 +351,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void interventionChangeSenderIdentification(
+	public void interventionSetSenderIdentification(
 			final Intervention intervention,
 			final String newSenderIdentification) {
 		intervention.setAssignedSenderIdentification(newSenderIdentification);
@@ -364,7 +368,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void interventionChangeDashboardTemplatePath(
+	public void interventionSetDashboardTemplatePath(
 			final Intervention intervention, final String newTemplatePath) {
 		intervention.setDashboardTemplatePath(newTemplatePath);
 
@@ -372,7 +376,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void interventionChangeDashboardPasswordPattern(
+	public void interventionSetDashboardPasswordPattern(
 			final Intervention intervention, final String newPasswordPattern) {
 		intervention.setDashboardPasswordPattern(newPasswordPattern);
 
@@ -380,7 +384,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void interventionChangeDeepstreamPassword(
+	public void interventionSetDeepstreamPassword(
 			final Intervention intervention, final String newPassword) {
 		intervention.setDeepstreamPassword(newPassword);
 
@@ -563,7 +567,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void interventionVariableWithValueChangeName(
+	public void interventionVariableWithValueSetName(
 			final InterventionVariableWithValue interventionVariableWithValue,
 			final String newName) throws NotificationMessageException {
 
@@ -593,7 +597,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void interventionVariableWithValueChangeValue(
+	public void interventionVariableWithValueSetValue(
 			final InterventionVariableWithValue interventionVariableWithValue,
 			final String newValue) throws NotificationMessageException {
 
@@ -603,7 +607,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void interventionVariableWithValueChangePrivacyType(
+	public void interventionVariableWithValueSetPrivacyType(
 			final InterventionVariableWithValue interventionVariableWithValue,
 			final InterventionVariableWithValuePrivacyTypes newPrivacyType)
 			throws NotificationMessageException {
@@ -614,7 +618,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void interventionVariableWithValueChangeAccessType(
+	public void interventionVariableWithValueSetAccessType(
 			final InterventionVariableWithValue interventionVariableWithValue,
 			final InterventionVariableWithValueAccessTypes newAccessType)
 			throws NotificationMessageException {
@@ -718,7 +722,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void monitoringMessageGroupChangeName(
+	public void monitoringMessageGroupSetName(
 			final MonitoringMessageGroup monitoringMessageGroup,
 			final String newName) {
 		if (newName.equals("")) {
@@ -732,7 +736,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void monitoringMessageGroupChangeValidationExpression(
+	public void monitoringMessageGroupSetValidationExpression(
 			final MonitoringMessageGroup monitoringMessageGroup,
 			final String newExpression) {
 		if (newExpression.equals("")) {
@@ -1076,7 +1080,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void microDialogChangeName(final MicroDialog microDialog,
+	public void microDialogSetName(final MicroDialog microDialog,
 			final String newName) {
 		if (newName.equals("")) {
 			microDialog.setName(ImplementationConstants.DEFAULT_OBJECT_NAME);
@@ -1097,51 +1101,36 @@ public class InterventionAdministrationManagerService {
 	@Synchronized
 	public MicroDialogMessage microDialogMessageCreate(
 			final ObjectId microDialogId) {
-		val microDialogMessage = new MicroDialogMessage(microDialogId,
-				new LString(), false, 0, null, null, null,
-				AnswerTypes.FREE_TEXT, new LString());
+		val microDialogMessage = new MicroDialogMessage(microDialogId, 0,
+				new LString(), false, null, null, false, null, null,
+				AnswerTypes.FREE_TEXT, false,
+				ImplementationConstants.DEFAULT_MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED,
+				new LString());
 
+		int newOrder = 0;
 		val highestOrderMessage = databaseManagerService
 				.findOneSortedModelObject(MicroDialogMessage.class,
 						Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG,
 						Queries.MICRO_DIALOG__SORT_BY_ORDER_DESC,
 						microDialogId);
+		val highestOrderDecisionPoint = databaseManagerService
+				.findOneSortedModelObject(MicroDialogDecisionPoint.class,
+						Queries.MICRO_DIALOG_DECISION_POINT__BY_MICRO_DIALOG,
+						Queries.MICRO_DIALOG__SORT_BY_ORDER_DESC,
+						microDialogId);
 
 		if (highestOrderMessage != null) {
-			microDialogMessage.setOrder(highestOrderMessage.getOrder() + 1);
+			newOrder = highestOrderMessage.getOrder();
 		}
+		if (highestOrderDecisionPoint != null
+				&& newOrder < highestOrderDecisionPoint.getOrder()) {
+			newOrder = highestOrderDecisionPoint.getOrder();
+		}
+		microDialogMessage.setOrder(newOrder + 1);
 
 		databaseManagerService.saveModelObject(microDialogMessage);
 
 		return microDialogMessage;
-	}
-
-	@Synchronized
-	public MicroDialogMessage microDialogMessageMove(
-			final MicroDialogMessage microDialogMessage, final boolean moveUp) {
-		// Find micro dialog message to swap with
-		val microDialogMessageToSwapWith = databaseManagerService
-				.findOneSortedModelObject(MicroDialogMessage.class,
-						moveUp ? Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG_AND_ORDER_LOWER
-								: Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG_AND_ORDER_HIGHER,
-						moveUp ? Queries.MONITORING_MESSAGE__SORT_BY_ORDER_DESC
-								: Queries.MONITORING_MESSAGE__SORT_BY_ORDER_ASC,
-						microDialogMessage.getMicroDialog(),
-						microDialogMessage.getOrder());
-
-		if (microDialogMessageToSwapWith == null) {
-			return null;
-		}
-
-		// Swap order
-		final int order = microDialogMessage.getOrder();
-		microDialogMessage.setOrder(microDialogMessageToSwapWith.getOrder());
-		microDialogMessageToSwapWith.setOrder(order);
-
-		databaseManagerService.saveModelObject(microDialogMessage);
-		databaseManagerService.saveModelObject(microDialogMessageToSwapWith);
-
-		return microDialogMessageToSwapWith;
 	}
 
 	@Synchronized
@@ -1220,6 +1209,15 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
+	public void microDialogMessageSetMinutesUntilMessageIsHandledAsUnanswered(
+			final MicroDialogMessage microDialogMessage, final int newValue) {
+		microDialogMessage
+				.setMinutesUntilMessageIsHandledAsUnanswered(newValue);
+
+		databaseManagerService.saveModelObject(microDialogMessage);
+	}
+
+	@Synchronized
 	public void microDialogMessageSetAnswerType(
 			final MicroDialogMessage microDialogMessage,
 			final AnswerTypes answerType) {
@@ -1263,16 +1261,27 @@ public class InterventionAdministrationManagerService {
 				// Adjust order
 				microDialogMessage.setOrder(0);
 
+				int newOrder = 0;
 				val highestOrderMessage = databaseManagerService
 						.findOneSortedModelObject(MicroDialogMessage.class,
 								Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG,
-								Queries.MICRO_DIALOG_MESSAGE__SORT_BY_ORDER_DESC,
+								Queries.MICRO_DIALOG__SORT_BY_ORDER_DESC,
+								microDialogMessage.getMicroDialog());
+				val highestOrderDecisionPoint = databaseManagerService
+						.findOneSortedModelObject(
+								MicroDialogDecisionPoint.class,
+								Queries.MICRO_DIALOG_DECISION_POINT__BY_MICRO_DIALOG,
+								Queries.MICRO_DIALOG__SORT_BY_ORDER_DESC,
 								microDialogMessage.getMicroDialog());
 
 				if (highestOrderMessage != null) {
-					microDialogMessage
-							.setOrder(highestOrderMessage.getOrder() + 1);
+					newOrder = highestOrderMessage.getOrder();
 				}
+				if (highestOrderDecisionPoint != null
+						&& newOrder < highestOrderDecisionPoint.getOrder()) {
+					newOrder = highestOrderDecisionPoint.getOrder();
+				}
+				microDialogMessage.setOrder(newOrder + 1);
 
 				databaseManagerService.saveModelObject(microDialogMessage);
 
@@ -1363,6 +1372,370 @@ public class InterventionAdministrationManagerService {
 	public void microDialogMessageRuleDelete(
 			final MicroDialogMessageRule microDialogMessageRule) {
 		databaseManagerService.deleteModelObject(microDialogMessageRule);
+	}
+
+	// Micro Dialog Decision Point
+	@Synchronized
+	public MicroDialogDecisionPoint microDialogDecisionPointCreate(
+			final ObjectId microDialogId) {
+		val microDialogDecisionPoint = new MicroDialogDecisionPoint(
+				microDialogId, 0);
+
+		int newOrder = 0;
+		val highestOrderMessage = databaseManagerService
+				.findOneSortedModelObject(MicroDialogMessage.class,
+						Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG,
+						Queries.MICRO_DIALOG__SORT_BY_ORDER_DESC,
+						microDialogId);
+		val highestOrderDecisionPoint = databaseManagerService
+				.findOneSortedModelObject(MicroDialogDecisionPoint.class,
+						Queries.MICRO_DIALOG_DECISION_POINT__BY_MICRO_DIALOG,
+						Queries.MICRO_DIALOG__SORT_BY_ORDER_DESC,
+						microDialogId);
+
+		if (highestOrderMessage != null) {
+			newOrder = highestOrderMessage.getOrder();
+		}
+		if (highestOrderDecisionPoint != null
+				&& newOrder < highestOrderDecisionPoint.getOrder()) {
+			newOrder = highestOrderDecisionPoint.getOrder();
+		}
+		microDialogDecisionPoint.setOrder(newOrder + 1);
+
+		databaseManagerService.saveModelObject(microDialogDecisionPoint);
+
+		return microDialogDecisionPoint;
+	}
+
+	@Synchronized
+	public MicroDialogDecisionPoint microDialogDecisionPointImport(
+			final File file) throws FileNotFoundException, IOException {
+		val importedModelObjects = modelObjectExchangeService
+				.importModelObjects(file,
+						ModelObjectExchangeFormatTypes.MICRO_DIALOG_DECISION_POINT);
+
+		for (val modelObject : importedModelObjects) {
+			if (modelObject instanceof MicroDialogDecisionPoint) {
+				val microDialogDecisionPoint = (MicroDialogDecisionPoint) modelObject;
+
+				// Adjust order
+				int newOrder = 0;
+				val highestOrderMessage = databaseManagerService
+						.findOneSortedModelObject(MicroDialogMessage.class,
+								Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG,
+								Queries.MICRO_DIALOG__SORT_BY_ORDER_DESC,
+								microDialogDecisionPoint.getMicroDialog());
+				val highestOrderDecisionPoint = databaseManagerService
+						.findOneSortedModelObject(
+								MicroDialogDecisionPoint.class,
+								Queries.MICRO_DIALOG_DECISION_POINT__BY_MICRO_DIALOG,
+								Queries.MICRO_DIALOG__SORT_BY_ORDER_DESC,
+								microDialogDecisionPoint.getMicroDialog());
+
+				if (highestOrderMessage != null) {
+					newOrder = highestOrderMessage.getOrder();
+				}
+				if (highestOrderDecisionPoint != null
+						&& newOrder < highestOrderDecisionPoint.getOrder()) {
+					newOrder = highestOrderDecisionPoint.getOrder();
+				}
+				microDialogDecisionPoint.setOrder(newOrder + 1);
+
+				databaseManagerService
+						.saveModelObject(microDialogDecisionPoint);
+
+				return microDialogDecisionPoint;
+			}
+		}
+
+		return null;
+	}
+
+	@Synchronized
+	public File microDialogDecisionPointExport(
+			final MicroDialogDecisionPoint microDialogDecisionPoint) {
+		final List<ModelObject> modelObjectsToExport = new ArrayList<ModelObject>();
+
+		log.debug(
+				"Recursively collect all model objects related to the micro dialog decision point");
+		microDialogDecisionPoint.collectThisAndRelatedModelObjectsForExport(
+				modelObjectsToExport);
+
+		log.debug("Export micro dialog decision point");
+		return modelObjectExchangeService.exportModelObjects(
+				modelObjectsToExport,
+				ModelObjectExchangeFormatTypes.MICRO_DIALOG_DECISION_POINT);
+	}
+
+	@Synchronized
+	public void microDialogDecisionPointDelete(
+			final MicroDialogDecisionPoint microDialogDecisionPoint) {
+		databaseManagerService.deleteModelObject(microDialogDecisionPoint);
+	}
+
+	// Micro Dialog Element (Interface)
+	@Synchronized
+	public MicroDialogElementInterface microDialogElementMove(
+			final MicroDialogElementInterface microDialogElement,
+			final boolean moveUp) {
+		// Find micro dialog element (message or decision point) to swap with
+		MicroDialogElementInterface microDialogElementToSwapWith;
+
+		val microDialogMessageToCompareWith = databaseManagerService
+				.findOneSortedModelObject(MicroDialogMessage.class,
+						moveUp ? Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG_AND_ORDER_LOWER
+								: Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG_AND_ORDER_HIGHER,
+						moveUp ? Queries.MICRO_DIALOG_MESSAGE__SORT_BY_ORDER_DESC
+								: Queries.MICRO_DIALOG_MESSAGE__SORT_BY_ORDER_ASC,
+						microDialogElement.getMicroDialog(),
+						microDialogElement.getOrder());
+		val microDialogDecisionPointToCompareWith = databaseManagerService
+				.findOneSortedModelObject(MicroDialogDecisionPoint.class,
+						moveUp ? Queries.MICRO_DIALOG_DECISION_POINT__BY_MICRO_DIALOG_AND_ORDER_LOWER
+								: Queries.MICRO_DIALOG_DECISION_POINT__BY_MICRO_DIALOG_AND_ORDER_HIGHER,
+						moveUp ? Queries.MICRO_DIALOG_DECISION_POINT__SORT_BY_ORDER_DESC
+								: Queries.MICRO_DIALOG_DECISION_POINT__SORT_BY_ORDER_ASC,
+						microDialogElement.getMicroDialog(),
+						microDialogElement.getOrder());
+
+		if (microDialogMessageToCompareWith == null
+				&& microDialogDecisionPointToCompareWith == null) {
+			return null;
+		}
+
+		if (microDialogMessageToCompareWith == null) {
+			microDialogElementToSwapWith = microDialogDecisionPointToCompareWith;
+		} else if (microDialogDecisionPointToCompareWith == null) {
+			microDialogElementToSwapWith = microDialogMessageToCompareWith;
+		} else if (moveUp) {
+			if (microDialogMessageToCompareWith
+					.getOrder() > microDialogDecisionPointToCompareWith
+							.getOrder()) {
+				microDialogElementToSwapWith = microDialogMessageToCompareWith;
+			} else {
+				microDialogElementToSwapWith = microDialogDecisionPointToCompareWith;
+			}
+		} else {
+			if (microDialogMessageToCompareWith
+					.getOrder() < microDialogDecisionPointToCompareWith
+							.getOrder()) {
+				microDialogElementToSwapWith = microDialogMessageToCompareWith;
+			} else {
+				microDialogElementToSwapWith = microDialogDecisionPointToCompareWith;
+			}
+		}
+
+		// Swap order
+		final int order = microDialogElement.getOrder();
+		microDialogElement.setOrder(microDialogElementToSwapWith.getOrder());
+		microDialogElementToSwapWith.setOrder(order);
+
+		databaseManagerService
+				.saveModelObject((ModelObject) microDialogElement);
+		databaseManagerService
+				.saveModelObject((ModelObject) microDialogElementToSwapWith);
+
+		return microDialogElementToSwapWith;
+	}
+
+	// Micro Dialog Rule
+	@Synchronized
+	private MicroDialogRule microDialogRuleCreate(
+			final ObjectId microDialogDecisionPointId,
+			final ObjectId parentMicroDialogRuleId) {
+		val microDialogRule = new MicroDialogRule("",
+				RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "", "",
+				parentMicroDialogRuleId, 0, null, false,
+				microDialogDecisionPointId);
+
+		val highestOrderRule = databaseManagerService.findOneSortedModelObject(
+				MicroDialogRule.class,
+				Queries.MICRO_DIALOG_RULE__BY_MICRO_DIALOG_DECISION_POINT_AND_PARENT,
+				Queries.MICRO_DIALOG_RULE__SORT_BY_ORDER_DESC,
+				microDialogDecisionPointId, parentMicroDialogRuleId);
+
+		if (highestOrderRule != null) {
+			microDialogRule.setOrder(highestOrderRule.getOrder() + 1);
+		}
+
+		databaseManagerService.saveModelObject(microDialogRule);
+
+		return microDialogRule;
+	}
+
+	/**
+	 * @param movement
+	 *            Relative movement to target: 0=as child, 1=above, 2=below
+	 * @param microDialogRuleIdToMove
+	 *            {@link MicroDialogRule} to move
+	 * @param parentItemId
+	 *            The new parent {@link MicroDialogRule}
+	 * @param sameLevelTargetItemId
+	 *            The new relative {@link MicroDialogRule} above/below the
+	 *            {@link MicroDialogRule} to move
+	 * @param microDialogDecisionPointId
+	 */
+	@Synchronized
+	public void microDialogRuleMove(final int movement,
+			final ObjectId microDialogRuleIdToMove, final ObjectId parentItemId,
+			final ObjectId sameLevelTargetItemId,
+			final ObjectId microDialogDecisionPointId) {
+		if (movement == 0) {
+			// At the beginning of sublist of target
+
+			// Move all items in sublist one step down
+			val otherMicroDialogRulesToMove = databaseManagerService
+					.findModelObjects(MicroDialogRule.class,
+							Queries.MICRO_DIALOG_RULE__BY_MICRO_DIALOG_DECISION_POINT_AND_PARENT,
+							microDialogDecisionPointId, parentItemId);
+			for (val otherMicroDialogRuleToMove : otherMicroDialogRulesToMove) {
+				otherMicroDialogRuleToMove
+						.setOrder(otherMicroDialogRuleToMove.getOrder() + 1);
+				databaseManagerService
+						.saveModelObject(otherMicroDialogRuleToMove);
+			}
+
+			// Set target as new parent
+			val microDialogRuleToMove = databaseManagerService
+					.getModelObjectById(MicroDialogRule.class,
+							microDialogRuleIdToMove);
+			microDialogRuleToMove.setIsSubRuleOfMonitoringRule(parentItemId);
+
+			// Set at beginning of list
+			microDialogRuleToMove.setOrder(0);
+
+			databaseManagerService.saveModelObject(microDialogRuleToMove);
+		} else if (movement == 1 || movement == 2) {
+			// Move above or below
+
+			// Move all items in sublist after target one step
+			// down
+			val referenceTarget = databaseManagerService.getModelObjectById(
+					MicroDialogRule.class, sameLevelTargetItemId);
+
+			val otherMicroDialogRulesToMove = databaseManagerService
+					.findModelObjects(MicroDialogRule.class,
+							Queries.MICRO_DIALOG_RULE__BY_MICRO_DIALOG_DECISION_POINT_AND_PARENT_AND_ORDER_HIGHER,
+							microDialogDecisionPointId,
+							referenceTarget.getIsSubRuleOfMonitoringRule(),
+							referenceTarget.getOrder());
+			for (val otherMicroDialogRuleToMove : otherMicroDialogRulesToMove) {
+				otherMicroDialogRuleToMove
+						.setOrder(otherMicroDialogRuleToMove.getOrder() + 1);
+				databaseManagerService
+						.saveModelObject(otherMicroDialogRuleToMove);
+			}
+
+			// Set parent of target to rule
+			val microDialogRuleToMove = databaseManagerService
+					.getModelObjectById(MicroDialogRule.class,
+							microDialogRuleIdToMove);
+			microDialogRuleToMove.setIsSubRuleOfMonitoringRule(
+					referenceTarget.getIsSubRuleOfMonitoringRule());
+
+			if (movement == 1) {
+				// Adjust order for moved above
+
+				// Set order to former order of target
+				microDialogRuleToMove.setOrder(referenceTarget.getOrder());
+
+				// Set order of target one down
+				referenceTarget.setOrder(referenceTarget.getOrder() + 1);
+				databaseManagerService.saveModelObject(referenceTarget);
+			} else {
+				// Adjust order for moved below
+
+				// Set order to former order of target plus 1
+				microDialogRuleToMove.setOrder(referenceTarget.getOrder() + 1);
+			}
+
+			databaseManagerService.saveModelObject(microDialogRuleToMove);
+		}
+	}
+
+	@Synchronized
+	public void microDialogRuleSetStoreResultToVariable(
+			final MicroDialogRule microDialogRule, final String variableName)
+			throws NotificationMessageException {
+		if (variableName == null || variableName.equals("")) {
+			microDialogRule.setStoreValueToVariableWithName(null);
+
+			databaseManagerService.saveModelObject(microDialogRule);
+
+		} else {
+			if (!StringValidator.isValidVariableName(variableName)) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_NOT_VALID);
+			}
+
+			if (variablesManagerService
+					.isWriteProtectedReservedVariableName(variableName)) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_IS_RESERVED_BY_THE_SYSTEM);
+			}
+
+			microDialogRule.setStoreValueToVariableWithName(variableName);
+
+			databaseManagerService.saveModelObject(microDialogRule);
+		}
+	}
+
+	@Synchronized
+	public MicroDialogRule microDialogRuleImport(final File file)
+			throws FileNotFoundException, IOException {
+		val importedModelObjects = modelObjectExchangeService
+				.importModelObjects(file,
+						ModelObjectExchangeFormatTypes.MICRO_DIALOG_RULE);
+
+		for (val modelObject : importedModelObjects) {
+			if (modelObject instanceof MicroDialogRule) {
+				val microDialogRule = (MicroDialogRule) modelObject;
+
+				// Adjust order
+				microDialogRule.setOrder(0);
+
+				val highestOrderRule = databaseManagerService
+						.findOneSortedModelObject(MicroDialogRule.class,
+								Queries.MICRO_DIALOG_RULE__BY_MICRO_DIALOG_DECISION_POINT_AND_PARENT,
+								Queries.MICRO_DIALOG_RULE__SORT_BY_ORDER_DESC,
+								microDialogRule.getMicroDialogDecisionPoint(),
+								microDialogRule.getIsSubRuleOfMonitoringRule());
+
+				if (highestOrderRule != null) {
+					microDialogRule.setOrder(highestOrderRule.getOrder() + 1);
+				}
+
+				databaseManagerService.saveModelObject(microDialogRule);
+
+				return microDialogRule;
+			}
+		}
+
+		return null;
+	}
+
+	@Synchronized
+	public File microDialogRuleExport(final ObjectId microDialogRuleId) {
+		final List<ModelObject> modelObjectsToExport = new ArrayList<ModelObject>();
+
+		val microDialogRule = databaseManagerService
+				.getModelObjectById(MicroDialogRule.class, microDialogRuleId);
+
+		log.debug(
+				"Recursively collect all model objects related to the micro dialog rule");
+		microDialogRule.collectThisAndRelatedModelObjectsForExport(
+				modelObjectsToExport);
+
+		log.debug("Export micro dialog rule");
+		return modelObjectExchangeService.exportModelObjects(
+				modelObjectsToExport,
+				ModelObjectExchangeFormatTypes.MICRO_DIALOG_RULE);
+	}
+
+	@Synchronized
+	public void microDialogRuleDelete(final ObjectId microDialogRuleId) {
+		databaseManagerService.deleteModelObject(MicroDialogRule.class,
+				microDialogRuleId);
 	}
 
 	// Media Object
@@ -1548,7 +1921,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void monitoringRuleChangeSendMessageIfTrue(
+	public void monitoringRuleSetSendMessageIfTrue(
 			final MonitoringRule monitoringRule, final boolean newValue) {
 		monitoringRule.setSendMessageIfTrue(newValue);
 
@@ -1556,7 +1929,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void monitoringRuleChangeSendMessageToSupervisor(
+	public void monitoringRuleSetSendMessageToSupervisor(
 			final MonitoringRule monitoringRule, final boolean newValue) {
 		monitoringRule.setSendMessageToSupervisor(newValue);
 
@@ -1564,7 +1937,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void monitoringRuleChangeMarkCaseAsSolvedIfTrue(
+	public void monitoringRuleSetMarkCaseAsSolvedIfTrue(
 			final MonitoringRule monitoringRule, final boolean newValue) {
 		monitoringRule.setMarkCaseAsSolvedWhenTrue(newValue);
 
@@ -1572,7 +1945,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void monitoringRuleChangeStopInterventionIfTrue(
+	public void monitoringRuleSetStopInterventionIfTrue(
 			final MonitoringRule monitoringRule, final boolean newValue) {
 		monitoringRule.setStopInterventionWhenTrue(newValue);
 
@@ -1580,7 +1953,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void monitoringRuleChangeRelatedMonitoringMessageGroup(
+	public void monitoringRuleSetRelatedMonitoringMessageGroup(
 			final MonitoringRule monitoringRule,
 			final ObjectId newMonitoringMessageGroupId) {
 		monitoringRule
@@ -1617,7 +1990,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void monitoringRuleChangeHourToSendMessage(
+	public void monitoringRuleSetHourToSendMessage(
 			final MonitoringRule monitoringRule, final int newValue) {
 		monitoringRule.setHourToSendMessage(newValue);
 
@@ -1625,7 +1998,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void monitoringRuleChangeMinutesUntilMessageIsHandledAsUnanswered(
+	public void monitoringRuleSetMinutesUntilMessageIsHandledAsUnanswered(
 			final MonitoringRule monitoringRule, final int newValue) {
 		monitoringRule.setMinutesUntilMessageIsHandledAsUnanswered(newValue);
 
@@ -1690,6 +2063,7 @@ public class InterventionAdministrationManagerService {
 				monitoringRuleId);
 	}
 
+	// Monitoring Reply Rule
 	@Synchronized
 	public MonitoringReplyRule monitoringReplyRuleCreate(
 			final ObjectId monitoringRuleId,
@@ -1931,7 +2305,7 @@ public class InterventionAdministrationManagerService {
 
 	// Abstract Rule
 	@Synchronized
-	public void abstractRuleChangeComment(final AbstractRule abstractRule,
+	public void abstractRuleSetComment(final AbstractRule abstractRule,
 			final String comment) throws NotificationMessageException {
 		if (comment == null) {
 			abstractRule.setComment("");
@@ -1943,7 +2317,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void abstractRuleChangeRuleWithPlaceholders(
+	public void abstractRuleSetRuleWithPlaceholders(
 			final AbstractRule abstractRule, final String textWithPlaceholders,
 			final List<String> allPossibleVariables)
 			throws NotificationMessageException {
@@ -1963,7 +2337,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void abstractRuleChangeRuleComparisonTermWithPlaceholders(
+	public void abstractRuleSetRuleComparisonTermWithPlaceholders(
 			final AbstractRule abstractRule, final String textWithPlaceholders,
 			final List<String> allPossibleVariables)
 			throws NotificationMessageException {
@@ -1984,7 +2358,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void abstractRuleChangeEquationSign(final AbstractRule abstractRule,
+	public void abstractRuleSetEquationSign(final AbstractRule abstractRule,
 			final RuleEquationSignTypes newType) {
 		abstractRule.setRuleEquationSign(newType);
 
@@ -2289,13 +2663,64 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
+	public MicroDialog getMicroDialog(final ObjectId microDialogId) {
+		return databaseManagerService.getModelObjectById(MicroDialog.class,
+				microDialogId);
+	}
+
+	@Synchronized
+	public Iterable<MicroDialog> getAllMicroDialogsOfIntervention(
+			final ObjectId interventionId) {
+		return databaseManagerService.findSortedModelObjects(MicroDialog.class,
+				Queries.MICRO_DIALOG__BY_INTERVENTION,
+				Queries.MICRO_DIALOG__SORT_BY_ORDER_ASC, interventionId);
+	}
+
+	@Synchronized
 	public Iterable<MicroDialogMessageRule> getAllMicroDialogMessageRulesOfMicroDialogMessage(
-			final ObjectId monitoringMessageId) {
+			final ObjectId microDialogMessageId) {
 		return databaseManagerService.findSortedModelObjects(
 				MicroDialogMessageRule.class,
 				Queries.MICRO_DIALOG_MESSAGE_RULE__BY_MICRO_DIALOG_MESSAGE,
 				Queries.MICRO_DIALOG_MESSAGE_RULE__SORT_BY_ORDER_ASC,
-				monitoringMessageId);
+				microDialogMessageId);
+	}
+
+	@Synchronized
+	public Iterable<MicroDialogMessageRule> getAllMicroDialogRulesOfMicroDialogDecisionPoint(
+			final ObjectId microDialogDecisionPointId) {
+		return databaseManagerService.findSortedModelObjects(
+				MicroDialogMessageRule.class,
+				Queries.MICRO_DIALOG_RULE__BY_MICRO_DIALOG_DECISION_POINT,
+				Queries.MICRO_DIALOG_RULE__SORT_BY_ORDER_ASC,
+				microDialogDecisionPointId);
+	}
+
+	public List<? extends ModelObject> getAllMicroDialogElementsOfMicroDialog(
+			final ObjectId microDialogId) {
+		// Messages
+		val messages = databaseManagerService.findSortedModelObjects(
+				MicroDialogMessage.class,
+				Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG,
+				Queries.MICRO_DIALOG_MESSAGE__SORT_BY_ORDER_ASC, microDialogId);
+		// Decision points
+		val decisionPoints = databaseManagerService.findSortedModelObjects(
+				MicroDialogDecisionPoint.class,
+				Queries.MICRO_DIALOG_DECISION_POINT__BY_MICRO_DIALOG,
+				Queries.MICRO_DIALOG_DECISION_POINT__SORT_BY_ORDER_ASC,
+				microDialogId);
+
+		// Merge lists while retaining order
+		val microDialogElements = ListMerger.mergeMicroDialogElements(messages,
+				decisionPoints);
+
+		final List<ModelObject> modelObjectList = new ArrayList<>();
+
+		for (val microDialogElement : microDialogElements) {
+			modelObjectList.add((ModelObject) microDialogElement);
+		}
+
+		return modelObjectList;
 	}
 
 	@Synchronized

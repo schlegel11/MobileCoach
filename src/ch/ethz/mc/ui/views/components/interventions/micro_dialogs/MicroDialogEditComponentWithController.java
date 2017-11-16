@@ -1,25 +1,5 @@
 package ch.ethz.mc.ui.views.components.interventions.micro_dialogs;
 
-/*
- * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
- * initiative of the Institute of Technology Management at University of St.
- * Gallen and the Department of Management, Technology and Economics at ETH
- * Zurich
- * 
- * For details see README.md file in the root folder of this project.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import java.io.File;
 
 import org.bson.types.ObjectId;
@@ -31,10 +11,12 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
-import ch.ethz.mc.model.persistent.MonitoringMessage;
-import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
-import ch.ethz.mc.model.ui.UIMonitoringMessage;
-import ch.ethz.mc.ui.views.components.basics.ShortStringEditComponent;
+import ch.ethz.mc.model.ModelObject;
+import ch.ethz.mc.model.persistent.MicroDialog;
+import ch.ethz.mc.model.persistent.MicroDialogDecisionPoint;
+import ch.ethz.mc.model.persistent.MicroDialogMessage;
+import ch.ethz.mc.model.persistent.concepts.MicroDialogElementInterface;
+import ch.ethz.mc.model.ui.UIAbstractMicroDialogElement;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
@@ -43,164 +25,94 @@ import lombok.extern.log4j.Log4j2;
  *
  * @author Andreas Filler
  */
-/**
- * @author Andreas Filler
- *
- */
 @SuppressWarnings("serial")
 @Log4j2
 public class MicroDialogEditComponentWithController
 		extends MicroDialogEditComponent {
 
-	private final MonitoringMessageGroup						monitoringMessageGroup;
+	private final MicroDialog											microDialog;
 
-	private final ObjectId										interventionId;
+	private final ObjectId												interventionId;
 
-	private UIMonitoringMessage									selectedUIMonitoringMessage	= null;
+	private UIAbstractMicroDialogElement								selectedUIMicroDialogElement	= null;
 
-	private final BeanContainer<ObjectId, UIMonitoringMessage>	beanContainer;
+	private final BeanContainer<ObjectId, UIAbstractMicroDialogElement>	beanContainer;
 
 	protected MicroDialogEditComponentWithController(
-			final MonitoringMessageGroup monitoringMessageGroup,
-			final ObjectId interventionId) {
+			final MicroDialog microDialog, final ObjectId interventionId) {
 		super();
 
-		this.monitoringMessageGroup = monitoringMessageGroup;
+		this.microDialog = microDialog;
 		this.interventionId = interventionId;
 
 		// table options
-		val monitoringMessageTable = getMonitoringMessageTable();
+		val microDialogElementsTable = getMicroDialogElementsTable();
 
 		// table content
-		val messagesOfMessageGroup = getInterventionAdministrationManagerService()
-				.getAllMonitoringMessagesOfMonitoringMessageGroup(
-						monitoringMessageGroup.getId());
+		val elementsOfMicroDialog = getInterventionAdministrationManagerService()
+				.getAllMicroDialogElementsOfMicroDialog(microDialog.getId());
 
 		beanContainer = createBeanContainerForModelObjects(
-				UIMonitoringMessage.class, messagesOfMessageGroup);
+				UIAbstractMicroDialogElement.class, elementsOfMicroDialog);
 
-		monitoringMessageTable.setContainerDataSource(beanContainer);
-		monitoringMessageTable.setSortContainerPropertyId(
-				UIMonitoringMessage.getSortColumn());
-		monitoringMessageTable
-				.setVisibleColumns(UIMonitoringMessage.getVisibleColumns());
-		monitoringMessageTable
-				.setColumnHeaders(UIMonitoringMessage.getColumnHeaders());
-		monitoringMessageTable.setSortAscending(true);
-		monitoringMessageTable.setSortEnabled(false);
-
-		// check boxes
-		getMessagesExpectAnswerCheckBox()
-				.setValue(monitoringMessageGroup.isMessagesExpectAnswer());
-		getRandomOrderCheckBox()
-				.setValue(monitoringMessageGroup.isSendInRandomOrder());
-		getSendSamePositionIfSendingAsReplyCheckBox().setValue(
-				monitoringMessageGroup.isSendSamePositionIfSendingAsReply());
-
-		// validation expression
-		getValidationExpressionTextFieldComponent()
-				.setValue(monitoringMessageGroup.getValidationExpression());
+		microDialogElementsTable.setContainerDataSource(beanContainer);
+		microDialogElementsTable.setSortContainerPropertyId(
+				UIAbstractMicroDialogElement.getSortColumn());
+		microDialogElementsTable.setVisibleColumns(
+				UIAbstractMicroDialogElement.getVisibleColumns());
+		microDialogElementsTable.setColumnHeaders(
+				UIAbstractMicroDialogElement.getColumnHeaders());
+		microDialogElementsTable.setSortAscending(true);
+		microDialogElementsTable.setSortEnabled(false);
 
 		// handle table selection change
-		monitoringMessageTable
+		microDialogElementsTable
 				.addValueChangeListener(new ValueChangeListener() {
 
 					@Override
 					public void valueChange(final ValueChangeEvent event) {
-						val objectId = monitoringMessageTable.getValue();
+						val objectId = microDialogElementsTable.getValue();
 						if (objectId == null) {
 							setNothingSelected();
-							selectedUIMonitoringMessage = null;
+							selectedUIMicroDialogElement = null;
 						} else {
-							selectedUIMonitoringMessage = getUIModelObjectFromTableByObjectId(
-									monitoringMessageTable,
-									UIMonitoringMessage.class, objectId);
+							selectedUIMicroDialogElement = getUIModelObjectFromTableByObjectId(
+									microDialogElementsTable,
+									UIAbstractMicroDialogElement.class,
+									objectId);
 							setSomethingSelected();
-						}
-					}
-				});
-
-		// handle check box change
-		getMessagesExpectAnswerCheckBox()
-				.addValueChangeListener(new ValueChangeListener() {
-
-					@Override
-					public void valueChange(final ValueChangeEvent event) {
-						getInterventionAdministrationManagerService()
-								.monitoringMessageGroupSetMessagesExceptAnswer(
-										monitoringMessageGroup,
-										getMessagesExpectAnswerCheckBox()
-												.getValue());
-					}
-				});
-		getRandomOrderCheckBox()
-				.addValueChangeListener(new ValueChangeListener() {
-
-					@Override
-					public void valueChange(final ValueChangeEvent event) {
-						getInterventionAdministrationManagerService()
-								.monitoringMessageGroupSetRandomSendOrder(
-										monitoringMessageGroup,
-										getRandomOrderCheckBox().getValue());
-
-						if (monitoringMessageGroup.isSendInRandomOrder()
-								&& monitoringMessageGroup
-										.isSendSamePositionIfSendingAsReply()) {
-							getSendSamePositionIfSendingAsReplyCheckBox()
-									.setValue(false);
-						}
-					}
-				});
-		getSendSamePositionIfSendingAsReplyCheckBox()
-				.addValueChangeListener(new ValueChangeListener() {
-
-					@Override
-					public void valueChange(final ValueChangeEvent event) {
-						getInterventionAdministrationManagerService()
-								.monitoringMessageGroupSetSendSamePositionIfSendingAsReply(
-										monitoringMessageGroup,
-										getSendSamePositionIfSendingAsReplyCheckBox()
-												.getValue());
-
-						if (monitoringMessageGroup.isSendInRandomOrder()
-								&& monitoringMessageGroup
-										.isSendSamePositionIfSendingAsReply()) {
-							getRandomOrderCheckBox().setValue(false);
 						}
 					}
 				});
 
 		// handle buttons
 		val buttonClickListener = new ButtonClickListener();
-		getNewButton().addClickListener(buttonClickListener);
+		getNewMessageButton().addClickListener(buttonClickListener);
+		getNewDecisionPointButton().addClickListener(buttonClickListener);
 		getEditButton().addClickListener(buttonClickListener);
 		getDuplicateButton().addClickListener(buttonClickListener);
 		getMoveUpButton().addClickListener(buttonClickListener);
 		getMoveDownButton().addClickListener(buttonClickListener);
 		getDeleteButton().addClickListener(buttonClickListener);
-		getValidationExpressionTextFieldComponent().getButton()
-				.addClickListener(buttonClickListener);
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
 		@Override
 		public void buttonClick(final ClickEvent event) {
-			if (event.getButton() == getNewButton()) {
+			if (event.getButton() == getNewMessageButton()) {
 				createMessage();
+			} else if (event.getButton() == getNewDecisionPointButton()) {
+				createDecisionPoint();
 			} else if (event.getButton() == getEditButton()) {
-				editMessage();
+				editElement();
 			} else if (event.getButton() == getDuplicateButton()) {
-				duplicateMessage();
+				duplicateElement();
 			} else if (event.getButton() == getMoveUpButton()) {
-				moveMessage(true);
+				moveElement(true);
 			} else if (event.getButton() == getMoveDownButton()) {
-				moveMessage(false);
+				moveElement(false);
 			} else if (event.getButton() == getDeleteButton()) {
-				deleteMessage();
-			} else if (event
-					.getButton() == getValidationExpressionTextFieldComponent()
-							.getButton()) {
-				editValidationExpression();
+				deleteElement();
 			}
 			event.getButton().setEnabled(true);
 		}
@@ -208,84 +120,160 @@ public class MicroDialogEditComponentWithController
 
 	public void createMessage() {
 		log.debug("Create message");
-		val newMonitoringMessage = getInterventionAdministrationManagerService()
-				.monitoringMessageCreate(monitoringMessageGroup.getId());
+		val newMicroDialogMessage = getInterventionAdministrationManagerService()
+				.microDialogMessageCreate(microDialog.getId());
 
 		showModalClosableEditWindow(
-				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__CREATE_MONITORING_MESSAGE,
+				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__CREATE_MICRO_DIALOG_MESSAGE,
 				new MicroDialogMessageEditComponentWithController(
-						newMonitoringMessage, interventionId),
+						newMicroDialogMessage, interventionId),
 				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
-						beanContainer.addItem(newMonitoringMessage.getId(),
-								UIMonitoringMessage.class
-										.cast(newMonitoringMessage
+						beanContainer.addItem(newMicroDialogMessage.getId(),
+								UIAbstractMicroDialogElement.class
+										.cast(newMicroDialogMessage
 												.toUIModelObject()));
-						getMonitoringMessageTable()
-								.select(newMonitoringMessage.getId());
+						getMicroDialogElementsTable()
+								.select(newMicroDialogMessage.getId());
 						getAdminUI().showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_CREATED);
+								AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_MESSAGE_CREATED);
 
 						closeWindow();
 					}
 				});
 	}
 
-	public void editMessage() {
-		log.debug("Edit message");
-		val selectedMonitoringMessage = selectedUIMonitoringMessage
-				.getRelatedModelObject(MonitoringMessage.class);
+	public void createDecisionPoint() {
+		log.debug("Create decision point");
+		val newMicroDialogDecisionPoint = getInterventionAdministrationManagerService()
+				.microDialogDecisionPointCreate(microDialog.getId());
 
-		showModalClosableEditWindow(
-				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_MONITORING_MESSAGE,
-				new MicroDialogMessageEditComponentWithController(
-						selectedMonitoringMessage, interventionId),
-				new ExtendableButtonClickListener() {
-					@Override
-					public void buttonClick(final ClickEvent event) {
-						// Adapt UI
-						removeAndAddModelObjectToBeanContainer(beanContainer,
-								selectedMonitoringMessage);
-						getMonitoringMessageTable().sort();
-						getMonitoringMessageTable()
-								.select(selectedMonitoringMessage.getId());
-						getAdminUI().showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_UPDATED);
+		// showModalClosableEditWindow(
+		// AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__CREATE_MICRO_DIALOG_DECISION_POINT,
+		// new MicroDialogDecisionPointEditComponentWithController(
+		// newMicroDialogDecisionPoint, interventionId),
+		// new ExtendableButtonClickListener() {
+		// @Override
+		// public void buttonClick(final ClickEvent event) {
+		// Adapt UI
+		beanContainer.addItem(newMicroDialogDecisionPoint.getId(),
+				UIAbstractMicroDialogElement.class
+						.cast(newMicroDialogDecisionPoint.toUIModelObject()));
+		getMicroDialogElementsTable()
+				.select(newMicroDialogDecisionPoint.getId());
+		getAdminUI().showInformationNotification(
+				AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_DECISION_POINT_CREATED);
 
-						closeWindow();
-					}
-				});
+		// closeWindow();
+		// }
+		// });
 	}
 
-	public void duplicateMessage() {
-		log.debug("Duplicate message");
+	public void editElement() {
+		log.debug("Edit element");
 
-		final File temporaryBackupFile = getInterventionAdministrationManagerService()
-				.monitoringMessageExport(selectedUIMonitoringMessage
-						.getRelatedModelObject(MonitoringMessage.class));
+		if (selectedUIMicroDialogElement.isMessage()) {
+			val selectedMicroDialogMessage = selectedUIMicroDialogElement
+					.getRelatedModelObject(MicroDialogMessage.class);
 
+			showModalClosableEditWindow(
+					AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_MICRO_DIALOG_MESSAGE,
+					new MicroDialogMessageEditComponentWithController(
+							selectedMicroDialogMessage, interventionId),
+					new ExtendableButtonClickListener() {
+						@Override
+						public void buttonClick(final ClickEvent event) {
+							// Adapt UI
+							removeAndAddModelObjectToBeanContainer(
+									beanContainer, selectedMicroDialogMessage);
+							getMicroDialogElementsTable().sort();
+							getMicroDialogElementsTable()
+									.select(selectedMicroDialogMessage.getId());
+							getAdminUI().showInformationNotification(
+									AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_MESSAGE_UPDATED);
+
+							closeWindow();
+						}
+					});
+		} else {
+			val selectedMicroDialogDecisionPoint = selectedUIMicroDialogElement
+					.getRelatedModelObject(MicroDialogMessage.class);
+
+			// showModalClosableEditWindow(
+			// AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_MICRO_DIALOG_DECISION_POINT,
+			// new MicroDialogDecisionPointEditComponentWithController(
+			// selectedMicroDialogDecisionPoint, interventionId),
+			// new ExtendableButtonClickListener() {
+			// @Override
+			// public void buttonClick(final ClickEvent event) {
+			// Adapt UI
+			removeAndAddModelObjectToBeanContainer(beanContainer,
+					selectedMicroDialogDecisionPoint);
+			getMicroDialogElementsTable().sort();
+			getMicroDialogElementsTable()
+					.select(selectedMicroDialogDecisionPoint.getId());
+			getAdminUI().showInformationNotification(
+					AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_DECISION_POINT_UPDATED);
+
+			// closeWindow();
+			// }
+			// });
+		}
+	}
+
+	public void duplicateElement() {
+		log.debug("Duplicate element");
+
+		File temporaryBackupFile = null;
 		try {
-			final MonitoringMessage importedMonitoringMessage = getInterventionAdministrationManagerService()
-					.monitoringMessageImport(temporaryBackupFile);
+			ModelObject importedMicroDialogElement;
+			if (selectedUIMicroDialogElement.isMessage()) {
+				temporaryBackupFile = getInterventionAdministrationManagerService()
+						.microDialogMessageExport(selectedUIMicroDialogElement
+								.getRelatedModelObject(
+										MicroDialogMessage.class));
 
-			if (importedMonitoringMessage == null) {
-				throw new Exception("Imported message not found in import");
+				importedMicroDialogElement = getInterventionAdministrationManagerService()
+						.microDialogMessageImport(temporaryBackupFile);
+			} else {
+				temporaryBackupFile = getInterventionAdministrationManagerService()
+						.microDialogDecisionPointExport(
+								selectedUIMicroDialogElement
+										.getRelatedModelObject(
+												MicroDialogDecisionPoint.class));
+
+				importedMicroDialogElement = getInterventionAdministrationManagerService()
+						.microDialogDecisionPointImport(temporaryBackupFile);
+			}
+
+			if (importedMicroDialogElement == null) {
+				throw new Exception("Imported element not found in import");
 			}
 
 			// Adapt UI
-			beanContainer.addItem(importedMonitoringMessage.getId(),
-					UIMonitoringMessage.class
-							.cast(importedMonitoringMessage.toUIModelObject()));
-			getMonitoringMessageTable()
-					.select(importedMonitoringMessage.getId());
+			beanContainer.addItem(importedMicroDialogElement.getId(),
+					UIAbstractMicroDialogElement.class.cast(
+							importedMicroDialogElement.toUIModelObject()));
+			getMicroDialogElementsTable()
+					.select(importedMicroDialogElement.getId());
 
-			getAdminUI().showInformationNotification(
-					AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_DUPLICATED);
+			if (selectedUIMicroDialogElement.isMessage()) {
+				getAdminUI().showInformationNotification(
+						AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_MESSAGE_DUPLICATED);
+			} else {
+				getAdminUI().showInformationNotification(
+						AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_DECISION_POINT_DUPLICATED);
+			}
 		} catch (final Exception e) {
-			getAdminUI().showWarningNotification(
-					AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_DUPLICATION_FAILED);
+			if (selectedUIMicroDialogElement.isMessage()) {
+				getAdminUI().showWarningNotification(
+						AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_MESSAGE_DUPLICATION_FAILED);
+			} else {
+				getAdminUI().showWarningNotification(
+						AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_DECISION_POINT_DUPLICATION_FAILD);
+			}
 		}
 
 		try {
@@ -295,82 +283,92 @@ public class MicroDialogEditComponentWithController
 		}
 	}
 
-	public void moveMessage(final boolean moveUp) {
-		log.debug("Move message {}", moveUp ? "up" : "down");
+	public void moveElement(final boolean moveUp) {
+		log.debug("Move element {}", moveUp ? "up" : "down");
 
-		val selectedMonitoringMessage = selectedUIMonitoringMessage
-				.getRelatedModelObject(MonitoringMessage.class);
-		val swappedMonitoringMessage = getInterventionAdministrationManagerService()
-				.monitoringMessageMove(selectedMonitoringMessage, moveUp);
+		MicroDialogElementInterface selectedMicroDialogElement;
+		if (selectedUIMicroDialogElement.isMessage()) {
+			selectedMicroDialogElement = selectedUIMicroDialogElement
+					.getRelatedModelObject(MicroDialogMessage.class);
+		} else {
+			selectedMicroDialogElement = selectedUIMicroDialogElement
+					.getRelatedModelObject(MicroDialogDecisionPoint.class);
+		}
 
-		if (swappedMonitoringMessage == null) {
-			log.debug("Message is already at top/end of list");
+		val swappedMicroDialogElement = getInterventionAdministrationManagerService()
+				.microDialogElementMove(selectedMicroDialogElement, moveUp);
+		if (swappedMicroDialogElement == null) {
+			log.debug("Element is already at top/end of list");
 			return;
 		}
 
 		removeAndAddModelObjectToBeanContainer(beanContainer,
-				swappedMonitoringMessage);
+				(ModelObject) swappedMicroDialogElement);
 		removeAndAddModelObjectToBeanContainer(beanContainer,
-				selectedMonitoringMessage);
-		getMonitoringMessageTable().sort();
-		getMonitoringMessageTable().select(selectedMonitoringMessage.getId());
+				(ModelObject) selectedMicroDialogElement);
+		getMicroDialogElementsTable().sort();
+		getMicroDialogElementsTable()
+				.select(((ModelObject) selectedMicroDialogElement).getId());
 	}
 
-	public void deleteMessage() {
-		log.debug("Delete message");
+	public void deleteElement() {
+		log.debug("Delete element");
 		showConfirmationWindow(new ExtendableButtonClickListener() {
 			@Override
 			public void buttonClick(final ClickEvent event) {
-				try {
-					val selectedMonitoringMessage = selectedUIMonitoringMessage
-							.getRelatedModelObject(MonitoringMessage.class);
+				if (selectedUIMicroDialogElement.isMessage()) {
+					try {
+						val selectedMicroDialogMessage = selectedUIMicroDialogElement
+								.getRelatedModelObject(
+										MicroDialogMessage.class);
 
-					// Delete variable
-					getInterventionAdministrationManagerService()
-							.monitoringMessageDelete(selectedMonitoringMessage);
-				} catch (final Exception e) {
-					closeWindow();
-					handleException(e);
-					return;
+						// Delete message
+						getInterventionAdministrationManagerService()
+								.microDialogMessageDelete(
+										selectedMicroDialogMessage);
+					} catch (final Exception e) {
+						closeWindow();
+						handleException(e);
+						return;
+					}
+
+					// Adapt UI
+					getMicroDialogElementsTable()
+							.removeItem(
+									selectedUIMicroDialogElement
+											.getRelatedModelObject(
+													MicroDialogMessage.class)
+											.getId());
+					getAdminUI().showInformationNotification(
+							AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_MESSAGE_DELETED);
+				} else {
+					try {
+						val selectedMicroDialogDecisionPoint = selectedUIMicroDialogElement
+								.getRelatedModelObject(
+										MicroDialogDecisionPoint.class);
+
+						// Delete decision point
+						getInterventionAdministrationManagerService()
+								.microDialogDecisionPointDelete(
+										selectedMicroDialogDecisionPoint);
+					} catch (final Exception e) {
+						closeWindow();
+						handleException(e);
+						return;
+					}
+
+					// Adapt UI
+					getMicroDialogElementsTable()
+							.removeItem(selectedUIMicroDialogElement
+									.getRelatedModelObject(
+											MicroDialogDecisionPoint.class)
+									.getId());
+					getAdminUI().showInformationNotification(
+							AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_DECISION_POINT_DELETED);
 				}
-
-				// Adapt UI
-				getMonitoringMessageTable()
-						.removeItem(selectedUIMonitoringMessage
-								.getRelatedModelObject(MonitoringMessage.class)
-								.getId());
-				getAdminUI().showInformationNotification(
-						AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_DELETED);
-
 				closeWindow();
 			}
 		}, null);
 	}
 
-	public void editValidationExpression() {
-		log.debug("Edit validation expression");
-
-		showModalStringValueEditWindow(
-				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_VALIDATION_EXPRESSION,
-				monitoringMessageGroup.getValidationExpression(), null,
-				new ShortStringEditComponent(),
-				new ExtendableButtonClickListener() {
-					@Override
-					public void buttonClick(final ClickEvent event) {
-						// Adapt UI
-						getInterventionAdministrationManagerService()
-								.monitoringMessageGroupChangeValidationExpression(
-										monitoringMessageGroup,
-										getStringValue());
-
-						getValidationExpressionTextFieldComponent()
-								.setValue(monitoringMessageGroup
-										.getValidationExpression());
-						getAdminUI().showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__VALIDATION_EXPRESSION_UPDATED);
-
-						closeWindow();
-					}
-				}, null);
-	}
 }

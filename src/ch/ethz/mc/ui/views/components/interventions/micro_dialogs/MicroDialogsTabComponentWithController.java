@@ -33,7 +33,7 @@ import com.vaadin.ui.TabSheet.Tab;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.model.persistent.Intervention;
-import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
+import ch.ethz.mc.model.persistent.MicroDialog;
 import ch.ethz.mc.ui.views.components.basics.ShortStringEditComponent;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -50,9 +50,9 @@ public class MicroDialogsTabComponentWithController
 
 	private final Intervention				intervention;
 
-	private MonitoringMessageGroup			selectedMonitoringMessageGroup	= null;
+	private MicroDialog						selectedMicroDialog	= null;
 
-	private final Hashtable<Tab, ObjectId>	tabsWithObjectIdsOfMessageGroup;
+	private final Hashtable<Tab, ObjectId>	tabsWithObjectIdsOfMicroDialog;
 
 	public MicroDialogsTabComponentWithController(
 			final Intervention intervention) {
@@ -60,56 +60,52 @@ public class MicroDialogsTabComponentWithController
 
 		this.intervention = intervention;
 
-		tabsWithObjectIdsOfMessageGroup = new Hashtable<TabSheet.Tab, ObjectId>();
+		tabsWithObjectIdsOfMicroDialog = new Hashtable<TabSheet.Tab, ObjectId>();
 
 		// Retrieve monitoring message groups to set current and fill tabs
-		final Iterable<MonitoringMessageGroup> monitoringMessageGroupsIterable = getInterventionAdministrationManagerService()
-				.getAllMonitoringMessageGroupsOfIntervention(
-						intervention.getId());
+		final Iterable<MicroDialog> microDialogsIterable = getInterventionAdministrationManagerService()
+				.getAllMicroDialogsOfIntervention(intervention.getId());
 
-		for (val monitoringMessageGroup : monitoringMessageGroupsIterable) {
-			val newTab = addTabComponent(monitoringMessageGroup,
-					intervention.getId());
+		for (val microDialog : microDialogsIterable) {
+			val newTab = addTabComponent(microDialog, intervention.getId());
 
-			tabsWithObjectIdsOfMessageGroup.put(newTab,
-					monitoringMessageGroup.getId());
+			tabsWithObjectIdsOfMicroDialog.put(newTab, microDialog.getId());
 
-			if (getMonitoringMessageGroupsTabSheet().getComponentCount() == 1) {
+			if (getMicroDialogsTabSheet().getComponentCount() == 1) {
 				// First tab added
-				selectedMonitoringMessageGroup = monitoringMessageGroup;
-				getMonitoringMessageGroupsTabSheet().setSelectedTab(newTab);
+				selectedMicroDialog = microDialog;
+				getMicroDialogsTabSheet().setSelectedTab(newTab);
 			}
 		}
 
-		if (getMonitoringMessageGroupsTabSheet().getComponentCount() > 0) {
+		if (getMicroDialogsTabSheet().getComponentCount() > 0) {
 			setSomethingSelected();
 		}
 
 		// handle tab selection change
-		getMonitoringMessageGroupsTabSheet()
+		getMicroDialogsTabSheet()
 				.addSelectedTabChangeListener(new SelectedTabChangeListener() {
 
 					@Override
 					public void selectedTabChange(
 							final SelectedTabChangeEvent event) {
-						log.debug("New group selected");
+						log.debug("New dialog selected");
 
 						val selectedTab = event.getTabSheet().getSelectedTab();
 						if (selectedTab == null) {
 							setNothingSelected();
-							selectedMonitoringMessageGroup = null;
+							selectedMicroDialog = null;
 						} else {
 							val selectedTabObject = event.getTabSheet()
 									.getTab(selectedTab);
-							val monitoringMessageGroupObjectId = tabsWithObjectIdsOfMessageGroup
+							val microDialogObjectId = tabsWithObjectIdsOfMicroDialog
 									.get(selectedTabObject);
 
 							// New tabs cannot be found in list, so the selected
 							// tab will be set programmatically after creation
-							if (monitoringMessageGroupObjectId != null) {
-								selectedMonitoringMessageGroup = getInterventionAdministrationManagerService()
-										.getMonitoringMessageGroup(
-												monitoringMessageGroupObjectId);
+							if (microDialogObjectId != null) {
+								selectedMicroDialog = getInterventionAdministrationManagerService()
+										.getMicroDialog(microDialogObjectId);
 							}
 
 							setSomethingSelected();
@@ -119,44 +115,43 @@ public class MicroDialogsTabComponentWithController
 
 		// handle buttons
 		val buttonClickListener = new ButtonClickListener();
-		getNewGroupButton().addClickListener(buttonClickListener);
-		getRenameGroupButton().addClickListener(buttonClickListener);
-		getMoveGroupLeftButton().addClickListener(buttonClickListener);
-		getMoveGroupRightButton().addClickListener(buttonClickListener);
-		getDeleteGroupButton().addClickListener(buttonClickListener);
+		getNewDialogButton().addClickListener(buttonClickListener);
+		getRenameDialogButton().addClickListener(buttonClickListener);
+		getMoveDialogLeftButton().addClickListener(buttonClickListener);
+		getMoveDialogRightButton().addClickListener(buttonClickListener);
+		getDeleteDialogButton().addClickListener(buttonClickListener);
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
 		@Override
 		public void buttonClick(final ClickEvent event) {
-			if (event.getButton() == getNewGroupButton()) {
-				createGroup();
-			} else if (event.getButton() == getMoveGroupLeftButton()) {
-				moveGroup(true);
-			} else if (event.getButton() == getMoveGroupRightButton()) {
-				moveGroup(false);
-			} else if (event.getButton() == getRenameGroupButton()) {
-				renameGroup();
-			} else if (event.getButton() == getDeleteGroupButton()) {
-				deleteGroup();
+			if (event.getButton() == getNewDialogButton()) {
+				createDialog();
+			} else if (event.getButton() == getMoveDialogLeftButton()) {
+				moveDialog(true);
+			} else if (event.getButton() == getMoveDialogRightButton()) {
+				moveDialog(false);
+			} else if (event.getButton() == getRenameDialogButton()) {
+				renameDialog();
+			} else if (event.getButton() == getDeleteDialogButton()) {
+				deleteDialog();
 			}
 		}
 	}
 
-	public void createGroup() {
-		log.debug("Create group");
+	public void createDialog() {
+		log.debug("Create dialog");
 		showModalStringValueEditWindow(
-				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NAME_FOR_MONITORING_MESSAGE_GROUP,
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NAME_FOR_MICRO_DIALOG,
 				null, null, new ShortStringEditComponent(),
 				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
-						MonitoringMessageGroup newMonitoringMessageGroup;
+						MicroDialog newMicroDialog;
 						try {
 							// Create new variable
-							newMonitoringMessageGroup = getInterventionAdministrationManagerService()
-									.monitoringMessageGroupCreate(
-											getStringValue(),
+							newMicroDialog = getInterventionAdministrationManagerService()
+									.microDialogCreate(getStringValue(),
 											intervention.getId());
 						} catch (final Exception e) {
 							handleException(e);
@@ -164,37 +159,35 @@ public class MicroDialogsTabComponentWithController
 						}
 
 						// Adapt UI
-						val newTab = addTabComponent(newMonitoringMessageGroup,
+						val newTab = addTabComponent(newMicroDialog,
 								intervention.getId());
 
-						tabsWithObjectIdsOfMessageGroup.put(newTab,
-								newMonitoringMessageGroup.getId());
+						tabsWithObjectIdsOfMicroDialog.put(newTab,
+								newMicroDialog.getId());
 
-						selectedMonitoringMessageGroup = newMonitoringMessageGroup;
+						selectedMicroDialog = newMicroDialog;
 
-						getMonitoringMessageGroupsTabSheet()
-								.setSelectedTab(newTab);
+						getMicroDialogsTabSheet().setSelectedTab(newTab);
 						getAdminUI().showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_GROUP_CREATED);
+								AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_CREATED);
 
 						closeWindow();
 					}
 				}, null);
 	}
 
-	public void moveGroup(final boolean moveLeft) {
-		log.debug("Move group {}", moveLeft ? "left" : "right");
+	public void moveDialog(final boolean moveLeft) {
+		log.debug("Move dialog {}", moveLeft ? "left" : "right");
 
-		val swappedMonitoringMessageGroup = getInterventionAdministrationManagerService()
-				.monitoringMessageGroupMove(selectedMonitoringMessageGroup,
-						moveLeft);
+		val swappedMicroDialog = getInterventionAdministrationManagerService()
+				.microDialogMove(selectedMicroDialog, moveLeft);
 
-		if (swappedMonitoringMessageGroup == null) {
-			log.debug("Message group is already at beginning/end of list");
+		if (swappedMicroDialog == null) {
+			log.debug("Micro dialog is already at beginning/end of list");
 			return;
 		}
 
-		val tabSheet = getMonitoringMessageGroupsTabSheet();
+		val tabSheet = getMicroDialogsTabSheet();
 		val currentPosition = tabSheet
 				.getTabPosition(tabSheet.getTab(tabSheet.getSelectedTab()));
 		if (moveLeft) {
@@ -208,12 +201,12 @@ public class MicroDialogsTabComponentWithController
 		setSomethingSelected();
 	}
 
-	public void renameGroup() {
-		log.debug("Rename group");
+	public void renameDialog() {
+		log.debug("Rename dialog");
 
 		showModalStringValueEditWindow(
-				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_NAME_FOR_MONITORING_MESSAGE_GROUP,
-				selectedMonitoringMessageGroup.getName(), null,
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_NAME_FOR_MICRO_DIALOG,
+				selectedMicroDialog.getName(), null,
 				new ShortStringEditComponent(),
 				new ExtendableButtonClickListener() {
 					@Override
@@ -221,8 +214,7 @@ public class MicroDialogsTabComponentWithController
 						try {
 							// Change name
 							getInterventionAdministrationManagerService()
-									.monitoringMessageGroupChangeName(
-											selectedMonitoringMessageGroup,
+									.microDialogSetName(selectedMicroDialog,
 											getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
@@ -230,29 +222,28 @@ public class MicroDialogsTabComponentWithController
 						}
 
 						// Adapt UI
-						val tab = getMonitoringMessageGroupsTabSheet();
-						tab.getTab(tab.getSelectedTab()).setCaption(
-								selectedMonitoringMessageGroup.getName());
+						val tab = getMicroDialogsTabSheet();
+						tab.getTab(tab.getSelectedTab())
+								.setCaption(selectedMicroDialog.getName());
 
 						getAdminUI().showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_GROUP_RENAMED);
+								AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_RENAMED);
 						closeWindow();
 					}
 				}, null);
 	}
 
-	public void deleteGroup() {
-		log.debug("Delete group");
+	public void deleteDialog() {
+		log.debug("Delete dialog");
 
 		showConfirmationWindow(new ExtendableButtonClickListener() {
 
 			@Override
 			public void buttonClick(final ClickEvent event) {
 				try {
-					// Delete group
+					// Delete dialog
 					getInterventionAdministrationManagerService()
-							.monitoringMessageGroupDelete(
-									selectedMonitoringMessageGroup);
+							.microDialogDelete(selectedMicroDialog);
 				} catch (final Exception e) {
 					closeWindow();
 					handleException(e);
@@ -260,9 +251,9 @@ public class MicroDialogsTabComponentWithController
 				}
 
 				// Adapt UI
-				val tabSheet = getMonitoringMessageGroupsTabSheet();
+				val tabSheet = getMicroDialogsTabSheet();
 
-				tabsWithObjectIdsOfMessageGroup
+				tabsWithObjectIdsOfMicroDialog
 						.remove(tabSheet.getTab(tabSheet.getSelectedTab()));
 
 				tabSheet.removeTab(tabSheet.getTab(tabSheet.getSelectedTab()));
@@ -270,20 +261,19 @@ public class MicroDialogsTabComponentWithController
 				val selectedTab = tabSheet.getSelectedTab();
 				if (selectedTab == null) {
 					setNothingSelected();
-					selectedMonitoringMessageGroup = null;
+					selectedMicroDialog = null;
 				} else {
 					val selectedTabObject = tabSheet.getTab(selectedTab);
-					val monitoringMessageGroupObjectId = tabsWithObjectIdsOfMessageGroup
+					val microDialogObjectId = tabsWithObjectIdsOfMicroDialog
 							.get(selectedTabObject);
-					selectedMonitoringMessageGroup = getInterventionAdministrationManagerService()
-							.getMonitoringMessageGroup(
-									monitoringMessageGroupObjectId);
+					selectedMicroDialog = getInterventionAdministrationManagerService()
+							.getMicroDialog(microDialogObjectId);
 
 					setSomethingSelected();
 				}
 
 				getAdminUI().showInformationNotification(
-						AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_GROUP_DELETED);
+						AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_DELETED);
 
 				closeWindow();
 			}

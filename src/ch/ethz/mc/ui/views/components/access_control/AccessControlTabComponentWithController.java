@@ -221,7 +221,7 @@ public class AccessControlTabComponentWithController
 
 							// Change password
 							getInterventionAdministrationManagerService()
-									.authorChangePassword(selectedAuthor,
+									.authorSetPassword(selectedAuthor,
 											getStringValue());
 						} catch (final Exception e) {
 							handleException(e);

@@ -32,8 +32,10 @@ import ch.ethz.mc.model.persistent.IntermediateSurveyAndFeedbackParticipantShort
 import ch.ethz.mc.model.persistent.InterventionVariableWithValue;
 import ch.ethz.mc.model.persistent.MediaObjectParticipantShortURL;
 import ch.ethz.mc.model.persistent.MicroDialog;
+import ch.ethz.mc.model.persistent.MicroDialogDecisionPoint;
 import ch.ethz.mc.model.persistent.MicroDialogMessage;
 import ch.ethz.mc.model.persistent.MicroDialogMessageRule;
+import ch.ethz.mc.model.persistent.MicroDialogRule;
 import ch.ethz.mc.model.persistent.MonitoringMessage;
 import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
 import ch.ethz.mc.model.persistent.MonitoringMessageRule;
@@ -106,8 +108,12 @@ public class Indices {
 			"{'intervention':1}" };
 	private static final String[]	microDialogMessageIndices								= new String[] {
 			"{'microDialog':1}" };
+	private static final String[]	microDialogDecisionPointIndices							= new String[] {
+			"{'microDialog':1}" };
 	private static final String[]	microDialogMessageRuleIndices							= new String[] {
 			"{'belongingMicroDialogMessage':1}" };
+	private static final String[]	microDialogRuleIndices									= new String[] {
+			"{'microDialogDecisionPoint':1,'isSubRuleOfMonitoringRule':1}" };
 
 	/**
 	 * Creates a hashtable containing all indices for all {@link ModelObject}
@@ -152,8 +158,11 @@ public class Indices {
 
 		indices.put(MicroDialog.class, microDialogIndices);
 		indices.put(MicroDialogMessage.class, microDialogMessageIndices);
+		indices.put(MicroDialogDecisionPoint.class,
+				microDialogDecisionPointIndices);
 		indices.put(MicroDialogMessageRule.class,
 				microDialogMessageRuleIndices);
+		indices.put(MicroDialogRule.class, microDialogRuleIndices);
 
 		return indices;
 	}

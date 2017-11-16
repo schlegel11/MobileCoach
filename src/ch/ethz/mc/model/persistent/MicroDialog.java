@@ -30,6 +30,7 @@ import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.ui.UIMicroDialog;
 import ch.ethz.mc.model.ui.UIModelObject;
+import ch.ethz.mc.tools.ListMerger;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -104,6 +105,15 @@ public class MicroDialog extends ModelObject {
 			microDialogMessage
 					.collectThisAndRelatedModelObjectsForExport(exportList);
 		}
+
+		// Add micro dialog decision points
+		for (val microDialogDecisionPoint : ModelObject.find(
+				MicroDialogDecisionPoint.class,
+				Queries.MICRO_DIALOG_DECISION_POINT__BY_MICRO_DIALOG,
+				getId())) {
+			microDialogDecisionPoint
+					.collectThisAndRelatedModelObjectsForExport(exportList);
+		}
 	}
 
 	/*
@@ -118,6 +128,12 @@ public class MicroDialog extends ModelObject {
 				Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG, getId());
 
 		ModelObject.delete(microDialogMessagesToDelete);
+
+		val microDialogDecisionPointsToDelete = ModelObject.find(
+				MicroDialogDecisionPoint.class,
+				Queries.MICRO_DIALOG_DECISION_POINT__BY_MICRO_DIALOG, getId());
+
+		ModelObject.delete(microDialogDecisionPointsToDelete);
 	}
 
 	/*
@@ -130,19 +146,30 @@ public class MicroDialog extends ModelObject {
 	public String toTable() {
 		String table = wrapRow(wrapHeader("Name:") + wrapField(escape(name)));
 
-		// Messages
 		final StringBuffer buffer = new StringBuffer();
+
+		// Messages
 		val messages = ModelObject.findSorted(MicroDialogMessage.class,
 				Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG,
 				Queries.MICRO_DIALOG_MESSAGE__SORT_BY_ORDER_ASC, getId());
+		// Decision points
+		val decisionPoints = ModelObject.findSorted(
+				MicroDialogDecisionPoint.class,
+				Queries.MICRO_DIALOG_DECISION_POINT__BY_MICRO_DIALOG,
+				Queries.MICRO_DIALOG_DECISION_POINT__SORT_BY_ORDER_ASC,
+				getId());
 
-		for (val message : messages) {
-			buffer.append(message.toTable());
+		// Merge lists while retaining order
+		val microDialogElements = ListMerger.mergeMicroDialogElements(messages,
+				decisionPoints);
+
+		for (val microDialogElement : microDialogElements) {
+			buffer.append(microDialogElement.toTable());
 		}
 
 		if (buffer.length() > 0) {
-			table += wrapRow(
-					wrapHeader("Messages:") + wrapField(buffer.toString()));
+			table += wrapRow(wrapHeader("Messages & Decision Points:")
+					+ wrapField(buffer.toString()));
 		}
 
 		return wrapTable(table);

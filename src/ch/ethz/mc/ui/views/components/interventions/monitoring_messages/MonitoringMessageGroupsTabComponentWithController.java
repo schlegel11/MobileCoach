@@ -222,7 +222,7 @@ public class MonitoringMessageGroupsTabComponentWithController
 						try {
 							// Change name
 							getInterventionAdministrationManagerService()
-									.monitoringMessageGroupChangeName(
+									.monitoringMessageGroupSetName(
 											selectedMonitoringMessageGroup,
 											getStringValue());
 						} catch (final Exception e) {

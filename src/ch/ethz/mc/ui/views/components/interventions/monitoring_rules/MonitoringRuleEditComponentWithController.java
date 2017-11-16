@@ -127,7 +127,7 @@ public class MonitoringRuleEditComponentWithController
 								"Adjust related monitoring message group to {}",
 								newMonitoringMessageGroupId);
 						getInterventionAdministrationManagerService()
-								.monitoringRuleChangeRelatedMonitoringMessageGroup(
+								.monitoringRuleSetRelatedMonitoringMessageGroup(
 										monitoringRule,
 										newMonitoringMessageGroupId);
 
@@ -189,7 +189,7 @@ public class MonitoringRuleEditComponentWithController
 						val newValue = (boolean) event.getProperty().getValue();
 
 						getInterventionAdministrationManagerService()
-								.monitoringRuleChangeSendMessageIfTrue(
+								.monitoringRuleSetSendMessageIfTrue(
 										monitoringRule, newValue);
 
 						if (newValue) {
@@ -224,7 +224,7 @@ public class MonitoringRuleEditComponentWithController
 						val newValue = (boolean) event.getProperty().getValue();
 
 						getInterventionAdministrationManagerService()
-								.monitoringRuleChangeSendMessageToSupervisor(
+								.monitoringRuleSetSendMessageToSupervisor(
 										monitoringRule, newValue);
 
 						if (newValue) {
@@ -258,7 +258,7 @@ public class MonitoringRuleEditComponentWithController
 						val newValue = (boolean) event.getProperty().getValue();
 
 						getInterventionAdministrationManagerService()
-								.monitoringRuleChangeMarkCaseAsSolvedIfTrue(
+								.monitoringRuleSetMarkCaseAsSolvedIfTrue(
 										monitoringRule, newValue);
 
 						if (newValue) {
@@ -290,7 +290,7 @@ public class MonitoringRuleEditComponentWithController
 						val newValue = (boolean) event.getProperty().getValue();
 
 						getInterventionAdministrationManagerService()
-								.monitoringRuleChangeStopInterventionIfTrue(
+								.monitoringRuleSetStopInterventionIfTrue(
 										monitoringRule, newValue);
 
 						if (newValue) {
@@ -497,13 +497,13 @@ public class MonitoringRuleEditComponentWithController
 		public void valueChange(final ValueChangeEvent event) {
 			if (event.getProperty() == getHourToSendMessageSlider()) {
 				getInterventionAdministrationManagerService()
-						.monitoringRuleChangeHourToSendMessage(monitoringRule,
+						.monitoringRuleSetHourToSendMessage(monitoringRule,
 								((Double) event.getProperty().getValue())
 										.intValue());
 			} else if (event
 					.getProperty() == getMinutesUntilHandledAsNotAnsweredSlider()) {
 				getInterventionAdministrationManagerService()
-						.monitoringRuleChangeMinutesUntilMessageIsHandledAsUnanswered(
+						.monitoringRuleSetMinutesUntilMessageIsHandledAsUnanswered(
 								monitoringRule,
 								((Double) event.getProperty().getValue())
 										.intValue());
