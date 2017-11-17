@@ -1,4 +1,4 @@
-package ch.ethz.mc.ui.views;
+package ch.ethz.mc.ui.components;
 
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
@@ -20,33 +20,37 @@ package ch.ethz.mc.ui.views;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import lombok.extern.log4j.Log4j2;
-
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-
-import ch.ethz.mc.ui.components.views.ErrorViewComponent;
+import java.util.List;
 
 /**
- * Provides error view
+ * Extends an {@link AbstractConfirmationComponent} with the ability to set and
+ * return
+ * a {@link String} value
  * 
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
-@Log4j2
-public class ErrorView extends AbstractView implements View {
-	private ErrorViewComponent errorViewComponent;
+public abstract class AbstractStringValueEditComponent
+		extends AbstractConfirmationComponent {
 
-	@Override
-	public void enter(final ViewChangeEvent event) {
-		log.debug("Entered ERROR view");
+	/**
+	 * Set the current {@link String} value
+	 * 
+	 * @return
+	 */
+	public abstract void setStringValue(final String value);
 
-		setSizeFull();
+	/**
+	 * Return the current {@link String} value
+	 * 
+	 * @return
+	 */
+	public abstract String getStringValue();
 
-		// Create view and listeners
-		errorViewComponent = new ErrorViewComponent();
-
-		// Add view
-		this.addComponent(errorViewComponent);
-	}
+	/**
+	 * Adds variables to select to the component
+	 * 
+	 * @return
+	 */
+	public abstract void addVariables(final List<String> variables);
 }

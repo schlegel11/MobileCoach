@@ -1,4 +1,4 @@
-package ch.ethz.mc.ui.views;
+package ch.ethz.mc.ui.components;
 
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
@@ -20,33 +20,31 @@ package ch.ethz.mc.ui.views;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import lombok.extern.log4j.Log4j2;
-
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-
-import ch.ethz.mc.ui.components.views.ErrorViewComponent;
+import com.vaadin.ui.Button;
 
 /**
- * Provides error view
+ * Extends an {@link AbstractCustomComponent} with the ability to confirm or
+ * cancel
  * 
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
-@Log4j2
-public class ErrorView extends AbstractView implements View {
-	private ErrorViewComponent errorViewComponent;
+public abstract class AbstractConfirmationComponent
+		extends AbstractCustomComponent {
+	/**
+	 * Register the listener which is called when the OK button has been clicked
+	 * 
+	 * @param clickListener
+	 */
+	public abstract void registerOkButtonListener(
+			final Button.ClickListener clickListener);
 
-	@Override
-	public void enter(final ViewChangeEvent event) {
-		log.debug("Entered ERROR view");
-
-		setSizeFull();
-
-		// Create view and listeners
-		errorViewComponent = new ErrorViewComponent();
-
-		// Add view
-		this.addComponent(errorViewComponent);
-	}
+	/**
+	 * Register the listener which is called when the Cancel button has been
+	 * clicked
+	 * 
+	 * @param clickListener
+	 */
+	public abstract void registerCancelButtonListener(
+			final Button.ClickListener clickListener);
 }

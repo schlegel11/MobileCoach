@@ -1,4 +1,4 @@
-package ch.ethz.mc.ui.views;
+package ch.ethz.mc.ui.components;
 
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
@@ -20,33 +20,14 @@ package ch.ethz.mc.ui.views;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import lombok.extern.log4j.Log4j2;
-
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-
-import ch.ethz.mc.ui.components.views.ErrorViewComponent;
 
 /**
- * Provides error view
+ * Extends an {@link AbstractConfirmationComponent} with the ability to have a
+ * one close button variant
  * 
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
-@Log4j2
-public class ErrorView extends AbstractView implements View {
-	private ErrorViewComponent errorViewComponent;
-
-	@Override
-	public void enter(final ViewChangeEvent event) {
-		log.debug("Entered ERROR view");
-
-		setSizeFull();
-
-		// Create view and listeners
-		errorViewComponent = new ErrorViewComponent();
-
-		// Add view
-		this.addComponent(errorViewComponent);
-	}
+public abstract class AbstractClosableEditComponent
+		extends AbstractConfirmationComponent {
 }

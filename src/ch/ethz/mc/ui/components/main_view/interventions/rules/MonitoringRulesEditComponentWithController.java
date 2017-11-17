@@ -1,4 +1,4 @@
-package ch.ethz.mc.ui.views;
+package ch.ethz.mc.ui.components.main_view.interventions.rules;
 
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
@@ -21,32 +21,27 @@ package ch.ethz.mc.ui.views;
  * limitations under the License.
  */
 import lombok.extern.log4j.Log4j2;
-
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-
-import ch.ethz.mc.ui.components.views.ErrorViewComponent;
+import ch.ethz.mc.model.persistent.Intervention;
+import ch.ethz.mc.model.persistent.MonitoringReplyRule;
+import ch.ethz.mc.ui.components.basics.AbstractMonitoringRulesEditComponentWithController;
 
 /**
- * Provides error view
+ * Implements the controller for the monitoring rules edit component for
+ * {@link MonitoringReplyRule}s
  * 
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
 @Log4j2
-public class ErrorView extends AbstractView implements View {
-	private ErrorViewComponent errorViewComponent;
+public class MonitoringRulesEditComponentWithController
+		extends AbstractMonitoringRulesEditComponentWithController {
 
-	@Override
-	public void enter(final ViewChangeEvent event) {
-		log.debug("Entered ERROR view");
+	public MonitoringRulesEditComponentWithController(
+			final Intervention intervention) {
+		super();
+		log.debug(
+				"Init monitoring rules edit component with controller for monitoring rules");
 
-		setSizeFull();
-
-		// Create view and listeners
-		errorViewComponent = new ErrorViewComponent();
-
-		// Add view
-		this.addComponent(errorViewComponent);
+		init(intervention);
 	}
 }

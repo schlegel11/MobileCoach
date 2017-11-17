@@ -24,7 +24,7 @@ import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.ui.AdminNavigatorUI;
 import ch.ethz.mc.ui.UISession;
-import ch.ethz.mc.ui.views.components.AbstractCustomComponent;
+import ch.ethz.mc.ui.components.AbstractCustomComponent;
 
 import com.vaadin.navigator.View;
 import com.vaadin.server.ThemeResource;

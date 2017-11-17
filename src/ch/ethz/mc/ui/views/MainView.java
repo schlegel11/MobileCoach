@@ -25,12 +25,12 @@ import lombok.extern.log4j.Log4j2;
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.ThemeImageStrings;
 import ch.ethz.mc.ui.AdminNavigatorUI;
-import ch.ethz.mc.ui.views.components.access_control.AccessControlTabComponentWithController;
-import ch.ethz.mc.ui.views.components.account.AccountTabComponentWithController;
-import ch.ethz.mc.ui.views.components.basics.MenuButtonComponent;
-import ch.ethz.mc.ui.views.components.interventions.AllInterventionsTabComponentWithController;
-import ch.ethz.mc.ui.views.components.views.MainViewComponent;
-import ch.ethz.mc.ui.views.components.welcome.WelcomeTabComponentWithController;
+import ch.ethz.mc.ui.components.basics.MenuButtonComponent;
+import ch.ethz.mc.ui.components.main_view.access_control.AccessControlTabComponentWithController;
+import ch.ethz.mc.ui.components.main_view.account.AccountTabComponentWithController;
+import ch.ethz.mc.ui.components.main_view.interventions.AllInterventionsTabComponentWithController;
+import ch.ethz.mc.ui.components.main_view.welcome.WelcomeTabComponentWithController;
+import ch.ethz.mc.ui.components.views.MainViewComponent;
 
 import com.vaadin.event.LayoutEvents.LayoutClickEvent;
 import com.vaadin.event.LayoutEvents.LayoutClickListener;
