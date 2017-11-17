@@ -94,7 +94,8 @@ public class ScreeningSurveySlideRuleEditComponentWithController
 
 		// Configure integrated components
 		ruleEditComponent = getAbstractRuleEditComponentWithController();
-		ruleEditComponent.init(screeningSurveyId, RuleTypes.SCREENING_SURVEY_RULES);
+		ruleEditComponent.init(screeningSurveyId,
+				RuleTypes.SCREENING_SURVEY_RULES);
 		ruleEditComponent.adjust(screeningSurveySlideRule);
 
 		/*

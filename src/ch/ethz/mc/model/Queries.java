@@ -152,19 +152,21 @@ public class Queries {
 	public static final String	MONITORING_RULE__BY_INTERVENTION_AND_PARENT																																										= "{'intervention':#,'isSubRuleOfMonitoringRule':#}";
 	public static final String	MONITORING_RULE__BY_INTERVENTION_AND_TYPE																																										= "{'intervention':#,'type':#}";
 	public static final String	MONITORING_RULE__BY_PARENT																																														= "{'isSubRuleOfMonitoringRule':#}";
+	public static final String	MONITORING_RULE__BY_INTERVENTION_AND_PARENT_AND_ORDER_HIGHER																																					= "{'intervention':#,'isSubRuleOfMonitoringRule':#,'order':{$gt:#}}";
+	public static final String	MONITORING_RULE__BY_RELATED_MONITORING_MESSAGE_GROUP																																							= "{'relatedMonitoringMessageGroup':#}";
 	public static final String	MONITORING_RULE__SORT_BY_ORDER_ASC																																												= "{'order':1}";
 	public static final String	MONITORING_RULE__SORT_BY_ORDER_DESC																																												= "{'order':-1}";
-	public static final String	MONITORING_RULE__BY_INTERVENTION_AND_PARENT_AND_ORDER_HIGHER																																					= "{'intervention':#,'isSubRuleOfMonitoringRule':#,'order':{$gt:#}}";
 
 	public static final String	MONITORING_REPLY_RULE__BY_MONITORING_RULE_ONLY_GOT_ANSWER																																						= "{'isGotAnswerRuleForMonitoringRule':#}";
 	public static final String	MONITORING_REPLY_RULE__BY_MONITORING_RULE_ONLY_GOT_NO_ANSWER																																					= "{'isGotNoAnswerRuleForMonitoringRule':#}}";
 	public static final String	MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_ANSWER																																			= "{'isGotAnswerRuleForMonitoringRule':#,'isSubRuleOfMonitoringRule':#}";
 	public static final String	MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_NO_ANSWER																																			= "{'isGotNoAnswerRuleForMonitoringRule':#,'isSubRuleOfMonitoringRule':#}";
 	public static final String	MONITORING_REPLY_RULE__BY_PARENT																																												= "{'isSubRuleOfMonitoringRule':#}";
-	public static final String	MONITORING_REPLY_RULE__SORT_BY_ORDER_ASC																																										= "{'order':1}";
-	public static final String	MONITORING_REPLY_RULE__SORT_BY_ORDER_DESC																																										= "{'order':-1}";
+	public static final String	MONITORING_REPLY_RULE__BY_RELATED_MONITORING_MESSAGE_GROUP																																						= "{'relatedMonitoringMessageGroup':#}";
 	public static final String	MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_AND_ORDER_HIGHER_ONLY_GOT_ANSWER																															= "{'isGotAnswerRuleForMonitoringRule':#,'isSubRuleOfMonitoringRule':#,'order':{$gt:#}}";
 	public static final String	MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_AND_ORDER_HIGHER_ONLY_GOT_NO_ANSWER																														= "{'isGotNoAnswerRuleForMonitoringRule':#,'isSubRuleOfMonitoringRule':#,'order':{$gt:#}}";
+	public static final String	MONITORING_REPLY_RULE__SORT_BY_ORDER_ASC																																										= "{'order':1}";
+	public static final String	MONITORING_REPLY_RULE__SORT_BY_ORDER_DESC																																										= "{'order':-1}";
 
 	public static final String	MONITORING_REPLY_RULE__BY_MONITORING_RULE																																										= "{$or:[{'isGotAnswerRuleForMonitoringRule':#},{'isGotNoAnswerRuleForMonitoringRule':#}]}";
 

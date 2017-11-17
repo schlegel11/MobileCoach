@@ -99,16 +99,14 @@ public class InterventionEditingContainerComponentWithController
 
 		// Add intervention participants tab
 		addPointableTab(getContentTabSheet(),
-				new ParticipantsTabComponentWithController(
-						intervention),
+				new ParticipantsTabComponentWithController(intervention),
 				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__PARTICIPANTS_TAB,
 				ThemeImageStrings.COMPONENT_ICON);
 
 		// Add intervention variables tab
 		registerToSetEditingDependingOnMessaging(
 				addPointableTab(getContentTabSheet(),
-						new VariablesTabComponentWithController(
-								intervention),
+						new VariablesTabComponentWithController(intervention),
 						AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__VARIABLES_TAB,
 						ThemeImageStrings.COMPONENT_ICON));
 
@@ -139,8 +137,7 @@ public class InterventionEditingContainerComponentWithController
 		if (getUISession().isAdmin()) {
 			// Add intervention access tab
 			addPointableTab(getContentTabSheet(),
-					new AccessTabComponentWithController(
-							intervention),
+					new AccessTabComponentWithController(intervention),
 					AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__ACCESS_TAB,
 					ThemeImageStrings.COMPONENT_ICON);
 		}

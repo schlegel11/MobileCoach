@@ -201,32 +201,32 @@ public class BasicSettingsAndModulesTabComponentWithController
 		for (val startingDay : intervention.getMonitoringStartingDays()) {
 			switch (startingDay) {
 				case 1:
-					getBasicSettingsAndModulesComponent()
-							.getMondayCheckbox().setValue(true);
+					getBasicSettingsAndModulesComponent().getMondayCheckbox()
+							.setValue(true);
 					break;
 				case 2:
-					getBasicSettingsAndModulesComponent()
-							.getTuesdayCheckbox().setValue(true);
+					getBasicSettingsAndModulesComponent().getTuesdayCheckbox()
+							.setValue(true);
 					break;
 				case 3:
-					getBasicSettingsAndModulesComponent()
-							.getWednesdayCheckbox().setValue(true);
+					getBasicSettingsAndModulesComponent().getWednesdayCheckbox()
+							.setValue(true);
 					break;
 				case 4:
-					getBasicSettingsAndModulesComponent()
-							.getThursdayCheckbox().setValue(true);
+					getBasicSettingsAndModulesComponent().getThursdayCheckbox()
+							.setValue(true);
 					break;
 				case 5:
-					getBasicSettingsAndModulesComponent()
-							.getFridayCheckbox().setValue(true);
+					getBasicSettingsAndModulesComponent().getFridayCheckbox()
+							.setValue(true);
 					break;
 				case 6:
-					getBasicSettingsAndModulesComponent()
-							.getSaturdayCheckbox().setValue(true);
+					getBasicSettingsAndModulesComponent().getSaturdayCheckbox()
+							.setValue(true);
 					break;
 				case 7:
-					getBasicSettingsAndModulesComponent()
-							.getSundayCheckbox().setValue(true);
+					getBasicSettingsAndModulesComponent().getSundayCheckbox()
+							.setValue(true);
 					break;
 			}
 		}
@@ -235,9 +235,8 @@ public class BasicSettingsAndModulesTabComponentWithController
 
 			@Override
 			public void valueChange(final ValueChangeEvent event) {
-				if (event
-						.getProperty() == getBasicSettingsAndModulesComponent()
-								.getMondayCheckbox()) {
+				if (event.getProperty() == getBasicSettingsAndModulesComponent()
+						.getMondayCheckbox()) {
 					getInterventionAdministrationManagerService()
 							.interventionSetStartingDay(intervention, 1,
 									(boolean) event.getProperty().getValue());
@@ -347,8 +346,8 @@ public class BasicSettingsAndModulesTabComponentWithController
 
 	private void adjust() {
 
-		getBasicSettingsAndModulesComponent().adjust(
-				intervention.isActive(), intervention.isMonitoringActive());
+		getBasicSettingsAndModulesComponent().adjust(intervention.isActive(),
+				intervention.isMonitoringActive());
 
 		val interventionBasicSettingsComponent = getBasicSettingsAndModulesComponent();
 

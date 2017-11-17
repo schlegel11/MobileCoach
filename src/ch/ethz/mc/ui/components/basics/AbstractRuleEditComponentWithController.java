@@ -47,7 +47,7 @@ import lombok.extern.log4j.Log4j2;
 public class AbstractRuleEditComponentWithController
 		extends AbstractRuleEditComponent implements ValueChangeListener {
 
-	private RuleTypes								type;
+	private RuleTypes							type;
 
 	private boolean								initDone	= false;
 

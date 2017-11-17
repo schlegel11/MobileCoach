@@ -70,7 +70,8 @@ public class MonitoringRuleEditComponentWithController
 				.getMonitoringRule(monitoringRuleId);
 
 		ruleEditComponent = getAbstractRuleEditComponentWithController();
-		ruleEditComponent.init(intervention.getId(), RuleTypes.MONITORING_RULES);
+		ruleEditComponent.init(intervention.getId(),
+				RuleTypes.MONITORING_RULES);
 		ruleEditComponent.adjust(monitoringRule);
 
 		monitoringReplyRulesEditComponentWithControllerIfAnswer = getMonitoringReplyRulesEditComponentWithControllerIfAnswer();

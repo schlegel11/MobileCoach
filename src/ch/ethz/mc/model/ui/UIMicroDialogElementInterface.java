@@ -3,6 +3,8 @@ package ch.ethz.mc.model.ui;
 import com.vaadin.data.fieldgroup.PropertyId;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.conf.Messages;
+import ch.ethz.mc.model.persistent.MicroDialogMessage;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -28,6 +30,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.val;
 
 @AllArgsConstructor
 @Data
@@ -96,5 +99,23 @@ public class UIMicroDialogElementInterface extends UIModelObject {
 
 	public static String getSortColumn() {
 		return ORDER;
+	}
+
+	@Override
+	public String toString() {
+		if (isMessage) {
+			val microDialogMessage = getRelatedModelObject(
+					MicroDialogMessage.class);
+
+			if (microDialogMessage.getTextWithPlaceholders().isEmpty()) {
+				return Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET);
+			} else {
+				return microDialogMessage.getTextWithPlaceholders()
+						.toShortenedString(160);
+			}
+		} else {
+			return this.getClass().getName();
+		}
 	}
 }

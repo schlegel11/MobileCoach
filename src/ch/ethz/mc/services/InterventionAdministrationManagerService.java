@@ -750,7 +750,26 @@ public class InterventionAdministrationManagerService {
 
 	@Synchronized
 	public void monitoringMessageGroupDelete(
-			final MonitoringMessageGroup monitoringMessageGroupToDelete) {
+			final MonitoringMessageGroup monitoringMessageGroupToDelete)
+			throws NotificationMessageException {
+
+		val linkedMonitoringRules = databaseManagerService.findModelObjects(
+				MonitoringRule.class,
+				Queries.MONITORING_RULE__BY_RELATED_MONITORING_MESSAGE_GROUP,
+				monitoringMessageGroupToDelete.getId());
+		if (linkedMonitoringRules.iterator().hasNext()) {
+			throw new NotificationMessageException(
+					AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_GROUP_CANT_DELETE);
+		}
+
+		val linkedMonitoringReplyRules = databaseManagerService
+				.findModelObjects(MonitoringReplyRule.class,
+						Queries.MONITORING_REPLY_RULE__BY_RELATED_MONITORING_MESSAGE_GROUP,
+						monitoringMessageGroupToDelete.getId());
+		if (linkedMonitoringReplyRules.iterator().hasNext()) {
+			throw new NotificationMessageException(
+					AdminMessageStrings.NOTIFICATION__MONITORING_MESSAGE_GROUP_CANT_DELETE);
+		}
 
 		databaseManagerService
 				.deleteModelObject(monitoringMessageGroupToDelete);

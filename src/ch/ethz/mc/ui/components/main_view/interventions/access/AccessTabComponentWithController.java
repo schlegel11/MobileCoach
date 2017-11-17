@@ -45,8 +45,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @SuppressWarnings("serial")
 @Log4j2
-public class AccessTabComponentWithController
-		extends AccessTabComponent {
+public class AccessTabComponentWithController extends AccessTabComponent {
 
 	private final Intervention						intervention;
 
@@ -56,8 +55,7 @@ public class AccessTabComponentWithController
 	private final BeanContainer<ObjectId, UIAuthor>	tableBeanContainer;
 	private final BeanContainer<UIAuthor, UIAuthor>	comboBoxBeanContainer;
 
-	public AccessTabComponentWithController(
-			final Intervention intervention) {
+	public AccessTabComponentWithController(final Intervention intervention) {
 		super();
 
 		this.intervention = intervention;

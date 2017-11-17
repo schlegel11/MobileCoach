@@ -44,7 +44,8 @@ public class MonitoringMessageRuleEditComponentWithController
 
 		// Configure integrated components
 		ruleEditComponent = getAbstractRuleEditComponentWithController();
-		ruleEditComponent.init(interventionId, RuleTypes.MONITORING_MESSAGE_RULES);
+		ruleEditComponent.init(interventionId,
+				RuleTypes.MONITORING_MESSAGE_RULES);
 		ruleEditComponent.adjust(monitoringMessageRule);
 
 		/*

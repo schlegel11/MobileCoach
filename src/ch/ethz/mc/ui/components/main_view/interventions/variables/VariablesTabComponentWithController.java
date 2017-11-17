@@ -47,8 +47,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @SuppressWarnings("serial")
 @Log4j2
-public class VariablesTabComponentWithController
-		extends VariablesTabComponent {
+public class VariablesTabComponentWithController extends VariablesTabComponent {
 
 	private final Intervention										intervention;
 

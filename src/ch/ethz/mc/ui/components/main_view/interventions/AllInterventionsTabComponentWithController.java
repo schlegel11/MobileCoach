@@ -469,8 +469,7 @@ public class AllInterventionsTabComponentWithController
 
 							// Change name
 							getInterventionAdministrationManagerService()
-									.interventionSetName(
-											selectedIntervention,
+									.interventionSetName(selectedIntervention,
 											getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
