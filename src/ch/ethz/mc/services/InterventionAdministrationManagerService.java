@@ -1338,7 +1338,27 @@ public class InterventionAdministrationManagerService {
 
 	@Synchronized
 	public void microDialogMessageDelete(
-			final MicroDialogMessage microDialogMessage) {
+			final MicroDialogMessage microDialogMessage)
+			throws NotificationMessageException {
+
+		val linkedMicroDialogRulesWhenTrue = databaseManagerService
+				.findModelObjects(MicroDialogRule.class,
+						Queries.MICRO_DIALOG_RULE__BY_NEXT_MICRO_DIALOG_MESSAGE_WHEN_TRUE,
+						microDialogMessage.getId());
+		if (linkedMicroDialogRulesWhenTrue.iterator().hasNext()) {
+			throw new NotificationMessageException(
+					AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_MESSAGE_CANT_DELETE);
+		}
+
+		val linkedMicroDialogRulesWhenFalse = databaseManagerService
+				.findModelObjects(MicroDialogRule.class,
+						Queries.MICRO_DIALOG_RULE__BY_NEXT_MICRO_DIALOG_MESSAGE_WHEN_FALSE,
+						microDialogMessage.getId());
+		if (linkedMicroDialogRulesWhenFalse.iterator().hasNext()) {
+			throw new NotificationMessageException(
+					AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_MESSAGE_CANT_DELETE);
+		}
+
 		databaseManagerService.deleteModelObject(microDialogMessage);
 	}
 
@@ -1568,7 +1588,7 @@ public class InterventionAdministrationManagerService {
 
 	// Micro Dialog Rule
 	@Synchronized
-	private MicroDialogRule microDialogRuleCreate(
+	public MicroDialogRule microDialogRuleCreate(
 			final ObjectId microDialogDecisionPointId,
 			final ObjectId parentMicroDialogRuleId) {
 		val microDialogRule = new MicroDialogRule("",
@@ -1706,6 +1726,42 @@ public class InterventionAdministrationManagerService {
 
 			databaseManagerService.saveModelObject(microDialogRule);
 		}
+	}
+
+	@Synchronized
+	public void microDialogRuleSetNextMicroDialogMessageWhenTrue(
+			final MicroDialogRule microDialogRule,
+			final ObjectId newMicroDialogMessageId) {
+		microDialogRule
+				.setNextMicroDialogMessageWhenTrue(newMicroDialogMessageId);
+
+		databaseManagerService.saveModelObject(microDialogRule);
+	}
+
+	@Synchronized
+	public void microDialogRuleSetNextMicroDialogMessageWhenFalse(
+			final MicroDialogRule microDialogRule,
+			final ObjectId newMicroDialogMessageId) {
+		microDialogRule
+				.setNextMicroDialogMessageWhenFalse(newMicroDialogMessageId);
+
+		databaseManagerService.saveModelObject(microDialogRule);
+	}
+
+	@Synchronized
+	public void microDialogRuleSetStopMicroDialogWhenTrue(
+			final MicroDialogRule microDialogRule, final boolean newValue) {
+		microDialogRule.setStopMicroDialogWhenTrue(newValue);
+
+		databaseManagerService.saveModelObject(microDialogRule);
+	}
+
+	@Synchronized
+	public void microDialogRuleSetLeaveDecisionPointWhenTrue(
+			final MicroDialogRule microDialogRule, final boolean newValue) {
+		microDialogRule.setLeaveDecisionPointWhenTrue(newValue);
+
+		databaseManagerService.saveModelObject(microDialogRule);
 	}
 
 	@Synchronized
@@ -2715,15 +2771,44 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public Iterable<MicroDialogMessageRule> getAllMicroDialogRulesOfMicroDialogDecisionPoint(
+	public Iterable<MicroDialogRule> getAllMicroDialogRulesOfMicroDialogDecisionPoint(
 			final ObjectId microDialogDecisionPointId) {
 		return databaseManagerService.findSortedModelObjects(
-				MicroDialogMessageRule.class,
+				MicroDialogRule.class,
 				Queries.MICRO_DIALOG_RULE__BY_MICRO_DIALOG_DECISION_POINT,
 				Queries.MICRO_DIALOG_RULE__SORT_BY_ORDER_ASC,
 				microDialogDecisionPointId);
 	}
 
+	@Synchronized
+	public Iterable<MicroDialogRule> getAllMicroDialogRulesOfMicroDialogDecisionPointAndParent(
+			final ObjectId microDialogDecisionPointId,
+			final ObjectId parentMicroDialogRuleId) {
+		return databaseManagerService.findSortedModelObjects(
+				MicroDialogRule.class,
+				Queries.MICRO_DIALOG_RULE__BY_MICRO_DIALOG_DECISION_POINT_AND_PARENT,
+				Queries.MICRO_DIALOG_RULE__SORT_BY_ORDER_ASC,
+				microDialogDecisionPointId, parentMicroDialogRuleId);
+	}
+
+	@Synchronized
+	public MicroDialogRule getMicroDialogRule(
+			final ObjectId microDialogRuleId) {
+		return databaseManagerService.getModelObjectById(MicroDialogRule.class,
+				microDialogRuleId);
+	}
+
+	@Synchronized
+	public Iterable<MicroDialogMessage> getAllMicroDialogMessagesOfMicroDialog(
+			final ObjectId microDialogId) {
+
+		return databaseManagerService.findSortedModelObjects(
+				MicroDialogMessage.class,
+				Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG,
+				Queries.MICRO_DIALOG_MESSAGE__SORT_BY_ORDER_ASC, microDialogId);
+	}
+
+	@Synchronized
 	public List<? extends ModelObject> getAllMicroDialogElementsOfMicroDialog(
 			final ObjectId microDialogId) {
 		// Messages

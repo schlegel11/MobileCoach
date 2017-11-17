@@ -9,13 +9,13 @@ import com.vaadin.ui.Button.ClickEvent;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.model.memory.types.RuleTypes;
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
 import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.ui.UIMonitoringMessageGroup;
 import ch.ethz.mc.ui.components.basics.AbstractRuleEditComponentWithController;
 import ch.ethz.mc.ui.components.basics.ShortPlaceholderStringEditComponent;
-import ch.ethz.mc.ui.components.basics.AbstractRuleEditComponentWithController.TYPES;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -70,7 +70,7 @@ public class MonitoringRuleEditComponentWithController
 				.getMonitoringRule(monitoringRuleId);
 
 		ruleEditComponent = getAbstractRuleEditComponentWithController();
-		ruleEditComponent.init(intervention.getId(), TYPES.MONITORING_RULES);
+		ruleEditComponent.init(intervention.getId(), RuleTypes.MONITORING_RULES);
 		ruleEditComponent.adjust(monitoringRule);
 
 		monitoringReplyRulesEditComponentWithControllerIfAnswer = getMonitoringReplyRulesEditComponentWithControllerIfAnswer();

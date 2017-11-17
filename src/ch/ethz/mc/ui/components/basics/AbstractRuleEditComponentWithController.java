@@ -31,6 +31,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.model.memory.types.RuleTypes;
 import ch.ethz.mc.model.persistent.concepts.AbstractRule;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import lombok.val;
@@ -46,11 +47,7 @@ import lombok.extern.log4j.Log4j2;
 public class AbstractRuleEditComponentWithController
 		extends AbstractRuleEditComponent implements ValueChangeListener {
 
-	public enum TYPES {
-		MONITORING_RULES, SCREENING_SURVEY_RULES, FEEDBACK_RULES, MONITORING_MESSAGE_RULES, MICRO_DIALOG_MESSAGE_RULES
-	};
-
-	private TYPES								type;
+	private RuleTypes								type;
 
 	private boolean								initDone	= false;
 
@@ -94,7 +91,7 @@ public class AbstractRuleEditComponentWithController
 	}
 
 	public void init(final ObjectId rulesRelatedModelObjectId,
-			final TYPES type) {
+			final RuleTypes type) {
 		this.rulesRelatedModelObjectId = rulesRelatedModelObjectId;
 		this.type = type;
 
@@ -188,6 +185,7 @@ public class AbstractRuleEditComponentWithController
 		final List<String> allPossibleVariables;
 		switch (type) {
 			case MONITORING_RULES:
+			case MICRO_DIALOG_RULES:
 			case MONITORING_MESSAGE_RULES:
 			case MICRO_DIALOG_MESSAGE_RULES:
 				allPossibleVariables = getInterventionAdministrationManagerService()
@@ -214,8 +212,8 @@ public class AbstractRuleEditComponentWithController
 						try {
 							// Change rule text with placeholders
 							getInterventionAdministrationManagerService()
-									.abstractRuleSetRuleWithPlaceholders(
-											rule, getStringValue(),
+									.abstractRuleSetRuleWithPlaceholders(rule,
+											getStringValue(),
 											allPossibleVariables);
 						} catch (final Exception e) {
 							handleException(e);

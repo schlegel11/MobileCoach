@@ -22,9 +22,9 @@ package ch.ethz.mc.ui.components.main_view.interventions.micro_dialogs;
  */
 import org.bson.types.ObjectId;
 
+import ch.ethz.mc.model.memory.types.RuleTypes;
 import ch.ethz.mc.model.persistent.MicroDialogMessageRule;
 import ch.ethz.mc.ui.components.basics.AbstractRuleEditComponentWithController;
-import ch.ethz.mc.ui.components.basics.AbstractRuleEditComponentWithController.TYPES;
 
 /**
  * Extends the micro dialog message rule edit component with a controller
@@ -45,7 +45,7 @@ public class MicroDialogMessageRuleEditComponentWithController
 		// Configure integrated components
 		ruleEditComponent = getAbstractRuleEditComponentWithController();
 		ruleEditComponent.init(interventionId,
-				TYPES.MICRO_DIALOG_MESSAGE_RULES);
+				RuleTypes.MICRO_DIALOG_MESSAGE_RULES);
 		ruleEditComponent.adjust(microDialogMessageRule);
 
 		/*

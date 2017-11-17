@@ -1,0 +1,288 @@
+package ch.ethz.mc.ui.components.main_view.interventions.micro_dialogs;
+
+import org.bson.types.ObjectId;
+
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+
+import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.model.memory.types.RuleTypes;
+import ch.ethz.mc.model.persistent.Intervention;
+import ch.ethz.mc.model.persistent.MicroDialogMessage;
+import ch.ethz.mc.model.persistent.MicroDialogRule;
+import ch.ethz.mc.model.ui.UIMicroDialogElementInterface;
+import ch.ethz.mc.ui.components.basics.AbstractRuleEditComponentWithController;
+import ch.ethz.mc.ui.components.basics.ShortPlaceholderStringEditComponent;
+/*
+ * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
+ * initiative of the Institute of Technology Management at University of St.
+ * Gallen and the Department of Management, Technology and Economics at ETH
+ * Zurich
+ * 
+ * For details see README.md file in the root folder of this project.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
+
+/**
+ * Extends the monitoring reply rule edit component with a controller
+ *
+ * @author Andreas Filler
+ */
+@SuppressWarnings("serial")
+@Log4j2
+public class MicroDialogRuleEditComponentWithController
+		extends MicroDialogRuleEditComponent {
+	private final ObjectId									interventionId;
+
+	private final AbstractRuleEditComponentWithController	ruleEditComponent;
+
+	private final MicroDialogRule							microDialogRule;
+
+	public MicroDialogRuleEditComponentWithController(
+			final Intervention intervention, final ObjectId microDialogId,
+			final ObjectId microDialogRuleId) {
+		super();
+
+		interventionId = intervention.getId();
+
+		// Configure integrated components
+		microDialogRule = getInterventionAdministrationManagerService()
+				.getMicroDialogRule(microDialogRuleId);
+
+		ruleEditComponent = getAbstractRuleEditComponentWithController();
+		ruleEditComponent.init(intervention.getId(),
+				RuleTypes.MICRO_DIALOG_RULES);
+		ruleEditComponent.adjust(microDialogRule);
+
+		/*
+		 * Adjust own components
+		 */
+		// Handle combo box
+		val nextMicroDialogMessageWhenTrueComboBox = getNextMicroDialogMessageWhenTrueComboBox();
+		val nextMicroDialogMessageWhenFalseComboBox = getNextMicroDialogMessageWhenFalseComboBox();
+		val allMicroDialogMessagesInMicroDialog = getInterventionAdministrationManagerService()
+				.getAllMicroDialogMessagesOfMicroDialog(microDialogId);
+
+		for (val microDialogMessage : allMicroDialogMessagesInMicroDialog) {
+			val uiMicroDialogMessage = microDialogMessage.toUIModelObject();
+
+			nextMicroDialogMessageWhenTrueComboBox
+					.addItem(uiMicroDialogMessage);
+			if (microDialogMessage.getId().equals(
+					microDialogRule.getNextMicroDialogMessageWhenTrue())) {
+				nextMicroDialogMessageWhenTrueComboBox
+						.select(uiMicroDialogMessage);
+			}
+
+			nextMicroDialogMessageWhenFalseComboBox
+					.addItem(uiMicroDialogMessage);
+			if (microDialogMessage.getId().equals(
+					microDialogRule.getNextMicroDialogMessageWhenFalse())) {
+				nextMicroDialogMessageWhenFalseComboBox
+						.select(uiMicroDialogMessage);
+			}
+		}
+		nextMicroDialogMessageWhenTrueComboBox
+				.addValueChangeListener(new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						final UIMicroDialogElementInterface uiMonitoringMessageGroup = (UIMicroDialogElementInterface) event
+								.getProperty().getValue();
+
+						ObjectId newMicroDialogMessageId;
+						if (uiMonitoringMessageGroup == null) {
+							newMicroDialogMessageId = null;
+						} else {
+							newMicroDialogMessageId = uiMonitoringMessageGroup
+									.getRelatedModelObject(
+											MicroDialogMessage.class)
+									.getId();
+						}
+
+						log.debug(
+								"Adjust dialog message to jump to when true to {}",
+								newMicroDialogMessageId);
+						getInterventionAdministrationManagerService()
+								.microDialogRuleSetNextMicroDialogMessageWhenTrue(
+										microDialogRule,
+										newMicroDialogMessageId);
+
+						adjust();
+
+					}
+				});
+		nextMicroDialogMessageWhenFalseComboBox
+				.addValueChangeListener(new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						final UIMicroDialogElementInterface uiMonitoringMessageGroup = (UIMicroDialogElementInterface) event
+								.getProperty().getValue();
+
+						ObjectId newMicroDialogMessageId;
+						if (uiMonitoringMessageGroup == null) {
+							newMicroDialogMessageId = null;
+						} else {
+							newMicroDialogMessageId = uiMonitoringMessageGroup
+									.getRelatedModelObject(
+											MicroDialogMessage.class)
+									.getId();
+						}
+
+						log.debug(
+								"Adjust dialog message to jump to when false to {}",
+								newMicroDialogMessageId);
+						getInterventionAdministrationManagerService()
+								.microDialogRuleSetNextMicroDialogMessageWhenFalse(
+										microDialogRule,
+										newMicroDialogMessageId);
+
+						adjust();
+
+					}
+				});
+
+		// Add button listeners
+		val buttonClickListener = new ButtonClickListener();
+		getStoreVariableTextFieldComponent().getButton()
+				.addClickListener(buttonClickListener);
+
+		// Add other listeners
+		getStopMicroDialogWhenTrueCheckBox()
+				.setValue(microDialogRule.isStopMicroDialogWhenTrue());
+		getStopMicroDialogWhenTrueCheckBox()
+				.addValueChangeListener(new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						log.debug("Adjust stop micro dialog if true");
+						val newValue = (boolean) event.getProperty().getValue();
+
+						getInterventionAdministrationManagerService()
+								.microDialogRuleSetStopMicroDialogWhenTrue(
+										microDialogRule, newValue);
+
+						if (newValue) {
+							getLeaveDecisionPointWhenTrueCheckBox()
+									.setValue(false);
+
+							getNextMicroDialogMessageWhenTrueComboBox()
+									.setValue(null);
+							getNextMicroDialogMessageWhenFalseComboBox()
+									.setValue(null);
+						}
+
+						adjust();
+					}
+				});
+
+		getLeaveDecisionPointWhenTrueCheckBox()
+				.setValue(microDialogRule.isLeaveDecisionPointWhenTrue());
+		getLeaveDecisionPointWhenTrueCheckBox()
+				.addValueChangeListener(new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						log.debug("Adjust leave decision point if true");
+						val newValue = (boolean) event.getProperty().getValue();
+
+						getInterventionAdministrationManagerService()
+								.microDialogRuleSetLeaveDecisionPointWhenTrue(
+										microDialogRule, newValue);
+
+						if (newValue) {
+							getStopMicroDialogWhenTrueCheckBox()
+									.setValue(false);
+						}
+
+						adjust();
+					}
+				});
+
+		// Adjust UI for first time
+		adjust();
+	}
+
+	private class ButtonClickListener implements Button.ClickListener {
+		@Override
+		public void buttonClick(final ClickEvent event) {
+			if (event.getButton() == getStoreVariableTextFieldComponent()
+					.getButton()) {
+				editStoreResultVariable();
+			}
+			event.getButton().setEnabled(true);
+		}
+	}
+
+	private void adjust() {
+		// Adjust store result variable
+		getStoreVariableTextFieldComponent()
+				.setValue(microDialogRule.getStoreValueToVariableWithName());
+
+		// Adjust checkboxes
+		if (microDialogRule.isStopMicroDialogWhenTrue()) {
+			getLeaveDecisionPointWhenTrueCheckBox().setEnabled(false);
+		} else {
+			getLeaveDecisionPointWhenTrueCheckBox().setEnabled(true);
+		}
+
+		if (microDialogRule.isLeaveDecisionPointWhenTrue()) {
+			getStopMicroDialogWhenTrueCheckBox().setEnabled(false);
+		} else {
+			getStopMicroDialogWhenTrueCheckBox().setEnabled(true);
+		}
+
+		// Adjust comboboxes
+		if (microDialogRule.isStopMicroDialogWhenTrue()) {
+			getJumpGridLayout().setEnabled(false);
+		} else {
+			getJumpGridLayout().setEnabled(true);
+		}
+	}
+
+	public void editStoreResultVariable() {
+		log.debug("Edit store result to variable");
+		val allPossibleVariables = getInterventionAdministrationManagerService()
+				.getAllWritableMonitoringRuleVariablesOfIntervention(
+						interventionId);
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_VARIABLE,
+				microDialogRule.getStoreValueToVariableWithName(),
+				allPossibleVariables, new ShortPlaceholderStringEditComponent(),
+				new ExtendableButtonClickListener() {
+
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Change name
+							getInterventionAdministrationManagerService()
+									.microDialogRuleSetStoreResultToVariable(
+											microDialogRule, getStringValue());
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						adjust();
+
+						closeWindow();
+					}
+				}, null);
+	}
+}

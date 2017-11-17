@@ -22,9 +22,9 @@ package ch.ethz.mc.ui.components.main_view.interventions.monitoring_groups_and_m
  */
 import org.bson.types.ObjectId;
 
+import ch.ethz.mc.model.memory.types.RuleTypes;
 import ch.ethz.mc.model.persistent.MonitoringMessageRule;
 import ch.ethz.mc.ui.components.basics.AbstractRuleEditComponentWithController;
-import ch.ethz.mc.ui.components.basics.AbstractRuleEditComponentWithController.TYPES;
 
 /**
  * Extends the monitoring message rule edit component with a controller
@@ -44,7 +44,7 @@ public class MonitoringMessageRuleEditComponentWithController
 
 		// Configure integrated components
 		ruleEditComponent = getAbstractRuleEditComponentWithController();
-		ruleEditComponent.init(interventionId, TYPES.MONITORING_MESSAGE_RULES);
+		ruleEditComponent.init(interventionId, RuleTypes.MONITORING_MESSAGE_RULES);
 		ruleEditComponent.adjust(monitoringMessageRule);
 
 		/*

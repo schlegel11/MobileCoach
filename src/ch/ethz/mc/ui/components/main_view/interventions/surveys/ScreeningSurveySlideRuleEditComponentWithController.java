@@ -26,13 +26,13 @@ import lombok.extern.log4j.Log4j2;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.model.memory.types.RuleTypes;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlideRule;
 import ch.ethz.mc.model.ui.UIScreeningSurveySlide;
 import ch.ethz.mc.ui.components.basics.AbstractRuleEditComponentWithController;
 import ch.ethz.mc.ui.components.basics.ShortPlaceholderStringEditComponent;
 import ch.ethz.mc.ui.components.basics.ShortStringEditComponent;
-import ch.ethz.mc.ui.components.basics.AbstractRuleEditComponentWithController.TYPES;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -94,7 +94,7 @@ public class ScreeningSurveySlideRuleEditComponentWithController
 
 		// Configure integrated components
 		ruleEditComponent = getAbstractRuleEditComponentWithController();
-		ruleEditComponent.init(screeningSurveyId, TYPES.SCREENING_SURVEY_RULES);
+		ruleEditComponent.init(screeningSurveyId, RuleTypes.SCREENING_SURVEY_RULES);
 		ruleEditComponent.adjust(screeningSurveySlideRule);
 
 		/*

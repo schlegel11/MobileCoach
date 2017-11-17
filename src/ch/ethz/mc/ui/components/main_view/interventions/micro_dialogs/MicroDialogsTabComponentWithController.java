@@ -67,7 +67,7 @@ public class MicroDialogsTabComponentWithController
 				.getAllMicroDialogsOfIntervention(intervention.getId());
 
 		for (val microDialog : microDialogsIterable) {
-			val newTab = addTabComponent(microDialog, intervention.getId());
+			val newTab = addTabComponent(microDialog, intervention);
 
 			tabsWithObjectIdsOfMicroDialog.put(newTab, microDialog.getId());
 
@@ -160,7 +160,7 @@ public class MicroDialogsTabComponentWithController
 
 						// Adapt UI
 						val newTab = addTabComponent(newMicroDialog,
-								intervention.getId());
+								intervention);
 
 						tabsWithObjectIdsOfMicroDialog.put(newTab,
 								newMicroDialog.getId());

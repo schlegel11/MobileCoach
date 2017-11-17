@@ -24,25 +24,7 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-
 import org.bson.types.ObjectId;
-
-import ch.ethz.mc.conf.AdminMessageStrings;
-import ch.ethz.mc.conf.ImplementationConstants;
-import ch.ethz.mc.conf.Messages;
-import ch.ethz.mc.conf.ThemeImageStrings;
-import ch.ethz.mc.model.persistent.Intervention;
-import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
-import ch.ethz.mc.model.persistent.MonitoringReplyRule;
-import ch.ethz.mc.model.persistent.MonitoringRule;
-import ch.ethz.mc.model.persistent.concepts.AbstractMonitoringRule;
-import ch.ethz.mc.model.persistent.types.MonitoringRuleTypes;
-import ch.ethz.mc.tools.StringHelpers;
-import ch.ethz.mc.ui.components.AbstractClosableEditComponent;
-import ch.ethz.mc.ui.components.main_view.interventions.rules.MonitoringReplyRuleEditComponentWithController;
-import ch.ethz.mc.ui.components.main_view.interventions.rules.MonitoringRuleEditComponentWithController;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -62,6 +44,26 @@ import com.vaadin.ui.Tree;
 import com.vaadin.ui.Tree.TreeDragMode;
 import com.vaadin.ui.Tree.TreeTargetDetails;
 
+import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.conf.Messages;
+import ch.ethz.mc.conf.ThemeImageStrings;
+import ch.ethz.mc.model.memory.types.RecursiveRuleTypes;
+import ch.ethz.mc.model.persistent.Intervention;
+import ch.ethz.mc.model.persistent.MicroDialogRule;
+import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
+import ch.ethz.mc.model.persistent.MonitoringReplyRule;
+import ch.ethz.mc.model.persistent.MonitoringRule;
+import ch.ethz.mc.model.persistent.concepts.AbstractMonitoringRule;
+import ch.ethz.mc.model.persistent.types.MonitoringRuleTypes;
+import ch.ethz.mc.tools.StringHelpers;
+import ch.ethz.mc.ui.components.AbstractClosableEditComponent;
+import ch.ethz.mc.ui.components.main_view.interventions.micro_dialogs.MicroDialogRuleEditComponentWithController;
+import ch.ethz.mc.ui.components.main_view.interventions.rules.MonitoringReplyRuleEditComponentWithController;
+import ch.ethz.mc.ui.components.main_view.interventions.rules.MonitoringRuleEditComponentWithController;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
+
 /**
  * Extends the abstract monitoring rules edit component with a controller
  *
@@ -74,10 +76,12 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 
 	private Intervention			intervention;
 
-	// If set we deal with a MonitoringReplyRule
-	private ObjectId				relatedMonitoringRuleId;
+	private RecursiveRuleTypes		rulesType;
 
-	private boolean					isMonitoringRule;
+	private ObjectId				relatedMonitoringRuleId;
+	private ObjectId				relatedMicroDialogId;
+	private ObjectId				relatedMicroDialogDecisionPointId;
+
 	private boolean					isGotAnswerRule;
 
 	private Tree					rulesTree;
@@ -105,6 +109,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 			ThemeImageStrings.SUPERVISOR_ICON_SMALL);
 	private final ThemeResource		STOP_RULE_ICON					= new ThemeResource(
 			ThemeImageStrings.STOP_ICON_SMALL);
+	private final ThemeResource		REDIRECT_RULE_ICON				= new ThemeResource(
+			ThemeImageStrings.REDIRECT_ICON_SMALL);
 
 	private HierarchicalContainer	container;
 
@@ -118,7 +124,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 	 * @param intervention
 	 */
 	public void init(final Intervention intervention) {
-		internalInit(intervention, null, false);
+		internalInit(intervention, null, null, null, false);
 	}
 
 	/**
@@ -131,7 +137,22 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 	public void init(final Intervention intervention,
 			final ObjectId relatedMonitoringRuleId,
 			final boolean isGotAnswerRule) {
-		internalInit(intervention, relatedMonitoringRuleId, isGotAnswerRule);
+		internalInit(intervention, relatedMonitoringRuleId, null, null,
+				isGotAnswerRule);
+	}
+
+	/**
+	 * Initialization for {@link MicroDialogRule}s
+	 *
+	 * @param intervention
+	 * @param relatedMicroDialogId
+	 * @param relatedMicroDialogDecisionPoint
+	 */
+	public void init(final Intervention intervention,
+			final ObjectId relatedMicroDialogId,
+			final ObjectId relatedMicroDialogDecisionPoint) {
+		internalInit(intervention, null, relatedMicroDialogId,
+				relatedMicroDialogDecisionPoint, false);
 	}
 
 	/**
@@ -140,30 +161,45 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 	 *
 	 * @param intervention
 	 * @param relatedMonitoringRuleId
+	 * @param relatedMicroDialogId
+	 * @param relatedMicroDialogDecisionPointId
 	 * @param isGotAnswerRule
 	 */
 	private void internalInit(final Intervention intervention,
 			final ObjectId relatedMonitoringRuleId,
+			final ObjectId relatedMicroDialogId,
+			final ObjectId relatedMicroDialogDecisionPointId,
 			final boolean isGotAnswerRule) {
 		this.intervention = intervention;
 
-		if (relatedMonitoringRuleId == null) {
-			isMonitoringRule = true;
-		} else {
-			isMonitoringRule = false;
+		if (relatedMonitoringRuleId == null
+				&& relatedMicroDialogDecisionPointId == null) {
+			rulesType = RecursiveRuleTypes.MONITORING_RULES;
+		} else if (relatedMonitoringRuleId != null) {
+			rulesType = RecursiveRuleTypes.MONITORING_REPLY_RULES;
 
-			// Adjust UI of MonitoringReplyRules to have a lower height
+			// Adjust UI for MonitoringReplyRules to have a lower height and
+			// remove additional info dialog
 			getMonitoringRuleInfoLabel().setVisible(false);
 			getTreeLayout().setHeight(130, Unit.PIXELS);
+		} else if (relatedMicroDialogDecisionPointId != null) {
+			rulesType = RecursiveRuleTypes.MICRO_DIALOG_RULES;
+
+			// Adjust UI for MicroDialogRules
+			getSendMessageLabel().setVisible(false);
+			getSendMessageValue().setVisible(false);
+			getMonitoringRuleInfoLabel().setVisible(false);
 		}
 		this.relatedMonitoringRuleId = relatedMonitoringRuleId;
+		this.relatedMicroDialogId = relatedMicroDialogId;
+		this.relatedMicroDialogDecisionPointId = relatedMicroDialogDecisionPointId;
 		this.isGotAnswerRule = isGotAnswerRule;
 
 		rulesTree = getRulesTree();
 
 		selectedMonitoringRuleId = null;
 
-		// tree content
+		// Tree content
 		final Set<ObjectId> monitoringRuleIdCache = new HashSet<ObjectId>();
 
 		container = new HierarchicalContainer();
@@ -182,30 +218,49 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 
 		recursiveAddItemsToTree(null, monitoringRuleIdCache);
 
-		// clean old unlinked rules
+		// Clean old unlinked rules
 		log.debug("Cleaning old unlinked rules");
-		Iterable<? extends AbstractMonitoringRule> allMonitoringRules;
-		if (isMonitoringRule) {
-			allMonitoringRules = getInterventionAdministrationManagerService()
-					.getAllMonitoringRulesOfIntervention(intervention.getId());
-		} else {
-			allMonitoringRules = getInterventionAdministrationManagerService()
-					.getAllMonitoringReplyRulesOfMonitoringRule(
-							relatedMonitoringRuleId, isGotAnswerRule);
+		Iterable<? extends AbstractMonitoringRule> allMonitoringRules = null;
+		switch (rulesType) {
+			case MONITORING_RULES:
+				allMonitoringRules = getInterventionAdministrationManagerService()
+						.getAllMonitoringRulesOfIntervention(
+								intervention.getId());
+				break;
+			case MONITORING_REPLY_RULES:
+				allMonitoringRules = getInterventionAdministrationManagerService()
+						.getAllMonitoringReplyRulesOfMonitoringRule(
+								relatedMonitoringRuleId, isGotAnswerRule);
+				break;
+			case MICRO_DIALOG_RULES:
+				allMonitoringRules = getInterventionAdministrationManagerService()
+						.getAllMicroDialogRulesOfMicroDialogDecisionPoint(
+								relatedMicroDialogDecisionPointId);
+				break;
 		}
+
 		for (final AbstractMonitoringRule abstractMonitoringRule : allMonitoringRules) {
 			if (!monitoringRuleIdCache
 					.contains(abstractMonitoringRule.getId())) {
 				log.warn("Deleting unlinked rule with id {}",
 						abstractMonitoringRule.getId());
-				if (isMonitoringRule) {
-					getInterventionAdministrationManagerService()
-							.monitoringRuleDelete(
-									abstractMonitoringRule.getId());
-				} else {
-					getInterventionAdministrationManagerService()
-							.monitoringReplyRuleDelete(
-									abstractMonitoringRule.getId());
+
+				switch (rulesType) {
+					case MONITORING_RULES:
+						getInterventionAdministrationManagerService()
+								.monitoringRuleDelete(
+										abstractMonitoringRule.getId());
+						break;
+					case MONITORING_REPLY_RULES:
+						getInterventionAdministrationManagerService()
+								.monitoringReplyRuleDelete(
+										abstractMonitoringRule.getId());
+						break;
+					case MICRO_DIALOG_RULES:
+						getInterventionAdministrationManagerService()
+								.microDialogRuleDelete(
+										abstractMonitoringRule.getId());
+						break;
 				}
 			}
 		}
@@ -241,16 +296,25 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 
 	private void recursiveAddItemsToTree(final ObjectId parentMonitoringRuleId,
 			final Set<ObjectId> monitoringRuleIdCache) {
-		Iterable<? extends AbstractMonitoringRule> existingMonitoringRules;
-		if (isMonitoringRule) {
-			existingMonitoringRules = getInterventionAdministrationManagerService()
-					.getAllMonitoringRulesOfInterventionAndParent(
-							intervention.getId(), parentMonitoringRuleId);
-		} else {
-			existingMonitoringRules = getInterventionAdministrationManagerService()
-					.getAllMonitoringReplyRulesOfMonitoringRuleAndParent(
-							relatedMonitoringRuleId, parentMonitoringRuleId,
-							isGotAnswerRule);
+		Iterable<? extends AbstractMonitoringRule> existingMonitoringRules = null;
+		switch (rulesType) {
+			case MONITORING_RULES:
+				existingMonitoringRules = getInterventionAdministrationManagerService()
+						.getAllMonitoringRulesOfInterventionAndParent(
+								intervention.getId(), parentMonitoringRuleId);
+				break;
+			case MONITORING_REPLY_RULES:
+				existingMonitoringRules = getInterventionAdministrationManagerService()
+						.getAllMonitoringReplyRulesOfMonitoringRuleAndParent(
+								relatedMonitoringRuleId, parentMonitoringRuleId,
+								isGotAnswerRule);
+				break;
+			case MICRO_DIALOG_RULES:
+				existingMonitoringRules = getInterventionAdministrationManagerService()
+						.getAllMicroDialogRulesOfMicroDialogDecisionPointAndParent(
+								relatedMicroDialogDecisionPointId,
+								parentMonitoringRuleId);
+				break;
 		}
 
 		for (final AbstractMonitoringRule abstractMonitoringRule : existingMonitoringRules) {
@@ -288,16 +352,25 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 		if (selectedMonitoringRuleId == null) {
 			setNothingSelected();
 		} else {
-			final AbstractMonitoringRule selectedMonitoringRule;
-			final MonitoringRuleTypes ruleType;
-			if (isMonitoringRule) {
-				selectedMonitoringRule = getInterventionAdministrationManagerService()
-						.getMonitoringRule(selectedMonitoringRuleId);
-				ruleType = ((MonitoringRule) selectedMonitoringRule).getType();
-			} else {
-				selectedMonitoringRule = getInterventionAdministrationManagerService()
-						.getMonitoringReplyRule(selectedMonitoringRuleId);
-				ruleType = null;
+			AbstractMonitoringRule selectedMonitoringRule = null;
+			MonitoringRuleTypes ruleType = null;
+			switch (rulesType) {
+				case MONITORING_RULES:
+					selectedMonitoringRule = getInterventionAdministrationManagerService()
+							.getMonitoringRule(selectedMonitoringRuleId);
+					ruleType = ((MonitoringRule) selectedMonitoringRule)
+							.getType();
+					break;
+				case MONITORING_REPLY_RULES:
+					selectedMonitoringRule = getInterventionAdministrationManagerService()
+							.getMonitoringReplyRule(selectedMonitoringRuleId);
+					ruleType = null;
+					break;
+				case MICRO_DIALOG_RULES:
+					selectedMonitoringRule = getInterventionAdministrationManagerService()
+							.getMicroDialogRule(selectedMonitoringRuleId);
+					ruleType = null;
+					break;
 			}
 
 			String resultVariable;
@@ -310,7 +383,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 						.getStoreValueToVariableWithName();
 			}
 
-			String sendMessage;
+			String sendMessage = null;
 			if (selectedMonitoringRule.isSendMessageIfTrue()) {
 				val recipient = selectedMonitoringRule
 						.isSendMessageToSupervisor()
@@ -338,19 +411,25 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 					}
 				}
 			} else {
-				if (isMonitoringRule) {
-					val selectedMonitoringRuleCasted = (MonitoringRule) selectedMonitoringRule;
-					if (selectedMonitoringRuleCasted
-							.isStopInterventionWhenTrue()) {
-						sendMessage = Messages.getAdminString(
-								AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_NO_MESSAGE_BUT_FINISH_INTERVENTION);
-					} else {
+				switch (rulesType) {
+					case MONITORING_RULES:
+						val selectedMonitoringRuleCasted = (MonitoringRule) selectedMonitoringRule;
+						if (selectedMonitoringRuleCasted
+								.isStopInterventionWhenTrue()) {
+							sendMessage = Messages.getAdminString(
+									AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_NO_MESSAGE_BUT_FINISH_INTERVENTION);
+						} else {
+							sendMessage = Messages.getAdminString(
+									AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_NO_MESSAGE);
+						}
+						break;
+					case MONITORING_REPLY_RULES:
 						sendMessage = Messages.getAdminString(
 								AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_NO_MESSAGE);
-					}
-				} else {
-					sendMessage = Messages.getAdminString(
-							AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__SEND_NO_MESSAGE);
+						break;
+					case MICRO_DIALOG_RULES:
+						sendMessage = "";
+						break;
 				}
 			}
 
@@ -373,7 +452,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 			} else {
 				icon = MESSAGE_RULE_ICON;
 			}
-		} else if (isMonitoringRule) {
+		} else if (rulesType == RecursiveRuleTypes.MONITORING_RULES) {
 			val monitoringRule = (MonitoringRule) abstractMonitoringRule;
 			if (monitoringRule.isStopInterventionWhenTrue()) {
 				icon = STOP_RULE_ICON;
@@ -389,6 +468,20 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 					.getType() == MonitoringRuleTypes.USER_INTENTION) {
 				icon = INTENTION_RULE_ICON;
 			} else if (monitoringRule.isMarkCaseAsSolvedWhenTrue()) {
+				icon = SOLVING_RULE_ICON;
+			} else {
+				icon = RULE_ICON;
+			}
+		} else if (rulesType == RecursiveRuleTypes.MICRO_DIALOG_RULES) {
+			val microDialogRule = (MicroDialogRule) abstractMonitoringRule;
+			if (microDialogRule.isStopMicroDialogWhenTrue()) {
+				icon = STOP_RULE_ICON;
+			} else if (microDialogRule
+					.getNextMicroDialogMessageWhenTrue() != null
+					|| microDialogRule
+							.getNextMicroDialogMessageWhenFalse() != null) {
+				icon = REDIRECT_RULE_ICON;
+			} else if (microDialogRule.isLeaveDecisionPointWhenTrue()) {
 				icon = SOLVING_RULE_ICON;
 			} else {
 				icon = RULE_ICON;
@@ -410,26 +503,50 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 	public void createRule() {
 		log.debug("Create rule");
 		final AbstractMonitoringRule newAbstractMonitoringRule;
-		if (isMonitoringRule) {
-			newAbstractMonitoringRule = getInterventionAdministrationManagerService()
-					.monitoringRuleCreate(intervention.getId(),
-							selectedMonitoringRuleId == null ? null
-									: selectedMonitoringRuleId);
-		} else {
-			newAbstractMonitoringRule = getInterventionAdministrationManagerService()
-					.monitoringReplyRuleCreate(relatedMonitoringRuleId,
-							selectedMonitoringRuleId == null ? null
-									: selectedMonitoringRuleId,
-							isGotAnswerRule);
+		switch (rulesType) {
+			case MONITORING_RULES:
+				newAbstractMonitoringRule = getInterventionAdministrationManagerService()
+						.monitoringRuleCreate(intervention.getId(),
+								selectedMonitoringRuleId == null ? null
+										: selectedMonitoringRuleId);
+				break;
+			case MONITORING_REPLY_RULES:
+				newAbstractMonitoringRule = getInterventionAdministrationManagerService()
+						.monitoringReplyRuleCreate(relatedMonitoringRuleId,
+								selectedMonitoringRuleId == null ? null
+										: selectedMonitoringRuleId,
+								isGotAnswerRule);
+				break;
+			case MICRO_DIALOG_RULES:
+				newAbstractMonitoringRule = getInterventionAdministrationManagerService()
+						.microDialogRuleCreate(
+								relatedMicroDialogDecisionPointId,
+								selectedMonitoringRuleId == null ? null
+										: selectedMonitoringRuleId);
+				break;
+			default:
+				newAbstractMonitoringRule = null;
+				break;
 		}
 
-		AbstractClosableEditComponent componentWithController;
-		if (isMonitoringRule) {
-			componentWithController = new MonitoringRuleEditComponentWithController(
-					intervention, newAbstractMonitoringRule.getId());
-		} else {
-			componentWithController = new MonitoringReplyRuleEditComponentWithController(
-					intervention, newAbstractMonitoringRule.getId());
+		final AbstractClosableEditComponent componentWithController;
+		switch (rulesType) {
+			case MONITORING_RULES:
+				componentWithController = new MonitoringRuleEditComponentWithController(
+						intervention, newAbstractMonitoringRule.getId());
+				break;
+			case MONITORING_REPLY_RULES:
+				componentWithController = new MonitoringReplyRuleEditComponentWithController(
+						intervention, newAbstractMonitoringRule.getId());
+				break;
+			case MICRO_DIALOG_RULES:
+				componentWithController = new MicroDialogRuleEditComponentWithController(
+						intervention, relatedMicroDialogId,
+						newAbstractMonitoringRule.getId());
+				break;
+			default:
+				componentWithController = null;
+				break;
 		}
 
 		showModalClosableEditWindow(
@@ -456,13 +573,24 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 	public void editRule() {
 		log.debug("Edit rule");
 
-		AbstractClosableEditComponent componentWithController;
-		if (isMonitoringRule) {
-			componentWithController = new MonitoringRuleEditComponentWithController(
-					intervention, selectedMonitoringRuleId);
-		} else {
-			componentWithController = new MonitoringReplyRuleEditComponentWithController(
-					intervention, selectedMonitoringRuleId);
+		final AbstractClosableEditComponent componentWithController;
+		switch (rulesType) {
+			case MONITORING_RULES:
+				componentWithController = new MonitoringRuleEditComponentWithController(
+						intervention, selectedMonitoringRuleId);
+				break;
+			case MONITORING_REPLY_RULES:
+				componentWithController = new MonitoringReplyRuleEditComponentWithController(
+						intervention, selectedMonitoringRuleId);
+				break;
+			case MICRO_DIALOG_RULES:
+				componentWithController = new MicroDialogRuleEditComponentWithController(
+						intervention, relatedMicroDialogId,
+						selectedMonitoringRuleId);
+				break;
+			default:
+				componentWithController = null;
+				break;
 		}
 
 		showModalClosableEditWindow(
@@ -471,15 +599,23 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						// Adjust item and icon
-						AbstractMonitoringRule selectedAbstractMonitoringRule;
-						if (isMonitoringRule) {
-							selectedAbstractMonitoringRule = getInterventionAdministrationManagerService()
-									.getMonitoringRule(
-											selectedMonitoringRuleId);
-						} else {
-							selectedAbstractMonitoringRule = getInterventionAdministrationManagerService()
-									.getMonitoringReplyRule(
-											selectedMonitoringRuleId);
+						AbstractMonitoringRule selectedAbstractMonitoringRule = null;
+						switch (rulesType) {
+							case MONITORING_RULES:
+								selectedAbstractMonitoringRule = getInterventionAdministrationManagerService()
+										.getMonitoringRule(
+												selectedMonitoringRuleId);
+								break;
+							case MONITORING_REPLY_RULES:
+								selectedAbstractMonitoringRule = getInterventionAdministrationManagerService()
+										.getMonitoringReplyRule(
+												selectedMonitoringRuleId);
+								break;
+							case MICRO_DIALOG_RULES:
+								selectedAbstractMonitoringRule = getInterventionAdministrationManagerService()
+										.getMicroDialogRule(
+												selectedMonitoringRuleId);
+								break;
 						}
 
 						final String name = StringHelpers.createRuleName(
@@ -507,13 +643,20 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 	private void addItemToTree(final ObjectId monitoringRuleId,
 			final ObjectId parentMonitoringRuleId) {
 		// Create name and icon
-		AbstractMonitoringRule abstractMonitoringRule;
-		if (isMonitoringRule) {
-			abstractMonitoringRule = getInterventionAdministrationManagerService()
-					.getMonitoringRule(monitoringRuleId);
-		} else {
-			abstractMonitoringRule = getInterventionAdministrationManagerService()
-					.getMonitoringReplyRule(monitoringRuleId);
+		AbstractMonitoringRule abstractMonitoringRule = null;
+		switch (rulesType) {
+			case MONITORING_RULES:
+				abstractMonitoringRule = getInterventionAdministrationManagerService()
+						.getMonitoringRule(monitoringRuleId);
+				break;
+			case MONITORING_REPLY_RULES:
+				abstractMonitoringRule = getInterventionAdministrationManagerService()
+						.getMonitoringReplyRule(monitoringRuleId);
+				break;
+			case MICRO_DIALOG_RULES:
+				abstractMonitoringRule = getInterventionAdministrationManagerService()
+						.getMicroDialogRule(monitoringRuleId);
+				break;
 		}
 
 		final String name = StringHelpers.createRuleName(abstractMonitoringRule,
@@ -549,15 +692,26 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 			return;
 		}
 
-		if (isMonitoringRule) {
-			getInterventionAdministrationManagerService().monitoringRuleMove(
-					movement.ordinal(), sourceItemId, parentItemId,
-					sameLevelTargetItemId, intervention.getId());
-		} else {
-			getInterventionAdministrationManagerService()
-					.monitoringReplyRuleMove(movement.ordinal(), sourceItemId,
-							parentItemId, sameLevelTargetItemId,
-							relatedMonitoringRuleId, isGotAnswerRule);
+		switch (rulesType) {
+			case MONITORING_RULES:
+				getInterventionAdministrationManagerService()
+						.monitoringRuleMove(movement.ordinal(), sourceItemId,
+								parentItemId, sameLevelTargetItemId,
+								intervention.getId());
+				break;
+			case MONITORING_REPLY_RULES:
+				getInterventionAdministrationManagerService()
+						.monitoringReplyRuleMove(movement.ordinal(),
+								sourceItemId, parentItemId,
+								sameLevelTargetItemId, relatedMonitoringRuleId,
+								isGotAnswerRule);
+				break;
+			case MICRO_DIALOG_RULES:
+				getInterventionAdministrationManagerService()
+						.microDialogRuleMove(movement.ordinal(), sourceItemId,
+								parentItemId, sameLevelTargetItemId,
+								relatedMicroDialogDecisionPointId);
+				break;
 		}
 	}
 
@@ -569,7 +723,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 	 */
 	private boolean checkIfDragAllowed(
 			final ObjectId abstractMonitoringRuleId) {
-		if (isMonitoringRule) {
+		if (rulesType == RecursiveRuleTypes.MONITORING_RULES) {
 			val monitoringRule = getInterventionAdministrationManagerService()
 					.getMonitoringRule(abstractMonitoringRuleId);
 			if (monitoringRule.getType() == MonitoringRuleTypes.NORMAL) {
@@ -585,23 +739,37 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 	public void duplicateRule() {
 		log.debug("Duplicate rule");
 
-		final File temporaryBackupFile;
-		if (isMonitoringRule) {
-			temporaryBackupFile = getInterventionAdministrationManagerService()
-					.monitoringRuleExport(selectedMonitoringRuleId);
-		} else {
-			temporaryBackupFile = getInterventionAdministrationManagerService()
-					.monitoringReplyRuleExport(selectedMonitoringRuleId);
+		File temporaryBackupFile = null;
+		switch (rulesType) {
+			case MONITORING_RULES:
+				temporaryBackupFile = getInterventionAdministrationManagerService()
+						.monitoringRuleExport(selectedMonitoringRuleId);
+				break;
+			case MONITORING_REPLY_RULES:
+				temporaryBackupFile = getInterventionAdministrationManagerService()
+						.monitoringReplyRuleExport(selectedMonitoringRuleId);
+				break;
+			case MICRO_DIALOG_RULES:
+				temporaryBackupFile = getInterventionAdministrationManagerService()
+						.microDialogRuleExport(selectedMonitoringRuleId);
+				break;
 		}
 
 		try {
-			final AbstractMonitoringRule importedMonitoringRule;
-			if (isMonitoringRule) {
-				importedMonitoringRule = getInterventionAdministrationManagerService()
-						.monitoringRuleImport(temporaryBackupFile);
-			} else {
-				importedMonitoringRule = getInterventionAdministrationManagerService()
-						.monitoringReplyRuleImport(temporaryBackupFile);
+			AbstractMonitoringRule importedMonitoringRule = null;
+			switch (rulesType) {
+				case MONITORING_RULES:
+					importedMonitoringRule = getInterventionAdministrationManagerService()
+							.monitoringRuleImport(temporaryBackupFile);
+					break;
+				case MONITORING_REPLY_RULES:
+					importedMonitoringRule = getInterventionAdministrationManagerService()
+							.monitoringReplyRuleImport(temporaryBackupFile);
+					break;
+				case MICRO_DIALOG_RULES:
+					importedMonitoringRule = getInterventionAdministrationManagerService()
+							.microDialogRuleImport(temporaryBackupFile);
+					break;
 			}
 
 			if (importedMonitoringRule == null) {
@@ -639,13 +807,22 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 			public void buttonClick(final ClickEvent event) {
 				try {
 					// Delete rule
-					if (isMonitoringRule) {
-						getInterventionAdministrationManagerService()
-								.monitoringRuleDelete(selectedMonitoringRuleId);
-					} else {
-						getInterventionAdministrationManagerService()
-								.monitoringReplyRuleDelete(
-										selectedMonitoringRuleId);
+					switch (rulesType) {
+						case MONITORING_RULES:
+							getInterventionAdministrationManagerService()
+									.monitoringRuleDelete(
+											selectedMonitoringRuleId);
+							break;
+						case MONITORING_REPLY_RULES:
+							getInterventionAdministrationManagerService()
+									.monitoringReplyRuleDelete(
+											selectedMonitoringRuleId);
+							break;
+						case MICRO_DIALOG_RULES:
+							getInterventionAdministrationManagerService()
+									.microDialogRuleDelete(
+											selectedMonitoringRuleId);
+							break;
 					}
 				} catch (final Exception e) {
 					closeWindow();

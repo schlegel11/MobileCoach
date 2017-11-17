@@ -445,7 +445,7 @@ public class MonitoringRuleEditComponent extends AbstractClosableEditComponent {
 		// minutesButton1
 		minutesButton1 = new Button();
 		minutesButton1.setCaption("1");
-		minutesButton1.setImmediate(false);
+		minutesButton1.setImmediate(true);
 		minutesButton1.setWidth("60px");
 		minutesButton1.setHeight("-1px");
 		horizontalLayout_1.addComponent(minutesButton1);

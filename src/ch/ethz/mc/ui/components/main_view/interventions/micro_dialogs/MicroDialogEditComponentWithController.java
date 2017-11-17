@@ -12,6 +12,7 @@ import com.vaadin.ui.Button.ClickEvent;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.model.ModelObject;
+import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.MicroDialog;
 import ch.ethz.mc.model.persistent.MicroDialogDecisionPoint;
 import ch.ethz.mc.model.persistent.MicroDialogMessage;
@@ -30,20 +31,20 @@ import lombok.extern.log4j.Log4j2;
 public class MicroDialogEditComponentWithController
 		extends MicroDialogEditComponent {
 
-	private final MicroDialog											microDialog;
+	private final MicroDialog												microDialog;
 
-	private final ObjectId												interventionId;
+	private final Intervention												intervention;
 
-	private UIMicroDialogElementInterface								selectedUIMicroDialogElement	= null;
+	private UIMicroDialogElementInterface									selectedUIMicroDialogElement	= null;
 
 	private final BeanContainer<ObjectId, UIMicroDialogElementInterface>	beanContainer;
 
 	protected MicroDialogEditComponentWithController(
-			final MicroDialog microDialog, final ObjectId interventionId) {
+			final MicroDialog microDialog, final Intervention intervention) {
 		super();
 
 		this.microDialog = microDialog;
-		this.interventionId = interventionId;
+		this.intervention = intervention;
 
 		// table options
 		val microDialogElementsTable = getMicroDialogElementsTable();
@@ -126,7 +127,7 @@ public class MicroDialogEditComponentWithController
 		showModalClosableEditWindow(
 				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__CREATE_MICRO_DIALOG_MESSAGE,
 				new MicroDialogMessageEditComponentWithController(
-						newMicroDialogMessage, interventionId),
+						newMicroDialogMessage, intervention.getId()),
 				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
@@ -150,25 +151,27 @@ public class MicroDialogEditComponentWithController
 		val newMicroDialogDecisionPoint = getInterventionAdministrationManagerService()
 				.microDialogDecisionPointCreate(microDialog.getId());
 
-		// showModalClosableEditWindow(
-		// AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__CREATE_MICRO_DIALOG_DECISION_POINT,
-		// new MicroDialogDecisionPointEditComponentWithController(
-		// newMicroDialogDecisionPoint, interventionId),
-		// new ExtendableButtonClickListener() {
-		// @Override
-		// public void buttonClick(final ClickEvent event) {
-		// Adapt UI
-		beanContainer.addItem(newMicroDialogDecisionPoint.getId(),
-				UIMicroDialogElementInterface.class
-						.cast(newMicroDialogDecisionPoint.toUIModelObject()));
-		getMicroDialogElementsTable()
-				.select(newMicroDialogDecisionPoint.getId());
-		getAdminUI().showInformationNotification(
-				AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_DECISION_POINT_CREATED);
+		showModalClosableEditWindow(
+				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__CREATE_MICRO_DIALOG_DECISION_POINT,
+				new MicroDialogDecisionPointEditComponentWithController(
+						intervention, newMicroDialogDecisionPoint),
+				new ExtendableButtonClickListener() {
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						// Adapt UI
+						beanContainer.addItem(
+								newMicroDialogDecisionPoint.getId(),
+								UIMicroDialogElementInterface.class
+										.cast(newMicroDialogDecisionPoint
+												.toUIModelObject()));
+						getMicroDialogElementsTable()
+								.select(newMicroDialogDecisionPoint.getId());
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_DECISION_POINT_CREATED);
 
-		// closeWindow();
-		// }
-		// });
+						closeWindow();
+					}
+				});
 	}
 
 	public void editElement() {
@@ -181,7 +184,7 @@ public class MicroDialogEditComponentWithController
 			showModalClosableEditWindow(
 					AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_MICRO_DIALOG_MESSAGE,
 					new MicroDialogMessageEditComponentWithController(
-							selectedMicroDialogMessage, interventionId),
+							selectedMicroDialogMessage, intervention.getId()),
 					new ExtendableButtonClickListener() {
 						@Override
 						public void buttonClick(final ClickEvent event) {
@@ -199,27 +202,28 @@ public class MicroDialogEditComponentWithController
 					});
 		} else {
 			val selectedMicroDialogDecisionPoint = selectedUIMicroDialogElement
-					.getRelatedModelObject(MicroDialogMessage.class);
+					.getRelatedModelObject(MicroDialogDecisionPoint.class);
 
-			// showModalClosableEditWindow(
-			// AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_MICRO_DIALOG_DECISION_POINT,
-			// new MicroDialogDecisionPointEditComponentWithController(
-			// selectedMicroDialogDecisionPoint, interventionId),
-			// new ExtendableButtonClickListener() {
-			// @Override
-			// public void buttonClick(final ClickEvent event) {
-			// Adapt UI
-			removeAndAddModelObjectToBeanContainer(beanContainer,
-					selectedMicroDialogDecisionPoint);
-			getMicroDialogElementsTable().sort();
-			getMicroDialogElementsTable()
-					.select(selectedMicroDialogDecisionPoint.getId());
-			getAdminUI().showInformationNotification(
-					AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_DECISION_POINT_UPDATED);
+			showModalClosableEditWindow(
+					AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_MICRO_DIALOG_DECISION_POINT,
+					new MicroDialogDecisionPointEditComponentWithController(
+							intervention, selectedMicroDialogDecisionPoint),
+					new ExtendableButtonClickListener() {
+						@Override
+						public void buttonClick(final ClickEvent event) {
+							// Adapt UI
+							removeAndAddModelObjectToBeanContainer(
+									beanContainer,
+									selectedMicroDialogDecisionPoint);
+							getMicroDialogElementsTable().sort();
+							getMicroDialogElementsTable().select(
+									selectedMicroDialogDecisionPoint.getId());
+							getAdminUI().showInformationNotification(
+									AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_DECISION_POINT_UPDATED);
 
-			// closeWindow();
-			// }
-			// });
+							closeWindow();
+						}
+					});
 		}
 	}
 

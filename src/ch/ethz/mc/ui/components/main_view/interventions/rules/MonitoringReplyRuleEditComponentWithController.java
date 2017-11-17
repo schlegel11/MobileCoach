@@ -26,13 +26,13 @@ import lombok.extern.log4j.Log4j2;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.model.memory.types.RuleTypes;
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
 import ch.ethz.mc.model.persistent.MonitoringReplyRule;
 import ch.ethz.mc.model.ui.UIMonitoringMessageGroup;
 import ch.ethz.mc.ui.components.basics.AbstractRuleEditComponentWithController;
 import ch.ethz.mc.ui.components.basics.ShortPlaceholderStringEditComponent;
-import ch.ethz.mc.ui.components.basics.AbstractRuleEditComponentWithController.TYPES;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -66,7 +66,7 @@ public class MonitoringReplyRuleEditComponentWithController
 				.getMonitoringReplyRule(monitoringReplyRuleId);
 
 		ruleEditComponent = getAbstractRuleEditComponentWithController();
-		ruleEditComponent.init(intervention.getId(), TYPES.MONITORING_RULES);
+		ruleEditComponent.init(intervention.getId(), RuleTypes.MONITORING_RULES);
 		ruleEditComponent.adjust(monitoringRule);
 
 		/*

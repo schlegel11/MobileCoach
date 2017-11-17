@@ -78,7 +78,42 @@ public class MicroDialogRule extends AbstractMonitoringRule {
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId microDialogDecisionPoint;
+	private ObjectId	microDialogDecisionPoint;
+
+	/**
+	 * <strong>OPTIONAL:</strong> If the rule result is <strong>true</strong>
+	 * the {@link Participant} will be redirected to the given
+	 * {@link MicroDialogMessage}
+	 */
+	@Getter
+	@Setter
+	private ObjectId	nextMicroDialogMessageWhenTrue;
+
+	/**
+	 * <strong>OPTIONAL:</strong> If the rule result is <strong>false</strong>
+	 * the {@link Participant} will be redirected to the given
+	 * {@link MicroDialogMessage}
+	 */
+	@Getter
+	@Setter
+	private ObjectId	nextMicroDialogMessageWhenFalse;
+
+	/**
+	 * <strong>OPTIONAL:</strong> The whole micro dialog will be set to finished
+	 * for
+	 * participant and rule execution will stop when the rule evaluates to true
+	 */
+	@Getter
+	@Setter
+	private boolean		stopMicroDialogWhenTrue;
+
+	/**
+	 * <strong>OPTIONAL:</strong> The execution of the rules of this decision
+	 * point will stop when the rule evalutes to true
+	 */
+	@Getter
+	@Setter
+	private boolean		leaveDecisionPointWhenTrue;
 
 	/*
 	 * (non-Javadoc)

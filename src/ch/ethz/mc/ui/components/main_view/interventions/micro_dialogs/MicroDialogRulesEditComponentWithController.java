@@ -1,5 +1,7 @@
-package ch.ethz.mc.ui.components.main_view.interventions.surveys.feedbacks;
+package ch.ethz.mc.ui.components.main_view.interventions.micro_dialogs;
 
+import ch.ethz.mc.model.persistent.MonitoringRule;
+import ch.ethz.mc.ui.components.basics.AbstractMonitoringRulesEditComponentWithController;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -20,35 +22,23 @@ package ch.ethz.mc.ui.components.main_view.interventions.surveys.feedbacks;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import org.bson.types.ObjectId;
-
-import ch.ethz.mc.model.memory.types.RuleTypes;
-import ch.ethz.mc.model.persistent.FeedbackSlideRule;
-import ch.ethz.mc.ui.components.basics.AbstractRuleEditComponentWithController;
+import lombok.extern.log4j.Log4j2;
 
 /**
- * Extends the feedback slide rule edit component with a controller
+ * Implements the controller for the monitoring rules edit component for
+ * {@link MonitoringRule}s
  * 
  * @author Andreas Filler
  */
 @SuppressWarnings("serial")
-public class FeedbackSlideRuleEditComponentWithController
-		extends FeedbackSlideRuleEditComponent {
+@Log4j2
+public class MicroDialogRulesEditComponentWithController
+		extends AbstractMonitoringRulesEditComponentWithController {
 
-	private final AbstractRuleEditComponentWithController ruleEditComponent;
-
-	public FeedbackSlideRuleEditComponentWithController(
-			final FeedbackSlideRule feedbackSlideRule,
-			final ObjectId screeningSurveyId) {
+	public MicroDialogRulesEditComponentWithController() {
 		super();
 
-		// Configure integrated components
-		ruleEditComponent = getAbstractRuleEditComponentWithController();
-		ruleEditComponent.init(screeningSurveyId, RuleTypes.FEEDBACK_RULES);
-		ruleEditComponent.adjust(feedbackSlideRule);
-
-		/*
-		 * Adjust own components
-		 */
+		log.debug(
+				"Init monitoring rules edit component with controller for micro dialog rules");
 	}
 }
