@@ -96,6 +96,9 @@ public class DataModelUpdateManager {
 				case 16:
 					updateToVersion16();
 					break;
+				case 20:
+					updateToVersion20();
+					break;
 			}
 
 			log.info("Update to version {} done", updateToVersionInThisStep);
@@ -333,6 +336,39 @@ public class DataModelUpdateManager {
 									.toString()) * 60);
 			monitoringRuleCollection.update((ObjectId) document.get("_id"))
 					.with(Queries.UPDATE_VERSION_16__MONITORING_RULE__CHANGE_1_REMOVE);
+		}
+	}
+
+	/**
+	 * Changes for version 20:
+	 */
+	private static void updateToVersion20() {
+		val mongoDriverMonitoringMessageCollection = jongo.getDatabase()
+				.getCollection("MonitoringMessage");
+		val monitoringMessageCollection = jongo
+				.getCollection("MonitoringMessage");
+
+		for (final DBObject document : mongoDriverMonitoringMessageCollection
+				.find().snapshot()) {
+
+			val formerValue = document.get(
+					Queries.UPDATE_VERSION_20__MONITORING_MESSAGE__CHANGE_1_FIELD);
+
+			if (formerValue == null) {
+				monitoringMessageCollection
+						.update((ObjectId) document.get("_id"))
+						.with(Queries.UPDATE_VERSION_20__MONITORING_MESSAGE__CHANGE_1_CHANGE,
+								false);
+			} else {
+				monitoringMessageCollection
+						.update((ObjectId) document.get("_id"))
+						.with(Queries.UPDATE_VERSION_20__MONITORING_MESSAGE__CHANGE_1_CHANGE,
+								formerValue);
+			}
+			monitoringMessageCollection.update((ObjectId) document.get("_id"))
+					.with(Queries.UPDATE_VERSION_20__MONITORING_MESSAGE__CHANGE_1_REMOVE);
+			monitoringMessageCollection.update((ObjectId) document.get("_id"))
+					.with("{$unset:{'minutesUntilMessageIsHandledAsUnanswered':1}}");
 		}
 	}
 }

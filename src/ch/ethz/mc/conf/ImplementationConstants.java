@@ -35,8 +35,9 @@ public class ImplementationConstants {
 	public static final String	DEFAULT_ANSWER_NAME																	= "";
 
 	public static final int		MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MIN									= 1;
-	public static final int		MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX									= 5760;
-	public static final int		MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX_MANUAL							= 2160;
+	public static final int		MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX_MONITORING_MESSAGE				= 5760;
+	public static final int		MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX_MICRO_DIALOG_MESSAGE				= 1440;
+	public static final int		MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX_MANUAL_MESSAGE					= 2160;
 	public static final int		DEFAULT_MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED								= 240;
 
 	public static final int		HOUR_TO_SEND_MESSAGE_MIN															= 0;

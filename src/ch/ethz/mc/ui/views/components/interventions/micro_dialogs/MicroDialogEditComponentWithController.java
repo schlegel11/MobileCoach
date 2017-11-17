@@ -16,7 +16,7 @@ import ch.ethz.mc.model.persistent.MicroDialog;
 import ch.ethz.mc.model.persistent.MicroDialogDecisionPoint;
 import ch.ethz.mc.model.persistent.MicroDialogMessage;
 import ch.ethz.mc.model.persistent.concepts.MicroDialogElementInterface;
-import ch.ethz.mc.model.ui.UIAbstractMicroDialogElement;
+import ch.ethz.mc.model.ui.UIMicroDialogElementInterface;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
@@ -34,9 +34,9 @@ public class MicroDialogEditComponentWithController
 
 	private final ObjectId												interventionId;
 
-	private UIAbstractMicroDialogElement								selectedUIMicroDialogElement	= null;
+	private UIMicroDialogElementInterface								selectedUIMicroDialogElement	= null;
 
-	private final BeanContainer<ObjectId, UIAbstractMicroDialogElement>	beanContainer;
+	private final BeanContainer<ObjectId, UIMicroDialogElementInterface>	beanContainer;
 
 	protected MicroDialogEditComponentWithController(
 			final MicroDialog microDialog, final ObjectId interventionId) {
@@ -53,15 +53,15 @@ public class MicroDialogEditComponentWithController
 				.getAllMicroDialogElementsOfMicroDialog(microDialog.getId());
 
 		beanContainer = createBeanContainerForModelObjects(
-				UIAbstractMicroDialogElement.class, elementsOfMicroDialog);
+				UIMicroDialogElementInterface.class, elementsOfMicroDialog);
 
 		microDialogElementsTable.setContainerDataSource(beanContainer);
 		microDialogElementsTable.setSortContainerPropertyId(
-				UIAbstractMicroDialogElement.getSortColumn());
+				UIMicroDialogElementInterface.getSortColumn());
 		microDialogElementsTable.setVisibleColumns(
-				UIAbstractMicroDialogElement.getVisibleColumns());
+				UIMicroDialogElementInterface.getVisibleColumns());
 		microDialogElementsTable.setColumnHeaders(
-				UIAbstractMicroDialogElement.getColumnHeaders());
+				UIMicroDialogElementInterface.getColumnHeaders());
 		microDialogElementsTable.setSortAscending(true);
 		microDialogElementsTable.setSortEnabled(false);
 
@@ -78,7 +78,7 @@ public class MicroDialogEditComponentWithController
 						} else {
 							selectedUIMicroDialogElement = getUIModelObjectFromTableByObjectId(
 									microDialogElementsTable,
-									UIAbstractMicroDialogElement.class,
+									UIMicroDialogElementInterface.class,
 									objectId);
 							setSomethingSelected();
 						}
@@ -132,7 +132,7 @@ public class MicroDialogEditComponentWithController
 					public void buttonClick(final ClickEvent event) {
 						// Adapt UI
 						beanContainer.addItem(newMicroDialogMessage.getId(),
-								UIAbstractMicroDialogElement.class
+								UIMicroDialogElementInterface.class
 										.cast(newMicroDialogMessage
 												.toUIModelObject()));
 						getMicroDialogElementsTable()
@@ -159,7 +159,7 @@ public class MicroDialogEditComponentWithController
 		// public void buttonClick(final ClickEvent event) {
 		// Adapt UI
 		beanContainer.addItem(newMicroDialogDecisionPoint.getId(),
-				UIAbstractMicroDialogElement.class
+				UIMicroDialogElementInterface.class
 						.cast(newMicroDialogDecisionPoint.toUIModelObject()));
 		getMicroDialogElementsTable()
 				.select(newMicroDialogDecisionPoint.getId());
@@ -254,7 +254,7 @@ public class MicroDialogEditComponentWithController
 
 			// Adapt UI
 			beanContainer.addItem(importedMicroDialogElement.getId(),
-					UIAbstractMicroDialogElement.class.cast(
+					UIMicroDialogElementInterface.class.cast(
 							importedMicroDialogElement.toUIModelObject()));
 			getMicroDialogElementsTable()
 					.select(importedMicroDialogElement.getId());

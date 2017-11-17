@@ -32,7 +32,7 @@ import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.concepts.MicroDialogElementInterface;
-import ch.ethz.mc.model.ui.UIAbstractMicroDialogElement;
+import ch.ethz.mc.model.ui.UIMicroDialogElementInterface;
 import ch.ethz.mc.model.ui.UIModelObject;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -92,7 +92,7 @@ public class MicroDialogDecisionPoint extends ModelObject
 			}
 		}
 
-		final val microDialogMessage = new UIAbstractMicroDialogElement(
+		final val microDialogMessage = new UIMicroDialogElementInterface(
 				getOrder(),
 				Messages.getAdminString(
 						AdminMessageStrings.UI_MODEL__DECISION_POINT),

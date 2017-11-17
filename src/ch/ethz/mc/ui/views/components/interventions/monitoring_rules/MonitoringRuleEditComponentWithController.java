@@ -150,6 +150,7 @@ public class MonitoringRuleEditComponentWithController
 
 		// Handle sliders
 		final val valueChangeListener = new SliderValueChangeListener();
+
 		val hourToSendSlider = getHourToSendMessageSlider();
 		hourToSendSlider.setImmediate(true);
 		hourToSendSlider
@@ -163,7 +164,7 @@ public class MonitoringRuleEditComponentWithController
 		minutesUntilHandledAsNotAnsweredSlider.setMin(
 				ImplementationConstants.MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MIN);
 		minutesUntilHandledAsNotAnsweredSlider.setMax(
-				ImplementationConstants.MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX);
+				ImplementationConstants.MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX_MONITORING_MESSAGE);
 		minutesUntilHandledAsNotAnsweredSlider
 				.addValueChangeListener(valueChangeListener);
 

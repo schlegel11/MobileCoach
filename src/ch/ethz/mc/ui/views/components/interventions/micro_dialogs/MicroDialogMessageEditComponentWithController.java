@@ -10,6 +10,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Table;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.persistent.MicroDialogMessage;
 import ch.ethz.mc.model.persistent.MicroDialogMessageRule;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
@@ -19,6 +20,7 @@ import ch.ethz.mc.model.ui.UIScreeningSurvey;
 import ch.ethz.mc.ui.views.components.basics.LocalizedPlaceholderStringEditComponent;
 import ch.ethz.mc.ui.views.components.basics.MediaObjectIntegrationComponentWithController.MediaObjectCreationOrDeleteionListener;
 import ch.ethz.mc.ui.views.components.basics.ShortPlaceholderStringEditComponent;
+import ch.ethz.mc.ui.views.components.basics.ShortStringEditComponent;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -110,6 +112,18 @@ public class MicroDialogMessageEditComponentWithController
 			}
 		});
 
+		// Handle sliders
+		final val valueChangeListener = new SliderValueChangeListener();
+
+		val minutesUntilHandledAsNotAnsweredSlider = getMinutesUntilHandledAsNotAnsweredSlider();
+		minutesUntilHandledAsNotAnsweredSlider.setImmediate(true);
+		minutesUntilHandledAsNotAnsweredSlider.setMin(
+				ImplementationConstants.MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MIN);
+		minutesUntilHandledAsNotAnsweredSlider.setMax(
+				ImplementationConstants.MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX_MICRO_DIALOG_MESSAGE);
+		minutesUntilHandledAsNotAnsweredSlider
+				.addValueChangeListener(valueChangeListener);
+
 		// handle buttons
 		val buttonClickListener = new ButtonClickListener();
 		getNewRuleButton().addClickListener(buttonClickListener);
@@ -117,12 +131,19 @@ public class MicroDialogMessageEditComponentWithController
 		getMoveUpRuleButton().addClickListener(buttonClickListener);
 		getMoveDownRuleButton().addClickListener(buttonClickListener);
 		getDeleteRuleButton().addClickListener(buttonClickListener);
+		getMinutesButton1().addClickListener(buttonClickListener);
+		getMinutesButton5().addClickListener(buttonClickListener);
+		getMinutesButton10().addClickListener(buttonClickListener);
+		getMinutesButton30().addClickListener(buttonClickListener);
+		getMinutesButton60().addClickListener(buttonClickListener);
 
 		getTextWithPlaceholdersTextFieldComponent().getButton()
 				.addClickListener(buttonClickListener);
 		getStoreVariableTextFieldComponent().getButton()
 				.addClickListener(buttonClickListener);
 		getAnswerOptionsTextFieldComponent().getButton()
+				.addClickListener(buttonClickListener);
+		getNoReplyTextFieldComponent().getButton()
 				.addClickListener(buttonClickListener);
 
 		// Handle media object to component
@@ -197,7 +218,7 @@ public class MicroDialogMessageEditComponentWithController
 			}
 		});
 
-		// Handle check box
+		// Handle check boxes
 		val isCommandMessagCheckBox = getIsCommandCheckbox();
 		isCommandMessagCheckBox.setValue(microDialogMessage.isCommandMessage());
 
@@ -208,6 +229,55 @@ public class MicroDialogMessageEditComponentWithController
 					public void valueChange(final ValueChangeEvent event) {
 						getInterventionAdministrationManagerService()
 								.microDialogMessageSetIsCommandMessage(
+										microDialogMessage, (boolean) event
+												.getProperty().getValue());
+
+						if (microDialogMessage.isCommandMessage()
+								&& microDialogMessage
+										.isMessageExpectsAnswer()) {
+							getMessageExpectsAnswerCheckBox().setValue(false);
+						}
+
+						adjust();
+					}
+				});
+
+		val messageExpectsAnswerCheckBox = getMessageExpectsAnswerCheckBox();
+		messageExpectsAnswerCheckBox
+				.setValue(microDialogMessage.isMessageExpectsAnswer());
+
+		messageExpectsAnswerCheckBox
+				.addValueChangeListener(new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						getInterventionAdministrationManagerService()
+								.microDialogMessageSetMessageExpectsAnswer(
+										microDialogMessage, (boolean) event
+												.getProperty().getValue());
+
+						if (!microDialogMessage.isMessageExpectsAnswer()
+								&& microDialogMessage
+										.isMessageBlocksMicroDialogUntilAnswered()) {
+							getMessageBlocksMicroDialogUntilAnsweredCheckBox()
+									.setValue(false);
+						}
+
+						adjust();
+					}
+				});
+
+		val messageBlocksMicroDialogUntilAnsweredCheckBox = getMessageBlocksMicroDialogUntilAnsweredCheckBox();
+		messageBlocksMicroDialogUntilAnsweredCheckBox.setValue(
+				microDialogMessage.isMessageBlocksMicroDialogUntilAnswered());
+
+		messageBlocksMicroDialogUntilAnsweredCheckBox
+				.addValueChangeListener(new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						getInterventionAdministrationManagerService()
+								.microDialogMessageSetMessageBlocksMicroDialogUntilAnsweredCheckBox(
 										microDialogMessage, (boolean) event
 												.getProperty().getValue());
 					}
@@ -221,6 +291,51 @@ public class MicroDialogMessageEditComponentWithController
 				.setValue(microDialogMessage.getStoreValueToVariableWithName());
 		getAnswerOptionsTextFieldComponent().setValue(microDialogMessage
 				.getAnswerOptionsWithPlaceholders().toString());
+		getNoReplyTextFieldComponent()
+				.setValue(microDialogMessage.getNoReplyValue());
+
+		if (microDialogMessage.isCommandMessage()) {
+			getMessageExpectsAnswerCheckBox().setEnabled(false);
+		} else {
+			getMessageExpectsAnswerCheckBox().setEnabled(true);
+		}
+
+		if (!microDialogMessage.isMessageExpectsAnswer()) {
+			getMessageBlocksMicroDialogUntilAnsweredCheckBox()
+					.setEnabled(false);
+			getAnswerGridLayout().setEnabled(false);
+			getMinutesUntilHandledAsNotAnsweredSlider().setEnabled(false);
+		} else {
+			getMessageBlocksMicroDialogUntilAnsweredCheckBox().setEnabled(true);
+			getAnswerGridLayout().setEnabled(true);
+			getMinutesUntilHandledAsNotAnsweredSlider().setEnabled(true);
+		}
+
+		// Adjust sliders
+		final int daysUntilMessageIsHandledAsUnanswered = (int) Math.floor(
+				microDialogMessage.getMinutesUntilMessageIsHandledAsUnanswered()
+						/ 60 / 24);
+		final int hoursWithoutDaysUntilMessageIsHandledAsUnanswered = (int) Math
+				.floor(microDialogMessage
+						.getMinutesUntilMessageIsHandledAsUnanswered() / 60)
+				- daysUntilMessageIsHandledAsUnanswered * 24;
+		final int minutesWithoutHoursAndDaysUntilMessageIsHandledAsUnanswered = microDialogMessage
+				.getMinutesUntilMessageIsHandledAsUnanswered()
+				- daysUntilMessageIsHandledAsUnanswered * 24 * 60
+				- hoursWithoutDaysUntilMessageIsHandledAsUnanswered * 60;
+
+		localize(getMinutesUntilHandledAsNotAnsweredSlider(),
+				AdminMessageStrings.MICRO_DIALOG_MESSAGE_EDITING__TIMEFRAME_AFTER_SENDING_UNTIL_HANDLED_AS_NOT_ANSWERED_VALUE,
+				daysUntilMessageIsHandledAsUnanswered,
+				hoursWithoutDaysUntilMessageIsHandledAsUnanswered,
+				minutesWithoutHoursAndDaysUntilMessageIsHandledAsUnanswered);
+		try {
+			getMinutesUntilHandledAsNotAnsweredSlider()
+					.setValue((double) microDialogMessage
+							.getMinutesUntilMessageIsHandledAsUnanswered());
+		} catch (final Exception e) {
+			// Do nothing
+		}
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
@@ -246,6 +361,19 @@ public class MicroDialogMessageEditComponentWithController
 			} else if (event.getButton() == getAnswerOptionsTextFieldComponent()
 					.getButton()) {
 				editAnswerOptionsWithPlaceholder();
+			} else if (event.getButton() == getNoReplyTextFieldComponent()
+					.getButton()) {
+				editNoReplyValue();
+			} else if (event.getButton() == getMinutesButton1()) {
+				getMinutesUntilHandledAsNotAnsweredSlider().setValue(1d);
+			} else if (event.getButton() == getMinutesButton5()) {
+				getMinutesUntilHandledAsNotAnsweredSlider().setValue(5d);
+			} else if (event.getButton() == getMinutesButton10()) {
+				getMinutesUntilHandledAsNotAnsweredSlider().setValue(10d);
+			} else if (event.getButton() == getMinutesButton30()) {
+				getMinutesUntilHandledAsNotAnsweredSlider().setValue(30d);
+			} else if (event.getButton() == getMinutesButton60()) {
+				getMinutesUntilHandledAsNotAnsweredSlider().setValue(60d);
 			}
 			event.getButton().setEnabled(true);
 		}
@@ -334,6 +462,35 @@ public class MicroDialogMessageEditComponentWithController
 											microDialogMessage,
 											getLStringValue(),
 											allPossibleMessageVariables);
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						adjust();
+
+						closeWindow();
+					}
+				}, null);
+	}
+
+	public void editNoReplyValue() {
+		log.debug("Edit no reply value");
+
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_VALUE_ON_NO_REPLY,
+				microDialogMessage.getNoReplyValue(), null,
+				new ShortStringEditComponent(),
+				new ExtendableButtonClickListener() {
+
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Change no reply value
+							getInterventionAdministrationManagerService()
+									.microDialogMessageSetNoReplyValue(
+											microDialogMessage,
+											getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -459,5 +616,22 @@ public class MicroDialogMessageEditComponentWithController
 		getInterventionAdministrationManagerService()
 				.microDialogMessageSetLinkedMediaObject(microDialogMessage,
 						mediaObjectId);
+	}
+
+	private class SliderValueChangeListener implements ValueChangeListener {
+
+		@Override
+		public void valueChange(final ValueChangeEvent event) {
+			if (event
+					.getProperty() == getMinutesUntilHandledAsNotAnsweredSlider()) {
+				getInterventionAdministrationManagerService()
+						.microDialogMessageSetMinutesUntilMessageIsHandledAsUnanswered(
+								microDialogMessage,
+								((Double) event.getProperty().getValue())
+										.intValue());
+			}
+
+			adjust();
+		}
 	}
 }

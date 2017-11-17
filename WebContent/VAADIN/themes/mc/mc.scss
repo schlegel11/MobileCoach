@@ -193,6 +193,19 @@ input.gwt-FileUpload {
         background-position: 5px;
         text-indent: 20px;
     }
+    .v-table-cell-content-message {
+        background-image: url("img/message-icon-small.png");
+        background-repeat: no-repeat;
+        background-position: 5px;
+        text-indent: 20px;
+    }
+    .v-table-cell-content-decision-point {
+        background-image: url("img/rule-icon-small.png");
+        background-repeat: no-repeat;
+        background-position: 5px;
+        text-indent: 20px;
+        font-weight: bold;
+    }
     /* Own styles */
     /* about-window */
     .about-window .about-text {

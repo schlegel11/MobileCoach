@@ -243,7 +243,7 @@ public class PlaceholderStringEditWithMessageGroupSelectionComponent
 		minutesUntilHandledAsNotAnsweredSlider.setMin(
 				ImplementationConstants.MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MIN);
 		minutesUntilHandledAsNotAnsweredSlider.setMax(
-				ImplementationConstants.MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX_MANUAL);
+				ImplementationConstants.MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX_MANUAL_MESSAGE);
 		minutesUntilHandledAsNotAnsweredSlider.setEnabled(false);
 
 		stringTextArea.focus();

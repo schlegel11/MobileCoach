@@ -79,6 +79,7 @@ public class Queries {
 	public static final String	MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG																																											= "{'microDialog':#}";
 	public static final String	MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG_AND_ORDER_LOWER																																							= "{'microDialog':#,'order':{$lt:#}}";
 	public static final String	MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG_AND_ORDER_HIGHER																																							= "{'microDialog':#,'order':{$gt:#}}";
+	public static final String	MICRO_DIALOG_MESSAGE__BY_LINKED_INTERMEDIATE_SURVEY																																								= "{'linkedIntermediateSurvey':#}";
 	public static final String	MICRO_DIALOG_MESSAGE__SORT_BY_ORDER_ASC																																											= "{'order':1}";
 	public static final String	MICRO_DIALOG_MESSAGE__SORT_BY_ORDER_DESC																																										= "{'order':-1}";
 
@@ -222,7 +223,7 @@ public class Queries {
 	public static final String	UPDATE_VERSION_12__MONITORING_RULE__CHANGE_1																																									= "{$set:{'type':'NORMAL'}}";
 	public static final String	UPDATE_VERSION_13__MONITORING_RULE__CHANGE_1																																									= "{$set:{'markCaseAsSolvedWhenTrue':false}}";
 	public static final String	UPDATE_VERSION_14__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'type':'PLAIN'}}";
-	public static final String	UPDATE_VERSION_14__MONITORING_MESSAGE__CHANGE_1																																									= "{$set:{'isCommandMessage':false}}";
+	public static final String	UPDATE_VERSION_14__MONITORING_MESSAGE__CHANGE_1																																									= "{$set:{'commandMessage':false}}";
 	public static final String	UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_1_FIELD																																								= "message";
 	public static final String	UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_1_CHANGE																																								= "{$set:{'messageWithForcedLinks':#}}";
 	public static final String	UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_2																																										= "{$set:{'surveyLink':null}}";
@@ -236,4 +237,8 @@ public class Queries {
 	public static final String	UPDATE_VERSION_16__MONITORING_RULE__CHANGE_1_CHANGE																																								= "{$set:{'minutesUntilMessageIsHandledAsUnanswered':#}}";
 	public static final String	UPDATE_VERSION_16__MONITORING_RULE__CHANGE_1_REMOVE																																								= "{$unset:{'"
 			+ UPDATE_VERSION_16__MONITORING_RULE__CHANGE_1_FIELD + "':1}}";
+	public static final String	UPDATE_VERSION_20__MONITORING_MESSAGE__CHANGE_1_FIELD																																							= "isCommandMessage";
+	public static final String	UPDATE_VERSION_20__MONITORING_MESSAGE__CHANGE_1_CHANGE																																							= "{$set:{'commandMessage':#}}";
+	public static final String	UPDATE_VERSION_20__MONITORING_MESSAGE__CHANGE_1_REMOVE																																							= "{$unset:{'"
+			+ UPDATE_VERSION_20__MONITORING_MESSAGE__CHANGE_1_FIELD + "':1}}";
 }

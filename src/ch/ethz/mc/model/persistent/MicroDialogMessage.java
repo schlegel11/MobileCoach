@@ -34,7 +34,7 @@ import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.concepts.MicroDialogElementInterface;
 import ch.ethz.mc.model.persistent.subelements.LString;
 import ch.ethz.mc.model.persistent.types.AnswerTypes;
-import ch.ethz.mc.model.ui.UIAbstractMicroDialogElement;
+import ch.ethz.mc.model.ui.UIMicroDialogElementInterface;
 import ch.ethz.mc.model.ui.UIModelObject;
 import ch.ethz.mc.tools.StringHelpers;
 import lombok.AllArgsConstructor;
@@ -88,7 +88,7 @@ public class MicroDialogMessage extends ModelObject
 	 */
 	@Getter
 	@Setter
-	private boolean		isCommandMessage;
+	private boolean		commandMessage;
 
 	/**
 	 * <strong>OPTIONAL:</strong> The {@link MediaObject} used/presented in this
@@ -116,6 +116,15 @@ public class MicroDialogMessage extends ModelObject
 	private boolean		messageExpectsAnswer;
 
 	/**
+	 * Defines if the {@link MicroDialogMessage}s in the group expect to be
+	 * answeres by the {@link Participant}
+	 *
+	 */
+	@Getter
+	@Setter
+	private boolean		messageBlocksMicroDialogUntilAnswered;
+
+	/**
 	 * <strong>OPTIONAL:</strong> If the result of the
 	 * {@link MicroDialogMessage}
 	 * should be
@@ -140,15 +149,6 @@ public class MicroDialogMessage extends ModelObject
 	@Setter
 	@NonNull
 	private AnswerTypes	answerType;
-
-	/**
-	 * Defines if the {@link MicroDialogMessage}s in the group expect to be
-	 * answeres by the {@link Participant}
-	 *
-	 */
-	@Getter
-	@Setter
-	private boolean		messageBlocksMicroDialogUntilAnswered;
 
 	/**
 	 * <strong>OPTIONAL if sendMessageIfTrue is false:</strong> The minutes a
@@ -206,11 +206,11 @@ public class MicroDialogMessage extends ModelObject
 			}
 		}
 
-		final val microDialogMessage = new UIAbstractMicroDialogElement(
+		final val microDialogMessage = new UIMicroDialogElementInterface(
 				getOrder(),
 				Messages.getAdminString(AdminMessageStrings.UI_MODEL__MESSAGE),
 				true, textWithPlaceholders.toShortenedString(80),
-				isCommandMessage
+				commandMessage
 						? Messages.getAdminString(
 								AdminMessageStrings.UI_MODEL__YES)
 						: Messages.getAdminString(
@@ -227,7 +227,7 @@ public class MicroDialogMessage extends ModelObject
 								AdminMessageStrings.UI_MODEL__NO),
 				messageExpectsAnswer
 						? Messages.getAdminString(
-								AdminMessageStrings.UI_MODEL__NO)
+								AdminMessageStrings.UI_MODEL__EXPECTS_NO_ANSWER)
 						: answerType.toString(),
 				storeValueToVariableWithName != null
 						? storeValueToVariableWithName : "",

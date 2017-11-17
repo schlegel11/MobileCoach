@@ -8,6 +8,7 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.model.ui.UIMicroDialogElementInterface;
 import ch.ethz.mc.ui.views.components.AbstractCustomComponent;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
@@ -31,6 +32,7 @@ import ch.ethz.mc.ui.views.components.AbstractCustomComponent;
  */
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.val;
 
 /**
  * Provides the micro dialog edit component
@@ -78,14 +80,40 @@ public class MicroDialogEditComponent extends AbstractCustomComponent {
 
 		// manually added
 		localize(newMessageButton,
-				AdminMessageStrings.MICRO_DIALOG_DIALOG_EDITING__NEW_MESSAGE);
+				AdminMessageStrings.MICRO_DIALOG_EDITING__NEW_MESSAGE);
 		localize(newDecisionPointButton,
-				AdminMessageStrings.MICRO_DIALOG_DIALOG_EDITING__NEW_DECISION_POINT);
+				AdminMessageStrings.MICRO_DIALOG_EDITING__NEW_DECISION_POINT);
 		localize(editButton, AdminMessageStrings.GENERAL__EDIT);
 		localize(duplicateButton, AdminMessageStrings.GENERAL__DUPLICATE);
 		localize(moveUpButton, AdminMessageStrings.GENERAL__MOVE_UP);
 		localize(moveDownButton, AdminMessageStrings.GENERAL__MOVE_DOWN);
 		localize(deleteButton, AdminMessageStrings.GENERAL__DELETE);
+
+		// set table formatter
+		microDialogElementsTable
+				.setCellStyleGenerator(new Table.CellStyleGenerator() {
+					@Override
+					public String getStyle(final Table source,
+							final Object itemId, final Object propertyId) {
+						if (propertyId != null) {
+							if (propertyId.equals(
+									UIMicroDialogElementInterface.TYPE)) {
+								final val uiMicroDialogElement = getUIModelObjectFromTableByObjectId(
+										source,
+										UIMicroDialogElementInterface.class,
+										itemId);
+
+								if (uiMicroDialogElement.isMessage()) {
+									return "message";
+								} else {
+									return "decision-point";
+								}
+							}
+						}
+
+						return null;
+					}
+				});
 
 		// set button start state
 		setNothingSelected();
@@ -125,7 +153,7 @@ public class MicroDialogEditComponent extends AbstractCustomComponent {
 		microDialogElementsTable = new Table();
 		microDialogElementsTable.setImmediate(false);
 		microDialogElementsTable.setWidth("100.0%");
-		microDialogElementsTable.setHeight("250px");
+		microDialogElementsTable.setHeight("300px");
 		mainLayout.addComponent(microDialogElementsTable);
 
 		// buttonLayout

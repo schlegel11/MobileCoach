@@ -32,7 +32,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class UIAbstractMicroDialogElement extends UIModelObject {
+public class UIMicroDialogElementInterface extends UIModelObject {
 	// NOTE: The String values have to fit the name of the variables
 	public static final String	ORDER									= "order";
 	public static final String	TYPE									= "type";
@@ -76,21 +76,21 @@ public class UIAbstractMicroDialogElement extends UIModelObject {
 	private int					containsRules;
 
 	public static Object[] getVisibleColumns() {
-		return new Object[] { TYPE, TEXT_WITH_PLACEHOLDERS, IS_COMMAND_MESSAGE,
-				CONTAINS_MEDIA_CONTENT, CONTAINS_LINK_TO_INTERMEDIATE_SURVEY,
-				ANSWER_TYPE, RESULT_VARIABLE, CONTAINS_RULES };
+		return new Object[] { TYPE, TEXT_WITH_PLACEHOLDERS, ANSWER_TYPE,
+				RESULT_VARIABLE, IS_COMMAND_MESSAGE, CONTAINS_MEDIA_CONTENT,
+				CONTAINS_LINK_TO_INTERMEDIATE_SURVEY, CONTAINS_RULES };
 	}
 
 	public static String[] getColumnHeaders() {
 		return new String[] { localize(AdminMessageStrings.UI_COLUMNS__TYPE),
 				localize(AdminMessageStrings.UI_COLUMNS__MESSAGE_TEXT),
+				localize(AdminMessageStrings.UI_COLUMNS__ANSWER_TYPE),
+				localize(AdminMessageStrings.UI_COLUMNS__RESULT_VARIABLE),
 				localize(AdminMessageStrings.UI_COLUMNS__COMMAND_MESSAGE),
 				localize(
 						AdminMessageStrings.UI_COLUMNS__CONTAINS_MEDIA_CONTENT),
 				localize(
 						AdminMessageStrings.UI_COLUMNS__CONTAINS_LINK_TO_INTERMEDIATE_SURVEY),
-				localize(AdminMessageStrings.UI_COLUMNS__ANSWER_TYPE),
-				localize(AdminMessageStrings.UI_COLUMNS__RESULT_VARIABLE),
 				localize(AdminMessageStrings.UI_COLUMNS__CONTAINS_RULES) };
 	}
 

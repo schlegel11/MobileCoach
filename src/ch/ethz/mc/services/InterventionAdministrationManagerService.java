@@ -255,8 +255,8 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void authorSetPassword(final Author author,
-			final String newPassword) throws NotificationMessageException {
+	public void authorSetPassword(final Author author, final String newPassword)
+			throws NotificationMessageException {
 		if (newPassword.length() < 5) {
 			throw new NotificationMessageException(
 					AdminMessageStrings.NOTIFICATION__THE_GIVEN_PASSWORD_IS_NOT_SAFE);
@@ -1102,8 +1102,8 @@ public class InterventionAdministrationManagerService {
 	public MicroDialogMessage microDialogMessageCreate(
 			final ObjectId microDialogId) {
 		val microDialogMessage = new MicroDialogMessage(microDialogId, 0,
-				new LString(), false, null, null, false, null, null,
-				AnswerTypes.FREE_TEXT, false,
+				new LString(), false, null, null, false, false, null, null,
+				AnswerTypes.FREE_TEXT,
 				ImplementationConstants.DEFAULT_MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED,
 				new LString());
 
@@ -1161,6 +1161,25 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
+	public void microDialogMessageSetMessageExpectsAnswer(
+			final MicroDialogMessage microDialogMessage,
+			final boolean messageExpectsAnswer) {
+		microDialogMessage.setMessageExpectsAnswer(messageExpectsAnswer);
+
+		databaseManagerService.saveModelObject(microDialogMessage);
+	}
+
+	@Synchronized
+	public void microDialogMessageSetMessageBlocksMicroDialogUntilAnsweredCheckBox(
+			final MicroDialogMessage microDialogMessage,
+			final boolean messageBlocksMicroDialog) {
+		microDialogMessage.setMessageBlocksMicroDialogUntilAnswered(
+				messageBlocksMicroDialog);
+
+		databaseManagerService.saveModelObject(microDialogMessage);
+	}
+
+	@Synchronized
 	public void microDialogMessageSetTextWithPlaceholders(
 			final MicroDialogMessage microDialogMessage,
 			final LString textWithPlaceholders,
@@ -1206,6 +1225,15 @@ public class InterventionAdministrationManagerService {
 
 			databaseManagerService.saveModelObject(microDialogMessage);
 		}
+	}
+
+	@Synchronized
+	public void microDialogMessageSetNoReplyValue(
+			final MicroDialogMessage microDialogMessage,
+			final String newValue) {
+		microDialogMessage.setNoReplyValue(newValue);
+
+		databaseManagerService.saveModelObject(microDialogMessage);
 	}
 
 	@Synchronized

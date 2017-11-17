@@ -79,15 +79,15 @@ public abstract class MicroDialogsTabComponent extends AbstractCustomComponent {
 
 		// manually added
 		localize(newDialogButton,
-				AdminMessageStrings.MICRO_DIALOG_DIALOG_EDITING__NEW_DIALOG);
+				AdminMessageStrings.MICRO_DIALOG_EDITING__NEW_DIALOG);
 		localize(renameDialogButton,
-				AdminMessageStrings.MICRO_DIALOG_DIALOG_EDITING__RENAME_DIALOG);
+				AdminMessageStrings.MICRO_DIALOG_EDITING__RENAME_DIALOG);
 		localize(moveDialogLeftButton,
-				AdminMessageStrings.MICRO_DIALOG_DIALOG_EDITING__MOVE_DIALOG_LEFT);
+				AdminMessageStrings.MICRO_DIALOG_EDITING__MOVE_DIALOG_LEFT);
 		localize(moveDialogRightButton,
-				AdminMessageStrings.MICRO_DIALOG_DIALOG_EDITING__MOVE_DIALOG_RIGHT);
+				AdminMessageStrings.MICRO_DIALOG_EDITING__MOVE_DIALOG_RIGHT);
 		localize(deleteDialogButton,
-				AdminMessageStrings.MICRO_DIALOG_DIALOG_EDITING__DELETE_DIALOG);
+				AdminMessageStrings.MICRO_DIALOG_EDITING__DELETE_DIALOG);
 
 		// set button start state
 		setNothingSelected();
