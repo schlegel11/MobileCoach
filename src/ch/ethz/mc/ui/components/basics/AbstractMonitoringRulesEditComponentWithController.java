@@ -550,7 +550,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 		}
 
 		showModalClosableEditWindow(
-				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__CREATE_MONITORING_RULE,
+				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__CREATE_RULE,
 				componentWithController, new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
@@ -560,7 +560,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 						rulesTree.select(newAbstractMonitoringRule.getId());
 
 						getAdminUI().showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__MONITORING_RULE_CREATED);
+								AdminMessageStrings.NOTIFICATION__RULE_CREATED);
 
 						adjust();
 
@@ -594,7 +594,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 		}
 
 		showModalClosableEditWindow(
-				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_MONITORING_RULE,
+				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__EDIT_RULE,
 				componentWithController, new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
@@ -629,7 +629,7 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 						item.getItemProperty(ICON).setValue(icon);
 
 						getAdminUI().showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__MONITORING_RULE_UPDATED);
+								AdminMessageStrings.NOTIFICATION__RULE_UPDATED);
 
 						adjust();
 

@@ -147,12 +147,12 @@ public class MicroDialogRuleEditComponent
 		// common part: create layout
 		mainLayout = new VerticalLayout();
 		mainLayout.setImmediate(false);
-		mainLayout.setWidth("800px");
+		mainLayout.setWidth("1050px");
 		mainLayout.setHeight("-1px");
 		mainLayout.setMargin(true);
 
 		// top-level component properties
-		setWidth("800px");
+		setWidth("1050px");
 		setHeight("-1px");
 
 		// abstractRuleEditComponentWithController
@@ -237,7 +237,7 @@ public class MicroDialogRuleEditComponent
 		// storeVariableTextFieldComponent
 		storeVariableTextFieldComponent = new VariableTextFieldComponent();
 		storeVariableTextFieldComponent.setImmediate(false);
-		storeVariableTextFieldComponent.setWidth("350px");
+		storeVariableTextFieldComponent.setWidth("400px");
 		storeVariableTextFieldComponent.setHeight("-1px");
 		gridLayout1.addComponent(storeVariableTextFieldComponent, 1, 0);
 		gridLayout1.setComponentAlignment(storeVariableTextFieldComponent,
@@ -270,7 +270,7 @@ public class MicroDialogRuleEditComponent
 		// nextMicroDialogMessageWhenTrueComboBox
 		nextMicroDialogMessageWhenTrueComboBox = new ComboBox();
 		nextMicroDialogMessageWhenTrueComboBox.setImmediate(false);
-		nextMicroDialogMessageWhenTrueComboBox.setWidth("350px");
+		nextMicroDialogMessageWhenTrueComboBox.setWidth("400px");
 		nextMicroDialogMessageWhenTrueComboBox.setHeight("-1px");
 		jumpGridLayout.addComponent(nextMicroDialogMessageWhenTrueComboBox, 1,
 				0);
@@ -289,7 +289,7 @@ public class MicroDialogRuleEditComponent
 		// nextMicroDialogMessageWhenFalseComboBox
 		nextMicroDialogMessageWhenFalseComboBox = new ComboBox();
 		nextMicroDialogMessageWhenFalseComboBox.setImmediate(false);
-		nextMicroDialogMessageWhenFalseComboBox.setWidth("350px");
+		nextMicroDialogMessageWhenFalseComboBox.setWidth("400px");
 		nextMicroDialogMessageWhenFalseComboBox.setHeight("-1px");
 		jumpGridLayout.addComponent(nextMicroDialogMessageWhenFalseComboBox, 1,
 				1);

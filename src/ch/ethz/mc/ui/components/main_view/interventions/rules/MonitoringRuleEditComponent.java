@@ -220,12 +220,12 @@ public class MonitoringRuleEditComponent extends AbstractClosableEditComponent {
 		// common part: create layout
 		mainLayout = new VerticalLayout();
 		mainLayout.setImmediate(false);
-		mainLayout.setWidth("800px");
+		mainLayout.setWidth("1050px");
 		mainLayout.setHeight("-1px");
 		mainLayout.setMargin(false);
 
 		// top-level component properties
-		setWidth("800px");
+		setWidth("1050px");
 		setHeight("-1px");
 
 		// topLayout

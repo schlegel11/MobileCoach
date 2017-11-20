@@ -94,12 +94,12 @@ public class MicroDialogDecisionPointEditComponent
 		// common part: create layout
 		mainLayout = new VerticalLayout();
 		mainLayout.setImmediate(false);
-		mainLayout.setWidth("800px");
+		mainLayout.setWidth("950px");
 		mainLayout.setHeight("-1px");
 		mainLayout.setMargin(false);
 
 		// top-level component properties
-		setWidth("800px");
+		setWidth("950px");
 		setHeight("-1px");
 
 		// topLayout

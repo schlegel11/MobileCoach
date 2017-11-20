@@ -44,8 +44,8 @@ import lombok.extern.log4j.Log4j2;
  */
 @SuppressWarnings("serial")
 @Log4j2
-public class AbstractRuleEditComponentWithController
-		extends AbstractRuleEditComponent implements ValueChangeListener {
+public class OldAbstractRuleEditComponentWithController
+		extends OldAbstractRuleEditComponent implements ValueChangeListener {
 
 	private RuleTypes							type;
 
@@ -62,7 +62,7 @@ public class AbstractRuleEditComponentWithController
 
 	private final VariableTextFieldComponent	commentComponent;
 
-	public AbstractRuleEditComponentWithController() {
+	public OldAbstractRuleEditComponentWithController() {
 		super();
 
 		commentComponent = getCommentVariableTextFieldComponent();
@@ -232,7 +232,6 @@ public class AbstractRuleEditComponentWithController
 		final List<String> allPossibleVariables;
 		switch (type) {
 			case MONITORING_RULES:
-			case MICRO_DIALOG_RULES:
 			case MONITORING_MESSAGE_RULES:
 			case MICRO_DIALOG_MESSAGE_RULES:
 				allPossibleVariables = getInterventionAdministrationManagerService()

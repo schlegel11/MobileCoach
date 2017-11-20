@@ -89,12 +89,12 @@ public class MicroDialogMessageRuleEditComponent
 		// common part: create layout
 		mainLayout = new VerticalLayout();
 		mainLayout.setImmediate(false);
-		mainLayout.setWidth("700px");
+		mainLayout.setWidth("1050px");
 		mainLayout.setHeight("-1px");
 		mainLayout.setMargin(true);
 
 		// top-level component properties
-		setWidth("700px");
+		setWidth("1050px");
 		setHeight("-1px");
 
 		// abstractRuleEditComponentWithController
