@@ -11,8 +11,10 @@ import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.memory.types.RuleTypes;
 import ch.ethz.mc.model.persistent.Intervention;
+import ch.ethz.mc.model.persistent.MicroDialog;
 import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
 import ch.ethz.mc.model.persistent.MonitoringRule;
+import ch.ethz.mc.model.ui.UIMicroDialog;
 import ch.ethz.mc.model.ui.UIMonitoringMessageGroup;
 import ch.ethz.mc.ui.components.basics.AbstractRuleEditComponentWithController;
 import ch.ethz.mc.ui.components.basics.ShortPlaceholderStringEditComponent;
@@ -84,7 +86,7 @@ public class MonitoringRuleEditComponentWithController
 		/*
 		 * Adjust own components
 		 */
-		// Handle combo box
+		// Handle combo boxes
 		currentMonitoringMessageGroup = null;
 		val allMonitoringMessageGroupsOfIntervention = getInterventionAdministrationManagerService()
 				.getAllMonitoringMessageGroupsOfIntervention(
@@ -149,6 +151,43 @@ public class MonitoringRuleEditComponentWithController
 					}
 				});
 
+		val allMicroDialogsOfIntervention = getInterventionAdministrationManagerService()
+				.getAllMicroDialogsOfIntervention(intervention.getId());
+		val microDialogComboBox = getMicroDialogComboBox();
+		for (val microDialog : allMicroDialogsOfIntervention) {
+			val uiMicroDialog = microDialog.toUIModelObject();
+			microDialogComboBox.addItem(uiMicroDialog);
+			if (microDialog.getId()
+					.equals(monitoringRule.getRelatedMicroDialog())) {
+				microDialogComboBox.select(uiMicroDialog);
+			}
+		}
+		microDialogComboBox.addValueChangeListener(new ValueChangeListener() {
+
+			@Override
+			public void valueChange(final ValueChangeEvent event) {
+				final UIMicroDialog uiMicroDialog = (UIMicroDialog) event
+						.getProperty().getValue();
+
+				ObjectId newMicroDialogId;
+				if (uiMicroDialog == null) {
+					newMicroDialogId = null;
+				} else {
+					newMicroDialogId = uiMicroDialog
+							.getRelatedModelObject(MicroDialog.class).getId();
+				}
+
+				log.debug("Adjust related micro dialog to {}",
+						newMicroDialogId);
+				getInterventionAdministrationManagerService()
+						.monitoringRuleChangeRelatedMicroDialog(monitoringRule,
+								newMicroDialogId);
+
+				adjust();
+
+			}
+		});
+
 		// Handle sliders
 		final val valueChangeListener = new SliderValueChangeListener();
 
@@ -210,6 +249,54 @@ public class MonitoringRuleEditComponentWithController
 								&& getSendToSupervisorCheckBox().getValue()) {
 							getSendToSupervisorCheckBox().setValue(false);
 						}
+						if (newValue
+								&& getStartMicroDialogCheckBox().getValue()) {
+							getStartMicroDialogCheckBox().setValue(false);
+						}
+						if (!newValue && getMessageGroupComboBox()
+								.getValue() != null) {
+							getMessageGroupComboBox().setValue(null);
+						}
+
+						adjust();
+					}
+				});
+
+		getStartMicroDialogCheckBox()
+				.setValue(monitoringRule.isActivateMicroDialogIfTrue());
+		getStartMicroDialogCheckBox()
+				.addValueChangeListener(new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						log.debug("Adjust start micro dialog if true");
+						val newValue = (boolean) event.getProperty().getValue();
+
+						getInterventionAdministrationManagerService()
+								.monitoringRuleChangeActivateMicroDialogIfTrue(
+										monitoringRule, (boolean) event
+												.getProperty().getValue());
+
+						if (newValue) {
+							if (getMarkCaseAsSolvedWhenTrueCheckBox()
+									.getValue()) {
+								getMarkCaseAsSolvedWhenTrueCheckBox()
+										.setValue(false);
+							}
+							if (getStopRuleExecutionAndFinishInterventionIfTrueCheckBox()
+									.getValue()) {
+								getStopRuleExecutionAndFinishInterventionIfTrueCheckBox()
+										.setValue(false);
+							}
+						}
+						if (newValue
+								&& getSendMessageIfTrueCheckBox().getValue()) {
+							getSendMessageIfTrueCheckBox().setValue(false);
+						}
+						if (!newValue && getMicroDialogComboBox()
+								.getValue() != null) {
+							getMicroDialogComboBox().setValue(null);
+						}
 
 						adjust();
 					}
@@ -267,8 +354,8 @@ public class MonitoringRuleEditComponentWithController
 							if (getSendMessageIfTrueCheckBox().getValue()) {
 								getSendMessageIfTrueCheckBox().setValue(false);
 							}
-							if (getSendToSupervisorCheckBox().getValue()) {
-								getSendToSupervisorCheckBox().setValue(false);
+							if (getStartMicroDialogCheckBox().getValue()) {
+								getStartMicroDialogCheckBox().setValue(false);
 							}
 							if (getStopRuleExecutionAndFinishInterventionIfTrueCheckBox()
 									.getValue()) {
@@ -299,8 +386,8 @@ public class MonitoringRuleEditComponentWithController
 							if (getSendMessageIfTrueCheckBox().getValue()) {
 								getSendMessageIfTrueCheckBox().setValue(false);
 							}
-							if (getSendToSupervisorCheckBox().getValue()) {
-								getSendToSupervisorCheckBox().setValue(false);
+							if (getStartMicroDialogCheckBox().getValue()) {
+								getStartMicroDialogCheckBox().setValue(false);
 							}
 							if (getMarkCaseAsSolvedWhenTrueCheckBox()
 									.getValue()) {
@@ -343,12 +430,10 @@ public class MonitoringRuleEditComponentWithController
 		getStoreVariableTextFieldComponent()
 				.setValue(monitoringRule.getStoreValueToVariableWithName());
 
-		// Adjust stop rule execution checkbox
+		// Adjust enabled status of UI elements
 		if (monitoringRule.isSendMessageIfTrue()) {
 			getMessageGroupLabel().setEnabled(true);
 			getMessageGroupComboBox().setEnabled(true);
-			getHourToSendMessageLabel().setEnabled(true);
-			getHourToSendMessageSlider().setEnabled(true);
 
 			if (currentMonitoringMessageGroup != null
 					&& !currentMonitoringMessageGroup
@@ -401,8 +486,6 @@ public class MonitoringRuleEditComponentWithController
 		} else {
 			getMessageGroupLabel().setEnabled(false);
 			getMessageGroupComboBox().setEnabled(false);
-			getHourToSendMessageLabel().setEnabled(false);
-			getHourToSendMessageSlider().setEnabled(false);
 
 			getMinutesButton1().setEnabled(false);
 			getMinutesButton5().setEnabled(false);
@@ -426,14 +509,29 @@ public class MonitoringRuleEditComponentWithController
 			getMonitoringReplyRulesEditComponentWithControllerIfNoAnswer()
 					.getRulesTree().setEnabled(false);
 		}
+		if (monitoringRule.isActivateMicroDialogIfTrue()) {
+			getMicroDialogLabel().setEnabled(true);
+			getMicroDialogComboBox().setEnabled(true);
+		} else {
+			getMicroDialogLabel().setEnabled(false);
+			getMicroDialogComboBox().setEnabled(false);
+		}
+		if (monitoringRule.isSendMessageIfTrue()
+				|| monitoringRule.isActivateMicroDialogIfTrue()) {
+			getHourToSendMessageLabel().setEnabled(true);
+			getHourToSendMessageSlider().setEnabled(true);
+		} else {
+			getHourToSendMessageLabel().setEnabled(false);
+			getHourToSendMessageSlider().setEnabled(false);
+		}
 
 		// Adjust sliders
 		localize(getHourToSendMessageSlider(),
 				AdminMessageStrings.MONITORING_RULE_EDITING__HOUR_TO_SEND_MESSAGE_VALUE,
-				monitoringRule.getHourToSendMessage());
+				monitoringRule.getHourToSendMessageOrActivateMicroDialog());
 		try {
-			getHourToSendMessageSlider()
-					.setValue((double) monitoringRule.getHourToSendMessage());
+			getHourToSendMessageSlider().setValue((double) monitoringRule
+					.getHourToSendMessageOrActivateMicroDialog());
 		} catch (final Exception e) {
 			// Do nothing
 		}
@@ -499,7 +597,7 @@ public class MonitoringRuleEditComponentWithController
 		public void valueChange(final ValueChangeEvent event) {
 			if (event.getProperty() == getHourToSendMessageSlider()) {
 				getInterventionAdministrationManagerService()
-						.monitoringRuleSetHourToSendMessage(monitoringRule,
+						.monitoringRuleSetHourToSendMessageOrActivateMicroDialog(monitoringRule,
 								((Double) event.getProperty().getValue())
 										.intValue());
 			} else if (event

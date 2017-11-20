@@ -1105,7 +1105,7 @@ public class InterventionExecutionManagerService {
 						// Calculate time to send message
 						long timeToSendMessageInMillis;
 						final int hourToSendMessage = monitoringRule
-								.getHourToSendMessage();
+								.getHourToSendMessageOrActivateMicroDialog();
 						if (hourToSendMessage > 0) {
 							final Calendar timeToSendMessage = Calendar
 									.getInstance();
@@ -1310,7 +1310,7 @@ public class InterventionExecutionManagerService {
 					// Calculate time to send message
 					long timeToSendMessageInMillis;
 					final int hourToSendMessage = monitoringRule
-							.getHourToSendMessage();
+							.getHourToSendMessageOrActivateMicroDialog();
 					if (hourToSendMessage > 0) {
 						final Calendar timeToSendMessage = Calendar
 								.getInstance();

@@ -22,12 +22,14 @@ package ch.ethz.mc.model.persistent;
  */
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
@@ -53,6 +55,14 @@ import lombok.val;
 @AllArgsConstructor
 public class MicroDialogDecisionPoint extends ModelObject
 		implements MicroDialogElementInterface {
+	/**
+	 * A comment for the author, not visible to any participant
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private String		comment;
+
 	/**
 	 * The {@link MicroDialog} this {@link MicroDialogDecisionPoint} belongs
 	 * to
@@ -96,7 +106,10 @@ public class MicroDialogDecisionPoint extends ModelObject
 				getOrder(),
 				Messages.getAdminString(
 						AdminMessageStrings.UI_MODEL__DECISION_POINT),
-				false, "", "", "", "", "", "", decisionPointRules);
+				false,
+				StringUtils.isBlank(comment)
+						? ImplementationConstants.DEFAULT_OBJECT_NAME : comment,
+				"", "", "", "", "", decisionPointRules);
 
 		microDialogMessage.setRelatedModelObject(this);
 

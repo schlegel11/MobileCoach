@@ -1445,7 +1445,7 @@ public class InterventionAdministrationManagerService {
 	@Synchronized
 	public MicroDialogDecisionPoint microDialogDecisionPointCreate(
 			final ObjectId microDialogId) {
-		val microDialogDecisionPoint = new MicroDialogDecisionPoint(
+		val microDialogDecisionPoint = new MicroDialogDecisionPoint("",
 				microDialogId, 0);
 
 		int newOrder = 0;
@@ -1472,6 +1472,19 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(microDialogDecisionPoint);
 
 		return microDialogDecisionPoint;
+	}
+
+	@Synchronized
+	public void microDialogDecisionPointSetComment(
+			final MicroDialogDecisionPoint microDialogDecisionPoint,
+			final String comment) throws NotificationMessageException {
+		if (comment == null) {
+			microDialogDecisionPoint.setComment("");
+		} else {
+			microDialogDecisionPoint.setComment(comment);
+		}
+
+		databaseManagerService.saveModelObject(microDialogDecisionPoint);
 	}
 
 	@Synchronized
@@ -2031,6 +2044,14 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
+	public void monitoringRuleChangeActivateMicroDialogIfTrue(
+			final MonitoringRule monitoringRule, final boolean newValue) {
+		monitoringRule.setActivateMicroDialogIfTrue(newValue);
+
+		databaseManagerService.saveModelObject(monitoringRule);
+	}
+
+	@Synchronized
 	public void monitoringRuleSetSendMessageToSupervisor(
 			final MonitoringRule monitoringRule, final boolean newValue) {
 		monitoringRule.setSendMessageToSupervisor(newValue);
@@ -2065,6 +2086,15 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
+	public void monitoringRuleChangeRelatedMicroDialog(
+			final MonitoringRule monitoringRule,
+			final ObjectId newMicroDialogId) {
+		monitoringRule.setRelatedMicroDialog(newMicroDialogId);
+
+		databaseManagerService.saveModelObject(monitoringRule);
+	}
+
+	@Synchronized
 	public void monitoringRuleSetStoreResultToVariable(
 			final MonitoringRule monitoringRule, final String variableName)
 			throws NotificationMessageException {
@@ -2092,9 +2122,9 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void monitoringRuleSetHourToSendMessage(
+	public void monitoringRuleSetHourToSendMessageOrActivateMicroDialog(
 			final MonitoringRule monitoringRule, final int newValue) {
-		monitoringRule.setHourToSendMessage(newValue);
+		monitoringRule.setHourToSendMessageOrActivateMicroDialog(newValue);
 
 		databaseManagerService.saveModelObject(monitoringRule);
 	}
@@ -2286,6 +2316,15 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
+	public void monitoringReplyRuleChangeActivateMicroDialogIfTrue(
+			final MonitoringReplyRule monitoringReplyRule,
+			final boolean newValue) {
+		monitoringReplyRule.setActivateMicroDialogIfTrue(newValue);
+
+		databaseManagerService.saveModelObject(monitoringReplyRule);
+	}
+
+	@Synchronized
 	public void monitoringReplyRuleChangeSendMessageToSupervisor(
 			final MonitoringReplyRule monitoringReplyRule,
 			final boolean newValue) {
@@ -2300,6 +2339,15 @@ public class InterventionAdministrationManagerService {
 			final ObjectId newMonitoringMessageGroupId) {
 		monitoringReplyRule
 				.setRelatedMonitoringMessageGroup(newMonitoringMessageGroupId);
+
+		databaseManagerService.saveModelObject(monitoringReplyRule);
+	}
+
+	@Synchronized
+	public void monitoringReplyRuleChangeRelatedMicroDialog(
+			final MonitoringReplyRule monitoringReplyRule,
+			final ObjectId newMicroDialogId) {
+		monitoringReplyRule.setRelatedMicroDialog(newMicroDialogId);
 
 		databaseManagerService.saveModelObject(monitoringReplyRule);
 	}

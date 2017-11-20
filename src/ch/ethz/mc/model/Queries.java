@@ -245,6 +245,10 @@ public class Queries {
 	public static final String	UPDATE_VERSION_20__MONITORING_MESSAGE__CHANGE_1_CHANGE																																							= "{$set:{'commandMessage':#}}";
 	public static final String	UPDATE_VERSION_20__MONITORING_MESSAGE__CHANGE_1_REMOVE																																							= "{$unset:{'"
 			+ UPDATE_VERSION_20__MONITORING_MESSAGE__CHANGE_1_FIELD + "':1}}";
+	public static final String	UPDATE_VERSION_20__MONITORING_RULE__CHANGE_1_FIELD																																								= "hourToSendMessage";
+	public static final String	UPDATE_VERSION_20__MONITORING_RULE__CHANGE_1_CHANGE																																								= "{$set:{'hourToSendMessageOrActivateMicroDialog':#}}";
+	public static final String	UPDATE_VERSION_20__MONITORING_RULE__CHANGE_1_REMOVE																																								= "{$unset:{'"
+			+ UPDATE_VERSION_20__MONITORING_RULE__CHANGE_1_FIELD + "':1}}";
 	public static final String	UPDATE_VERSION_20__ABSTRACT_MONITORING_RULE__CHANGE_1																																							= "{$set:{'activateMicroDialogIfTrue':false}}";
 	public static final String	UPDATE_VERSION_20__ABSTRACT_MONITORING_RULE__CHANGE_2																																							= "{$set:{'relatedMicroDialog':null}}";
 	public static final String	UPDATE_VERSION_20__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'relatedMicroDialogForActivation':null}}";

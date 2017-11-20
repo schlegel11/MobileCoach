@@ -67,7 +67,8 @@ public class MonitoringRule extends AbstractMonitoringRule {
 			final ObjectId relatedMonitoringMessageGroup,
 			final boolean activateMicroDialogIfTrue,
 			final ObjectId relatedMicroDialog, final MonitoringRuleTypes type,
-			final ObjectId intervention, final int hourToSendMessage,
+			final ObjectId intervention,
+			final int hourToSendMessageOrActivateMicroDialog,
 			final int minutesUntilMessageIsHandledAsUnanswered,
 			final boolean stopInterventionWhenTrue,
 			final boolean markCaseAsSolvedWhenTrue) {
@@ -80,7 +81,7 @@ public class MonitoringRule extends AbstractMonitoringRule {
 
 		this.type = type;
 		this.intervention = intervention;
-		this.hourToSendMessage = hourToSendMessage;
+		this.hourToSendMessageOrActivateMicroDialog = hourToSendMessageOrActivateMicroDialog;
 		this.minutesUntilMessageIsHandledAsUnanswered = minutesUntilMessageIsHandledAsUnanswered;
 		this.stopInterventionWhenTrue = stopInterventionWhenTrue;
 		this.markCaseAsSolvedWhenTrue = markCaseAsSolvedWhenTrue;
@@ -103,12 +104,13 @@ public class MonitoringRule extends AbstractMonitoringRule {
 	private ObjectId			intervention;
 
 	/**
-	 * <strong>OPTIONAL if sendMessageIfTrue is false:</strong> The hour the
+	 * <strong>OPTIONAL if sendMessageIfTrue and activateMicroDialogIfTrue are
+	 * both false:</strong> The hour the
 	 * message should be sent
 	 */
 	@Getter
 	@Setter
-	private int					hourToSendMessage;
+	private int					hourToSendMessageOrActivateMicroDialog;
 
 	/**
 	 * <strong>OPTIONAL if sendMessageIfTrue is false:</strong> The minutes a
@@ -206,8 +208,10 @@ public class MonitoringRule extends AbstractMonitoringRule {
 				+ wrapField(formatYesNo(stopInterventionWhenTrue)));
 
 		if (isSendMessageIfTrue()) {
-			table += wrapRow(wrapHeader("Hour to send message:", style)
-					+ wrapField(escape(hourToSendMessage + ":00")));
+			table += wrapRow(wrapHeader(
+					"Hour to send message or activate micro dialog:", style)
+					+ wrapField(escape(
+							hourToSendMessageOrActivateMicroDialog + ":00")));
 		}
 
 		if (getRelatedMonitoringMessageGroup() != null) {

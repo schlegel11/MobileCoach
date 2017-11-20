@@ -37,15 +37,15 @@ import lombok.val;
 @EqualsAndHashCode(callSuper = false)
 public class UIMicroDialogElementInterface extends UIModelObject {
 	// NOTE: The String values have to fit the name of the variables
-	public static final String	ORDER									= "order";
-	public static final String	TYPE									= "type";
-	public static final String	TEXT_WITH_PLACEHOLDERS					= "textWithPlaceholders";
-	public static final String	IS_COMMAND_MESSAGE						= "isCommandMessage";
-	public static final String	CONTAINS_MEDIA_CONTENT					= "containsMediaContent";
-	public static final String	CONTAINS_LINK_TO_INTERMEDIATE_SURVEY	= "containsLinkToIntermediateSurvey";
-	public static final String	ANSWER_TYPE								= "answerType";
-	public static final String	RESULT_VARIABLE							= "resultVariable";
-	public static final String	CONTAINS_RULES							= "containsRules";
+	public static final String	ORDER										= "order";
+	public static final String	TYPE										= "type";
+	public static final String	MESSAGE_TEXT_WITH_PLACEHOLDERS_OR_COMMENT	= "messageTextWithPlaceholdersOrComment";
+	public static final String	IS_COMMAND_MESSAGE							= "isCommandMessage";
+	public static final String	CONTAINS_MEDIA_CONTENT						= "containsMediaContent";
+	public static final String	CONTAINS_LINK_TO_INTERMEDIATE_SURVEY		= "containsLinkToIntermediateSurvey";
+	public static final String	ANSWER_TYPE									= "answerType";
+	public static final String	RESULT_VARIABLE								= "resultVariable";
+	public static final String	CONTAINS_RULES								= "containsRules";
 
 	@PropertyId(ORDER)
 	private int					order;
@@ -55,10 +55,10 @@ public class UIMicroDialogElementInterface extends UIModelObject {
 
 	@Getter
 	@Setter
-	private boolean				isMessage								= false;
+	private boolean				isMessage									= false;
 
-	@PropertyId(TEXT_WITH_PLACEHOLDERS)
-	private String				textWithPlaceholders;
+	@PropertyId(MESSAGE_TEXT_WITH_PLACEHOLDERS_OR_COMMENT)
+	private String				messageTextWithPlaceholdersOrComment;
 
 	@PropertyId(IS_COMMAND_MESSAGE)
 	private String				isCommandMessage;
@@ -79,14 +79,16 @@ public class UIMicroDialogElementInterface extends UIModelObject {
 	private int					containsRules;
 
 	public static Object[] getVisibleColumns() {
-		return new Object[] { TYPE, TEXT_WITH_PLACEHOLDERS, ANSWER_TYPE,
-				RESULT_VARIABLE, IS_COMMAND_MESSAGE, CONTAINS_MEDIA_CONTENT,
-				CONTAINS_LINK_TO_INTERMEDIATE_SURVEY, CONTAINS_RULES };
+		return new Object[] { TYPE, MESSAGE_TEXT_WITH_PLACEHOLDERS_OR_COMMENT,
+				ANSWER_TYPE, RESULT_VARIABLE, IS_COMMAND_MESSAGE,
+				CONTAINS_MEDIA_CONTENT, CONTAINS_LINK_TO_INTERMEDIATE_SURVEY,
+				CONTAINS_RULES };
 	}
 
 	public static String[] getColumnHeaders() {
 		return new String[] { localize(AdminMessageStrings.UI_COLUMNS__TYPE),
-				localize(AdminMessageStrings.UI_COLUMNS__MESSAGE_TEXT),
+				localize(
+						AdminMessageStrings.UI_COLUMNS__MESSAGE_TEXT_OR_COMMENT),
 				localize(AdminMessageStrings.UI_COLUMNS__ANSWER_TYPE),
 				localize(AdminMessageStrings.UI_COLUMNS__RESULT_VARIABLE),
 				localize(AdminMessageStrings.UI_COLUMNS__COMMAND_MESSAGE),

@@ -367,15 +367,34 @@ public class DataModelUpdateManager {
 			}
 			monitoringMessageCollection.update((ObjectId) document.get("_id"))
 					.with(Queries.UPDATE_VERSION_20__MONITORING_MESSAGE__CHANGE_1_REMOVE);
-			monitoringMessageCollection.update((ObjectId) document.get("_id"))
-					.with("{$unset:{'minutesUntilMessageIsHandledAsUnanswered':1}}");
 		}
 
+		val mongoDriverMonitoringRuleCollection = jongo.getDatabase()
+				.getCollection("MonitoringRule");
 		val monitoringRuleCollection = jongo.getCollection("MonitoringRule");
 		monitoringRuleCollection.update(Queries.EVERYTHING).multi().with(
 				Queries.UPDATE_VERSION_20__ABSTRACT_MONITORING_RULE__CHANGE_1);
 		monitoringRuleCollection.update(Queries.EVERYTHING).multi().with(
 				Queries.UPDATE_VERSION_20__ABSTRACT_MONITORING_RULE__CHANGE_2);
+
+		for (final DBObject document : mongoDriverMonitoringRuleCollection
+				.find().snapshot()) {
+
+			val formerValue = document.get(
+					Queries.UPDATE_VERSION_20__MONITORING_RULE__CHANGE_1_FIELD);
+
+			if (formerValue == null) {
+				monitoringRuleCollection.update((ObjectId) document.get("_id"))
+						.with(Queries.UPDATE_VERSION_20__MONITORING_RULE__CHANGE_1_CHANGE,
+								false);
+			} else {
+				monitoringRuleCollection.update((ObjectId) document.get("_id"))
+						.with(Queries.UPDATE_VERSION_20__MONITORING_RULE__CHANGE_1_CHANGE,
+								formerValue);
+			}
+			monitoringRuleCollection.update((ObjectId) document.get("_id"))
+					.with(Queries.UPDATE_VERSION_20__MONITORING_RULE__CHANGE_1_REMOVE);
+		}
 
 		val monitoringReplyRuleCollection = jongo
 				.getCollection("MonitoringReplyRule");

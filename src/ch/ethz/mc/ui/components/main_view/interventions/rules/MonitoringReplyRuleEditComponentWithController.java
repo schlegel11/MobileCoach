@@ -1,5 +1,22 @@
 package ch.ethz.mc.ui.components.main_view.interventions.rules;
 
+import org.bson.types.ObjectId;
+
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+
+import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.model.memory.types.RuleTypes;
+import ch.ethz.mc.model.persistent.Intervention;
+import ch.ethz.mc.model.persistent.MicroDialog;
+import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
+import ch.ethz.mc.model.persistent.MonitoringReplyRule;
+import ch.ethz.mc.model.ui.UIMicroDialog;
+import ch.ethz.mc.model.ui.UIMonitoringMessageGroup;
+import ch.ethz.mc.ui.components.basics.AbstractRuleEditComponentWithController;
+import ch.ethz.mc.ui.components.basics.ShortPlaceholderStringEditComponent;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -22,22 +39,6 @@ package ch.ethz.mc.ui.components.main_view.interventions.rules;
  */
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
-
-import org.bson.types.ObjectId;
-
-import ch.ethz.mc.conf.AdminMessageStrings;
-import ch.ethz.mc.model.memory.types.RuleTypes;
-import ch.ethz.mc.model.persistent.Intervention;
-import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
-import ch.ethz.mc.model.persistent.MonitoringReplyRule;
-import ch.ethz.mc.model.ui.UIMonitoringMessageGroup;
-import ch.ethz.mc.ui.components.basics.AbstractRuleEditComponentWithController;
-import ch.ethz.mc.ui.components.basics.ShortPlaceholderStringEditComponent;
-
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
 
 /**
  * Extends the monitoring reply rule edit component with a controller
@@ -73,7 +74,7 @@ public class MonitoringReplyRuleEditComponentWithController
 		/*
 		 * Adjust own components
 		 */
-		// Handle combo box
+		// Handle combo boxes
 		val allMonitoringMessageGroupsExpectingNoAnswerOfIntervention = getInterventionAdministrationManagerService()
 				.getAllMonitoringMessageGroupsExpectingNoAnswerOfIntervention(
 						intervention.getId());
@@ -118,15 +119,52 @@ public class MonitoringReplyRuleEditComponentWithController
 					}
 				});
 
+		val allMicroDialogsOfIntervention = getInterventionAdministrationManagerService()
+				.getAllMicroDialogsOfIntervention(intervention.getId());
+		val microDialogComboBox = getMicroDialogComboBox();
+		for (val microDialog : allMicroDialogsOfIntervention) {
+			val uiMicroDialog = microDialog.toUIModelObject();
+			microDialogComboBox.addItem(uiMicroDialog);
+			if (microDialog.getId()
+					.equals(monitoringRule.getRelatedMicroDialog())) {
+				microDialogComboBox.select(uiMicroDialog);
+			}
+		}
+		microDialogComboBox.addValueChangeListener(new ValueChangeListener() {
+
+			@Override
+			public void valueChange(final ValueChangeEvent event) {
+				final UIMicroDialog uiMicroDialog = (UIMicroDialog) event
+						.getProperty().getValue();
+
+				ObjectId newMicroDialogId;
+				if (uiMicroDialog == null) {
+					newMicroDialogId = null;
+				} else {
+					newMicroDialogId = uiMicroDialog
+							.getRelatedModelObject(MicroDialog.class).getId();
+				}
+
+				log.debug("Adjust related micro dialog to {}",
+						newMicroDialogId);
+				getInterventionAdministrationManagerService()
+						.monitoringReplyRuleChangeRelatedMicroDialog(
+								monitoringRule, newMicroDialogId);
+
+				adjust();
+
+			}
+		});
+
 		// Add button listeners
 		val buttonClickListener = new ButtonClickListener();
 		getStoreVariableTextFieldComponent().getButton()
 				.addClickListener(buttonClickListener);
 
 		// Add other listeners
-		getSendMessageIfTrueComboBox()
+		getSendMessageIfTrueCheckBox()
 				.setValue(monitoringRule.isSendMessageIfTrue());
-		getSendMessageIfTrueComboBox()
+		getSendMessageIfTrueCheckBox()
 				.addValueChangeListener(new ValueChangeListener() {
 
 					@Override
@@ -140,17 +178,53 @@ public class MonitoringReplyRuleEditComponentWithController
 												.getProperty().getValue());
 
 						if (!newValue
-								&& getSendToSupervisorComboBox().getValue()) {
-							getSendToSupervisorComboBox().setValue(false);
+								&& getSendToSupervisorCheckBox().getValue()) {
+							getSendToSupervisorCheckBox().setValue(false);
+						}
+						if (newValue
+								&& getStartMicroDialogCheckBox().getValue()) {
+							getStartMicroDialogCheckBox().setValue(false);
+						}
+						if (!newValue && getMessageGroupComboBox()
+								.getValue() != null) {
+							getMessageGroupComboBox().setValue(null);
 						}
 
 						adjust();
 					}
 				});
 
-		getSendToSupervisorComboBox()
+		getStartMicroDialogCheckBox()
+				.setValue(monitoringRule.isActivateMicroDialogIfTrue());
+		getStartMicroDialogCheckBox()
+				.addValueChangeListener(new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						log.debug("Adjust start micro dialog if true");
+						val newValue = (boolean) event.getProperty().getValue();
+
+						getInterventionAdministrationManagerService()
+								.monitoringReplyRuleChangeActivateMicroDialogIfTrue(
+										monitoringRule, (boolean) event
+												.getProperty().getValue());
+
+						if (newValue
+								&& getSendMessageIfTrueCheckBox().getValue()) {
+							getSendMessageIfTrueCheckBox().setValue(false);
+						}
+						if (!newValue && getMicroDialogComboBox()
+								.getValue() != null) {
+							getMicroDialogComboBox().setValue(null);
+						}
+
+						adjust();
+					}
+				});
+
+		getSendToSupervisorCheckBox()
 				.setValue(monitoringRule.isSendMessageToSupervisor());
-		getSendToSupervisorComboBox()
+		getSendToSupervisorCheckBox()
 				.addValueChangeListener(new ValueChangeListener() {
 
 					@Override
@@ -163,8 +237,8 @@ public class MonitoringReplyRuleEditComponentWithController
 										monitoringRule, newValue);
 
 						if (newValue
-								&& !getSendMessageIfTrueComboBox().getValue()) {
-							getSendMessageIfTrueComboBox().setValue(true);
+								&& !getSendMessageIfTrueCheckBox().getValue()) {
+							getSendMessageIfTrueCheckBox().setValue(true);
 						}
 
 						adjust();
@@ -191,13 +265,20 @@ public class MonitoringReplyRuleEditComponentWithController
 		getStoreVariableTextFieldComponent()
 				.setValue(monitoringRule.getStoreValueToVariableWithName());
 
-		// Adjust stop rule execution checkbox
+		// Adjust enabled status of UI elements
 		if (monitoringRule.isSendMessageIfTrue()) {
 			getMessageGroupLabel().setEnabled(true);
 			getMessageGroupComboBox().setEnabled(true);
 		} else {
 			getMessageGroupLabel().setEnabled(false);
 			getMessageGroupComboBox().setEnabled(false);
+		}
+		if (monitoringRule.isActivateMicroDialogIfTrue()) {
+			getMicroDialogLabel().setEnabled(true);
+			getMicroDialogComboBox().setEnabled(true);
+		} else {
+			getMicroDialogLabel().setEnabled(false);
+			getMicroDialogComboBox().setEnabled(false);
 		}
 	}
 
