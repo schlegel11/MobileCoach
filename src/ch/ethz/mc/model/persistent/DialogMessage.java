@@ -220,6 +220,23 @@ public class DialogMessage extends ModelObject {
 	private ObjectId					relatedMonitoringMessage;
 
 	/**
+	 * <strong>OPTIONAL:</strong> The {@link MicroDialog} that should be
+	 * activated
+	 * when the appropriate point in time occurs
+	 */
+	@Getter
+	@Setter
+	private ObjectId					relatedMicroDialogForActivation;
+
+	/**
+	 * <strong>OPTIONAL:</strong> The {@link MicroDialogMessage} used to create
+	 * this {@link DialogMessage}
+	 */
+	@Getter
+	@Setter
+	private ObjectId					relatedMicroDialogMessage;
+
+	/**
 	 * The information if a {@link Participant} viewed the presented media
 	 * content (if
 	 * integrated in the {@link MonitoringMessage})

@@ -1612,8 +1612,7 @@ public class InterventionAdministrationManagerService {
 			final ObjectId parentMicroDialogRuleId) {
 		val microDialogRule = new MicroDialogRule("",
 				RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "", "",
-				parentMicroDialogRuleId, 0, null, false,
-				microDialogDecisionPointId);
+				parentMicroDialogRuleId, 0, null, microDialogDecisionPointId);
 
 		val highestOrderRule = databaseManagerService.findOneSortedModelObject(
 				MicroDialogRule.class,
@@ -1902,8 +1901,8 @@ public class InterventionAdministrationManagerService {
 			final MonitoringRuleTypes type) {
 		val monitoringRule = new MonitoringRule("",
 				RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "", "",
-				parentMonitoringRuleId, 0, null, false, null, type,
-				interventionId,
+				parentMonitoringRuleId, 0, null, false, false, null, false,
+				null, type, interventionId,
 				ImplementationConstants.DEFAULT_HOUR_TO_SEND_MESSAGE,
 				ImplementationConstants.DEFAULT_MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED,
 				false, false);
@@ -2174,8 +2173,8 @@ public class InterventionAdministrationManagerService {
 			final boolean isGotAnswerRule) {
 		val monitoringReplyRule = new MonitoringReplyRule("",
 				RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "", "",
-				parentMonitoringReplyRuleId, 0, null, false, null,
-				isGotAnswerRule ? monitoringRuleId : null,
+				parentMonitoringReplyRuleId, 0, null, false, false, null, false,
+				null, isGotAnswerRule ? monitoringRuleId : null,
 				isGotAnswerRule ? null : monitoringRuleId);
 
 		val highestOrderRule = databaseManagerService.findOneSortedModelObject(

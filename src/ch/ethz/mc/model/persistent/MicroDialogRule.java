@@ -61,12 +61,13 @@ public class MicroDialogRule extends AbstractMonitoringRule {
 			final String ruleComparisonTermWithPlaceholders,
 			final String comment, final ObjectId isSubRuleOfMonitoringRule,
 			final int order, final String storeValueToVariableWithName,
-			final boolean sendMessageIfTrue,
 			final ObjectId microDialogDecisionPoint) {
+		// No related monitoring message group and no sending of messages from
+		// message groups in any case (neither user nor supervisor)
 		super(ruleWithPlaceholders, ruleEquationSign,
 				ruleComparisonTermWithPlaceholders, comment,
 				isSubRuleOfMonitoringRule, order, storeValueToVariableWithName,
-				false, null);
+				false, false, null, false, null);
 
 		this.microDialogDecisionPoint = microDialogDecisionPoint;
 	}
@@ -78,7 +79,7 @@ public class MicroDialogRule extends AbstractMonitoringRule {
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId	microDialogDecisionPoint;
+	private ObjectId		microDialogDecisionPoint;
 
 	/**
 	 * <strong>OPTIONAL:</strong> If the rule result is <strong>true</strong>
@@ -87,7 +88,7 @@ public class MicroDialogRule extends AbstractMonitoringRule {
 	 */
 	@Getter
 	@Setter
-	private ObjectId	nextMicroDialogMessageWhenTrue;
+	private ObjectId		nextMicroDialogMessageWhenTrue;
 
 	/**
 	 * <strong>OPTIONAL:</strong> If the rule result is <strong>false</strong>
@@ -96,7 +97,7 @@ public class MicroDialogRule extends AbstractMonitoringRule {
 	 */
 	@Getter
 	@Setter
-	private ObjectId	nextMicroDialogMessageWhenFalse;
+	private ObjectId		nextMicroDialogMessageWhenFalse;
 
 	/**
 	 * <strong>OPTIONAL:</strong> The whole micro dialog will be set to finished
@@ -105,7 +106,7 @@ public class MicroDialogRule extends AbstractMonitoringRule {
 	 */
 	@Getter
 	@Setter
-	private boolean		stopMicroDialogWhenTrue;
+	private boolean			stopMicroDialogWhenTrue;
 
 	/**
 	 * <strong>OPTIONAL:</strong> The execution of the rules of this decision
@@ -113,7 +114,42 @@ public class MicroDialogRule extends AbstractMonitoringRule {
 	 */
 	@Getter
 	@Setter
-	private boolean		leaveDecisionPointWhenTrue;
+	private boolean			leaveDecisionPointWhenTrue;
+
+	/**
+	 * Not relevant for this instance of the class --> ignore in JSON mapping
+	 */
+	@Getter
+	@JsonIgnore
+	private final boolean	sendMessageIfTrue				= false;
+
+	/**
+	 * Not relevant for this instance of the class --> ignore in JSON mapping
+	 */
+	@Getter
+	@JsonIgnore
+	private final boolean	sendMessageToSupervisor			= false;
+
+	/**
+	 * Not relevant for this instance of the class --> ignore in JSON mapping
+	 */
+	@Getter
+	@JsonIgnore
+	private final ObjectId	relatedMonitoringMessageGroup	= null;
+
+	/**
+	 * Not relevant for this instance of the class --> ignore in JSON mapping
+	 */
+	@Getter
+	@JsonIgnore
+	private final boolean	activateMicroDialogIfTrue		= false;
+
+	/**
+	 * Not relevant for this instance of the class --> ignore in JSON mapping
+	 */
+	@Getter
+	@JsonIgnore
+	private final ObjectId	relatedMicroDialog				= null;
 
 	/*
 	 * (non-Javadoc)

@@ -63,16 +63,20 @@ public class MonitoringRule extends AbstractMonitoringRule {
 			final String comment, final ObjectId isSubRuleOfMonitoringRule,
 			final int order, final String storeValueToVariableWithName,
 			final boolean sendMessageIfTrue,
+			final boolean sendMessageToSupervisor,
 			final ObjectId relatedMonitoringMessageGroup,
-			final MonitoringRuleTypes type, final ObjectId intervention,
-			final int hourToSendMessage,
+			final boolean activateMicroDialogIfTrue,
+			final ObjectId relatedMicroDialog, final MonitoringRuleTypes type,
+			final ObjectId intervention, final int hourToSendMessage,
 			final int minutesUntilMessageIsHandledAsUnanswered,
 			final boolean stopInterventionWhenTrue,
 			final boolean markCaseAsSolvedWhenTrue) {
 		super(ruleWithPlaceholders, ruleEquationSign,
 				ruleComparisonTermWithPlaceholders, comment,
 				isSubRuleOfMonitoringRule, order, storeValueToVariableWithName,
-				sendMessageIfTrue, relatedMonitoringMessageGroup);
+				sendMessageIfTrue, sendMessageToSupervisor,
+				relatedMonitoringMessageGroup, activateMicroDialogIfTrue,
+				relatedMicroDialog);
 
 		this.type = type;
 		this.intervention = intervention;

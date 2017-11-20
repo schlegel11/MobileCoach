@@ -370,5 +370,24 @@ public class DataModelUpdateManager {
 			monitoringMessageCollection.update((ObjectId) document.get("_id"))
 					.with("{$unset:{'minutesUntilMessageIsHandledAsUnanswered':1}}");
 		}
+
+		val monitoringRuleCollection = jongo.getCollection("MonitoringRule");
+		monitoringRuleCollection.update(Queries.EVERYTHING).multi().with(
+				Queries.UPDATE_VERSION_20__ABSTRACT_MONITORING_RULE__CHANGE_1);
+		monitoringRuleCollection.update(Queries.EVERYTHING).multi().with(
+				Queries.UPDATE_VERSION_20__ABSTRACT_MONITORING_RULE__CHANGE_2);
+
+		val monitoringReplyRuleCollection = jongo
+				.getCollection("MonitoringReplyRule");
+		monitoringReplyRuleCollection.update(Queries.EVERYTHING).multi().with(
+				Queries.UPDATE_VERSION_20__ABSTRACT_MONITORING_RULE__CHANGE_1);
+		monitoringReplyRuleCollection.update(Queries.EVERYTHING).multi().with(
+				Queries.UPDATE_VERSION_20__ABSTRACT_MONITORING_RULE__CHANGE_2);
+
+		val dialogMessageCollection = jongo.getCollection("DialogMessage");
+		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+				.with(Queries.UPDATE_VERSION_20__DIALOG_MESSAGE__CHANGE_1);
+		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+				.with(Queries.UPDATE_VERSION_20__DIALOG_MESSAGE__CHANGE_2);
 	}
 }

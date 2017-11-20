@@ -56,6 +56,8 @@ import ch.ethz.mc.model.persistent.DialogStatus;
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.MediaObject;
 import ch.ethz.mc.model.persistent.MediaObjectParticipantShortURL;
+import ch.ethz.mc.model.persistent.MicroDialog;
+import ch.ethz.mc.model.persistent.MicroDialogMessage;
 import ch.ethz.mc.model.persistent.MonitoringMessage;
 import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
 import ch.ethz.mc.model.persistent.MonitoringMessageRule;
@@ -291,6 +293,8 @@ public class InterventionExecutionManagerService {
 			final long timestampToSendMessage,
 			final MonitoringRule relatedMonitoringRule,
 			final MonitoringMessage relatedMonitoringMessage,
+			final MicroDialog relatedMicroDialogForActivation,
+			final MicroDialogMessage relatedMicroDialogMessage,
 			final boolean supervisorMessage, final boolean answerExpected,
 			final int minutesUntilHandledAsNotAnswered) {
 		log.debug("Create message and prepare for sending");
@@ -303,6 +307,10 @@ public class InterventionExecutionManagerService {
 						: relatedMonitoringRule.getId(),
 				relatedMonitoringMessage == null ? null
 						: relatedMonitoringMessage.getId(),
+				relatedMicroDialogForActivation == null ? null
+						: relatedMicroDialogForActivation.getId(),
+				relatedMicroDialogMessage == null ? null
+						: relatedMicroDialogMessage.getId(),
 				false, manuallySent);
 
 		// Check linked media object
@@ -588,7 +596,7 @@ public class InterventionExecutionManagerService {
 				false, -1, receivedMessage.getReceivedTimestamp(),
 				receivedMessage.getMessage(), receivedMessage.getMessage(),
 				type == DialogMessageTypes.INTENTION ? false : true, null, null,
-				false, false);
+				null, null, false, false);
 
 		val highestOrderMessage = databaseManagerService
 				.findOneSortedModelObject(DialogMessage.class,
@@ -971,12 +979,24 @@ public class InterventionExecutionManagerService {
 										: DialogMessageTypes.PLAIN;
 
 						// Prepare message for sending
+						// dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
+						// participant, dialogMessageType,
+						// messageTextToSend, answerTypeToSend,
+						// answerOptionsToSend, false,
+						// InternalDateTime.currentTimeMillis(), null,
+						// monitoringMessage,
+						// monitoringReplyRule != null
+						// ? monitoringReplyRule
+						// .isSendMessageToSupervisor()
+						// : false,
+						// false, 0);
+						// TODO Adjust for micro dialogs
 						dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
 								participant, dialogMessageType,
 								messageTextToSend, answerTypeToSend,
 								answerOptionsToSend, false,
 								InternalDateTime.currentTimeMillis(), null,
-								monitoringMessage,
+								monitoringMessage, null, null,
 								monitoringReplyRule != null
 										? monitoringReplyRule
 												.isSendMessageToSupervisor()
@@ -1110,12 +1130,24 @@ public class InterventionExecutionManagerService {
 										: DialogMessageTypes.PLAIN;
 
 						// Prepare message for sending
+						// dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
+						// participant, dialogMessageType,
+						// messageTextToSend, answerTypeToSend,
+						// answerOptionsToSend, false,
+						// timeToSendMessageInMillis, monitoringRule,
+						// monitoringMessage,
+						// monitoringRule != null
+						// ? monitoringRule
+						// .isSendMessageToSupervisor()
+						// : false,
+						// monitoringMessageExpectsAnswer, 0);
+						// TODO Adjust for micro dialogs
 						dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
 								participant, dialogMessageType,
 								messageTextToSend, answerTypeToSend,
 								answerOptionsToSend, false,
 								timeToSendMessageInMillis, monitoringRule,
-								monitoringMessage,
+								monitoringMessage, null, null,
 								monitoringRule != null
 										? monitoringRule
 												.isSendMessageToSupervisor()
@@ -1303,11 +1335,21 @@ public class InterventionExecutionManagerService {
 									: DialogMessageTypes.PLAIN;
 
 					// Prepare message for sending
+					// dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
+					// participant, dialogMessageType, messageTextToSend,
+					// answerTypeToSend, answerOptionsToSend, false,
+					// timeToSendMessageInMillis, monitoringRule,
+					// monitoringMessage,
+					// monitoringRule != null
+					// ? monitoringRule.isSendMessageToSupervisor()
+					// : false,
+					// monitoringMessageExpectsAnswer, 0);
+					// TODO Adjust for micro dialogs
 					dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
 							participant, dialogMessageType, messageTextToSend,
 							answerTypeToSend, answerOptionsToSend, false,
 							timeToSendMessageInMillis, monitoringRule,
-							monitoringMessage,
+							monitoringMessage, null, null,
 							monitoringRule != null
 									? monitoringRule.isSendMessageToSupervisor()
 									: false,
@@ -1700,7 +1742,7 @@ public class InterventionExecutionManagerService {
 		// Create dialog message
 		dialogMessageCreateManuallyOrByRulesIncludingMediaObject(participant,
 				DialogMessageTypes.PLAIN, messageTextToSend, null, null, true,
-				InternalDateTime.currentTimeMillis(), null, null,
+				InternalDateTime.currentTimeMillis(), null, null, null, null,
 				advisorMessage, false, 0);
 	}
 
@@ -1755,12 +1797,21 @@ public class InterventionExecutionManagerService {
 		}
 
 		// Create dialog message
+		// dialogMessageCreateManuallyOrByRulesIncludingMediaObject(participant,
+		// determinedMonitoringMessageToSend.isCommandMessage()
+		// ? DialogMessageTypes.COMMAND : DialogMessageTypes.PLAIN,
+		// messageTextToSend, answerTypeToSend, answerOptionsToSend, true,
+		// InternalDateTime.currentTimeMillis(), null,
+		// determinedMonitoringMessageToSend, advisorMessage,
+		// monitoringMessageGroup.isMessagesExpectAnswer(),
+		// minutesUntilHandledAsNotAnswered);
+		// TODO Adjust for micro dialogs
 		dialogMessageCreateManuallyOrByRulesIncludingMediaObject(participant,
 				determinedMonitoringMessageToSend.isCommandMessage()
 						? DialogMessageTypes.COMMAND : DialogMessageTypes.PLAIN,
 				messageTextToSend, answerTypeToSend, answerOptionsToSend, true,
 				InternalDateTime.currentTimeMillis(), null,
-				determinedMonitoringMessageToSend, advisorMessage,
+				determinedMonitoringMessageToSend, null, null, advisorMessage,
 				monitoringMessageGroup.isMessagesExpectAnswer(),
 				minutesUntilHandledAsNotAnswered);
 	}
