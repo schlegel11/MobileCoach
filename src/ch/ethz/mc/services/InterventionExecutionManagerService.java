@@ -57,6 +57,7 @@ import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.MediaObject;
 import ch.ethz.mc.model.persistent.MediaObjectParticipantShortURL;
 import ch.ethz.mc.model.persistent.MicroDialog;
+import ch.ethz.mc.model.persistent.MicroDialogDecisionPoint;
 import ch.ethz.mc.model.persistent.MicroDialogMessage;
 import ch.ethz.mc.model.persistent.MonitoringMessage;
 import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
@@ -316,30 +317,35 @@ public class InterventionExecutionManagerService {
 		// Check linked media object
 		MediaObject linkedMediaObject = null;
 		if (relatedMonitoringMessage != null) {
-			val monitoringMessage = databaseManagerService.getModelObjectById(
-					MonitoringMessage.class,
-					dialogMessage.getRelatedMonitoringMessage());
-
-			if (monitoringMessage != null
-					&& monitoringMessage.getLinkedMediaObject() != null) {
+			if (relatedMonitoringMessage.getLinkedMediaObject() != null) {
 				linkedMediaObject = databaseManagerService.getModelObjectById(
 						MediaObject.class,
-						monitoringMessage.getLinkedMediaObject());
+						relatedMonitoringMessage.getLinkedMediaObject());
+			}
+		} else if (relatedMicroDialogMessage != null) {
+			if (relatedMicroDialogMessage.getLinkedMediaObject() != null) {
+				linkedMediaObject = databaseManagerService.getModelObjectById(
+						MediaObject.class,
+						relatedMicroDialogMessage.getLinkedMediaObject());
 			}
 		}
 
 		// Check linked intermediate survey
 		ScreeningSurvey linkedIntermediateSurvey = null;
 		if (relatedMonitoringMessage != null) {
-			val monitoringMessage = databaseManagerService.getModelObjectById(
-					MonitoringMessage.class,
-					dialogMessage.getRelatedMonitoringMessage());
-
-			if (monitoringMessage != null && monitoringMessage
+			if (relatedMonitoringMessage
 					.getLinkedIntermediateSurvey() != null) {
 				linkedIntermediateSurvey = databaseManagerService
 						.getModelObjectById(ScreeningSurvey.class,
-								monitoringMessage
+								relatedMonitoringMessage
+										.getLinkedIntermediateSurvey());
+			}
+		} else if (relatedMicroDialogMessage != null) {
+			if (relatedMicroDialogMessage
+					.getLinkedIntermediateSurvey() != null) {
+				linkedIntermediateSurvey = databaseManagerService
+						.getModelObjectById(ScreeningSurvey.class,
+								relatedMicroDialogMessage
 										.getLinkedIntermediateSurvey());
 			}
 		}
@@ -1319,13 +1325,14 @@ public class InterventionExecutionManagerService {
 				return null;
 			}
 
-			if (recursiveRuleResolver.isCaseMarkedAsSolved() && !isIntention) {
-				unexpectedDialogMessageSetProblemSolved(dialogMessageCreated);
-			}
-
 			/*
 			 * Care for rule execution results
 			 */
+
+			// Rule solves problem
+			if (recursiveRuleResolver.isCaseMarkedAsSolved() && !isIntention) {
+				unexpectedDialogMessageSetProblemSolved(dialogMessageCreated);
+			}
 
 			// Prepare messages for sending
 			for (val messageToSendTask : recursiveRuleResolver
@@ -1513,6 +1520,36 @@ public class InterventionExecutionManagerService {
 				for (val dialogMessageWithSenderIdentificationToSend : dialogMessagesWithSenderIdentificationToSend) {
 					final val dialogMessageToSend = dialogMessageWithSenderIdentificationToSend
 							.getDialogMessage();
+
+					if (dialogMessageToSend == null) {
+						continue;
+					}
+
+					if (dialogMessageToSend
+							.getType() == DialogMessageTypes.MICRO_DIALOG_ACTIVATION) {
+						// It's a micro dialog activation
+						try {
+							dialogMessageStatusChangesForSending(
+									dialogMessageToSend.getId(),
+									DialogMessageStatusTypes.SENDING,
+									InternalDateTime.currentTimeMillis());
+
+							handleMicroDialog(participantId,
+									dialogMessageToSend
+											.getRelatedMicroDialogForActivation(),
+									null);
+
+							dialogMessageStatusChangesForSending(
+									dialogMessageToSend.getId(),
+									DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
+									InternalDateTime.currentTimeMillis());
+						} catch (final Exception e) {
+							log.error("Error at hanlding micro dialog");
+						}
+
+						continue;
+					}
+
 					try {
 						DialogOption dialogOption = null;
 						boolean sendToSupervisor;
@@ -1597,6 +1634,235 @@ public class InterventionExecutionManagerService {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Handles the processing of {@link MicroDialog}s for a specific
+	 * {@link Participant}; If a {@link MicroDialogMessage} is given, the
+	 * processing proceeds at the given point
+	 * 
+	 * @param participantId
+	 * @param microDialogId
+	 * @param microDialogMessageId
+	 */
+	@Synchronized
+	private void handleMicroDialog(final ObjectId participantId,
+			final ObjectId microDialogId, final ObjectId microDialogMessageId) {
+		int currentOrder = -1;
+		boolean stopMicroDialogHandling = false;
+		long lastMessageSent = 0;
+
+		Participant participant = null;
+		MicroDialog microDialog = null;
+
+		boolean variablesRequireRefresh = true;
+		Hashtable<String, AbstractVariableWithValue> variablesWithValues = null;
+
+		itemsLoop: do {
+			if (microDialogMessageId != null) {
+				val microDialogMessage = databaseManagerService
+						.getModelObjectById(MicroDialogMessage.class,
+								microDialogMessageId);
+				if (microDialogMessage != null) {
+					currentOrder = microDialogMessage.getOrder();
+				}
+			}
+			val microDialogMessage = databaseManagerService
+					.findOneSortedModelObject(MicroDialogMessage.class,
+							Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG_AND_ORDER_HIGHER,
+							Queries.MICRO_DIALOG_MESSAGE__SORT_BY_ORDER_ASC,
+							microDialogId, currentOrder);
+			val microDialogDecisionPoint = databaseManagerService
+					.findOneSortedModelObject(MicroDialogDecisionPoint.class,
+							Queries.MICRO_DIALOG_DECISION_POINT__BY_MICRO_DIALOG_AND_ORDER_HIGHER,
+							Queries.MICRO_DIALOG_DECISION_POINT__SORT_BY_ORDER_ASC,
+							microDialogId, currentOrder);
+
+			boolean handleMessage;
+			if (microDialogMessage == null
+					&& microDialogDecisionPoint == null) {
+				return;
+			} else if (microDialogMessage == null) {
+				handleMessage = false;
+			} else if (microDialogDecisionPoint == null) {
+				handleMessage = true;
+			} else if (microDialogMessage.getOrder() < microDialogDecisionPoint
+					.getOrder()) {
+				handleMessage = true;
+			} else {
+				handleMessage = false;
+			}
+
+			if (handleMessage) {
+				// Handle message
+				currentOrder = microDialogMessage.getOrder();
+				log.debug("Checking micro dialog message {}",
+						microDialogMessage.getId());
+
+				// Check rules of message for execution
+				if (participant == null) {
+					participant = databaseManagerService.getModelObjectById(
+							Participant.class, participantId);
+				}
+
+				val rules = databaseManagerService.findSortedModelObjects(
+						MonitoringMessageRule.class,
+						Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE,
+						Queries.MONITORING_MESSAGE_RULE__SORT_BY_ORDER_ASC,
+						microDialogMessage.getId());
+
+				for (val rule : rules) {
+					if (variablesRequireRefresh
+							|| variablesWithValues == null) {
+						variablesWithValues = variablesManagerService
+								.getAllVariablesWithValuesOfParticipantAndSystem(
+										participant);
+						variablesRequireRefresh = false;
+					}
+
+					val ruleResult = RuleEvaluator.evaluateRule(
+							participant.getId(), participant.getLanguage(),
+							rule, variablesWithValues.values());
+
+					if (!ruleResult.isEvaluatedSuccessful()) {
+						log.error("Error when validating rule: "
+								+ ruleResult.getErrorMessage());
+						continue;
+					}
+
+					// Check if true rule matches
+					if (!ruleResult.isRuleMatchesEquationSign()) {
+						log.debug("Rule does not match, so skip this message");
+						continue itemsLoop;
+					}
+				}
+
+				// Determine message text and answer type with options to send
+				val variablesWithValuesForMessageGeneration = variablesManagerService
+						.getAllVariablesWithValuesOfParticipantAndSystem(
+								participant, null, microDialogMessage);
+				val messageTextToSend = VariableStringReplacer
+						.findVariablesAndReplaceWithTextValues(
+								participant.getLanguage(),
+								microDialogMessage.getTextWithPlaceholders()
+										.get(participant),
+								variablesWithValuesForMessageGeneration
+										.values(),
+								"");
+
+				AnswerTypes answerTypeToSend = null;
+				String answerOptionsToSend = null;
+				if (microDialogMessage.isMessageExpectsAnswer()) {
+					answerTypeToSend = microDialogMessage.getAnswerType();
+
+					answerOptionsToSend = StringHelpers
+							.parseColonSeparatedMultiLineStringToJSON(
+									microDialogMessage
+											.getAnswerOptionsWithPlaceholders(),
+									participant.getLanguage(),
+									variablesWithValuesForMessageGeneration
+											.values());
+				}
+
+				// Ensure higher timestamp
+				val newTimestamp = InternalDateTime.currentTimeMillis();
+				if (newTimestamp > lastMessageSent) {
+					lastMessageSent = newTimestamp;
+				} else {
+					lastMessageSent++;
+				}
+
+				if (microDialog == null) {
+					microDialog = databaseManagerService.getModelObjectById(
+							MicroDialog.class, microDialogId);
+				}
+
+				// Prepare message for sending
+				dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
+						participant,
+						microDialogMessage.isCommandMessage()
+								? DialogMessageTypes.COMMAND
+								: DialogMessageTypes.PLAIN,
+						messageTextToSend, answerTypeToSend,
+						answerOptionsToSend, false, lastMessageSent, null, null,
+						microDialog, microDialogMessage, false,
+						microDialogMessage.isMessageExpectsAnswer(),
+						microDialogMessage
+								.getMinutesUntilMessageIsHandledAsUnanswered());
+
+				// Proceed with micro dialog handling?
+				if (microDialogMessage
+						.isMessageBlocksMicroDialogUntilAnswered()) {
+					stopMicroDialogHandling = true;
+				}
+			} else {
+				// Handle decision point
+				currentOrder = microDialogDecisionPoint.getOrder();
+				log.debug("Checking micro dialog decision point {}",
+						microDialogDecisionPoint.getId());
+
+				// Resolve rules
+				RecursiveAbstractMonitoringRulesResolver recursiveRuleResolver;
+				try {
+					recursiveRuleResolver = new RecursiveAbstractMonitoringRulesResolver(
+							this, databaseManagerService,
+							variablesManagerService, participant,
+							EXECUTION_CASE.MICRO_DIALOG_DECISION_POINT, null,
+							null, false, microDialogDecisionPoint.getId());
+
+					recursiveRuleResolver.resolve();
+				} catch (final Exception e) {
+					log.error(
+							"Could not resolve micro dialog decision point message rules for participant {}: {}",
+							participant.getId(), e.getMessage());
+					return;
+				}
+
+				/*
+				 * Care for rule execution results
+				 */
+				if (recursiveRuleResolver.isStopMicroDialogWhenTrue()) {
+					return;
+				} else if (recursiveRuleResolver
+						.isLeaveDecisionPointWhenTrue()) {
+					stopMicroDialogHandling = true;
+				} else if (recursiveRuleResolver
+						.getNextMicroDialogMessage() != null) {
+					val nextMicroDialogMessage = recursiveRuleResolver
+							.getNextMicroDialogMessage();
+					log.debug("Jump to micro dialog messge {}",
+							nextMicroDialogMessage.getId());
+
+					currentOrder = nextMicroDialogMessage.getOrder() - 1;
+				} else if (recursiveRuleResolver.getNextMicroDialog() != null) {
+					val nextMicroDialog = recursiveRuleResolver
+							.getNextMicroDialog();
+					log.debug("Jump to micro dialog {}",
+							nextMicroDialog.getId());
+
+					stopMicroDialogHandling = true;
+
+					// Ensure higher timestamp
+					val newTimestamp = InternalDateTime.currentTimeMillis();
+					if (newTimestamp > lastMessageSent) {
+						lastMessageSent = newTimestamp;
+					} else {
+						lastMessageSent++;
+					}
+
+					// Start activation of next micro dialog
+					dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
+							participant,
+							DialogMessageTypes.MICRO_DIALOG_ACTIVATION,
+							nextMicroDialog.getName(), AnswerTypes.CUSTOM, null,
+							false, lastMessageSent, null, null, nextMicroDialog,
+							null, false, false, 0);
+				}
+
+				// Variables need to be refreshed after performing rules
+				variablesRequireRefresh = true;
+			}
+		} while (!stopMicroDialogHandling);
 	}
 
 	/*
@@ -1838,7 +2104,7 @@ public class InterventionExecutionManagerService {
 		// Determine message text and answer type with options to send
 		val variablesWithValues = variablesManagerService
 				.getAllVariablesWithValuesOfParticipantAndSystem(participant,
-						determinedMonitoringMessageToSend);
+						determinedMonitoringMessageToSend, null);
 		val messageTextToSend = VariableStringReplacer
 				.findVariablesAndReplaceWithTextValues(
 						participant.getLanguage(),

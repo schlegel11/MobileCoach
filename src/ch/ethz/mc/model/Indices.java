@@ -107,9 +107,9 @@ public class Indices {
 	private static final String[]	microDialogIndices										= new String[] {
 			"{'intervention':1}" };
 	private static final String[]	microDialogMessageIndices								= new String[] {
-			"{'microDialog':1}" };
+			"{'microDialog':1}", "{'microDialog':1,'order':1}" };
 	private static final String[]	microDialogDecisionPointIndices							= new String[] {
-			"{'microDialog':1}" };
+			"{'microDialog':1}", "{'microDialog':1,'order':1}" };
 	private static final String[]	microDialogMessageRuleIndices							= new String[] {
 			"{'belongingMicroDialogMessage':1}" };
 	private static final String[]	microDialogRuleIndices									= new String[] {

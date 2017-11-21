@@ -10,8 +10,10 @@ import com.vaadin.ui.Button.ClickEvent;
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.model.memory.types.RuleTypes;
 import ch.ethz.mc.model.persistent.Intervention;
+import ch.ethz.mc.model.persistent.MicroDialog;
 import ch.ethz.mc.model.persistent.MicroDialogMessage;
 import ch.ethz.mc.model.persistent.MicroDialogRule;
+import ch.ethz.mc.model.ui.UIMicroDialog;
 import ch.ethz.mc.model.ui.UIMicroDialogElementInterface;
 import ch.ethz.mc.ui.components.basics.AbstractRuleEditComponentWithController;
 import ch.ethz.mc.ui.components.basics.ShortPlaceholderStringEditComponent;
@@ -72,7 +74,51 @@ public class MicroDialogRuleEditComponentWithController
 		/*
 		 * Adjust own components
 		 */
-		// Handle combo box
+		// Handle combo boxes
+		val nextMicroDialogWhenTrueComboBox = getNextMicroDialogWhenTrueComboBox();
+		val allMicroDialogsOfIntervention = getInterventionAdministrationManagerService()
+				.getAllMicroDialogsOfIntervention(interventionId);
+
+		for (val microDialog : allMicroDialogsOfIntervention) {
+			val uiMicroDialog = microDialog.toUIModelObject();
+
+			if (!uiMicroDialog.getRelatedModelObject(MicroDialog.class).getId()
+					.equals(microDialogId)) {
+				nextMicroDialogWhenTrueComboBox.addItem(uiMicroDialog);
+				if (microDialog.getId()
+						.equals(microDialogRule.getNextMicroDialogWhenTrue())) {
+					nextMicroDialogWhenTrueComboBox.select(uiMicroDialog);
+				}
+			}
+		}
+		nextMicroDialogWhenTrueComboBox
+				.addValueChangeListener(new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						final UIMicroDialog uiMicroDialog = (UIMicroDialog) event
+								.getProperty().getValue();
+
+						ObjectId newMicroDialogId;
+						if (uiMicroDialog == null) {
+							newMicroDialogId = null;
+						} else {
+							newMicroDialogId = uiMicroDialog
+									.getRelatedModelObject(MicroDialog.class)
+									.getId();
+						}
+
+						log.debug("Adjust dialog to jump to when true to {}",
+								newMicroDialogId);
+						getInterventionAdministrationManagerService()
+								.microDialogRuleSetNextMicroDialogWhenTrue(
+										microDialogRule, newMicroDialogId);
+
+						adjust();
+
+					}
+				});
+
 		val nextMicroDialogMessageWhenTrueComboBox = getNextMicroDialogMessageWhenTrueComboBox();
 		val nextMicroDialogMessageWhenFalseComboBox = getNextMicroDialogMessageWhenFalseComboBox();
 		val allMicroDialogMessagesInMicroDialog = getInterventionAdministrationManagerService()
@@ -102,14 +148,14 @@ public class MicroDialogRuleEditComponentWithController
 
 					@Override
 					public void valueChange(final ValueChangeEvent event) {
-						final UIMicroDialogElementInterface uiMonitoringMessageGroup = (UIMicroDialogElementInterface) event
+						final UIMicroDialogElementInterface uiMicroDialogMessage = (UIMicroDialogElementInterface) event
 								.getProperty().getValue();
 
 						ObjectId newMicroDialogMessageId;
-						if (uiMonitoringMessageGroup == null) {
+						if (uiMicroDialogMessage == null) {
 							newMicroDialogMessageId = null;
 						} else {
-							newMicroDialogMessageId = uiMonitoringMessageGroup
+							newMicroDialogMessageId = uiMicroDialogMessage
 									.getRelatedModelObject(
 											MicroDialogMessage.class)
 									.getId();
@@ -132,14 +178,14 @@ public class MicroDialogRuleEditComponentWithController
 
 					@Override
 					public void valueChange(final ValueChangeEvent event) {
-						final UIMicroDialogElementInterface uiMonitoringMessageGroup = (UIMicroDialogElementInterface) event
+						final UIMicroDialogElementInterface uiMicroDialogMessage = (UIMicroDialogElementInterface) event
 								.getProperty().getValue();
 
 						ObjectId newMicroDialogMessageId;
-						if (uiMonitoringMessageGroup == null) {
+						if (uiMicroDialogMessage == null) {
 							newMicroDialogMessageId = null;
 						} else {
-							newMicroDialogMessageId = uiMonitoringMessageGroup
+							newMicroDialogMessageId = uiMicroDialogMessage
 									.getRelatedModelObject(
 											MicroDialogMessage.class)
 									.getId();
@@ -182,6 +228,7 @@ public class MicroDialogRuleEditComponentWithController
 							getLeaveDecisionPointWhenTrueCheckBox()
 									.setValue(false);
 
+							getNextMicroDialogWhenTrueComboBox().setValue(null);
 							getNextMicroDialogMessageWhenTrueComboBox()
 									.setValue(null);
 							getNextMicroDialogMessageWhenFalseComboBox()
@@ -209,6 +256,12 @@ public class MicroDialogRuleEditComponentWithController
 						if (newValue) {
 							getStopMicroDialogWhenTrueCheckBox()
 									.setValue(false);
+
+							getNextMicroDialogWhenTrueComboBox().setValue(null);
+							getNextMicroDialogMessageWhenTrueComboBox()
+									.setValue(null);
+							getNextMicroDialogMessageWhenFalseComboBox()
+									.setValue(null);
 						}
 
 						adjust();
@@ -235,7 +288,7 @@ public class MicroDialogRuleEditComponentWithController
 		getStoreVariableTextFieldComponent()
 				.setValue(microDialogRule.getStoreValueToVariableWithName());
 
-		// Adjust checkboxes
+		// Adjust check boxes
 		if (microDialogRule.isStopMicroDialogWhenTrue()) {
 			getLeaveDecisionPointWhenTrueCheckBox().setEnabled(false);
 		} else {
@@ -248,8 +301,9 @@ public class MicroDialogRuleEditComponentWithController
 			getStopMicroDialogWhenTrueCheckBox().setEnabled(true);
 		}
 
-		// Adjust comboboxes
-		if (microDialogRule.isStopMicroDialogWhenTrue()) {
+		// Adjust combo boxes
+		if (microDialogRule.isStopMicroDialogWhenTrue()
+				|| microDialogRule.isLeaveDecisionPointWhenTrue()) {
 			getJumpGridLayout().setEnabled(false);
 		} else {
 			getJumpGridLayout().setEnabled(true);

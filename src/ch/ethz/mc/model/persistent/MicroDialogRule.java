@@ -61,7 +61,12 @@ public class MicroDialogRule extends AbstractMonitoringRule {
 			final String ruleComparisonTermWithPlaceholders,
 			final String comment, final ObjectId isSubRuleOfMonitoringRule,
 			final int order, final String storeValueToVariableWithName,
-			final ObjectId microDialogDecisionPoint) {
+			final ObjectId microDialogDecisionPoint,
+			final ObjectId nextMicroDialogWhenTrue,
+			final ObjectId nextMicroDialogMessageWhenTrue,
+			final ObjectId nextMicroDialogMessageWhenFalse,
+			final boolean stopMicroDialogWhenTrue,
+			final boolean leaveDecisionPointWhenTrue) {
 		// No related monitoring message group and no sending of messages from
 		// message groups in any case (neither user nor supervisor)
 		super(ruleWithPlaceholders, ruleEquationSign,
@@ -70,6 +75,11 @@ public class MicroDialogRule extends AbstractMonitoringRule {
 				false, false, null, false, null);
 
 		this.microDialogDecisionPoint = microDialogDecisionPoint;
+		this.nextMicroDialogWhenTrue = nextMicroDialogWhenTrue;
+		this.nextMicroDialogMessageWhenTrue = nextMicroDialogMessageWhenTrue;
+		this.nextMicroDialogMessageWhenFalse = nextMicroDialogMessageWhenFalse;
+		this.stopMicroDialogWhenTrue = stopMicroDialogWhenTrue;
+		this.leaveDecisionPointWhenTrue = leaveDecisionPointWhenTrue;
 	}
 
 	/**
@@ -80,6 +90,15 @@ public class MicroDialogRule extends AbstractMonitoringRule {
 	@Setter
 	@NonNull
 	private ObjectId		microDialogDecisionPoint;
+
+	/**
+	 * <strong>OPTIONAL:</strong> If the rule result is <strong>true</strong>
+	 * the {@link Participant} will be redirected to the given
+	 * {@link MicroDialogMessage}
+	 */
+	@Getter
+	@Setter
+	private ObjectId		nextMicroDialogWhenTrue;
 
 	/**
 	 * <strong>OPTIONAL:</strong> If the rule result is <strong>true</strong>

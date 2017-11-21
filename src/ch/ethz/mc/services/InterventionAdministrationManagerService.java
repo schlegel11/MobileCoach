@@ -1625,7 +1625,8 @@ public class InterventionAdministrationManagerService {
 			final ObjectId parentMicroDialogRuleId) {
 		val microDialogRule = new MicroDialogRule("",
 				RuleEquationSignTypes.CALCULATED_VALUE_EQUALS, "", "",
-				parentMicroDialogRuleId, 0, null, microDialogDecisionPointId);
+				parentMicroDialogRuleId, 0, null, microDialogDecisionPointId,
+				null, null, null, false, false);
 
 		val highestOrderRule = databaseManagerService.findOneSortedModelObject(
 				MicroDialogRule.class,
@@ -1757,6 +1758,15 @@ public class InterventionAdministrationManagerService {
 
 			databaseManagerService.saveModelObject(microDialogRule);
 		}
+	}
+
+	@Synchronized
+	public void microDialogRuleSetNextMicroDialogWhenTrue(
+			final MicroDialogRule microDialogRule,
+			final ObjectId newMicroDialogId) {
+		microDialogRule.setNextMicroDialogWhenTrue(newMicroDialogId);
+
+		databaseManagerService.saveModelObject(microDialogRule);
 	}
 
 	@Synchronized

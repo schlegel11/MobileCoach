@@ -85,7 +85,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 	private boolean												monitoringReplyRuleCaseIsTrue							= false;
 
 	// Only relevant for MonitoringRules and MonitoringReplyRules
-	private List<AbstractMonitoringRule>						abstractMonitoringRulesToCheckForMicroDialogActivation;
+	private List<AbstractMonitoringRule>						abstractMonitoringRulesToCheckForMicroDialogActivation	= null;
 
 	// Only relevant for MicroDialogRules
 	private MicroDialogDecisionPoint							relatedMicroDialogDecisionPointForMicroDialogRuleCase	= null;
@@ -115,6 +115,8 @@ public class RecursiveAbstractMonitoringRulesResolver {
 	private boolean												leaveDecisionPointWhenTrue								= false;
 	@Getter
 	private boolean												stopMicroDialogWhenTrue									= false;
+	@Getter
+	private MicroDialog											nextMicroDialog											= null;
 	@Getter
 	private MicroDialogMessage									nextMicroDialogMessage									= null;
 
@@ -251,6 +253,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				abstractMonitoringRulesToCheckForMicroDialogActivation = new ArrayList<AbstractMonitoringRule>();
 				break;
 			case MICRO_DIALOG_DECISION_POINT:
+				abstractMonitoringRulesToCheckForMicroDialogActivation = null;
 				break;
 		}
 
@@ -271,6 +274,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				resultsToCreateMessagesFor = messageSendingResultForMonitoringReplyRules;
 				break;
 			case MICRO_DIALOG_DECISION_POINT:
+				resultsToCreateMessagesFor = null;
 				break;
 		}
 
@@ -339,7 +343,8 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				// Determine message text and answer type with options to send
 				val variablesWithValues = variablesManagerService
 						.getAllVariablesWithValuesOfParticipantAndSystem(
-								participant, determinedMonitoringMessageToSend);
+								participant, determinedMonitoringMessageToSend,
+								null);
 				val messageTextToSend = VariableStringReplacer
 						.findVariablesAndReplaceWithTextValues(
 								participant.getLanguage(),
@@ -371,25 +376,27 @@ public class RecursiveAbstractMonitoringRulesResolver {
 		}
 
 		// Determine micro dialogs to activate
-		microDialogsToActivate = new ArrayList<MicroDialogActivation>();
-		for (val ruleToCheckForMicroDialogActivation : abstractMonitoringRulesToCheckForMicroDialogActivation) {
-			val microDialogId = ruleToCheckForMicroDialogActivation
-					.getRelatedMicroDialog();
+		if (abstractMonitoringRulesToCheckForMicroDialogActivation != null) {
+			microDialogsToActivate = new ArrayList<MicroDialogActivation>();
+			for (val ruleToCheckForMicroDialogActivation : abstractMonitoringRulesToCheckForMicroDialogActivation) {
+				val microDialogId = ruleToCheckForMicroDialogActivation
+						.getRelatedMicroDialog();
 
-			val microDialog = databaseManagerService
-					.getModelObjectById(MicroDialog.class, microDialogId);
+				val microDialog = databaseManagerService
+						.getModelObjectById(MicroDialog.class, microDialogId);
 
-			int hourToActivateMicroDialog = 0;
+				int hourToActivateMicroDialog = 0;
 
-			if (ruleToCheckForMicroDialogActivation instanceof MonitoringRule) {
-				hourToActivateMicroDialog = ((MonitoringRule) ruleToCheckForMicroDialogActivation)
-						.getHourToSendMessageOrActivateMicroDialog();
-			}
+				if (ruleToCheckForMicroDialogActivation instanceof MonitoringRule) {
+					hourToActivateMicroDialog = ((MonitoringRule) ruleToCheckForMicroDialogActivation)
+							.getHourToSendMessageOrActivateMicroDialog();
+				}
 
-			if (microDialog != null) {
-				val microDialogActivation = new MicroDialogActivation(
-						microDialog, hourToActivateMicroDialog);
-				microDialogsToActivate.add(microDialogActivation);
+				if (microDialog != null) {
+					val microDialogActivation = new MicroDialogActivation(
+							microDialog, hourToActivateMicroDialog);
+					microDialogsToActivate.add(microDialogActivation);
+				}
 			}
 		}
 	}
@@ -696,7 +703,24 @@ public class RecursiveAbstractMonitoringRulesResolver {
 						completelyStop = true;
 					}
 
-					// Redirection to other next message
+					// Redirection to other next micro dialog
+					if (((MicroDialogRule) rule)
+							.getNextMicroDialogWhenTrue() != null) {
+						log.debug("Rule jumps to other next micro dialog");
+
+						val nextMicroDialogId = ((MicroDialogRule) rule)
+								.getNextMicroDialogWhenTrue();
+
+						val proposedNextMicroDialog = databaseManagerService
+								.getModelObjectById(MicroDialog.class,
+										nextMicroDialogId);
+
+						if (proposedNextMicroDialog != null) {
+							nextMicroDialog = proposedNextMicroDialog;
+						}
+					}
+
+					// Redirection to other next micro dialog message
 					if (((MicroDialogRule) rule)
 							.getNextMicroDialogMessageWhenTrue() != null) {
 						log.debug(

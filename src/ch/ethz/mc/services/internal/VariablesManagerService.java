@@ -188,12 +188,13 @@ public class VariablesManagerService {
 	public Hashtable<String, AbstractVariableWithValue> getAllVariablesWithValuesOfParticipantAndSystem(
 			final Participant participant) {
 		return getAllVariablesWithValuesOfParticipantAndSystem(participant,
-				null);
+				null, null);
 	}
 
 	public Hashtable<String, AbstractVariableWithValue> getAllVariablesWithValuesOfParticipantAndSystem(
 			final Participant participant,
-			MonitoringMessage relatedMonitoringMessage) {
+			MonitoringMessage relatedMonitoringMessage,
+			MicroDialogMessage relatedMicroDialogMessage) {
 		val variablesWithValues = new Hashtable<String, AbstractVariableWithValue>();
 
 		// Add all read/write participant variables
@@ -267,7 +268,8 @@ public class VariablesManagerService {
 		for (val variable : SystemVariables.READ_ONLY_SYSTEM_VARIABLES
 				.values()) {
 			val readOnlySystemVariableValue = getReadOnlySystemVariableValue(
-					date, variable, relatedMonitoringMessage);
+					date, variable, relatedMonitoringMessage,
+					relatedMicroDialogMessage);
 
 			if (readOnlySystemVariableValue != null) {
 				addToHashtable(variablesWithValues, variable.toVariableName(),
@@ -464,7 +466,8 @@ public class VariablesManagerService {
 
 	private String getReadOnlySystemVariableValue(final Date date,
 			final READ_ONLY_SYSTEM_VARIABLES variable,
-			MonitoringMessage relatedMonitoringMessage) {
+			MonitoringMessage relatedMonitoringMessage,
+			MicroDialogMessage relatedMicroDialogMessage) {
 		switch (variable) {
 			case systemHourOfDay:
 				return hourOfDayFormatter.format(date);
@@ -480,12 +483,20 @@ public class VariablesManagerService {
 				if (relatedMonitoringMessage != null && relatedMonitoringMessage
 						.getLinkedIntermediateSurvey() != null) {
 					return ImplementationConstants.PLACEHOLDER_LINKED_SURVEY;
+				} else if (relatedMicroDialogMessage != null
+						&& relatedMicroDialogMessage
+								.getLinkedIntermediateSurvey() != null) {
+					return ImplementationConstants.PLACEHOLDER_LINKED_SURVEY;
 				} else {
 					return "";
 				}
 			case systemLinkedMediaObject:
 				if (relatedMonitoringMessage != null && relatedMonitoringMessage
 						.getLinkedMediaObject() != null) {
+					return ImplementationConstants.PLACEHOLDER_LINKED_MEDIA_OBJECT;
+				} else if (relatedMicroDialogMessage != null
+						&& relatedMicroDialogMessage
+								.getLinkedMediaObject() != null) {
 					return ImplementationConstants.PLACEHOLDER_LINKED_MEDIA_OBJECT;
 				} else {
 					return "";
@@ -1035,7 +1046,7 @@ public class VariablesManagerService {
 							READ_ONLY_SYSTEM_VARIABLES.valueOf(variable.replace(
 									ImplementationConstants.VARIABLE_PREFIX,
 									"")),
-							null);
+							null, null);
 				} catch (final Exception e) {
 					return null;
 				}

@@ -597,7 +597,8 @@ public class MonitoringRuleEditComponentWithController
 		public void valueChange(final ValueChangeEvent event) {
 			if (event.getProperty() == getHourToSendMessageSlider()) {
 				getInterventionAdministrationManagerService()
-						.monitoringRuleSetHourToSendMessageOrActivateMicroDialog(monitoringRule,
+						.monitoringRuleSetHourToSendMessageOrActivateMicroDialog(
+								monitoringRule,
 								((Double) event.getProperty().getValue())
 										.intValue());
 			} else if (event
