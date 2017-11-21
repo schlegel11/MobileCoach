@@ -937,11 +937,11 @@ public class InterventionExecutionManagerService {
 					recursiveRuleResolver = new RecursiveAbstractMonitoringRulesResolver(
 							this, databaseManagerService,
 							variablesManagerService, participant,
-							EXECUTION_CASE.MONITORING_RULES_REPLY,
+							EXECUTION_CASE.MONITORING_REPLY_RULES,
 							dialogMessage.getRelatedMonitoringMessage(),
 							dialogMessage
 									.getRelatedMonitoringRuleForReplyRules(),
-							userAnswered);
+							userAnswered, null);
 
 					recursiveRuleResolver.resolve();
 				} catch (final Exception e) {
@@ -1066,7 +1066,7 @@ public class InterventionExecutionManagerService {
 						participant,
 						periodicCheck ? EXECUTION_CASE.MONITORING_RULES_PERIODIC
 								: EXECUTION_CASE.MONITORING_RULES_DAILY,
-						null, null, false);
+						null, null, false, null);
 
 				recursiveRuleResolver.resolve();
 			} catch (final Exception e) {
@@ -1094,7 +1094,7 @@ public class InterventionExecutionManagerService {
 						val monitoringMessage = messageToSendTask
 								.getMonitoringMessageToSend();
 						val monitoringMessageExpectsAnswer = messageToSendTask
-								.isMonitoringRuleExpectsAnswer();
+								.isAnswerExpected();
 						val messageTextToSend = messageToSendTask
 								.getMessageTextToSend();
 						val answerTypeToSend = messageToSendTask
@@ -1272,7 +1272,7 @@ public class InterventionExecutionManagerService {
 						isIntention
 								? EXECUTION_CASE.MONITORING_RULES_USER_INTENTION
 								: EXECUTION_CASE.MONITORING_RULES_UNEXPECTED_MESSAGE,
-						null, null, false);
+						null, null, false, null);
 
 				recursiveRuleResolver.resolve();
 			} catch (final Exception e) {
@@ -1299,7 +1299,7 @@ public class InterventionExecutionManagerService {
 					val monitoringMessage = messageToSendTask
 							.getMonitoringMessageToSend();
 					val monitoringMessageExpectsAnswer = messageToSendTask
-							.isMonitoringRuleExpectsAnswer();
+							.isAnswerExpected();
 					val messageTextToSend = messageToSendTask
 							.getMessageTextToSend();
 					val answerTypeToSend = messageToSendTask
