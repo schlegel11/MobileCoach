@@ -951,6 +951,11 @@ public class InterventionExecutionManagerService {
 					continue;
 				}
 
+				/*
+				 * Care for rule execution results
+				 */
+
+				// Prepare messages for sending
 				for (val messageToSendTask : recursiveRuleResolver
 						.getMessageSendingResultForMonitoringReplyRules()) {
 					if (messageToSendTask.getMessageTextToSend() != null) {
@@ -979,18 +984,6 @@ public class InterventionExecutionManagerService {
 										: DialogMessageTypes.PLAIN;
 
 						// Prepare message for sending
-						// dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
-						// participant, dialogMessageType,
-						// messageTextToSend, answerTypeToSend,
-						// answerOptionsToSend, false,
-						// InternalDateTime.currentTimeMillis(), null,
-						// monitoringMessage,
-						// monitoringReplyRule != null
-						// ? monitoringReplyRule
-						// .isSendMessageToSupervisor()
-						// : false,
-						// false, 0);
-						// TODO Adjust for micro dialogs
 						dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
 								participant, dialogMessageType,
 								messageTextToSend, answerTypeToSend,
@@ -1003,6 +996,21 @@ public class InterventionExecutionManagerService {
 										: false,
 								false, 0);
 					}
+				}
+
+				// Check micro dialog activation
+				for (val microDialogActivation : recursiveRuleResolver
+						.getMicroDialogsToActivate()) {
+
+					dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
+							participant,
+							DialogMessageTypes.MICRO_DIALOG_ACTIVATION,
+							microDialogActivation.getMiroDialogToActivate()
+									.getName(),
+							AnswerTypes.CUSTOM, null, false,
+							InternalDateTime.currentTimeMillis(), null, null,
+							microDialogActivation.getMiroDialogToActivate(),
+							null, false, false, 0);
 				}
 			}
 		}
@@ -1082,6 +1090,11 @@ public class InterventionExecutionManagerService {
 				log.debug("Finishing intervention for participant");
 				dialogStatusSetMonitoringFinished(participant.getId());
 			} else {
+				/*
+				 * Care for rule execution results
+				 */
+
+				// Prepare messages for sending
 				for (val messageToSendTask : recursiveRuleResolver
 						.getMessageSendingResultForMonitoringRules()) {
 					if (messageToSendTask.getMessageTextToSend() != null) {
@@ -1130,18 +1143,6 @@ public class InterventionExecutionManagerService {
 										: DialogMessageTypes.PLAIN;
 
 						// Prepare message for sending
-						// dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
-						// participant, dialogMessageType,
-						// messageTextToSend, answerTypeToSend,
-						// answerOptionsToSend, false,
-						// timeToSendMessageInMillis, monitoringRule,
-						// monitoringMessage,
-						// monitoringRule != null
-						// ? monitoringRule
-						// .isSendMessageToSupervisor()
-						// : false,
-						// monitoringMessageExpectsAnswer, 0);
-						// TODO Adjust for micro dialogs
 						dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
 								participant, dialogMessageType,
 								messageTextToSend, answerTypeToSend,
@@ -1154,6 +1155,41 @@ public class InterventionExecutionManagerService {
 										: false,
 								monitoringMessageExpectsAnswer, 0);
 					}
+				}
+
+				// Check micro dialog activation
+				for (val microDialogActivation : recursiveRuleResolver
+						.getMicroDialogsToActivate()) {
+					// Calculate time to send message
+					long timeToSendMessageInMillis;
+					final int hourToSendMessage = microDialogActivation
+							.getHourToActivateMicroDialog();
+					if (hourToSendMessage > 0) {
+						final Calendar timeToSendMessage = Calendar
+								.getInstance();
+						timeToSendMessage.setTimeInMillis(
+								InternalDateTime.currentTimeMillis());
+						timeToSendMessage.set(Calendar.HOUR_OF_DAY,
+								hourToSendMessage);
+						timeToSendMessage.set(Calendar.MINUTE, 0);
+						timeToSendMessage.set(Calendar.SECOND, 0);
+						timeToSendMessage.set(Calendar.MILLISECOND, 0);
+						timeToSendMessageInMillis = timeToSendMessage
+								.getTimeInMillis();
+					} else {
+						timeToSendMessageInMillis = InternalDateTime
+								.currentTimeMillis();
+					}
+
+					dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
+							participant,
+							DialogMessageTypes.MICRO_DIALOG_ACTIVATION,
+							microDialogActivation.getMiroDialogToActivate()
+									.getName(),
+							AnswerTypes.CUSTOM, null, false,
+							timeToSendMessageInMillis, null, null,
+							microDialogActivation.getMiroDialogToActivate(),
+							null, false, false, 0);
 				}
 
 				if (!periodicCheck) {
@@ -1287,6 +1323,11 @@ public class InterventionExecutionManagerService {
 				unexpectedDialogMessageSetProblemSolved(dialogMessageCreated);
 			}
 
+			/*
+			 * Care for rule execution results
+			 */
+
+			// Prepare messages for sending
 			for (val messageToSendTask : recursiveRuleResolver
 					.getMessageSendingResultForMonitoringRules()) {
 				if (messageToSendTask.getMessageTextToSend() != null) {
@@ -1335,16 +1376,6 @@ public class InterventionExecutionManagerService {
 									: DialogMessageTypes.PLAIN;
 
 					// Prepare message for sending
-					// dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
-					// participant, dialogMessageType, messageTextToSend,
-					// answerTypeToSend, answerOptionsToSend, false,
-					// timeToSendMessageInMillis, monitoringRule,
-					// monitoringMessage,
-					// monitoringRule != null
-					// ? monitoringRule.isSendMessageToSupervisor()
-					// : false,
-					// monitoringMessageExpectsAnswer, 0);
-					// TODO Adjust for micro dialogs
 					dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
 							participant, dialogMessageType, messageTextToSend,
 							answerTypeToSend, answerOptionsToSend, false,
@@ -1355,6 +1386,39 @@ public class InterventionExecutionManagerService {
 									: false,
 							monitoringMessageExpectsAnswer, 0);
 				}
+			}
+
+			// Check micro dialog activation
+			for (val microDialogActivation : recursiveRuleResolver
+					.getMicroDialogsToActivate()) {
+				// Calculate time to send message
+				long timeToSendMessageInMillis;
+				final int hourToSendMessage = microDialogActivation
+						.getHourToActivateMicroDialog();
+				if (hourToSendMessage > 0) {
+					final Calendar timeToSendMessage = Calendar.getInstance();
+					timeToSendMessage.setTimeInMillis(
+							InternalDateTime.currentTimeMillis());
+					timeToSendMessage.set(Calendar.HOUR_OF_DAY,
+							hourToSendMessage);
+					timeToSendMessage.set(Calendar.MINUTE, 0);
+					timeToSendMessage.set(Calendar.SECOND, 0);
+					timeToSendMessage.set(Calendar.MILLISECOND, 0);
+					timeToSendMessageInMillis = timeToSendMessage
+							.getTimeInMillis();
+				} else {
+					timeToSendMessageInMillis = InternalDateTime
+							.currentTimeMillis();
+				}
+
+				dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
+						participant, DialogMessageTypes.MICRO_DIALOG_ACTIVATION,
+						microDialogActivation.getMiroDialogToActivate()
+								.getName(),
+						AnswerTypes.CUSTOM, null, false,
+						timeToSendMessageInMillis, null, null,
+						microDialogActivation.getMiroDialogToActivate(), null,
+						false, false, 0);
 			}
 
 			return dialogMessageCreated;
@@ -1797,15 +1861,6 @@ public class InterventionExecutionManagerService {
 		}
 
 		// Create dialog message
-		// dialogMessageCreateManuallyOrByRulesIncludingMediaObject(participant,
-		// determinedMonitoringMessageToSend.isCommandMessage()
-		// ? DialogMessageTypes.COMMAND : DialogMessageTypes.PLAIN,
-		// messageTextToSend, answerTypeToSend, answerOptionsToSend, true,
-		// InternalDateTime.currentTimeMillis(), null,
-		// determinedMonitoringMessageToSend, advisorMessage,
-		// monitoringMessageGroup.isMessagesExpectAnswer(),
-		// minutesUntilHandledAsNotAnswered);
-		// TODO Adjust for micro dialogs
 		dialogMessageCreateManuallyOrByRulesIncludingMediaObject(participant,
 				determinedMonitoringMessageToSend.isCommandMessage()
 						? DialogMessageTypes.COMMAND : DialogMessageTypes.PLAIN,

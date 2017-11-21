@@ -635,8 +635,9 @@ public class RecursiveAbstractMonitoringRulesResolver {
 					}
 
 					// Message sending
-					log.debug("Rule will send message!");
 					if (rule.isSendMessageIfTrue()) {
+						log.debug("Rule will send message!");
+
 						final MessageSendingResultForMonitoringRule result = new MessageSendingResultForMonitoringRule();
 
 						result.setAbstractMonitoringRuleRequiredToPrepareMessage(
@@ -646,8 +647,9 @@ public class RecursiveAbstractMonitoringRulesResolver {
 					}
 
 					// Micro dialog activation
-					log.debug("Rule will activate micro dialog!");
 					if (rule.isActivateMicroDialogIfTrue()) {
+						log.debug("Rule will activate micro dialog!");
+
 						abstractMonitoringRulesToCheckForMicroDialogActivation
 								.add(rule);
 					}
@@ -655,8 +657,9 @@ public class RecursiveAbstractMonitoringRulesResolver {
 					break;
 				case MONITORING_REPLY_RULES:
 					// Message sending
-					log.debug("Rule will send message!");
 					if (rule.isSendMessageIfTrue()) {
+						log.debug("Rule will send message!");
+
 						final MessageSendingResultForMonitoringReplyRule result = new MessageSendingResultForMonitoringReplyRule();
 
 						result.setAbstractMonitoringRuleRequiredToPrepareMessage(
@@ -666,8 +669,9 @@ public class RecursiveAbstractMonitoringRulesResolver {
 					}
 
 					// Micro dialog activation
-					log.debug("Rule will activate micro dialog!");
 					if (rule.isActivateMicroDialogIfTrue()) {
+						log.debug("Rule will activate micro dialog!");
+
 						abstractMonitoringRulesToCheckForMicroDialogActivation
 								.add(rule);
 					}

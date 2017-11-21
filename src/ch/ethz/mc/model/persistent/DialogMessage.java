@@ -286,6 +286,10 @@ public class DialogMessage extends ModelObject {
 				typeString = Messages.getAdminString(
 						AdminMessageStrings.UI_MODEL__PLAIN_TEXT_MESSAGE);
 				break;
+			case MICRO_DIALOG_ACTIVATION:
+				typeString = Messages.getAdminString(
+						AdminMessageStrings.UI_MODEL__MICRO_DIALOG_ACTIVATION_MESSAGE);
+				break;
 		}
 
 		final val dialogMessage = new UIDialogMessageWithParticipantForResults(
@@ -369,6 +373,10 @@ public class DialogMessage extends ModelObject {
 				typeString = Messages.getAdminString(
 						AdminMessageStrings.UI_MODEL__PLAIN_TEXT_MESSAGE);
 				break;
+			case MICRO_DIALOG_ACTIVATION:
+				typeString = Messages.getAdminString(
+						AdminMessageStrings.UI_MODEL__MICRO_DIALOG_ACTIVATION_MESSAGE);
+				break;
 		}
 
 		final val dialogMessage = new UIDialogMessageWithParticipant(
@@ -450,6 +458,10 @@ public class DialogMessage extends ModelObject {
 			case PLAIN:
 				typeString = Messages.getAdminString(
 						AdminMessageStrings.UI_MODEL__PLAIN_TEXT_MESSAGE);
+				break;
+			case MICRO_DIALOG_ACTIVATION:
+				typeString = Messages.getAdminString(
+						AdminMessageStrings.UI_MODEL__MICRO_DIALOG_ACTIVATION_MESSAGE);
 				break;
 		}
 

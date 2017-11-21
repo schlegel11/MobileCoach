@@ -50,6 +50,7 @@ import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.conf.ThemeImageStrings;
 import ch.ethz.mc.model.memory.types.RecursiveRuleTypes;
 import ch.ethz.mc.model.persistent.Intervention;
+import ch.ethz.mc.model.persistent.MicroDialog;
 import ch.ethz.mc.model.persistent.MicroDialogRule;
 import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
 import ch.ethz.mc.model.persistent.MonitoringReplyRule;
@@ -410,6 +411,23 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 								recipient, monitoringMessageGroup.getName());
 					}
 				}
+			} else if (selectedMonitoringRule.isActivateMicroDialogIfTrue()) {
+				if (selectedMonitoringRule.getRelatedMicroDialog() == null) {
+					sendMessage = Messages.getAdminString(
+							AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__ACTIVATE_MICRO_DIALOG_BUT_NO_MICRO_DIALOG_SELECTED);
+				} else {
+					final MicroDialog microDialog = getInterventionAdministrationManagerService()
+							.getMicroDialog(selectedMonitoringRule
+									.getRelatedMicroDialog());
+					if (microDialog == null) {
+						sendMessage = Messages.getAdminString(
+								AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__ACTIVATE_MICRO_DIALOG_BUT_MICRO_DIALOG_ALREADY_DELETED);
+					} else {
+						sendMessage = Messages.getAdminString(
+								AdminMessageStrings.ABSTRACT_MONITORING_RULES_EDITING__ACTIVATE_MICRO_DIALOG_WITH_NAME,
+								microDialog.getName());
+					}
+				}
 			} else {
 				switch (rulesType) {
 					case MONITORING_RULES:
@@ -446,7 +464,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 	private ThemeResource getAppropriateIcon(
 			final AbstractMonitoringRule abstractMonitoringRule) {
 		ThemeResource icon;
-		if (abstractMonitoringRule.isSendMessageIfTrue()) {
+		if (abstractMonitoringRule.isSendMessageIfTrue()
+				|| abstractMonitoringRule.isActivateMicroDialogIfTrue()) {
 			if (abstractMonitoringRule.isSendMessageToSupervisor()) {
 				icon = SUPERVISOR_MESSAGE_RULE_ICON;
 			} else {

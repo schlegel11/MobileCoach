@@ -2996,6 +2996,12 @@ public class InterventionAdministrationManagerService {
 		variables.addAll(variablesManagerService
 				.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(
 						interventionId));
+		variables.addAll(variablesManagerService
+				.getAllMicroDialogMessageVariableNamesOfIntervention(
+						interventionId));
+		variables.addAll(variablesManagerService
+				.getAllMicroDialogRuleVariableNamesOfIntervention(
+						interventionId));
 
 		Collections.sort(variables);
 
@@ -3019,6 +3025,12 @@ public class InterventionAdministrationManagerService {
 						interventionId));
 		variables.addAll(variablesManagerService
 				.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(
+						interventionId));
+		variables.addAll(variablesManagerService
+				.getAllMicroDialogMessageVariableNamesOfIntervention(
+						interventionId));
+		variables.addAll(variablesManagerService
+				.getAllMicroDialogRuleVariableNamesOfIntervention(
 						interventionId));
 
 		Collections.sort(variables);
@@ -3044,6 +3056,12 @@ public class InterventionAdministrationManagerService {
 		variables.addAll(variablesManagerService
 				.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(
 						interventionId));
+		variables.addAll(variablesManagerService
+				.getAllMicroDialogMessageVariableNamesOfIntervention(
+						interventionId));
+		variables.addAll(variablesManagerService
+				.getAllMicroDialogRuleVariableNamesOfIntervention(
+						interventionId));
 
 		Collections.sort(variables);
 
@@ -3067,6 +3085,12 @@ public class InterventionAdministrationManagerService {
 						interventionId));
 		variables.addAll(variablesManagerService
 				.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(
+						interventionId));
+		variables.addAll(variablesManagerService
+				.getAllMicroDialogMessageVariableNamesOfIntervention(
+						interventionId));
+		variables.addAll(variablesManagerService
+				.getAllMicroDialogRuleVariableNamesOfIntervention(
 						interventionId));
 
 		Collections.sort(variables);

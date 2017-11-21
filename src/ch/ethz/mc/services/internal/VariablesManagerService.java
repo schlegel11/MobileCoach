@@ -45,6 +45,10 @@ import ch.ethz.mc.model.persistent.DialogStatus;
 import ch.ethz.mc.model.persistent.IntermediateSurveyAndFeedbackParticipantShortURL;
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.InterventionVariableWithValue;
+import ch.ethz.mc.model.persistent.MicroDialog;
+import ch.ethz.mc.model.persistent.MicroDialogDecisionPoint;
+import ch.ethz.mc.model.persistent.MicroDialogMessage;
+import ch.ethz.mc.model.persistent.MicroDialogRule;
 import ch.ethz.mc.model.persistent.MonitoringMessage;
 import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
 import ch.ethz.mc.model.persistent.MonitoringReplyRule;
@@ -930,6 +934,63 @@ public class VariablesManagerService {
 						.getStoreValueToVariableWithName() != null) {
 					variables.add(monitoringReplyRuleModelObject
 							.getStoreValueToVariableWithName());
+				}
+			}
+		}
+
+		return variables;
+	}
+
+	public Set<String> getAllMicroDialogMessageVariableNamesOfIntervention(
+			final ObjectId interventionId) {
+		val variables = new HashSet<String>();
+
+		val microDialogModelObjects = databaseManagerService.findModelObjects(
+				MicroDialog.class, Queries.MICRO_DIALOG__BY_INTERVENTION,
+				interventionId);
+		for (val microDialogModelObject : microDialogModelObjects) {
+			val microDialogMessageModelObjects = databaseManagerService
+					.findModelObjects(MicroDialogMessage.class,
+							Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG,
+							microDialogModelObject.getId());
+
+			for (val microDialogMessageModelObject : microDialogMessageModelObjects) {
+				if (microDialogMessageModelObject
+						.getStoreValueToVariableWithName() != null) {
+					variables.add(microDialogMessageModelObject
+							.getStoreValueToVariableWithName());
+				}
+			}
+		}
+
+		return variables;
+	}
+
+	public Set<String> getAllMicroDialogRuleVariableNamesOfIntervention(
+			final ObjectId interventionId) {
+		val variables = new HashSet<String>();
+
+		val microDialogModelObjects = databaseManagerService.findModelObjects(
+				MicroDialog.class, Queries.MICRO_DIALOG__BY_INTERVENTION,
+				interventionId);
+		for (val microDialogModelObject : microDialogModelObjects) {
+			val microDialogDecisionPointModelObjects = databaseManagerService
+					.findModelObjects(MicroDialogDecisionPoint.class,
+							Queries.MICRO_DIALOG_DECISION_POINT__BY_MICRO_DIALOG,
+							microDialogModelObject.getId());
+
+			for (val microDialogDecisionPointModelObject : microDialogDecisionPointModelObjects) {
+				val microDialogRuleModelObjects = databaseManagerService
+						.findModelObjects(MicroDialogRule.class,
+								Queries.MICRO_DIALOG_RULE__BY_MICRO_DIALOG_DECISION_POINT,
+								microDialogDecisionPointModelObject.getId());
+
+				for (val microDialogRuleModelObject : microDialogRuleModelObjects) {
+					if (microDialogRuleModelObject
+							.getStoreValueToVariableWithName() != null) {
+						variables.add(microDialogRuleModelObject
+								.getStoreValueToVariableWithName());
+					}
 				}
 			}
 		}
