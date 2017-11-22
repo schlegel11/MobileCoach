@@ -364,7 +364,7 @@ public class CommunicationManagerService {
 									message.getSubject());
 							val receivedMessage = new ReceivedMessage();
 							receivedMessage.setType(DialogOptionTypes.SMS);
-							receivedMessage.setIntention(false);
+							receivedMessage.setTypeIntention(false);
 							receivedMessage.setRelatedMessageIdBasedOnOrder(-1);
 
 							// Parse message content

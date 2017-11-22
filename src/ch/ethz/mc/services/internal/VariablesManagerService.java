@@ -300,7 +300,8 @@ public class VariablesManagerService {
 				case participantRawMessageReply:
 				case participantUnexpectedMessage:
 				case participantUnexpectedRawMessage:
-				case participantIntention:
+				case participantIntentionRaw:
+				case participantIntentionContent:
 					if (!variablesWithValues
 							.containsKey(variable.toVariableName())) {
 						addToHashtable(variablesWithValues,

@@ -622,7 +622,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 														.get(DeepstreamConstants.RELATED_MESSAGE_ID)
 														.getAsInt()
 												: -1,
-								false);
+								null, null, false);
 
 						if (receivedSuccessful) {
 							rpcResponse.send(new JsonPrimitive(true));
@@ -645,11 +645,22 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 						final boolean receivedSuccessful = receiveMessage(
 								jsonData.get(DeepstreamConstants.USER)
 										.getAsString(),
-								jsonData.get(DeepstreamConstants.USER_INTENTION)
-										.getAsString(),
+								jsonData.has(DeepstreamConstants.USER_MESSAGE)
+										? jsonData
+												.get(DeepstreamConstants.USER_MESSAGE)
+												.getAsString()
+										: null,
 								jsonData.get(DeepstreamConstants.USER_TIMESTAMP)
 										.getAsLong(),
-								-1, true);
+								-1,
+								jsonData.get(DeepstreamConstants.USER_INTENTION)
+										.getAsString(),
+								jsonData.has(DeepstreamConstants.USER_CONTENT)
+										? jsonData
+												.get(DeepstreamConstants.USER_CONTENT)
+												.getAsString()
+										: null,
+								true);
 
 						if (receivedSuccessful) {
 							rpcResponse.send(new JsonPrimitive(true));
@@ -693,17 +704,20 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 
 	/**
 	 * @param participantId
-	 * @param content
+	 * @param message
 	 * @param timestamp
 	 * @param relatedMessageIdBasedOnOrder
-	 * @param isIntention
+	 * @param intention
+	 * @param content
+	 * @param typeIntention
 	 * @return
 	 */
 	private boolean receiveMessage(final String participantId,
-			final String content, final long timestamp,
-			final int relatedMessageIdBasedOnOrder, final boolean isIntention) {
+			final String message, final long timestamp,
+			final int relatedMessageIdBasedOnOrder, final String intention,
+			final String content, final boolean typeIntention) {
 		log.debug("Received {} message for participant {}",
-				isIntention ? "intention" : "regular", participantId);
+				typeIntention ? "intention" : "regular", participantId);
 
 		val receivedMessage = new ReceivedMessage();
 
@@ -711,14 +725,16 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 		// be discarded later automatically when no appropriate dialog option is
 		// found)
 		receivedMessage.setType(DialogOptionTypes.EXTERNAL_ID);
-		receivedMessage.setIntention(isIntention);
-		receivedMessage
-				.setRelatedMessageIdBasedOnOrder(relatedMessageIdBasedOnOrder);
-		receivedMessage.setReceivedTimestamp(timestamp);
-		receivedMessage.setMessage(content);
 		receivedMessage.setSender(
 				ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
 						+ participantId);
+		receivedMessage.setMessage(message);
+		receivedMessage.setTypeIntention(typeIntention);
+		receivedMessage
+				.setRelatedMessageIdBasedOnOrder(relatedMessageIdBasedOnOrder);
+		receivedMessage.setIntention(intention);
+		receivedMessage.setContent(content);
+		receivedMessage.setReceivedTimestamp(timestamp);
 
 		if (receivedMessage.getMessage() != null
 				&& receivedMessage.getSender() != null) {

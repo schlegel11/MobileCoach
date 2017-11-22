@@ -47,11 +47,19 @@ public class ReceivedMessage {
 
 	@Getter
 	@Setter
-	private boolean				isIntention;
+	private boolean				typeIntention;
 
 	@Getter
 	@Setter
 	private int					relatedMessageIdBasedOnOrder;
+
+	@Getter
+	@Setter
+	private String				intention;
+
+	@Getter
+	@Setter
+	private String				content;
 
 	@Getter
 	@Setter

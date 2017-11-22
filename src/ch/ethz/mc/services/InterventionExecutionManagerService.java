@@ -613,15 +613,32 @@ public class InterventionExecutionManagerService {
 	private DialogMessage dialogMessageCreateAsUnexpectedReceivedOrIntention(
 			final ObjectId participantId, final DialogMessageTypes type,
 			final ReceivedMessage receivedMessage) {
+
+		// Check type
+		val isTypeIntention = receivedMessage.isTypeIntention();
+
+		// Create values
+		String message;
+		final String messageWithForcedLinks;
+		if (isTypeIntention) {
+			message = receivedMessage.getMessage();
+			messageWithForcedLinks = receivedMessage.getContent() == null
+					? receivedMessage.getIntention()
+					: receivedMessage.getIntention()
+							+ receivedMessage.getContent();
+		} else {
+			message = receivedMessage.getMessage();
+			messageWithForcedLinks = StringHelpers
+					.cleanReceivedMessageString(receivedMessage.getMessage());
+		}
+
 		val dialogMessage = new DialogMessage(participantId, 0,
-				type == DialogMessageTypes.INTENTION
-						? DialogMessageStatusTypes.RECEIVED_AS_INTENTION
+				isTypeIntention ? DialogMessageStatusTypes.RECEIVED_AS_INTENTION
 						: DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY,
 				type, "", "", null, null, null, null, null, -1, -1, false,
-				false, -1, receivedMessage.getReceivedTimestamp(),
-				receivedMessage.getMessage(), receivedMessage.getMessage(),
-				type == DialogMessageTypes.INTENTION ? false : true, null, null,
-				null, null, false, false);
+				false, -1, receivedMessage.getReceivedTimestamp(), message,
+				messageWithForcedLinks, isTypeIntention ? false : true, null,
+				null, null, null, false, false);
 
 		val highestOrderMessage = databaseManagerService
 				.findOneSortedModelObject(DialogMessage.class,
@@ -1292,9 +1309,20 @@ public class InterventionExecutionManagerService {
 			return null;
 		}
 
-		val rawMessageValue = receivedMessage.getMessage();
-		val cleanedMessageValue = StringHelpers
-				.cleanReceivedMessageString(receivedMessage.getMessage());
+		// Check type
+		val isTypeIntention = receivedMessage.isTypeIntention();
+
+		// Create values
+		String rawMessageValue;
+		final String cleanedMessageValue;
+		if (isTypeIntention) {
+			rawMessageValue = receivedMessage.getIntention();
+			cleanedMessageValue = receivedMessage.getContent();
+		} else {
+			rawMessageValue = receivedMessage.getMessage();
+			cleanedMessageValue = StringHelpers
+					.cleanReceivedMessageString(receivedMessage.getMessage());
+		}
 
 		// Check if received messages is a "stop"-message (only relevant for SMS
 		// or Email messages)
@@ -1320,8 +1348,7 @@ public class InterventionExecutionManagerService {
 		// Check for intention messages or reply cases (message reply or micro
 		// dialog reply)
 		DialogMessage dialogMessage = null;
-		val isIntention = receivedMessage.isIntention();
-		if (!isIntention) {
+		if (!isTypeIntention) {
 			dialogMessage = getDialogMessageOfParticipantWaitingForAnswer(
 					dialogOption.getParticipant(),
 					receivedMessage.getReceivedTimestamp(),
@@ -1331,12 +1358,12 @@ public class InterventionExecutionManagerService {
 		if (dialogMessage == null) {
 			log.debug(
 					"Received an {} message from '{}', store it, mark it accordingly and execute rules",
-					isIntention ? "intention" : "unexpected",
+					isTypeIntention ? "intention" : "unexpected",
 					receivedMessage.getSender());
 
 			val dialogMessageCreated = dialogMessageCreateAsUnexpectedReceivedOrIntention(
 					dialogOption.getParticipant(),
-					isIntention ? DialogMessageTypes.INTENTION
+					isTypeIntention ? DialogMessageTypes.INTENTION
 							: DialogMessageTypes.PLAIN,
 					receivedMessage);
 
@@ -1344,10 +1371,20 @@ public class InterventionExecutionManagerService {
 					Participant.class, dialogOption.getParticipant());
 
 			try {
-				if (isIntention) {
+				if (isTypeIntention) {
 					variablesManagerService.writeVariableValueOfParticipant(
 							participant.getId(),
-							SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantIntention
+							SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantIntentionRaw
+									.toVariableName(),
+							rawMessageValue, true, false);
+					variablesManagerService.writeVariableValueOfParticipant(
+							participant.getId(),
+							SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantIntentionContent
+									.toVariableName(),
+							cleanedMessageValue, true, false);
+					variablesManagerService.writeVariableValueOfParticipant(
+							participant.getId(),
+							SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantIntentionContent
 									.toVariableName(),
 							rawMessageValue, true, false);
 				} else {
@@ -1366,13 +1403,13 @@ public class InterventionExecutionManagerService {
 				log.error(
 						"Could not store value '{}' of {} message for participant {}: {}",
 						rawMessageValue,
-						isIntention ? "intention" : "unexpected",
+						isTypeIntention ? "intention" : "unexpected",
 						participant.getId(), e.getMessage());
 				return null;
 			}
 
 			log.debug("Caring for {} message rules resolving",
-					isIntention ? "intention" : "unexpected");
+					isTypeIntention ? "intention" : "unexpected");
 
 			// Resolve rules
 			RecursiveAbstractMonitoringRulesResolver recursiveRuleResolver;
@@ -1380,7 +1417,7 @@ public class InterventionExecutionManagerService {
 				recursiveRuleResolver = new RecursiveAbstractMonitoringRulesResolver(
 						this, databaseManagerService, variablesManagerService,
 						participant,
-						isIntention
+						isTypeIntention
 								? EXECUTION_CASE.MONITORING_RULES_USER_INTENTION
 								: EXECUTION_CASE.MONITORING_RULES_UNEXPECTED_MESSAGE,
 						null, null, false, null);
@@ -1389,7 +1426,7 @@ public class InterventionExecutionManagerService {
 			} catch (final Exception e) {
 				log.error(
 						"Could not resolve {} message rules for participant {}: {}",
-						isIntention ? "intention" : "unexpected",
+						isTypeIntention ? "intention" : "unexpected",
 						participant.getId(), e.getMessage());
 				return null;
 			}
@@ -1399,7 +1436,8 @@ public class InterventionExecutionManagerService {
 			 */
 
 			// Rule solves problem
-			if (recursiveRuleResolver.isCaseMarkedAsSolved() && !isIntention) {
+			if (recursiveRuleResolver.isCaseMarkedAsSolved()
+					&& !isTypeIntention) {
 				unexpectedDialogMessageSetProblemSolved(dialogMessageCreated);
 			}
 
@@ -1409,7 +1447,7 @@ public class InterventionExecutionManagerService {
 				if (messageToSendTask.getMessageTextToSend() != null) {
 					log.debug(
 							"Preparing message on {} message for sending to participant",
-							isIntention ? "intention" : "unexpected");
+							isTypeIntention ? "intention" : "unexpected");
 
 					val monitoringRule = (MonitoringRule) messageToSendTask
 							.getAbstractMonitoringRuleRequiredToPrepareMessage();

@@ -70,6 +70,7 @@ public class DeepstreamConstants {
 	public static final String	USER_INTENTION						= "user-intention";
 	public static final String	USER_TIMESTAMP						= "user-timestamp";
 	public static final String	USER_MESSAGE						= "user-message";
+	public static final String	USER_CONTENT						= "user-content";
 	public static final String	LAST_MODIFIED						= "last-modified";
 	public static final String	CONTAINS_SURVEY						= "contains-survey";
 	public static final String	EXPECTS_ANSWER						= "expects-answer";
