@@ -18,9 +18,9 @@ import ch.ethz.mc.model.persistent.types.AnswerTypes;
 import ch.ethz.mc.model.ui.UIMicroDialogMessageRule;
 import ch.ethz.mc.model.ui.UIScreeningSurvey;
 import ch.ethz.mc.ui.components.basics.LocalizedPlaceholderStringEditComponent;
+import ch.ethz.mc.ui.components.basics.MediaObjectIntegrationComponentWithController.MediaObjectCreationOrDeleteionListener;
 import ch.ethz.mc.ui.components.basics.ShortPlaceholderStringEditComponent;
 import ch.ethz.mc.ui.components.basics.ShortStringEditComponent;
-import ch.ethz.mc.ui.components.basics.MediaObjectIntegrationComponentWithController.MediaObjectCreationOrDeleteionListener;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -119,8 +119,9 @@ public class MicroDialogMessageEditComponentWithController
 		minutesUntilHandledAsNotAnsweredSlider.setImmediate(true);
 		minutesUntilHandledAsNotAnsweredSlider.setMin(
 				ImplementationConstants.MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MIN);
-		minutesUntilHandledAsNotAnsweredSlider.setMax(
-				ImplementationConstants.MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX_MICRO_DIALOG_MESSAGE);
+		minutesUntilHandledAsNotAnsweredSlider
+				.setMax(ImplementationConstants.MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX_MICRO_DIALOG_MESSAGE
+						+ 1);
 		minutesUntilHandledAsNotAnsweredSlider
 				.addValueChangeListener(valueChangeListener);
 
@@ -312,23 +313,31 @@ public class MicroDialogMessageEditComponentWithController
 		}
 
 		// Adjust sliders
-		final int daysUntilMessageIsHandledAsUnanswered = (int) Math.floor(
-				microDialogMessage.getMinutesUntilMessageIsHandledAsUnanswered()
-						/ 60 / 24);
-		final int hoursWithoutDaysUntilMessageIsHandledAsUnanswered = (int) Math
-				.floor(microDialogMessage
-						.getMinutesUntilMessageIsHandledAsUnanswered() / 60)
-				- daysUntilMessageIsHandledAsUnanswered * 24;
-		final int minutesWithoutHoursAndDaysUntilMessageIsHandledAsUnanswered = microDialogMessage
-				.getMinutesUntilMessageIsHandledAsUnanswered()
-				- daysUntilMessageIsHandledAsUnanswered * 24 * 60
-				- hoursWithoutDaysUntilMessageIsHandledAsUnanswered * 60;
+		if (microDialogMessage
+				.getMinutesUntilMessageIsHandledAsUnanswered() > ImplementationConstants.MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX_MICRO_DIALOG_MESSAGE) {
+			localize(getMinutesUntilHandledAsNotAnsweredSlider(),
+					AdminMessageStrings.GENERAL__INFINITE);
+		} else {
+			final int daysUntilMessageIsHandledAsUnanswered = (int) Math
+					.floor(microDialogMessage
+							.getMinutesUntilMessageIsHandledAsUnanswered() / 60
+							/ 24);
+			final int hoursWithoutDaysUntilMessageIsHandledAsUnanswered = (int) Math
+					.floor(microDialogMessage
+							.getMinutesUntilMessageIsHandledAsUnanswered() / 60)
+					- daysUntilMessageIsHandledAsUnanswered * 24;
+			final int minutesWithoutHoursAndDaysUntilMessageIsHandledAsUnanswered = microDialogMessage
+					.getMinutesUntilMessageIsHandledAsUnanswered()
+					- daysUntilMessageIsHandledAsUnanswered * 24 * 60
+					- hoursWithoutDaysUntilMessageIsHandledAsUnanswered * 60;
 
-		localize(getMinutesUntilHandledAsNotAnsweredSlider(),
-				AdminMessageStrings.MICRO_DIALOG_MESSAGE_EDITING__TIMEFRAME_AFTER_SENDING_UNTIL_HANDLED_AS_NOT_ANSWERED_VALUE,
-				daysUntilMessageIsHandledAsUnanswered,
-				hoursWithoutDaysUntilMessageIsHandledAsUnanswered,
-				minutesWithoutHoursAndDaysUntilMessageIsHandledAsUnanswered);
+			localize(getMinutesUntilHandledAsNotAnsweredSlider(),
+					AdminMessageStrings.MICRO_DIALOG_MESSAGE_EDITING__TIMEFRAME_AFTER_SENDING_UNTIL_HANDLED_AS_NOT_ANSWERED_VALUE,
+					daysUntilMessageIsHandledAsUnanswered,
+					hoursWithoutDaysUntilMessageIsHandledAsUnanswered,
+					minutesWithoutHoursAndDaysUntilMessageIsHandledAsUnanswered);
+		}
+
 		try {
 			getMinutesUntilHandledAsNotAnsweredSlider()
 					.setValue((double) microDialogMessage
@@ -624,11 +633,15 @@ public class MicroDialogMessageEditComponentWithController
 		public void valueChange(final ValueChangeEvent event) {
 			if (event
 					.getProperty() == getMinutesUntilHandledAsNotAnsweredSlider()) {
+				int newValue = ((Double) event.getProperty().getValue())
+						.intValue();
+				if (newValue > ImplementationConstants.MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX_MICRO_DIALOG_MESSAGE) {
+					newValue = Integer.MAX_VALUE;
+				}
+
 				getInterventionAdministrationManagerService()
 						.microDialogMessageSetMinutesUntilMessageIsHandledAsUnanswered(
-								microDialogMessage,
-								((Double) event.getProperty().getValue())
-										.intValue());
+								microDialogMessage, newValue);
 			}
 
 			adjust();

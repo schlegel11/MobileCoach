@@ -223,28 +223,35 @@ public class MonitoringRule extends AbstractMonitoringRule {
 						+ wrapField(escape(messageGroup.getName())));
 
 				if (messageGroup.isMessagesExpectAnswer()) {
-					final int daysUntilMessageIsHandledAsUnanswered = (int) Math
-							.floor(getMinutesUntilMessageIsHandledAsUnanswered()
-									/ 60 / 24);
-					final int hoursWithoutDaysUntilMessageIsHandledAsUnanswered = (int) Math
-							.floor(getMinutesUntilMessageIsHandledAsUnanswered()
-									/ 60)
-							- daysUntilMessageIsHandledAsUnanswered * 24;
-					final int minutesWithoutHoursAndDaysUntilMessageIsHandledAsUnanswered = getMinutesUntilMessageIsHandledAsUnanswered()
-							- daysUntilMessageIsHandledAsUnanswered * 24 * 60
-							- hoursWithoutDaysUntilMessageIsHandledAsUnanswered
-									* 60;
+					if (getMinutesUntilMessageIsHandledAsUnanswered() == Integer.MAX_VALUE) {
+						table += wrapRow(wrapHeader(
+								"Time until message is handled as unanswered:",
+								style) + wrapField(escape("infinite")));
+					} else {
+						final int daysUntilMessageIsHandledAsUnanswered = (int) Math
+								.floor(getMinutesUntilMessageIsHandledAsUnanswered()
+										/ 60 / 24);
+						final int hoursWithoutDaysUntilMessageIsHandledAsUnanswered = (int) Math
+								.floor(getMinutesUntilMessageIsHandledAsUnanswered()
+										/ 60)
+								- daysUntilMessageIsHandledAsUnanswered * 24;
+						final int minutesWithoutHoursAndDaysUntilMessageIsHandledAsUnanswered = getMinutesUntilMessageIsHandledAsUnanswered()
+								- daysUntilMessageIsHandledAsUnanswered * 24
+										* 60
+								- hoursWithoutDaysUntilMessageIsHandledAsUnanswered
+										* 60;
 
-					table += wrapRow(wrapHeader(
-							"Time until message is handled as unanswered:",
-							style)
-							+ wrapField(
-									escape(daysUntilMessageIsHandledAsUnanswered
-											+ " day(s), "
-											+ hoursWithoutDaysUntilMessageIsHandledAsUnanswered
-											+ " hour(s), "
-											+ minutesWithoutHoursAndDaysUntilMessageIsHandledAsUnanswered
-											+ " minute(s)")));
+						table += wrapRow(wrapHeader(
+								"Time until message is handled as unanswered:",
+								style)
+								+ wrapField(
+										escape(daysUntilMessageIsHandledAsUnanswered
+												+ " day(s), "
+												+ hoursWithoutDaysUntilMessageIsHandledAsUnanswered
+												+ " hour(s), "
+												+ minutesWithoutHoursAndDaysUntilMessageIsHandledAsUnanswered
+												+ " minute(s)")));
+					}
 
 					/*
 					 * Reply Rules

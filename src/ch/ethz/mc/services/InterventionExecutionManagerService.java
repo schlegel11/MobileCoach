@@ -526,10 +526,16 @@ public class InterventionExecutionManagerService {
 						dialogMessage.getRelatedMonitoringRuleForReplyRules());
 
 				if (monitoringRule != null) {
-					final long isUnansweredAfterTimestamp = timeStampOfEvent
-							+ monitoringRule
-									.getMinutesUntilMessageIsHandledAsUnanswered()
-									* ImplementationConstants.MINUTES_TO_TIME_IN_MILLIS_MULTIPLICATOR;
+					long isUnansweredAfterTimestamp;
+					if (monitoringRule
+							.getMinutesUntilMessageIsHandledAsUnanswered() == Integer.MAX_VALUE) {
+						isUnansweredAfterTimestamp = Long.MAX_VALUE;
+					} else {
+						isUnansweredAfterTimestamp = timeStampOfEvent
+								+ monitoringRule
+										.getMinutesUntilMessageIsHandledAsUnanswered()
+										* ImplementationConstants.MINUTES_TO_TIME_IN_MILLIS_MULTIPLICATOR;
+					}
 
 					dialogMessage.setIsUnansweredAfterTimestamp(
 							isUnansweredAfterTimestamp);
@@ -543,10 +549,16 @@ public class InterventionExecutionManagerService {
 								dialogMessage.getRelatedMicroDialogMessage());
 
 				if (microDialogMessage != null) {
-					final long isUnansweredAfterTimestamp = timeStampOfEvent
-							+ microDialogMessage
-									.getMinutesUntilMessageIsHandledAsUnanswered()
-									* ImplementationConstants.MINUTES_TO_TIME_IN_MILLIS_MULTIPLICATOR;
+					long isUnansweredAfterTimestamp;
+					if (microDialogMessage
+							.getMinutesUntilMessageIsHandledAsUnanswered() == Integer.MAX_VALUE) {
+						isUnansweredAfterTimestamp = Long.MAX_VALUE;
+					} else {
+						isUnansweredAfterTimestamp = timeStampOfEvent
+								+ microDialogMessage
+										.getMinutesUntilMessageIsHandledAsUnanswered()
+										* ImplementationConstants.MINUTES_TO_TIME_IN_MILLIS_MULTIPLICATOR;
+					}
 
 					dialogMessage.setIsUnansweredAfterTimestamp(
 							isUnansweredAfterTimestamp);

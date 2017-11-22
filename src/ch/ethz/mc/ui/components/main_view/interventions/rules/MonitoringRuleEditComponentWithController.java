@@ -203,8 +203,9 @@ public class MonitoringRuleEditComponentWithController
 		minutesUntilHandledAsNotAnsweredSlider.setImmediate(true);
 		minutesUntilHandledAsNotAnsweredSlider.setMin(
 				ImplementationConstants.MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MIN);
-		minutesUntilHandledAsNotAnsweredSlider.setMax(
-				ImplementationConstants.MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX_MONITORING_MESSAGE);
+		minutesUntilHandledAsNotAnsweredSlider
+				.setMax(ImplementationConstants.MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX_MONITORING_MESSAGE
+						+ 1);
 		minutesUntilHandledAsNotAnsweredSlider
 				.addValueChangeListener(valueChangeListener);
 
@@ -535,23 +536,31 @@ public class MonitoringRuleEditComponentWithController
 		} catch (final Exception e) {
 			// Do nothing
 		}
-		final int daysUntilMessageIsHandledAsUnanswered = (int) Math.floor(
-				monitoringRule.getMinutesUntilMessageIsHandledAsUnanswered()
-						/ 60 / 24);
-		final int hoursWithoutDaysUntilMessageIsHandledAsUnanswered = (int) Math
-				.floor(monitoringRule
-						.getMinutesUntilMessageIsHandledAsUnanswered() / 60)
-				- daysUntilMessageIsHandledAsUnanswered * 24;
-		final int minutesWithoutHoursAndDaysUntilMessageIsHandledAsUnanswered = monitoringRule
-				.getMinutesUntilMessageIsHandledAsUnanswered()
-				- daysUntilMessageIsHandledAsUnanswered * 24 * 60
-				- hoursWithoutDaysUntilMessageIsHandledAsUnanswered * 60;
 
-		localize(getMinutesUntilHandledAsNotAnsweredSlider(),
-				AdminMessageStrings.MONITORING_RULE_EDITING__TIMEFRAME_AFTER_SENDING_UNTIL_HANDLED_AS_NOT_ANSWERED_VALUE,
-				daysUntilMessageIsHandledAsUnanswered,
-				hoursWithoutDaysUntilMessageIsHandledAsUnanswered,
-				minutesWithoutHoursAndDaysUntilMessageIsHandledAsUnanswered);
+		if (monitoringRule
+				.getMinutesUntilMessageIsHandledAsUnanswered() > ImplementationConstants.MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX_MONITORING_MESSAGE) {
+			localize(getMinutesUntilHandledAsNotAnsweredSlider(),
+					AdminMessageStrings.GENERAL__INFINITE);
+		} else {
+			final int daysUntilMessageIsHandledAsUnanswered = (int) Math.floor(
+					monitoringRule.getMinutesUntilMessageIsHandledAsUnanswered()
+							/ 60 / 24);
+			final int hoursWithoutDaysUntilMessageIsHandledAsUnanswered = (int) Math
+					.floor(monitoringRule
+							.getMinutesUntilMessageIsHandledAsUnanswered() / 60)
+					- daysUntilMessageIsHandledAsUnanswered * 24;
+			final int minutesWithoutHoursAndDaysUntilMessageIsHandledAsUnanswered = monitoringRule
+					.getMinutesUntilMessageIsHandledAsUnanswered()
+					- daysUntilMessageIsHandledAsUnanswered * 24 * 60
+					- hoursWithoutDaysUntilMessageIsHandledAsUnanswered * 60;
+
+			localize(getMinutesUntilHandledAsNotAnsweredSlider(),
+					AdminMessageStrings.MONITORING_RULE_EDITING__TIMEFRAME_AFTER_SENDING_UNTIL_HANDLED_AS_NOT_ANSWERED_VALUE,
+					daysUntilMessageIsHandledAsUnanswered,
+					hoursWithoutDaysUntilMessageIsHandledAsUnanswered,
+					minutesWithoutHoursAndDaysUntilMessageIsHandledAsUnanswered);
+		}
+
 		try {
 			getMinutesUntilHandledAsNotAnsweredSlider()
 					.setValue((double) monitoringRule
@@ -603,11 +612,15 @@ public class MonitoringRuleEditComponentWithController
 										.intValue());
 			} else if (event
 					.getProperty() == getMinutesUntilHandledAsNotAnsweredSlider()) {
+				int newValue = ((Double) event.getProperty().getValue())
+						.intValue();
+				if (newValue > ImplementationConstants.MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX_MICRO_DIALOG_MESSAGE) {
+					newValue = Integer.MAX_VALUE;
+				}
+
 				getInterventionAdministrationManagerService()
 						.monitoringRuleSetMinutesUntilMessageIsHandledAsUnanswered(
-								monitoringRule,
-								((Double) event.getProperty().getValue())
-										.intValue());
+								monitoringRule, newValue);
 			}
 
 			adjust();
