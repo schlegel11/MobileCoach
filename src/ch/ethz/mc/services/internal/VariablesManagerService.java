@@ -45,6 +45,10 @@ import ch.ethz.mc.model.persistent.DialogStatus;
 import ch.ethz.mc.model.persistent.IntermediateSurveyAndFeedbackParticipantShortURL;
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.InterventionVariableWithValue;
+import ch.ethz.mc.model.persistent.MicroDialog;
+import ch.ethz.mc.model.persistent.MicroDialogDecisionPoint;
+import ch.ethz.mc.model.persistent.MicroDialogMessage;
+import ch.ethz.mc.model.persistent.MicroDialogRule;
 import ch.ethz.mc.model.persistent.MonitoringMessage;
 import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
 import ch.ethz.mc.model.persistent.MonitoringReplyRule;
@@ -184,12 +188,13 @@ public class VariablesManagerService {
 	public Hashtable<String, AbstractVariableWithValue> getAllVariablesWithValuesOfParticipantAndSystem(
 			final Participant participant) {
 		return getAllVariablesWithValuesOfParticipantAndSystem(participant,
-				null);
+				null, null);
 	}
 
 	public Hashtable<String, AbstractVariableWithValue> getAllVariablesWithValuesOfParticipantAndSystem(
 			final Participant participant,
-			MonitoringMessage relatedMonitoringMessage) {
+			MonitoringMessage relatedMonitoringMessage,
+			MicroDialogMessage relatedMicroDialogMessage) {
 		val variablesWithValues = new Hashtable<String, AbstractVariableWithValue>();
 
 		// Add all read/write participant variables
@@ -263,7 +268,8 @@ public class VariablesManagerService {
 		for (val variable : SystemVariables.READ_ONLY_SYSTEM_VARIABLES
 				.values()) {
 			val readOnlySystemVariableValue = getReadOnlySystemVariableValue(
-					date, variable, relatedMonitoringMessage);
+					date, variable, relatedMonitoringMessage,
+					relatedMicroDialogMessage);
 
 			if (readOnlySystemVariableValue != null) {
 				addToHashtable(variablesWithValues, variable.toVariableName(),
@@ -460,7 +466,8 @@ public class VariablesManagerService {
 
 	private String getReadOnlySystemVariableValue(final Date date,
 			final READ_ONLY_SYSTEM_VARIABLES variable,
-			MonitoringMessage relatedMonitoringMessage) {
+			MonitoringMessage relatedMonitoringMessage,
+			MicroDialogMessage relatedMicroDialogMessage) {
 		switch (variable) {
 			case systemHourOfDay:
 				return hourOfDayFormatter.format(date);
@@ -476,12 +483,20 @@ public class VariablesManagerService {
 				if (relatedMonitoringMessage != null && relatedMonitoringMessage
 						.getLinkedIntermediateSurvey() != null) {
 					return ImplementationConstants.PLACEHOLDER_LINKED_SURVEY;
+				} else if (relatedMicroDialogMessage != null
+						&& relatedMicroDialogMessage
+								.getLinkedIntermediateSurvey() != null) {
+					return ImplementationConstants.PLACEHOLDER_LINKED_SURVEY;
 				} else {
 					return "";
 				}
 			case systemLinkedMediaObject:
 				if (relatedMonitoringMessage != null && relatedMonitoringMessage
 						.getLinkedMediaObject() != null) {
+					return ImplementationConstants.PLACEHOLDER_LINKED_MEDIA_OBJECT;
+				} else if (relatedMicroDialogMessage != null
+						&& relatedMicroDialogMessage
+								.getLinkedMediaObject() != null) {
 					return ImplementationConstants.PLACEHOLDER_LINKED_MEDIA_OBJECT;
 				} else {
 					return "";
@@ -937,6 +952,63 @@ public class VariablesManagerService {
 		return variables;
 	}
 
+	public Set<String> getAllMicroDialogMessageVariableNamesOfIntervention(
+			final ObjectId interventionId) {
+		val variables = new HashSet<String>();
+
+		val microDialogModelObjects = databaseManagerService.findModelObjects(
+				MicroDialog.class, Queries.MICRO_DIALOG__BY_INTERVENTION,
+				interventionId);
+		for (val microDialogModelObject : microDialogModelObjects) {
+			val microDialogMessageModelObjects = databaseManagerService
+					.findModelObjects(MicroDialogMessage.class,
+							Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG,
+							microDialogModelObject.getId());
+
+			for (val microDialogMessageModelObject : microDialogMessageModelObjects) {
+				if (microDialogMessageModelObject
+						.getStoreValueToVariableWithName() != null) {
+					variables.add(microDialogMessageModelObject
+							.getStoreValueToVariableWithName());
+				}
+			}
+		}
+
+		return variables;
+	}
+
+	public Set<String> getAllMicroDialogRuleVariableNamesOfIntervention(
+			final ObjectId interventionId) {
+		val variables = new HashSet<String>();
+
+		val microDialogModelObjects = databaseManagerService.findModelObjects(
+				MicroDialog.class, Queries.MICRO_DIALOG__BY_INTERVENTION,
+				interventionId);
+		for (val microDialogModelObject : microDialogModelObjects) {
+			val microDialogDecisionPointModelObjects = databaseManagerService
+					.findModelObjects(MicroDialogDecisionPoint.class,
+							Queries.MICRO_DIALOG_DECISION_POINT__BY_MICRO_DIALOG,
+							microDialogModelObject.getId());
+
+			for (val microDialogDecisionPointModelObject : microDialogDecisionPointModelObjects) {
+				val microDialogRuleModelObjects = databaseManagerService
+						.findModelObjects(MicroDialogRule.class,
+								Queries.MICRO_DIALOG_RULE__BY_MICRO_DIALOG_DECISION_POINT,
+								microDialogDecisionPointModelObject.getId());
+
+				for (val microDialogRuleModelObject : microDialogRuleModelObjects) {
+					if (microDialogRuleModelObject
+							.getStoreValueToVariableWithName() != null) {
+						variables.add(microDialogRuleModelObject
+								.getStoreValueToVariableWithName());
+					}
+				}
+			}
+		}
+
+		return variables;
+	}
+
 	/*
 	 * External or service access methods
 	 */
@@ -974,7 +1046,7 @@ public class VariablesManagerService {
 							READ_ONLY_SYSTEM_VARIABLES.valueOf(variable.replace(
 									ImplementationConstants.VARIABLE_PREFIX,
 									"")),
-							null);
+							null, null);
 				} catch (final Exception e) {
 					return null;
 				}

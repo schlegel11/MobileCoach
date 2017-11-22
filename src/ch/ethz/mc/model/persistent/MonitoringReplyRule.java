@@ -22,20 +22,19 @@ package ch.ethz.mc.model.persistent;
  */
 import java.util.List;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.val;
-
 import org.bson.types.ObjectId;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.concepts.AbstractMonitoringRule;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import ch.ethz.mc.tools.StringHelpers;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.val;
 
 /**
  * {@link ModelObject} to represent an {@link MonitoringReplyRule}
@@ -63,13 +62,18 @@ public class MonitoringReplyRule extends AbstractMonitoringRule {
 			final String comment, final ObjectId isSubRuleOfMonitoringRule,
 			final int order, final String storeValueToVariableWithName,
 			final boolean sendMessageIfTrue,
+			final boolean sendMessageToSupervisor,
 			final ObjectId relatedMonitoringMessageGroup,
+			final boolean activateMicroDialogIfTrue,
+			final ObjectId relatedMicroDialog,
 			final ObjectId isGotAnswerRuleForMonitoringRule,
 			final ObjectId isGotNoAnswerRuleForMonitoringRule) {
 		super(ruleWithPlaceholders, ruleEquationSign,
 				ruleComparisonTermWithPlaceholders, comment,
 				isSubRuleOfMonitoringRule, order, storeValueToVariableWithName,
-				sendMessageIfTrue, relatedMonitoringMessageGroup);
+				sendMessageIfTrue, sendMessageToSupervisor,
+				relatedMonitoringMessageGroup, activateMicroDialogIfTrue,
+				relatedMicroDialog);
 
 		this.isGotAnswerRuleForMonitoringRule = isGotAnswerRuleForMonitoringRule;
 		this.isGotNoAnswerRuleForMonitoringRule = isGotNoAnswerRuleForMonitoringRule;

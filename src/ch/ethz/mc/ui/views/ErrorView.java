@@ -21,10 +21,11 @@ package ch.ethz.mc.ui.views;
  * limitations under the License.
  */
 import lombok.extern.log4j.Log4j2;
-import ch.ethz.mc.ui.views.components.views.ErrorViewComponent;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+
+import ch.ethz.mc.ui.components.views.ErrorViewComponent;
 
 /**
  * Provides error view

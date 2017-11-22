@@ -27,6 +27,10 @@ import org.bson.types.ObjectId;
 
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.Intervention;
+import ch.ethz.mc.model.persistent.MicroDialog;
+import ch.ethz.mc.model.persistent.MicroDialogDecisionPoint;
+import ch.ethz.mc.model.persistent.MicroDialogMessage;
+import ch.ethz.mc.model.persistent.MicroDialogRule;
 import ch.ethz.mc.model.persistent.MonitoringMessage;
 import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
 import ch.ethz.mc.model.persistent.MonitoringReplyRule;
@@ -39,6 +43,7 @@ import ch.ethz.mc.services.InterventionExecutionManagerService;
 import ch.ethz.mc.tools.RuleEvaluator;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.tools.VariableStringReplacer;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
@@ -54,58 +59,90 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class RecursiveAbstractMonitoringRulesResolver {
 	public static enum EXECUTION_CASE {
-		MONITORING_RULES_DAILY, MONITORING_RULES_PERIODIC, MONITORING_RULES_UNEXPECTED_MESSAGE, MONITORING_RULES_USER_INTENTION, MONITORING_RULES_REPLY
+		MONITORING_RULES_DAILY, MONITORING_RULES_PERIODIC, MONITORING_RULES_UNEXPECTED_MESSAGE, MONITORING_RULES_USER_INTENTION, MONITORING_REPLY_RULES, MICRO_DIALOG_DECISION_POINT
 	}
 
 	// General objects
-	private final InterventionExecutionManagerService	interventionExecutionManagerService;
-	private final DatabaseManagerService				databaseManagerService;
-	private final VariablesManagerService				variablesManagerService;
+	private final InterventionExecutionManagerService			interventionExecutionManagerService;
+	private final DatabaseManagerService						databaseManagerService;
+	private final VariablesManagerService						variablesManagerService;
 
 	// Internal objects
-	private boolean										completelyStop											= false;
+	private boolean												completelyStop											= false;
 
-	// Relevant for both cases
-	private final Participant							participant;
+	// Relevant for all cases
+	private final Participant									participant;
+	private final Intervention									intervention;
 
-	// Gives information if the whole class should handle MonitoringRules
-	// (different types) or MonitoringReplyRules
-	private final EXECUTION_CASE						executionCase;
-	private final boolean								isMonitoringRule;
-
-	// Only relevant for MonitoringRules
-	private final Intervention							intervention;
+	// Gives information which kinds of AbstractMonitoringRules this instance
+	// should handle
+	private final EXECUTION_CASE								executionCase;
+	private boolean												ONE_OF_MONITORING_RULES_CASES							= false;
 
 	// Only relevant for MonitoringReplyRules
-	private MonitoringMessage							relatedMonitoringMessageForReplyRuleCase				= null;
-	private MonitoringRule								relatedMonitoringRuleForReplyRuleCase					= null;
-	private final boolean								monitoringReplyRuleCaseIsTrue;
+	private MonitoringMessage									relatedMonitoringMessageForReplyRuleCase				= null;
+	private MonitoringRule										relatedMonitoringRuleForReplyRuleCase					= null;
+	private boolean												monitoringReplyRuleCaseIsTrue							= false;
+
+	// Only relevant for MonitoringRules and MonitoringReplyRules
+	private List<AbstractMonitoringRule>						abstractMonitoringRulesToCheckForMicroDialogActivation	= null;
+
+	// Only relevant for MicroDialogRules
+	private MicroDialogDecisionPoint							relatedMicroDialogDecisionPointForMicroDialogRuleCase	= null;
 
 	/*
-	 * Values to resolve related to intervention process
+	 * Values to resolve related to further intervention processing
 	 */
 
 	// Only relevant for MonitoringRules
-	private boolean										interventionIsFinishedForParticipantAfterThisResolving	= false;
-	private boolean										markCaseAsSolved										= false;
+	@Getter
+	private boolean												interventionFinishedForParticipantAfterThisResolving	= false;
+	@Getter
+	private boolean												caseMarkedAsSolved										= false;
+	@Getter
+	private List<MessageSendingResultForMonitoringRule>			messageSendingResultForMonitoringRules;
+
+	// Only relevant for MonitorinReplyRules
+	@Getter
+	private List<MessageSendingResultForMonitoringReplyRule>	messageSendingResultForMonitoringReplyRules;
+
+	// Only relevant for MonitoringRules and MonitoringReplyRules
+	@Getter
+	private List<MicroDialogActivation>							microDialogsToActivate;
+
+	// Only relevant for MicroDialogRules
+	@Getter
+	private boolean												leaveDecisionPointWhenTrue								= false;
+	@Getter
+	private boolean												stopMicroDialogWhenTrue									= false;
+	@Getter
+	private MicroDialog											nextMicroDialog											= null;
+	@Getter
+	private MicroDialogMessage									nextMicroDialogMessage									= null;
 
 	/*
 	 * Helper classes containing resolved values about messages to send
 	 */
-
 	private abstract class AbstractMessageSendingResultForAbstractMontoringRule {
 		@Getter
 		@Setter
-		private String					messageTextToSend								= "";
+		private String		messageTextToSend	= "";
 
 		@Getter
 		@Setter
-		private AnswerTypes				answerTypeToSend								= null;
+		private AnswerTypes	answerTypeToSend	= null;
 
 		@Getter
 		@Setter
-		private String					answerOptionsToSend								= null;
+		private String		answerOptionsToSend	= null;
 
+		@Getter
+		@Setter
+		private boolean		answerExpected		= false;
+	}
+
+	private abstract class AbstractMessageSendingResultForMonitoringRulesAndMonitoringReplyRules
+			extends AbstractMessageSendingResultForAbstractMontoringRule {
 		@Getter
 		@Setter
 		private MonitoringMessage		monitoringMessageToSend							= null;
@@ -113,36 +150,53 @@ public class RecursiveAbstractMonitoringRulesResolver {
 		@Getter
 		@Setter
 		private AbstractMonitoringRule	abstractMonitoringRuleRequiredToPrepareMessage	= null;
-
-		@Getter
-		@Setter
-		private boolean					monitoringRuleExpectsAnswer						= false;
-	}
-
-	public class MessageSendingResultForMonitoringRule
-			extends AbstractMessageSendingResultForAbstractMontoringRule {
-	}
-
-	public class MessageSendingResultForMonitoringReplyRule
-			extends AbstractMessageSendingResultForAbstractMontoringRule {
 	}
 
 	/*
-	 * Values to resolve
+	 * Helper class for micro dialog activation
 	 */
-	@Getter
-	private final List<MessageSendingResultForMonitoringRule>		messageSendingResultForMonitoringRules		= new ArrayList<RecursiveAbstractMonitoringRulesResolver.MessageSendingResultForMonitoringRule>();
-	@Getter
-	private final List<MessageSendingResultForMonitoringReplyRule>	messageSendingResultForMonitoringReplyRules	= new ArrayList<RecursiveAbstractMonitoringRulesResolver.MessageSendingResultForMonitoringReplyRule>();
+	@AllArgsConstructor
+	public class MicroDialogActivation {
+		@Getter
+		@Setter
+		private MicroDialog	miroDialogToActivate;
+
+		@Getter
+		@Setter
+		private int			hourToActivateMicroDialog;
+	}
+
+	// Solution for MonitoringRules
+	public class MessageSendingResultForMonitoringRule extends
+			AbstractMessageSendingResultForMonitoringRulesAndMonitoringReplyRules {
+	}
+
+	// Solution Solution for MonitoringReplyRules
+	public class MessageSendingResultForMonitoringReplyRule extends
+			AbstractMessageSendingResultForMonitoringRulesAndMonitoringReplyRules {
+	}
+
+	// Solution Solution for MicroDialogRules
+	public class MessageSendingResultForMicroDialogRule
+			extends AbstractMessageSendingResultForAbstractMontoringRule {
+		@Getter
+		@Setter
+		private MicroDialogMessage		microDialogMessageToSend						= null;
+
+		@Getter
+		@Setter
+		private AbstractMonitoringRule	abstractMonitoringRuleRequiredToPrepareMessage	= null;
+	}
 
 	public RecursiveAbstractMonitoringRulesResolver(
 			final InterventionExecutionManagerService interventionExecutionManagerService,
 			final DatabaseManagerService databaseManagerService,
 			final VariablesManagerService variablesManagerService,
 			final Participant participant, final EXECUTION_CASE executionCase,
-			final ObjectId relatedMonitoringMessageForReplyRuleCase,
-			final ObjectId relatedMonitoringRuleForReplyRuleCase,
-			final boolean monitoringReplyRuleCase) {
+			final ObjectId relatedMonitoringMessageForReplyRuleCaseId,
+			final ObjectId relatedMonitoringRuleForReplyRuleCaseId,
+			final boolean monitoringReplyRuleCase,
+			final ObjectId relatedMicroDialogDecisionPointForMicroDialogRuleCaseId) {
 		this.interventionExecutionManagerService = interventionExecutionManagerService;
 		this.databaseManagerService = databaseManagerService;
 		this.variablesManagerService = variablesManagerService;
@@ -154,123 +208,196 @@ public class RecursiveAbstractMonitoringRulesResolver {
 
 		this.executionCase = executionCase;
 
-		if (executionCase == EXECUTION_CASE.MONITORING_RULES_REPLY) {
-			isMonitoringRule = false;
-		} else {
-			isMonitoringRule = true;
-		}
+		switch (executionCase) {
+			case MONITORING_RULES_DAILY:
+			case MONITORING_RULES_PERIODIC:
+			case MONITORING_RULES_UNEXPECTED_MESSAGE:
+			case MONITORING_RULES_USER_INTENTION:
+				ONE_OF_MONITORING_RULES_CASES = true;
+				break;
+			case MONITORING_REPLY_RULES:
+				ONE_OF_MONITORING_RULES_CASES = false;
 
-		if (!isMonitoringRule) {
-			this.relatedMonitoringMessageForReplyRuleCase = databaseManagerService
-					.getModelObjectById(MonitoringMessage.class,
-							relatedMonitoringMessageForReplyRuleCase);
-			this.relatedMonitoringRuleForReplyRuleCase = databaseManagerService
-					.getModelObjectById(MonitoringRule.class,
-							relatedMonitoringRuleForReplyRuleCase);
+				relatedMonitoringMessageForReplyRuleCase = databaseManagerService
+						.getModelObjectById(MonitoringMessage.class,
+								relatedMonitoringMessageForReplyRuleCaseId);
+				relatedMonitoringRuleForReplyRuleCase = databaseManagerService
+						.getModelObjectById(MonitoringRule.class,
+								relatedMonitoringRuleForReplyRuleCaseId);
+
+				monitoringReplyRuleCaseIsTrue = monitoringReplyRuleCase;
+
+				break;
+			case MICRO_DIALOG_DECISION_POINT:
+				ONE_OF_MONITORING_RULES_CASES = false;
+
+				relatedMicroDialogDecisionPointForMicroDialogRuleCase = databaseManagerService
+						.getModelObjectById(MicroDialogDecisionPoint.class,
+								relatedMicroDialogDecisionPointForMicroDialogRuleCaseId);
+				break;
 		}
-		monitoringReplyRuleCaseIsTrue = monitoringReplyRuleCase;
 	}
 
 	public void resolve() {
+		// Prepare result lists
+		switch (executionCase) {
+			case MONITORING_RULES_DAILY:
+			case MONITORING_RULES_PERIODIC:
+			case MONITORING_RULES_UNEXPECTED_MESSAGE:
+			case MONITORING_RULES_USER_INTENTION:
+				messageSendingResultForMonitoringRules = new ArrayList<RecursiveAbstractMonitoringRulesResolver.MessageSendingResultForMonitoringRule>();
+				abstractMonitoringRulesToCheckForMicroDialogActivation = new ArrayList<AbstractMonitoringRule>();
+				break;
+			case MONITORING_REPLY_RULES:
+				messageSendingResultForMonitoringReplyRules = new ArrayList<RecursiveAbstractMonitoringRulesResolver.MessageSendingResultForMonitoringReplyRule>();
+				abstractMonitoringRulesToCheckForMicroDialogActivation = new ArrayList<AbstractMonitoringRule>();
+				break;
+			case MICRO_DIALOG_DECISION_POINT:
+				abstractMonitoringRulesToCheckForMicroDialogActivation = null;
+				break;
+		}
+
 		// Recursively check all rules
 		executeRules(null);
 
-		final List<? extends AbstractMessageSendingResultForAbstractMontoringRule> resultsToCreateMessagesFor;
+		// Prepare generation of messages
+		List<? extends AbstractMessageSendingResultForMonitoringRulesAndMonitoringReplyRules> resultsToCreateMessagesFor = null;
 
-		if (isMonitoringRule) {
-			resultsToCreateMessagesFor = messageSendingResultForMonitoringRules;
-		} else {
-			resultsToCreateMessagesFor = messageSendingResultForMonitoringReplyRules;
+		switch (executionCase) {
+			case MONITORING_RULES_DAILY:
+			case MONITORING_RULES_PERIODIC:
+			case MONITORING_RULES_UNEXPECTED_MESSAGE:
+			case MONITORING_RULES_USER_INTENTION:
+				resultsToCreateMessagesFor = messageSendingResultForMonitoringRules;
+				break;
+			case MONITORING_REPLY_RULES:
+				resultsToCreateMessagesFor = messageSendingResultForMonitoringReplyRules;
+				break;
+			case MICRO_DIALOG_DECISION_POINT:
+				resultsToCreateMessagesFor = null;
+				break;
 		}
 
-		for (val resultToCreateMessageFor : resultsToCreateMessagesFor) {
-			if (resultToCreateMessageFor
-					.getAbstractMonitoringRuleRequiredToPrepareMessage()
-					.getRelatedMonitoringMessageGroup() == null) {
-				log.warn(
-						"There is no message group defined in rule {} to send a message to participant {}",
-						resultToCreateMessageFor
-								.getAbstractMonitoringRuleRequiredToPrepareMessage(),
-						participant.getId());
+		// Create messages to be send out
+		if (resultsToCreateMessagesFor != null) {
+			for (val resultToCreateMessageFor : resultsToCreateMessagesFor) {
+				if (resultToCreateMessageFor
+						.getAbstractMonitoringRuleRequiredToPrepareMessage()
+						.getRelatedMonitoringMessageGroup() == null) {
+					log.warn(
+							"There is no message group defined in rule {} to send a message to participant {}",
+							resultToCreateMessageFor
+									.getAbstractMonitoringRuleRequiredToPrepareMessage(),
+							participant.getId());
 
-				resultToCreateMessageFor.setMessageTextToSend(null);
+					resultToCreateMessageFor.setMessageTextToSend(null);
 
-				continue;
-			}
+					continue;
+				}
 
-			// Determine message to send by checking message groups for already
-			// sent messages
-			val monitoringMessageGroup = databaseManagerService
-					.getModelObjectById(MonitoringMessageGroup.class,
+				// Determine message to send by checking message groups for
+				// already
+				// sent messages
+				val monitoringMessageGroup = databaseManagerService
+						.getModelObjectById(MonitoringMessageGroup.class,
+								resultToCreateMessageFor
+										.getAbstractMonitoringRuleRequiredToPrepareMessage()
+										.getRelatedMonitoringMessageGroup());
+
+				if (monitoringMessageGroup == null) {
+					log.warn(
+							"The monitoring message group {} for participant {} could not be found",
 							resultToCreateMessageFor
 									.getAbstractMonitoringRuleRequiredToPrepareMessage()
-									.getRelatedMonitoringMessageGroup());
+									.getRelatedMonitoringMessageGroup(),
+							participant.getId());
 
-			if (monitoringMessageGroup == null) {
-				log.warn(
-						"The monitoring message group {} for participant {} could not be found",
-						resultToCreateMessageFor
-								.getAbstractMonitoringRuleRequiredToPrepareMessage()
-								.getRelatedMonitoringMessageGroup(),
-						participant.getId());
+					continue;
+				}
 
-				continue;
-			}
+				resultToCreateMessageFor.setAnswerExpected(
+						monitoringMessageGroup.isMessagesExpectAnswer());
 
-			resultToCreateMessageFor.setMonitoringRuleExpectsAnswer(
-					monitoringMessageGroup.isMessagesExpectAnswer());
+				val determinedMonitoringMessageToSend = interventionExecutionManagerService
+						.determineMessageOfMessageGroupToSend(participant,
+								monitoringMessageGroup,
+								relatedMonitoringMessageForReplyRuleCase,
+								ONE_OF_MONITORING_RULES_CASES);
+				if (determinedMonitoringMessageToSend == null) {
+					log.warn(
+							"There are no more messages left in message group {} to send a message to participant {}",
+							resultToCreateMessageFor
+									.getAbstractMonitoringRuleRequiredToPrepareMessage()
+									.getRelatedMonitoringMessageGroup(),
+							participant.getId());
 
-			val determinedMonitoringMessageToSend = interventionExecutionManagerService
-					.determineMessageOfMessageGroupToSend(participant,
-							monitoringMessageGroup,
-							relatedMonitoringMessageForReplyRuleCase,
-							isMonitoringRule);
-			if (determinedMonitoringMessageToSend == null) {
-				log.warn(
-						"There are no more messages left in message group {} to send a message to participant {}",
-						resultToCreateMessageFor
-								.getAbstractMonitoringRuleRequiredToPrepareMessage()
-								.getRelatedMonitoringMessageGroup(),
-						participant.getId());
+					resultToCreateMessageFor.setMessageTextToSend(null);
 
-				resultToCreateMessageFor.setMessageTextToSend(null);
+					continue;
+				}
 
-				continue;
-			}
+				// Remember message that will be sent
+				resultToCreateMessageFor.setMonitoringMessageToSend(
+						determinedMonitoringMessageToSend);
 
-			// Remember message that will be sent
-			resultToCreateMessageFor.setMonitoringMessageToSend(
-					determinedMonitoringMessageToSend);
-
-			// Determine message text and answer type with options to send
-			val variablesWithValues = variablesManagerService
-					.getAllVariablesWithValuesOfParticipantAndSystem(
-							participant, determinedMonitoringMessageToSend);
-			val messageTextToSend = VariableStringReplacer
-					.findVariablesAndReplaceWithTextValues(
-							participant.getLanguage(),
-							determinedMonitoringMessageToSend
-									.getTextWithPlaceholders().get(participant),
-							variablesWithValues.values(), "");
-
-			AnswerTypes answerTypeToSend = null;
-			String answerOptionsToSend = null;
-			if (monitoringMessageGroup.isMessagesExpectAnswer()) {
-				answerTypeToSend = determinedMonitoringMessageToSend
-						.getAnswerType();
-
-				answerOptionsToSend = StringHelpers
-						.parseColonSeparatedMultiLineStringToJSON(
-								determinedMonitoringMessageToSend
-										.getAnswerOptionsWithPlaceholders(),
+				// Determine message text and answer type with options to send
+				val variablesWithValues = variablesManagerService
+						.getAllVariablesWithValuesOfParticipantAndSystem(
+								participant, determinedMonitoringMessageToSend,
+								null);
+				val messageTextToSend = VariableStringReplacer
+						.findVariablesAndReplaceWithTextValues(
 								participant.getLanguage(),
-								variablesWithValues.values());
-			}
+								determinedMonitoringMessageToSend
+										.getTextWithPlaceholders()
+										.get(participant),
+								variablesWithValues.values(), "");
 
-			resultToCreateMessageFor.setMessageTextToSend(messageTextToSend);
-			resultToCreateMessageFor.setAnswerTypeToSend(answerTypeToSend);
-			resultToCreateMessageFor
-					.setAnswerOptionsToSend(answerOptionsToSend);
+				AnswerTypes answerTypeToSend = null;
+				String answerOptionsToSend = null;
+				if (monitoringMessageGroup.isMessagesExpectAnswer()) {
+					answerTypeToSend = determinedMonitoringMessageToSend
+							.getAnswerType();
+
+					answerOptionsToSend = StringHelpers
+							.parseColonSeparatedMultiLineStringToJSON(
+									determinedMonitoringMessageToSend
+											.getAnswerOptionsWithPlaceholders(),
+									participant.getLanguage(),
+									variablesWithValues.values());
+				}
+
+				resultToCreateMessageFor
+						.setMessageTextToSend(messageTextToSend);
+				resultToCreateMessageFor.setAnswerTypeToSend(answerTypeToSend);
+				resultToCreateMessageFor
+						.setAnswerOptionsToSend(answerOptionsToSend);
+			}
+		}
+
+		// Determine micro dialogs to activate
+		if (abstractMonitoringRulesToCheckForMicroDialogActivation != null) {
+			microDialogsToActivate = new ArrayList<MicroDialogActivation>();
+			for (val ruleToCheckForMicroDialogActivation : abstractMonitoringRulesToCheckForMicroDialogActivation) {
+				val microDialogId = ruleToCheckForMicroDialogActivation
+						.getRelatedMicroDialog();
+
+				val microDialog = databaseManagerService
+						.getModelObjectById(MicroDialog.class, microDialogId);
+
+				int hourToActivateMicroDialog = 0;
+
+				if (ruleToCheckForMicroDialogActivation instanceof MonitoringRule) {
+					hourToActivateMicroDialog = ((MonitoringRule) ruleToCheckForMicroDialogActivation)
+							.getHourToSendMessageOrActivateMicroDialog();
+				}
+
+				if (microDialog != null) {
+					val microDialogActivation = new MicroDialogActivation(
+							microDialog, hourToActivateMicroDialog);
+					microDialogsToActivate.add(microDialogActivation);
+				}
+			}
 		}
 	}
 
@@ -282,9 +409,11 @@ public class RecursiveAbstractMonitoringRulesResolver {
 	 */
 	private void executeRules(final AbstractMonitoringRule parent) {
 		// Start with the whole process
-		Iterable<? extends AbstractMonitoringRule> rulesOnCurrentLevel;
+		Iterable<? extends AbstractMonitoringRule> rulesOnCurrentLevel = null;
 		if (parent == null) {
-			if (isMonitoringRule) {
+			// Root of rules tree
+			if (ONE_OF_MONITORING_RULES_CASES) {
+				// Handle monitoring rules separately due to complexity
 				MonitoringRule masterParent = null;
 
 				switch (executionCase) {
@@ -316,9 +445,13 @@ public class RecursiveAbstractMonitoringRulesResolver {
 										intervention.getId(),
 										MonitoringRuleTypes.USER_INTENTION);
 						break;
-					case MONITORING_RULES_REPLY:
+					case MONITORING_REPLY_RULES:
 						log.error(
 								"Reply rule request in monitoring rule exection: Should never happen!");
+						break;
+					case MICRO_DIALOG_DECISION_POINT:
+						log.error(
+								"Micro dialog rule request in monitoring rule exection: Should never happen!");
 						break;
 				}
 
@@ -328,49 +461,88 @@ public class RecursiveAbstractMonitoringRulesResolver {
 								Queries.MONITORING_RULE__SORT_BY_ORDER_ASC,
 								intervention.getId(), masterParent.getId());
 			} else {
-				if (monitoringReplyRuleCaseIsTrue) {
-					rulesOnCurrentLevel = databaseManagerService
-							.findSortedModelObjects(MonitoringReplyRule.class,
-									Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_ANSWER,
-									Queries.MONITORING_REPLY_RULE__SORT_BY_ORDER_ASC,
-									relatedMonitoringRuleForReplyRuleCase
-											.getId(),
-									null);
-				} else {
-					rulesOnCurrentLevel = databaseManagerService
-							.findSortedModelObjects(MonitoringReplyRule.class,
-									Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_NO_ANSWER,
-									Queries.MONITORING_REPLY_RULE__SORT_BY_ORDER_ASC,
-									relatedMonitoringRuleForReplyRuleCase
-											.getId(),
-									null);
+				switch (executionCase) {
+					case MONITORING_RULES_DAILY:
+					case MONITORING_RULES_PERIODIC:
+					case MONITORING_RULES_UNEXPECTED_MESSAGE:
+					case MONITORING_RULES_USER_INTENTION:
+						// Already solved above
+						break;
+					case MONITORING_REPLY_RULES:
+						if (monitoringReplyRuleCaseIsTrue) {
+							rulesOnCurrentLevel = databaseManagerService
+									.findSortedModelObjects(
+											MonitoringReplyRule.class,
+											Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_ANSWER,
+											Queries.MONITORING_REPLY_RULE__SORT_BY_ORDER_ASC,
+											relatedMonitoringRuleForReplyRuleCase
+													.getId(),
+											null);
+						} else {
+							rulesOnCurrentLevel = databaseManagerService
+									.findSortedModelObjects(
+											MonitoringReplyRule.class,
+											Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_NO_ANSWER,
+											Queries.MONITORING_REPLY_RULE__SORT_BY_ORDER_ASC,
+											relatedMonitoringRuleForReplyRuleCase
+													.getId(),
+											null);
+						}
+						break;
+					case MICRO_DIALOG_DECISION_POINT:
+						rulesOnCurrentLevel = databaseManagerService
+								.findSortedModelObjects(MicroDialogRule.class,
+										Queries.MICRO_DIALOG_RULE__BY_MICRO_DIALOG_DECISION_POINT_AND_PARENT,
+										Queries.MICRO_DIALOG_RULE__SORT_BY_ORDER_ASC,
+										relatedMicroDialogDecisionPointForMicroDialogRuleCase
+												.getId(),
+										null);
+						break;
 				}
 			}
 		} else {
-			if (isMonitoringRule) {
-				rulesOnCurrentLevel = databaseManagerService
-						.findSortedModelObjects(MonitoringRule.class,
-								Queries.MONITORING_RULE__BY_INTERVENTION_AND_PARENT,
-								Queries.MONITORING_RULE__SORT_BY_ORDER_ASC,
-								intervention.getId(), parent.getId());
-			} else {
-				if (monitoringReplyRuleCaseIsTrue) {
+			// Leafs of rules tree
+			switch (executionCase) {
+				case MONITORING_RULES_DAILY:
+				case MONITORING_RULES_PERIODIC:
+				case MONITORING_RULES_UNEXPECTED_MESSAGE:
+				case MONITORING_RULES_USER_INTENTION:
 					rulesOnCurrentLevel = databaseManagerService
-							.findSortedModelObjects(MonitoringReplyRule.class,
-									Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_ANSWER,
-									Queries.MONITORING_REPLY_RULE__SORT_BY_ORDER_ASC,
-									relatedMonitoringRuleForReplyRuleCase
+							.findSortedModelObjects(MonitoringRule.class,
+									Queries.MONITORING_RULE__BY_INTERVENTION_AND_PARENT,
+									Queries.MONITORING_RULE__SORT_BY_ORDER_ASC,
+									intervention.getId(), parent.getId());
+					break;
+				case MONITORING_REPLY_RULES:
+					if (monitoringReplyRuleCaseIsTrue) {
+						rulesOnCurrentLevel = databaseManagerService
+								.findSortedModelObjects(
+										MonitoringReplyRule.class,
+										Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_ANSWER,
+										Queries.MONITORING_REPLY_RULE__SORT_BY_ORDER_ASC,
+										relatedMonitoringRuleForReplyRuleCase
+												.getId(),
+										parent.getId());
+					} else {
+						rulesOnCurrentLevel = databaseManagerService
+								.findSortedModelObjects(
+										MonitoringReplyRule.class,
+										Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_NO_ANSWER,
+										Queries.MONITORING_REPLY_RULE__SORT_BY_ORDER_ASC,
+										relatedMonitoringRuleForReplyRuleCase
+												.getId(),
+										parent.getId());
+					}
+					break;
+				case MICRO_DIALOG_DECISION_POINT:
+					rulesOnCurrentLevel = databaseManagerService
+							.findSortedModelObjects(MicroDialogRule.class,
+									Queries.MICRO_DIALOG_RULE__BY_MICRO_DIALOG_DECISION_POINT_AND_PARENT,
+									Queries.MICRO_DIALOG_RULE__SORT_BY_ORDER_ASC,
+									relatedMicroDialogDecisionPointForMicroDialogRuleCase
 											.getId(),
 									parent.getId());
-				} else {
-					rulesOnCurrentLevel = databaseManagerService
-							.findSortedModelObjects(MonitoringReplyRule.class,
-									Queries.MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_NO_ANSWER,
-									Queries.MONITORING_REPLY_RULE__SORT_BY_ORDER_ASC,
-									relatedMonitoringRuleForReplyRuleCase
-											.getId(),
-									parent.getId());
-				}
+					break;
 			}
 		}
 
@@ -445,51 +617,159 @@ public class RecursiveAbstractMonitoringRulesResolver {
 			}
 		}
 
-		if (isMonitoringRule && ruleResult.isRuleMatchesEquationSign()
-				&& ((MonitoringRule) rule).isMarkCaseAsSolvedWhenTrue()) {
-			// Check if message solves case and stops further rule executions
-			log.debug("Rule will mark case as solved and stop rule execution!");
+		// Rule evaluates to TRUE
+		if (ruleResult.isRuleMatchesEquationSign()) {
+			switch (executionCase) {
+				case MONITORING_RULES_DAILY:
+				case MONITORING_RULES_PERIODIC:
+				case MONITORING_RULES_UNEXPECTED_MESSAGE:
+				case MONITORING_RULES_USER_INTENTION:
+					// Rule "solves" case
+					if (((MonitoringRule) rule).isMarkCaseAsSolvedWhenTrue()) {
+						log.debug(
+								"Rule marks case as solved and stops rule execution!");
 
-			markCaseAsSolved = true;
-			completelyStop = true;
-		}
+						caseMarkedAsSolved = true;
+						completelyStop = true;
+					}
 
-		if (ruleResult.isRuleMatchesEquationSign()
-				&& rule.isSendMessageIfTrue()) {
-			// Sending message
-			log.debug("Rule will send message!");
+					// Rule stops whole intervention for participant
+					if (((MonitoringRule) rule).isStopInterventionWhenTrue()) {
+						log.debug("Rule stops intervention for participant!");
 
-			if (isMonitoringRule) {
-				final MessageSendingResultForMonitoringRule result = new MessageSendingResultForMonitoringRule();
+						interventionFinishedForParticipantAfterThisResolving = true;
+						completelyStop = true;
+					}
 
-				result.setAbstractMonitoringRuleRequiredToPrepareMessage(rule);
+					// Message sending
+					if (rule.isSendMessageIfTrue()) {
+						log.debug("Rule will send message!");
 
-				messageSendingResultForMonitoringRules.add(result);
-			} else {
-				final MessageSendingResultForMonitoringReplyRule result = new MessageSendingResultForMonitoringReplyRule();
+						final MessageSendingResultForMonitoringRule result = new MessageSendingResultForMonitoringRule();
 
-				result.setAbstractMonitoringRuleRequiredToPrepareMessage(rule);
+						result.setAbstractMonitoringRuleRequiredToPrepareMessage(
+								rule);
 
-				messageSendingResultForMonitoringReplyRules.add(result);
+						messageSendingResultForMonitoringRules.add(result);
+					}
+
+					// Micro dialog activation
+					if (rule.isActivateMicroDialogIfTrue()) {
+						log.debug("Rule will activate micro dialog!");
+
+						abstractMonitoringRulesToCheckForMicroDialogActivation
+								.add(rule);
+					}
+
+					break;
+				case MONITORING_REPLY_RULES:
+					// Message sending
+					if (rule.isSendMessageIfTrue()) {
+						log.debug("Rule will send message!");
+
+						final MessageSendingResultForMonitoringReplyRule result = new MessageSendingResultForMonitoringReplyRule();
+
+						result.setAbstractMonitoringRuleRequiredToPrepareMessage(
+								rule);
+
+						messageSendingResultForMonitoringReplyRules.add(result);
+					}
+
+					// Micro dialog activation
+					if (rule.isActivateMicroDialogIfTrue()) {
+						log.debug("Rule will activate micro dialog!");
+
+						abstractMonitoringRulesToCheckForMicroDialogActivation
+								.add(rule);
+					}
+					break;
+				case MICRO_DIALOG_DECISION_POINT:
+					// Rule leaves decision point
+					if (((MicroDialogRule) rule)
+							.isLeaveDecisionPointWhenTrue()) {
+						log.debug(
+								"Rule leaves decision point and stops rule execution!");
+
+						leaveDecisionPointWhenTrue = true;
+						completelyStop = true;
+					}
+
+					// Rule stops micro dialog
+					if (((MicroDialogRule) rule).isStopMicroDialogWhenTrue()) {
+						log.debug(
+								"Rule stops complete micro dialog and stops rule execution!");
+
+						stopMicroDialogWhenTrue = true;
+						completelyStop = true;
+					}
+
+					// Redirection to other next micro dialog
+					if (((MicroDialogRule) rule)
+							.getNextMicroDialogWhenTrue() != null) {
+						log.debug("Rule jumps to other next micro dialog");
+
+						val nextMicroDialogId = ((MicroDialogRule) rule)
+								.getNextMicroDialogWhenTrue();
+
+						val proposedNextMicroDialog = databaseManagerService
+								.getModelObjectById(MicroDialog.class,
+										nextMicroDialogId);
+
+						if (proposedNextMicroDialog != null) {
+							nextMicroDialog = proposedNextMicroDialog;
+						}
+					}
+
+					// Redirection to other next micro dialog message
+					if (((MicroDialogRule) rule)
+							.getNextMicroDialogMessageWhenTrue() != null) {
+						log.debug(
+								"Rule jumps to other next micro dialog message");
+
+						val nextMicroDialogMessageId = ((MicroDialogRule) rule)
+								.getNextMicroDialogMessageWhenTrue();
+
+						val proposedNextDialogMessage = databaseManagerService
+								.getModelObjectById(MicroDialogMessage.class,
+										nextMicroDialogMessageId);
+
+						if (proposedNextDialogMessage != null) {
+							nextMicroDialogMessage = proposedNextDialogMessage;
+						}
+					}
+					break;
 			}
-		} else if (isMonitoringRule && ruleResult.isRuleMatchesEquationSign()
-				&& ((MonitoringRule) rule).isStopInterventionWhenTrue()) {
-			// Stop execution when rule is finalizing rule
-			log.debug("Rule will stop intervention for participant!");
+		} else {
+			// Rule evaluates to FALSE
+			switch (executionCase) {
+				case MONITORING_RULES_DAILY:
+				case MONITORING_RULES_PERIODIC:
+				case MONITORING_RULES_UNEXPECTED_MESSAGE:
+				case MONITORING_RULES_USER_INTENTION:
+				case MONITORING_REPLY_RULES:
+					break;
+				case MICRO_DIALOG_DECISION_POINT:
+					// Redirection to other next message
+					if (((MicroDialogRule) rule)
+							.getNextMicroDialogMessageWhenFalse() != null) {
+						log.debug(
+								"Rule jumps to other next micro dialog message");
 
-			interventionIsFinishedForParticipantAfterThisResolving = true;
+						val nextMicroDialogMessageId = ((MicroDialogRule) rule)
+								.getNextMicroDialogMessageWhenFalse();
 
-			completelyStop = true;
+						val proposedNextDialogMessage = databaseManagerService
+								.getModelObjectById(MicroDialogMessage.class,
+										nextMicroDialogMessageId);
+
+						if (proposedNextDialogMessage != null) {
+							nextMicroDialogMessage = proposedNextDialogMessage;
+						}
+					}
+					break;
+			}
 		}
 
 		return ruleResult.isRuleMatchesEquationSign();
-	}
-
-	public boolean isInterventionFinishedForParticipantAfterThisResolving() {
-		return interventionIsFinishedForParticipantAfterThisResolving;
-	}
-
-	public boolean isCaseMarkedAsSolved() {
-		return markCaseAsSolved;
 	}
 }

@@ -26,8 +26,8 @@ import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.ui.AdminNavigatorUI;
-import ch.ethz.mc.ui.views.components.basics.AboutTextComponent;
-import ch.ethz.mc.ui.views.components.views.LoginViewComponent;
+import ch.ethz.mc.ui.components.basics.AboutTextComponent;
+import ch.ethz.mc.ui.components.views.LoginViewComponent;
 
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.navigator.View;

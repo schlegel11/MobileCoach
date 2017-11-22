@@ -25,7 +25,7 @@ import lombok.extern.log4j.Log4j2;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.model.ui.UIModule;
-import ch.ethz.mc.ui.views.components.AbstractClosableEditComponent;
+import ch.ethz.mc.ui.components.AbstractClosableEditComponent;
 
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;

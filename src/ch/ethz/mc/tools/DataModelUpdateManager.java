@@ -96,6 +96,9 @@ public class DataModelUpdateManager {
 				case 16:
 					updateToVersion16();
 					break;
+				case 20:
+					updateToVersion20();
+					break;
 			}
 
 			log.info("Update to version {} done", updateToVersionInThisStep);
@@ -334,5 +337,76 @@ public class DataModelUpdateManager {
 			monitoringRuleCollection.update((ObjectId) document.get("_id"))
 					.with(Queries.UPDATE_VERSION_16__MONITORING_RULE__CHANGE_1_REMOVE);
 		}
+	}
+
+	/**
+	 * Changes for version 20:
+	 */
+	private static void updateToVersion20() {
+		val mongoDriverMonitoringMessageCollection = jongo.getDatabase()
+				.getCollection("MonitoringMessage");
+		val monitoringMessageCollection = jongo
+				.getCollection("MonitoringMessage");
+
+		for (final DBObject document : mongoDriverMonitoringMessageCollection
+				.find().snapshot()) {
+
+			val formerValue = document.get(
+					Queries.UPDATE_VERSION_20__MONITORING_MESSAGE__CHANGE_1_FIELD);
+
+			if (formerValue == null) {
+				monitoringMessageCollection
+						.update((ObjectId) document.get("_id"))
+						.with(Queries.UPDATE_VERSION_20__MONITORING_MESSAGE__CHANGE_1_CHANGE,
+								false);
+			} else {
+				monitoringMessageCollection
+						.update((ObjectId) document.get("_id"))
+						.with(Queries.UPDATE_VERSION_20__MONITORING_MESSAGE__CHANGE_1_CHANGE,
+								formerValue);
+			}
+			monitoringMessageCollection.update((ObjectId) document.get("_id"))
+					.with(Queries.UPDATE_VERSION_20__MONITORING_MESSAGE__CHANGE_1_REMOVE);
+		}
+
+		val mongoDriverMonitoringRuleCollection = jongo.getDatabase()
+				.getCollection("MonitoringRule");
+		val monitoringRuleCollection = jongo.getCollection("MonitoringRule");
+		monitoringRuleCollection.update(Queries.EVERYTHING).multi().with(
+				Queries.UPDATE_VERSION_20__ABSTRACT_MONITORING_RULE__CHANGE_1);
+		monitoringRuleCollection.update(Queries.EVERYTHING).multi().with(
+				Queries.UPDATE_VERSION_20__ABSTRACT_MONITORING_RULE__CHANGE_2);
+
+		for (final DBObject document : mongoDriverMonitoringRuleCollection
+				.find().snapshot()) {
+
+			val formerValue = document.get(
+					Queries.UPDATE_VERSION_20__MONITORING_RULE__CHANGE_1_FIELD);
+
+			if (formerValue == null) {
+				monitoringRuleCollection.update((ObjectId) document.get("_id"))
+						.with(Queries.UPDATE_VERSION_20__MONITORING_RULE__CHANGE_1_CHANGE,
+								false);
+			} else {
+				monitoringRuleCollection.update((ObjectId) document.get("_id"))
+						.with(Queries.UPDATE_VERSION_20__MONITORING_RULE__CHANGE_1_CHANGE,
+								formerValue);
+			}
+			monitoringRuleCollection.update((ObjectId) document.get("_id"))
+					.with(Queries.UPDATE_VERSION_20__MONITORING_RULE__CHANGE_1_REMOVE);
+		}
+
+		val monitoringReplyRuleCollection = jongo
+				.getCollection("MonitoringReplyRule");
+		monitoringReplyRuleCollection.update(Queries.EVERYTHING).multi().with(
+				Queries.UPDATE_VERSION_20__ABSTRACT_MONITORING_RULE__CHANGE_1);
+		monitoringReplyRuleCollection.update(Queries.EVERYTHING).multi().with(
+				Queries.UPDATE_VERSION_20__ABSTRACT_MONITORING_RULE__CHANGE_2);
+
+		val dialogMessageCollection = jongo.getCollection("DialogMessage");
+		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+				.with(Queries.UPDATE_VERSION_20__DIALOG_MESSAGE__CHANGE_1);
+		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+				.with(Queries.UPDATE_VERSION_20__DIALOG_MESSAGE__CHANGE_2);
 	}
 }

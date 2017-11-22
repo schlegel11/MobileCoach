@@ -220,6 +220,23 @@ public class DialogMessage extends ModelObject {
 	private ObjectId					relatedMonitoringMessage;
 
 	/**
+	 * <strong>OPTIONAL:</strong> The {@link MicroDialog} that should be
+	 * activated
+	 * when the appropriate point in time occurs
+	 */
+	@Getter
+	@Setter
+	private ObjectId					relatedMicroDialogForActivation;
+
+	/**
+	 * <strong>OPTIONAL:</strong> The {@link MicroDialogMessage} used to create
+	 * this {@link DialogMessage}
+	 */
+	@Getter
+	@Setter
+	private ObjectId					relatedMicroDialogMessage;
+
+	/**
 	 * The information if a {@link Participant} viewed the presented media
 	 * content (if
 	 * integrated in the {@link MonitoringMessage})
@@ -268,6 +285,10 @@ public class DialogMessage extends ModelObject {
 			case PLAIN:
 				typeString = Messages.getAdminString(
 						AdminMessageStrings.UI_MODEL__PLAIN_TEXT_MESSAGE);
+				break;
+			case MICRO_DIALOG_ACTIVATION:
+				typeString = Messages.getAdminString(
+						AdminMessageStrings.UI_MODEL__MICRO_DIALOG_ACTIVATION_MESSAGE);
 				break;
 		}
 
@@ -352,6 +373,10 @@ public class DialogMessage extends ModelObject {
 				typeString = Messages.getAdminString(
 						AdminMessageStrings.UI_MODEL__PLAIN_TEXT_MESSAGE);
 				break;
+			case MICRO_DIALOG_ACTIVATION:
+				typeString = Messages.getAdminString(
+						AdminMessageStrings.UI_MODEL__MICRO_DIALOG_ACTIVATION_MESSAGE);
+				break;
 		}
 
 		final val dialogMessage = new UIDialogMessageWithParticipant(
@@ -433,6 +458,10 @@ public class DialogMessage extends ModelObject {
 			case PLAIN:
 				typeString = Messages.getAdminString(
 						AdminMessageStrings.UI_MODEL__PLAIN_TEXT_MESSAGE);
+				break;
+			case MICRO_DIALOG_ACTIVATION:
+				typeString = Messages.getAdminString(
+						AdminMessageStrings.UI_MODEL__MICRO_DIALOG_ACTIVATION_MESSAGE);
 				break;
 		}
 

@@ -63,20 +63,25 @@ public class MonitoringRule extends AbstractMonitoringRule {
 			final String comment, final ObjectId isSubRuleOfMonitoringRule,
 			final int order, final String storeValueToVariableWithName,
 			final boolean sendMessageIfTrue,
+			final boolean sendMessageToSupervisor,
 			final ObjectId relatedMonitoringMessageGroup,
-			final MonitoringRuleTypes type, final ObjectId intervention,
-			final int hourToSendMessage,
+			final boolean activateMicroDialogIfTrue,
+			final ObjectId relatedMicroDialog, final MonitoringRuleTypes type,
+			final ObjectId intervention,
+			final int hourToSendMessageOrActivateMicroDialog,
 			final int minutesUntilMessageIsHandledAsUnanswered,
 			final boolean stopInterventionWhenTrue,
 			final boolean markCaseAsSolvedWhenTrue) {
 		super(ruleWithPlaceholders, ruleEquationSign,
 				ruleComparisonTermWithPlaceholders, comment,
 				isSubRuleOfMonitoringRule, order, storeValueToVariableWithName,
-				sendMessageIfTrue, relatedMonitoringMessageGroup);
+				sendMessageIfTrue, sendMessageToSupervisor,
+				relatedMonitoringMessageGroup, activateMicroDialogIfTrue,
+				relatedMicroDialog);
 
 		this.type = type;
 		this.intervention = intervention;
-		this.hourToSendMessage = hourToSendMessage;
+		this.hourToSendMessageOrActivateMicroDialog = hourToSendMessageOrActivateMicroDialog;
 		this.minutesUntilMessageIsHandledAsUnanswered = minutesUntilMessageIsHandledAsUnanswered;
 		this.stopInterventionWhenTrue = stopInterventionWhenTrue;
 		this.markCaseAsSolvedWhenTrue = markCaseAsSolvedWhenTrue;
@@ -99,12 +104,13 @@ public class MonitoringRule extends AbstractMonitoringRule {
 	private ObjectId			intervention;
 
 	/**
-	 * <strong>OPTIONAL if sendMessageIfTrue is false:</strong> The hour the
+	 * <strong>OPTIONAL if sendMessageIfTrue and activateMicroDialogIfTrue are
+	 * both false:</strong> The hour the
 	 * message should be sent
 	 */
 	@Getter
 	@Setter
-	private int					hourToSendMessage;
+	private int					hourToSendMessageOrActivateMicroDialog;
 
 	/**
 	 * <strong>OPTIONAL if sendMessageIfTrue is false:</strong> The minutes a
@@ -202,8 +208,10 @@ public class MonitoringRule extends AbstractMonitoringRule {
 				+ wrapField(formatYesNo(stopInterventionWhenTrue)));
 
 		if (isSendMessageIfTrue()) {
-			table += wrapRow(wrapHeader("Hour to send message:", style)
-					+ wrapField(escape(hourToSendMessage + ":00")));
+			table += wrapRow(wrapHeader(
+					"Hour to send message or activate micro dialog:", style)
+					+ wrapField(escape(
+							hourToSendMessageOrActivateMicroDialog + ":00")));
 		}
 
 		if (getRelatedMonitoringMessageGroup() != null) {

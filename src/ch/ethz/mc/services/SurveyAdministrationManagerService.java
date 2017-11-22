@@ -31,10 +31,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
-import lombok.Synchronized;
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.MC;
@@ -45,6 +41,7 @@ import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.Feedback;
 import ch.ethz.mc.model.persistent.FeedbackSlide;
 import ch.ethz.mc.model.persistent.FeedbackSlideRule;
+import ch.ethz.mc.model.persistent.MicroDialogMessage;
 import ch.ethz.mc.model.persistent.MonitoringMessage;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
@@ -61,6 +58,9 @@ import ch.ethz.mc.tools.GlobalUniqueIdGenerator;
 import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mc.tools.StringValidator;
 import ch.ethz.mc.ui.NotificationMessageException;
+import lombok.Synchronized;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 /**
@@ -309,6 +309,15 @@ public class SurveyAdministrationManagerService {
 							Queries.MONITORING_MESSAGE__BY_LINKED_INTERMEDIATE_SURVEY,
 							screeningSurveyToDelete.getId());
 			if (monitoringMessagesLinkingIntermediateSurvey.iterator()
+					.hasNext()) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_CANT_DELETE);
+			}
+			val microDialogMessagesLinkingIntermediateSurvey = databaseManagerService
+					.findModelObjects(MicroDialogMessage.class,
+							Queries.MICRO_DIALOG_MESSAGE__BY_LINKED_INTERMEDIATE_SURVEY,
+							screeningSurveyToDelete.getId());
+			if (microDialogMessagesLinkingIntermediateSurvey.iterator()
 					.hasNext()) {
 				throw new NotificationMessageException(
 						AdminMessageStrings.NOTIFICATION__SCREENING_SURVEY_CANT_DELETE);

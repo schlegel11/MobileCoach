@@ -22,14 +22,9 @@ package ch.ethz.mc.model.persistent;
  */
 import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.Setter;
-import lombok.val;
-
 import org.bson.types.ObjectId;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
@@ -41,8 +36,12 @@ import ch.ethz.mc.model.persistent.types.AnswerTypes;
 import ch.ethz.mc.model.ui.UIModelObject;
 import ch.ethz.mc.model.ui.UIMonitoringMessage;
 import ch.ethz.mc.tools.StringHelpers;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.val;
 
 /**
  * {@link ModelObject} to represent an {@link MonitoringMessage}
@@ -78,7 +77,7 @@ public class MonitoringMessage extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private boolean		isCommandMessage;
+	private boolean		commandMessage;
 
 	/**
 	 * The position of the {@link MonitoringMessage} compared to all other
@@ -154,22 +153,23 @@ public class MonitoringMessage extends ModelObject {
 	@Override
 	public UIModelObject toUIModelObject() {
 		int messageRules = 0;
-		val monitoringRules = MC.getInstance()
+		val monitoringMessageRules = MC.getInstance()
 				.getInterventionAdministrationManagerService()
 				.getAllMonitoringMessageRulesOfMonitoringMessage(getId());
 
-		if (monitoringRules != null) {
-			val screeningSurveySlideRulesIterator = monitoringRules.iterator();
+		if (monitoringMessageRules != null) {
+			val monitoringMessageRulesIterator = monitoringMessageRules
+					.iterator();
 
-			while (screeningSurveySlideRulesIterator.hasNext()) {
-				screeningSurveySlideRulesIterator.next();
+			while (monitoringMessageRulesIterator.hasNext()) {
+				monitoringMessageRulesIterator.next();
 				messageRules++;
 			}
 		}
 
 		final val monitoringMessage = new UIMonitoringMessage(order,
 				textWithPlaceholders.toShortenedString(80),
-				isCommandMessage
+				commandMessage
 						? Messages.getAdminString(
 								AdminMessageStrings.UI_MODEL__YES)
 						: Messages.getAdminString(

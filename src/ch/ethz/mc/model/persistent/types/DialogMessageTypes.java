@@ -26,7 +26,7 @@ package ch.ethz.mc.model.persistent.types;
  * @author Andreas Filler
  */
 public enum DialogMessageTypes {
-	PLAIN, INTENTION, COMMAND;
+	PLAIN, INTENTION, COMMAND, MICRO_DIALOG_ACTIVATION;
 
 	@Override
 	public String toString() {

@@ -64,4 +64,6 @@ public class ThemeImageStrings {
 			+ "signs-icon-small.png";
 	public static final String	STOP_ICON_SMALL			= IMAGE_PATH
 			+ "stop-icon-small.png";
+	public static final String	REDIRECT_ICON_SMALL		= IMAGE_PATH
+			+ "arrow-right-icon-small.png";
 }

@@ -22,14 +22,9 @@ package ch.ethz.mc.model.persistent;
  */
 import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.Setter;
-import lombok.val;
-
 import org.apache.commons.lang3.StringUtils;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Messages;
@@ -37,8 +32,12 @@ import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.ui.UIIntervention;
 import ch.ethz.mc.model.ui.UIModelObject;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.val;
 
 /**
  * {@link ModelObject} to represent an {@link Intervention}
@@ -216,6 +215,12 @@ public class Intervention extends ModelObject {
 			monitoringMessageGroups
 					.collectThisAndRelatedModelObjectsForExport(exportList);
 		}
+
+		// Add micro dialogs
+		for (val microDialogs : ModelObject.find(MicroDialog.class,
+				Queries.MICRO_DIALOG__BY_INTERVENTION, getId())) {
+			microDialogs.collectThisAndRelatedModelObjectsForExport(exportList);
+		}
 	}
 
 	/*
@@ -253,6 +258,11 @@ public class Intervention extends ModelObject {
 				MonitoringMessageGroup.class,
 				Queries.MONITORING_MESSAGE_GROUP__BY_INTERVENTION, getId());
 		ModelObject.delete(monitoringMessageGroupsToDelete);
+
+		// Delete micro dialogs
+		val microDialogsToDelete = ModelObject.find(MicroDialog.class,
+				Queries.MICRO_DIALOG__BY_INTERVENTION, getId());
+		ModelObject.delete(microDialogsToDelete);
 
 		// Delete screening surveys
 		val screeningSurveysToDelete = ModelObject.find(ScreeningSurvey.class,

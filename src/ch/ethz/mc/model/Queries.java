@@ -70,6 +70,39 @@ public class Queries {
 	public static final String	MONITORING_MESSAGE_RULE__SORT_BY_ORDER_ASC																																										= "{'order':1}";
 	public static final String	MONITORING_MESSAGE_RULE__SORT_BY_ORDER_DESC																																										= "{'order':-1}";
 
+	public static final String	MICRO_DIALOG__BY_INTERVENTION																																													= "{'intervention':#}";
+	public static final String	MICRO_DIALOG__BY_INTERVENTION_AND_ORDER_LOWER																																									= "{'intervention':#,'order':{$lt:#}}";
+	public static final String	MICRO_DIALOG__BY_INTERVENTION_AND_ORDER_HIGHER																																									= "{'intervention':#,'order':{$gt:#}}";
+	public static final String	MICRO_DIALOG__SORT_BY_ORDER_ASC																																													= "{'order':1}";
+	public static final String	MICRO_DIALOG__SORT_BY_ORDER_DESC																																												= "{'order':-1}";
+
+	public static final String	MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG																																											= "{'microDialog':#}";
+	public static final String	MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG_AND_ORDER_LOWER																																							= "{'microDialog':#,'order':{$lt:#}}";
+	public static final String	MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG_AND_ORDER_HIGHER																																							= "{'microDialog':#,'order':{$gt:#}}";
+	public static final String	MICRO_DIALOG_MESSAGE__BY_LINKED_INTERMEDIATE_SURVEY																																								= "{'linkedIntermediateSurvey':#}";
+	public static final String	MICRO_DIALOG_MESSAGE__SORT_BY_ORDER_ASC																																											= "{'order':1}";
+	public static final String	MICRO_DIALOG_MESSAGE__SORT_BY_ORDER_DESC																																										= "{'order':-1}";
+
+	public static final String	MICRO_DIALOG_MESSAGE_RULE__BY_MICRO_DIALOG_MESSAGE																																								= "{'belongingMicroDialogMessage':#}";
+	public static final String	MICRO_DIALOG_MESSAGE_RULE__BY_MICRO_DIALOG_MESSAGE_AND_ORDER_LOWER																																				= "{'belongingMicroDialogMessage':#,'order':{$lt:#}}";
+	public static final String	MICRO_DIALOG_MESSAGE_RULE__BY_MICRO_DIALOG_MESSAGE_AND_ORDER_HIGHER																																				= "{'belongingMicroDialogMessage':#,'order':{$gt:#}}";
+	public static final String	MICRO_DIALOG_MESSAGE_RULE__SORT_BY_ORDER_ASC																																									= "{'order':1}";
+	public static final String	MICRO_DIALOG_MESSAGE_RULE__SORT_BY_ORDER_DESC																																									= "{'order':-1}";
+
+	public static final String	MICRO_DIALOG_DECISION_POINT__BY_MICRO_DIALOG																																									= "{'microDialog':#}";
+	public static final String	MICRO_DIALOG_DECISION_POINT__BY_MICRO_DIALOG_AND_ORDER_LOWER																																					= "{'microDialog':#,'order':{$lt:#}}";
+	public static final String	MICRO_DIALOG_DECISION_POINT__BY_MICRO_DIALOG_AND_ORDER_HIGHER																																					= "{'microDialog':#,'order':{$gt:#}}";
+	public static final String	MICRO_DIALOG_DECISION_POINT__SORT_BY_ORDER_ASC																																									= "{'order':1}";
+	public static final String	MICRO_DIALOG_DECISION_POINT__SORT_BY_ORDER_DESC																																									= "{'order':-1}";
+
+	public static final String	MICRO_DIALOG_RULE__BY_MICRO_DIALOG_DECISION_POINT																																								= "{'microDialogDecisionPoint':#}";
+	public static final String	MICRO_DIALOG_RULE__BY_MICRO_DIALOG_DECISION_POINT_AND_PARENT																																					= "{'microDialogDecisionPoint':#,'isSubRuleOfMonitoringRule':#}";
+	public static final String	MICRO_DIALOG_RULE__BY_MICRO_DIALOG_DECISION_POINT_AND_PARENT_AND_ORDER_HIGHER																																	= "{'microDialogDecisionPoint':#,'isSubRuleOfMonitoringRule':#,'order':{$gt:#}}";
+	public static final String	MICRO_DIALOG_RULE__BY_NEXT_MICRO_DIALOG_MESSAGE_WHEN_TRUE																																						= "{'nextMicroDialogMessageWhenTrue':#}";
+	public static final String	MICRO_DIALOG_RULE__BY_NEXT_MICRO_DIALOG_MESSAGE_WHEN_FALSE																																						= "{'nextMicroDialogMessageWhenFalse':#}";
+	public static final String	MICRO_DIALOG_RULE__SORT_BY_ORDER_ASC																																											= "{'order':1}";
+	public static final String	MICRO_DIALOG_RULE__SORT_BY_ORDER_DESC																																											= "{'order':-1}";
+
 	public static final String	SCREENING_SURVEY__BY_INTERVENTION																																												= "{'intervention':#}";
 
 	public static final String	SCREENING_SURVEY_SLIDE__BY_SCREENING_SURVEY																																										= "{'screeningSurvey':#}";
@@ -119,19 +152,21 @@ public class Queries {
 	public static final String	MONITORING_RULE__BY_INTERVENTION_AND_PARENT																																										= "{'intervention':#,'isSubRuleOfMonitoringRule':#}";
 	public static final String	MONITORING_RULE__BY_INTERVENTION_AND_TYPE																																										= "{'intervention':#,'type':#}";
 	public static final String	MONITORING_RULE__BY_PARENT																																														= "{'isSubRuleOfMonitoringRule':#}";
+	public static final String	MONITORING_RULE__BY_INTERVENTION_AND_PARENT_AND_ORDER_HIGHER																																					= "{'intervention':#,'isSubRuleOfMonitoringRule':#,'order':{$gt:#}}";
+	public static final String	MONITORING_RULE__BY_RELATED_MONITORING_MESSAGE_GROUP																																							= "{'relatedMonitoringMessageGroup':#}";
 	public static final String	MONITORING_RULE__SORT_BY_ORDER_ASC																																												= "{'order':1}";
 	public static final String	MONITORING_RULE__SORT_BY_ORDER_DESC																																												= "{'order':-1}";
-	public static final String	MONITORING_RULE__BY_INTERVENTION_AND_PARENT_AND_ORDER_HIGHER																																					= "{'intervention':#,'isSubRuleOfMonitoringRule':#,'order':{$gt:#}}";
 
 	public static final String	MONITORING_REPLY_RULE__BY_MONITORING_RULE_ONLY_GOT_ANSWER																																						= "{'isGotAnswerRuleForMonitoringRule':#}";
 	public static final String	MONITORING_REPLY_RULE__BY_MONITORING_RULE_ONLY_GOT_NO_ANSWER																																					= "{'isGotNoAnswerRuleForMonitoringRule':#}}";
 	public static final String	MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_ANSWER																																			= "{'isGotAnswerRuleForMonitoringRule':#,'isSubRuleOfMonitoringRule':#}";
 	public static final String	MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_ONLY_GOT_NO_ANSWER																																			= "{'isGotNoAnswerRuleForMonitoringRule':#,'isSubRuleOfMonitoringRule':#}";
 	public static final String	MONITORING_REPLY_RULE__BY_PARENT																																												= "{'isSubRuleOfMonitoringRule':#}";
-	public static final String	MONITORING_REPLY_RULE__SORT_BY_ORDER_ASC																																										= "{'order':1}";
-	public static final String	MONITORING_REPLY_RULE__SORT_BY_ORDER_DESC																																										= "{'order':-1}";
+	public static final String	MONITORING_REPLY_RULE__BY_RELATED_MONITORING_MESSAGE_GROUP																																						= "{'relatedMonitoringMessageGroup':#}";
 	public static final String	MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_AND_ORDER_HIGHER_ONLY_GOT_ANSWER																															= "{'isGotAnswerRuleForMonitoringRule':#,'isSubRuleOfMonitoringRule':#,'order':{$gt:#}}";
 	public static final String	MONITORING_REPLY_RULE__BY_MONITORING_RULE_AND_PARENT_AND_ORDER_HIGHER_ONLY_GOT_NO_ANSWER																														= "{'isGotNoAnswerRuleForMonitoringRule':#,'isSubRuleOfMonitoringRule':#,'order':{$gt:#}}";
+	public static final String	MONITORING_REPLY_RULE__SORT_BY_ORDER_ASC																																										= "{'order':1}";
+	public static final String	MONITORING_REPLY_RULE__SORT_BY_ORDER_DESC																																										= "{'order':-1}";
 
 	public static final String	MONITORING_REPLY_RULE__BY_MONITORING_RULE																																										= "{$or:[{'isGotAnswerRuleForMonitoringRule':#},{'isGotNoAnswerRuleForMonitoringRule':#}]}";
 
@@ -192,7 +227,7 @@ public class Queries {
 	public static final String	UPDATE_VERSION_12__MONITORING_RULE__CHANGE_1																																									= "{$set:{'type':'NORMAL'}}";
 	public static final String	UPDATE_VERSION_13__MONITORING_RULE__CHANGE_1																																									= "{$set:{'markCaseAsSolvedWhenTrue':false}}";
 	public static final String	UPDATE_VERSION_14__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'type':'PLAIN'}}";
-	public static final String	UPDATE_VERSION_14__MONITORING_MESSAGE__CHANGE_1																																									= "{$set:{'isCommandMessage':false}}";
+	public static final String	UPDATE_VERSION_14__MONITORING_MESSAGE__CHANGE_1																																									= "{$set:{'commandMessage':false}}";
 	public static final String	UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_1_FIELD																																								= "message";
 	public static final String	UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_1_CHANGE																																								= "{$set:{'messageWithForcedLinks':#}}";
 	public static final String	UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_2																																										= "{$set:{'surveyLink':null}}";
@@ -206,4 +241,16 @@ public class Queries {
 	public static final String	UPDATE_VERSION_16__MONITORING_RULE__CHANGE_1_CHANGE																																								= "{$set:{'minutesUntilMessageIsHandledAsUnanswered':#}}";
 	public static final String	UPDATE_VERSION_16__MONITORING_RULE__CHANGE_1_REMOVE																																								= "{$unset:{'"
 			+ UPDATE_VERSION_16__MONITORING_RULE__CHANGE_1_FIELD + "':1}}";
+	public static final String	UPDATE_VERSION_20__MONITORING_MESSAGE__CHANGE_1_FIELD																																							= "isCommandMessage";
+	public static final String	UPDATE_VERSION_20__MONITORING_MESSAGE__CHANGE_1_CHANGE																																							= "{$set:{'commandMessage':#}}";
+	public static final String	UPDATE_VERSION_20__MONITORING_MESSAGE__CHANGE_1_REMOVE																																							= "{$unset:{'"
+			+ UPDATE_VERSION_20__MONITORING_MESSAGE__CHANGE_1_FIELD + "':1}}";
+	public static final String	UPDATE_VERSION_20__MONITORING_RULE__CHANGE_1_FIELD																																								= "hourToSendMessage";
+	public static final String	UPDATE_VERSION_20__MONITORING_RULE__CHANGE_1_CHANGE																																								= "{$set:{'hourToSendMessageOrActivateMicroDialog':#}}";
+	public static final String	UPDATE_VERSION_20__MONITORING_RULE__CHANGE_1_REMOVE																																								= "{$unset:{'"
+			+ UPDATE_VERSION_20__MONITORING_RULE__CHANGE_1_FIELD + "':1}}";
+	public static final String	UPDATE_VERSION_20__ABSTRACT_MONITORING_RULE__CHANGE_1																																							= "{$set:{'activateMicroDialogIfTrue':false}}";
+	public static final String	UPDATE_VERSION_20__ABSTRACT_MONITORING_RULE__CHANGE_2																																							= "{$set:{'relatedMicroDialog':null}}";
+	public static final String	UPDATE_VERSION_20__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'relatedMicroDialogForActivation':null}}";
+	public static final String	UPDATE_VERSION_20__DIALOG_MESSAGE__CHANGE_2																																										= "{$set:{'relatedMicroDialogMessage':null}}";
 }

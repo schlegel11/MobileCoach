@@ -31,6 +31,14 @@ import ch.ethz.mc.model.persistent.FeedbackSlideRule;
 import ch.ethz.mc.model.persistent.IntermediateSurveyAndFeedbackParticipantShortURL;
 import ch.ethz.mc.model.persistent.InterventionVariableWithValue;
 import ch.ethz.mc.model.persistent.MediaObjectParticipantShortURL;
+import ch.ethz.mc.model.persistent.MicroDialog;
+import ch.ethz.mc.model.persistent.MicroDialogDecisionPoint;
+import ch.ethz.mc.model.persistent.MicroDialogMessage;
+import ch.ethz.mc.model.persistent.MicroDialogMessageRule;
+import ch.ethz.mc.model.persistent.MicroDialogRule;
+import ch.ethz.mc.model.persistent.MonitoringMessage;
+import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
+import ch.ethz.mc.model.persistent.MonitoringMessageRule;
 import ch.ethz.mc.model.persistent.MonitoringReplyRule;
 import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.Participant;
@@ -47,6 +55,7 @@ import lombok.val;
 public class Indices {
 	private static final String[]	authorIndices											= new String[] {
 			"{'username':1}" };
+
 	private static final String[]	dialogMessageIndices									= new String[] {
 			"{'participant':1,'status':1}", "{'participant':1,'order':1}",
 			"{'participant':1,'status':1,'shouldBeSentTimestamp':1}",
@@ -56,6 +65,7 @@ public class Indices {
 	private static final String[]	dialogStatusIndices										= new String[] {
 			"{'participant':1,'dataForMonitoringParticipationAvailable':1,'screeningSurveyPerformed':1,'monitoringPerformed':1}",
 			"{'participant':1,'lastVisitedScreeningSurveySlideTimestamp':1}" };
+
 	private static final String[]	participantIndices										= new String[] {
 			"{'intervention':1}", "{'intervention':1,'monitoringActive':1}",
 			"{'intervention':1,'group':1,'monitoringActive':1}" };
@@ -87,6 +97,24 @@ public class Indices {
 			"{'shortId':1}", "{'participant':1,'survey':1}",
 			"{'participant':1,'feedback':1}" };
 
+	private static final String[]	monitoringMessageGroupIndices							= new String[] {
+			"{'intervention':1}" };
+	private static final String[]	monitoringMessageIndices								= new String[] {
+			"{'monitoringMessageGroup':1}" };
+	private static final String[]	monitoringMessageRuleIndices							= new String[] {
+			"{'belongingMonitoringMessage':1}" };
+
+	private static final String[]	microDialogIndices										= new String[] {
+			"{'intervention':1}" };
+	private static final String[]	microDialogMessageIndices								= new String[] {
+			"{'microDialog':1}", "{'microDialog':1,'order':1}" };
+	private static final String[]	microDialogDecisionPointIndices							= new String[] {
+			"{'microDialog':1}", "{'microDialog':1,'order':1}" };
+	private static final String[]	microDialogMessageRuleIndices							= new String[] {
+			"{'belongingMicroDialogMessage':1}" };
+	private static final String[]	microDialogRuleIndices									= new String[] {
+			"{'microDialogDecisionPoint':1,'isSubRuleOfMonitoringRule':1}" };
+
 	/**
 	 * Creates a hashtable containing all indices for all {@link ModelObject}
 	 *
@@ -96,9 +124,11 @@ public class Indices {
 		val indices = new Hashtable<Class<? extends ModelObject>, String[]>();
 
 		indices.put(Author.class, authorIndices);
+
 		indices.put(DialogMessage.class, dialogMessageIndices);
 		indices.put(DialogOption.class, dialogOptionIndices);
 		indices.put(DialogStatus.class, dialogStatusIndices);
+
 		indices.put(Participant.class, participantIndices);
 
 		indices.put(ParticipantVariableWithValue.class,
@@ -120,6 +150,19 @@ public class Indices {
 				mediaObjectParticipantShortURLIndices);
 		indices.put(IntermediateSurveyAndFeedbackParticipantShortURL.class,
 				intermediateSurveyAndFeedbackParticipantShortURLIndices);
+
+		indices.put(MonitoringMessageGroup.class,
+				monitoringMessageGroupIndices);
+		indices.put(MonitoringMessage.class, monitoringMessageIndices);
+		indices.put(MonitoringMessageRule.class, monitoringMessageRuleIndices);
+
+		indices.put(MicroDialog.class, microDialogIndices);
+		indices.put(MicroDialogMessage.class, microDialogMessageIndices);
+		indices.put(MicroDialogDecisionPoint.class,
+				microDialogDecisionPointIndices);
+		indices.put(MicroDialogMessageRule.class,
+				microDialogMessageRuleIndices);
+		indices.put(MicroDialogRule.class, microDialogRuleIndices);
 
 		return indices;
 	}

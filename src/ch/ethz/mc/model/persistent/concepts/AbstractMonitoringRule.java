@@ -1,5 +1,12 @@
 package ch.ethz.mc.model.persistent.concepts;
 
+import org.bson.types.ObjectId;
+
+import ch.ethz.mc.model.ModelObject;
+import ch.ethz.mc.model.persistent.MicroDialog;
+import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
+import ch.ethz.mc.model.persistent.Participant;
+import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -23,12 +30,6 @@ package ch.ethz.mc.model.persistent.concepts;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import org.bson.types.ObjectId;
-
-import ch.ethz.mc.model.ModelObject;
-import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
-import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 
 /**
  * {@link ModelObject} to represent an {@link AbstractMonitoringRule}
@@ -56,7 +57,10 @@ public abstract class AbstractMonitoringRule extends AbstractRule {
 			final String comment, final ObjectId isSubRuleOfMonitoringRule,
 			final int order, final String storeValueToVariableWithName,
 			final boolean sendMessageIfTrue,
-			final ObjectId relatedMonitoringMessageGroup) {
+			final boolean sendMessageToSupervisor,
+			final ObjectId relatedMonitoringMessageGroup,
+			final boolean activateMicroDialogIfTrue,
+			final ObjectId relatedMicroDialog) {
 		super(ruleWithPlaceholders, ruleEquationSign,
 				ruleComparisonTermWithPlaceholders, comment);
 
@@ -64,7 +68,10 @@ public abstract class AbstractMonitoringRule extends AbstractRule {
 		this.order = order;
 		this.storeValueToVariableWithName = storeValueToVariableWithName;
 		this.sendMessageIfTrue = sendMessageIfTrue;
+		this.sendMessageToSupervisor = sendMessageToSupervisor;
 		this.relatedMonitoringMessageGroup = relatedMonitoringMessageGroup;
+		this.activateMicroDialogIfTrue = activateMicroDialogIfTrue;
+		this.relatedMicroDialog = relatedMicroDialog;
 	}
 
 	/**
@@ -99,7 +106,7 @@ public abstract class AbstractMonitoringRule extends AbstractRule {
 	/**
 	 * <strong>OPTIONAL:</strong> If the result of the
 	 * {@link AbstractMonitoringRule} is
-	 * true, a message will be send if this is true
+	 * true, a message will be send
 	 */
 	@Getter
 	@Setter
@@ -120,4 +127,21 @@ public abstract class AbstractMonitoringRule extends AbstractRule {
 	@Getter
 	@Setter
 	private ObjectId	relatedMonitoringMessageGroup;
+
+	/**
+	 * <strong>OPTIONAL:</strong> If the result of the
+	 * {@link AbstractMonitoringRule} is
+	 * true, a micro dialog will be activated for the {@link Participant}
+	 */
+	@Getter
+	@Setter
+	private boolean		activateMicroDialogIfTrue;
+
+	/**
+	 * <strong>OPTIONAL if activateMicroDialogIfTrue is false:</strong> The
+	 * {@link MicroDialog} that should be activated
+	 */
+	@Getter
+	@Setter
+	private ObjectId	relatedMicroDialog;
 }
