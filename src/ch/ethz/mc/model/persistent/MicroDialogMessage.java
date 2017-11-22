@@ -225,10 +225,9 @@ public class MicroDialogMessage extends ModelObject
 								AdminMessageStrings.UI_MODEL__YES)
 						: Messages.getAdminString(
 								AdminMessageStrings.UI_MODEL__NO),
-				messageExpectsAnswer
-						? Messages.getAdminString(
-								AdminMessageStrings.UI_MODEL__EXPECTS_NO_ANSWER)
-						: answerType.toString(),
+				messageExpectsAnswer ? answerType.toString()
+						: Messages.getAdminString(
+								AdminMessageStrings.UI_MODEL__EXPECTS_NO_ANSWER),
 				storeValueToVariableWithName != null
 						? storeValueToVariableWithName : "",
 				messageRules);

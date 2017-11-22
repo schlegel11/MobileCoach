@@ -519,6 +519,7 @@ public class InterventionExecutionManagerService {
 
 		// Adjust for sent
 		if (newStatus == DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER) {
+			// Adjust unanswered time frame for monitoring messages
 			if (dialogMessage.getRelatedMonitoringRuleForReplyRules() != null) {
 				val monitoringRule = databaseManagerService.getModelObjectById(
 						MonitoringRule.class,
@@ -535,8 +536,26 @@ public class InterventionExecutionManagerService {
 				}
 			}
 
+			// Adjust unanswered time frame for micro dialog messages
+			if (dialogMessage.getRelatedMicroDialogMessage() != null) {
+				val microDialogMessage = databaseManagerService
+						.getModelObjectById(MicroDialogMessage.class,
+								dialogMessage.getRelatedMicroDialogMessage());
+
+				if (microDialogMessage != null) {
+					final long isUnansweredAfterTimestamp = timeStampOfEvent
+							+ microDialogMessage
+									.getMinutesUntilMessageIsHandledAsUnanswered()
+									* ImplementationConstants.MINUTES_TO_TIME_IN_MILLIS_MULTIPLICATOR;
+
+					dialogMessage.setIsUnansweredAfterTimestamp(
+							isUnansweredAfterTimestamp);
+				}
+			}
+
 			dialogMessage.setSentTimestamp(timeStampOfEvent);
 
+			// Adjust unanswered time frame for manual messages
 			if (dialogMessage.isManuallySent()) {
 				final long appropriateReplyTimeframe = dialogMessage
 						.getIsUnansweredAfterTimestamp()
@@ -846,43 +865,58 @@ public class InterventionExecutionManagerService {
 
 		// Handle messages
 		for (val dialogMessage : dialogMessages) {
+			// Remember this here on a higher level to reuse it later for
+			// further micro dialog handling
+			MicroDialogMessage relatedMicroDialogMessage = null;
+			if (dialogMessage.getRelatedMicroDialogMessage() != null) {
+				relatedMicroDialogMessage = databaseManagerService
+						.getModelObjectById(MicroDialogMessage.class,
+								dialogMessage.getRelatedMicroDialogMessage());
+			}
+
 			// Handle storing of message reply (the text sent) by
 			// participant if
 			// message is answered by
 			// participant and not manually sent
-			if (userAnswered
-					&& dialogMessage.getRelatedMonitoringMessage() != null) {
-				log.debug(
-						"Managing message reply (because the message is answered and has a reference to a monitoring message)");
-
-				val relatedMonitoringMessage = databaseManagerService
-						.getModelObjectById(MonitoringMessage.class,
-								dialogMessage.getRelatedMonitoringMessage());
+			if (userAnswered) {
+				MonitoringMessage relatedMonitoringMessage = null;
+				if (dialogMessage.getRelatedMonitoringMessage() != null) {
+					relatedMonitoringMessage = databaseManagerService
+							.getModelObjectById(MonitoringMessage.class,
+									dialogMessage
+											.getRelatedMonitoringMessage());
+				}
 
 				// Store value to variable (which is only relevant if a
-				// reply is expected = related monitoring message is
+				// reply is expected = related monitoring message or micro
+				// dialog message is
 				// available)
-				if (relatedMonitoringMessage != null) {
+				if (relatedMonitoringMessage != null
+						|| relatedMicroDialogMessage != null) {
+					log.debug(
+							"Managing message reply (because the message is answered and has a reference to a monitoring or micro dialog message)");
+
 					val cleanedMessageValue = dialogMessage.getAnswerReceived();
 					val rawMessageValue = dialogMessage.getAnswerReceivedRaw();
 
-					log.debug(
-							"Store value '{}' (cleand as: '{}') of message to '{}' and reply variables for participant {}",
-							rawMessageValue, cleanedMessageValue,
-							relatedMonitoringMessage
-									.getStoreValueToVariableWithName(),
-							participant.getId());
+					String variableToStore;
+					if (relatedMonitoringMessage != null) {
+						variableToStore = relatedMonitoringMessage
+								.getStoreValueToVariableWithName();
+					} else {
+						variableToStore = relatedMicroDialogMessage
+								.getStoreValueToVariableWithName();
+					}
 					try {
-						if (relatedMonitoringMessage
-								.getStoreValueToVariableWithName() != null
-								&& !relatedMonitoringMessage
-										.getStoreValueToVariableWithName()
-										.equals("")) {
+						log.debug(
+								"Store value '{}' (cleand as: '{}') of message to '{}' and reply variables for participant {}",
+								rawMessageValue, cleanedMessageValue,
+								variableToStore, participant.getId());
+						if (!StringUtils.isBlank(variableToStore)) {
 							variablesManagerService
 									.writeVariableValueOfParticipant(
 											participant.getId(),
-											relatedMonitoringMessage
-													.getStoreValueToVariableWithName(),
+											variableToStore,
 											cleanedMessageValue);
 						}
 						variablesManagerService.writeVariableValueOfParticipant(
@@ -899,9 +933,36 @@ public class InterventionExecutionManagerService {
 						log.error(
 								"Could not store value '{}' of message to '{}' for participant {}: {}",
 								dialogMessage.getAnswerReceived(),
-								relatedMonitoringMessage
-										.getStoreValueToVariableWithName(),
-								participant.getId(), e.getMessage());
+								variableToStore, participant.getId(),
+								e.getMessage());
+					}
+				}
+			} else {
+				// User did not answer so store default value for micro dialog
+				// messages
+				if (relatedMicroDialogMessage != null && StringUtils
+						.isBlank(relatedMicroDialogMessage.getNoReplyValue())) {
+					val variableToStore = relatedMicroDialogMessage
+							.getStoreValueToVariableWithName();
+					val noReplyValue = relatedMicroDialogMessage
+							.getNoReplyValue();
+					try {
+						log.debug(
+								"Store micro dialog message no reply value '{}' (cleand as: '{}') of message to '{}' for participant {}",
+								noReplyValue, noReplyValue, variableToStore,
+								participant.getId());
+						if (!StringUtils.isBlank(variableToStore)) {
+							variablesManagerService
+									.writeVariableValueOfParticipant(
+											participant.getId(),
+											variableToStore, noReplyValue);
+						}
+					} catch (final Exception e) {
+						log.error(
+								"Could not store micro dialog message no reply value '{}' of message to '{}' for participant {}: {}",
+								dialogMessage.getAnswerReceived(),
+								variableToStore, participant.getId(),
+								e.getMessage());
 					}
 				}
 			}
@@ -1018,8 +1079,15 @@ public class InterventionExecutionManagerService {
 							microDialogActivation.getMiroDialogToActivate(),
 							null, false, false, 0);
 				}
+			} else if (relatedMicroDialogMessage != null) {
+				log.debug("Caring for further micro dialog handling");
+
+				handleMicroDialog(dialogMessage.getParticipant(),
+						relatedMicroDialogMessage.getMicroDialog(),
+						relatedMicroDialogMessage.getId());
 			}
 		}
+
 	}
 
 	@Synchronized
@@ -1249,7 +1317,8 @@ public class InterventionExecutionManagerService {
 			}
 		}
 
-		// Check for intention messages or reply case
+		// Check for intention messages or reply cases (message reply or micro
+		// dialog reply)
 		DialogMessage dialogMessage = null;
 		val isIntention = receivedMessage.isIntention();
 		if (!isIntention) {
@@ -1432,56 +1501,71 @@ public class InterventionExecutionManagerService {
 		} else {
 			// Check if result is in general automatically
 			// processable
-			log.debug(
-					"Received an expected message from '{}', start validation",
-					receivedMessage.getSender());
 
-			val relatedMonitoringMessage = databaseManagerService
-					.getModelObjectById(MonitoringMessage.class,
-							dialogMessage.getRelatedMonitoringMessage());
+			if (dialogMessage.getRelatedMonitoringMessage() != null) {
+				log.debug(
+						"Received an expected message reply from '{}', start validation",
+						receivedMessage.getSender());
 
-			val relatedMonitoringMessageGroup = databaseManagerService
-					.getModelObjectById(MonitoringMessageGroup.class,
-							relatedMonitoringMessage
-									.getMonitoringMessageGroup());
+				val relatedMonitoringMessage = databaseManagerService
+						.getModelObjectById(MonitoringMessage.class,
+								dialogMessage.getRelatedMonitoringMessage());
 
-			if (relatedMonitoringMessageGroup.getValidationExpression() != null
-					&& !cleanedMessageValue
-							.matches(relatedMonitoringMessageGroup
-									.getValidationExpression())) {
-				// Has validation expression, but does not match
+				val relatedMonitoringMessageGroup = databaseManagerService
+						.getModelObjectById(MonitoringMessageGroup.class,
+								relatedMonitoringMessage
+										.getMonitoringMessageGroup());
 
-				dialogMessage = dialogMessageStatusChangesAfterSending(
-						dialogMessage.getId(),
-						DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
-						receivedMessage.getReceivedTimestamp(),
-						cleanedMessageValue, receivedMessage.getMessage());
-
-				return dialogMessage;
-			} else if (relatedMonitoringMessageGroup
-					.getValidationExpression() != null
-					&& cleanedMessageValue.matches(relatedMonitoringMessageGroup
-							.getValidationExpression())) {
-				// Has validation expression and matches
-
-				val matcher = Pattern
-						.compile(relatedMonitoringMessageGroup
-								.getValidationExpression())
-						.matcher(cleanedMessageValue);
-
-				if (matcher.groupCount() > 0) {
-					// Pattern has a group
-					matcher.find();
+				if (relatedMonitoringMessageGroup
+						.getValidationExpression() != null
+						&& !cleanedMessageValue
+								.matches(relatedMonitoringMessageGroup
+										.getValidationExpression())) {
+					// Has validation expression, but does not match
 
 					dialogMessage = dialogMessageStatusChangesAfterSending(
 							dialogMessage.getId(),
-							DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
+							DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
 							receivedMessage.getReceivedTimestamp(),
-							matcher.group(1), receivedMessage.getMessage());
+							cleanedMessageValue, receivedMessage.getMessage());
 
 					return dialogMessage;
+				} else if (relatedMonitoringMessageGroup
+						.getValidationExpression() != null
+						&& cleanedMessageValue
+								.matches(relatedMonitoringMessageGroup
+										.getValidationExpression())) {
+					// Has validation expression and matches
+
+					val matcher = Pattern
+							.compile(relatedMonitoringMessageGroup
+									.getValidationExpression())
+							.matcher(cleanedMessageValue);
+
+					if (matcher.groupCount() > 0) {
+						// Pattern has a group
+						matcher.find();
+
+						dialogMessage = dialogMessageStatusChangesAfterSending(
+								dialogMessage.getId(),
+								DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
+								receivedMessage.getReceivedTimestamp(),
+								matcher.group(1), receivedMessage.getMessage());
+
+						return dialogMessage;
+					} else {
+						// Pattern has no group
+						dialogMessage = dialogMessageStatusChangesAfterSending(
+								dialogMessage.getId(),
+								DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
+								receivedMessage.getReceivedTimestamp(),
+								cleanedMessageValue,
+								receivedMessage.getMessage());
+
+						return dialogMessage;
+					}
 				} else {
-					// Pattern has no group
+					// Has no validation expression
 					dialogMessage = dialogMessageStatusChangesAfterSending(
 							dialogMessage.getId(),
 							DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
@@ -1491,7 +1575,9 @@ public class InterventionExecutionManagerService {
 					return dialogMessage;
 				}
 			} else {
-				// Has no validation expression
+				log.debug("Received an expected micro dialog reply from '{}'",
+						receivedMessage.getSender());
+
 				dialogMessage = dialogMessageStatusChangesAfterSending(
 						dialogMessage.getId(),
 						DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
@@ -1658,15 +1744,15 @@ public class InterventionExecutionManagerService {
 		boolean variablesRequireRefresh = true;
 		Hashtable<String, AbstractVariableWithValue> variablesWithValues = null;
 
-		itemsLoop: do {
-			if (microDialogMessageId != null) {
-				val microDialogMessage = databaseManagerService
-						.getModelObjectById(MicroDialogMessage.class,
-								microDialogMessageId);
-				if (microDialogMessage != null) {
-					currentOrder = microDialogMessage.getOrder();
-				}
+		if (microDialogMessageId != null) {
+			val microDialogMessage = databaseManagerService.getModelObjectById(
+					MicroDialogMessage.class, microDialogMessageId);
+			if (microDialogMessage != null) {
+				currentOrder = microDialogMessage.getOrder();
 			}
+		}
+
+		itemsLoop: do {
 			val microDialogMessage = databaseManagerService
 					.findOneSortedModelObject(MicroDialogMessage.class,
 							Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG_AND_ORDER_HIGHER,
@@ -1786,9 +1872,7 @@ public class InterventionExecutionManagerService {
 						messageTextToSend, answerTypeToSend,
 						answerOptionsToSend, false, lastMessageSent, null, null,
 						microDialog, microDialogMessage, false,
-						microDialogMessage.isMessageExpectsAnswer(),
-						microDialogMessage
-								.getMinutesUntilMessageIsHandledAsUnanswered());
+						microDialogMessage.isMessageExpectsAnswer(), 0);
 
 				// Proceed with micro dialog handling?
 				if (microDialogMessage
@@ -2549,7 +2633,7 @@ public class InterventionExecutionManagerService {
 		val dialogMessages = databaseManagerService.findSortedModelObjects(
 				DialogMessage.class,
 				Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_UNANSWERED_AFTER_TIMESTAMP_LOWER,
-				Queries.DIALOG_MESSAGE__SORT_BY_ORDER_DESC, participantId,
+				Queries.DIALOG_MESSAGE__SORT_BY_ORDER_ASC, participantId,
 				DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
 				InternalDateTime.currentTimeMillis());
 
@@ -2562,7 +2646,7 @@ public class InterventionExecutionManagerService {
 		val dialogMessages = databaseManagerService.findSortedModelObjects(
 				DialogMessage.class,
 				Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS,
-				Queries.DIALOG_MESSAGE__SORT_BY_ORDER_DESC, participantId,
+				Queries.DIALOG_MESSAGE__SORT_BY_ORDER_ASC, participantId,
 				DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT);
 
 		return dialogMessages;
