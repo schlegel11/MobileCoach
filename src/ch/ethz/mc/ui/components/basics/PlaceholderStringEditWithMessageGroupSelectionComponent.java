@@ -282,13 +282,13 @@ public class PlaceholderStringEditWithMessageGroupSelectionComponent
 		// common part: create layout
 		mainLayout = new VerticalLayout();
 		mainLayout.setImmediate(false);
-		mainLayout.setWidth("700px");
+		mainLayout.setWidth("750px");
 		mainLayout.setHeight("400px");
 		mainLayout.setMargin(true);
 		mainLayout.setSpacing(true);
 
 		// top-level component properties
-		setWidth("700px");
+		setWidth("750px");
 		setHeight("400px");
 
 		// editAreaLayout

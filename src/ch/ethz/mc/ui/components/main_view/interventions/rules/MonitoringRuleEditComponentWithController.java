@@ -562,9 +562,14 @@ public class MonitoringRuleEditComponentWithController
 		}
 
 		try {
+			int newValue = monitoringRule
+					.getMinutesUntilMessageIsHandledAsUnanswered();
+			if (newValue == Integer.MAX_VALUE) {
+				newValue = (int) getMinutesUntilHandledAsNotAnsweredSlider()
+						.getMax();
+			}
 			getMinutesUntilHandledAsNotAnsweredSlider()
-					.setValue((double) monitoringRule
-							.getMinutesUntilMessageIsHandledAsUnanswered());
+					.setValue((double) newValue);
 		} catch (final Exception e) {
 			// Do nothing
 		}

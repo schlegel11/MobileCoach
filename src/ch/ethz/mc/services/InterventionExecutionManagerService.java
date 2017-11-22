@@ -1329,7 +1329,8 @@ public class InterventionExecutionManagerService {
 		final String cleanedMessageValue;
 		if (isTypeIntention) {
 			rawMessageValue = receivedMessage.getIntention();
-			cleanedMessageValue = receivedMessage.getContent();
+			cleanedMessageValue = StringHelpers
+					.cleanReceivedMessageString(receivedMessage.getIntention());
 		} else {
 			rawMessageValue = receivedMessage.getMessage();
 			cleanedMessageValue = StringHelpers
@@ -1386,19 +1387,19 @@ public class InterventionExecutionManagerService {
 				if (isTypeIntention) {
 					variablesManagerService.writeVariableValueOfParticipant(
 							participant.getId(),
-							SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantIntentionRaw
-									.toVariableName(),
-							rawMessageValue, true, false);
-					variablesManagerService.writeVariableValueOfParticipant(
-							participant.getId(),
-							SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantIntentionContent
+							SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantIntention
 									.toVariableName(),
 							cleanedMessageValue, true, false);
 					variablesManagerService.writeVariableValueOfParticipant(
 							participant.getId(),
-							SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantIntentionContent
+							SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantRawIntention
 									.toVariableName(),
 							rawMessageValue, true, false);
+					variablesManagerService.writeVariableValueOfParticipant(
+							participant.getId(),
+							SystemVariables.READ_ONLY_PARTICIPANT_REPLY_VARIABLES.participantIntentionContent
+									.toVariableName(),
+							receivedMessage.getContent(), true, false);
 				} else {
 					variablesManagerService.writeVariableValueOfParticipant(
 							participant.getId(),

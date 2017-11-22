@@ -339,9 +339,14 @@ public class MicroDialogMessageEditComponentWithController
 		}
 
 		try {
+			int newValue = microDialogMessage
+					.getMinutesUntilMessageIsHandledAsUnanswered();
+			if (newValue == Integer.MAX_VALUE) {
+				newValue = (int) getMinutesUntilHandledAsNotAnsweredSlider()
+						.getMax();
+			}
 			getMinutesUntilHandledAsNotAnsweredSlider()
-					.setValue((double) microDialogMessage
-							.getMinutesUntilMessageIsHandledAsUnanswered());
+					.setValue((double) newValue);
 		} catch (final Exception e) {
 			// Do nothing
 		}

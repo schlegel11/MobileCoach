@@ -300,7 +300,8 @@ public class VariablesManagerService {
 				case participantRawMessageReply:
 				case participantUnexpectedMessage:
 				case participantUnexpectedRawMessage:
-				case participantIntentionRaw:
+				case participantIntention:
+				case participantRawIntention:
 				case participantIntentionContent:
 					if (!variablesWithValues
 							.containsKey(variable.toVariableName())) {
@@ -578,10 +579,14 @@ public class VariablesManagerService {
 
 	@Synchronized
 	public void writeVariableValueOfParticipant(final ObjectId participantId,
-			final String variableName, final String variableValue,
+			final String variableName, String variableValue,
 			final boolean overwriteAllowed, final boolean describesMediaUpload)
 			throws WriteProtectedVariableException,
 			InvalidVariableNameException {
+		if (variableValue == null) {
+			variableValue = "";
+		}
+
 		log.debug("Storing variable {} with value {} for participant {}",
 				variableName, variableValue, participantId);
 
