@@ -32,16 +32,18 @@ public class FileConversationManagementService implements
 	
 	Map<String, ConversationRepository> repositoryByName = new HashMap<>();
 	Map<String, ConversationRepository> repositoryByHash = new HashMap<>();
+	String interventionPath = null;
 	
 	private final String DEFAULT_REPOSITORY_NAME = "pathmate2";
 	
-	private FileConversationManagementService(){
+	private FileConversationManagementService(String interventionPath){
+		this.interventionPath = interventionPath;
 	}
 	
-	public static FileConversationManagementService start(String interventionPath) {
-		FileConversationManagementService result = new FileConversationManagementService();
+	public static FileConversationManagementService start(String interventionPath){
+		FileConversationManagementService result = new FileConversationManagementService(interventionPath);
 		try {
-			result.loadFromFolder(interventionPath);
+			result.loadFromFolder();
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
@@ -77,7 +79,9 @@ public class FileConversationManagementService implements
 		return result;
 	}
 	
-	public void loadFromFolder(String path) throws Exception {
+	public void loadFromFolder() throws Exception {
+		String path = this.interventionPath;
+		
 		// List all folders
 		List<Path> paths = Files.list(Paths.get(path)).filter(Files::isDirectory).collect(Collectors.toList());
 		for (Path p : paths){
@@ -143,5 +147,14 @@ public class FileConversationManagementService implements
 		InputStream stream = new FileInputStream(file);
 		DomParser parser = new DomParser(repository, null, referenceChecker);
 		parser.parse(stream);
+	}
+
+	@Override
+	public void refresh() {
+		try {
+			loadFromFolder();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
 	}
 }

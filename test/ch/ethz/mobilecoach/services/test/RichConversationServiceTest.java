@@ -79,6 +79,12 @@ public class RichConversationServiceTest {
 		public ConversationRepository getRepository(String interventionId) {
 			return repository;
 		}
+
+		@Override
+		public void refresh() {
+			// TODO Auto-generated method stub
+			
+		}
     }
     
     

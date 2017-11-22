@@ -47,6 +47,8 @@ public class CustomServices extends AbstractService {
 		super(restManagerService);
 		this.db = db;
 		this.vars = vars;
+		
+		// TODO: these should be added only when MobileCoach is configured to do so, to prevent security problems
 		interventionMap.put("PersonalityChange", new PersonalityChange(db, vars));
 	}
 

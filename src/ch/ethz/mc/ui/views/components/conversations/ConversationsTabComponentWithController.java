@@ -48,6 +48,7 @@ public class ConversationsTabComponentWithController extends
 
 	private UIConversation								selectedUIConversation			= null;
 	private BeanItem<UIConversation>					selectedUIConversationBeanItem	= null;
+	private final BeanContainer<String, ConversationRepository> repositories;
 
 	private final BeanContainer<ObjectId, UIConversation>	beanContainer;
 
@@ -68,7 +69,7 @@ public class ConversationsTabComponentWithController extends
 		conversationsTable.setColumnHeaders(UIConversation.getColumnHeaders());
 		
 		// intervention scripts table content
-		BeanContainer<String, ConversationRepository> repositories = new BeanContainer<String, ConversationRepository>(ConversationRepository.class);
+		repositories = new BeanContainer<String, ConversationRepository>(ConversationRepository.class);
 		val conversationRepositoriesTable = getConversationRepositoriesComponent().getConversationRepositoriesTable();
 		conversationRepositoriesTable.setContainerDataSource(repositories);
 		conversationRepositoriesTable.setVisibleColumns(new Object[] {"shortHash", "path", "numberOfConversations", "numberOfActions"});
@@ -104,6 +105,8 @@ public class ConversationsTabComponentWithController extends
 				buttonClickListener);
 		conversationsEditComponent.getRefreshButton().addClickListener(
 				buttonClickListener);
+		getConversationRepositoriesComponent().getRefreshButton().addClickListener(
+				buttonClickListener);
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
@@ -118,12 +121,22 @@ public class ConversationsTabComponentWithController extends
 				deleteConversation();
 			} else if (event.getButton() == conversationsEditComponent.getDeleteAllButton()) {
 				deleteAllConversations();
+			} else if (event.getButton() == getConversationRepositoriesComponent().getRefreshButton()) {
+				refreshRepositories();
 			}
 		}
 	}
 	
 	public void refresh() {
 		refreshBeanContainer(beanContainer, UIConversation.class, getRichConversationService().getAllConversations());
+	}
+	
+	public void refreshRepositories() {
+		MC.getInstance().getFileConversationManagementService().refresh();
+		repositories.removeAllItems();
+		repositories.addAll(MC.getInstance().getFileConversationManagementService().getAllRepositories());
+		getAdminUI().showInformationNotification(
+				AdminMessageStrings.NOTIFICATION__UPLOAD_SUCCESSFUL); // TODO: put better message
 	}
 
 

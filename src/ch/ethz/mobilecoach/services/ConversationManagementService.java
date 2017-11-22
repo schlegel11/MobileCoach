@@ -5,5 +5,6 @@ import ch.ethz.mobilecoach.chatlib.engine.ConversationRepository;
 public interface ConversationManagementService {
 	
 	public ConversationRepository getRepository(String interventionId);
+	public void refresh();
 
 }
