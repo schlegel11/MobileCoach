@@ -8,17 +8,17 @@ package ch.ethz.mc.model.persistent;
  * 
  * For details see README.md file in the root folder of this project.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 import java.util.List;
 
@@ -42,9 +42,8 @@ import lombok.val;
  * A {@link MonitoringReplyRule} is the core aspect in decision making in this
  * system. The {@link MonitoringReplyRule}s are executed step by step regarding
  * their order and level. Each {@link MonitoringReplyRule} can be defined in a
- * way
- * that it stores the result of the rule in a variable and/or if it shall send a
- * message.
+ * way that it stores the result of the rule in a variable and/or if it shall
+ * send a message.
  *
  * A {@link MonitoringReplyRule} always belongs to a {@link MonitoringRule} to
  * be executed on answer or no answer
@@ -81,8 +80,8 @@ public class MonitoringReplyRule extends AbstractMonitoringRule {
 
 	/**
 	 * <strong>OPTIONAL:</strong> Belongs to the mentioned
-	 * {@link MonitoringRule} and will be executed in
-	 * case of an answer by the {@link Participant}
+	 * {@link MonitoringRule} and will be executed in case of an answer by the
+	 * {@link Participant}
 	 */
 	@Getter
 	@Setter
@@ -90,8 +89,8 @@ public class MonitoringReplyRule extends AbstractMonitoringRule {
 
 	/**
 	 * <strong>OPTIONAL:</strong> Belongs to the mentioned
-	 * {@link MonitoringRule} and will be executed in
-	 * case of no answer by the {@link Participant}
+	 * {@link MonitoringRule} and will be executed in case of no answer by the
+	 * {@link Participant}
 	 */
 	@Getter
 	@Setter

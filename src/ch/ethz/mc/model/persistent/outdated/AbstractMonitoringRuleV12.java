@@ -8,17 +8,17 @@ package ch.ethz.mc.model.persistent.outdated;
  * 
  * For details see README.md file in the root folder of this project.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -58,10 +58,8 @@ public abstract class AbstractMonitoringRuleV12 extends AbstractRuleV12 {
 
 	/**
 	 * <strong>OPTIONAL:</strong> If the {@link AbstractMonitoringRuleV12} is
-	 * nested
-	 * below another {@link AbstractMonitoringRuleV12} the father has to be
-	 * referenced
-	 * here
+	 * nested below another {@link AbstractMonitoringRuleV12} the father has to
+	 * be referenced here
 	 */
 	@Getter
 	@Setter
@@ -78,8 +76,7 @@ public abstract class AbstractMonitoringRuleV12 extends AbstractRuleV12 {
 	/**
 	 * <strong>OPTIONAL:</strong> If the result of the
 	 * {@link AbstractMonitoringRuleV12} should be stored, the name of the
-	 * appropriate
-	 * variable can be set here.
+	 * appropriate variable can be set here.
 	 */
 	@Getter
 	@Setter
@@ -87,8 +84,8 @@ public abstract class AbstractMonitoringRuleV12 extends AbstractRuleV12 {
 
 	/**
 	 * <strong>OPTIONAL:</strong> If the result of the
-	 * {@link AbstractMonitoringRuleV12} is
-	 * true, a message will be send if this is true
+	 * {@link AbstractMonitoringRuleV12} is true, a message will be send if this
+	 * is true
 	 */
 	@Getter
 	@Setter

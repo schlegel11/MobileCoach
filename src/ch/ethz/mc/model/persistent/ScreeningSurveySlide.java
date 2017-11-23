@@ -8,17 +8,17 @@ package ch.ethz.mc.model.persistent;
  * 
  * For details see README.md file in the root folder of this project.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 import java.util.ArrayList;
 import java.util.List;
@@ -69,8 +69,7 @@ public class ScreeningSurveySlide extends ModelObject {
 	public static class Question extends AbstractSerializableTable {
 		/**
 		 * The question presented to the {@link Participant} containing
-		 * placeholders
-		 * for variables
+		 * placeholders for variables
 		 */
 		@Getter
 		@Setter
@@ -87,10 +86,8 @@ public class ScreeningSurveySlide extends ModelObject {
 
 		/**
 		 * <strong>OPTIONAL:</strong> The return values of the answers presented
-		 * to
-		 * the {@link Participant} for selection; the selected answer value can
-		 * be
-		 * stored
+		 * to the {@link Participant} for selection; the selected answer value
+		 * can be stored
 		 */
 		@Getter
 		@Setter
@@ -106,9 +103,8 @@ public class ScreeningSurveySlide extends ModelObject {
 
 		/**
 		 * <strong>OPTIONAL:</strong> The name of the variable in which the
-		 * value of
-		 * the answer which was selected by the {@link Participant} should be
-		 * stored
+		 * value of the answer which was selected by the {@link Participant}
+		 * should be stored
 		 */
 		@Getter
 		@Setter
@@ -152,8 +148,7 @@ public class ScreeningSurveySlide extends ModelObject {
 
 	/**
 	 * A absolutely unique Id to enable to reference a {@link ScreeningSurvey}
-	 * also after independent export/import to/from
-	 * another system
+	 * also after independent export/import to/from another system
 	 */
 	@Getter
 	@Setter
@@ -181,8 +176,7 @@ public class ScreeningSurveySlide extends ModelObject {
 
 	/**
 	 * The title of the {@link ScreeningSurveySlide} presented to the
-	 * {@link Participant} containing placeholders
-	 * for variables
+	 * {@link Participant} containing placeholders for variables
 	 */
 	@Getter
 	@Setter
@@ -209,8 +203,7 @@ public class ScreeningSurveySlide extends ModelObject {
 	/**
 	 * Enables to add an optional layout attribute for the template generation
 	 * in addition to the template set by the question type containing
-	 * placeholders
-	 * for variables
+	 * placeholders for variables
 	 */
 	@Getter
 	@Setter

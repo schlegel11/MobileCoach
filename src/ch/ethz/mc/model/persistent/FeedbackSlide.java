@@ -8,17 +8,17 @@ package ch.ethz.mc.model.persistent;
  * 
  * For details see README.md file in the root folder of this project.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 import java.util.List;
 
@@ -45,9 +45,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 /**
  * {@link ModelObject} to represent an {@link FeedbackSlide}
  *
- * A {@link Feedback} consists of several {@link FeedbackSlide}s,
- * which are presented to a {@link Participant} in a fixed order, but only when
- * the defined {@link FeedbackSlideRule}s are all true.
+ * A {@link Feedback} consists of several {@link FeedbackSlide}s, which are
+ * presented to a {@link Participant} in a fixed order, but only when the
+ * defined {@link FeedbackSlideRule}s are all true.
  *
  * @author Andreas Filler
  */
@@ -65,9 +65,8 @@ public class FeedbackSlide extends ModelObject {
 	/**
 	 * The position of the {@link FeedbackSlide} compared to all other
 	 * {@link FeedbackSlide}s; the first slide will be presented to the
-	 * {@link Participant}; afterwards the next in this order will be
-	 * presented, if all rules return <code>true</code>, otherwise the next
-	 * slide it tested
+	 * {@link Participant}; afterwards the next in this order will be presented,
+	 * if all rules return <code>true</code>, otherwise the next slide it tested
 	 */
 	@Getter
 	@Setter
@@ -75,8 +74,7 @@ public class FeedbackSlide extends ModelObject {
 
 	/**
 	 * The title of the {@link FeedbackSlide} presented to the
-	 * {@link Participant} containing placeholders
-	 * for variables
+	 * {@link Participant} containing placeholders for variables
 	 */
 	@Getter
 	@Setter
@@ -94,8 +92,7 @@ public class FeedbackSlide extends ModelObject {
 	/**
 	 * Enables to add an optional layout attribute for the template generation
 	 * in addition to the template set by the question type containing
-	 * placeholders
-	 * for variables
+	 * placeholders for variables
 	 */
 	@Getter
 	@Setter
@@ -110,8 +107,8 @@ public class FeedbackSlide extends ModelObject {
 	private ObjectId	linkedMediaObject;
 
 	/**
-	 * The text presented to the {@link Participant} containing placeholders
-	 * for variables
+	 * The text presented to the {@link Participant} containing placeholders for
+	 * variables
 	 */
 	@Getter
 	@Setter

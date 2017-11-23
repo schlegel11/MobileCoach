@@ -8,17 +8,17 @@ package ch.ethz.mc.model.persistent.types;
  * 
  * For details see README.md file in the root folder of this project.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,26 @@ import java.util.List;
  * @author Andreas Filler
  */
 public enum RuleEquationSignTypes {
-	CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE, CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_FALSE, CALCULATED_VALUE_IS_SMALLER_THAN, CALCULATED_VALUE_IS_SMALLER_OR_EQUAL_THAN, CALCULATED_VALUE_EQUALS, CALCULATED_VALUE_IS_BIGGER_OR_EQUAL_THAN, CALCULATED_VALUE_IS_BIGGER_THAN, CREATE_TEXT_BUT_RESULT_IS_ALWAYS_TRUE, CREATE_TEXT_BUT_RESULT_IS_ALWAYS_FALSE, CALCULATE_AMOUNT_OF_SELECT_MANY_VALUES, TEXT_VALUE_EQUALS, TEXT_VALUE_NOT_EQUALS, TEXT_VALUE_MATCHES_REGULAR_EXPRESSION, TEXT_VALUE_NOT_MATCHES_REGULAR_EXPRESSION, TEXT_VALUE_FROM_SELECT_MANY_AT_POSITION, TEXT_VALUE_FROM_SELECT_MANY_AT_RANDOM_POSITION, DATE_DIFFERENCE_VALUE_EQUALS, CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_TRUE_IF_ZERO, CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_ALWAYS_TRUE, CHECK_VALUE_IN_VARIABLE_ACROSS_INVTERVENTIONS_AND_TRUE_IF_DUPLICATE_FOUND;
+	CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
+	CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_FALSE,
+	CALCULATED_VALUE_IS_SMALLER_THAN,
+	CALCULATED_VALUE_IS_SMALLER_OR_EQUAL_THAN,
+	CALCULATED_VALUE_EQUALS,
+	CALCULATED_VALUE_IS_BIGGER_OR_EQUAL_THAN,
+	CALCULATED_VALUE_IS_BIGGER_THAN,
+	CREATE_TEXT_BUT_RESULT_IS_ALWAYS_TRUE,
+	CREATE_TEXT_BUT_RESULT_IS_ALWAYS_FALSE,
+	CALCULATE_AMOUNT_OF_SELECT_MANY_VALUES,
+	TEXT_VALUE_EQUALS,
+	TEXT_VALUE_NOT_EQUALS,
+	TEXT_VALUE_MATCHES_REGULAR_EXPRESSION,
+	TEXT_VALUE_NOT_MATCHES_REGULAR_EXPRESSION,
+	TEXT_VALUE_FROM_SELECT_MANY_AT_POSITION,
+	TEXT_VALUE_FROM_SELECT_MANY_AT_RANDOM_POSITION,
+	DATE_DIFFERENCE_VALUE_EQUALS,
+	CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_TRUE_IF_ZERO,
+	CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_ALWAYS_TRUE,
+	CHECK_VALUE_IN_VARIABLE_ACROSS_INVTERVENTIONS_AND_TRUE_IF_DUPLICATE_FOUND;
 
 	private static List<RuleEquationSignTypes> calculatedEquationSigns = null;
 

@@ -8,17 +8,17 @@ package ch.ethz.mc.services;
  * 
  * For details see README.md file in the root folder of this project.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 import java.util.Collections;
 import java.util.List;
@@ -311,8 +311,7 @@ public class RESTManagerService {
 
 	/**
 	 * Calculate average of variable for all participants of the same
-	 * group/intervention as the
-	 * given participant
+	 * group/intervention as the given participant
 	 *
 	 * @param participantId
 	 * @param variable
@@ -368,8 +367,7 @@ public class RESTManagerService {
 
 	/**
 	 * Calculate average of variable for dashboard for all participants of the
-	 * given
-	 * group/intervention
+	 * given group/intervention
 	 *
 	 * @param interventionId
 	 * @param variable
@@ -822,8 +820,7 @@ public class RESTManagerService {
 
 	/**
 	 * Reads variable for all participants of the same group/intervention as the
-	 * given
-	 * participant
+	 * given participant
 	 *
 	 * @param participantId
 	 * @param variables
@@ -1077,8 +1074,7 @@ public class RESTManagerService {
 
 	/**
 	 * Reads variables for all participants of the same group/intervetion as the
-	 * given
-	 * participant
+	 * given participant
 	 *
 	 * @param participantId
 	 * @param variables

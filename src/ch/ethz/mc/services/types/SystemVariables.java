@@ -8,17 +8,17 @@ package ch.ethz.mc.services.types;
  * 
  * For details see README.md file in the root folder of this project.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 import ch.ethz.mc.conf.ImplementationConstants;
 
@@ -29,7 +29,13 @@ import ch.ethz.mc.conf.ImplementationConstants;
  */
 public class SystemVariables {
 	public enum READ_ONLY_SYSTEM_VARIABLES {
-		systemHourOfDay, systemDayOfMonth, systemMonth, systemYear, systemDayInWeek, systemLinkedSurvey, systemLinkedMediaObject;
+		systemHourOfDay,
+		systemDayOfMonth,
+		systemMonth,
+		systemYear,
+		systemDayInWeek,
+		systemLinkedSurvey,
+		systemLinkedMediaObject;
 
 		public String toVariableName() {
 			return ImplementationConstants.VARIABLE_PREFIX + toString();
@@ -37,7 +43,9 @@ public class SystemVariables {
 	};
 
 	public enum READ_ONLY_PARTICIPANT_VARIABLES {
-		participantParticipationInWeeks, participantParticipationInDays, participantFeedbackURL;
+		participantParticipationInWeeks,
+		participantParticipationInDays,
+		participantFeedbackURL;
 
 		public String toVariableName() {
 			return ImplementationConstants.VARIABLE_PREFIX + toString();
@@ -45,7 +53,15 @@ public class SystemVariables {
 	};
 
 	public enum READ_WRITE_PARTICIPANT_VARIABLES {
-		participantName, participantLanguage, participantGroup, participantDialogOptionSMSData, participantDialogOptionEmailData, participantDialogOptionExternalID, participantSupervisorDialogOptionSMSData, participantSupervisorDialogOptionEmailData, participantSupervisorDialogOptionExternalID;
+		participantName,
+		participantLanguage,
+		participantGroup,
+		participantDialogOptionSMSData,
+		participantDialogOptionEmailData,
+		participantDialogOptionExternalID,
+		participantSupervisorDialogOptionSMSData,
+		participantSupervisorDialogOptionEmailData,
+		participantSupervisorDialogOptionExternalID;
 
 		public String toVariableName() {
 			return ImplementationConstants.VARIABLE_PREFIX + toString();
@@ -53,7 +69,13 @@ public class SystemVariables {
 	};
 
 	public enum READ_ONLY_PARTICIPANT_REPLY_VARIABLES {
-		participantMessageReply, participantRawMessageReply, participantUnexpectedMessage, participantUnexpectedRawMessage, participantIntention, participantRawIntention, participantIntentionContent;
+		participantMessageReply,
+		participantRawMessageReply,
+		participantUnexpectedMessage,
+		participantUnexpectedRawMessage,
+		participantIntention,
+		participantRawIntention,
+		participantIntentionContent;
 
 		public String toVariableName() {
 			return ImplementationConstants.VARIABLE_PREFIX + toString();

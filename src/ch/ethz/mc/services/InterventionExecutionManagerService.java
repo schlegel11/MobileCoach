@@ -8,17 +8,17 @@ package ch.ethz.mc.services;
  * 
  * For details see README.md file in the root folder of this project.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 import java.io.File;
 import java.io.FileWriter;
@@ -766,8 +766,8 @@ public class InterventionExecutionManagerService {
 	/*
 	 * MAIN methods -
 	 * 
-	 * (the following two methods contain the elemental parts of
-	 * the monitoring process)
+	 * (the following two methods contain the elemental parts of the monitoring
+	 * process)
 	 */
 	/**
 	 * Cares for the execution of the following four main methods in the
@@ -2014,10 +2014,8 @@ public class InterventionExecutionManagerService {
 
 	/**
 	 * Checks message groups which groups and messages are (1) already used //
-	 * (2) used less // (3) simply fit and
-	 * returns the {@link MonitoringMessage} to send or null if there are no
-	 * messages in the group
-	 * left
+	 * (2) used less // (3) simply fit and returns the {@link MonitoringMessage}
+	 * to send or null if there are no messages in the group left
 	 *
 	 * @return
 	 */
@@ -2562,17 +2560,14 @@ public class InterventionExecutionManagerService {
 	 */
 	/**
 	 * Returns a list of {@link ObjectId}s of {@link Participant}s that have
-	 * messages that should be sent; Parameters
-	 * therefore are:
+	 * messages that should be sent; Parameters therefore are:
 	 *
-	 * - the belonging intervention is active
-	 * - the belonging intervention monitoring is active
-	 * - the participant has monitoring active
-	 * - the participant has all data for monitoring available
-	 * - the participant has finished the screening survey
-	 * - the participant not finished the monitoring
-	 * - the message should have the status PREPARED_FOR_SENDING
-	 * - the should be sent timestamp should be lower than the current time -->
+	 * - the belonging intervention is active - the belonging intervention
+	 * monitoring is active - the participant has monitoring active - the
+	 * participant has all data for monitoring available - the participant has
+	 * finished the screening survey - the participant not finished the
+	 * monitoring - the message should have the status PREPARED_FOR_SENDING -
+	 * the should be sent timestamp should be lower than the current time -->
 	 * relevant, but will be checked later
 	 *
 	 * @return
@@ -2618,14 +2613,12 @@ public class InterventionExecutionManagerService {
 	 * Returns a list of {@link DialogMessage}s that should be sent; Parameters
 	 * therefore are:
 	 *
-	 * - the belonging intervention is active
-	 * - the belonging intervention monitoring is active
-	 * - the participant has monitoring active
-	 * - the participant has all data for monitoring available
-	 * - the participant has finished the screening survey
-	 * - the participant not finished the monitoring
-	 * - the message should have the status PREPARED_FOR_SENDING
-	 * - the should be sent timestamp should be lower than the current time
+	 * - the belonging intervention is active - the belonging intervention
+	 * monitoring is active - the participant has monitoring active - the
+	 * participant has all data for monitoring available - the participant has
+	 * finished the screening survey - the participant not finished the
+	 * monitoring - the message should have the status PREPARED_FOR_SENDING -
+	 * the should be sent timestamp should be lower than the current time
 	 *
 	 * @return
 	 */
@@ -2800,15 +2793,12 @@ public class InterventionExecutionManagerService {
 	 * Returns a list of {@link Participant}s that are relevant for monitoring;
 	 * Parameters therefore are:
 	 *
-	 * - the belonging intervention is active
-	 * - the belonging intervention monitoring is active
-	 * - the participant has monitoring active
-	 * - the participant has all data for monitoring available --> relevant, but
-	 * will be checked later
-	 * - the participant has finished the screening survey --> relevant, but
-	 * will be checked later
-	 * - the participant not finished the monitoring --> relevant, but will be
-	 * checked later
+	 * - the belonging intervention is active - the belonging intervention
+	 * monitoring is active - the participant has monitoring active - the
+	 * participant has all data for monitoring available --> relevant, but will
+	 * be checked later - the participant has finished the screening survey -->
+	 * relevant, but will be checked later - the participant not finished the
+	 * monitoring --> relevant, but will be checked later
 	 *
 	 * @return
 	 */

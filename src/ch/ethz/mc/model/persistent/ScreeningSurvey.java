@@ -8,17 +8,17 @@ package ch.ethz.mc.model.persistent;
  * 
  * For details see README.md file in the root folder of this project.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 import java.util.List;
 
@@ -48,8 +48,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * she/he has to perform one of the {@link ScreeningSurvey}s belonging to an
  * Intervention. In this {@link ScreeningSurvey}, which consist of several
  * {@link ScreeningSurveySlide}s, the basic {@link ParticipantVariableWithValue}
- * s
- * are collected as well as used to calculate the next
+ * s are collected as well as used to calculate the next
  * {@link ScreeningSurveySlide}s.
  *
  * @author Andreas Filler
@@ -59,8 +58,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class ScreeningSurvey extends ModelObject {
 	/**
 	 * A absolutely unique Id to enable to reference a {@link ScreeningSurvey}
-	 * also after independent export/import to/from
-	 * another system
+	 * also after independent export/import to/from another system
 	 */
 	@Getter
 	@Setter

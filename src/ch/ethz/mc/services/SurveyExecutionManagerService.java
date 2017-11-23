@@ -8,17 +8,17 @@ package ch.ethz.mc.services;
  * 
  * For details see README.md file in the root folder of this project.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 import java.io.File;
 import java.text.DateFormat;
@@ -74,8 +74,8 @@ import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.tools.VariableStringReplacer;
 
 /**
- * Cares for the orchestration of {@link ScreeningSurveySlides} as
- * part of a {@link ScreeningSurvey} or a {@link Feedback}
+ * Cares for the orchestration of {@link ScreeningSurveySlides} as part of a
+ * {@link ScreeningSurvey} or a {@link Feedback}
  *
  * The templates are based on the Mustache standard. Details can be found in the
  * {@link SurveySlideTemplateFieldTypes} class
@@ -302,10 +302,8 @@ public class SurveyExecutionManagerService {
 	}
 
 	/**
-	 * Returns if the requested dashboard is currently accessible
-	 * (means the the {@link Intervention} is active and the dashboard is
-	 * activated
-	 * active)
+	 * Returns if the requested dashboard is currently accessible (means the the
+	 * {@link Intervention} is active and the dashboard is activated active)
 	 *
 	 * @param screeningSurveyId
 	 * @return
@@ -385,8 +383,8 @@ public class SurveyExecutionManagerService {
 	}
 
 	/**
-	 * Returns if the requested {@link Feedback} is currently accessible
-	 * (means the the {@link Intervention} is active) by checking the
+	 * Returns if the requested {@link Feedback} is currently accessible (means
+	 * the the {@link Intervention} is active) by checking the
 	 * {@link Participant} first
 	 *
 	 * @param screeningSurveyId
@@ -1021,10 +1019,9 @@ public class SurveyExecutionManagerService {
 	 * {@link Participant} with the following state:
 	 *
 	 * - the belonging intervention is active and automatic finishing of surveys
-	 * is on
-	 * - the participant has all data for monitoring available
-	 * - the participant has not finished the screening survey
-	 * - the participant has not finished the monitoring
+	 * is on - the participant has all data for monitoring available - the
+	 * participant has not finished the screening survey - the participant has
+	 * not finished the monitoring
 	 * 
 	 * Important: For performance reasons this method is NOT synchronized
 	 * anymore.

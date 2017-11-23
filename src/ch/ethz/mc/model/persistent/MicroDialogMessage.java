@@ -8,17 +8,17 @@ package ch.ethz.mc.model.persistent;
  * 
  * For details see README.md file in the root folder of this project.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 import java.util.List;
 
@@ -47,8 +47,8 @@ import lombok.val;
 /**
  * {@link ModelObject} to represent an {@link MicroDialogMessage}
  *
- * {@link MicroDialogMessage}s will be sent to the {@link Participant} during
- * an {@link Intervention}. {@link MicroDialogMessage}s are part of
+ * {@link MicroDialogMessage}s will be sent to the {@link Participant} during an
+ * {@link Intervention}. {@link MicroDialogMessage}s are part of
  * {@link MicroDialog}s
  *
  * @author Andreas Filler
@@ -58,8 +58,7 @@ import lombok.val;
 public class MicroDialogMessage extends ModelObject
 		implements MicroDialogElementInterface {
 	/**
-	 * The {@link MicroDialog} this {@link MicroDialogMessage} belongs
-	 * to
+	 * The {@link MicroDialog} this {@link MicroDialogMessage} belongs to
 	 */
 	@Getter
 	@Setter
@@ -67,9 +66,8 @@ public class MicroDialogMessage extends ModelObject
 	private ObjectId	microDialog;
 
 	/**
-	 * The position of the {@link MicroDialogMessage} compared to all
-	 * other {@link MicroDialogElementInterface}s in the same
-	 * {@link MicroDialog}
+	 * The position of the {@link MicroDialogMessage} compared to all other
+	 * {@link MicroDialogElementInterface}s in the same {@link MicroDialog}
 	 */
 	@Getter
 	@Setter
@@ -107,8 +105,8 @@ public class MicroDialogMessage extends ModelObject
 	private ObjectId	linkedIntermediateSurvey;
 
 	/**
-	 * Defines if the {@link MicroDialogMessage} expects to be
-	 * answered by the {@link Participant}
+	 * Defines if the {@link MicroDialogMessage} expects to be answered by the
+	 * {@link Participant}
 	 *
 	 */
 	@Getter
@@ -126,17 +124,16 @@ public class MicroDialogMessage extends ModelObject
 
 	/**
 	 * <strong>OPTIONAL:</strong> If the result of the
-	 * {@link MicroDialogMessage}
-	 * should be
-	 * stored, the name of the appropriate variable can be set here.
+	 * {@link MicroDialogMessage} should be stored, the name of the appropriate
+	 * variable can be set here.
 	 */
 	@Getter
 	@Setter
 	private String		storeValueToVariableWithName;
 
 	/**
-	 * <strong>OPTIONAL:</strong> The value the variable should have if the
-	 * user does not reply
+	 * <strong>OPTIONAL:</strong> The value the variable should have if the user
+	 * does not reply
 	 */
 	@Getter
 	@Setter

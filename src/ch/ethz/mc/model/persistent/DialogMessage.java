@@ -8,17 +8,17 @@ package ch.ethz.mc.model.persistent;
  * 
  * For details see README.md file in the root folder of this project.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 import java.util.Date;
 
@@ -204,8 +204,7 @@ public class DialogMessage extends ModelObject {
 
 	/**
 	 * <strong>OPTIONAL:</strong> The {@link MonitoringRule} containing the
-	 * {@link MonitoringReplyRule}s to
-	 * execute after a timeout or reply
+	 * {@link MonitoringReplyRule}s to execute after a timeout or reply
 	 */
 	@Getter
 	@Setter
@@ -221,8 +220,7 @@ public class DialogMessage extends ModelObject {
 
 	/**
 	 * <strong>OPTIONAL:</strong> The {@link MicroDialog} that should be
-	 * activated
-	 * when the appropriate point in time occurs
+	 * activated when the appropriate point in time occurs
 	 */
 	@Getter
 	@Setter
@@ -238,8 +236,7 @@ public class DialogMessage extends ModelObject {
 
 	/**
 	 * The information if a {@link Participant} viewed the presented media
-	 * content (if
-	 * integrated in the {@link MonitoringMessage})
+	 * content (if integrated in the {@link MonitoringMessage})
 	 */
 	@Getter
 	@Setter
@@ -342,8 +339,8 @@ public class DialogMessage extends ModelObject {
 	}
 
 	/**
-	 * Create a {@link UIDialogMessageWithParticipant} with the
-	 * belonging {@link Participant}
+	 * Create a {@link UIDialogMessageWithParticipant} with the belonging
+	 * {@link Participant}
 	 *
 	 * @param participantId
 	 * @param participantName

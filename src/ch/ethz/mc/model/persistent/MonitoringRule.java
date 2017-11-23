@@ -8,17 +8,17 @@ package ch.ethz.mc.model.persistent;
  * 
  * For details see README.md file in the root folder of this project.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 import java.util.List;
 
@@ -42,9 +42,9 @@ import lombok.val;
  * {@link ModelObject} to represent an {@link MonitoringRule}
  *
  * A {@link MonitoringRule} is the core aspect in decision making in this
- * system. The {@link MonitoringRule}s are executed step by step regarding
- * their order and level. Each {@link MonitoringRule} can be defined in a way
- * that it stores the result of the rule in a variable and/or if it shall send a
+ * system. The {@link MonitoringRule}s are executed step by step regarding their
+ * order and level. Each {@link MonitoringRule} can be defined in a way that it
+ * stores the result of the rule in a variable and/or if it shall send a
  * message.
  *
  * A {@link MonitoringRule} also contains information about how to react
@@ -105,8 +105,7 @@ public class MonitoringRule extends AbstractMonitoringRule {
 
 	/**
 	 * <strong>OPTIONAL if sendMessageIfTrue and activateMicroDialogIfTrue are
-	 * both false:</strong> The hour the
-	 * message should be sent
+	 * both false:</strong> The hour the message should be sent
 	 */
 	@Getter
 	@Setter
