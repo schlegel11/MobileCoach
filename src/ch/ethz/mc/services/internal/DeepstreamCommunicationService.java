@@ -104,12 +104,16 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 		host = deepstreamHost;
 
 		loginData = new JsonObject();
-		loginData.addProperty(DeepstreamConstants.USER,
+		loginData.addProperty(DeepstreamConstants.REST_FIELD_CLIENT_VERSION,
+				Constants.getDeepstreamMinClientVersion());
+		loginData.addProperty(DeepstreamConstants.REST_FIELD_USER,
 				Constants.getDeepstreamServerRole());
-		loginData.addProperty(DeepstreamConstants.SECRET,
+		loginData.addProperty(DeepstreamConstants.REST_FIELD_SECRET,
 				deepstreamServerPassword);
-		loginData.addProperty(DeepstreamConstants.ROLE, deepstreamServerRole);
-		loginData.addProperty(DeepstreamConstants.INTERVENTION_PASSWORD,
+		loginData.addProperty(DeepstreamConstants.REST_FIELD_ROLE,
+				deepstreamServerRole);
+		loginData.addProperty(
+				DeepstreamConstants.REST_FIELD_INTERVENTION_PASSWORD,
 				"not required");
 
 		gson = new Gson();
