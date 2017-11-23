@@ -91,6 +91,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 	private final JsonObject						loginData;
 
 	private boolean									startupComplete		= false;
+	private int										startupAttempt		= 0;
 	private boolean									restStartupComplete	= false;
 	private boolean									reconnecting		= false;
 
@@ -531,7 +532,16 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 
 		if (!result.loggedIn()) {
 			log.warn("Login failed.");
-			return false;
+			cleanupClient();
+
+			if (startupAttempt < 10) {
+				startupAttempt++;
+				log.info("Retrying attempt {}...", startupAttempt);
+				Thread.sleep(1000);
+				return connectOrReconnect();
+			} else {
+				return false;
+			}
 		}
 
 		log.debug("Login successful.");
