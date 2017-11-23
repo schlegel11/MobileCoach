@@ -24,19 +24,27 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Locale;
-
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
+import java.util.Set;
 
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
+
+import com.fathzer.soft.javaluator.AbstractEvaluator;
+import com.fathzer.soft.javaluator.DoubleEvaluator;
+import com.fathzer.soft.javaluator.Function;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Option;
+import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
+import com.jayway.jsonpath.spi.json.JsonProvider;
+import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
+import com.jayway.jsonpath.spi.mapper.MappingProvider;
 
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.memory.RuleEvaluationResult;
@@ -45,10 +53,11 @@ import ch.ethz.mc.model.persistent.concepts.AbstractRule;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import ch.ethz.mc.services.internal.VariablesManagerService;
-
-import com.fathzer.soft.javaluator.AbstractEvaluator;
-import com.fathzer.soft.javaluator.DoubleEvaluator;
-import com.fathzer.soft.javaluator.Function;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Evaluates calculated and text based rules
@@ -57,6 +66,29 @@ import com.fathzer.soft.javaluator.Function;
  */
 @Log4j2
 public class RuleEvaluator {
+	static {
+		// Initialize JsonPath to use Jackson
+		Configuration.setDefaults(new Configuration.Defaults() {
+			private final JsonProvider		jsonProvider	= new JacksonJsonProvider();
+			private final MappingProvider	mappingProvider	= new JacksonMappingProvider();
+
+			@Override
+			public JsonProvider jsonProvider() {
+				return jsonProvider;
+			}
+
+			@Override
+			public MappingProvider mappingProvider() {
+				return mappingProvider;
+			}
+
+			@Override
+			public Set<Option> options() {
+				return EnumSet.noneOf(Option.class);
+			}
+		});
+	}
+
 	@Setter
 	@Getter(value = AccessLevel.PRIVATE)
 	private static VariablesManagerService variablesManagerService;
@@ -308,6 +340,29 @@ public class RuleEvaluator {
 					ruleEvaluationResult.setRuleMatchesEquationSign(true);
 
 					ruleEvaluationResult.setTextRuleValue(parts[position]);
+					break;
+				case TEXT_VALUE_FROM_JSON_BY_JSON_PATH:
+					try {
+						val jsonResult = JsonPath.read(
+								ruleEvaluationResult.getTextRuleValue(),
+								"$" + ruleEvaluationResult
+										.getTextRuleComparisonTermValue());
+
+						ruleEvaluationResult.setRuleMatchesEquationSign(true);
+
+						if (jsonResult instanceof LinkedList<?>) {
+							ruleEvaluationResult.setTextRuleValue(StringUtils
+									.join(((LinkedList<?>) jsonResult)
+											.iterator(), ", "));
+						} else {
+							ruleEvaluationResult
+									.setTextRuleValue(jsonResult.toString());
+						}
+					} catch (final Exception e) {
+						ruleEvaluationResult.setRuleMatchesEquationSign(false);
+						ruleEvaluationResult.setTextRuleValue("");
+					}
+
 					break;
 				case DATE_DIFFERENCE_VALUE_EQUALS:
 					val calendarDiff = Calendar.getInstance();

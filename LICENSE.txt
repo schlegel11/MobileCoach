@@ -52,6 +52,8 @@ also available under the Apache License:
      https://code.google.com/p/jcsv/
    * Deepstream.io Java Client
      https://github.com/deepstreamIO/deepstream.io-client-java/
+   * Jayway JsonPath
+     https://github.com/json-path/JsonPath
    
 This software uses the following software components, which are 
 available under the LGPL License:

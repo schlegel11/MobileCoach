@@ -636,7 +636,7 @@ public class InterventionExecutionManagerService {
 			message = receivedMessage.getMessage();
 			messageWithForcedLinks = receivedMessage.getContent() == null
 					? receivedMessage.getIntention()
-					: receivedMessage.getIntention()
+					: receivedMessage.getIntention() + "\n"
 							+ receivedMessage.getContent();
 		} else {
 			message = receivedMessage.getMessage();

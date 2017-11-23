@@ -20,6 +20,7 @@
 	<!ENTITY resteasy.version "3.0.19.Final">
 	<!ENTITY jcsv.version "1.4.0">
 	<!ENTITY deepstream.version "2.2.2">
+	<!ENTITY jsonpath.version "2.3.0">
 ]>
 <ivy-module version="2.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -128,5 +129,8 @@
 		
 		<!-- Deepstream -->
 		<dependency org="io.deepstream" name="deepstream.io-client-java" rev="&deepstream.version;" />
+
+		<!-- Jayway JsonPath -->
+		<dependency org="com.jayway.jsonpath" name="json-path" rev="&jsonpath.version;" />
 	</dependencies>
 </ivy-module>
