@@ -48,9 +48,12 @@ import com.vaadin.ui.Upload.SucceededListener;
 public class FileUploadComponentWithController extends FileUploadComponent {
 
 	private UploadListener	listener;
-
-	public FileUploadComponentWithController() {
+	private final String expectedFileExtension;
+	
+	public FileUploadComponentWithController(String expectedFileExtension) {
 		super();
+		
+		this.expectedFileExtension = expectedFileExtension;
 
 		val uploader = new Uploader();
 		getUploadComponent().setReceiver(uploader);
@@ -58,6 +61,10 @@ public class FileUploadComponentWithController extends FileUploadComponent {
 		getUploadComponent().addSucceededListener(uploader);
 		getUploadComponent().addFailedListener(uploader);
 		getUploadComponent().setErrorHandler(uploader);
+	}
+
+	public FileUploadComponentWithController() {
+		this(Constants.getFileExtension());
 	}
 
 	public void setListener(final UploadListener listener) {
@@ -88,8 +95,7 @@ public class FileUploadComponentWithController extends FileUploadComponent {
 				return null;
 			}
 
-			if (!temporaryFileExtension.toLowerCase().equals(
-					Constants.getFileExtension())) {
+			if (!temporaryFileExtension.toLowerCase().equals(expectedFileExtension)) {
 				return null;
 			}
 
