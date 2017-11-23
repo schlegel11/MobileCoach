@@ -736,7 +736,13 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 		receivedMessage.setContent(content);
 		receivedMessage.setReceivedTimestamp(timestamp);
 
-		if (receivedMessage.getMessage() != null
+		if (typeIntention && receivedMessage.getIntention() != null
+				&& receivedMessage.getSender() != null) {
+			synchronized (receivedMessages) {
+				receivedMessages.add(receivedMessage);
+			}
+			return true;
+		} else if (!typeIntention && receivedMessage.getMessage() != null
 				&& receivedMessage.getSender() != null) {
 			synchronized (receivedMessages) {
 				receivedMessages.add(receivedMessage);
