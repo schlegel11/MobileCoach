@@ -84,7 +84,8 @@ public class RuleEvaluator {
 
 			@Override
 			public Set<Option> options() {
-				return EnumSet.noneOf(Option.class);
+				return EnumSet.of(Option.DEFAULT_PATH_LEAF_TO_NULL,
+						Option.ALWAYS_RETURN_LIST, Option.SUPPRESS_EXCEPTIONS);
 			}
 		});
 	}
@@ -348,16 +349,26 @@ public class RuleEvaluator {
 								"$" + ruleEvaluationResult
 										.getTextRuleComparisonTermValue());
 
-						ruleEvaluationResult.setRuleMatchesEquationSign(true);
+						ruleEvaluationResult.setRuleMatchesEquationSign(false);
 
-						if (jsonResult instanceof LinkedList<?>) {
-							ruleEvaluationResult.setTextRuleValue(StringUtils
-									.join(((LinkedList<?>) jsonResult)
-											.iterator(), ", "));
-						} else {
-							ruleEvaluationResult
-									.setTextRuleValue(jsonResult.toString());
+						final StringBuffer resultsString = new StringBuffer();
+						val jsonResultsList = (LinkedList<?>) jsonResult;
+						for (int i = 0; i < jsonResultsList.size(); i++) {
+							val item = jsonResultsList.get(i);
+
+							if (item != null) {
+								ruleEvaluationResult
+										.setRuleMatchesEquationSign(true);
+
+								if (resultsString.length() > 0) {
+									resultsString.append(", ");
+								}
+
+								resultsString.append(item.toString());
+							}
 						}
+						ruleEvaluationResult
+								.setTextRuleValue(resultsString.toString());
 					} catch (final Exception e) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(false);
 						ruleEvaluationResult.setTextRuleValue("");
