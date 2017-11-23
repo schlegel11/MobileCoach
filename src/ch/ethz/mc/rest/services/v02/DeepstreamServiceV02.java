@@ -27,16 +27,16 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+import ch.ethz.mc.conf.DeepstreamConstants;
+import ch.ethz.mc.services.RESTManagerService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
-import ch.ethz.mc.conf.DeepstreamConstants;
-import ch.ethz.mc.services.RESTManagerService;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 /**
  * REST-based services required for the interplay with deepstream
@@ -84,6 +84,9 @@ public class DeepstreamServiceV02 extends AbstractServiceV02 {
 			val authData = (JsonObject) jsonObjectPayload
 					.get(DeepstreamConstants.DS_FIELD_AUTH_DATA);
 
+			val clientVersion = authData
+					.get(DeepstreamConstants.REST_FIELD_CLIENT_VERSION)
+					.getAsInt();
 			val user = authData.get(DeepstreamConstants.REST_FIELD_USER)
 					.getAsString();
 			val secret = authData.get(DeepstreamConstants.REST_FIELD_SECRET)
@@ -99,8 +102,8 @@ public class DeepstreamServiceV02 extends AbstractServiceV02 {
 					"Checking deepstream access for {} with role {} and password {}",
 					user, role, interventionPassword);
 			val accessGranted = restManagerService
-					.checkDeepstreamAccessAndRetrieveUserId(user, secret, role,
-							interventionPassword);
+					.checkDeepstreamAccessAndRetrieveUserId(clientVersion, user,
+							secret, role, interventionPassword);
 
 			if (!accessGranted) {
 				return Response.status(Status.FORBIDDEN).build();

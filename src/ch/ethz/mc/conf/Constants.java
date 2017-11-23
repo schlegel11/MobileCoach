@@ -253,6 +253,10 @@ public class Constants {
 	private static String		deepstreamParticipantRole			= "participant";
 	@Getter
 	private static String		deepstreamSupervisorRole			= "supervisor";
+	@Getter
+	private static int			deepstreamMinClientVersion			= 1;
+	@Getter
+	private static int			deepstreamMaxClientVersion			= 1;
 
 	@Getter
 	private static final String	deepstreamServerPassword			= RandomStringUtils

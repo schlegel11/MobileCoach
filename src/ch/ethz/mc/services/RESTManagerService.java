@@ -24,11 +24,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-import lombok.Getter;
-import lombok.Synchronized;
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
@@ -58,6 +53,10 @@ import ch.ethz.mc.services.internal.FileStorageManagerService;
 import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.services.internal.VariablesManagerService.ExternallyReadProtectedVariableException;
 import ch.ethz.mc.services.internal.VariablesManagerService.ExternallyWriteProtectedVariableException;
+import lombok.Getter;
+import lombok.Synchronized;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Cares for the orchestration of all REST calls
@@ -82,6 +81,8 @@ public class RESTManagerService {
 	private final String							deepstreamServerRole;
 	private final String							deepstreamParticipantRole;
 	private final String							deepstreamSuperviserRole;
+	private final int								deepstreamMinClientVersion;
+	private final int								deepstreamMaxClientVersion;
 
 	private final String							deepstreamServerPassword;
 
@@ -107,6 +108,8 @@ public class RESTManagerService {
 		deepstreamServerRole = Constants.getDeepstreamServerRole();
 		deepstreamParticipantRole = Constants.getDeepstreamParticipantRole();
 		deepstreamSuperviserRole = Constants.getDeepstreamSupervisorRole();
+		deepstreamMinClientVersion = Constants.getDeepstreamMinClientVersion();
+		deepstreamMaxClientVersion = Constants.getDeepstreamMaxClientVersion();
 
 		deepstreamServerPassword = Constants.getDeepstreamServerPassword();
 
@@ -602,9 +605,15 @@ public class RESTManagerService {
 	 * @param secret
 	 * @return
 	 */
-	public boolean checkDeepstreamAccessAndRetrieveUserId(final String user,
-			final String secret, final String role,
-			final String interventionPassword) {
+	public boolean checkDeepstreamAccessAndRetrieveUserId(
+			final int clientVersion, final String user, final String secret,
+			final String role, final String interventionPassword) {
+
+		// Prevent access for too old or new clients
+		if (clientVersion < deepstreamMinClientVersion
+				|| clientVersion > deepstreamMaxClientVersion) {
+			return false;
+		}
 
 		// Prevent unauthorized access with empty values
 		if (StringUtils.isBlank(user) || StringUtils.isBlank(secret)

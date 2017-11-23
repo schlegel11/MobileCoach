@@ -33,6 +33,7 @@ public class DeepstreamConstants {
 
 	public static final String	REST_FIELD_PARTICIPANT				= "participant";
 	public static final String	REST_FIELD_NICKNAME					= "nickname";
+	public static final String	REST_FIELD_CLIENT_VERSION			= "client-version";
 	public static final String	REST_FIELD_USER						= "user";
 	public static final String	REST_FIELD_SECRET					= "secret";
 	public static final String	REST_FIELD_ROLE						= "role";
