@@ -70,4 +70,5 @@ available under the following proprietary licenses:
      https://opensource.org/licenses/BSD-3-Clause
    * Thumbnailator
      https://github.com/coobird/thumbnailator/blob/master/LICENSE
-   
+   * pushy
+     https://github.com/relayrides/pushy/blob/master/LICENSE.md

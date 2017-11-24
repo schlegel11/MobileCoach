@@ -56,6 +56,7 @@ import ch.ethz.mc.model.memory.ReceivedMessage;
 import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
+import ch.ethz.mc.model.persistent.types.DialogMessageTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
 import ch.ethz.mc.tools.InternalDateTime;
@@ -82,9 +83,11 @@ public class CommunicationManagerService {
 	private final boolean						emailActive;
 	private final boolean						smsActive;
 	private final boolean						deepstreamActive;
+	private final boolean						pushNotificationsActive;
 
 	@Getter
 	private DeepstreamCommunicationService		deepstreamCommunicationService;
+	private PushNotificationService				pushNotificationService;
 
 	private InterventionExecutionManagerService	interventionExecutionManagerService;
 	private final Session						incomingMailSession;
@@ -108,7 +111,7 @@ public class CommunicationManagerService {
 
 	private final List<MailingThread>			runningMailingThreads;
 
-	private CommunicationManagerService() {
+	private CommunicationManagerService() throws Exception {
 		log.info("Preparing service...");
 
 		runningMailingThreads = new ArrayList<MailingThread>();
@@ -119,6 +122,7 @@ public class CommunicationManagerService {
 		emailActive = Constants.isEmailActive();
 		smsActive = Constants.isSmsActive();
 		deepstreamActive = Constants.isDeepstreamActive();
+		pushNotificationsActive = Constants.isPushNotificationsActive();
 
 		// Mailing configuration
 		val mailhostIncoming = Constants.getMailhostIncoming();
@@ -180,7 +184,7 @@ public class CommunicationManagerService {
 		documentBuilderFactory.setNamespaceAware(true);
 		receiverDateFormat = new SimpleDateFormat("ddMMyyyyHHmmss", Locale.US);
 
-		// Initialize deepstream communication (if required)
+		// Initialize deepstream communication service (if required)
 		if (deepstreamActive) {
 			deepstreamCommunicationService = DeepstreamCommunicationService
 					.prepare(Constants.getDeepstreamHost(),
@@ -188,6 +192,18 @@ public class CommunicationManagerService {
 							Constants.getDeepstreamServerPassword());
 		} else {
 			deepstreamCommunicationService = null;
+		}
+		// Initialize push notification service (if required)
+		if (pushNotificationsActive) {
+			pushNotificationService = PushNotificationService.prepare(
+					Constants.isPushNotificationsIOSActive(),
+					Constants.isPushNotificationsAndroidActive(),
+					Constants.isPushNotificationsProductionMode(),
+					Constants.getPushNotificationsIOSAppIdentifier(),
+					Constants.getPushNotificationsIOSCertificateFile(),
+					Constants.getPushNotificationsIOSCertificatePassword());
+		} else {
+			pushNotificationService = null;
 		}
 
 		log.info("Prepared.");
@@ -201,15 +217,20 @@ public class CommunicationManagerService {
 	}
 
 	public void start(
-			final InterventionExecutionManagerService interventionExecutionManagerService)
+			final InterventionExecutionManagerService interventionExecutionManagerService,
+			final VariablesManagerService variablesManagerService)
 			throws Exception {
 		log.info("Starting service...");
 
 		this.interventionExecutionManagerService = interventionExecutionManagerService;
 
 		if (deepstreamActive) {
-			deepstreamCommunicationService
-					.start(interventionExecutionManagerService);
+			deepstreamCommunicationService.start(
+					interventionExecutionManagerService,
+					variablesManagerService);
+		}
+		if (pushNotificationsActive) {
+			pushNotificationService.start(interventionExecutionManagerService);
 		}
 
 		log.info("Started.");
@@ -219,11 +240,20 @@ public class CommunicationManagerService {
 		log.info("Stopping service...");
 
 		if (deepstreamActive) {
-			log.debug("Stopping deepstream server...");
+			log.debug("Stopping deepstream service...");
 			try {
 				deepstreamCommunicationService.stop();
 			} catch (final Exception e) {
-				log.warn("Error when stopping deepstream server: {}",
+				log.warn("Error when stopping deepstream service: {}",
+						e.getMessage());
+			}
+		}
+		if (pushNotificationsActive) {
+			log.debug("Stopping push notification service...");
+			try {
+				pushNotificationService.stop();
+			} catch (final Exception e) {
+				log.warn("Error when stopping push notification service: {}",
 						e.getMessage());
 			}
 		}
@@ -312,6 +342,16 @@ public class CommunicationManagerService {
 					log.warn(
 							"No appropriate handler could be found for external id dialog option with data {}",
 							dialogOption.getData());
+				}
+				if (pushNotificationsActive && dialogMessage
+						.getType() != DialogMessageTypes.COMMAND) {
+					try {
+						pushNotificationService.asyncSendPushNotification(
+								dialogOption, message);
+					} catch (final Exception e) {
+						log.warn("Could not send push notification: {}",
+								e.getMessage());
+					}
 				}
 				break;
 		}

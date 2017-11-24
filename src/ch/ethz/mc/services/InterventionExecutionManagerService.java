@@ -39,6 +39,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
@@ -71,6 +72,7 @@ import ch.ethz.mc.model.persistent.types.AnswerTypes;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogMessageTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
+import ch.ethz.mc.model.persistent.types.PushNotificationTypes;
 import ch.ethz.mc.services.internal.CommunicationManagerService;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
@@ -183,7 +185,8 @@ public class InterventionExecutionManagerService {
 
 				// Start communication manager service
 				try {
-					communicationManagerService.start(instance);
+					communicationManagerService.start(instance,
+							variablesManagerService);
 
 					// Start working threads
 					outgoingMessageWorker.start();
@@ -761,6 +764,61 @@ public class InterventionExecutionManagerService {
 				InternalDateTime.currentTimeMillis());
 
 		databaseManagerService.saveModelObject(dialogStatus);
+	}
+
+	// Dialog option
+	@Synchronized
+	public boolean dialogOptionAddPushNotificationTokenBasedOnTypeAndData(
+			final DialogOptionTypes dialogOptionType, final String data,
+			final PushNotificationTypes pushNotificationType,
+			final String pushToken) {
+
+		val dialogOption = databaseManagerService.findOneModelObject(
+				DialogOption.class, Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
+				dialogOptionType, data);
+
+		if (dialogOption != null) {
+			dialogOptionAddPushNotificationToken(dialogOption.getId(),
+					pushNotificationType, pushToken);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	@Synchronized
+	private void dialogOptionAddPushNotificationToken(
+			final ObjectId dialogOptionId,
+			final PushNotificationTypes pushNotificationType,
+			final String newToken) {
+		val tokenToStore = pushNotificationType.toString() + newToken;
+
+		val dialogOption = databaseManagerService
+				.getModelObjectById(DialogOption.class, dialogOptionId);
+
+		if (!ArrayUtils.contains(dialogOption.getPushNotificationTokens(),
+				tokenToStore)) {
+			dialogOption.setPushNotificationTokens(ArrayUtils.add(
+					dialogOption.getPushNotificationTokens(), tokenToStore));
+		}
+
+		databaseManagerService.saveModelObject(dialogOption);
+	}
+
+	@Synchronized
+	public void dialogOptionRemovePushNotificationToken(
+			final ObjectId dialogOptionId,
+			final PushNotificationTypes pushNotificationType,
+			final String token) {
+		val tokenToRemove = pushNotificationType.toString() + token;
+
+		val dialogOption = databaseManagerService
+				.getModelObjectById(DialogOption.class, dialogOptionId);
+
+		dialogOption.setPushNotificationTokens(ArrayUtils.removeElement(
+				dialogOption.getPushNotificationTokens(), tokenToRemove));
+
+		databaseManagerService.saveModelObject(dialogOption);
 	}
 
 	/*

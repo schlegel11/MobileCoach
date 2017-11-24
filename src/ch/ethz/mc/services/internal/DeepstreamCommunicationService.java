@@ -1,5 +1,25 @@
 package ch.ethz.mc.services.internal;
 
+/*
+ * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
+ * initiative of the Institute of Technology Management at University of St.
+ * Gallen and the Department of Management, Technology and Economics at ETH
+ * Zurich
+ * 
+ * For details see README.md file in the root folder of this project.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -24,33 +44,15 @@ import ch.ethz.mc.model.memory.ExternalRegistration;
 import ch.ethz.mc.model.memory.ReceivedMessage;
 import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogOption;
+import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.types.AnswerTypes;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogMessageTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
+import ch.ethz.mc.model.persistent.types.PushNotificationTypes;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
 import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mc.tools.InternalDateTime;
-/*
- * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
- * initiative of the Institute of Technology Management at University of St.
- * Gallen and the Department of Management, Technology and Economics at ETH
- * Zurich
- * 
- * For details see README.md file in the root folder of this project.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
 import io.deepstream.ConfigOptions;
 import io.deepstream.ConnectionState;
 import io.deepstream.ConnectionStateListener;
@@ -76,11 +78,11 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 	@Getter
 	private static DeepstreamCommunicationService	instance			= null;
 
-	private final HashSet<String>					loggedInUsers;
-
 	private InterventionExecutionManagerService		interventionExecutionManagerService;
 
 	private RESTManagerService						restManagerService;
+
+	private final HashSet<String>					loggedInUsers;
 
 	private final int								substringLength;
 
@@ -138,7 +140,8 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 	}
 
 	public void start(
-			final InterventionExecutionManagerService interventionExecutionManagerService)
+			final InterventionExecutionManagerService interventionExecutionManagerService,
+			final VariablesManagerService variablesManagerService)
 			throws Exception {
 		log.info("Starting service...");
 
@@ -169,6 +172,17 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 	/*
 	 * Public methods
 	 */
+	/**
+	 * Enables the REST interface to inform this server about it's own startup
+	 * 
+	 * @param restManagerService
+	 */
+	public void RESTInterfaceStarted(
+			final RESTManagerService restManagerService) {
+		this.restManagerService = restManagerService;
+		restStartupComplete = true;
+	}
+
 	/**
 	 * Queue message for sending using deepstream
 	 * 
@@ -474,12 +488,15 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 	public boolean checkSecret(final String participantOrSupervisorIdentifier,
 			final String secret) {
 		try {
-			val record = client.record
-					.getRecord(DeepstreamConstants.PATH_MESSAGES
-							+ participantOrSupervisorIdentifier);
+			String secretFromRecord;
+			synchronized (client) {
+				val record = client.record
+						.getRecord(DeepstreamConstants.PATH_MESSAGES
+								+ participantOrSupervisorIdentifier);
 
-			val secretFromRecord = record.get(DeepstreamConstants.SECRET)
-					.getAsString();
+				secretFromRecord = record.get(DeepstreamConstants.SECRET)
+						.getAsString();
+			}
 
 			if (StringUtils.isBlank(secretFromRecord)) {
 				return false;
@@ -495,6 +512,108 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 					participantOrSupervisorIdentifier);
 		}
 		return true;
+	}
+
+	/**
+	 * Creates a deepstream participant/supervisor and the belonging
+	 * intervention participant structures or returns null if not allowed
+	 * 
+	 * @param nickname
+	 * @param relatedParticipantExternalId
+	 * @param interventionPattern
+	 * @param interventionPassword
+	 * @param supervisorRequest
+	 * @return
+	 */
+	public ExternalRegistration registerUser(final String nickname,
+			final String relatedParticipantExternalId,
+			final String interventionPattern, final String interventionPassword,
+			final boolean supervisorRequest) {
+
+		// Prepare deepstream and reserve unique ID
+		String participantOrSupervisorExternalId;
+		final String secret = RandomStringUtils.randomAlphanumeric(128);
+		synchronized (client) {
+			do {
+				participantOrSupervisorExternalId = RandomStringUtils
+						.randomAlphanumeric(32);
+			} while (client.record.has(DeepstreamConstants.PATH_MESSAGES
+					+ participantOrSupervisorExternalId).getResult());
+
+			val record = client.record
+					.getRecord(DeepstreamConstants.PATH_MESSAGES
+							+ participantOrSupervisorExternalId);
+			record.set(DeepstreamConstants.SECRET, secret);
+			record.set(DeepstreamConstants.ROLE,
+					supervisorRequest ? Constants.getDeepstreamSupervisorRole()
+							: Constants.getDeepstreamParticipantRole());
+		}
+
+		val record = client.record.getRecord(DeepstreamConstants.PATH_MESSAGES
+				+ participantOrSupervisorExternalId);
+
+		boolean createdSucessfully = false;
+		try {
+			createdSucessfully = interventionExecutionManagerService
+					.checkAccessRightsAndRegisterParticipantOrSupervisorExternallyWithoutSurvey(
+							nickname,
+							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+									+ relatedParticipantExternalId,
+							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+									+ participantOrSupervisorExternalId,
+							interventionPattern, interventionPassword,
+							supervisorRequest);
+		} finally {
+			// Cleanup prepared user if registration was not possible
+			if (!createdSucessfully) {
+				record.delete();
+
+				return null;
+			}
+		}
+
+		return new ExternalRegistration(participantOrSupervisorExternalId,
+				secret);
+	}
+
+	/**
+	 * Checks if participant is currently connected
+	 * 
+	 * @param participantId
+	 * @return
+	 */
+	public boolean checkIfParticipantIsConnected(final String participantId) {
+		if (loggedInUsers.contains(participantId)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Cleans up deepstream based on a specific participant/supervisor
+	 * 
+	 * @param participantOrSupervisorId
+	 */
+	public void cleanupForParticipantOrSupervisor(
+			final String participantOrSupervisorId) {
+		try {
+			restManagerService.destroyToken(
+					ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+							+ participantOrSupervisorId);
+
+			synchronized (client) {
+				val record = client.record
+						.getRecord(DeepstreamConstants.PATH_MESSAGES
+								+ participantOrSupervisorId);
+
+				record.delete();
+			}
+		} catch (final Exception e) {
+			log.warn(
+					"Could not cleanup deepstream for participant/supervisor {}",
+					participantOrSupervisorId);
+		}
 	}
 
 	/*
@@ -572,26 +691,6 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see io.deepstream.PresenceEventListener#onClientLogin(java.lang.String)
-	 */
-	@Override
-	public void onClientLogin(final String user) {
-		loggedInUsers.add(user);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see io.deepstream.PresenceEventListener#onClientLogout(java.lang.String)
-	 */
-	@Override
-	public void onClientLogout(final String user) {
-		loggedInUsers.remove(user);
-	}
-
 	/**
 	 * Provide RPC methods
 	 */
@@ -601,11 +700,10 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 				(rpcName, data, rpcResponse) -> {
 					final JsonObject jsonData = (JsonObject) gson
 							.toJsonTree(data);
-					try {
-						val participantId = jsonData
-								.get(DeepstreamConstants.USER).getAsString();
 
-						final String restToken = createRESTToken(participantId);
+					try {
+						final String restToken = createRESTToken(jsonData
+								.get(DeepstreamConstants.USER).getAsString());
 
 						rpcResponse.send(restToken);
 					} catch (final Exception e) {
@@ -615,13 +713,53 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 						return;
 					}
 				});
+		// Can be called by a "participant" or "supervisor" (role)
+		client.rpc.provide(DeepstreamConstants.RPC_PUSH_TOKEN,
+				(rpcName, data, rpcResponse) -> {
+					final JsonObject jsonData = (JsonObject) gson
+							.toJsonTree(data);
+
+					try {
+						val platform = jsonData
+								.get(DeepstreamConstants.PLATFORM)
+								.getAsString();
+
+						PushNotificationTypes platformType;
+						if (platform.equals(DeepstreamConstants.PLATFORM_IOS)) {
+							platformType = PushNotificationTypes.IOS;
+						} else if (platform
+								.equals(DeepstreamConstants.PLATFORM_ANDROID)) {
+							platformType = PushNotificationTypes.ANDROID;
+						} else {
+							throw new Exception("Given platform " + platform
+									+ " is not supported");
+						}
+
+						final boolean storedSuccessful = storePushToken(
+								jsonData.get(DeepstreamConstants.USER)
+										.getAsString(),
+								platformType,
+								jsonData.get(DeepstreamConstants.TOKEN)
+										.getAsString());
+
+						if (storedSuccessful) {
+							rpcResponse.send(new JsonPrimitive(true));
+						} else {
+							rpcResponse.send(new JsonPrimitive(false));
+						}
+					} catch (final Exception e) {
+						log.warn("Error when storing push token: {}",
+								e.getMessage());
+						rpcResponse.send(new JsonPrimitive(false));
+						return;
+					}
+				});
 		// Can only be called by a "participant" (role)
 		client.rpc.provide(DeepstreamConstants.RPC_USER_MESSAGE,
 				(rpcName, data, rpcResponse) -> {
 					final JsonObject jsonData = (JsonObject) gson
 							.toJsonTree(data);
 
-					log.warn(jsonData);
 					try {
 						final boolean receivedSuccessful = receiveMessage(
 								jsonData.get(DeepstreamConstants.USER)
@@ -655,6 +793,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 				(rpcName, data, rpcResponse) -> {
 					final JsonObject jsonData = (JsonObject) gson
 							.toJsonTree(data);
+
 					try {
 						final boolean receivedSuccessful = receiveMessage(
 								jsonData.get(DeepstreamConstants.USER)
@@ -693,6 +832,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 				(rpcName, data, rpcResponse) -> {
 					final JsonObject jsonData = (JsonObject) gson
 							.toJsonTree(data);
+
 					try {
 						final JsonObject messageDiff = getMessageDiff(
 								jsonData.get(DeepstreamConstants.USER)
@@ -710,10 +850,44 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 				});
 	}
 
+	/**
+	 * Creates a REST token for the {@link Participant}
+	 * 
+	 * @param participantId
+	 * @return
+	 */
 	private String createRESTToken(final String participantId) {
 		return restManagerService.createToken(
 				ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
 						+ participantId);
+	}
+
+	/**
+	 * Stores a push token for participant or supervisor
+	 * 
+	 * @param participantOrSupervisorId
+	 * @return
+	 */
+	private boolean storePushToken(final String participantOrSupervisorId,
+			final PushNotificationTypes pushNotificationType,
+			final String pushToken) {
+		val userTry = interventionExecutionManagerService
+				.dialogOptionAddPushNotificationTokenBasedOnTypeAndData(
+						DialogOptionTypes.EXTERNAL_ID,
+						ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+								+ participantOrSupervisorId,
+						pushNotificationType, pushToken);
+
+		if (userTry) {
+			return true;
+		}
+
+		return interventionExecutionManagerService
+				.dialogOptionAddPushNotificationTokenBasedOnTypeAndData(
+						DialogOptionTypes.SUPERVISOR_EXTERNAL_ID,
+						ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+								+ participantOrSupervisorId,
+						pushNotificationType, pushToken);
 	}
 
 	/**
@@ -808,115 +982,40 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 		return jsonObject;
 	}
 
-	/**
-	 * Creates a deepstream participant/supervisor and the belonging
-	 * intervention participant structures or returns null if not allowed
-	 * 
-	 * @param nickname
-	 * @param relatedParticipantExternalId
-	 * @param interventionPattern
-	 * @param interventionPassword
-	 * @param supervisorRequest
-	 * @return
-	 */
-	public ExternalRegistration registerUser(final String nickname,
-			final String relatedParticipantExternalId,
-			final String interventionPattern, final String interventionPassword,
-			final boolean supervisorRequest) {
-
-		// Prepare deepstream and reserve unique ID
-		String participantOrSupervisorExternalId;
-		final String secret = RandomStringUtils.randomAlphanumeric(128);
-		synchronized (client) {
-			do {
-				participantOrSupervisorExternalId = RandomStringUtils
-						.randomAlphanumeric(32);
-			} while (client.record.has(DeepstreamConstants.PATH_MESSAGES
-					+ participantOrSupervisorExternalId).getResult());
-
-			val record = client.record
-					.getRecord(DeepstreamConstants.PATH_MESSAGES
-							+ participantOrSupervisorExternalId);
-			record.set(DeepstreamConstants.SECRET, secret);
-			record.set(DeepstreamConstants.ROLE,
-					supervisorRequest ? Constants.getDeepstreamSupervisorRole()
-							: Constants.getDeepstreamParticipantRole());
-		}
-
-		val record = client.record.getRecord(DeepstreamConstants.PATH_MESSAGES
-				+ participantOrSupervisorExternalId);
-
-		boolean createdSucessfully = false;
+	private void cleanupClient() throws Exception {
 		try {
-			createdSucessfully = interventionExecutionManagerService
-					.checkAccessRightsAndRegisterParticipantOrSupervisorExternallyWithoutSurvey(
-							nickname,
-							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
-									+ relatedParticipantExternalId,
-							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
-									+ participantOrSupervisorExternalId,
-							interventionPattern, interventionPassword,
-							supervisorRequest);
-		} finally {
-			// Cleanup prepared user if registration was not possible
-			if (!createdSucessfully) {
-				record.delete();
-
-				return null;
-			}
-		}
-
-		return new ExternalRegistration(participantOrSupervisorExternalId,
-				secret);
-	}
-
-	/**
-	 * Checks if participant is currently connected
-	 * 
-	 * @param participantId
-	 * @return
-	 */
-	public boolean checkIfParticipantIsConnected(final String participantId) {
-		if (loggedInUsers.contains(participantId)) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * Cleans up deepstream based on a specific participant/supervisor
-	 * 
-	 * @param participantOrSupervisorId
-	 */
-	public void cleanupForParticipantOrSupervisor(
-			final String participantOrSupervisorId) {
-		try {
-			restManagerService.destroyToken(
-					ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
-							+ participantOrSupervisorId);
-
-			val record = client.record
-					.getRecord(DeepstreamConstants.PATH_MESSAGES
-							+ participantOrSupervisorId);
-
-			record.delete();
+			client.setRuntimeErrorHandler(null);
+			client.removeConnectionChangeListener(this);
+			client.presence.unsubscribe(this);
+			client.rpc.unprovide(DeepstreamConstants.RPC_REST_TOKEN);
+			client.rpc.unprovide(DeepstreamConstants.RPC_USER_MESSAGE);
+			client.rpc.unprovide(DeepstreamConstants.RPC_USER_INTENTION);
+			client.rpc.unprovide(DeepstreamConstants.RPC_MESSAGE_DIFF);
 		} catch (final Exception e) {
-			log.warn(
-					"Could not cleanup deepstream for participant/supervisor {}",
-					participantOrSupervisorId);
+			log.warn("Problems when cleaning up client: {}", e.getMessage());
+		} finally {
+			client.close();
 		}
 	}
 
-	/**
-	 * Enables the REST interface to inform this server about it's own startup
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param restManagerService
+	 * @see io.deepstream.PresenceEventListener#onClientLogin(java.lang.String)
 	 */
-	public void RESTInterfaceStarted(
-			final RESTManagerService restManagerService) {
-		this.restManagerService = restManagerService;
-		restStartupComplete = true;
+	@Override
+	public void onClientLogin(final String user) {
+		loggedInUsers.add(user);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see io.deepstream.PresenceEventListener#onClientLogout(java.lang.String)
+	 */
+	@Override
+	public void onClientLogout(final String user) {
+		loggedInUsers.remove(user);
 	}
 
 	@Override
@@ -955,22 +1054,6 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 
 		if (startupComplete && connectionState == ConnectionState.CLOSED) {
 			onException(null, Event.CONNECTION_ERROR, null);
-		}
-	}
-
-	private void cleanupClient() throws Exception {
-		try {
-			client.setRuntimeErrorHandler(null);
-			client.removeConnectionChangeListener(this);
-			client.presence.unsubscribe(this);
-			client.rpc.unprovide(DeepstreamConstants.RPC_REST_TOKEN);
-			client.rpc.unprovide(DeepstreamConstants.RPC_USER_MESSAGE);
-			client.rpc.unprovide(DeepstreamConstants.RPC_USER_INTENTION);
-			client.rpc.unprovide(DeepstreamConstants.RPC_MESSAGE_DIFF);
-		} catch (final Exception e) {
-			log.warn("Problems when cleaning up client: {}", e.getMessage());
-		} finally {
-			client.close();
 		}
 	}
 }

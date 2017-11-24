@@ -125,7 +125,7 @@ public class Intervention extends ModelObject {
 
 	/**
 	 * Defines which other interventions on a specific server instance should be
-	 * checked for uniqueness regarding sepcific variable values
+	 * checked for uniqueness regarding specific variable values
 	 */
 	@Getter
 	@Setter

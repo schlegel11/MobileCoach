@@ -49,6 +49,7 @@ public class DeepstreamConstants {
 	public static final String	TYPE_COMMAND						= "COMMAND";
 
 	public static final String	RPC_REST_TOKEN						= "rest-token";
+	public static final String	RPC_PUSH_TOKEN						= "push-token";
 	public static final String	RPC_USER_MESSAGE					= "user-message";
 	public static final String	RPC_USER_INTENTION					= "user-intention";
 	public static final String	RPC_MESSAGE_DIFF					= "message-diff";
@@ -66,6 +67,8 @@ public class DeepstreamConstants {
 	public static final String	OPTIONS								= "options";
 	public static final String	STATUS								= "status";
 	public static final String	CONTENT								= "content";
+	public static final String	PLATFORM							= "platform";
+	public static final String	TOKEN								= "token";
 	public static final String	SERVER_TIMESTAMP					= "server-timestamp";
 	public static final String	RELATED_MESSAGE_ID					= "related-message-id";
 	public static final String	USER_INTENTION						= "user-intention";
@@ -79,4 +82,7 @@ public class DeepstreamConstants {
 	public static final String	SERVER_MESSAGE						= "server-message";
 	public static final String	CONTAINS_MEDIA						= "contains-media";
 	public static final String	ANSWER_FORMAT						= "answer-format";
+
+	public static final String	PLATFORM_IOS						= "ios";
+	public static final String	PLATFORM_ANDROID					= "android";
 }

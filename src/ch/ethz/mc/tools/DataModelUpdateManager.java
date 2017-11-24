@@ -98,6 +98,8 @@ public class DataModelUpdateManager {
 					break;
 				case 20:
 					updateToVersion20();
+				case 24:
+					updateToVersion24();
 					break;
 			}
 
@@ -408,5 +410,14 @@ public class DataModelUpdateManager {
 				.with(Queries.UPDATE_VERSION_20__DIALOG_MESSAGE__CHANGE_1);
 		dialogMessageCollection.update(Queries.EVERYTHING).multi()
 				.with(Queries.UPDATE_VERSION_20__DIALOG_MESSAGE__CHANGE_2);
+	}
+
+	/**
+	 * Changes for version 24:
+	 */
+	private static void updateToVersion24() {
+		val dialogOptionCollection = jongo.getCollection("DialogOption");
+		dialogOptionCollection.update(Queries.EVERYTHING).multi()
+				.with(Queries.UPDATE_VERSION_24__DIALOG_OPTION__CHANGE_1);
 	}
 }

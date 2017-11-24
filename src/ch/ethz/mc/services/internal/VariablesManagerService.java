@@ -608,41 +608,39 @@ public class VariablesManagerService {
 				case participantDialogOptionEmailData:
 					log.debug(
 							"Setting variable 'participantDialogOptionEmailData'");
-					participantSetDialogOption(participantId,
-							DialogOptionTypes.EMAIL,
+					dialogOptionCreate(participantId, DialogOptionTypes.EMAIL,
 							StringHelpers.cleanEmailAddress(variableValue));
 					break;
 				case participantDialogOptionSMSData:
 					log.debug(
 							"Setting variable 'participantDialogOptionSMSData'");
-					participantSetDialogOption(participantId,
-							DialogOptionTypes.SMS,
+					dialogOptionCreate(participantId, DialogOptionTypes.SMS,
 							StringHelpers.cleanPhoneNumber(variableValue));
 					break;
 				case participantDialogOptionExternalID:
 					log.debug(
 							"Setting variable 'participantDialogOptionDeepstreamData'");
-					participantSetDialogOption(participantId,
+					dialogOptionCreate(participantId,
 							DialogOptionTypes.EXTERNAL_ID, variableValue);
 					break;
 				case participantSupervisorDialogOptionEmailData:
 					log.debug(
 							"Setting variable 'participantSupervisorDialogOptionEmailData'");
-					participantSetDialogOption(participantId,
+					dialogOptionCreate(participantId,
 							DialogOptionTypes.SUPERVISOR_EMAIL,
 							StringHelpers.cleanEmailAddress(variableValue));
 					break;
 				case participantSupervisorDialogOptionSMSData:
 					log.debug(
 							"Setting variable 'participantSupervisorDialogOptionSMSData'");
-					participantSetDialogOption(participantId,
+					dialogOptionCreate(participantId,
 							DialogOptionTypes.SUPERVISOR_SMS,
 							StringHelpers.cleanPhoneNumber(variableValue));
 					break;
 				case participantSupervisorDialogOptionExternalID:
 					log.debug(
 							"Setting variable 'participantSupervisorDialogOptionDeepstreamData'");
-					participantSetDialogOption(participantId,
+					dialogOptionCreate(participantId,
 							DialogOptionTypes.SUPERVISOR_EXTERNAL_ID,
 							variableValue);
 					break;
@@ -768,8 +766,9 @@ public class VariablesManagerService {
 		databaseManagerService.saveModelObject(participant);
 	}
 
+	// Dialog Option
 	@Synchronized
-	private void participantSetDialogOption(final ObjectId participantId,
+	private void dialogOptionCreate(final ObjectId participantId,
 			final DialogOptionTypes dialogOptionType,
 			final String dialogOptionData) {
 		DialogOption dialogOption = databaseManagerService.findOneModelObject(
@@ -779,7 +778,7 @@ public class VariablesManagerService {
 
 		if (dialogOption == null) {
 			dialogOption = new DialogOption(participantId, dialogOptionType,
-					dialogOptionData);
+					dialogOptionData, new String[] {});
 		}
 
 		dialogOption.setData(dialogOptionData);

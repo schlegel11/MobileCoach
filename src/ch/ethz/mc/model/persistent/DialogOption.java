@@ -22,19 +22,18 @@ package ch.ethz.mc.model.persistent;
  */
 import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.Setter;
-import lombok.val;
-
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.services.internal.DeepstreamCommunicationService;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.val;
 
 /**
  * {@link ModelObject} to represent an {@link DialogOption}
@@ -72,6 +71,14 @@ public class DialogOption extends ModelObject {
 	@Setter
 	@NonNull
 	private String				data;
+
+	/**
+	 * The tokens required to reach the {@link Participant}'s push notification
+	 * service using this {@link DialogOption}
+	 */
+	@Getter
+	@Setter
+	private String[]			pushNotificationTokens;
 
 	/*
 	 * (non-Javadoc)

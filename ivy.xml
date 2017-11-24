@@ -21,6 +21,7 @@
 	<!ENTITY jcsv.version "1.4.0">
 	<!ENTITY deepstream.version "2.2.2">
 	<!ENTITY jsonpath.version "2.3.0">
+	<!ENTITY pushy.version "0.11.3">
 ]>
 <ivy-module version="2.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -132,5 +133,8 @@
 
 		<!-- Jayway JsonPath -->
 		<dependency org="com.jayway.jsonpath" name="json-path" rev="&jsonpath.version;" />
+
+		<!-- pushy -->
+		<dependency org="com.turo" name="pushy" rev="&pushy.version;" />
 	</dependencies>
 </ivy-module>

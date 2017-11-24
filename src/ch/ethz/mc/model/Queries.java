@@ -253,4 +253,5 @@ public class Queries {
 	public static final String	UPDATE_VERSION_20__ABSTRACT_MONITORING_RULE__CHANGE_2																																							= "{$set:{'relatedMicroDialog':null}}";
 	public static final String	UPDATE_VERSION_20__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'relatedMicroDialogForActivation':null}}";
 	public static final String	UPDATE_VERSION_20__DIALOG_MESSAGE__CHANGE_2																																										= "{$set:{'relatedMicroDialogMessage':null}}";
+	public static final String	UPDATE_VERSION_24__DIALOG_OPTION__CHANGE_1																																										= "{$set:{'pushNotificationTokens':[]}}";
 }
