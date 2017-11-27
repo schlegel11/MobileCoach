@@ -121,6 +121,7 @@ public class ImplementationConstants {
 	public static final String	FEEDBACK_SLIDE_WEB_FORM_NAVIGATION_VARIABLE_VALUE_NEXT				= "next";
 	public static final String	FEEDBACK_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE					= "MC_ConsistencyCheckValue";
 
+	public static final String	PLACEHOLDER_NEW_MESSAGE_APP_IDENTIFIER								= "\n---\n";
 	public static final String	PLACEHOLDER_LINKED_SURVEY											= "####LINKED_SURVEY####";
 	public static final String	PLACEHOLDER_LINKED_MEDIA_OBJECT										= "####LINKED_MEDIA_OBJECT####";
 

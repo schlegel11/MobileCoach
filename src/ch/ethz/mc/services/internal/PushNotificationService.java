@@ -1,7 +1,14 @@
 package ch.ethz.mc.services.internal;
 
 import java.io.File;
+import java.util.Base64;
+import java.util.Base64.Encoder;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.commons.io.Charsets;
 import org.apache.commons.lang3.NotImplementedException;
 
 import com.turo.pushy.apns.ApnsClient;
@@ -11,6 +18,7 @@ import com.turo.pushy.apns.util.ApnsPayloadBuilder;
 import com.turo.pushy.apns.util.SimpleApnsPushNotification;
 import com.turo.pushy.apns.util.TokenUtil;
 
+import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.types.PushNotificationTypes;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
@@ -37,12 +45,16 @@ public class PushNotificationService {
 	private static final String					ANDROID_IDENTIFIER	= PushNotificationTypes.ANDROID
 			.toString();
 
+	final static String							BLOB				= "blob";
+	final static String							BAD_DEVICE_TOKEN	= "BadDeviceToken";
+
 	private final boolean						iOSActive;
 	private final boolean						androidActive;
 
 	private final String						iOSAppIdentifier;
 
 	final ApnsClient							apnsClient;
+	final Encoder								encoder;
 
 	private PushNotificationService(final boolean pushNotificationsIOSActive,
 			final boolean pushNotificationsAndroidActive,
@@ -70,6 +82,8 @@ public class PushNotificationService {
 		} else {
 			apnsClient = null;
 		}
+
+		encoder = Base64.getEncoder();
 	}
 
 	public static PushNotificationService prepare(
@@ -119,74 +133,129 @@ public class PushNotificationService {
 	}
 
 	public void asyncSendPushNotification(final DialogOption dialogOption,
-			final String message) {
-		for (val unSplittedToken : dialogOption.getPushNotificationTokens()) {
-			if (iOSActive && unSplittedToken.startsWith(IOS_IDENTIFIER)) {
-				val token = unSplittedToken.substring(IOS_IDENTIFIER.length());
-				log.debug("Trying to send iOS push notification to token {}",
-						token);
+			final String messageWithPotentialNewMessageSplitter) {
+		for (val message : messageWithPotentialNewMessageSplitter.split(
+				ImplementationConstants.PLACEHOLDER_NEW_MESSAGE_APP_IDENTIFIER)) {
+			for (val unSplittedToken : dialogOption
+					.getPushNotificationTokens()) {
 
-				final SimpleApnsPushNotification pushNotification;
-				{
-					final ApnsPayloadBuilder payloadBuilder = new ApnsPayloadBuilder();
-					payloadBuilder.setAlertBody("Example!");
+				val messageContent = message.replace(
+						ImplementationConstants.PLACEHOLDER_LINKED_SURVEY, "🔗")
+						.replace(
+								ImplementationConstants.PLACEHOLDER_LINKED_MEDIA_OBJECT,
+								"🖼");
 
-					final String payload = payloadBuilder
-							.buildWithDefaultMaximumLength();
+				String encryptedMessage;
+				try {
+					final String key = dialogOption.getData().substring(0, 16);
+					final String iv = "4537823546456123";
 
-					pushNotification = new SimpleApnsPushNotification(
-							TokenUtil.sanitizeTokenString(token),
-							iOSAppIdentifier, payload);
+					final Cipher cipher = Cipher
+							.getInstance("AES/CBC/NoPadding");
+					final int blockSize = cipher.getBlockSize();
+
+					final byte[] dataBytes = messageContent
+							.getBytes(Charsets.UTF_8);
+					int plaintextLength = dataBytes.length;
+					if (plaintextLength % blockSize != 0) {
+						plaintextLength = plaintextLength + blockSize
+								- plaintextLength % blockSize;
+					}
+
+					final byte[] plaintext = new byte[plaintextLength];
+					System.arraycopy(dataBytes, 0, plaintext, 0,
+							dataBytes.length);
+
+					final SecretKeySpec keyspec = new SecretKeySpec(
+							key.getBytes(), "AES");
+					final IvParameterSpec ivspec = new IvParameterSpec(
+							iv.getBytes());
+
+					cipher.init(Cipher.ENCRYPT_MODE, keyspec, ivspec);
+					final byte[] encrypted = cipher.doFinal(plaintext);
+
+					encryptedMessage = Base64.getEncoder()
+							.encodeToString(encrypted);
+				} catch (final Exception e) {
+					log.error("Error at encoding message: ", e.getMessage());
+					continue;
 				}
 
-				final Future<PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture = apnsClient
-						.sendNotification(pushNotification);
+				if (iOSActive && unSplittedToken.startsWith(IOS_IDENTIFIER)) {
+					val token = unSplittedToken
+							.substring(IOS_IDENTIFIER.length());
+					log.debug(
+							"Trying to send iOS push notification to token {}",
+							token);
 
-				sendNotificationFuture.addListener(
-						new GenericFutureListener<Future<? super PushNotificationResponse<SimpleApnsPushNotification>>>() {
-							@Override
-							public void operationComplete(
-									final Future<? super PushNotificationResponse<SimpleApnsPushNotification>> future)
-									throws Exception {
-								final PushNotificationResponse<SimpleApnsPushNotification> pushNotificationResponse = sendNotificationFuture
-										.get();
+					final SimpleApnsPushNotification pushNotification;
+					{
+						final ApnsPayloadBuilder payloadBuilder = new ApnsPayloadBuilder();
+						payloadBuilder.addCustomProperty(BLOB,
+								encryptedMessage);
+						payloadBuilder.setContentAvailable(true);
 
-								if (pushNotificationResponse.isAccepted()) {
-									log.debug(
-											"Push notification accepted by APNs gateway.");
-								} else {
-									log.debug(
-											"Notification rejected by the APNs gateway: "
-													+ pushNotificationResponse
-															.getRejectionReason());
+						final String payload = payloadBuilder
+								.buildWithDefaultMaximumLength();
 
-									if (pushNotificationResponse
-											.getTokenInvalidationTimestamp() != null) {
+						pushNotification = new SimpleApnsPushNotification(
+								TokenUtil.sanitizeTokenString(token),
+								iOSAppIdentifier, payload);
+					}
+
+					final Future<PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture = apnsClient
+							.sendNotification(pushNotification);
+
+					sendNotificationFuture.addListener(
+							new GenericFutureListener<Future<? super PushNotificationResponse<SimpleApnsPushNotification>>>() {
+								@Override
+								public void operationComplete(
+										final Future<? super PushNotificationResponse<SimpleApnsPushNotification>> future)
+										throws Exception {
+									final PushNotificationResponse<SimpleApnsPushNotification> pushNotificationResponse = sendNotificationFuture
+											.get();
+
+									if (pushNotificationResponse.isAccepted()) {
 										log.debug(
-												"Token is invalid since {} and will be removed for the appropriate participant"
-														+ pushNotificationResponse
-																.getTokenInvalidationTimestamp());
+												"Push notification accepted by APNs gateway.");
+									} else {
+										log.debug(
+												"Notification rejected by the APNs gateway: ",
+												pushNotificationResponse
+														.getRejectionReason());
 
-										interventionExecutionManagerService
-												.dialogOptionRemovePushNotificationToken(
-														dialogOption.getId(),
-														PushNotificationTypes.IOS,
-														token);
+										if (pushNotificationResponse
+												.getRejectionReason()
+												.equals(BAD_DEVICE_TOKEN)
+												|| pushNotificationResponse
+														.getTokenInvalidationTimestamp() != null) {
+											log.debug(
+													"Token is invalid (since {}) and will be removed for the appropriate participant",
+													pushNotificationResponse
+															.getTokenInvalidationTimestamp());
+
+											interventionExecutionManagerService
+													.dialogOptionRemovePushNotificationToken(
+															dialogOption
+																	.getId(),
+															PushNotificationTypes.IOS,
+															token);
+										}
 									}
 								}
-							}
-						});
-			} else if (androidActive
-					&& unSplittedToken.startsWith(ANDROID_IDENTIFIER)) {
-				val token = unSplittedToken
-						.substring(ANDROID_IDENTIFIER.length());
-				log.debug(
-						"Trying to send Android push notification to token {}",
-						token);
+							});
+				} else if (androidActive
+						&& unSplittedToken.startsWith(ANDROID_IDENTIFIER)) {
+					val token = unSplittedToken
+							.substring(ANDROID_IDENTIFIER.length());
+					log.debug(
+							"Trying to send Android push notification to token {}",
+							token);
 
-				// TODO Android push implementation
-				throw new NotImplementedException(
-						"Android push notifications implementation missing");
+					// TODO Android push implementation
+					throw new NotImplementedException(
+							"Android push notifications implementation missing");
+				}
 			}
 		}
 	}

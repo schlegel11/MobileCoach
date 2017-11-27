@@ -39,4 +39,6 @@ rpc:
   "rest-token":
     provide: "user.data.role === 'server'"
     request: "user.data.role === 'participant' && user.data.user === data.user"
-  
+  "push-token":
+    provide: "user.data.role === 'server'"
+    request: "(user.data.role === 'participant' || user.data.role === 'supervisor') && user.data.user === data.user"  
