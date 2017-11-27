@@ -1,6 +1,11 @@
 package ch.ethz.mc.services.internal;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Base64;
 import java.util.Base64.Encoder;
 
@@ -9,8 +14,8 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.io.Charsets;
-import org.apache.commons.lang3.NotImplementedException;
 
+import com.google.gson.JsonObject;
 import com.turo.pushy.apns.ApnsClient;
 import com.turo.pushy.apns.ApnsClientBuilder;
 import com.turo.pushy.apns.PushNotificationResponse;
@@ -48,10 +53,13 @@ public class PushNotificationService {
 	final static String							BLOB				= "blob";
 	final static String							BAD_DEVICE_TOKEN	= "BadDeviceToken";
 
+	public final static String					GOOGLE_FCM_API_URL	= "https://fcm.googleapis.com/fcm/send";
+
 	private final boolean						iOSActive;
 	private final boolean						androidActive;
 
 	private final String						iOSAppIdentifier;
+	private final String						androidAuthKey;
 
 	final ApnsClient							apnsClient;
 	final Encoder								encoder;
@@ -61,12 +69,13 @@ public class PushNotificationService {
 			final boolean pushNotificationsProductionMode,
 			final String pushNotificationsIOSAppIdentifier,
 			final String pushNotificationsIOSCertificateFile,
-			final String pushNotificationsIOSCertificatePassword)
-			throws Exception {
+			final String pushNotificationsIOSCertificatePassword,
+			final String pushNotificationsAndroidAuthKey) throws Exception {
 		iOSActive = pushNotificationsIOSActive;
 		androidActive = pushNotificationsAndroidActive;
 
 		iOSAppIdentifier = pushNotificationsIOSAppIdentifier;
+		androidAuthKey = pushNotificationsAndroidAuthKey;
 
 		if (iOSActive) {
 			val iOSCertificateFile = new File(
@@ -92,8 +101,8 @@ public class PushNotificationService {
 			final boolean pushNotificationsProductionMode,
 			final String pushNotificationsIOSAppIdentifier,
 			final String pushNotificationsIOSCertificateFile,
-			final String pushNotificationsIOSCertificatePassword)
-			throws Exception {
+			final String pushNotificationsIOSCertificatePassword,
+			final String pushNotificationsAndroidAuthKey) throws Exception {
 		log.info("Preparing service...");
 		if (instance == null) {
 			instance = new PushNotificationService(pushNotificationsIOSActive,
@@ -101,7 +110,8 @@ public class PushNotificationService {
 					pushNotificationsProductionMode,
 					pushNotificationsIOSAppIdentifier,
 					pushNotificationsIOSCertificateFile,
-					pushNotificationsIOSCertificatePassword);
+					pushNotificationsIOSCertificatePassword,
+					pushNotificationsAndroidAuthKey);
 		}
 		log.info("Prepared.");
 		return instance;
@@ -132,6 +142,9 @@ public class PushNotificationService {
 		log.info("Stopped.");
 	}
 
+	/*
+	 * Public methods
+	 */
 	public void asyncSendPushNotification(final DialogOption dialogOption,
 			final String messageWithPotentialNewMessageSplitter) {
 		for (val message : messageWithPotentialNewMessageSplitter.split(
@@ -182,89 +195,146 @@ public class PushNotificationService {
 				}
 
 				if (iOSActive && unSplittedToken.startsWith(IOS_IDENTIFIER)) {
-					val token = unSplittedToken
-							.substring(IOS_IDENTIFIER.length());
-					log.debug(
-							"Trying to send iOS push notification to token {}",
-							token);
-
-					final SimpleApnsPushNotification pushNotification;
-					{
-						final ApnsPayloadBuilder payloadBuilder = new ApnsPayloadBuilder();
-						payloadBuilder.addCustomProperty(BLOB,
-								encryptedMessage);
-						payloadBuilder.setContentAvailable(true);
-
-						final String payload = payloadBuilder
-								.buildWithDefaultMaximumLength();
-
-						pushNotification = new SimpleApnsPushNotification(
-								TokenUtil.sanitizeTokenString(token),
-								iOSAppIdentifier, payload);
-					}
-
-					final Future<PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture = apnsClient
-							.sendNotification(pushNotification);
-
-					sendNotificationFuture.addListener(
-							new GenericFutureListener<Future<? super PushNotificationResponse<SimpleApnsPushNotification>>>() {
-								@Override
-								public void operationComplete(
-										final Future<? super PushNotificationResponse<SimpleApnsPushNotification>> future)
-										throws Exception {
-									final PushNotificationResponse<SimpleApnsPushNotification> pushNotificationResponse = sendNotificationFuture
-											.get();
-
-									if (pushNotificationResponse.isAccepted()) {
-										log.debug(
-												"Push notification accepted by APNs gateway.");
-									} else {
-										log.debug(
-												"Notification rejected by the APNs gateway: ",
-												pushNotificationResponse
-														.getRejectionReason());
-
-										if (pushNotificationResponse
-												.getRejectionReason()
-												.equals(BAD_DEVICE_TOKEN)
-												|| pushNotificationResponse
-														.getTokenInvalidationTimestamp() != null) {
-											log.debug(
-													"Token is invalid (since {}) and will be removed for the appropriate participant",
-													pushNotificationResponse
-															.getTokenInvalidationTimestamp());
-
-											interventionExecutionManagerService
-													.dialogOptionRemovePushNotificationToken(
-															dialogOption
-																	.getId(),
-															PushNotificationTypes.IOS,
-															token);
-										}
-									}
-								}
-							});
+					sendIOSPushNotification(dialogOption, unSplittedToken,
+							encryptedMessage);
 				} else if (androidActive
 						&& unSplittedToken.startsWith(ANDROID_IDENTIFIER)) {
-					val token = unSplittedToken
-							.substring(ANDROID_IDENTIFIER.length());
-					log.debug(
-							"Trying to send Android push notification to token {}",
-							token);
-
-					// TODO Android push implementation
-					throw new NotImplementedException(
-							"Android push notifications implementation missing");
+					sendAndroidPushNotification(dialogOption, unSplittedToken,
+							encryptedMessage);
 				}
 			}
 		}
 	}
 
 	/*
-	 * Public methods
-	 */
-
-	/*
 	 * Class methods
 	 */
+	/**
+	 * Sends a push notification using Apple servers
+	 * 
+	 * @param dialogOption
+	 * @param unSplittedToken
+	 * @param encryptedMessage
+	 */
+	private void sendIOSPushNotification(final DialogOption dialogOption,
+			final java.lang.String unSplittedToken,
+			final String encryptedMessage) {
+		val token = unSplittedToken.substring(IOS_IDENTIFIER.length());
+		log.debug("Trying to send iOS push notification to token {}", token);
+
+		final SimpleApnsPushNotification pushNotification;
+		{
+			final ApnsPayloadBuilder payloadBuilder = new ApnsPayloadBuilder();
+			payloadBuilder.addCustomProperty(BLOB, encryptedMessage);
+			payloadBuilder.setContentAvailable(true);
+
+			final String payload = payloadBuilder
+					.buildWithDefaultMaximumLength();
+
+			pushNotification = new SimpleApnsPushNotification(
+					TokenUtil.sanitizeTokenString(token), iOSAppIdentifier,
+					payload);
+		}
+
+		final Future<PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture = apnsClient
+				.sendNotification(pushNotification);
+
+		sendNotificationFuture.addListener(
+				new GenericFutureListener<Future<? super PushNotificationResponse<SimpleApnsPushNotification>>>() {
+					@Override
+					public void operationComplete(
+							final Future<? super PushNotificationResponse<SimpleApnsPushNotification>> future)
+							throws Exception {
+						final PushNotificationResponse<SimpleApnsPushNotification> pushNotificationResponse = sendNotificationFuture
+								.get();
+
+						if (pushNotificationResponse.isAccepted()) {
+							log.debug(
+									"Push notification accepted by APNs gateway.");
+						} else {
+							log.debug(
+									"Notification rejected by the APNs gateway: ",
+									pushNotificationResponse
+											.getRejectionReason());
+
+							if (pushNotificationResponse.getRejectionReason()
+									.equals(BAD_DEVICE_TOKEN)
+									|| pushNotificationResponse
+											.getTokenInvalidationTimestamp() != null) {
+								log.debug(
+										"Token is invalid (since {}) and will be removed for the appropriate participant",
+										pushNotificationResponse
+												.getTokenInvalidationTimestamp());
+
+								interventionExecutionManagerService
+										.dialogOptionRemovePushNotificationToken(
+												dialogOption.getId(),
+												PushNotificationTypes.IOS,
+												token);
+							}
+						}
+					}
+				});
+	}
+
+	/**
+	 * Sends a push notification using Google servers
+	 * 
+	 * @param dialogOption
+	 * @param unSplittedToken
+	 * @param encryptedMessage
+	 */
+	private void sendAndroidPushNotification(final DialogOption dialogOption,
+			final java.lang.String unSplittedToken,
+			final String encryptedMessage) {
+		val token = unSplittedToken.substring(ANDROID_IDENTIFIER.length());
+		log.debug("Trying to send Android push notification to token {}",
+				token);
+
+		final String result = "";
+		try {
+			final URL url = new URL(GOOGLE_FCM_API_URL);
+			final HttpURLConnection conn = (HttpURLConnection) url
+					.openConnection();
+
+			conn.setUseCaches(false);
+			conn.setDoInput(true);
+			conn.setDoOutput(true);
+
+			conn.setRequestMethod("POST");
+			conn.setRequestProperty("Authorization", "key=" + androidAuthKey);
+			conn.setRequestProperty("Content-Type", "application/json");
+
+			final JsonObject jsonObject = new JsonObject();
+
+			jsonObject.addProperty("to", token);
+			final JsonObject info = new JsonObject();
+			info.addProperty("title", "notification title"); // Notification
+																// title
+			info.addProperty("body", "message body"); // Notification
+			// body
+			jsonObject.add("notification", info);
+			final OutputStreamWriter wr = new OutputStreamWriter(
+					conn.getOutputStream());
+			wr.write(jsonObject.getAsString());
+			wr.flush();
+
+			final BufferedReader br = new BufferedReader(
+					new InputStreamReader(conn.getInputStream()));
+
+			String output;
+			System.out.println("Output from Server...\n");
+			while ((output = br.readLine()) != null) {
+				System.out.println(output);
+			}
+			// TODO fix results management
+
+			log.warn(result);
+			log.debug("Push notification accepted by FCM gateway.");
+		} catch (final Exception e) {
+			log.warn(result);
+			log.debug("Notification rejected by the APNs gateway: ",
+					e.getMessage());
+		}
+	}
 }

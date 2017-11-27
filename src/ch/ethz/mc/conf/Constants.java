@@ -279,6 +279,8 @@ public class Constants {
 	private static String		pushNotificationsIOSCertificateFile		= "/mc_data/certs/push-http2.p12";
 	@Getter
 	private static String		pushNotificationsIOSCertificatePassword	= "abc123topsecret";
+	@Getter
+	private static String		pushNotificationsAndroidAuthKey			= "1234380438403840384068";
 
 	/**
 	 * Get all accepted country codes for SMS phone numbers

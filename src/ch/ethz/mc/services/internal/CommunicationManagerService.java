@@ -195,13 +195,15 @@ public class CommunicationManagerService {
 		}
 		// Initialize push notification service (if required)
 		if (pushNotificationsActive) {
-			pushNotificationService = PushNotificationService.prepare(
-					Constants.isPushNotificationsIOSActive(),
-					Constants.isPushNotificationsAndroidActive(),
-					Constants.isPushNotificationsProductionMode(),
-					Constants.getPushNotificationsIOSAppIdentifier(),
-					Constants.getPushNotificationsIOSCertificateFile(),
-					Constants.getPushNotificationsIOSCertificatePassword());
+			pushNotificationService = PushNotificationService
+					.prepare(Constants.isPushNotificationsIOSActive(),
+							Constants.isPushNotificationsAndroidActive(),
+							Constants.isPushNotificationsProductionMode(),
+							Constants.getPushNotificationsIOSAppIdentifier(),
+							Constants.getPushNotificationsIOSCertificateFile(),
+							Constants
+									.getPushNotificationsIOSCertificatePassword(),
+							Constants.getPushNotificationsAndroidAuthKey());
 		} else {
 			pushNotificationService = null;
 		}
