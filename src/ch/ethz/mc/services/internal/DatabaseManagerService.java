@@ -57,7 +57,7 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 		try {
 			// Creating MongoDB driver object
 			val mongoCredentials = new ArrayList<MongoCredential>();
-			mongoCredentials.add(MongoCredential.createMongoCRCredential(
+			mongoCredentials.add(MongoCredential.createCredential(
 					Constants.getDatabaseUser(), Constants.getDatabaseName(),
 					Constants.getDatabasePassword().toCharArray()));
 			val mongoDBOptions = MongoClientOptions.builder()
