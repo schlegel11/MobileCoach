@@ -60,6 +60,7 @@ import ch.ethz.mc.model.persistent.MediaObjectParticipantShortURL;
 import ch.ethz.mc.model.persistent.MicroDialog;
 import ch.ethz.mc.model.persistent.MicroDialogDecisionPoint;
 import ch.ethz.mc.model.persistent.MicroDialogMessage;
+import ch.ethz.mc.model.persistent.MicroDialogMessageRule;
 import ch.ethz.mc.model.persistent.MonitoringMessage;
 import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
 import ch.ethz.mc.model.persistent.MonitoringMessageRule;
@@ -633,26 +634,26 @@ public class InterventionExecutionManagerService {
 		val isTypeIntention = receivedMessage.isTypeIntention();
 
 		// Create values
-		String message;
-		final String messageWithForcedLinks;
+		String answerRaw;
+		final String answerCleaned;
 		if (isTypeIntention) {
-			message = receivedMessage.getMessage();
-			messageWithForcedLinks = receivedMessage.getContent() == null
+			answerCleaned = receivedMessage.getContent() == null
 					? receivedMessage.getIntention()
 					: receivedMessage.getIntention() + "\n"
 							+ receivedMessage.getContent();
+			answerRaw = receivedMessage.getMessage();
 		} else {
-			message = receivedMessage.getMessage();
-			messageWithForcedLinks = StringHelpers
+			answerCleaned = StringHelpers
 					.cleanReceivedMessageString(receivedMessage.getMessage());
+			answerRaw = receivedMessage.getMessage();
 		}
 
 		val dialogMessage = new DialogMessage(participantId, 0,
 				isTypeIntention ? DialogMessageStatusTypes.RECEIVED_AS_INTENTION
 						: DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY,
 				type, "", "", null, null, null, null, null, -1, -1, false,
-				false, -1, receivedMessage.getReceivedTimestamp(), message,
-				messageWithForcedLinks, isTypeIntention ? false : true, null,
+				false, -1, receivedMessage.getReceivedTimestamp(),
+				answerCleaned, answerRaw, isTypeIntention ? false : true, null,
 				null, null, null, false, false);
 
 		val highestOrderMessage = databaseManagerService
@@ -1901,9 +1902,9 @@ public class InterventionExecutionManagerService {
 				}
 
 				val rules = databaseManagerService.findSortedModelObjects(
-						MonitoringMessageRule.class,
-						Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE,
-						Queries.MONITORING_MESSAGE_RULE__SORT_BY_ORDER_ASC,
+						MicroDialogMessageRule.class,
+						Queries.MICRO_DIALOG_MESSAGE_RULE__BY_MICRO_DIALOG_MESSAGE,
+						Queries.MICRO_DIALOG_MESSAGE_RULE__SORT_BY_ORDER_ASC,
 						microDialogMessage.getId());
 
 				for (val rule : rules) {
