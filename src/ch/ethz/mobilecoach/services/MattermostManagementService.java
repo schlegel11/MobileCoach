@@ -63,6 +63,13 @@ public class MattermostManagementService {
 	public final static String appID = "325068aa-fc63-411c-a07e-b3e73c455e8e";
 
 	@Getter
+	private String observerUserId = null;
+	@Getter
+	private String observerUserName = null;
+	@Getter
+	private String observerUserPassword = null;
+
+	@Getter
 	private String coachUserId = Constants.getMattermostCoachUserId();
 	@Getter
 	private String coachUserName = Constants.getMattermostCoachUserName();
@@ -111,6 +118,7 @@ public class MattermostManagementService {
 	public static MattermostManagementService start(DatabaseManagerService databaseManagerService, VariablesManagerService variablesManagerService){
 		MattermostManagementService service = new MattermostManagementService(databaseManagerService, variablesManagerService);
 		service.loginAdmin();
+		service.createObserverUser();
 		return service;
 	}
 
@@ -219,6 +227,12 @@ public class MattermostManagementService {
 
 		addUserToChannel(config.getUserId(), managerChannel.getId(), team.teamId);
 		addUserToChannel(team.managerUserId, managerChannel.getId(), team.teamId);
+		
+		// add observer
+		if (observerUserId != null){
+			addUserToTeam(observerUserId, team.teamId);
+			addUserToChannel(observerUserId, coachingChannel.getId(), team.teamId);
+		}
 
 		config.setParticipantId(participantId);
 		databaseManagerService.saveModelObject(config);
@@ -280,7 +294,8 @@ public class MattermostManagementService {
 
 		JSONObject json = new JSONObject()
 				.put("email", email)
-				.put("password", password);
+				.put("password", password)
+				.put("username", username);
 		
 		if (firstName != null){
 			json.put("first_name", firstName);
@@ -288,8 +303,6 @@ public class MattermostManagementService {
 		if (lastName != null){
 			json.put("last_name", lastName);
 		}
-		
-		json.put("username", username);
 
 		log.info("Created Mattermost User: "+ username + " : " + password);
 
@@ -319,6 +332,36 @@ public class MattermostManagementService {
 		JSONObject json = new JSONObject().put("user_id", userId);
 		new MattermostTask<Void>(api_url + "teams/" + teamId + "/add_user_to_team", json).setToken(adminUserToken).run();
 	}
+	
+	/*      Observer User      */
+	
+	/*
+	 *  Create a user that can be used to observe what's going on with new users.
+	 */
+	public void createObserverUser(){
+		
+		String username = "observer" + UUID.randomUUID().toString();
+		String password = UUID.randomUUID().toString(); // TODO: use a cryptographically secure random generator
+		String email = username + "@" + emailHost;
+
+		JSONObject json = new JSONObject()
+				.put("email", email)
+				.put("password", password)
+				.put("username", username);
+		
+		String userId = new MattermostTask<String>(api_url + "users/create", json){
+			@Override
+			String handleResponse(HttpMethodBase method) throws Exception {
+				return new JSONObject(method.getResponseBodyAsString()).getString("id");
+			}
+		}.setToken(adminUserToken).run();
+		
+		observerUserId = userId;
+		observerUserName = username;
+		observerUserPassword = password;
+		
+	}
+	
 
 	/*
 	 * 		Providing Information
