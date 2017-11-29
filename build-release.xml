@@ -46,8 +46,7 @@ STEPS:
 		<delete file="release/stats.sh" />
 		<delete file="release/WebContent/WEB-INF/lib/FileServletWrapper.jar" />
 		<delete file="release/src/ch/ethz/mc/servlets/CreationRobotServlet.java" />
-		<echo file="release/.gitignore" append="false"
-			message="build${line.separator}out${line.separator}FileServletWrapper.jar" />
+		<echo file="release/.gitignore" append="false" message="/WebContent/WEB-INF/lib/FileServletWrapper.jar${line.separator}/build${line.separator}/out" />
 
 		<!-- Version info -->
 		<loadfile property="version" srcFile="WebContent/WEB-INF/version.txt" />
