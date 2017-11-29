@@ -29,6 +29,7 @@ import ch.ethz.mc.model.persistent.types.PushNotificationTypes;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
+import lombok.Cleanup;
 import lombok.Getter;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -291,11 +292,10 @@ public class PushNotificationService {
 		log.debug("Trying to send Android push notification to token {}",
 				token);
 
-		final String result = "";
+		HttpURLConnection conn = null;
 		try {
 			final URL url = new URL(GOOGLE_FCM_API_URL);
-			final HttpURLConnection conn = (HttpURLConnection) url
-					.openConnection();
+			conn = (HttpURLConnection) url.openConnection();
 
 			conn.setUseCaches(false);
 			conn.setDoInput(true);
@@ -309,32 +309,46 @@ public class PushNotificationService {
 
 			jsonObject.addProperty("to", token);
 			final JsonObject info = new JsonObject();
-			info.addProperty("title", "notification title"); // Notification
-																// title
-			info.addProperty("body", "message body"); // Notification
-			// body
-			jsonObject.add("notification", info);
+			info.addProperty("blob", encryptedMessage);
+			jsonObject.add("data", info);
+
+			@Cleanup
 			final OutputStreamWriter wr = new OutputStreamWriter(
 					conn.getOutputStream());
-			wr.write(jsonObject.getAsString());
+			wr.write(jsonObject.toString());
 			wr.flush();
+			int status = 0;
 
-			final BufferedReader br = new BufferedReader(
-					new InputStreamReader(conn.getInputStream()));
-
-			String output;
-			System.out.println("Output from Server...\n");
-			while ((output = br.readLine()) != null) {
-				System.out.println(output);
+			if (null != conn) {
+				status = conn.getResponseCode();
 			}
-			// TODO fix results management
 
-			log.warn(result);
-			log.debug("Push notification accepted by FCM gateway.");
+			if (status == 200) {
+				@Cleanup
+				val reader = new BufferedReader(
+						new InputStreamReader(conn.getInputStream()));
+				val response = reader.readLine();
+
+				log.debug("Push notification accepted by FCM gateway: {}.",
+						response);
+
+				if (response.equals("error:NotRegistered")) {
+					interventionExecutionManagerService
+							.dialogOptionRemovePushNotificationToken(
+									dialogOption.getId(),
+									PushNotificationTypes.ANDROID, token);
+				}
+			} else {
+				log.debug("Notification rejected by the FCM gateway: ", status);
+			}
+			conn.disconnect();
 		} catch (final Exception e) {
-			log.warn(result);
-			log.debug("Notification rejected by the APNs gateway: ",
+			log.debug("Notification rejected by the FCM gateway: ",
 					e.getMessage());
+		} finally {
+			if (conn != null) {
+				conn.disconnect();
+			}
 		}
 	}
 }
