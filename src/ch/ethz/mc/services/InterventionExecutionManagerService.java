@@ -1858,6 +1858,13 @@ public class InterventionExecutionManagerService {
 			val microDialogMessage = databaseManagerService.getModelObjectById(
 					MicroDialogMessage.class, microDialogMessageId);
 			if (microDialogMessage != null) {
+				// Only proceed with micro dialog if former message was a
+				// blocking message
+				if (!microDialogMessage
+						.isMessageBlocksMicroDialogUntilAnswered()) {
+					return;
+				}
+
 				currentOrder = microDialogMessage.getOrder();
 			}
 		}
