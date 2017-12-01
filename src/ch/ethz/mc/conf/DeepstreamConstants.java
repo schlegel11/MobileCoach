@@ -45,7 +45,7 @@ public class DeepstreamConstants {
 	public static final String	STATUS_SENT_BY_SERVER				= "SENT_BY_SERVER";
 	public static final String	STATUS_SENT_BY_USER					= "SENT_BY_USER";
 	public static final String	TYPE_PLAIN							= "PLAIN";
-	public static final String	TYPE_INTENTION						= "PLAIN";
+	public static final String	TYPE_INTENTION						= "INTENTION";
 	public static final String	TYPE_COMMAND						= "COMMAND";
 
 	public static final String	RPC_REST_TOKEN						= "rest-token";

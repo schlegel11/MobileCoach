@@ -52,7 +52,7 @@ The *FileServletWrapper* is an optional component for the MobileCoach system. To
 * Web application server (Apache Tomcat 8 or newer/compatible)
 * Web application server configured to listen on port 80 (HTTP) and 443 (HTTPS) with a valid or self-signed certificate
 * MongoDB (2.6.x or newer) installation with enabled user authentication, a created database and configured user
-* *Optional:* Deepstream.io (3.* or newer) server installation (suggested permissions file can be found in the root folder of this project)
+* *Optional:* Deepstream.io (3.1.1) server installation (suggested permissions file can be found in the root folder of this project)
 * [Eclipse IDE for Java EE Developers](https://eclipse.org/downloads/packages/release/Mars/2) (Not newer than Mars.2; project files included in repository)
 * [Apache Ivy Eclipse Integration](http://ant.apache.org/ivy/ivyde/) (already included in some distributions)
 * [Project Lombok Eclipse Integration](http://projectlombok.org) (Can be installed using a double-click on the **.jar** file)
@@ -65,7 +65,7 @@ The *FileServletWrapper* is an optional component for the MobileCoach system. To
 * Web application server (Apache Tomcat 8 or newer/compatible)
 * Web application server configured to listen on port 80 (HTTP) and 443 (HTTPS) with a valid certificate
 * MongoDB (2.6.* or newer) installation with enabled user authentication, a created database and configured user
-* *Optional:* Deepstream.io (3.* or newer) server installation (suggested permissions file can be found in the root folder of this project)
+* *Optional:* Deepstream.io (3.1.1) server installation (suggested permissions file can be found in the root folder of this project)
 
 ## Basic configuration
 
