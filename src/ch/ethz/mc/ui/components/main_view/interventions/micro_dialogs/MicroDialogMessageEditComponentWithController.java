@@ -137,6 +137,7 @@ public class MicroDialogMessageEditComponentWithController
 		getMinutesButton10().addClickListener(buttonClickListener);
 		getMinutesButton30().addClickListener(buttonClickListener);
 		getMinutesButton60().addClickListener(buttonClickListener);
+		getMinutesButtonInf().addClickListener(buttonClickListener);
 
 		getTextWithPlaceholdersTextFieldComponent().getButton()
 				.addClickListener(buttonClickListener);
@@ -388,6 +389,10 @@ public class MicroDialogMessageEditComponentWithController
 				getMinutesUntilHandledAsNotAnsweredSlider().setValue(30d);
 			} else if (event.getButton() == getMinutesButton60()) {
 				getMinutesUntilHandledAsNotAnsweredSlider().setValue(60d);
+			} else if (event.getButton() == getMinutesButtonInf()) {
+				getMinutesUntilHandledAsNotAnsweredSlider().setValue(
+						(double) (ImplementationConstants.MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX_MICRO_DIALOG_MESSAGE
+								+ 1));
 			}
 			event.getButton().setEnabled(true);
 		}
