@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import ch.ethz.mobilecoach.chatlib.engine.ConversationRepository;
 import ch.ethz.mobilecoach.chatlib.engine.checking.ReferenceChecker;
+import ch.ethz.mobilecoach.chatlib.engine.variation.Variator;
 import ch.ethz.mobilecoach.chatlib.engine.xml.DomParser;
 import lombok.extern.log4j.Log4j2;
 
@@ -89,6 +90,7 @@ public class FileConversationManagementService implements
 			String interventionId = dirName;
 			
 			ConversationRepository repository = new ConversationRepository(p.toString());
+			repository.setVariator(loadVariator(p));
 
 			try {
 				loadRepositoryFromFolder(p, repository);
@@ -101,6 +103,19 @@ public class FileConversationManagementService implements
 			}
 		}
 		
+	}
+	
+	public Variator loadVariator(Path path){
+		Path variations = path.resolve("variations.csv");
+		if (Files.exists(variations)){
+			try {
+				return new Variator(variations.toString());
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+		}
+		
+		return null;
 	}
 	
 	public void loadRepositoryFromFolder(Path path, ConversationRepository repository) throws Exception{

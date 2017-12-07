@@ -43,6 +43,7 @@ import ch.ethz.mobilecoach.chatlib.engine.timing.TimingCalculatorAdvanced;
 import ch.ethz.mobilecoach.chatlib.engine.translation.SimpleTranslator;
 import ch.ethz.mobilecoach.chatlib.engine.translation.Translator;
 import ch.ethz.mobilecoach.chatlib.engine.translation.VariantSelector;
+import ch.ethz.mobilecoach.chatlib.engine.translation.VariantSelectorLegacy;
 import ch.ethz.mobilecoach.chatlib.engine.variables.InMemoryVariableStore;
 import ch.ethz.mobilecoach.chatlib.engine.variables.VariableException;
 import ch.ethz.mobilecoach.chatlib.engine.variables.VariableStore;
@@ -312,6 +313,13 @@ public class RichConversationService {
 	
 	public Translator prepareTranslator(Locale language, ConversationRepository repository, VariableStore variables){
 		
+		// use Variator if available
+		
+		if (repository.getVariator() != null){
+			return new VariantSelector(repository.getVariator(), variables);
+		}
+		
+		
 		// Try to use variant selection
 			
 		Properties properties = getRepositoryProperties(repository);
@@ -322,7 +330,7 @@ public class RichConversationService {
 			
 			if (variantFile != null){// && variantMapping != null){
 				try {
-					return new VariantSelector(repository.getPath() + "/" + variantFile, null, variables);
+					return new VariantSelectorLegacy(repository.getPath() + "/" + variantFile, null, variables);
 				} catch (IOException e) {
 					log.error(e);
 				}
