@@ -269,6 +269,37 @@ public class RuleEvaluator {
 					ruleEvaluationResult
 							.setTextRuleValue(String.valueOf(parts.length));
 					break;
+				case CALCULATE_SUM_OF_SELECT_MANY_VALUES_AND_TRUE_IF_SMALLER_THAN:
+				case CALCULATE_SUM_OF_SELECT_MANY_VALUES_AND_TRUE_IF_EQUALS:
+				case CALCULATE_SUM_OF_SELECT_MANY_VALUES_AND_TRUE_IF_BIGGER_THAN:
+					parts = ruleEvaluationResult.getTextRuleValue().split(
+							ImplementationConstants.SELECT_MANY_SEPARATOR);
+
+					double sum = 0d;
+
+					for (val part : parts) {
+						sum += Double.parseDouble(part);
+					}
+
+					final double compareValue = Double
+							.parseDouble(ruleEvaluationResult
+									.getTextRuleComparisonTermValue());
+
+					if (rule.getRuleEquationSign() == RuleEquationSignTypes.CALCULATE_SUM_OF_SELECT_MANY_VALUES_AND_TRUE_IF_EQUALS
+							&& sum == compareValue) {
+						ruleEvaluationResult.setRuleMatchesEquationSign(true);
+					} else if (rule
+							.getRuleEquationSign() == RuleEquationSignTypes.CALCULATE_SUM_OF_SELECT_MANY_VALUES_AND_TRUE_IF_SMALLER_THAN
+							&& sum < compareValue) {
+						ruleEvaluationResult.setRuleMatchesEquationSign(true);
+					} else if (rule
+							.getRuleEquationSign() == RuleEquationSignTypes.CALCULATE_SUM_OF_SELECT_MANY_VALUES_AND_TRUE_IF_BIGGER_THAN
+							&& sum > compareValue) {
+						ruleEvaluationResult.setRuleMatchesEquationSign(true);
+					}
+					ruleEvaluationResult.setCalculatedRuleValue(sum);
+					ruleEvaluationResult.setTextRuleValue(String.valueOf(sum));
+					break;
 				case TEXT_VALUE_EQUALS:
 					if (ruleEvaluationResult.getTextRuleValue().trim()
 							.toLowerCase()
