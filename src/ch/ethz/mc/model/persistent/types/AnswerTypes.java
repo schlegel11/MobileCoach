@@ -71,6 +71,14 @@ public enum AnswerTypes {
 			case FREE_NUMBERS_RAW:
 			case FREE_TEXT_MULTILINE_RAW:
 			case FREE_TEXT_RAW:
+			case LIKERT:
+			case LIKERT_SILENT:
+			case LIKERT_SLIDER:
+			case SELECT_ONE:
+			case SELECT_MANY:
+			case SELECT_ONE_IMAGES:
+			case SELECT_MANY_IMAGES:
+			case CUSTOM:
 				return true;
 			default:
 				return false;

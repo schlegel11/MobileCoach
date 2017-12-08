@@ -285,7 +285,13 @@ public class RuleEvaluator {
 					double sum = 0d;
 
 					for (val part : parts) {
-						sum += Double.parseDouble(part);
+						if (!StringUtils.isBlank(part)) {
+							try {
+								sum += Double.parseDouble(part);
+							} catch (final Exception e) {
+								// Do nothing
+							}
+						}
 					}
 
 					final double compareValue = Double
