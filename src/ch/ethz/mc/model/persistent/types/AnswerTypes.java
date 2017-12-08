@@ -28,7 +28,10 @@ package ch.ethz.mc.model.persistent.types;
 public enum AnswerTypes {
 	FREE_TEXT,
 	FREE_TEXT_MULTILINE,
+	FREE_TEXT_RAW,
+	FREE_TEXT_MULTILINE_RAW,
 	FREE_NUMBERS,
+	FREE_NUMBERS_RAW,
 	LIKERT,
 	LIKERT_SILENT,
 	LIKERT_SLIDER,
@@ -44,6 +47,33 @@ public enum AnswerTypes {
 	}
 
 	public String toJSONField() {
-		return name().toLowerCase().replace("_", "-");
+		return nameWithoutRaw().toLowerCase().replace("_", "-");
+	}
+
+	private String nameWithoutRaw() {
+		switch (this) {
+			case FREE_NUMBERS_RAW:
+			case FREE_TEXT_MULTILINE_RAW:
+			case FREE_TEXT_RAW:
+				return name().replace("_RAW", "");
+			default:
+				return name();
+		}
+	}
+
+	/**
+	 * RAW types are not cleaned on saving
+	 * 
+	 * @return
+	 */
+	public boolean isRAW() {
+		switch (this) {
+			case FREE_NUMBERS_RAW:
+			case FREE_TEXT_MULTILINE_RAW:
+			case FREE_TEXT_RAW:
+				return true;
+			default:
+				return false;
+		}
 	}
 }

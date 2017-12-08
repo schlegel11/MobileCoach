@@ -977,8 +977,7 @@ public class InterventionExecutionManagerService {
 
 				// Store value to variable (which is only relevant if a
 				// reply is expected = related monitoring message or micro
-				// dialog message is
-				// available)
+				// dialog message is available)
 				if (relatedMonitoringMessage != null
 						|| relatedMicroDialogMessage != null) {
 					log.debug(
@@ -987,25 +986,48 @@ public class InterventionExecutionManagerService {
 					val cleanedMessageValue = dialogMessage.getAnswerReceived();
 					val rawMessageValue = dialogMessage.getAnswerReceivedRaw();
 
+					boolean storeCleaned = true;
 					String variableToStore;
 					if (relatedMonitoringMessage != null) {
 						variableToStore = relatedMonitoringMessage
 								.getStoreValueToVariableWithName();
+
+						if (relatedMonitoringMessage.getAnswerType().isRAW()) {
+							storeCleaned = false;
+						}
 					} else {
 						variableToStore = relatedMicroDialogMessage
 								.getStoreValueToVariableWithName();
+
+						if (relatedMicroDialogMessage.getAnswerType().isRAW()) {
+							storeCleaned = false;
+						}
 					}
 					try {
-						log.debug(
-								"Store value '{}' (cleand as: '{}') of message to '{}' and reply variables for participant {}",
-								rawMessageValue, cleanedMessageValue,
-								variableToStore, participant.getId());
-						if (!StringUtils.isBlank(variableToStore)) {
-							variablesManagerService
-									.writeVariableValueOfParticipant(
-											participant.getId(),
-											variableToStore,
-											cleanedMessageValue);
+						if (storeCleaned) {
+							log.debug(
+									"Store value '{}' (cleand as: '{}') of message to '{}' and reply variables for participant {}",
+									rawMessageValue, cleanedMessageValue,
+									variableToStore, participant.getId());
+							if (!StringUtils.isBlank(variableToStore)) {
+								variablesManagerService
+										.writeVariableValueOfParticipant(
+												participant.getId(),
+												variableToStore,
+												cleanedMessageValue);
+							}
+						} else {
+							log.debug(
+									"Store value '{}' of message to '{}' and reply variables for participant {}",
+									rawMessageValue, variableToStore,
+									participant.getId());
+							if (!StringUtils.isBlank(variableToStore)) {
+								variablesManagerService
+										.writeVariableValueOfParticipant(
+												participant.getId(),
+												variableToStore,
+												rawMessageValue);
+							}
 						}
 						variablesManagerService.writeVariableValueOfParticipant(
 								participant.getId(),
@@ -1896,6 +1918,12 @@ public class InterventionExecutionManagerService {
 				handleMessage = false;
 			}
 
+			// Retrieve participant (only once)
+			if (participant == null) {
+				participant = databaseManagerService
+						.getModelObjectById(Participant.class, participantId);
+			}
+
 			if (handleMessage) {
 				// Handle message
 				currentOrder = microDialogMessage.getOrder();
@@ -1903,11 +1931,6 @@ public class InterventionExecutionManagerService {
 						microDialogMessage.getId());
 
 				// Check rules of message for execution
-				if (participant == null) {
-					participant = databaseManagerService.getModelObjectById(
-							Participant.class, participantId);
-				}
-
 				val rules = databaseManagerService.findSortedModelObjects(
 						MicroDialogMessageRule.class,
 						Queries.MICRO_DIALOG_MESSAGE_RULE__BY_MICRO_DIALOG_MESSAGE,
