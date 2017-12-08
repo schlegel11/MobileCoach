@@ -239,6 +239,13 @@ public class RuleEvaluator {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
+				case CALCULATED_VALUE_NOT_EQUALS:
+					if (ruleEvaluationResult
+							.getCalculatedRuleValue() != ruleEvaluationResult
+									.getCalculatedRuleComparisonTermValue()) {
+						ruleEvaluationResult.setRuleMatchesEquationSign(true);
+					}
+					break;
 				case CALCULATED_VALUE_IS_BIGGER_OR_EQUAL_THAN:
 					if (ruleEvaluationResult
 							.getCalculatedRuleValue() >= ruleEvaluationResult
