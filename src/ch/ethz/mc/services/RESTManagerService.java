@@ -603,9 +603,9 @@ public class RESTManagerService {
 	 * @param secret
 	 * @return
 	 */
-	public boolean checkDeepstreamAccessAndRetrieveUserId(
-			final int clientVersion, final String user, final String secret,
-			final String role, final String interventionPassword) {
+	public boolean checkDeepstreamAccess(final int clientVersion,
+			final String user, final String secret, final String role,
+			final String interventionPassword) {
 
 		// Prevent access for too old or new clients
 		if (clientVersion < deepstreamMinClientVersion

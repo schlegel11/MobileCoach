@@ -99,12 +99,20 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 
 	private final Gson								gson;
 
+	private final String							participantRole;
+	private final String							supervisorRole;
+
 	private DeepstreamCommunicationService(final String deepstreamHost,
 			final String deepstreamServerRole,
-			final String deepstreamServerPassword) {
+			final String deepstreamServerPassword,
+			final String deepstreamParticipantRole,
+			final String deepstreamSupervisorRole) {
 		loggedInUsers = new HashSet<String>();
 
 		host = deepstreamHost;
+
+		participantRole = deepstreamParticipantRole;
+		supervisorRole = deepstreamSupervisorRole;
 
 		loginData = new JsonObject();
 		loginData.addProperty(DeepstreamConstants.REST_FIELD_CLIENT_VERSION,
@@ -129,11 +137,14 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 
 	public static DeepstreamCommunicationService prepare(
 			final String deepstreamHost, final String deepstreamServerRole,
-			final String deepstreamServerPassword) {
+			final String deepstreamServerPassword,
+			final String deepstreamParticipantRole,
+			final String deepstreamSupervisorRole) {
 		log.info("Preparing service...");
 		if (instance == null) {
 			instance = new DeepstreamCommunicationService(deepstreamHost,
-					deepstreamServerRole, deepstreamServerPassword);
+					deepstreamServerRole, deepstreamServerPassword,
+					deepstreamParticipantRole, deepstreamSupervisorRole);
 		}
 		log.info("Prepared.");
 		return instance;
@@ -545,8 +556,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 							+ participantOrSupervisorExternalId);
 			record.set(DeepstreamConstants.SECRET, secret);
 			record.set(DeepstreamConstants.ROLE,
-					supervisorRequest ? Constants.getDeepstreamSupervisorRole()
-							: Constants.getDeepstreamParticipantRole());
+					supervisorRequest ? supervisorRole : participantRole);
 		}
 
 		val record = client.record.getRecord(DeepstreamConstants.PATH_MESSAGES

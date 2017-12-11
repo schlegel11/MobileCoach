@@ -87,46 +87,113 @@ public class DeepstreamServiceV02 extends AbstractServiceV02 {
 			val clientVersion = authData
 					.get(DeepstreamConstants.REST_FIELD_CLIENT_VERSION)
 					.getAsInt();
-			val user = authData.get(DeepstreamConstants.REST_FIELD_USER)
-					.getAsString();
-			val secret = authData.get(DeepstreamConstants.REST_FIELD_SECRET)
-					.getAsString();
+			String user = null;
+			if (authData.has(DeepstreamConstants.REST_FIELD_USER)) {
+				user = authData.get(DeepstreamConstants.REST_FIELD_USER)
+						.getAsString();
+			}
+			String secret = null;
+			if (authData.has(DeepstreamConstants.REST_FIELD_SECRET)) {
+				secret = authData.get(DeepstreamConstants.REST_FIELD_SECRET)
+						.getAsString();
+			}
 			val role = authData.get(DeepstreamConstants.REST_FIELD_ROLE)
 					.getAsString();
+			String nickname = null;
+			if (authData.has(DeepstreamConstants.REST_FIELD_NICKNAME)) {
+				nickname = authData.get(DeepstreamConstants.REST_FIELD_NICKNAME)
+						.getAsString();
+			}
+			String relatedParticipant = null;
+			if (authData.has(DeepstreamConstants.REST_FIELD_PARTICIPANT)) {
+				relatedParticipant = authData
+						.get(DeepstreamConstants.REST_FIELD_PARTICIPANT)
+						.getAsString();
+			}
+			String interventionPattern = null;
+			if (authData
+					.has(DeepstreamConstants.REST_FIELD_INTERVENTION_PATTERN)) {
+				interventionPattern = authData
+						.get(DeepstreamConstants.REST_FIELD_INTERVENTION_PATTERN)
+						.getAsString();
+			}
 			val interventionPassword = authData
 					.get(DeepstreamConstants.REST_FIELD_INTERVENTION_PASSWORD)
 					.getAsString();
 
-			// Check access
-			log.debug(
-					"Checking deepstream access for {} with role {} and password {}",
-					user, role, interventionPassword);
-			val accessGranted = restManagerService
-					.checkDeepstreamAccessAndRetrieveUserId(clientVersion, user,
-							secret, role, interventionPassword);
+			if (user == null) {
+				// Try to register
+				val externalRegistration = restManagerService
+						.createDeepstreamUser(nickname, relatedParticipant,
+								interventionPattern, interventionPassword,
+								role);
 
-			if (!accessGranted) {
-				return Response.status(Status.FORBIDDEN).build();
+				if (externalRegistration == null) {
+					throw new WebApplicationException(
+							Response.status(Status.FORBIDDEN)
+									.entity("Could not create participant/supervisor for deepstream access")
+									.build());
+				}
+
+				user = externalRegistration.getExternalId();
+
+				// Send response
+				val responseServerData = new JsonObject();
+				responseServerData
+						.addProperty(DeepstreamConstants.REST_FIELD_USER, user);
+				responseServerData
+						.addProperty(DeepstreamConstants.REST_FIELD_ROLE, role);
+
+				val responseClientData = new JsonObject();
+				responseClientData.addProperty(
+						DeepstreamConstants.REST_FIELD_USER,
+						externalRegistration.getExternalId());
+				responseClientData.addProperty(
+						DeepstreamConstants.REST_FIELD_SECRET,
+						externalRegistration.getSecret());
+
+				val responseData = new JsonObject();
+				responseData.addProperty(DeepstreamConstants.DS_FIELD_USERNAME,
+						user);
+				responseData.add(DeepstreamConstants.DS_FIELD_CLIENT_DATA,
+						responseClientData);
+				responseData.add(DeepstreamConstants.DS_FIELD_SERVER_DATA,
+						responseServerData);
+
+				return Response.status(Status.OK)
+						.entity(gson.toJson(responseData)).build();
+			} else {
+				// Check access
+				log.debug(
+						"Checking deepstream access for {} with role {} and password {}",
+						user, role, interventionPassword);
+				val accessGranted = restManagerService.checkDeepstreamAccess(
+						clientVersion, user, secret, role,
+						interventionPassword);
+
+				if (!accessGranted) {
+					return Response.status(Status.FORBIDDEN).build();
+				}
+
+				// Send response
+				val responseServerData = new JsonObject();
+				responseServerData
+						.addProperty(DeepstreamConstants.REST_FIELD_USER, user);
+				responseServerData
+						.addProperty(DeepstreamConstants.REST_FIELD_ROLE, role);
+
+				val responseData = new JsonObject();
+				responseData.addProperty(DeepstreamConstants.DS_FIELD_USERNAME,
+						user);
+				responseData.add(DeepstreamConstants.DS_FIELD_SERVER_DATA,
+						responseServerData);
+
+				return Response.status(Status.OK)
+						.entity(gson.toJson(responseData)).build();
 			}
-
-			// Send response
-			val responseServerData = new JsonObject();
-			responseServerData.addProperty(DeepstreamConstants.REST_FIELD_USER,
-					user);
-			responseServerData.addProperty(DeepstreamConstants.REST_FIELD_ROLE,
-					role);
-
-			val responseData = new JsonObject();
-			responseData.addProperty(DeepstreamConstants.DS_FIELD_USERNAME,
-					user);
-			responseData.add(DeepstreamConstants.DS_FIELD_SERVER_DATA,
-					responseServerData);
-
-			return Response.status(Status.OK).entity(gson.toJson(responseData))
-					.build();
 		} catch (final Exception e) {
 			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
-					.entity("Could not authorize server/participant/supervisor for deepstream access: "
+					.entity("Could not register ort authorize server/participant/supervisor for deepstream access: "
 							+ e.getMessage())
 					.build());
 		}

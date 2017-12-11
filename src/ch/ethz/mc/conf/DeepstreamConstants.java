@@ -29,6 +29,7 @@ package ch.ethz.mc.conf;
 public class DeepstreamConstants {
 	public static final String	DS_FIELD_USERNAME					= "username";
 	public static final String	DS_FIELD_AUTH_DATA					= "authData";
+	public static final String	DS_FIELD_CLIENT_DATA				= "clientData";
 	public static final String	DS_FIELD_SERVER_DATA				= "serverData";
 
 	public static final String	REST_FIELD_PARTICIPANT				= "participant";
@@ -48,6 +49,7 @@ public class DeepstreamConstants {
 	public static final String	TYPE_INTENTION						= "INTENTION";
 	public static final String	TYPE_COMMAND						= "COMMAND";
 
+	public static final String	RPC_REGISTER						= "register";
 	public static final String	RPC_REST_TOKEN						= "rest-token";
 	public static final String	RPC_PUSH_TOKEN						= "push-token";
 	public static final String	RPC_USER_MESSAGE					= "user-message";
@@ -58,9 +60,12 @@ public class DeepstreamConstants {
 	public static final String	PATH_MESSAGE_UPDATE					= "message-update/";
 	public static final String	PATH_LIST							= "list/";
 
+	public static final String	NICKNAME							= "nickname";
+	public static final String	PARTICIPANT							= "participant";
 	public static final String	USER								= "user";
 	public static final String	SECRET								= "secret";
 	public static final String	ROLE								= "role";
+	public static final String	INTERVENTION_PATTERN				= "intervention-pattern";
 	public static final String	INTERVENTION_PASSWORD				= "intervention-password";
 	public static final String	ID									= "id";
 	public static final String	TYPE								= "type";
