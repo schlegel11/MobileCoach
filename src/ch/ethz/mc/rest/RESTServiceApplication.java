@@ -55,13 +55,14 @@ public class RESTServiceApplication extends Application {
 		final val matterMostService = MC.getInstance().getMattermostManagementService();
 		final val dbManagerService = MC.getInstance().getDatabaseManagerService();
 		final val variablesService = MC.getInstance().getVariablesManagerService();
+		final val surveyExecutionService = MC.getInstance().getSurveyExecutionManagerService();
 
 		// Variable access service
 		services.add(new CreditsService(restManagerService));
 		services.add(new ImageUploadService(restManagerService));
 		services.add(new VariableAccessService(restManagerService));
 		services.add(new VotingService(restManagerService));
-		services.add(new AppService(restManagerService, matterMostService));
+		services.add(new AppService(restManagerService, matterMostService, surveyExecutionService));
 		services.add(new OneSignalAppService(restManagerService, matterMostService));
 		services.add(new AppAuthenticationService(restManagerService));
 		services.add(new CustomServices(restManagerService, dbManagerService, variablesService));

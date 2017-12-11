@@ -129,6 +129,24 @@ public class SurveyExecutionManagerService {
 
 		log.info("Stopped.");
 	}
+	
+	
+	@Synchronized
+	public Participant createParticipantForApp(final ScreeningSurvey screeningSurvey, final Locale locale) {
+		
+		final val participant = new Participant(
+				screeningSurvey.getIntervention(),
+				InternalDateTime.currentTimeMillis(), "",
+				locale, null,
+				screeningSurvey.getId(), screeningSurvey.getGlobalUniqueId(),
+				null, null, true, "", "");
+
+		databaseManagerService.saveModelObject(participant);
+
+		dialogStatusCreate(participant.getId());
+
+		return participant;
+	}
 
 	/*
 	 * Modification methods

@@ -2,6 +2,7 @@ package ch.ethz.mc.rest.services;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -16,9 +17,13 @@ import javax.ws.rs.core.Response;
 
 import org.bson.types.ObjectId;
 
+import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.persistent.AppToken;
 import ch.ethz.mc.model.persistent.OneTimeToken;
+import ch.ethz.mc.model.persistent.Participant;
+import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.services.RESTManagerService;
+import ch.ethz.mc.services.SurveyExecutionManagerService;
 import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
 import ch.ethz.mobilecoach.model.persistent.MediaLibraryEntry;
 import ch.ethz.mobilecoach.services.MattermostManagementService;
@@ -36,11 +41,12 @@ public class AppService {
 
 	private RESTManagerService restManagerService;
 	private MattermostManagementService mattMgmtService;
+	private SurveyExecutionManagerService surveyService;
 
-	public AppService(RESTManagerService restManagerService, MattermostManagementService mattMgmtService) {
+	public AppService(RESTManagerService restManagerService, MattermostManagementService mattMgmtService, SurveyExecutionManagerService surveyService) {
 		this.restManagerService = restManagerService;
 		this.mattMgmtService = mattMgmtService;
-	}
+		this.surveyService = surveyService;	}
 
 	@GET
 	@Path("/getconfig")
@@ -74,6 +80,52 @@ public class AppService {
 				new UserConfigurationForAuthentication(userConfiguration),
 				getVariables(userId));
 	}
+	
+	
+	@GET
+	@Path("/create-participant")
+	@Produces("application/json")
+	public Result createParticipant(@Context final HttpServletRequest request, 
+			@HeaderParam("Survey") final String surveyId,
+			@HeaderParam("Locale") final String locale) throws BadRequestException {
+		
+		// validate locale
+		Locale localeObj = null;
+		for (Locale l: Constants.getInterventionLocales()){
+			if (l.toLanguageTag().equals(locale)){
+				localeObj = l;
+			}
+		}
+		if (localeObj == null) {
+			throw new WebApplicationException(Response.status(400).entity("Invalid Locale supplied").build());
+		}
+		
+		// validate screening survey
+		ScreeningSurvey survey = null;
+		for (ScreeningSurvey s: surveyService.getActiveNonItermediateScreeningSurveys()){
+			if (s.getId().toHexString().equals(surveyId)){
+				survey = s;
+				if (!s.isActive()){
+					throw new WebApplicationException(Response.status(403).entity("Survey is inactive").build());
+				}
+			}
+		}
+		if (survey == null) {
+			throw new WebApplicationException(Response.status(400).entity("Invalid Survey Id supplied").build());
+		}
+		
+		// create participant
+		Participant user = surveyService.createParticipantForApp(survey, localeObj);
+		ObjectId userId = user.getId();
+		
+		String mctoken = restManagerService.createAppTokenForParticipant(userId);
+		MattermostUserConfiguration userConfiguration = fetchUserConfiguration(userId);
+
+		return new Result(new MobileCoachAuthentication(userId.toHexString(), mctoken),
+				new UserConfigurationForAuthentication(userConfiguration),
+				getVariables(userId));
+	}
+	
 	
 	@GET
 	@Path("/media-library")
