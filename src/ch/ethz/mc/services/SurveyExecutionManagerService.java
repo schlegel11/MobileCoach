@@ -142,8 +142,13 @@ public class SurveyExecutionManagerService {
 				null, null, true, "", "");
 
 		databaseManagerService.saveModelObject(participant);
+		
+		final long currentTimestamp = InternalDateTime.currentTimeMillis();
+		final val dialogStatus = new DialogStatus(participant.getId(), "", null,
+				null, currentTimestamp, true, currentTimestamp, 0, true, 0,
+				0, false, 0);
 
-		dialogStatusCreate(participant.getId());
+		databaseManagerService.saveModelObject(dialogStatus);
 
 		return participant;
 	}
