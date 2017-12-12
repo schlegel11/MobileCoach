@@ -85,7 +85,7 @@ public class RuleEvaluator {
 			@Override
 			public Set<Option> options() {
 				return EnumSet.of(Option.DEFAULT_PATH_LEAF_TO_NULL,
-						Option.ALWAYS_RETURN_LIST, Option.SUPPRESS_EXCEPTIONS);
+						Option.SUPPRESS_EXCEPTIONS);
 			}
 		});
 	}
@@ -388,6 +388,7 @@ public class RuleEvaluator {
 					break;
 				case TEXT_VALUE_FROM_JSON_BY_JSON_PATH:
 					try {
+
 						val jsonResult = JsonPath.read(
 								ruleEvaluationResult.getTextRuleValue(),
 								"$" + ruleEvaluationResult
@@ -395,24 +396,30 @@ public class RuleEvaluator {
 
 						ruleEvaluationResult.setRuleMatchesEquationSign(false);
 
-						final StringBuffer resultsString = new StringBuffer();
-						val jsonResultsList = (LinkedList<?>) jsonResult;
-						for (int i = 0; i < jsonResultsList.size(); i++) {
-							val item = jsonResultsList.get(i);
+						if (jsonResult instanceof LinkedList) {
+							final StringBuffer resultsString = new StringBuffer();
 
-							if (item != null) {
-								ruleEvaluationResult
-										.setRuleMatchesEquationSign(true);
+							val jsonResultsList = (LinkedList<?>) jsonResult;
+							for (int i = 0; i < jsonResultsList.size(); i++) {
+								val item = jsonResultsList.get(i);
 
-								if (resultsString.length() > 0) {
-									resultsString.append(", ");
+								if (item != null) {
+									ruleEvaluationResult
+											.setRuleMatchesEquationSign(true);
+
+									if (resultsString.length() > 0) {
+										resultsString.append(", ");
+									}
+
+									resultsString.append(item.toString());
 								}
-
-								resultsString.append(item.toString());
 							}
+							ruleEvaluationResult
+									.setTextRuleValue(resultsString.toString());
+						} else {
+							ruleEvaluationResult
+									.setTextRuleValue(jsonResult.toString());
 						}
-						ruleEvaluationResult
-								.setTextRuleValue(resultsString.toString());
 					} catch (final Exception e) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(false);
 						ruleEvaluationResult.setTextRuleValue("");

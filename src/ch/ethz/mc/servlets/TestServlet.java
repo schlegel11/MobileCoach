@@ -143,6 +143,7 @@ public class TestServlet extends HttpServlet {
 		// dateCalculationTests();
 		// languageStringSerializationTest();
 		// ruleTests();
+		// jsonRetrievalAmountTest();
 	}
 
 	@SuppressWarnings("unused")
@@ -305,5 +306,42 @@ public class TestServlet extends HttpServlet {
 		final val result11 = RuleEvaluator.evaluateRule(null, null, rule10,
 				variables);
 		log.debug(">> " + result11.getTextRuleValue());
+	}
+
+	@SuppressWarnings("unused")
+	private void jsonRetrievalAmountTest() {
+		val variables = new ArrayList<AbstractVariableWithValue>();
+		variables.add(new InterventionVariableWithValue(null, "$foodDiary",
+				"{\"createdAt\":\"2017-12-08T09:17:01.074Z\",\"mealType\":\"DRINK_FOOD_OTHER\",\"mealPlace\":\"HOME\",\"mealTime\":\"2017-12-08T09:17:01.074Z\",\"food\":[{\"brands\":[\"7 Up\",\"Sprite\",\"Elmer Citro\",\"Citron\",\"Fanta\",\"Orangina\",\"Sinalco\",\"Passaia\",\"Jarimba\",\"Rivella rot\",\"Rivella grün\",\"Farmer\",\"Flauder\",\"Ginger Ale\"],\"foodnameDE\":\"Softdrink (mit Zucker)\",\"shadowDE\":\"Süssgetränk (mit Zucker), Limonade (mit Zucker), Gazosa (mit Zucker)\",\"foodnameFR\":null,\"shadowFR\":null,\"foodnameIT\":null,\"shadowIT\":null,\"pyramidStage\":\"6.29\",\"category\":\"Alkoholfreie Getränke\",\"foodGroup\":\"Getränke, alkoholfrei\",\"recipeName\":\"Softdrink mit Geschmack\",\"class\":13,\"count\":130,\"units\":[{\"unitNameDE\":\"Milliliter\",\"unitId\":1},{\"unitNameDE\":\"Deziliter\",\"conversion\":{\"factor\":100,\"targetUnitId\":1},\"unitId\":2},{\"unitNameDE\":\"Liter\",\"conversion\":{\"factor\":1000,\"targetUnitId\":1},\"unitId\":3},{\"unitNameDE\":\"Glas\",\"unitId\":4,\"conversion\":{\"factor\":200,\"targetUnitId\":1}},{\"unitNameDE\":\"Flasche\",\"unitId\":6,\"conversion\":{\"factor\":500,\"targetUnitId\":1}},{\"unitId\":\"Dose\",\"unitNameDE\":\"Dose\",\"conversion\":{\"factor\":330,\"targetUnitId\":1}}],\"id\":18,\"amount\":{\"value\":500,\"unit\":{\"unitNameDE\":\"Milliliter\",\"unitId\":1}},\"pyramidInfo\":{\"pyramidLevel\":\"6\",\"portionSize\":250}},{\"brands\":[],\"foodnameDE\":\"Rohschinken\",\"shadowDE\":\"Schinken (roh)\",\"foodnameFR\":null,\"shadowFR\":null,\"foodnameIT\":null,\"shadowIT\":null,\"pyramidStage\":\"4.17\",\"category\":\"Fleisch, Fleischprodukte und Fleischersatz\",\"foodGroup\":\"Fleischprodukte & Wurstwaren\",\"recipeName\":\"Schinken, roh (CH)\",\"class\":7,\"count\":198,\"units\":[{\"unitNameDE\":\"Gramm\",\"unitId\":0},{\"unitNameDE\":\"Portion\",\"unitId\":13,\"conversion\":{\"factor\":30,\"targetUnitId\":0}},{\"unitNameDE\":\"Scheibe\",\"unitId\":17,\"conversion\":{\"factor\":15,\"targetUnitId\":0}}],\"id\":121,\"amount\":{\"value\":15,\"unit\":{\"unitNameDE\":\"Gramm\",\"unitId\":0}},\"pyramidInfo\":{\"pyramidLevel\":\"4b\",\"portionSize\":110}}]}",
+				InterventionVariableWithValuePrivacyTypes.PRIVATE,
+				InterventionVariableWithValueAccessTypes.INTERNAL));
+		variables.add(new InterventionVariableWithValue(null, "$foodLength",
+				".food.length()",
+				InterventionVariableWithValuePrivacyTypes.PRIVATE,
+				InterventionVariableWithValueAccessTypes.INTERNAL));
+		variables.add(new InterventionVariableWithValue(null, "$food", ".food",
+				InterventionVariableWithValuePrivacyTypes.PRIVATE,
+				InterventionVariableWithValueAccessTypes.INTERNAL));
+
+		val rule1 = new MonitoringMessageRule(null, 0, "$foodDiary",
+				RuleEquationSignTypes.TEXT_VALUE_FROM_JSON_BY_JSON_PATH,
+				"$food", "");
+		final val result1 = RuleEvaluator.evaluateRule(null, null, rule1,
+				variables);
+		log.debug(">> " + result1.getTextRuleValue());
+
+		val rule2 = new MonitoringMessageRule(null, 0, "$foodDiary",
+				RuleEquationSignTypes.TEXT_VALUE_FROM_JSON_BY_JSON_PATH,
+				"$foodLength", "");
+		final val result2 = RuleEvaluator.evaluateRule(null, null, rule2,
+				variables);
+		log.debug(">> " + result2.getTextRuleValue());
+
+		val rule3 = new MonitoringMessageRule(null, 0, "$foodDiary",
+				RuleEquationSignTypes.TEXT_VALUE_FROM_JSON_BY_JSON_PATH,
+				".food[0].foodnameDE", "");
+		final val result3 = RuleEvaluator.evaluateRule(null, null, rule3,
+				variables);
+		log.debug(">> " + result3.getTextRuleValue());
 	}
 }
