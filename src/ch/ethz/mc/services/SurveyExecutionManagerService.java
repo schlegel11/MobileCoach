@@ -1034,6 +1034,13 @@ public class SurveyExecutionManagerService {
 	 */
 	@Synchronized
 	public void finishUnfinishedScreeningSurveys() {
+		
+		// only execute this sometimes, as it uses a lot of resources.
+		if (Math.random() < 0.05){
+			return;
+		}
+		
+		
 		for (final val interventionId : databaseManagerService
 				.findModelObjectIds(
 						Intervention.class,
