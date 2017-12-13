@@ -205,6 +205,13 @@ public class Constants {
 	
 	
 	/**
+	 * OneSignal configuration
+	 */
+	@Getter
+	private static String	oneSignalApiKey						= "ZjA3ZTkzNDEtYmRjMi00Y2M2LWEwOWItZTk2MzE2YTQ0NWQw";
+	
+	
+	/**
 	 * Mattermost configuration
 	 */
 	@Getter

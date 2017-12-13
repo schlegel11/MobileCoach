@@ -37,6 +37,7 @@ import org.bson.types.ObjectId;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.VariablesManagerService;
@@ -191,7 +192,7 @@ public class MattermostMessagingService implements MessagingService {
         
         senderIdToRecipient.put(userId, recipient);
         
-        if (!pushOnly){        
+        if (!pushOnly){
 	        JSONObject json = new JSONObject();
 	        json.put("props", new JSONObject(post));
 	        json.put("message", post.getMessage());
@@ -202,14 +203,14 @@ public class MattermostMessagingService implements MessagingService {
 				.setToken(mcUserToken).run();
         }
 		
-		
-		if(null == managementService.findOneSignalObject(recipient)){
-			log.error("Could not send push since OnSignal config missing: " + recipient);
-			return;
-		}
-		
-		if (post.getHidden() != true && wasLastMessageReceivedLongerAgoThan(channelId, 60 * 1000)){
-			// send push notifications only after 1 minute after the last message was received
+        // send push notifications only after 1 minute after the last message was received, unless the message is push-only
+		if (pushOnly || post.getHidden() != true && wasLastMessageReceivedLongerAgoThan(channelId, 60 * 1000)){
+			
+			if(null == managementService.findOneSignalObject(recipient)){
+				log.error("Could not send push since OnSignal config missing: " + recipient);
+				return;
+			}
+			
 			try {
 				sendPushNotification(recipient, post, channelId, userId);
 			} catch (Exception e){
@@ -267,8 +268,10 @@ public class MattermostMessagingService implements MessagingService {
 
 		LinkedHashMap<String, String> headers = new LinkedHashMap<>();
 		headers.put("Content-Type", "application/json");
-		headers.put("Authorization", "Basic ZjA3ZTkzNDEtYmRjMi00Y2M2LWEwOWItZTk2MzE2YTQ0NWQw");	
+		headers.put("Authorization", "Basic " + Constants.getOneSignalApiKey());	
 		String url = "https://onesignal.com/api/v1/notifications";
+		
+		log.info("Sending push using key " + Constants.getOneSignalApiKey().substring(0, 10) + "...");
 		
 		String message = post.getMessage();
 		if (message == null || "".equals(message)){
@@ -286,13 +289,21 @@ public class MattermostMessagingService implements MessagingService {
 				.put("data", data)
 				.put("collapse_id", userId);
 
-		new OneSignalTask<String>(url, json2, headers){
+		String result = new OneSignalTask<String>(url, json2, headers){
 			@Override
 			protected
 			String handleResponse(PostMethod method) throws Exception {
-				return new JSONObject(method.getResponseBodyAsString()).getString("id");
+				log.info("Response from OneSignal: " + method.getResponseBodyAsString(100));
+				if (method.getStatusCode() == 200){
+					return null;
+				}
+				return "HTTP " + method.getStatusCode() + ": " + method.getResponseBodyAsString(200);
 			}
-		}.run();	
+		}.run();
+		
+		if (result != null){
+			log.error("Error sending push: " + result);
+		}
 	}
 	
 	
