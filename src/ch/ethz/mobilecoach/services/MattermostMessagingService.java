@@ -155,7 +155,7 @@ public class MattermostMessagingService implements MessagingService {
 		Post post = new Post();
 		post.setId(UUID.randomUUID().toString());
 		post.setMessage(message);
-		sendMessage(sender, recipient, post);
+		sendMessage(sender, recipient, post, false);
 	}
 	
 	public void ensureParticipantExists(ObjectId recipient){
@@ -165,7 +165,7 @@ public class MattermostMessagingService implements MessagingService {
 	}
 	
 
-	public void sendMessage(String sender, ObjectId recipient, Post post){
+	public void sendMessage(String sender, ObjectId recipient, Post post, boolean pushOnly){
 		ensureLoggedIn();
 		ensureParticipantExists(recipient);	
 		
@@ -191,14 +191,17 @@ public class MattermostMessagingService implements MessagingService {
         
         senderIdToRecipient.put(userId, recipient);
         
-        JSONObject json = new JSONObject();
-        json.put("props", new JSONObject(post));
-        json.put("message", post.getMessage());
-        json.put("user_id", userId);
-        json.put("channel_id", channelId);
-        
-		new MattermostTask<Void>(managementService.api_url + "teams/" + teamId + "/channels/" + channelId + "/posts/create", json)
-			.setToken(mcUserToken).run();
+        if (!pushOnly){        
+	        JSONObject json = new JSONObject();
+	        json.put("props", new JSONObject(post));
+	        json.put("message", post.getMessage());
+	        json.put("user_id", userId);
+	        json.put("channel_id", channelId);
+	        
+			new MattermostTask<Void>(managementService.api_url + "teams/" + teamId + "/channels/" + channelId + "/posts/create", json)
+				.setToken(mcUserToken).run();
+        }
+		
 		
 		if(null == managementService.findOneSignalObject(recipient)){
 			log.error("Could not send push since OnSignal config missing: " + recipient);

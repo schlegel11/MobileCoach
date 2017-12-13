@@ -8,7 +8,7 @@ public interface MessagingService {
 
 	public void sendMessage(String sender, ObjectId recipient, String message);
 	
-	public void sendMessage(String sender, ObjectId recipient, Post post);
+	public void sendMessage(String sender, ObjectId recipient, Post post, boolean pushOnly);
 	
 	public void indicateTyping(String sender, ObjectId recipient);
 	

@@ -433,7 +433,7 @@ public class RichConversationService {
 				post.getParameters().putAll(message.parameters);
 				post.setHidden(message.hidden);
 
-				messagingService.sendMessage(sender, recipient, post);
+				messagingService.sendMessage(sender, recipient, post, message.isReminder != true);
 			}
 		}
 
