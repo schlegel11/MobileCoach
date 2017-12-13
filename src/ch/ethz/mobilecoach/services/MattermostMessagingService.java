@@ -262,8 +262,11 @@ public class MattermostMessagingService implements MessagingService {
 		
 		String[] playerIds = new String[oneSignalUserConfiguration.getPlayerIds().size()];
 		
+		String recipients = "";
+		
 		for(int ind = 0; ind < oneSignalUserConfiguration.getPlayerIds().size(); ind++){
 			playerIds[ind] = oneSignalUserConfiguration.getPlayerIds().get(ind);
+			recipients += playerIds[ind] + " ";
 		}
 
 		LinkedHashMap<String, String> headers = new LinkedHashMap<>();
@@ -271,7 +274,7 @@ public class MattermostMessagingService implements MessagingService {
 		headers.put("Authorization", "Basic " + Constants.getOneSignalApiKey());	
 		String url = "https://onesignal.com/api/v1/notifications";
 		
-		log.info("Sending push using key " + Constants.getOneSignalApiKey().substring(0, 10) + "...");
+		log.info("Sending push using key " + Constants.getOneSignalApiKey().substring(0, 5) + "... to " + recipients);
 		
 		String message = post.getMessage();
 		if (message == null || "".equals(message)){
