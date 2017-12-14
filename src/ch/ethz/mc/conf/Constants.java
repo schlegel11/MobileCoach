@@ -210,6 +210,9 @@ public class Constants {
 	@Getter
 	private static String	oneSignalApiKey						= "ZjA3ZTkzNDEtYmRjMi00Y2M2LWEwOWItZTk2MzE2YTQ0NWQw";
 	
+	@Getter
+	private static String	oneSignalAppId						= "325068aa-fc63-411c-a07e-b3e73c455e8e";
+	
 	
 	/**
 	 * Mattermost configuration

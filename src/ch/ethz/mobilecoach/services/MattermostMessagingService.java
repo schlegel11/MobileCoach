@@ -286,7 +286,7 @@ public class MattermostMessagingService implements MessagingService {
 		data.put("message_id", post.getId());
 		
 		JSONObject json2 = new JSONObject()
-				.put("app_id", MattermostManagementService.appID)     
+				.put("app_id", Constants.getOneSignalAppId())     
 				.put("contents", new JSONObject().put("en", message))
 				.put("include_player_ids", playerIds)
 				.put("data", data)

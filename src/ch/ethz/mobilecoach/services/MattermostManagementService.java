@@ -60,8 +60,6 @@ public class MattermostManagementService {
 	private String adminUserToken = null;
 	private String locale = "de";
 
-	public final static String appID = "325068aa-fc63-411c-a07e-b3e73c455e8e";
-
 	@Getter
 	private String observerUserId = null;
 	@Getter
