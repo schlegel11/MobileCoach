@@ -218,6 +218,12 @@ public class RuleEvaluator {
 				case CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_FALSE:
 					ruleEvaluationResult.setRuleMatchesEquationSign(false);
 					break;
+				case CREATE_TEXT_BUT_RESULT_IS_ALWAYS_TRUE:
+					ruleEvaluationResult.setRuleMatchesEquationSign(true);
+					break;
+				case CREATE_TEXT_BUT_RESULT_IS_ALWAYS_FALSE:
+					ruleEvaluationResult.setRuleMatchesEquationSign(false);
+					break;
 				case CALCULATED_VALUE_IS_SMALLER_THAN:
 					if (ruleEvaluationResult
 							.getCalculatedRuleValue() < ruleEvaluationResult
@@ -259,12 +265,6 @@ public class RuleEvaluator {
 									.getCalculatedRuleComparisonTermValue()) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
-					break;
-				case CREATE_TEXT_BUT_RESULT_IS_ALWAYS_TRUE:
-					ruleEvaluationResult.setRuleMatchesEquationSign(true);
-					break;
-				case CREATE_TEXT_BUT_RESULT_IS_ALWAYS_FALSE:
-					ruleEvaluationResult.setRuleMatchesEquationSign(false);
 					break;
 				case CALCULATE_AMOUNT_OF_SELECT_MANY_VALUES:
 					ruleEvaluationResult.setRuleMatchesEquationSign(true);
@@ -538,6 +538,11 @@ public class RuleEvaluator {
 					ruleEvaluationResult.setCalculatedRuleValue(calcDaysDiff);
 					ruleEvaluationResult
 							.setTextRuleValue(String.valueOf(calcDaysDiff));
+					break;
+				case STARTS_ITERATION_FROM_X_UP_TO_Y_AND_RESULT_IS_CURRENT:
+				case STARTS_REVERSE_ITERATION_FROM_X_DOWN_TO_Y_AND_RESULT_IS_CURRENT:
+					ruleEvaluationResult.setRuleMatchesEquationSign(true);
+					ruleEvaluationResult.setIterator(true);
 					break;
 				case CHECK_VALUE_IN_VARIABLE_ACROSS_INVTERVENTIONS_AND_TRUE_IF_DUPLICATE_FOUND:
 					val duplicateFound = checkValueInVariableForDuplicates(

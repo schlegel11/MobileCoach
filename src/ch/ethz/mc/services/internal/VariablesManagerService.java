@@ -658,7 +658,7 @@ public class VariablesManagerService {
 					break;
 			}
 		} else {
-			log.debug("Creating new variable");
+			log.debug("Creating new participant variable");
 			val participantVariableWithValue = databaseManagerService
 					.findOneSortedModelObject(
 							ParticipantVariableWithValue.class,

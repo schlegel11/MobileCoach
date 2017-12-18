@@ -112,6 +112,8 @@ public class ImplementationConstants {
 
 	public static final String	SURVEY_OR_FEEDBACK_SESSION_PREFIX									= "mc.survey_or_feedback.";
 
+	public static final int		RULE_ITERATORS_AUTOMATIC_EXECUTION_LOOP_DETECTION_THRESHOLD			= 500;
+
 	public static final String	SCREENING_SURVEY_SLIDE_WEB_FORM_RESULT_VARIABLES					= "MC_ResultValue_";
 	public static final String	SCREENING_SURVEY_SLIDE_WEB_FORM_CONSISTENCY_CHECK_VARIABLE			= "MC_ConsistencyCheckValue";
 	public static final int		SCREENING_SURVEY_SLIDE_AUTOMATIC_EXECUTION_LOOP_DETECTION_THRESHOLD	= 1000;
