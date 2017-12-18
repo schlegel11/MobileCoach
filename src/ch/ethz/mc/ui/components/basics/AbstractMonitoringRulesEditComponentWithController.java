@@ -112,6 +112,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 			ThemeImageStrings.STOP_ICON_SMALL);
 	private final ThemeResource		REDIRECT_RULE_ICON				= new ThemeResource(
 			ThemeImageStrings.REDIRECT_ICON_SMALL);
+	private final ThemeResource		ITERATOR_RULE_ICON				= new ThemeResource(
+			ThemeImageStrings.ITERATION_ICON_SMALL);
 
 	private HierarchicalContainer	container;
 
@@ -488,6 +490,9 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 				icon = INTENTION_RULE_ICON;
 			} else if (monitoringRule.isMarkCaseAsSolvedWhenTrue()) {
 				icon = SOLVING_RULE_ICON;
+			} else if (monitoringRule.getRuleEquationSign()
+					.isIteratorEquationSignType()) {
+				icon = ITERATOR_RULE_ICON;
 			} else {
 				icon = RULE_ICON;
 			}
@@ -502,6 +507,9 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 				icon = REDIRECT_RULE_ICON;
 			} else if (microDialogRule.isLeaveDecisionPointWhenTrue()) {
 				icon = SOLVING_RULE_ICON;
+			} else if (microDialogRule.getRuleEquationSign()
+					.isIteratorEquationSignType()) {
+				icon = ITERATOR_RULE_ICON;
 			} else {
 				icon = RULE_ICON;
 			}
