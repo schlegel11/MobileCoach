@@ -31,6 +31,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.ModelObject;
+import ch.ethz.mc.model.memory.MemoryVariable;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 import ch.ethz.mc.model.ui.UIParticipantVariableWithParticipant;
 import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
@@ -113,6 +114,18 @@ public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 		val formerValue = new FormerVariableValue(getTimestamp(), getValue(),
 				isDescribesMediaUpload());
 		formerVariableValues.add(formerValue);
+	}
+
+	/**
+	 * Converts current instance to {@link MemoryVariable}
+	 * 
+	 * @return
+	 */
+	public MemoryVariable toMemoryVariable() {
+		val memoryVariable = new MemoryVariable();
+		memoryVariable.setName(getName());
+		memoryVariable.setValue(getValue());
+		return memoryVariable;
 	}
 
 	/**

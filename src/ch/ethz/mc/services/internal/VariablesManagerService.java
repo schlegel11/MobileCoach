@@ -78,29 +78,29 @@ import ch.ethz.mc.tools.StringValidator;
  */
 @Log4j2
 public class VariablesManagerService {
-	private static VariablesManagerService														instance			= null;
+	private static VariablesManagerService										instance			= null;
 
-	private final DatabaseManagerService														databaseManagerService;
+	private final DatabaseManagerService										databaseManagerService;
 
-	private final HashSet<String>																allSystemReservedVariableNames;
-	private final HashSet<String>																allSystemReservedVariableNamesRelevantForSlides;
-	private final HashSet<String>																writableReservedVariableNames;
-	private final HashSet<String>																writeProtectedReservedVariableNames;
+	private final HashSet<String>												allSystemReservedVariableNames;
+	private final HashSet<String>												allSystemReservedVariableNamesRelevantForSlides;
+	private final HashSet<String>												writableReservedVariableNames;
+	private final HashSet<String>												writeProtectedReservedVariableNames;
 
-	private final HashSet<String>																externallyReadableSystemVariableNames;
-	private final HashSet<String>																externallyReadableParticipantVariableNames;
+	private final HashSet<String>												externallyReadableSystemVariableNames;
+	private final HashSet<String>												externallyReadableParticipantVariableNames;
 
-	private final ConcurrentHashMap<String, Hashtable<String, ParticipantVariableWithValue>>	participantsVariablesCache;
+	private final ConcurrentHashMap<String, Hashtable<String, MemoryVariable>>	participantsVariablesCache;
 
-	private static SimpleDateFormat																hourOfDayFormatter	= new SimpleDateFormat(
+	private static SimpleDateFormat												hourOfDayFormatter	= new SimpleDateFormat(
 			"H");
-	private static SimpleDateFormat																dayInWeekFormatter	= new SimpleDateFormat(
+	private static SimpleDateFormat												dayInWeekFormatter	= new SimpleDateFormat(
 			"u");
-	private static SimpleDateFormat																dayOfMonthFormatter	= new SimpleDateFormat(
+	private static SimpleDateFormat												dayOfMonthFormatter	= new SimpleDateFormat(
 			"d");
-	private static SimpleDateFormat																monthFormatter		= new SimpleDateFormat(
+	private static SimpleDateFormat												monthFormatter		= new SimpleDateFormat(
 			"M");
-	private static SimpleDateFormat																yearFormatter		= new SimpleDateFormat(
+	private static SimpleDateFormat												yearFormatter		= new SimpleDateFormat(
 			"yyyy");
 
 	private VariablesManagerService(
@@ -157,7 +157,7 @@ public class VariablesManagerService {
 		}
 
 		// Init cache
-		participantsVariablesCache = new ConcurrentHashMap<String, Hashtable<String, ParticipantVariableWithValue>>();
+		participantsVariablesCache = new ConcurrentHashMap<String, Hashtable<String, MemoryVariable>>();
 
 		log.info("Started.");
 	}
@@ -228,11 +228,11 @@ public class VariablesManagerService {
 								Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT,
 								participant.getId());
 
-				val participantVariablesCache = new Hashtable<String, ParticipantVariableWithValue>();
+				val participantVariablesCache = new Hashtable<String, MemoryVariable>();
 				for (val participantVariableWithValue : participantVariablesWithValues) {
 					participantVariablesCache.put(
 							participantVariableWithValue.getName(),
-							participantVariableWithValue);
+							participantVariableWithValue.toMemoryVariable());
 				}
 
 				participantsVariablesCache.put(
@@ -666,8 +666,7 @@ public class VariablesManagerService {
 						variableName,
 						variableValue == null ? "" : variableValue);
 				if (describesMediaUpload) {
-					participantVariableWithValue
-							.setDescribesMediaUpload(true);
+					participantVariableWithValue.setDescribesMediaUpload(true);
 				}
 
 				databaseManagerService
@@ -708,7 +707,8 @@ public class VariablesManagerService {
 				if (participantsVariablesCache
 						.containsKey(participantId.toHexString())) {
 					participantsVariablesCache.get(participantId.toHexString())
-							.put(variableName, participantVariableWithValue);
+							.put(variableName, participantVariableWithValue
+									.toMemoryVariable());
 				}
 			}
 		}
