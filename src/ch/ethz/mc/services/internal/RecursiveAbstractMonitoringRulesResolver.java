@@ -571,7 +571,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 
 			int currentIterationValue = 0;
 			int iterationExecution = 0;
-			boolean iterationCompleted = false;
+			boolean iterationCompleted;
 			do {
 				val nextRuleId = rule.getId().toHexString();
 
@@ -654,7 +654,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 					iterationLimitCache.put(nextRuleId, iterationExecution);
 				}
 
-				// Remember if children should be checked
+				// Remember if children should be checked and how to proceed
 				final boolean lookIntoChildren;
 				if (ruleEquationSign.isIteratorEquationSignType()) {
 					// For iterators children should always be checked, but only
@@ -670,6 +670,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				} else {
 					// The result value defines if the iteration is complete for
 					// regular rules
+					iterationCompleted = true;
 					lookIntoChildren = executionResult;
 				}
 
