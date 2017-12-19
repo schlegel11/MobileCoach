@@ -653,28 +653,27 @@ public class VariablesManagerService {
 					break;
 			}
 		} else {
-			log.debug("Creating new participant variable");
-			val participantVariableWithValue = databaseManagerService
+			ParticipantVariableWithValue participantVariableWithValue = databaseManagerService
 					.findOneModelObject(ParticipantVariableWithValue.class,
 							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME,
 							participantId, variableName);
 
-			ParticipantVariableWithValue newParticipantVariableWithValue;
-
 			if (participantVariableWithValue == null) {
+				log.debug("Creating new participant variable");
 				// Create new participant variable
-				newParticipantVariableWithValue = new ParticipantVariableWithValue(
+				participantVariableWithValue = new ParticipantVariableWithValue(
 						participantId, InternalDateTime.currentTimeMillis(),
 						variableName,
 						variableValue == null ? "" : variableValue);
 				if (describesMediaUpload) {
-					newParticipantVariableWithValue
+					participantVariableWithValue
 							.setDescribesMediaUpload(true);
 				}
 
 				databaseManagerService
-						.saveModelObject(newParticipantVariableWithValue);
+						.saveModelObject(participantVariableWithValue);
 			} else {
+				log.debug("Reuseing existing participant variable");
 				// Reuse existing participant variable and ensure that the new
 				// timestamp is definitely newer than the
 				// existing ones

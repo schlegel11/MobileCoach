@@ -33,8 +33,9 @@ public class ParticipantVariableWithValueV29 extends AbstractVariableWithValue {
 		describesMediaUpload = false;
 	}
 
+	@NoArgsConstructor
 	@AllArgsConstructor
-	private class FormerVariableValue {
+	public static class FormerVariableValue {
 		@Getter
 		@Setter
 		private long	timestamp;

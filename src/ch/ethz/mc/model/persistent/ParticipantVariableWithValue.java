@@ -66,8 +66,9 @@ public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 		describesMediaUpload = false;
 	}
 
+	@NoArgsConstructor
 	@AllArgsConstructor
-	private class FormerVariableValue {
+	public static class FormerVariableValue {
 		@Getter
 		@Setter
 		private long	timestamp;
@@ -88,21 +89,22 @@ public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId						participant;
+	private ObjectId					participant;
 
 	/**
 	 * The moment in time when the variable was created
 	 */
 	@Getter
 	@Setter
-	private long							timestamp;
+	private long						timestamp;
 
 	@Getter
 	@Setter
-	private boolean							describesMediaUpload;
+	private boolean						describesMediaUpload;
 
 	@Getter
-	private final List<FormerVariableValue>	formerVariableValues	= new ArrayList<FormerVariableValue>();
+	@Setter
+	private List<FormerVariableValue>	formerVariableValues	= new ArrayList<FormerVariableValue>();
 
 	/**
 	 * Remembers former variable value
