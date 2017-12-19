@@ -1,5 +1,6 @@
 package ch.ethz.mc.model.persistent;
 
+import java.util.ArrayList;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -23,13 +24,9 @@ package ch.ethz.mc.model.persistent;
 import java.util.Date;
 import java.util.List;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.Setter;
-import lombok.extern.log4j.Log4j2;
-
 import org.bson.types.ObjectId;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Messages;
@@ -37,8 +34,13 @@ import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 import ch.ethz.mc.model.ui.UIParticipantVariableWithParticipant;
 import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * {@link ModelObject} to represent an {@link ParticipantVariableWithValue}
@@ -64,24 +66,52 @@ public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 		describesMediaUpload = false;
 	}
 
+	@AllArgsConstructor
+	private class FormerVariableValue {
+		@Getter
+		@Setter
+		private long	timestamp;
+
+		@Getter
+		@Setter
+		@NonNull
+		private String	value;
+
+		@Getter
+		@Setter
+		private boolean	describesMediaUpload;
+	}
+
 	/**
 	 * {@link Participant} to which this variable and its value belong to
 	 */
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId	participant;
+	private ObjectId						participant;
 
 	/**
 	 * The moment in time when the variable was created
 	 */
 	@Getter
 	@Setter
-	private long		timestamp;
+	private long							timestamp;
 
 	@Getter
 	@Setter
-	private boolean		describesMediaUpload;
+	private boolean							describesMediaUpload;
+
+	@Getter
+	private final List<FormerVariableValue>	formerVariableValues	= new ArrayList<FormerVariableValue>();
+
+	/**
+	 * Remembers former variable value
+	 */
+	public void rememberFormerValue() {
+		val formerValue = new FormerVariableValue(getTimestamp(), getValue(),
+				isDescribesMediaUpload());
+		formerVariableValues.add(formerValue);
+	}
 
 	/**
 	 * Creates a {@link UIParticipantVariableWithParticipant} with the belonging

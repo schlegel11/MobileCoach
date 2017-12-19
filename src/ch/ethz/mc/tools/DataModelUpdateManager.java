@@ -21,6 +21,7 @@ package ch.ethz.mc.tools;
  * the License.
  */
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 import org.bson.types.ObjectId;
@@ -33,6 +34,8 @@ import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.consistency.DataModelConfiguration;
 import ch.ethz.mc.model.persistent.outdated.InterventionV12;
 import ch.ethz.mc.model.persistent.outdated.MonitoringRuleV12;
+import ch.ethz.mc.model.persistent.outdated.ParticipantVariableWithValueV28;
+import ch.ethz.mc.model.persistent.outdated.ParticipantVariableWithValueV29;
 import ch.ethz.mc.model.persistent.types.MonitoringRuleTypes;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import lombok.val;
@@ -98,8 +101,12 @@ public class DataModelUpdateManager {
 					break;
 				case 20:
 					updateToVersion20();
+					break;
 				case 24:
 					updateToVersion24();
+					break;
+				case 29:
+					updateToVersion29();
 					break;
 			}
 
@@ -419,5 +426,59 @@ public class DataModelUpdateManager {
 		val dialogOptionCollection = jongo.getCollection("DialogOption");
 		dialogOptionCollection.update(Queries.EVERYTHING).multi()
 				.with(Queries.UPDATE_VERSION_24__DIALOG_OPTION__CHANGE_1);
+	}
+
+	/**
+	 * Changes for version 29:
+	 */
+	private static void updateToVersion29() {
+		log.info("Converting old variables scheme to new one...");
+		val cache = new Hashtable<String, ParticipantVariableWithValueV29>();
+		val participantVariableWithValueCollection = jongo
+				.getCollection("ParticipantVariableWithValue");
+
+		for (val participantVariableWithValue : participantVariableWithValueCollection
+				.find(Queries.ALL)
+				.sort(Queries.UPDATE_VERSION_29__PARTICIPANT_VARIABLE_WITH_VAUE__CHANGE_1_SORT)
+				.as(ParticipantVariableWithValueV28.class)) {
+			val key = participantVariableWithValue.getParticipant()
+					.toHexString() + "-"
+					+ participantVariableWithValue.getName();
+
+			final ParticipantVariableWithValueV29 newParticipantVariableWithValue;
+			if (cache.containsKey(key)) {
+				newParticipantVariableWithValue = cache.get(key);
+				newParticipantVariableWithValue.rememberFormerValue();
+
+				newParticipantVariableWithValue.setDescribesMediaUpload(
+						participantVariableWithValue.isDescribesMediaUpload());
+				newParticipantVariableWithValue.setTimestamp(
+						participantVariableWithValue.getTimestamp());
+				newParticipantVariableWithValue
+						.setValue(participantVariableWithValue.getValue());
+			} else {
+				newParticipantVariableWithValue = new ParticipantVariableWithValueV29(
+						participantVariableWithValue.getParticipant(),
+						participantVariableWithValue.getTimestamp(),
+						participantVariableWithValue.getName(),
+						participantVariableWithValue.getValue());
+
+				newParticipantVariableWithValue.setDescribesMediaUpload(
+						participantVariableWithValue.isDescribesMediaUpload());
+
+				cache.put(key, newParticipantVariableWithValue);
+			}
+		}
+
+		log.info("Clearing all variables...");
+		participantVariableWithValueCollection.remove(Queries.ALL);
+
+		log.info("Storing new variables...");
+		for (val newParticipantVariableWithValueEntry : cache.entrySet()) {
+			participantVariableWithValueCollection
+					.save(newParticipantVariableWithValueEntry.getValue());
+		}
+
+		log.info("Done.");
 	}
 }

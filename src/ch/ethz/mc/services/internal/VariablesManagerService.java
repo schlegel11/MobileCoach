@@ -224,20 +224,15 @@ public class VariablesManagerService {
 						participant.getId().toHexString());
 
 				val participantVariablesWithValues = databaseManagerService
-						.findSortedModelObjects(
-								ParticipantVariableWithValue.class,
+						.findModelObjects(ParticipantVariableWithValue.class,
 								Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT,
-								Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
 								participant.getId());
 
 				val participantVariablesCache = new Hashtable<String, ParticipantVariableWithValue>();
 				for (val participantVariableWithValue : participantVariablesWithValues) {
-					if (!participantVariablesCache.containsKey(
-							participantVariableWithValue.getName())) {
-						participantVariablesCache.put(
-								participantVariableWithValue.getName(),
-								participantVariableWithValue);
-					}
+					participantVariablesCache.put(
+							participantVariableWithValue.getName(),
+							participantVariableWithValue);
 				}
 
 				participantsVariablesCache.put(
@@ -660,14 +655,14 @@ public class VariablesManagerService {
 		} else {
 			log.debug("Creating new participant variable");
 			val participantVariableWithValue = databaseManagerService
-					.findOneSortedModelObject(
-							ParticipantVariableWithValue.class,
+					.findOneModelObject(ParticipantVariableWithValue.class,
 							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME,
-							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
 							participantId, variableName);
 
 			ParticipantVariableWithValue newParticipantVariableWithValue;
+
 			if (participantVariableWithValue == null) {
+				// Create new participant variable
 				newParticipantVariableWithValue = new ParticipantVariableWithValue(
 						participantId, InternalDateTime.currentTimeMillis(),
 						variableName,
@@ -680,7 +675,8 @@ public class VariablesManagerService {
 				databaseManagerService
 						.saveModelObject(newParticipantVariableWithValue);
 			} else {
-				// Ensure that the new timestamp is definitely newer than the
+				// Reuse existing participant variable and ensure that the new
+				// timestamp is definitely newer than the
 				// existing ones
 				long creationTimestamp = InternalDateTime.currentTimeMillis();
 
@@ -690,16 +686,22 @@ public class VariablesManagerService {
 							.getTimestamp() + 1;
 				}
 
-				newParticipantVariableWithValue = new ParticipantVariableWithValue(
-						participantId, creationTimestamp, variableName,
-						variableValue == null ? "" : variableValue);
+				// Remember former values
+				participantVariableWithValue.rememberFormerValue();
+
+				// Write new values
+				participantVariableWithValue.setTimestamp(creationTimestamp);
+				participantVariableWithValue
+						.setValue(variableValue == null ? "" : variableValue);
+
 				if (describesMediaUpload) {
-					newParticipantVariableWithValue
-							.setDescribesMediaUpload(true);
+					participantVariableWithValue.setDescribesMediaUpload(true);
+				} else {
+					participantVariableWithValue.setDescribesMediaUpload(false);
 				}
 
 				databaseManagerService
-						.saveModelObject(newParticipantVariableWithValue);
+						.saveModelObject(participantVariableWithValue);
 			}
 
 			// Cache new value
@@ -707,7 +709,7 @@ public class VariablesManagerService {
 				if (participantsVariablesCache
 						.containsKey(participantId.toHexString())) {
 					participantsVariablesCache.get(participantId.toHexString())
-							.put(variableName, newParticipantVariableWithValue);
+							.put(variableName, participantVariableWithValue);
 				}
 			}
 		}
@@ -1155,10 +1157,8 @@ public class VariablesManagerService {
 
 			// Find variable value for participant
 			val participantVariableWithValue = databaseManagerService
-					.findOneSortedModelObject(
-							ParticipantVariableWithValue.class,
+					.findOneModelObject(ParticipantVariableWithValue.class,
 							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME,
-							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
 							participant.getId(), variable);
 
 			if (participantVariableWithValue != null) {
@@ -1358,10 +1358,8 @@ public class VariablesManagerService {
 
 			// Get existing variable of receiving participant
 			val participantVariableWithValue = databaseManagerService
-					.findOneSortedModelObject(
-							ParticipantVariableWithValue.class,
+					.findOneModelObject(ParticipantVariableWithValue.class,
 							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME,
-							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
 							receivingParticipant.getId(), variable);
 
 			// Write variable for receiving participant
@@ -1545,10 +1543,8 @@ public class VariablesManagerService {
 
 			// Get existing reminder variable of participant
 			val participantReminderVariableWithValue = databaseManagerService
-					.findOneSortedModelObject(
-							ParticipantVariableWithValue.class,
+					.findOneModelObject(ParticipantVariableWithValue.class,
 							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME,
-							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
 							participantId, reminderVariable);
 
 			// Remember credit for participant
@@ -1577,10 +1573,8 @@ public class VariablesManagerService {
 
 			// Get existing credit variable of participant
 			val participantCreditVariableWithValue = databaseManagerService
-					.findOneSortedModelObject(
-							ParticipantVariableWithValue.class,
+					.findOneModelObject(ParticipantVariableWithValue.class,
 							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME,
-							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
 							participantId, variable);
 
 			// Write credit for participant
