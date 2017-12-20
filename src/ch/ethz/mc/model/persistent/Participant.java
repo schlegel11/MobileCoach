@@ -24,13 +24,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.Setter;
-import lombok.val;
-
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.MC;
@@ -41,6 +34,13 @@ import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.ui.UIModelObject;
 import ch.ethz.mc.model.ui.UIParticipant;
+import ch.ethz.mc.services.internal.VariablesManagerService;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.val;
 
 /**
  * {@link ModelObject} to represent an {@link Participant}
@@ -284,6 +284,10 @@ public class Participant extends ModelObject {
 	 */
 	@Override
 	public void performOnDelete() {
+		// Invalidate variables cache
+		VariablesManagerService.getInstance()
+				.participantInvalidateVariableCache(getId());
+
 		// Delete dialog options
 		val dialogOptionsToDelete = ModelObject.find(DialogOption.class,
 				Queries.DIALOG_OPTION__BY_PARTICIPANT, getId());

@@ -30,6 +30,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import lombok.Getter;
 import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -78,6 +79,7 @@ import ch.ethz.mc.tools.StringValidator;
  */
 @Log4j2
 public class VariablesManagerService {
+	@Getter
 	private static VariablesManagerService										instance			= null;
 
 	private final DatabaseManagerService										databaseManagerService;
@@ -711,6 +713,14 @@ public class VariablesManagerService {
 									.toMemoryVariable());
 				}
 			}
+		}
+	}
+
+	@Synchronized
+	public void participantInvalidateVariableCache(
+			final ObjectId participantId) {
+		synchronized (participantsVariablesCache) {
+			participantsVariablesCache.remove(participantId.toHexString());
 		}
 	}
 
