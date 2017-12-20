@@ -1,6 +1,5 @@
 package ch.ethz.mc.model.persistent;
 
-import java.util.ArrayList;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -22,6 +21,7 @@ import java.util.ArrayList;
  * the License.
  */
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.bson.types.ObjectId;
@@ -105,15 +105,22 @@ public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 
 	@Getter
 	@Setter
-	private List<FormerVariableValue>	formerVariableValues	= new ArrayList<FormerVariableValue>();
+	private List<FormerVariableValue>	formerVariableValues	= new LinkedList<FormerVariableValue>();
 
 	/**
 	 * Remembers former variable value
 	 */
-	public void rememberFormerValue() {
-		val formerValue = new FormerVariableValue(getTimestamp(), getValue(),
-				isDescribesMediaUpload());
-		formerVariableValues.add(formerValue);
+	public void rememberFormerValue(final int maxVariableHistory) {
+		if (maxVariableHistory != 0) {
+			val formerValue = new FormerVariableValue(getTimestamp(),
+					getValue(), isDescribesMediaUpload());
+			formerVariableValues.add(formerValue);
+
+			if (maxVariableHistory > -1
+					&& formerVariableValues.size() > maxVariableHistory) {
+				formerVariableValues.remove(0);
+			}
+		}
 	}
 
 	/**

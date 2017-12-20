@@ -150,6 +150,10 @@ public class Constants {
 	@Getter
 	private static String		fileExtension							= ".mc";
 
+	// -1 can be used to set it to infinite, 0 disables the history completely
+	@Getter
+	private static int			maxVariableHistory						= 1000;
+
 	/**
 	 * Survey listing configuration
 	 */

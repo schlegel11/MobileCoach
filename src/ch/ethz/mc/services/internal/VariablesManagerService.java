@@ -93,6 +93,7 @@ public class VariablesManagerService {
 	private final HashSet<String>												externallyReadableParticipantVariableNames;
 
 	private final ConcurrentHashMap<String, Hashtable<String, MemoryVariable>>	participantsVariablesCache;
+	private final int															maxVariableHistory;
 
 	private static SimpleDateFormat												hourOfDayFormatter	= new SimpleDateFormat(
 			"H");
@@ -160,6 +161,7 @@ public class VariablesManagerService {
 
 		// Init cache
 		participantsVariablesCache = new ConcurrentHashMap<String, Hashtable<String, MemoryVariable>>();
+		maxVariableHistory = Constants.getMaxVariableHistory();
 
 		log.info("Started.");
 	}
@@ -687,7 +689,8 @@ public class VariablesManagerService {
 				}
 
 				// Remember former values
-				participantVariableWithValue.rememberFormerValue();
+				participantVariableWithValue
+						.rememberFormerValue(maxVariableHistory);
 
 				// Write new values
 				participantVariableWithValue.setTimestamp(creationTimestamp);
