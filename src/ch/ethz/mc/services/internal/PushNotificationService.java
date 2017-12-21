@@ -218,8 +218,7 @@ public class PushNotificationService {
 	 * @param encryptedMessage
 	 */
 	private void sendIOSPushNotification(final DialogOption dialogOption,
-			final java.lang.String unSplittedToken,
-			final String encryptedMessage) {
+			final String unSplittedToken, final String encryptedMessage) {
 		val token = unSplittedToken.substring(IOS_IDENTIFIER.length());
 		log.debug("Trying to send iOS push notification to token {}", token);
 
@@ -286,8 +285,7 @@ public class PushNotificationService {
 	 * @param encryptedMessage
 	 */
 	private void sendAndroidPushNotification(final DialogOption dialogOption,
-			final java.lang.String unSplittedToken,
-			final String encryptedMessage) {
+			final String unSplittedToken, final String encryptedMessage) {
 		val token = unSplittedToken.substring(ANDROID_IDENTIFIER.length());
 		log.debug("Trying to send Android push notification to token {}",
 				token);
