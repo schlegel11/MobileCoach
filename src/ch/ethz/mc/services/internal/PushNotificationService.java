@@ -227,6 +227,7 @@ public class PushNotificationService {
 			final ApnsPayloadBuilder payloadBuilder = new ApnsPayloadBuilder();
 			payloadBuilder.addCustomProperty(BLOB, encryptedMessage);
 			payloadBuilder.setContentAvailable(true);
+			payloadBuilder.setBadgeNumber(0);
 
 			final String payload = payloadBuilder
 					.buildWithDefaultMaximumLength();
