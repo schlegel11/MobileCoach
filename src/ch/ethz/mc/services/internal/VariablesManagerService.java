@@ -618,7 +618,7 @@ public class VariablesManagerService {
 					break;
 				case participantDialogOptionExternalID:
 					log.debug(
-							"Setting variable 'participantDialogOptionDeepstreamData'");
+							"Setting variable 'participantDialogOptionExternalID'");
 					dialogOptionCreate(participantId,
 							DialogOptionTypes.EXTERNAL_ID, variableValue);
 					break;
@@ -638,7 +638,7 @@ public class VariablesManagerService {
 					break;
 				case participantSupervisorDialogOptionExternalID:
 					log.debug(
-							"Setting variable 'participantSupervisorDialogOptionDeepstreamData'");
+							"Setting variable 'participantSupervisorDialogOptionExternalID'");
 					dialogOptionCreate(participantId,
 							DialogOptionTypes.SUPERVISOR_EXTERNAL_ID,
 							variableValue);
