@@ -52,6 +52,9 @@ public class PushNotificationService {
 			.toString();
 
 	final static String							BLOB				= "blob";
+	final static String							KEY					= "key";
+	final static String							TO					= "to";
+	final static String							DATA				= "data";
 	final static String							BAD_DEVICE_TOKEN	= "BadDeviceToken";
 
 	public final static String					GOOGLE_FCM_API_URL	= "https://fcm.googleapis.com/fcm/send";
@@ -226,6 +229,8 @@ public class PushNotificationService {
 		{
 			final ApnsPayloadBuilder payloadBuilder = new ApnsPayloadBuilder();
 			payloadBuilder.addCustomProperty(BLOB, encryptedMessage);
+			payloadBuilder.addCustomProperty(KEY, dialogOption.getData()
+					.substring(dialogOption.getData().length() - 16));
 			payloadBuilder.setContentAvailable(true);
 			payloadBuilder.setBadgeNumber(0);
 
@@ -306,10 +311,12 @@ public class PushNotificationService {
 
 			final JsonObject jsonObject = new JsonObject();
 
-			jsonObject.addProperty("to", token);
+			jsonObject.addProperty(TO, token);
 			final JsonObject info = new JsonObject();
-			info.addProperty("blob", encryptedMessage);
-			jsonObject.add("data", info);
+			info.addProperty(BLOB, encryptedMessage);
+			info.addProperty(KEY, dialogOption.getData()
+					.substring(dialogOption.getData().length() - 16));
+			jsonObject.add(DATA, info);
 
 			@Cleanup
 			final OutputStreamWriter wr = new OutputStreamWriter(
