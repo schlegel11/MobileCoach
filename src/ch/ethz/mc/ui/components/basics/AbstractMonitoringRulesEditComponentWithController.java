@@ -500,8 +500,9 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 			val microDialogRule = (MicroDialogRule) abstractMonitoringRule;
 			if (microDialogRule.isStopMicroDialogWhenTrue()) {
 				icon = STOP_RULE_ICON;
-			} else if (microDialogRule
-					.getNextMicroDialogMessageWhenTrue() != null
+			} else if (microDialogRule.getNextMicroDialogWhenTrue() != null
+					|| microDialogRule
+							.getNextMicroDialogMessageWhenTrue() != null
 					|| microDialogRule
 							.getNextMicroDialogMessageWhenFalse() != null) {
 				icon = REDIRECT_RULE_ICON;
