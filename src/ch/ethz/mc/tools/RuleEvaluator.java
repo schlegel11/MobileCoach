@@ -270,7 +270,8 @@ public class RuleEvaluator {
 					ruleEvaluationResult.setRuleMatchesEquationSign(true);
 
 					String[] parts = ruleEvaluationResult.getTextRuleValue()
-							.split(ImplementationConstants.SELECT_MANY_SEPARATOR);
+							.split(ImplementationConstants.SELECT_MANY_SEPARATOR,
+									-1);
 
 					ruleEvaluationResult.setCalculatedRuleValue(parts.length);
 					ruleEvaluationResult
@@ -280,7 +281,7 @@ public class RuleEvaluator {
 				case CALCULATE_SUM_OF_SELECT_MANY_VALUES_AND_TRUE_IF_EQUALS:
 				case CALCULATE_SUM_OF_SELECT_MANY_VALUES_AND_TRUE_IF_BIGGER_THAN:
 					parts = ruleEvaluationResult.getTextRuleValue().split(
-							ImplementationConstants.SELECT_MANY_SEPARATOR);
+							ImplementationConstants.SELECT_MANY_SEPARATOR, -1);
 
 					double sum = 0d;
 
@@ -294,9 +295,17 @@ public class RuleEvaluator {
 						}
 					}
 
-					final double compareValue = Double
-							.parseDouble(ruleEvaluationResult
-									.getTextRuleComparisonTermValue());
+					double compareValue = 0;
+					if (!StringUtils.isBlank(ruleEvaluationResult
+							.getTextRuleComparisonTermValue())) {
+						try {
+							compareValue = Double
+									.parseDouble(ruleEvaluationResult
+											.getTextRuleComparisonTermValue());
+						} catch (final Exception e) {
+							// Do nothing
+						}
+					}
 
 					if (rule.getRuleEquationSign() == RuleEquationSignTypes.CALCULATE_SUM_OF_SELECT_MANY_VALUES_AND_TRUE_IF_EQUALS
 							&& sum == compareValue) {
@@ -357,7 +366,8 @@ public class RuleEvaluator {
 						ruleEvaluationResult.setTextRuleValue("");
 					} else {
 						parts = ruleEvaluationResult.getTextRuleValue().split(
-								ImplementationConstants.SELECT_MANY_SEPARATOR);
+								ImplementationConstants.SELECT_MANY_SEPARATOR,
+								-1);
 
 						val position = Integer.parseInt(ruleEvaluationResult
 								.getTextRuleComparisonTermValue()) - 1;
@@ -378,7 +388,7 @@ public class RuleEvaluator {
 					break;
 				case TEXT_VALUE_FROM_SELECT_MANY_AT_RANDOM_POSITION:
 					parts = ruleEvaluationResult.getTextRuleValue().split(
-							ImplementationConstants.SELECT_MANY_SEPARATOR);
+							ImplementationConstants.SELECT_MANY_SEPARATOR, -1);
 
 					val position = RandomUtils.nextInt(0, parts.length);
 

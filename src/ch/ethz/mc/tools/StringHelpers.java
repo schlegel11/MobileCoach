@@ -270,7 +270,7 @@ public class StringHelpers {
 
 		val jsonOuterArray = new JsonArray();
 
-		for (val line : text.get(language).split("\n")) {
+		for (val line : text.get(language).split("\n", -1)) {
 			if (!StringUtils.isBlank(line)) {
 				val jsonArray = new JsonArray();
 
