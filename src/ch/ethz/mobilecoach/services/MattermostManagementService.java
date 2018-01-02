@@ -338,8 +338,8 @@ public class MattermostManagementService {
 	 */
 	public void createObserverUser(){
 		
-		String username = "observer" + UUID.randomUUID().toString();
-		String password = UUID.randomUUID().toString(); // TODO: use a cryptographically secure random generator
+		String username = "observer" + UUID.randomUUID().toString().replace("-", "");
+		String password = UUID.randomUUID().toString().replace("-", ""); // TODO: use a cryptographically secure random generator
 		String email = username + "@" + emailHost;
 
 		JSONObject json = new JSONObject()

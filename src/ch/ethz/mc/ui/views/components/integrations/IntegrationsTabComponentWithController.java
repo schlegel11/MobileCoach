@@ -66,8 +66,8 @@ public class IntegrationsTabComponentWithController extends
 		
 		if (mmManagementService.getObserverUserId() != null){
 			sb.append("\nObserver:");
-			sb.append("\nUsername:" + mmManagementService.getObserverUserName());
-			sb.append("\nPassword:" + mmManagementService.getObserverUserPassword());
+			sb.append("\nUsername: " + mmManagementService.getObserverUserName());
+			sb.append("\nPassword: " + mmManagementService.getObserverUserPassword());
 		}
 		
 		this.getTextArea().setValue(sb.toString());
