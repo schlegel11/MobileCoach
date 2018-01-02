@@ -109,6 +109,13 @@ public abstract class AbstractMonitoringRule extends AbstractRule {
 	@Getter
 	@Setter
 	private boolean		sendMessageToSupervisor;
+	
+	/**
+	 * <strong>OPTIONAL:</strong> If set the message will be sent using SMS or Email
+	 */
+	@Getter
+	@Setter
+	private boolean		sendOutsideOfApp;
 
 	/**
 	 * <strong>OPTIONAL if sendMassgeIfTrue is false:</strong> The

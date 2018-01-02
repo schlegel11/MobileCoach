@@ -198,6 +198,25 @@ MonitoringRuleEditComponent {
 						adjust();
 					}
 				});
+		
+		getSendOutsideOfAppComboBox().setValue(monitoringRule.isSendOutsideOfApp());
+		getSendOutsideOfAppComboBox().addValueChangeListener(
+				new ValueChangeListener() {
+					
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+
+						val newValue = (boolean) event.getProperty().getValue();
+	
+						getInterventionAdministrationManagerService()
+						.monitoringRuleChangeSendOutsideOfApp(
+								monitoringRule, newValue);
+						
+						getSendOutsideOfAppComboBox().setValue(newValue);
+						adjust();
+						
+					}
+				});
 
 		getSendToSupervisorComboBox().setValue(
 				monitoringRule.isSendMessageToSupervisor());

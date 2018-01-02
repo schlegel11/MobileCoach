@@ -102,6 +102,13 @@ public class DialogMessage extends ModelObject {
 	@Getter
 	@Setter
 	private boolean						supervisorMessage;
+	
+	/**
+	 * Should the message be sent through another channel than to the app?
+	 */
+	@Getter
+	@Setter
+	private boolean						outsideOfApp;
 
 	/**
 	 * Defines if an answer to this message is expected

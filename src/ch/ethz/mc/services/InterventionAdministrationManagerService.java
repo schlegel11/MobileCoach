@@ -1091,6 +1091,14 @@ public class InterventionAdministrationManagerService {
 
 		databaseManagerService.saveModelObject(monitoringRule);
 	}
+	
+	@Synchronized
+	public void monitoringRuleChangeSendOutsideOfApp(
+			final MonitoringRule monitoringRule, final boolean newValue) {
+		monitoringRule.setSendOutsideOfApp(newValue);
+
+		databaseManagerService.saveModelObject(monitoringRule);
+	}
 
 	@Synchronized
 	public void monitoringRuleChangeSendMessageToSupervisor(

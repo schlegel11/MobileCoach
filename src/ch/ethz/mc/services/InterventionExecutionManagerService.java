@@ -236,11 +236,12 @@ public class InterventionExecutionManagerService {
 			final boolean manuallySent, final long timestampToSendMessage,
 			final MonitoringRule relatedMonitoringRule,
 			final MonitoringMessage relatedMonitoringMessage,
-			final boolean supervisorMessage, final boolean answerExpected) {
+			final boolean supervisorMessage, final boolean answerExpected,
+			final boolean outsideOfApp) {
 		log.debug("Create message and prepare for sending");
 		val dialogMessage = new DialogMessage(participant.getId(), 0,
 				DialogMessageStatusTypes.PREPARED_FOR_SENDING, message,
-				timestampToSendMessage, -1, supervisorMessage, answerExpected,
+				timestampToSendMessage, -1, supervisorMessage, outsideOfApp, answerExpected,
 				-1, -1, null, null, false, relatedMonitoringRule == null ? null
 						: relatedMonitoringRule.getId(),
 				relatedMonitoringMessage == null ? null
@@ -470,7 +471,7 @@ public class InterventionExecutionManagerService {
 			final ObjectId participantId, final ReceivedMessage receivedMessage) {
 		val dialogMessage = new DialogMessage(participantId, 0,
 				DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY, "", -1, -1,
-				false, false, -1, receivedMessage.getReceivedTimestamp(),
+				false, false, false, -1, receivedMessage.getReceivedTimestamp(),
 				receivedMessage.getMessage(), receivedMessage.getMessage(),
 				true, null, null, false, false);
 
@@ -728,7 +729,7 @@ public class InterventionExecutionManagerService {
 									monitoringMessage,
 									monitoringReplyRule != null ? monitoringReplyRule
 											.isSendMessageToSupervisor()
-											: false, false);
+											: false, false, monitoringReplyRule.isSendOutsideOfApp());
 						}
 					}
 				}
@@ -830,7 +831,9 @@ public class InterventionExecutionManagerService {
 									monitoringRule != null ? monitoringRule
 											.isSendMessageToSupervisor()
 											: false,
-									monitoringMessageExpectsAnswer);
+									monitoringMessageExpectsAnswer,
+									monitoringRule.isSendOutsideOfApp()
+									);
 						}
 					}
 
@@ -981,7 +984,12 @@ public class InterventionExecutionManagerService {
 					dialogOption = getDialogOptionByParticipantAndRecipientType(
 							dialogMessageToSend.getParticipant(), false);
 					
-					if (dialogOption == null || Constants.preferAppDialogForParticipant) {
+					boolean preferAppDialog = 
+							Constants.preferAppDialogForParticipant &&
+							!dialogMessageWithSenderIdentificationToSend
+							.getDialogMessage().isOutsideOfApp();
+					
+					if (dialogOption == null || preferAppDialog) {
 						dialogOption = new DialogOption(
 								dialogMessageToSend.getParticipant(),
 								DialogOptionTypes.APP, "");
@@ -1078,7 +1086,7 @@ public class InterventionExecutionManagerService {
 						variablesWithValues.values(), "");
 		dialogMessageCreateManuallyOrByRulesIncludingMediaObject(participant,
 				messageToSend, true, InternalDateTime.currentTimeMillis(),
-				null, null, advisorMessage, false);
+				null, null, advisorMessage, false, false /* TODO: add option to send manual message as SMS/email */);
 	}
 
 	/*
