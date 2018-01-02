@@ -984,12 +984,14 @@ public class InterventionExecutionManagerService {
 					dialogOption = getDialogOptionByParticipantAndRecipientType(
 							dialogMessageToSend.getParticipant(), false);
 					
-					boolean preferAppDialog = 
-							Constants.preferAppDialogForParticipant &&
-							!dialogMessageWithSenderIdentificationToSend
-							.getDialogMessage().isOutsideOfApp();
-					
-					if (dialogOption == null || preferAppDialog) {
+					if (dialogMessageWithSenderIdentificationToSend.getDialogMessage().isOutsideOfApp()){
+						if (dialogOption == null) {
+							// no dialog option available: delete the message
+							log.warn("No dialog option outside of app available for participant " + dialogMessageToSend.getParticipant() + ". Deleting message...");
+							databaseManagerService.deleteModelObject(dialogMessageToSend);
+							continue;
+						}
+					} else if (dialogOption == null || Constants.preferAppDialogForParticipant) {
 						dialogOption = new DialogOption(
 								dialogMessageToSend.getParticipant(),
 								DialogOptionTypes.APP, "");
@@ -1076,7 +1078,7 @@ public class InterventionExecutionManagerService {
 	 */
 	@Synchronized
 	public void sendManualMessage(final Participant participant,
-			final boolean advisorMessage, final String messageWithPlaceholders) {
+			final boolean advisorMessage, final boolean outsideOfApp, final String messageWithPlaceholders) {
 		val variablesWithValues = variablesManagerService
 				.getAllVariablesWithValuesOfParticipantAndSystem(participant);
 
@@ -1086,7 +1088,7 @@ public class InterventionExecutionManagerService {
 						variablesWithValues.values(), "");
 		dialogMessageCreateManuallyOrByRulesIncludingMediaObject(participant,
 				messageToSend, true, InternalDateTime.currentTimeMillis(),
-				null, null, advisorMessage, false, false /* TODO: add option to send manual message as SMS/email */);
+				null, null, advisorMessage, false, outsideOfApp);
 	}
 
 	/*

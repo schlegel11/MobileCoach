@@ -456,6 +456,10 @@ InterventionResultsComponent {
 				placeholderStringEditWithCheckboxComponent
 						.getUniversalCheckBox(),
 				AdminMessageStrings.MONITORING_RULE_EDITING__SEND_TO_SUPERVISOR);
+		
+		val checkbox2 = placeholderStringEditWithCheckboxComponent.getUniversalCheckBox2();
+		checkbox2.setVisible(true);
+		checkbox2.setCaption("Enforce sending using Email or SMS");
 
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__SEND_MESSAGE_TO_ALL_SELECTED_PARTICIPANTS,
@@ -486,6 +490,9 @@ InterventionResultsComponent {
 								.sendManualMessage(participant,
 												placeholderStringEditWithCheckboxComponent
 														.getUniversalCheckBox()
+														.getValue(),
+												placeholderStringEditWithCheckboxComponent
+														.getUniversalCheckBox2()
 														.getValue(),
 										getStringValue());
 							}

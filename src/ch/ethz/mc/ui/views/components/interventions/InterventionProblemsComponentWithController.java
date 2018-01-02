@@ -414,6 +414,7 @@ InterventionProblemsComponent {
 											placeholderStringEditWithCheckboxComponent
 													.getUniversalCheckBox()
 													.getValue(),
+									false,
 									getStringValue());
 						}
 
