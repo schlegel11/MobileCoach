@@ -34,6 +34,7 @@ import net.balusc.webapp.FileServletWrapper;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.MC;
+import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.persistent.MediaObject;
 import ch.ethz.mc.services.InterventionAdministrationManagerService;
@@ -100,8 +101,9 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 		int height = 0;
 		boolean withWatermark = false;
 		boolean withCropping = false;
+		String[] pathParts;
 		try {
-			val pathParts = request.getPathInfo().split("/");
+			pathParts = request.getPathInfo().split("/");
 			requestedElement = pathParts[1];
 
 			if (pathParts.length >= 4) {
@@ -118,6 +120,14 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 			log.debug("Error at parsing path parts: {}", e.getMessage());
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return null;
+		}
+		
+		// Determine requested media object
+		ObjectId mediaObjectId = null;
+		try {
+			mediaObjectId = new ObjectId(requestedElement);
+		} catch (final Exception e) {
+			// ignore
 		}
 
 		File file = null;
@@ -157,15 +167,8 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 					return null;
 				}
 			}
-		} else {
-			// Determine requested media object
-			ObjectId mediaObjectId = null;
-			try {
-				mediaObjectId = new ObjectId(requestedElement);
-			} catch (final Exception e) {
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-				return null;
-			}
+		} else if (mediaObjectId != null){
+
 			log.debug("Requested media object {}", mediaObjectId);
 
 			final val mediaObject = interventionAdministrationManagerService
@@ -180,6 +183,15 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 			// Retrieve file from media object
 			file = interventionAdministrationManagerService.getFileByReference(
 					mediaObject.getFileReference(), FILE_STORES.STORAGE);
+		} else {
+			
+			// Note (DR): I'm adding this possibility to serve files directly from a folder to server videos and thumbnails for PersonalityChange.
+			// The goal is that we can easily replace files if we need them in a different quality or version.
+			
+			String root = Constants.getMediaDirectFileFolder();
+			
+			final File folder = new File(root);
+			file = new File(folder, pathParts[1]); // only use first part: security restriction
 		}
 
 		// Check if file actually exists in file system.
