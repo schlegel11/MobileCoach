@@ -75,7 +75,7 @@ public class Constants {
 	 * 
 	 * CAUTION: Can NOT be defined in configuration file
 	 */
-	public static final int		DATA_MODEL_VERSION					= 27;
+	public static final int		DATA_MODEL_VERSION					= 29;
 	/**
 	 * Data model configuration collection
 	 * 
@@ -149,6 +149,10 @@ public class Constants {
 
 	@Getter
 	private static String		fileExtension							= ".mc";
+
+	// -1 can be used to set it to infinite, 0 disables the history completely
+	@Getter
+	private static int			maxVariableHistory						= 1000;
 
 	/**
 	 * Survey listing configuration

@@ -193,7 +193,6 @@ public class Queries {
 	public static final String	PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT																																									= "{'participant':#}";
 	public static final String	PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME																																						= "{'participant':#,'name':#}";
 	public static final String	PARTICIPANT_VARIABLE_WITH_VALUE__BY_DESCRIBES_MEDIA_UPLOAD																																						= "{'describesMediaUpload':#}";
-	public static final String	PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC																																							= "{'timestamp':-1}";
 
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT																																													= "{'participant':#}";
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_MESSAGE_TYPE																																									= "{'participant':#,'supervisorMessage':#}";
@@ -254,4 +253,5 @@ public class Queries {
 	public static final String	UPDATE_VERSION_20__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'relatedMicroDialogForActivation':null}}";
 	public static final String	UPDATE_VERSION_20__DIALOG_MESSAGE__CHANGE_2																																										= "{$set:{'relatedMicroDialogMessage':null}}";
 	public static final String	UPDATE_VERSION_24__DIALOG_OPTION__CHANGE_1																																										= "{$set:{'pushNotificationTokens':[]}}";
+	public static final String	UPDATE_VERSION_29__PARTICIPANT_VARIABLE_WITH_VAUE__CHANGE_1_SORT																																				= "{'timestamp':1}";
 }

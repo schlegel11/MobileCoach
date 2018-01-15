@@ -31,14 +31,14 @@ import java.util.List;
 public enum RuleEquationSignTypes {
 	CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_TRUE,
 	CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_FALSE,
+	CREATE_TEXT_BUT_RESULT_IS_ALWAYS_TRUE,
+	CREATE_TEXT_BUT_RESULT_IS_ALWAYS_FALSE,
 	CALCULATED_VALUE_IS_SMALLER_THAN,
 	CALCULATED_VALUE_IS_SMALLER_OR_EQUAL_THAN,
 	CALCULATED_VALUE_EQUALS,
 	CALCULATED_VALUE_NOT_EQUALS,
 	CALCULATED_VALUE_IS_BIGGER_OR_EQUAL_THAN,
 	CALCULATED_VALUE_IS_BIGGER_THAN,
-	CREATE_TEXT_BUT_RESULT_IS_ALWAYS_TRUE,
-	CREATE_TEXT_BUT_RESULT_IS_ALWAYS_FALSE,
 	CALCULATE_AMOUNT_OF_SELECT_MANY_VALUES,
 	CALCULATE_SUM_OF_SELECT_MANY_VALUES_AND_TRUE_IF_SMALLER_THAN,
 	CALCULATE_SUM_OF_SELECT_MANY_VALUES_AND_TRUE_IF_EQUALS,
@@ -53,9 +53,12 @@ public enum RuleEquationSignTypes {
 	DATE_DIFFERENCE_VALUE_EQUALS,
 	CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_TRUE_IF_ZERO,
 	CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_ALWAYS_TRUE,
+	STARTS_ITERATION_FROM_X_UP_TO_Y_AND_RESULT_IS_CURRENT,
+	STARTS_REVERSE_ITERATION_FROM_X_DOWN_TO_Y_AND_RESULT_IS_CURRENT,
 	CHECK_VALUE_IN_VARIABLE_ACROSS_INVTERVENTIONS_AND_TRUE_IF_DUPLICATE_FOUND;
 
-	private static List<RuleEquationSignTypes> calculatedEquationSigns = null;
+	private static List<RuleEquationSignTypes>	calculatedEquationSigns	= null;
+	private static List<RuleEquationSignTypes>	iteratorEquationSigns	= null;
 
 	@Override
 	public String toString() {
@@ -78,9 +81,30 @@ public enum RuleEquationSignTypes {
 			calculatedEquationSigns
 					.add(CALCULATED_VALUE_IS_BIGGER_OR_EQUAL_THAN);
 			calculatedEquationSigns.add(CALCULATED_VALUE_IS_BIGGER_THAN);
+			calculatedEquationSigns
+					.add(STARTS_ITERATION_FROM_X_UP_TO_Y_AND_RESULT_IS_CURRENT);
+			calculatedEquationSigns.add(
+					RuleEquationSignTypes.STARTS_REVERSE_ITERATION_FROM_X_DOWN_TO_Y_AND_RESULT_IS_CURRENT);
 		}
 
 		if (calculatedEquationSigns.contains(this)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public synchronized boolean isIteratorEquationSignType() {
+		// Create list at first check
+		if (iteratorEquationSigns == null) {
+			iteratorEquationSigns = new ArrayList<RuleEquationSignTypes>();
+			iteratorEquationSigns
+					.add(STARTS_ITERATION_FROM_X_UP_TO_Y_AND_RESULT_IS_CURRENT);
+			iteratorEquationSigns.add(
+					RuleEquationSignTypes.STARTS_REVERSE_ITERATION_FROM_X_DOWN_TO_Y_AND_RESULT_IS_CURRENT);
+		}
+
+		if (iteratorEquationSigns.contains(this)) {
 			return true;
 		} else {
 			return false;

@@ -1,5 +1,7 @@
 package ch.ethz.mc.model.persistent.outdated;
 
+import ch.ethz.mc.model.ModelObject;
+import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -25,15 +27,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
-import ch.ethz.mc.model.ModelObject;
-import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 
 /**
- * {@link ModelObject} to represent a rule
- *
- * An {@link AbstractRuleV12} consists of the rule itself, an equation sign and
- * a comparison term. The rule can be evaluated and checked against the
- * comparison term based on the equation sign.
+ * CAUTION: Will only be used for conversion from data model 11 to 12
  *
  * @author Andreas Filler
  */

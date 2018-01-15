@@ -21,24 +21,27 @@ package ch.ethz.mc.model.persistent;
  * the License.
  */
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.Setter;
-import lombok.extern.log4j.Log4j2;
-
 import org.bson.types.ObjectId;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.ModelObject;
+import ch.ethz.mc.model.memory.MemoryVariable;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 import ch.ethz.mc.model.ui.UIParticipantVariableWithParticipant;
 import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * {@link ModelObject} to represent an {@link ParticipantVariableWithValue}
@@ -64,24 +67,73 @@ public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 		describesMediaUpload = false;
 	}
 
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public static class FormerVariableValue {
+		@Getter
+		@Setter
+		private long	timestamp;
+
+		@Getter
+		@Setter
+		@NonNull
+		private String	value;
+
+		@Getter
+		@Setter
+		private boolean	describesMediaUpload;
+	}
+
 	/**
 	 * {@link Participant} to which this variable and its value belong to
 	 */
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId	participant;
+	private ObjectId					participant;
 
 	/**
 	 * The moment in time when the variable was created
 	 */
 	@Getter
 	@Setter
-	private long		timestamp;
+	private long						timestamp;
 
 	@Getter
 	@Setter
-	private boolean		describesMediaUpload;
+	private boolean						describesMediaUpload;
+
+	@Getter
+	@Setter
+	private List<FormerVariableValue>	formerVariableValues	= new LinkedList<FormerVariableValue>();
+
+	/**
+	 * Remembers former variable value
+	 */
+	public void rememberFormerValue(final int maxVariableHistory) {
+		if (maxVariableHistory != 0) {
+			val formerValue = new FormerVariableValue(getTimestamp(),
+					getValue(), isDescribesMediaUpload());
+			formerVariableValues.add(formerValue);
+
+			if (maxVariableHistory > -1
+					&& formerVariableValues.size() > maxVariableHistory) {
+				formerVariableValues.remove(0);
+			}
+		}
+	}
+
+	/**
+	 * Converts current instance to {@link MemoryVariable}
+	 * 
+	 * @return
+	 */
+	public MemoryVariable toMemoryVariable() {
+		val memoryVariable = new MemoryVariable();
+		memoryVariable.setName(getName());
+		memoryVariable.setValue(getValue());
+		return memoryVariable;
+	}
 
 	/**
 	 * Creates a {@link UIParticipantVariableWithParticipant} with the belonging

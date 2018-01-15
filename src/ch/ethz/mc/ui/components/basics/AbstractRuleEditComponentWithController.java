@@ -75,11 +75,7 @@ public class AbstractRuleEditComponentWithController
 		ruleEquationSignComboBox.setTextInputAllowed(false);
 		ruleEquationSignComboBox.setNewItemsAllowed(false);
 		ruleEquationSignComboBox.setNullSelectionAllowed(false);
-		ruleEquationSignComboBox.setPageLength(20);
-
-		for (val equationSignType : RuleEquationSignTypes.values()) {
-			ruleEquationSignComboBox.addItem(equationSignType);
-		}
+		ruleEquationSignComboBox.setPageLength(0);
 
 		val buttonClickListener = new ButtonClickListener();
 		commentComponent.getButton().addClickListener(buttonClickListener);
@@ -94,6 +90,23 @@ public class AbstractRuleEditComponentWithController
 			final RuleTypes type) {
 		this.rulesRelatedModelObjectId = rulesRelatedModelObjectId;
 		this.type = type;
+
+		for (val equationSignType : RuleEquationSignTypes.values()) {
+			switch (type) {
+				case MONITORING_RULES:
+				case MICRO_DIALOG_RULES:
+					ruleEquationSignComboBox.addItem(equationSignType);
+					break;
+				case SCREENING_SURVEY_RULES:
+				case FEEDBACK_RULES:
+				case MONITORING_MESSAGE_RULES:
+				case MICRO_DIALOG_MESSAGE_RULES:
+					if (!equationSignType.isIteratorEquationSignType()) {
+						ruleEquationSignComboBox.addItem(equationSignType);
+					}
+					break;
+			}
+		}
 
 		initDone = true;
 	}

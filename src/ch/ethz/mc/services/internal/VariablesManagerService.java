@@ -30,6 +30,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import lombok.Getter;
 import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -78,29 +79,31 @@ import ch.ethz.mc.tools.StringValidator;
  */
 @Log4j2
 public class VariablesManagerService {
-	private static VariablesManagerService														instance			= null;
+	@Getter
+	private static VariablesManagerService										instance			= null;
 
-	private final DatabaseManagerService														databaseManagerService;
+	private final DatabaseManagerService										databaseManagerService;
 
-	private final HashSet<String>																allSystemReservedVariableNames;
-	private final HashSet<String>																allSystemReservedVariableNamesRelevantForSlides;
-	private final HashSet<String>																writableReservedVariableNames;
-	private final HashSet<String>																writeProtectedReservedVariableNames;
+	private final HashSet<String>												allSystemReservedVariableNames;
+	private final HashSet<String>												allSystemReservedVariableNamesRelevantForSlides;
+	private final HashSet<String>												writableReservedVariableNames;
+	private final HashSet<String>												writeProtectedReservedVariableNames;
 
-	private final HashSet<String>																externallyReadableSystemVariableNames;
-	private final HashSet<String>																externallyReadableParticipantVariableNames;
+	private final HashSet<String>												externallyReadableSystemVariableNames;
+	private final HashSet<String>												externallyReadableParticipantVariableNames;
 
-	private final ConcurrentHashMap<String, Hashtable<String, ParticipantVariableWithValue>>	participantsVariablesCache;
+	private final ConcurrentHashMap<String, Hashtable<String, MemoryVariable>>	participantsVariablesCache;
+	private final int															maxVariableHistory;
 
-	private static SimpleDateFormat																hourOfDayFormatter	= new SimpleDateFormat(
+	private static SimpleDateFormat												hourOfDayFormatter	= new SimpleDateFormat(
 			"H");
-	private static SimpleDateFormat																dayInWeekFormatter	= new SimpleDateFormat(
+	private static SimpleDateFormat												dayInWeekFormatter	= new SimpleDateFormat(
 			"u");
-	private static SimpleDateFormat																dayOfMonthFormatter	= new SimpleDateFormat(
+	private static SimpleDateFormat												dayOfMonthFormatter	= new SimpleDateFormat(
 			"d");
-	private static SimpleDateFormat																monthFormatter		= new SimpleDateFormat(
+	private static SimpleDateFormat												monthFormatter		= new SimpleDateFormat(
 			"M");
-	private static SimpleDateFormat																yearFormatter		= new SimpleDateFormat(
+	private static SimpleDateFormat												yearFormatter		= new SimpleDateFormat(
 			"yyyy");
 
 	private VariablesManagerService(
@@ -157,7 +160,8 @@ public class VariablesManagerService {
 		}
 
 		// Init cache
-		participantsVariablesCache = new ConcurrentHashMap<String, Hashtable<String, ParticipantVariableWithValue>>();
+		participantsVariablesCache = new ConcurrentHashMap<String, Hashtable<String, MemoryVariable>>();
+		maxVariableHistory = Constants.getMaxVariableHistory();
 
 		log.info("Started.");
 	}
@@ -224,20 +228,15 @@ public class VariablesManagerService {
 						participant.getId().toHexString());
 
 				val participantVariablesWithValues = databaseManagerService
-						.findSortedModelObjects(
-								ParticipantVariableWithValue.class,
+						.findModelObjects(ParticipantVariableWithValue.class,
 								Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT,
-								Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
 								participant.getId());
 
-				val participantVariablesCache = new Hashtable<String, ParticipantVariableWithValue>();
+				val participantVariablesCache = new Hashtable<String, MemoryVariable>();
 				for (val participantVariableWithValue : participantVariablesWithValues) {
-					if (!participantVariablesCache.containsKey(
-							participantVariableWithValue.getName())) {
-						participantVariablesCache.put(
-								participantVariableWithValue.getName(),
-								participantVariableWithValue);
-					}
+					participantVariablesCache.put(
+							participantVariableWithValue.getName(),
+							participantVariableWithValue.toMemoryVariable());
 				}
 
 				participantsVariablesCache.put(
@@ -619,7 +618,7 @@ public class VariablesManagerService {
 					break;
 				case participantDialogOptionExternalID:
 					log.debug(
-							"Setting variable 'participantDialogOptionDeepstreamData'");
+							"Setting variable 'participantDialogOptionExternalID'");
 					dialogOptionCreate(participantId,
 							DialogOptionTypes.EXTERNAL_ID, variableValue);
 					break;
@@ -639,7 +638,7 @@ public class VariablesManagerService {
 					break;
 				case participantSupervisorDialogOptionExternalID:
 					log.debug(
-							"Setting variable 'participantSupervisorDialogOptionDeepstreamData'");
+							"Setting variable 'participantSupervisorDialogOptionExternalID'");
 					dialogOptionCreate(participantId,
 							DialogOptionTypes.SUPERVISOR_EXTERNAL_ID,
 							variableValue);
@@ -658,29 +657,28 @@ public class VariablesManagerService {
 					break;
 			}
 		} else {
-			log.debug("Creating new variable");
-			val participantVariableWithValue = databaseManagerService
-					.findOneSortedModelObject(
-							ParticipantVariableWithValue.class,
+			ParticipantVariableWithValue participantVariableWithValue = databaseManagerService
+					.findOneModelObject(ParticipantVariableWithValue.class,
 							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME,
-							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
 							participantId, variableName);
 
-			ParticipantVariableWithValue newParticipantVariableWithValue;
 			if (participantVariableWithValue == null) {
-				newParticipantVariableWithValue = new ParticipantVariableWithValue(
+				log.debug("Creating new participant variable");
+				// Create new participant variable
+				participantVariableWithValue = new ParticipantVariableWithValue(
 						participantId, InternalDateTime.currentTimeMillis(),
 						variableName,
 						variableValue == null ? "" : variableValue);
 				if (describesMediaUpload) {
-					newParticipantVariableWithValue
-							.setDescribesMediaUpload(true);
+					participantVariableWithValue.setDescribesMediaUpload(true);
 				}
 
 				databaseManagerService
-						.saveModelObject(newParticipantVariableWithValue);
+						.saveModelObject(participantVariableWithValue);
 			} else {
-				// Ensure that the new timestamp is definitely newer than the
+				log.debug("Reuseing existing participant variable");
+				// Reuse existing participant variable and ensure that the new
+				// timestamp is definitely newer than the
 				// existing ones
 				long creationTimestamp = InternalDateTime.currentTimeMillis();
 
@@ -690,16 +688,23 @@ public class VariablesManagerService {
 							.getTimestamp() + 1;
 				}
 
-				newParticipantVariableWithValue = new ParticipantVariableWithValue(
-						participantId, creationTimestamp, variableName,
-						variableValue == null ? "" : variableValue);
+				// Remember former values
+				participantVariableWithValue
+						.rememberFormerValue(maxVariableHistory);
+
+				// Write new values
+				participantVariableWithValue.setTimestamp(creationTimestamp);
+				participantVariableWithValue
+						.setValue(variableValue == null ? "" : variableValue);
+
 				if (describesMediaUpload) {
-					newParticipantVariableWithValue
-							.setDescribesMediaUpload(true);
+					participantVariableWithValue.setDescribesMediaUpload(true);
+				} else {
+					participantVariableWithValue.setDescribesMediaUpload(false);
 				}
 
 				databaseManagerService
-						.saveModelObject(newParticipantVariableWithValue);
+						.saveModelObject(participantVariableWithValue);
 			}
 
 			// Cache new value
@@ -707,9 +712,18 @@ public class VariablesManagerService {
 				if (participantsVariablesCache
 						.containsKey(participantId.toHexString())) {
 					participantsVariablesCache.get(participantId.toHexString())
-							.put(variableName, newParticipantVariableWithValue);
+							.put(variableName, participantVariableWithValue
+									.toMemoryVariable());
 				}
 			}
+		}
+	}
+
+	@Synchronized
+	public void participantInvalidateVariableCache(
+			final ObjectId participantId) {
+		synchronized (participantsVariablesCache) {
+			participantsVariablesCache.remove(participantId.toHexString());
 		}
 	}
 
@@ -1155,10 +1169,8 @@ public class VariablesManagerService {
 
 			// Find variable value for participant
 			val participantVariableWithValue = databaseManagerService
-					.findOneSortedModelObject(
-							ParticipantVariableWithValue.class,
+					.findOneModelObject(ParticipantVariableWithValue.class,
 							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME,
-							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
 							participant.getId(), variable);
 
 			if (participantVariableWithValue != null) {
@@ -1358,10 +1370,8 @@ public class VariablesManagerService {
 
 			// Get existing variable of receiving participant
 			val participantVariableWithValue = databaseManagerService
-					.findOneSortedModelObject(
-							ParticipantVariableWithValue.class,
+					.findOneModelObject(ParticipantVariableWithValue.class,
 							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME,
-							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
 							receivingParticipant.getId(), variable);
 
 			// Write variable for receiving participant
@@ -1545,10 +1555,8 @@ public class VariablesManagerService {
 
 			// Get existing reminder variable of participant
 			val participantReminderVariableWithValue = databaseManagerService
-					.findOneSortedModelObject(
-							ParticipantVariableWithValue.class,
+					.findOneModelObject(ParticipantVariableWithValue.class,
 							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME,
-							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
 							participantId, reminderVariable);
 
 			// Remember credit for participant
@@ -1577,10 +1585,8 @@ public class VariablesManagerService {
 
 			// Get existing credit variable of participant
 			val participantCreditVariableWithValue = databaseManagerService
-					.findOneSortedModelObject(
-							ParticipantVariableWithValue.class,
+					.findOneModelObject(ParticipantVariableWithValue.class,
 							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME,
-							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
 							participantId, variable);
 
 			// Write credit for participant

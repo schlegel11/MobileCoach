@@ -21,11 +21,15 @@ package ch.ethz.mc.services.internal;
  * the License.
  */
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
+import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.Queries;
+import ch.ethz.mc.model.memory.RuleEvaluationResult;
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.MicroDialog;
 import ch.ethz.mc.model.persistent.MicroDialogDecisionPoint;
@@ -39,6 +43,7 @@ import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.concepts.AbstractMonitoringRule;
 import ch.ethz.mc.model.persistent.types.AnswerTypes;
 import ch.ethz.mc.model.persistent.types.MonitoringRuleTypes;
+import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
 import ch.ethz.mc.tools.RuleEvaluator;
 import ch.ethz.mc.tools.StringHelpers;
@@ -74,6 +79,8 @@ public class RecursiveAbstractMonitoringRulesResolver {
 
 	// Internal objects
 	private boolean												completelyStop											= false;
+	private final Hashtable<String, Integer>					iterationCache;
+	private final Hashtable<String, Integer>					iterationLimitCache;
 
 	// Relevant for all cases
 	private final Participant									participant;
@@ -212,6 +219,9 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				Intervention.class, participant.getIntervention());
 
 		this.executionCase = executionCase;
+
+		iterationCache = new Hashtable<String, Integer>();
+		iterationLimitCache = new Hashtable<String, Integer>();
 
 		switch (executionCase) {
 			case MONITORING_RULES_DAILY:
@@ -552,27 +562,143 @@ public class RecursiveAbstractMonitoringRulesResolver {
 		}
 
 		// Execute all rules on this level
-		for (val nextRule : rulesOnCurrentLevel) {
+		ruleLoop: for (val rule : rulesOnCurrentLevel) {
 			// There are some more rules on this level to execute so do it
 
-			val lookIntoChildren = executeRule(nextRule);
+			final RuleEquationSignTypes ruleEquationSign = rule
+					.getRuleEquationSign();
+			RuleEvaluationResult ruleResult = null;
 
-			// If it was the final rule, then stop the whole iteration
-			if (completelyStop) {
-				return;
-			}
+			int currentIterationValue = 0;
+			int iterationExecution = 0;
+			boolean iterationCompleted;
+			do {
+				val nextRuleId = rule.getId().toHexString();
 
-			if (lookIntoChildren) {
-				log.debug("Check children");
-				// Check children (recursion)
-				executeRules(nextRule);
+				// Check current iteration for iterator cycles
+				if (ruleEquationSign.isIteratorEquationSignType()) {
+					// Get appropriate current value
+					if (iterationCache.containsKey(nextRuleId)) {
+						currentIterationValue = iterationCache.get(nextRuleId);
+						iterationExecution = iterationLimitCache
+								.get(nextRuleId);
+					} else {
+						val variablesWithValues = variablesManagerService
+								.getAllVariablesWithValuesOfParticipantAndSystem(
+										participant);
 
-				// If one of the children decided to cancel execution, stop
-				// execution, otherwise go on
+						ruleResult = RuleEvaluator.evaluateRule(
+								participant.getId(), participant.getLanguage(),
+								rule, variablesWithValues.values());
+
+						if (ruleResult.isEvaluatedSuccessful()) {
+							currentIterationValue = (int) ruleResult
+									.getCalculatedRuleValue();
+							iterationCache.put(nextRuleId,
+									currentIterationValue);
+
+							// Iteration validation
+							if (ruleEquationSign == RuleEquationSignTypes.STARTS_ITERATION_FROM_X_UP_TO_Y_AND_RESULT_IS_CURRENT
+									&& ruleResult
+											.getCalculatedRuleValue() > ruleResult
+													.getCalculatedRuleComparisonTermValue()) {
+
+								log.error(
+										"Iteration rule {} contains conditions that can never match (x < y)",
+										rule);
+
+								// Reset iteration
+								iterationCache.remove(nextRuleId);
+								iterationLimitCache.remove(nextRuleId);
+
+								continue ruleLoop;
+							} else if (ruleEquationSign == RuleEquationSignTypes.STARTS_REVERSE_ITERATION_FROM_X_DOWN_TO_Y_AND_RESULT_IS_CURRENT
+									&& ruleResult
+											.getCalculatedRuleValue() < ruleResult
+													.getCalculatedRuleComparisonTermValue()) {
+
+								log.error(
+										"Iteration rule {} contains conditions that can never match (x > y)",
+										rule);
+
+								continue ruleLoop;
+							}
+						} else {
+							log.error(
+									"Error when validating rule {} of participant {}: {}",
+									rule.getId(), participant.getId(),
+									ruleResult.getErrorMessage());
+							log.error(
+									"Stopping rule execution for participant {}",
+									participant.getId());
+
+							return;
+						}
+					}
+				}
+
+				// Execute rule
+				val executionResult = executeRule(rule, ruleResult,
+						currentIterationValue);
+
+				// Adjust iteration value
+				if (ruleEquationSign.isIteratorEquationSignType()) {
+					if (ruleEquationSign == RuleEquationSignTypes.STARTS_ITERATION_FROM_X_UP_TO_Y_AND_RESULT_IS_CURRENT) {
+						currentIterationValue++;
+					} else {
+						currentIterationValue--;
+					}
+					iterationExecution++;
+
+					iterationCache.put(nextRuleId, currentIterationValue);
+					iterationLimitCache.put(nextRuleId, iterationExecution);
+				}
+
+				// Remember if children should be checked and how to proceed
+				final boolean lookIntoChildren;
+				if (ruleEquationSign.isIteratorEquationSignType()) {
+					// For iterators children should always be checked, but only
+					// while the cycle is still running
+					iterationCompleted = executionResult;
+					lookIntoChildren = true;
+
+					if (iterationCompleted) {
+						// Reset iteration if completed
+						iterationCache.remove(nextRuleId);
+						iterationLimitCache.remove(nextRuleId);
+					}
+				} else {
+					// The result value defines if the iteration is complete for
+					// regular rules
+					iterationCompleted = true;
+					lookIntoChildren = executionResult;
+				}
+
+				// For stability reasons stop iteration if something is wrong
+				if (iterationExecution == ImplementationConstants.RULE_ITERATORS_AUTOMATIC_EXECUTION_LOOP_DETECTION_THRESHOLD) {
+					log.error(
+							"One of the iterations seems to be cyclic - stopping the execution of the same");
+
+					continue ruleLoop;
+				}
+
+				// If it was the final rule, then stop the whole iteration
 				if (completelyStop) {
 					return;
 				}
-			}
+
+				if (lookIntoChildren) {
+					log.debug("Check children");
+					// Check children (recursion)
+					executeRules(rule);
+
+					// If one of the children decided to cancel execution, stop
+					// execution, otherwise go on
+					if (completelyStop) {
+						return;
+					}
+				}
+			} while (!iterationCompleted);
 		}
 
 		return;
@@ -580,18 +706,27 @@ public class RecursiveAbstractMonitoringRulesResolver {
 
 	/**
 	 * Executes an {@link AbstractMonitoringRule} and returns if the result
-	 * should be the last to call for this run
+	 * should be the last to call for this run or if the iteration is completed
 	 *
 	 * @param rule
+	 * @param currentIterationValue
 	 * @return
-	 * @throws Exception
 	 */
-	private boolean executeRule(final AbstractMonitoringRule rule) {
-		val variablesWithValues = variablesManagerService
-				.getAllVariablesWithValuesOfParticipantAndSystem(participant);
+	private boolean executeRule(final AbstractMonitoringRule rule,
+			final RuleEvaluationResult preEvaluatedRuleResult,
+			final int currentIterationValue) {
+		RuleEvaluationResult ruleResult;
+		if (preEvaluatedRuleResult != null) {
+			ruleResult = preEvaluatedRuleResult;
+		} else {
+			val variablesWithValues = variablesManagerService
+					.getAllVariablesWithValuesOfParticipantAndSystem(
+							participant);
 
-		val ruleResult = RuleEvaluator.evaluateRule(participant.getId(),
-				participant.getLanguage(), rule, variablesWithValues.values());
+			ruleResult = RuleEvaluator.evaluateRule(participant.getId(),
+					participant.getLanguage(), rule,
+					variablesWithValues.values());
+		}
 
 		if (!ruleResult.isEvaluatedSuccessful()) {
 			log.error("Error when validating rule {} of participant {}: {}",
@@ -607,16 +742,25 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				ruleResult.isRuleMatchesEquationSign());
 
 		// Store result if it should be stored
-		if (rule.getStoreValueToVariableWithName() != null
-				&& !rule.getStoreValueToVariableWithName().equals("")) {
+		if (!StringUtils.isBlank(rule.getStoreValueToVariableWithName())) {
 			try {
-				variablesManagerService.writeVariableValueOfParticipant(
-						participant.getId(),
-						rule.getStoreValueToVariableWithName(),
-						ruleResult.isCalculatedRule()
-								? StringHelpers.cleanDoubleValue(
-										ruleResult.getCalculatedRuleValue())
-								: ruleResult.getTextRuleValue());
+				// Iterators don't store the rule result, but their current
+				// iteration value
+				if (ruleResult.isIterator()) {
+					variablesManagerService.writeVariableValueOfParticipant(
+							participant.getId(),
+							rule.getStoreValueToVariableWithName(),
+							iterationCache.get(rule.getId().toHexString())
+									.toString());
+				} else {
+					variablesManagerService.writeVariableValueOfParticipant(
+							participant.getId(),
+							rule.getStoreValueToVariableWithName(),
+							ruleResult.isCalculatedRule()
+									? StringHelpers.cleanDoubleValue(
+											ruleResult.getCalculatedRuleValue())
+									: ruleResult.getTextRuleValue());
+				}
 			} catch (final Exception e) {
 				log.warn("Could not write variable value: {}", e.getMessage());
 			}
@@ -775,6 +919,12 @@ public class RecursiveAbstractMonitoringRulesResolver {
 			}
 		}
 
-		return ruleResult.isRuleMatchesEquationSign();
+		// Special solutions for iterators
+		if (ruleResult.isIterator()) {
+			return ruleResult
+					.getCalculatedRuleComparisonTermValue() == currentIterationValue;
+		} else {
+			return ruleResult.isRuleMatchesEquationSign();
+		}
 	}
 }

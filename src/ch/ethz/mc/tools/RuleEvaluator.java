@@ -85,7 +85,7 @@ public class RuleEvaluator {
 			@Override
 			public Set<Option> options() {
 				return EnumSet.of(Option.DEFAULT_PATH_LEAF_TO_NULL,
-						Option.ALWAYS_RETURN_LIST, Option.SUPPRESS_EXCEPTIONS);
+						Option.SUPPRESS_EXCEPTIONS);
 			}
 		});
 	}
@@ -218,6 +218,12 @@ public class RuleEvaluator {
 				case CALCULATE_VALUE_BUT_RESULT_IS_ALWAYS_FALSE:
 					ruleEvaluationResult.setRuleMatchesEquationSign(false);
 					break;
+				case CREATE_TEXT_BUT_RESULT_IS_ALWAYS_TRUE:
+					ruleEvaluationResult.setRuleMatchesEquationSign(true);
+					break;
+				case CREATE_TEXT_BUT_RESULT_IS_ALWAYS_FALSE:
+					ruleEvaluationResult.setRuleMatchesEquationSign(false);
+					break;
 				case CALCULATED_VALUE_IS_SMALLER_THAN:
 					if (ruleEvaluationResult
 							.getCalculatedRuleValue() < ruleEvaluationResult
@@ -260,17 +266,12 @@ public class RuleEvaluator {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					break;
-				case CREATE_TEXT_BUT_RESULT_IS_ALWAYS_TRUE:
-					ruleEvaluationResult.setRuleMatchesEquationSign(true);
-					break;
-				case CREATE_TEXT_BUT_RESULT_IS_ALWAYS_FALSE:
-					ruleEvaluationResult.setRuleMatchesEquationSign(false);
-					break;
 				case CALCULATE_AMOUNT_OF_SELECT_MANY_VALUES:
 					ruleEvaluationResult.setRuleMatchesEquationSign(true);
 
 					String[] parts = ruleEvaluationResult.getTextRuleValue()
-							.split(ImplementationConstants.SELECT_MANY_SEPARATOR);
+							.split(ImplementationConstants.SELECT_MANY_SEPARATOR,
+									-1);
 
 					ruleEvaluationResult.setCalculatedRuleValue(parts.length);
 					ruleEvaluationResult
@@ -280,7 +281,7 @@ public class RuleEvaluator {
 				case CALCULATE_SUM_OF_SELECT_MANY_VALUES_AND_TRUE_IF_EQUALS:
 				case CALCULATE_SUM_OF_SELECT_MANY_VALUES_AND_TRUE_IF_BIGGER_THAN:
 					parts = ruleEvaluationResult.getTextRuleValue().split(
-							ImplementationConstants.SELECT_MANY_SEPARATOR);
+							ImplementationConstants.SELECT_MANY_SEPARATOR, -1);
 
 					double sum = 0d;
 
@@ -294,9 +295,17 @@ public class RuleEvaluator {
 						}
 					}
 
-					final double compareValue = Double
-							.parseDouble(ruleEvaluationResult
-									.getTextRuleComparisonTermValue());
+					double compareValue = 0;
+					if (!StringUtils.isBlank(ruleEvaluationResult
+							.getTextRuleComparisonTermValue())) {
+						try {
+							compareValue = Double
+									.parseDouble(ruleEvaluationResult
+											.getTextRuleComparisonTermValue());
+						} catch (final Exception e) {
+							// Do nothing
+						}
+					}
 
 					if (rule.getRuleEquationSign() == RuleEquationSignTypes.CALCULATE_SUM_OF_SELECT_MANY_VALUES_AND_TRUE_IF_EQUALS
 							&& sum == compareValue) {
@@ -357,7 +366,8 @@ public class RuleEvaluator {
 						ruleEvaluationResult.setTextRuleValue("");
 					} else {
 						parts = ruleEvaluationResult.getTextRuleValue().split(
-								ImplementationConstants.SELECT_MANY_SEPARATOR);
+								ImplementationConstants.SELECT_MANY_SEPARATOR,
+								-1);
 
 						val position = Integer.parseInt(ruleEvaluationResult
 								.getTextRuleComparisonTermValue()) - 1;
@@ -378,7 +388,7 @@ public class RuleEvaluator {
 					break;
 				case TEXT_VALUE_FROM_SELECT_MANY_AT_RANDOM_POSITION:
 					parts = ruleEvaluationResult.getTextRuleValue().split(
-							ImplementationConstants.SELECT_MANY_SEPARATOR);
+							ImplementationConstants.SELECT_MANY_SEPARATOR, -1);
 
 					val position = RandomUtils.nextInt(0, parts.length);
 
@@ -388,6 +398,7 @@ public class RuleEvaluator {
 					break;
 				case TEXT_VALUE_FROM_JSON_BY_JSON_PATH:
 					try {
+
 						val jsonResult = JsonPath.read(
 								ruleEvaluationResult.getTextRuleValue(),
 								"$" + ruleEvaluationResult
@@ -395,24 +406,30 @@ public class RuleEvaluator {
 
 						ruleEvaluationResult.setRuleMatchesEquationSign(false);
 
-						final StringBuffer resultsString = new StringBuffer();
-						val jsonResultsList = (LinkedList<?>) jsonResult;
-						for (int i = 0; i < jsonResultsList.size(); i++) {
-							val item = jsonResultsList.get(i);
+						if (jsonResult instanceof LinkedList) {
+							final StringBuffer resultsString = new StringBuffer();
 
-							if (item != null) {
-								ruleEvaluationResult
-										.setRuleMatchesEquationSign(true);
+							val jsonResultsList = (LinkedList<?>) jsonResult;
+							for (int i = 0; i < jsonResultsList.size(); i++) {
+								val item = jsonResultsList.get(i);
 
-								if (resultsString.length() > 0) {
-									resultsString.append(", ");
+								if (item != null) {
+									ruleEvaluationResult
+											.setRuleMatchesEquationSign(true);
+
+									if (resultsString.length() > 0) {
+										resultsString.append(", ");
+									}
+
+									resultsString.append(item.toString());
 								}
-
-								resultsString.append(item.toString());
 							}
+							ruleEvaluationResult
+									.setTextRuleValue(resultsString.toString());
+						} else {
+							ruleEvaluationResult
+									.setTextRuleValue(jsonResult.toString());
 						}
-						ruleEvaluationResult
-								.setTextRuleValue(resultsString.toString());
 					} catch (final Exception e) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(false);
 						ruleEvaluationResult.setTextRuleValue("");
@@ -531,6 +548,11 @@ public class RuleEvaluator {
 					ruleEvaluationResult.setCalculatedRuleValue(calcDaysDiff);
 					ruleEvaluationResult
 							.setTextRuleValue(String.valueOf(calcDaysDiff));
+					break;
+				case STARTS_ITERATION_FROM_X_UP_TO_Y_AND_RESULT_IS_CURRENT:
+				case STARTS_REVERSE_ITERATION_FROM_X_DOWN_TO_Y_AND_RESULT_IS_CURRENT:
+					ruleEvaluationResult.setRuleMatchesEquationSign(true);
+					ruleEvaluationResult.setIterator(true);
 					break;
 				case CHECK_VALUE_IN_VARIABLE_ACROSS_INVTERVENTIONS_AND_TRUE_IF_DUPLICATE_FOUND:
 					val duplicateFound = checkValueInVariableForDuplicates(

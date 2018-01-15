@@ -1,5 +1,8 @@
 package ch.ethz.mc.model.persistent.outdated;
 
+import ch.ethz.mc.model.ModelObject;
+import ch.ethz.mc.model.persistent.Participant;
+import ch.ethz.mc.model.persistent.ScreeningSurvey;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -25,22 +28,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
-import ch.ethz.mc.model.ModelObject;
-import ch.ethz.mc.model.persistent.Participant;
-import ch.ethz.mc.model.persistent.ScreeningSurvey;
 
 /**
- * {@link ModelObject} to represent an {@link Intervention}
- *
- * An {@link Intervention} describes the whole project consisting of a
- * {@link ScreeningSurvey}, {@link MonitoringRule}s and {@link Participant}s.
- * It's the heart of the whole system.
+ * CAUTION: Will only be used for conversion from data model 11 to 12
  *
  * @author Andreas Filler
- */
-/**
- * @author Andreas Filler
- *
  */
 @NoArgsConstructor
 @AllArgsConstructor

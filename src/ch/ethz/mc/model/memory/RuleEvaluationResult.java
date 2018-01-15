@@ -46,7 +46,14 @@ public class RuleEvaluationResult {
 	 */
 	@Getter
 	@Setter
-	private boolean	isCalculatedRule					= false;
+	private boolean	calculatedRule						= false;
+
+	/**
+	 * The information if the rule is an iterator
+	 */
+	@Getter
+	@Setter
+	private boolean	iterator							= false;
 
 	/**
 	 * The result of the rule evaluation of calculated rules
