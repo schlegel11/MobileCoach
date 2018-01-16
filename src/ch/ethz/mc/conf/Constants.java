@@ -140,7 +140,7 @@ public class Constants {
 	@Getter
 	private static String	mediaUploadFolder					= "/mc_data/MediaUpload";
 	@Getter
-	private static String	mediaDirectFileFolder				= "/mc_data/MediaDirectFiles";
+	private static String	mediaDirectFolder				= "/mc_data/MediaDirectFiles";
 	@Getter
 	private static String	mediaCacheFolder					= "/mc_data/MediaCache";
 	@Getter

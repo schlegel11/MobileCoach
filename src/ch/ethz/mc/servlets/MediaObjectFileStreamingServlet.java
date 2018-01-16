@@ -188,7 +188,7 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 			// Note (DR): I'm adding this possibility to serve files directly from a folder to server videos and thumbnails for PersonalityChange.
 			// The goal is that we can easily replace files if we need them in a different quality or version.
 			
-			String root = Constants.getMediaDirectFileFolder();
+			String root = Constants.getMediaDirectFolder();
 			
 			final File folder = new File(root);
 			file = new File(folder, pathParts[1]); // only use first part: security restriction
