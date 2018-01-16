@@ -142,7 +142,12 @@ public class RichConversationService {
 	public void sendMessage(String sender, ObjectId recipient, String message) throws ExecutionException {
 
 		final String START_CONVERSATION_PREFIX = "start-conversation:";
-		if (message.startsWith(START_CONVERSATION_PREFIX)) {
+		final String CONSIDER_CONVERSATION_PREFIX = "consider-conversation:";
+		
+		boolean start = message.startsWith(START_CONVERSATION_PREFIX);
+		boolean consider = message.startsWith(CONSIDER_CONVERSATION_PREFIX);
+		
+		if (start || consider) {
 			
 			String interventionId = null;
 			String conversation;
@@ -176,7 +181,11 @@ public class RichConversationService {
 					engine.startConversation(conversation, conversationManagementService.getRepository(interventionId));
 				} else {
 					engine = prepareChatEngine(participant, chatEngineStateStore, interventionId);
-					engine.startConversation(conversation);
+					if (start){
+						engine.startConversation(conversation);
+					} else {
+						engine.considerConversation(conversation);
+					}
 				}
 			} catch (Exception e) {
 				log.error(e.getMessage() + " " + StringHelpers.getStackTraceAsLine(e), e);
