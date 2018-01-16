@@ -8,11 +8,13 @@ import java.time.LocalTime;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 
 import org.bson.types.ObjectId;
 import org.mockito.exceptions.verification.NeverWantedButInvoked;
 
+import ch.ethz.mc.MC;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.services.SurveyExecutionManagerService;
@@ -56,7 +58,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class RichConversationService {
 
-	private MessagingService					messagingService;
+	private MessagingService		messagingService;
+	
 	private ConversationManagementService		conversationManagementService;
 
 	private VariablesManagerService				variablesManagerService;
@@ -64,12 +67,12 @@ public class RichConversationService {
 	private SurveyExecutionManagerService		surveyService;
 	private LinkedHashMap<ObjectId, ChatEngine>	chatEngines	= new LinkedHashMap<>();
 
-	private RichConversationService(MessagingService mattermostMessagingService,
+	private RichConversationService(MessagingService messagingService,
 			ConversationManagementService conversationManagementService,
 			VariablesManagerService variablesManagerService,
 			DatabaseManagerService dBManagerService,
 			SurveyExecutionManagerService surveyService) throws Exception {
-		this.messagingService = mattermostMessagingService;
+		this.messagingService = messagingService;
 		this.conversationManagementService = conversationManagementService;
 		this.surveyService = surveyService;
 		this.variablesManagerService = variablesManagerService;
@@ -134,9 +137,8 @@ public class RichConversationService {
 			dBManagerService.saveModelObject(ces);
 		}
 
-		this.messagingService.startReceiving(); // now that all the listeners
-												// have been set, we can start
-												// receiving
+		this.messagingService.startReceiving();
+		// now that all the listeners have been set, we can start receiving
 	}
 
 	public void sendMessage(String sender, ObjectId recipient, String message) throws ExecutionException {
@@ -232,7 +234,8 @@ public class RichConversationService {
 		VariableStore variableStore = createVariableStore(participant.getId());
 		MediaLibrary mediaLibrary = new InDataBaseMediaLibrary(dBManagerService, surveyService, participant.getId(), participant.getIntervention());
 
-		MattermostConnector ui = new MattermostConnector(participant.getId());
+		MattermostConnector mattermostConnector = new MattermostConnector(participant.getId());
+		ConversationUI ui = new CommunicationSwitch(mattermostConnector, participant);
 		HelpersRepository helpers = new HelpersRepository();
 		
 		
@@ -275,13 +278,13 @@ public class RichConversationService {
 		
 		new TestHelpersFactory(engine, ui).addHelpers(helpers);
 
-		messagingService.setListener(participant.getId(), ui);
+		messagingService.setListener(participant.getId(), mattermostConnector);
 
 		ui.setUserReplyListener(new UserReplyListener() {
 			@Override
 			public void userReplied(Input input) {
 
-				ObjectId participantId = ui.getRecipient();
+				ObjectId participantId = mattermostConnector.getRecipient();
 
 				if (chatEngines.containsKey(participantId)) {
 					// make sure this is handled in another thread, so that we can continue immediately
@@ -386,6 +389,65 @@ public class RichConversationService {
 					participantId, participant);
 		}
 		return variableStore;
+	}
+	
+	private class CommunicationSwitch implements ConversationUI {
+		
+		private final MattermostConnector mattermostConnector;
+		private final Participant participant;
+		
+		public CommunicationSwitch(MattermostConnector mattermostConnector, Participant participant){
+			this.mattermostConnector = mattermostConnector;
+			this.participant = participant;
+		}
+
+		@Override
+		public void showMessage(Message message) {
+			if ("EmailOrSMS".equals(message.channel)){
+				MC.getInstance().getInterventionExecutionManagerService().sendMessageOutsideOfApp(participant, false, message.text);
+			} else if ("EmailOrSMS-Supervisor".equals(message.channel)){
+				MC.getInstance().getInterventionExecutionManagerService().sendMessageOutsideOfApp(participant, true, message.text);
+			} else {
+				mattermostConnector.showMessage(message);
+			}
+		}
+
+		@Override
+		public void showTyping(String sender) {
+			mattermostConnector.showTyping(sender);
+		}
+
+		@Override
+		public void setUserReplyListener(UserReplyListener listener) {
+			mattermostConnector.setUserReplyListener(listener);
+		}
+
+		@Override
+		public void delay(Runnable callback, Long milliseconds) {
+			mattermostConnector.delay(callback, milliseconds);
+		}
+
+		@Override
+		public void cancelDelay() {
+			mattermostConnector.cancelDelay();
+			
+		}
+
+		@Override
+		public void setDelayEnabled(boolean enabled) {
+			mattermostConnector.setDelayEnabled(enabled);
+		}
+
+		@Override
+		public long getMillisecondsUntil(LocalTime time) {
+			return mattermostConnector.getMillisecondsUntil(time);
+		}
+
+		@Override
+		public boolean supportsReminders() {
+			return mattermostConnector.supportsReminders();
+		}
+		
 	}
 
 	// WebSocket Listener

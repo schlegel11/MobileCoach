@@ -1090,6 +1090,20 @@ public class InterventionExecutionManagerService {
 				messageToSend, true, InternalDateTime.currentTimeMillis(),
 				null, null, advisorMessage, false, outsideOfApp);
 	}
+	
+	/**
+	 * Sends a "manual" message (for sending messages from xml scripts)
+	 *
+	 * @param participant
+	 * @param advisorMessage
+	 * @param message
+	 */
+	@Synchronized
+	public void sendMessageOutsideOfApp(final Participant participant, final boolean advisorMessage, final String message) {
+		dialogMessageCreateManuallyOrByRulesIncludingMediaObject(participant,
+				message, true, InternalDateTime.currentTimeMillis(),
+				null, null, advisorMessage, false, true);
+	}
 
 	/*
 	 * PRIVATE Getter methods
