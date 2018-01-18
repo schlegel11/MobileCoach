@@ -808,15 +808,15 @@ public class InterventionExecutionManagerService {
 									.getMessageTextToSend();
 
 							// Calculate time to send message
-							final int hourToSendMessage = monitoringRule
+							final double hourToSendMessage = monitoringRule
 									.getHourToSendMessage();
 							final Calendar timeToSendMessage = Calendar
 									.getInstance();
 							timeToSendMessage.setTimeInMillis(InternalDateTime
 									.currentTimeMillis());
-							timeToSendMessage.set(Calendar.HOUR_OF_DAY,
-									hourToSendMessage);
-							timeToSendMessage.set(Calendar.MINUTE, 0);
+							int hour = (int) hourToSendMessage;
+							timeToSendMessage.set(Calendar.HOUR_OF_DAY, hour);
+							timeToSendMessage.set(Calendar.MINUTE, (int)(60 * (hourToSendMessage - hour)));
 							timeToSendMessage.set(Calendar.SECOND, 0);
 							timeToSendMessage.set(Calendar.MILLISECOND, 0);
 

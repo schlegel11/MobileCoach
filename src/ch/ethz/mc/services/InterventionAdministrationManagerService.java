@@ -1155,7 +1155,7 @@ public class InterventionAdministrationManagerService {
 
 	@Synchronized
 	public void monitoringRuleChangeHourToSendMessage(
-			final MonitoringRule monitoringRule, final int newValue) {
+			final MonitoringRule monitoringRule, final double newValue) {
 		monitoringRule.setHourToSendMessage(newValue);
 
 		databaseManagerService.saveModelObject(monitoringRule);
