@@ -15,6 +15,7 @@ import org.bson.types.ObjectId;
 import org.mockito.exceptions.verification.NeverWantedButInvoked;
 
 import ch.ethz.mc.MC;
+import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.services.SurveyExecutionManagerService;
@@ -29,6 +30,7 @@ import ch.ethz.mobilecoach.app.Option;
 import ch.ethz.mobilecoach.app.Post;
 import ch.ethz.mobilecoach.chatlib.engine.ChatEngine;
 import ch.ethz.mobilecoach.chatlib.engine.ConversationRepository;
+import ch.ethz.mobilecoach.chatlib.engine.Evaluator;
 import ch.ethz.mobilecoach.chatlib.engine.ExecutionException;
 import ch.ethz.mobilecoach.chatlib.engine.HelpersRepository;
 import ch.ethz.mobilecoach.chatlib.engine.Input;
@@ -193,6 +195,8 @@ public class RichConversationService {
 				log.error(e.getMessage() + " " + StringHelpers.getStackTraceAsLine(e), e);
 				log.error("Could not start conversation: " + restString);
 			}
+			
+			
 
 		} else {
 			// stop conversation
@@ -203,6 +207,9 @@ public class RichConversationService {
 			// send a message
 			messagingService.sendMessage(sender, recipient, message);
 		}
+		
+		// update channel name
+		messagingService.setChannelName(recipient);
 	}
 
 	private ChatEngine prepareChatEngine(Participant participant,

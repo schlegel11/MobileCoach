@@ -239,6 +239,8 @@ public class Constants {
 	private static String	mattermostCoachUserName				= "";
 	@Getter
 	private static String	mattermostCoachUserPassword			= "";
+	@Getter
+	private static String	mattermostChannelName				= "000 $participantId";
 	
 	
 	// french configuration

@@ -39,12 +39,17 @@ import org.json.JSONObject;
 
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.Queries;
+import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
+import ch.ethz.mc.services.internal.InDataBaseVariableStore;
 import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mobilecoach.app.Post;
 import ch.ethz.mobilecoach.app.Results;
+import ch.ethz.mobilecoach.chatlib.engine.Evaluator;
 import ch.ethz.mobilecoach.chatlib.engine.Input;
+import ch.ethz.mobilecoach.chatlib.engine.variables.InMemoryVariableStore;
+import ch.ethz.mobilecoach.chatlib.engine.variables.VariableStore;
 import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
 import ch.ethz.mobilecoach.model.persistent.OneSignalUserConfiguration;
 import ch.ethz.mobilecoach.model.persistent.UserLastMessage;
@@ -208,13 +213,12 @@ public class MattermostMessagingService implements MessagingService {
 			
 			if(null == managementService.findOneSignalObject(recipient)){
 				log.error("Could not send push since OnSignal config missing: " + recipient);
-				return;
-			}
-			
-			try {
-				sendPushNotification(recipient, post, channelId, userId);
-			} catch (Exception e){
-				log.error("Error sending push notification: " + StringHelpers.getStackTraceAsLine(e), e);
+			} else {
+				try {
+					sendPushNotification(recipient, post, channelId, userId);
+				} catch (Exception e){
+					log.error("Error sending push notification: " + StringHelpers.getStackTraceAsLine(e), e);
+				}
 			}
 		}
 	}
@@ -731,6 +735,15 @@ public class MattermostMessagingService implements MessagingService {
 			}, 
 			10000 
 		);
+		
+	}
+
+	
+	@Override
+	public void setChannelName(ObjectId recipient) {
+		
+		// update channel name
+		managementService.updateChannelName(recipient);
 		
 	}
 }

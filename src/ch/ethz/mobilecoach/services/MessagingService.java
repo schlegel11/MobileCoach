@@ -20,4 +20,6 @@ public interface MessagingService {
 			
 	public void setListener(ObjectId recipient, MessageListener listener);
 	
+	public void setChannelName(ObjectId recipient);
+	
 }

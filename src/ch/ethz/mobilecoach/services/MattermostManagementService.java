@@ -15,8 +15,11 @@ import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.InDataBaseVariableStore;
 import ch.ethz.mc.services.internal.VariablesManagerService;
+import ch.ethz.mobilecoach.chatlib.engine.Evaluator;
+import ch.ethz.mobilecoach.chatlib.engine.ExecutionException;
 import ch.ethz.mobilecoach.chatlib.engine.translation.SimpleTranslator;
 import ch.ethz.mobilecoach.chatlib.engine.variables.VariableException;
+import ch.ethz.mobilecoach.chatlib.engine.variables.VariableStore;
 import ch.ethz.mobilecoach.interventions.PathMate;
 import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
 import ch.ethz.mobilecoach.model.persistent.OneSignalUserConfiguration;
@@ -204,8 +207,9 @@ public class MattermostManagementService {
 		MattermostUserConfiguration config = createMattermostUser(userName, userId, team.teamId, language.substring(0, 2));
 		addUserToTeam(config.getUserId(), team.teamId);
 		
-		String coachingChannelName = userName + " (" + userCoachName + ") " + userId;
-		String managerChannelName = userName + " (" + PathMate.SUPPORT_NAME + ") " + userId;
+		String channelName = getChannelName(participantId);
+		String coachingChannelName = channelName + " Coach";
+		String managerChannelName = channelName + " Team";
 		
 		MattermostChannel coachingChannel = createPrivateChannel(userCoachName, coachingChannelName, "BOT", team.teamId);
 		MattermostChannel managerChannel = createPrivateChannel(PathMate.SUPPORT_NAME, managerChannelName, "HUMAN", team.teamId);
@@ -500,6 +504,56 @@ public class MattermostManagementService {
 
 		public String getUrl() {
 			return userConfiguration.getUrl();
+		}
+	}
+	
+	private VariableStore createVariableStore(ObjectId participantId) {
+		Participant participant = databaseManagerService
+				.getModelObjectById(Participant.class, participantId);
+		VariableStore variableStore = new InDataBaseVariableStore(variablesManagerService,
+				participantId, participant);
+
+		return variableStore;
+	}
+
+	public String getChannelName(ObjectId recipient){
+		String nameWithPlaceholders = Constants.getMattermostChannelName();
+		String newName;
+		try {
+			newName = new Evaluator(createVariableStore(recipient)).evaluate(nameWithPlaceholders);
+		} catch (ExecutionException e) {
+			return nameWithPlaceholders;
+		}
+	    
+	    return newName;
+	}
+
+
+	public void updateChannelName(ObjectId recipient) {
+		String name = getChannelName(recipient);
+
+		MattermostUserConfiguration config = getUserConfiguration(recipient);
+		
+		{
+			String channelId = config.getChannels().get(0).getId();
+		    String teamId = config.getTeamId();
+			
+			JSONObject json = new JSONObject()
+					.put("id", channelId)
+					.put("display_name", name + " Coach");
+	
+			new MattermostTask<Void>(api_url + "teams/"+teamId+"/channels/update", json).setToken(adminUserToken).run();
+		}
+		
+		{
+			String channelId = config.getChannels().get(1).getId();
+			String teamId = config.getTeamId();
+			
+			JSONObject json = new JSONObject()
+					.put("id", channelId)
+					.put("display_name", name + " Team");
+	
+			new MattermostTask<Void>(api_url + "teams/"+teamId+"/channels/update", json).setToken(adminUserToken).run();
 		}
 	}
 }
