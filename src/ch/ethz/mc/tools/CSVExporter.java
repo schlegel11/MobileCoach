@@ -26,13 +26,18 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.List;
 
-import ch.ethz.mc.model.memory.DataTable;
-import ch.ethz.mc.model.ui.UIModelObject;
-import ch.ethz.mc.model.ui.results.UIDialogMessageWithParticipantForResults;
-import ch.ethz.mc.model.ui.results.UIVariableWithParticipantForResults;
+import org.apache.commons.csv.CSVFormat;
 
 import com.googlecode.jcsv.writer.CSVWriter;
 import com.googlecode.jcsv.writer.internal.CSVWriterBuilder;
+
+import ch.ethz.mc.model.memory.I18nStringsObject;
+import ch.ethz.mc.model.memory.ParticipantVariablesDataTable;
+import ch.ethz.mc.model.persistent.subelements.LString;
+import ch.ethz.mc.model.ui.UIModelObject;
+import ch.ethz.mc.model.ui.results.UIDialogMessageWithParticipantForResults;
+import ch.ethz.mc.model.ui.results.UIVariableWithParticipantForResults;
+import lombok.val;
 
 /**
  * Exports specific {@link UIModelObject}s as CSV
@@ -45,12 +50,14 @@ public class CSVExporter {
 	 * @return
 	 * @throws IOException
 	 */
-	public static InputStream convertDataTableToCSV(final DataTable dataTable)
-			throws IOException {
+	public static InputStream convertParticipantVariablesDataTableToCSV(
+			final ParticipantVariablesDataTable dataTable) throws IOException {
 		final StringWriter stringWriter = new StringWriter();
 
-		final CSVWriter<DataTable.DataEntry> csvWriter = new CSVWriterBuilder<DataTable.DataEntry>(
-				stringWriter).entryConverter(new CSVDataTableEntryConverter())
+		final CSVWriter<ParticipantVariablesDataTable.DataEntry> csvWriter = new CSVWriterBuilder<ParticipantVariablesDataTable.DataEntry>(
+				stringWriter)
+						.entryConverter(
+								new CSVParticipantVariablesDataTableEntryConverter())
 						.build();
 
 		csvWriter.write(dataTable.getHeaders());
@@ -112,5 +119,32 @@ public class CSVExporter {
 		csvWriter.close();
 
 		return new ByteArrayInputStream(stringWriter.toString().getBytes());
+	}
+
+	/**
+	 * Exports {@link LString}s with keys for i18n
+	 * 
+	 * @param items
+	 * @return
+	 * @throws IOException
+	 */
+	public static InputStream convertI18nStringsObjectsToCSV(
+			final List<I18nStringsObject> items) throws IOException {
+		final StringWriter stringWriter = new StringWriter();
+
+		val csvPrinter = CSVFormat.EXCEL.withDelimiter(';')
+				.withHeader(CSVI18nStringsObjectEntryConverter.getHeaders())
+				.print(stringWriter);
+
+		for (val item : items) {
+			csvPrinter.printRecord(
+					CSVI18nStringsObjectEntryConverter.convertEntry(item));
+		}
+
+		csvPrinter.flush();
+		csvPrinter.close();
+
+		return new ByteArrayInputStream(
+				stringWriter.toString().getBytes("UTF-8"));
 	}
 }

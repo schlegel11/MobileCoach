@@ -42,7 +42,7 @@ import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.Messages;
-import ch.ethz.mc.model.memory.DataTable;
+import ch.ethz.mc.model.memory.ParticipantVariablesDataTable;
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
@@ -185,7 +185,7 @@ public class InterventionResultsComponentWithController
 
 					@Override
 					public InputStream getStream() {
-						final DataTable dataTable = new DataTable();
+						final ParticipantVariablesDataTable dataTable = new ParticipantVariablesDataTable();
 
 						int i = 0;
 						for (val participantId : selectedUIParticipantsIds) {
@@ -211,7 +211,7 @@ public class InterventionResultsComponentWithController
 
 						try {
 							log.info("Converting table to CSV...");
-							return CSVExporter.convertDataTableToCSV(dataTable);
+							return CSVExporter.convertParticipantVariablesDataTableToCSV(dataTable);
 						} catch (final IOException e) {
 							log.error("Error at creating CSV: {}",
 									e.getMessage());

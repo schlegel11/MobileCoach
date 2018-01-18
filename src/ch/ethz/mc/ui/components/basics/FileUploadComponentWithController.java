@@ -26,12 +26,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-import ch.ethz.mc.conf.AdminMessageStrings;
-import ch.ethz.mc.conf.Constants;
-
 import com.vaadin.server.ErrorHandler;
 import com.vaadin.ui.Upload.FailedEvent;
 import com.vaadin.ui.Upload.FailedListener;
@@ -40,6 +34,12 @@ import com.vaadin.ui.Upload.StartedEvent;
 import com.vaadin.ui.Upload.StartedListener;
 import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.Upload.SucceededListener;
+
+import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.conf.Constants;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Extends the media object integration component with a controller
@@ -50,7 +50,16 @@ import com.vaadin.ui.Upload.SucceededListener;
 @Log4j2
 public class FileUploadComponentWithController extends FileUploadComponent {
 
-	private UploadListener listener;
+	private UploadListener	listener;
+
+	private String			acceptedFileExtension;
+
+	public FileUploadComponentWithController(
+			final String acceptedFileExtension) {
+		this();
+
+		this.acceptedFileExtension = acceptedFileExtension;
+	}
 
 	public FileUploadComponentWithController() {
 		super();
@@ -61,6 +70,8 @@ public class FileUploadComponentWithController extends FileUploadComponent {
 		getUploadComponent().addSucceededListener(uploader);
 		getUploadComponent().addFailedListener(uploader);
 		getUploadComponent().setErrorHandler(uploader);
+
+		acceptedFileExtension = Constants.getFileExtension();
 	}
 
 	public void setListener(final UploadListener listener) {
@@ -92,7 +103,7 @@ public class FileUploadComponentWithController extends FileUploadComponent {
 			}
 
 			if (!temporaryFileExtension.toLowerCase()
-					.equals(Constants.getFileExtension())) {
+					.equals(acceptedFileExtension.toLowerCase())) {
 				return null;
 			}
 

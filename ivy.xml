@@ -4,6 +4,7 @@
 	<!ENTITY commons-lang3.version "3.4">
 	<!ENTITY commons-collection.version "3.2.1">
 	<!ENTITY commons-io.version "2.4">
+	<!ENTITY commons-csv.version "1.5">
 	<!ENTITY geronimo-validation_1.0_spec.version "1.1">
 	<!ENTITY bval-bundle.version "0.5">
 	<!ENTITY vaadin.version "7.6.7">
@@ -56,6 +57,7 @@
 		<dependency org="commons-collections" name="commons-collections"
 			rev="&commons-collection.version;" />
 		<dependency org="commons-io" name="commons-io" rev="&commons-io.version;" />
+		<dependency org="org.apache.commons" name="commons-csv" rev="&commons-csv.version;" />
 
 		<!-- Apache Bean validation -->
 		<!-- currently not required <dependency org="org.apache.geronimo.specs" 
