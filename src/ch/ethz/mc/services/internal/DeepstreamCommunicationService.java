@@ -22,10 +22,12 @@ package ch.ethz.mc.services.internal;
  */
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -82,7 +84,8 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 
 	private RESTManagerService						restManagerService;
 
-	private final HashSet<String>					loggedInUsers;
+	private final Set<String>						loggedInUsers;
+	private final Hashtable<String, Integer>		usersMessagesSentSinceLaseLogin;
 
 	private final int								substringLength;
 
@@ -108,6 +111,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 			final String deepstreamParticipantRole,
 			final String deepstreamSupervisorRole) {
 		loggedInUsers = new HashSet<String>();
+		usersMessagesSentSinceLaseLogin = new Hashtable<String, Integer>();
 
 		host = deepstreamHost;
 
@@ -207,9 +211,10 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 	 * @param surveyLink
 	 * @param contentObjectLink
 	 * @param messageExpectsAnswer
+	 * @return Number of message since last connect of user
 	 */
 	@Synchronized
-	public void asyncSendMessage(final DialogOption dialogOption,
+	public int asyncSendMessage(final DialogOption dialogOption,
 			final ObjectId dialogMessageId, final int messageOrder,
 			final String message, final AnswerTypes answerType,
 			final String answerOptions,
@@ -222,6 +227,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 						InternalDateTime.currentTimeMillis());
 
 		val timestamp = InternalDateTime.currentTimeMillis();
+		int messagesSentSinceLastConnect = 1;
 		try {
 			val participantOrSupervisorIdentifier = dialogOption.getData()
 					.substring(substringLength);
@@ -279,6 +285,18 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 
 			client.event.emit(DeepstreamConstants.PATH_MESSAGE_UPDATE
 					+ participantOrSupervisorIdentifier, messageObject);
+
+			synchronized (usersMessagesSentSinceLaseLogin) {
+				if (usersMessagesSentSinceLaseLogin
+						.containsKey(participantOrSupervisorIdentifier)) {
+					messagesSentSinceLastConnect = usersMessagesSentSinceLaseLogin
+							.get(participantOrSupervisorIdentifier) + 1;
+				}
+				usersMessagesSentSinceLaseLogin.put(
+						participantOrSupervisorIdentifier,
+						messagesSentSinceLastConnect);
+			}
+
 		} catch (final Exception e) {
 			log.warn("Could not send message to {}: {}", dialogOption.getData(),
 					e.getMessage());
@@ -288,7 +306,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 							DialogMessageStatusTypes.PREPARED_FOR_SENDING,
 							timestamp);
 
-			return;
+			return 0;
 		}
 
 		if (messageExpectsAnswer) {
@@ -302,6 +320,8 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 							DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
 							timestamp);
 		}
+
+		return messagesSentSinceLastConnect;
 	}
 
 	/**
@@ -686,6 +706,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 
 			for (val user : client.presence.getAll()) {
 				loggedInUsers.add(user);
+				usersMessagesSentSinceLaseLogin.put(user, 0);
 			}
 
 			client.presence.subscribe(this);
@@ -1016,6 +1037,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 	@Override
 	public void onClientLogin(final String user) {
 		loggedInUsers.add(user);
+		usersMessagesSentSinceLaseLogin.put(user, 0);
 	}
 
 	/*
