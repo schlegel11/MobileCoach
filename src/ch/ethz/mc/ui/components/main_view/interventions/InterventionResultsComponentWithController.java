@@ -211,7 +211,9 @@ public class InterventionResultsComponentWithController
 
 						try {
 							log.info("Converting table to CSV...");
-							return CSVExporter.convertParticipantVariablesDataTableToCSV(dataTable);
+							return CSVExporter
+									.convertParticipantVariablesDataTableToCSV(
+											dataTable);
 						} catch (final IOException e) {
 							log.error("Error at creating CSV: {}",
 									e.getMessage());

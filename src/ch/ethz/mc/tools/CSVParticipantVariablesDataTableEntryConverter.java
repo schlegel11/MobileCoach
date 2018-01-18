@@ -39,7 +39,8 @@ public class CSVParticipantVariablesDataTableEntryConverter
 		return dataEntry.toStringArray();
 	}
 
-	public static DataEntry getHeaders(final ParticipantVariablesDataTable dataTable) {
+	public static DataEntry getHeaders(
+			final ParticipantVariablesDataTable dataTable) {
 		return dataTable.getHeaders();
 	}
 
