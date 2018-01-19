@@ -326,12 +326,12 @@ public class CommunicationManagerService {
 				break;
 			case EXTERNAL_ID:
 			case SUPERVISOR_EXTERNAL_ID:
-				int messagesSentSinceLastLogin = 0;
+				int visibleMessagesSentSinceLogout = 0;
 				if (dialogOption.getData().startsWith(
 						ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM)
 						&& deepstreamActive) {
 					try {
-						messagesSentSinceLastLogin = deepstreamCommunicationService
+						visibleMessagesSentSinceLogout = deepstreamCommunicationService
 								.asyncSendMessage(dialogOption,
 										dialogMessage.getId(), messageOrder,
 										message, dialogMessage.getAnswerType(),
@@ -350,13 +350,16 @@ public class CommunicationManagerService {
 							"No appropriate handler could be found for external id dialog option with data {}",
 							dialogOption.getData());
 				}
-				if (pushNotificationsActive && messagesSentSinceLastLogin > 0
+				// Only send push notifications if
+				// (1) it is switched on in general
+				// (2) if the message was really sent to out
+				// (3) it is a visible message
+				if (pushNotificationsActive && visibleMessagesSentSinceLogout > 0
 						&& dialogMessage
 								.getType() != DialogMessageTypes.COMMAND) {
 					try {
 						pushNotificationService.asyncSendPushNotification(
-								dialogOption, message,
-								messagesSentSinceLastLogin);
+								dialogOption, message, visibleMessagesSentSinceLogout);
 					} catch (final Exception e) {
 						log.warn("Could not send push notification: {}",
 								e.getMessage());

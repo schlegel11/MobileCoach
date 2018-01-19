@@ -170,11 +170,11 @@ public class PushNotificationService {
 	 * 
 	 * @param dialogOption
 	 * @param messageWithPotentialNewMessageSplitter
-	 * @param messagesSentSinceLastLogin
+	 * @param messagesSentSinceLastLogout
 	 */
 	public void asyncSendPushNotification(final DialogOption dialogOption,
 			final String messageWithPotentialNewMessageSplitter,
-			final int messagesSentSinceLastLogin) {
+			final int messagesSentSinceLastLogout) {
 		for (val message : messageWithPotentialNewMessageSplitter.split(
 				ImplementationConstants.PLACEHOLDER_NEW_MESSAGE_APP_IDENTIFIER)) {
 			for (val unSplittedToken : dialogOption
@@ -238,12 +238,12 @@ public class PushNotificationService {
 				if (iOSActive && unSplittedToken.startsWith(IOS_IDENTIFIER)) {
 					sendIOSPushNotification(dialogOption, unSplittedToken,
 							messageToSend, messageEncryped,
-							messagesSentSinceLastLogin);
+							messagesSentSinceLastLogout);
 				} else if (androidActive
 						&& unSplittedToken.startsWith(ANDROID_IDENTIFIER)) {
 					sendAndroidPushNotification(dialogOption, unSplittedToken,
 							messageToSend, messageEncryped,
-							messagesSentSinceLastLogin);
+							messagesSentSinceLastLogout);
 				}
 			}
 		}
@@ -259,18 +259,18 @@ public class PushNotificationService {
 	 * @param unSplittedToken
 	 * @param message
 	 * @param messageEncrypted
-	 * @param messagesSentSinceLastLogin
+	 * @param messagesSentSinceLastLogout
 	 */
 	private void sendIOSPushNotification(final DialogOption dialogOption,
 			final String unSplittedToken, String message,
 			final boolean messageEncrypted,
-			final int messagesSentSinceLastLogin) {
+			final int messagesSentSinceLastLogout) {
 
 		// Unencrypted messages only send out the first text
 		if (!messageEncrypted) {
-			if (messagesSentSinceLastLogin == 2) {
+			if (messagesSentSinceLastLogout == 2) {
 				message = "...";
-			} else if (messagesSentSinceLastLogin > 2) {
+			} else if (messagesSentSinceLastLogout > 2) {
 				message = null;
 			}
 		}
@@ -293,7 +293,7 @@ public class PushNotificationService {
 					payloadBuilder.setAlertBody(message);
 					payloadBuilder.setSoundFileName(DEFAULT);
 				}
-				payloadBuilder.setBadgeNumber(messagesSentSinceLastLogin);
+				payloadBuilder.setBadgeNumber(messagesSentSinceLastLogout);
 			}
 
 			final String payload = payloadBuilder
@@ -352,18 +352,18 @@ public class PushNotificationService {
 	 * @param unSplittedToken
 	 * @param message
 	 * @param messageEncrypted
-	 * @param messagesSentSinceLastLogin
+	 * @param messagesSentSinceLastLogout
 	 */
 	private void sendAndroidPushNotification(final DialogOption dialogOption,
 			final String unSplittedToken, String message,
 			final boolean messageEncrypted,
-			final int messagesSentSinceLastLogin) {
+			final int messagesSentSinceLastLogout) {
 
 		// Unencrypted messages only send out the first text
 		if (!messageEncrypted) {
-			if (messagesSentSinceLastLogin == 2) {
+			if (messagesSentSinceLastLogout == 2) {
 				message = "...";
-			} else if (messagesSentSinceLastLogin > 2) {
+			} else if (messagesSentSinceLastLogout > 2) {
 				return;
 			}
 		}

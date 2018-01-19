@@ -85,7 +85,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 	private RESTManagerService						restManagerService;
 
 	private final Set<String>						loggedInUsers;
-	private final Hashtable<String, Integer>		usersMessagesSentSinceLaseLogin;
+	private final Hashtable<String, Integer>		allVisibleUsersMessagesSentSinceLastLogout;
 
 	private final int								substringLength;
 
@@ -111,7 +111,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 			final String deepstreamParticipantRole,
 			final String deepstreamSupervisorRole) {
 		loggedInUsers = new HashSet<String>();
-		usersMessagesSentSinceLaseLogin = new Hashtable<String, Integer>();
+		allVisibleUsersMessagesSentSinceLastLogout = new Hashtable<String, Integer>();
 
 		host = deepstreamHost;
 
@@ -211,7 +211,8 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 	 * @param surveyLink
 	 * @param contentObjectLink
 	 * @param messageExpectsAnswer
-	 * @return Number of message since last connect of user
+	 * @return Number of visible message sent to this user since the last logout
+	 *         or zero if no message has been sent
 	 */
 	@Synchronized
 	public int asyncSendMessage(final DialogOption dialogOption,
@@ -227,7 +228,8 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 						InternalDateTime.currentTimeMillis());
 
 		val timestamp = InternalDateTime.currentTimeMillis();
-		int messagesSentSinceLastConnect = 1;
+		int messagesSentSinceLastLougout = 0;
+
 		try {
 			val participantOrSupervisorIdentifier = dialogOption.getData()
 					.substring(substringLength);
@@ -286,17 +288,23 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 			client.event.emit(DeepstreamConstants.PATH_MESSAGE_UPDATE
 					+ participantOrSupervisorIdentifier, messageObject);
 
-			synchronized (usersMessagesSentSinceLaseLogin) {
-				if (usersMessagesSentSinceLaseLogin
-						.containsKey(participantOrSupervisorIdentifier)) {
-					messagesSentSinceLastConnect = usersMessagesSentSinceLaseLogin
-							.get(participantOrSupervisorIdentifier) + 1;
+			// If it's not a visible message and the user is currently not
+			// logged in
+			if (!isCommand && !loggedInUsers
+					.contains(participantOrSupervisorIdentifier)) {
+				synchronized (allVisibleUsersMessagesSentSinceLastLogout) {
+					if (allVisibleUsersMessagesSentSinceLastLogout
+							.containsKey(participantOrSupervisorIdentifier)) {
+						messagesSentSinceLastLougout = allVisibleUsersMessagesSentSinceLastLogout
+								.get(participantOrSupervisorIdentifier) + 1;
+					} else {
+						messagesSentSinceLastLougout++;
+					}
+					allVisibleUsersMessagesSentSinceLastLogout.put(
+							participantOrSupervisorIdentifier,
+							messagesSentSinceLastLougout);
 				}
-				usersMessagesSentSinceLaseLogin.put(
-						participantOrSupervisorIdentifier,
-						messagesSentSinceLastConnect);
 			}
-
 		} catch (final Exception e) {
 			log.warn("Could not send message to {}: {}", dialogOption.getData(),
 					e.getMessage());
@@ -321,7 +329,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 							timestamp);
 		}
 
-		return messagesSentSinceLastConnect;
+		return messagesSentSinceLastLougout;
 	}
 
 	/**
@@ -706,7 +714,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 
 			for (val user : client.presence.getAll()) {
 				loggedInUsers.add(user);
-				usersMessagesSentSinceLaseLogin.put(user, 0);
+				allVisibleUsersMessagesSentSinceLastLogout.put(user, 0);
 			}
 
 			client.presence.subscribe(this);
@@ -1037,7 +1045,6 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 	@Override
 	public void onClientLogin(final String user) {
 		loggedInUsers.add(user);
-		usersMessagesSentSinceLaseLogin.put(user, 0);
 	}
 
 	/*
@@ -1048,6 +1055,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 	@Override
 	public void onClientLogout(final String user) {
 		loggedInUsers.remove(user);
+		allVisibleUsersMessagesSentSinceLastLogout.put(user, 0);
 	}
 
 	@Override
