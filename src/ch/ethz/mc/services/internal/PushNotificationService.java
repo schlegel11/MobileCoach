@@ -175,8 +175,12 @@ public class PushNotificationService {
 	public void asyncSendPushNotification(final DialogOption dialogOption,
 			final String messageWithPotentialNewMessageSplitter,
 			final int messagesSentSinceLastLogout) {
+
+		int subMessage = 0;
 		for (val message : messageWithPotentialNewMessageSplitter.split(
 				ImplementationConstants.PLACEHOLDER_NEW_MESSAGE_APP_IDENTIFIER)) {
+			subMessage++;
+
 			for (val unSplittedToken : dialogOption
 					.getPushNotificationTokens()) {
 
@@ -238,12 +242,12 @@ public class PushNotificationService {
 				if (iOSActive && unSplittedToken.startsWith(IOS_IDENTIFIER)) {
 					sendIOSPushNotification(dialogOption, unSplittedToken,
 							messageToSend, messageEncryped,
-							messagesSentSinceLastLogout);
+							messagesSentSinceLastLogout, subMessage);
 				} else if (androidActive
 						&& unSplittedToken.startsWith(ANDROID_IDENTIFIER)) {
 					sendAndroidPushNotification(dialogOption, unSplittedToken,
 							messageToSend, messageEncryped,
-							messagesSentSinceLastLogout);
+							messagesSentSinceLastLogout, subMessage);
 				}
 			}
 		}
@@ -260,16 +264,21 @@ public class PushNotificationService {
 	 * @param message
 	 * @param messageEncrypted
 	 * @param messagesSentSinceLastLogout
+	 * @param subMessage
 	 */
 	private void sendIOSPushNotification(final DialogOption dialogOption,
 			final String unSplittedToken, String message,
 			final boolean messageEncrypted,
-			final int messagesSentSinceLastLogout) {
+			final int messagesSentSinceLastLogout, final int subMessage) {
 
 		// Unencrypted messages only send out the first text
 		if (!messageEncrypted) {
 			if (messagesSentSinceLastLogout == 2) {
-				message = "...";
+				if (subMessage == 1) {
+					message = "...";
+				} else {
+					message = null;
+				}
 			} else if (messagesSentSinceLastLogout > 2) {
 				message = null;
 			}
@@ -353,16 +362,21 @@ public class PushNotificationService {
 	 * @param message
 	 * @param messageEncrypted
 	 * @param messagesSentSinceLastLogout
+	 * @param subMessage
 	 */
 	private void sendAndroidPushNotification(final DialogOption dialogOption,
 			final String unSplittedToken, String message,
 			final boolean messageEncrypted,
-			final int messagesSentSinceLastLogout) {
+			final int messagesSentSinceLastLogout, final int subMessage) {
 
 		// Unencrypted messages only send out the first text
 		if (!messageEncrypted) {
 			if (messagesSentSinceLastLogout == 2) {
-				message = "...";
+				if (subMessage == 1) {
+					message = "...";
+				} else {
+					message = null;
+				}
 			} else if (messagesSentSinceLastLogout > 2) {
 				return;
 			}

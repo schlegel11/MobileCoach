@@ -354,12 +354,13 @@ public class CommunicationManagerService {
 				// (1) it is switched on in general
 				// (2) if the message was really sent to out
 				// (3) it is a visible message
-				if (pushNotificationsActive && visibleMessagesSentSinceLogout > 0
-						&& dialogMessage
+				if (pushNotificationsActive
+						&& visibleMessagesSentSinceLogout > 0 && dialogMessage
 								.getType() != DialogMessageTypes.COMMAND) {
 					try {
 						pushNotificationService.asyncSendPushNotification(
-								dialogOption, message, visibleMessagesSentSinceLogout);
+								dialogOption, message,
+								visibleMessagesSentSinceLogout);
 					} catch (final Exception e) {
 						log.warn("Could not send push notification: {}",
 								e.getMessage());

@@ -63,6 +63,7 @@ import io.deepstream.DeepstreamRuntimeErrorHandler;
 import io.deepstream.Event;
 import io.deepstream.LoginResult;
 import io.deepstream.PresenceEventListener;
+import io.deepstream.Record;
 import io.deepstream.Topic;
 import lombok.Getter;
 import lombok.Synchronized;
@@ -85,7 +86,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 	private RESTManagerService						restManagerService;
 
 	private final Set<String>						loggedInUsers;
-	private final Hashtable<String, Integer>		allVisibleUsersMessagesSentSinceLastLogout;
+	private final Hashtable<String, Integer>		allUsersVisibleMessagesSentSinceLastLogout;
 
 	private final int								substringLength;
 
@@ -111,7 +112,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 			final String deepstreamParticipantRole,
 			final String deepstreamSupervisorRole) {
 		loggedInUsers = new HashSet<String>();
-		allVisibleUsersMessagesSentSinceLastLogout = new Hashtable<String, Integer>();
+		allUsersVisibleMessagesSentSinceLastLogout = new Hashtable<String, Integer>();
 
 		host = deepstreamHost;
 
@@ -222,21 +223,22 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 			final String textBasedMediaObjectContent, final String surveyLink,
 			final String contentObjectLink,
 			final boolean messageExpectsAnswer) {
+
 		val dialogMessage = interventionExecutionManagerService
 				.dialogMessageStatusChangesForSending(dialogMessageId,
 						DialogMessageStatusTypes.SENDING,
 						InternalDateTime.currentTimeMillis());
 
 		val timestamp = InternalDateTime.currentTimeMillis();
-		int messagesSentSinceLastLougout = 0;
+		int messagesSentSinceLastLogout = 0;
 
+		Record record = null;
 		try {
 			val participantOrSupervisorIdentifier = dialogOption.getData()
 					.substring(substringLength);
 
-			val record = client.record
-					.getRecord(DeepstreamConstants.PATH_MESSAGES
-							+ participantOrSupervisorIdentifier);
+			record = client.record.getRecord(DeepstreamConstants.PATH_MESSAGES
+					+ participantOrSupervisorIdentifier);
 
 			val isCommand = dialogMessage
 					.getType() == DialogMessageTypes.COMMAND;
@@ -288,21 +290,26 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 			client.event.emit(DeepstreamConstants.PATH_MESSAGE_UPDATE
 					+ participantOrSupervisorIdentifier, messageObject);
 
-			// If it's not a visible message and the user is currently not
-			// logged in
-			if (!isCommand && !loggedInUsers
-					.contains(participantOrSupervisorIdentifier)) {
-				synchronized (allVisibleUsersMessagesSentSinceLastLogout) {
-					if (allVisibleUsersMessagesSentSinceLastLogout
+			// If it's not a visible message ignore it
+			if (!isCommand) {
+				synchronized (allUsersVisibleMessagesSentSinceLastLogout) {
+					if (loggedInUsers
+							.contains(participantOrSupervisorIdentifier)) {
+						// If user is logged in remember as one (for late logout
+						// users)
+						messagesSentSinceLastLogout = 1;
+					} else if (allUsersVisibleMessagesSentSinceLastLogout
 							.containsKey(participantOrSupervisorIdentifier)) {
-						messagesSentSinceLastLougout = allVisibleUsersMessagesSentSinceLastLogout
+						// User is not logged in and well known
+						messagesSentSinceLastLogout = allUsersVisibleMessagesSentSinceLastLogout
 								.get(participantOrSupervisorIdentifier) + 1;
 					} else {
-						messagesSentSinceLastLougout++;
+						// User is not logged ind and not known
+						messagesSentSinceLastLogout = 1;
 					}
-					allVisibleUsersMessagesSentSinceLastLogout.put(
+					allUsersVisibleMessagesSentSinceLastLogout.put(
 							participantOrSupervisorIdentifier,
-							messagesSentSinceLastLougout);
+							messagesSentSinceLastLogout);
 				}
 			}
 		} catch (final Exception e) {
@@ -315,6 +322,10 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 							timestamp);
 
 			return 0;
+		} finally {
+			if (record != null) {
+				record.discard();
+			}
 		}
 
 		if (messageExpectsAnswer) {
@@ -329,7 +340,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 							timestamp);
 		}
 
-		return messagesSentSinceLastLougout;
+		return messagesSentSinceLastLogout;
 	}
 
 	/**
@@ -341,13 +352,15 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 	@Synchronized
 	public void asyncAcknowledgeMessage(final DialogMessage dialogMessage,
 			final ReceivedMessage receivedMessage) {
+
+		Record record = null;
 		try {
 			val timestamp = InternalDateTime.currentTimeMillis();
 
 			val participantIdentifier = receivedMessage.getSender()
 					.substring(substringLength);
 
-			val record = client.record.getRecord(
+			record = client.record.getRecord(
 					DeepstreamConstants.PATH_MESSAGES + participantIdentifier);
 
 			val messageOrder = dialogMessage.getOrder();
@@ -454,6 +467,10 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 		} catch (final Exception e) {
 			log.warn("Could not acknowledge message to {}: {}",
 					receivedMessage.getSender(), e.getMessage());
+		} finally {
+			if (record != null) {
+				record.discard();
+			}
 		}
 	}
 
@@ -467,13 +484,15 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 	public void asyncInformAboutAnsweringTimeout(
 			final DialogOption dialogOption,
 			final DialogMessage dialogMessage) {
+
+		Record record = null;
 		try {
 			val timestamp = InternalDateTime.currentTimeMillis();
 
 			val participantIdentifier = dialogOption.getData()
 					.substring(substringLength);
 
-			val record = client.record.getRecord(
+			record = client.record.getRecord(
 					DeepstreamConstants.PATH_MESSAGES + participantIdentifier);
 
 			val messageOrder = dialogMessage.getOrder();
@@ -498,6 +517,10 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 		} catch (final Exception e) {
 			log.warn("Could not inform about answering timeout: {}",
 					e.getMessage());
+		} finally {
+			if (record != null) {
+				record.discard();
+			}
 		}
 	}
 
@@ -529,12 +552,12 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 		try {
 			String secretFromRecord;
 			synchronized (client) {
-				val record = client.record
-						.getRecord(DeepstreamConstants.PATH_MESSAGES
+				val snapshot = client.record
+						.snapshot(DeepstreamConstants.PATH_MESSAGES
 								+ participantOrSupervisorIdentifier);
 
-				secretFromRecord = record.get(DeepstreamConstants.SECRET)
-						.getAsString();
+				secretFromRecord = snapshot.getData().getAsJsonObject()
+						.get(DeepstreamConstants.SECRET).getAsString();
 			}
 
 			if (StringUtils.isBlank(secretFromRecord)) {
@@ -607,6 +630,10 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 				record.delete();
 
 				return null;
+			} else {
+				if (record != null) {
+					record.discard();
+				}
 			}
 		}
 
@@ -635,13 +662,15 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 	 */
 	public void cleanupForParticipantOrSupervisor(
 			final String participantOrSupervisorId) {
+
+		Record record = null;
 		try {
 			restManagerService.destroyToken(
 					ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
 							+ participantOrSupervisorId);
 
 			synchronized (client) {
-				val record = client.record
+				record = client.record
 						.getRecord(DeepstreamConstants.PATH_MESSAGES
 								+ participantOrSupervisorId);
 
@@ -651,6 +680,10 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 			log.warn(
 					"Could not cleanup deepstream for participant/supervisor {}",
 					participantOrSupervisorId);
+		} finally {
+			if (record != null) {
+				record.discard();
+			}
 		}
 	}
 
@@ -714,7 +747,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 
 			for (val user : client.presence.getAll()) {
 				loggedInUsers.add(user);
-				allVisibleUsersMessagesSentSinceLastLogout.put(user, 0);
+				allUsersVisibleMessagesSentSinceLastLogout.put(user, 0);
 			}
 
 			client.presence.subscribe(this);
@@ -993,13 +1026,13 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 
 		long newestTimestamp = 0;
 
-		val record = client.record.getRecord(
+		val snapshot = client.record.snapshot(
 				DeepstreamConstants.PATH_MESSAGES + participantOrSupervisorId);
 
 		val jsonObject = new JsonObject();
 		val jsonObjects = new JsonObject();
 
-		final Iterator<Entry<String, JsonElement>> iterator = record.get()
+		final Iterator<Entry<String, JsonElement>> iterator = snapshot.getData()
 				.getAsJsonObject().entrySet().iterator();
 		while (iterator.hasNext()) {
 			val element = iterator.next();
@@ -1055,7 +1088,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 	@Override
 	public void onClientLogout(final String user) {
 		loggedInUsers.remove(user);
-		allVisibleUsersMessagesSentSinceLastLogout.put(user, 0);
+		allUsersVisibleMessagesSentSinceLastLogout.put(user, 0);
 	}
 
 	@Override
