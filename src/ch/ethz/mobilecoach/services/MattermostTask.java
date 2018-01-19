@@ -76,7 +76,7 @@ public class MattermostTask<RESULT> {
 		return null;
 	}
 	
-	RESULT handleResponse(HttpMethodBase method) throws Exception {
+	protected RESULT handleResponse(HttpMethodBase method) throws Exception {
 		return null;
 	};
 	

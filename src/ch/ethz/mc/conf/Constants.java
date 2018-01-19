@@ -234,6 +234,12 @@ public class Constants {
 	@Getter
 	private static String	mattermostManagerUserPassword		= "";
 	@Getter
+	private static String	mattermostMonitoringUserId			= "";
+	@Getter
+	private static String	mattermostMonitoringUserName		= "support-monitoring";
+	@Getter
+	private static String	mattermostMonitoringUserPassword	= "";
+	@Getter
 	private static String	mattermostCoachUserId				= "";
 	@Getter
 	private static String	mattermostCoachUserName				= "";

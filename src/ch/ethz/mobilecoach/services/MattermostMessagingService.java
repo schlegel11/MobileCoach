@@ -326,7 +326,7 @@ public class MattermostMessagingService implements MessagingService {
 		this.mcUserToken = new MattermostTask<String>(managementService.api_url + "users/login", json){
 
 			@Override
-			String handleResponse(HttpMethodBase method){
+			protected String handleResponse(HttpMethodBase method){
 				return method.getResponseHeader("Token").getValue();
 			}
 		}.run();
