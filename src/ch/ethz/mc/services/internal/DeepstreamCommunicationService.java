@@ -549,15 +549,16 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 	 */
 	public boolean checkSecret(final String participantOrSupervisorIdentifier,
 			final String secret) {
+		Record record = null;
 		try {
 			String secretFromRecord;
 			synchronized (client) {
-				val snapshot = client.record
-						.snapshot(DeepstreamConstants.PATH_MESSAGES
+				record = client.record
+						.getRecord(DeepstreamConstants.PATH_MESSAGES
 								+ participantOrSupervisorIdentifier);
 
-				secretFromRecord = snapshot.getData().getAsJsonObject()
-						.get(DeepstreamConstants.SECRET).getAsString();
+				secretFromRecord = record.get(DeepstreamConstants.SECRET)
+						.getAsString();
 			}
 
 			if (StringUtils.isBlank(secretFromRecord)) {
@@ -572,6 +573,10 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 		} catch (final Exception e) {
 			log.warn("Could not check secret of participant/supervisor {}",
 					participantOrSupervisorIdentifier);
+		} finally {
+			if (record != null) {
+				record.discard();
+			}
 		}
 		return true;
 	}
