@@ -613,13 +613,16 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 			record.set(DeepstreamConstants.SECRET, secret);
 			record.set(DeepstreamConstants.ROLE,
 					supervisorRequest ? supervisorRole : participantRole);
+
+			record.discard();
 		}
 
-		val record = client.record.getRecord(DeepstreamConstants.PATH_MESSAGES
-				+ participantOrSupervisorExternalId);
-
+		Record record = null;
 		boolean createdSucessfully = false;
 		try {
+			record = client.record.getRecord(DeepstreamConstants.PATH_MESSAGES
+					+ participantOrSupervisorExternalId);
+
 			createdSucessfully = interventionExecutionManagerService
 					.checkAccessRightsAndRegisterParticipantOrSupervisorExternallyWithoutSurvey(
 							nickname,
