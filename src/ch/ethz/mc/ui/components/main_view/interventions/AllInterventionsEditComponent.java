@@ -174,15 +174,16 @@ public class AllInterventionsEditComponent extends AbstractCustomComponent {
 		renameButton.setEnabled(interventionSelected);
 		editButton.setEnabled(interventionSelected);
 		duplicateButton.setEnabled(interventionSelected);
-		deleteButton.setEnabled(interventionSelected);
 
 		reportButton.setEnabled(interventionSelected);
 		resultsButton.setEnabled(interventionSelected);
 		problemsButton.setEnabled(interventionSelected);
 
 		if (interventionSelected && !interventionMonitoringActive) {
+			deleteButton.setEnabled(true);
 			i18nButton.setEnabled(true);
 		} else {
+			deleteButton.setEnabled(false);
 			i18nButton.setEnabled(false);
 		}
 

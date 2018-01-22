@@ -320,7 +320,8 @@ public class RuleEvaluator {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 					ruleEvaluationResult.setCalculatedRuleValue(sum);
-					ruleEvaluationResult.setTextRuleValue(String.valueOf(sum));
+					ruleEvaluationResult.setTextRuleValue(
+							StringHelpers.cleanDoubleValue(sum));
 					break;
 				case TEXT_VALUE_EQUALS:
 					if (ruleEvaluationResult.getTextRuleValue().trim()
