@@ -209,28 +209,53 @@ public class VariablesManagerService {
 						readWriteParticipantVariableValue);
 			}
 		}
+		
+		// Retrieve all stored participant variables and add them
+		synchronized (participantsVariablesCache) {
+			if (participantsVariablesCache
+					.containsKey(participant.getId().toHexString())) {
+				// Use cache
+				val participantVariablesCache = participantsVariablesCache
+						.get(participant.getId().toHexString());
+
+				variablesWithValues.putAll(participantVariablesCache);
+			} else {
+				// Create cache
+				log.debug("Creating cache for participant {} ",
+						participant.getId().toHexString());
+
+				val participantVariablesWithValues = databaseManagerService
+						.findSortedModelObjects(
+								ParticipantVariableWithValue.class,
+								Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT,
+								Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
+								participant.getId());
+
+				val participantVariablesCache = new Hashtable<String, MemoryVariable>();
+				for (val participantVariableWithValue : participantVariablesWithValues) {
+					if (!participantVariablesCache.containsKey(participantVariableWithValue.getName())){
+						participantVariablesCache.put(
+								participantVariableWithValue.getName(),
+								participantVariableWithValue.toMemoryVariable());
+					}
+				}
+
+				participantsVariablesCache.put(
+						participant.getId().toHexString(),
+						participantVariablesCache);
+
+				variablesWithValues.putAll(participantVariablesCache);
+			}
+		}
+		
 
 		// Retrieve all stored variables
-		val participantVariablesWithValues = databaseManagerService
-				.findSortedModelObjects(
-						ParticipantVariableWithValue.class,
-						Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT,
-						Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
-						participant.getId());
 		val interventionVariablesWithValues = databaseManagerService
 				.findModelObjects(
 						InterventionVariableWithValue.class,
 						Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION,
 						participant.getIntervention());
 
-		// Add all variables of participant
-		for (val participantVariableWithValue : participantVariablesWithValues) {
-			if (!variablesWithValues.containsKey(participantVariableWithValue
-					.getName())) {
-				variablesWithValues.put(participantVariableWithValue.getName(),
-						participantVariableWithValue);
-			}
-		}
 
 		// Add also variables of intervention, but only if not overwritten for
 		// participant
@@ -531,9 +556,11 @@ public class VariablesManagerService {
 							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME,
 							Queries.PARTICIPANT_VARIABLE_WITH_VALUE__SORT_BY_TIMESTAMP_DESC,
 							participantId, variableName);
+			
+			ParticipantVariableWithValue newParticipantVariableWithValue;
 
 			if (participantVariableWithValue == null) {
-				val newParticipantVariableWithValue = new ParticipantVariableWithValue(
+				newParticipantVariableWithValue = new ParticipantVariableWithValue(
 						participantId, InternalDateTime.currentTimeMillis(),
 						variableName, variableValue == null ? ""
 								: variableValue);
@@ -555,7 +582,7 @@ public class VariablesManagerService {
 							.getTimestamp() + 1;
 				}
 
-				val newParticipantVariableWithValue = new ParticipantVariableWithValue(
+				newParticipantVariableWithValue = new ParticipantVariableWithValue(
 						participantId, creationTimestamp, variableName,
 						variableValue == null ? "" : variableValue);
 				if (describesMediaUpload) {
@@ -566,6 +593,24 @@ public class VariablesManagerService {
 				databaseManagerService
 						.saveModelObject(newParticipantVariableWithValue);
 			}
+			
+			// Cache new value
+			synchronized (participantsVariablesCache) {
+				if (participantsVariablesCache
+						.containsKey(participantId.toHexString())) {
+					participantsVariablesCache.get(participantId.toHexString())
+							.put(variableName, newParticipantVariableWithValue
+									.toMemoryVariable());
+				}
+			}
+		}
+	}
+	
+	@Synchronized
+	public void participantInvalidateVariableCache(
+			final ObjectId participantId) {
+		synchronized (participantsVariablesCache) {
+			participantsVariablesCache.remove(participantId.toHexString());
 		}
 	}
 
