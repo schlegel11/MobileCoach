@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.bson.types.ObjectId;
 
@@ -78,6 +79,8 @@ public class VariablesManagerService {
 
 	private final HashSet<String>			externallyReadableSystemVariableNames;
 	private final HashSet<String>			externallyReadableParticipantVariableNames;
+
+	private final ConcurrentHashMap<String, Hashtable<String, MemoryVariable>>	participantsVariablesCache;
 
 	private static SimpleDateFormat			dayInWeekFormatter	= new SimpleDateFormat(
 																		"u");
@@ -139,6 +142,9 @@ public class VariablesManagerService {
 		for (val variable : SystemVariables.EXTERNALLY_READABLE_PARTICIPANT_VARIABLE_NAMES) {
 			externallyReadableParticipantVariableNames.add(variable);
 		}
+		
+		// Init cache
+		participantsVariablesCache = new ConcurrentHashMap<String, Hashtable<String, MemoryVariable>>();
 
 		log.info("Started.");
 	}
