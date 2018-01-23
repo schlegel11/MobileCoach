@@ -370,6 +370,9 @@ public class VariablesManagerService {
 				} catch (UnknownHostException e) {
 					return "[ip address not available]";
 				}
+			case systemTimestamp:
+				return new Long(System.currentTimeMillis()).toString();
+				
 		}
 		return null;
 	}
