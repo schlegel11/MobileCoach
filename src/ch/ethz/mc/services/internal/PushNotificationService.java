@@ -55,12 +55,19 @@ public class PushNotificationService {
 	final static String							KEY					= "key";
 	final static String							TO					= "to";
 	final static String							DATA				= "data";
+	final static String							NOTIFICATION		= "notification";
+	final static String							BODY				= "body";
+	final static String							SOUND				= "sound";
+	final static String							DEFAULT				= "default";
 	final static String							BAD_DEVICE_TOKEN	= "BadDeviceToken";
 
 	public final static String					GOOGLE_FCM_API_URL	= "https://fcm.googleapis.com/fcm/send";
 
 	private final boolean						iOSActive;
 	private final boolean						androidActive;
+
+	private final boolean						iOSEncrypted;
+	private final boolean						androidEncrypted;
 
 	private final String						iOSAppIdentifier;
 	private final String						androidAuthKey;
@@ -69,7 +76,9 @@ public class PushNotificationService {
 	final Encoder								encoder;
 
 	private PushNotificationService(final boolean pushNotificationsIOSActive,
+			final boolean pushNotificationsIOSEncrypted,
 			final boolean pushNotificationsAndroidActive,
+			final boolean pushNotificationsAndroidEncrypted,
 			final boolean pushNotificationsProductionMode,
 			final String pushNotificationsIOSAppIdentifier,
 			final String pushNotificationsIOSCertificateFile,
@@ -77,6 +86,9 @@ public class PushNotificationService {
 			final String pushNotificationsAndroidAuthKey) throws Exception {
 		iOSActive = pushNotificationsIOSActive;
 		androidActive = pushNotificationsAndroidActive;
+
+		iOSEncrypted = pushNotificationsIOSEncrypted;
+		androidEncrypted = pushNotificationsAndroidEncrypted;
 
 		iOSAppIdentifier = pushNotificationsIOSAppIdentifier;
 		androidAuthKey = pushNotificationsAndroidAuthKey;
@@ -101,7 +113,9 @@ public class PushNotificationService {
 
 	public static PushNotificationService prepare(
 			final boolean pushNotificationsIOSActive,
+			final boolean pushNotificationsIOSEncrypted,
 			final boolean pushNotificationsAndroidActive,
+			final boolean pushNotificationsAndroidEncrypted,
 			final boolean pushNotificationsProductionMode,
 			final String pushNotificationsIOSAppIdentifier,
 			final String pushNotificationsIOSCertificateFile,
@@ -110,7 +124,9 @@ public class PushNotificationService {
 		log.info("Preparing service...");
 		if (instance == null) {
 			instance = new PushNotificationService(pushNotificationsIOSActive,
+					pushNotificationsIOSEncrypted,
 					pushNotificationsAndroidActive,
+					pushNotificationsAndroidEncrypted,
 					pushNotificationsProductionMode,
 					pushNotificationsIOSAppIdentifier,
 					pushNotificationsIOSCertificateFile,
@@ -149,10 +165,22 @@ public class PushNotificationService {
 	/*
 	 * Public methods
 	 */
+	/**
+	 * Sends push notifications asynchronously
+	 * 
+	 * @param dialogOption
+	 * @param messageWithPotentialNewMessageSplitter
+	 * @param messagesSentSinceLastLogout
+	 */
 	public void asyncSendPushNotification(final DialogOption dialogOption,
-			final String messageWithPotentialNewMessageSplitter) {
+			final String messageWithPotentialNewMessageSplitter,
+			final int messagesSentSinceLastLogout) {
+
+		int subMessage = 0;
 		for (val message : messageWithPotentialNewMessageSplitter.split(
 				ImplementationConstants.PLACEHOLDER_NEW_MESSAGE_APP_IDENTIFIER)) {
+			subMessage++;
+
 			for (val unSplittedToken : dialogOption
 					.getPushNotificationTokens()) {
 
@@ -162,49 +190,64 @@ public class PushNotificationService {
 								ImplementationConstants.PLACEHOLDER_LINKED_MEDIA_OBJECT,
 								"🖼");
 
-				String encryptedMessage;
-				try {
-					final String key = dialogOption.getData().substring(0, 16);
-					final String iv = "4537823546456123";
+				String messageToSend;
+				boolean messageEncryped;
+				if (iOSEncrypted && unSplittedToken.startsWith(IOS_IDENTIFIER)
+						|| androidEncrypted && unSplittedToken
+								.startsWith(ANDROID_IDENTIFIER)) {
+					// Encrypt message
+					messageEncryped = true;
+					try {
+						final String key = dialogOption.getData().substring(0,
+								16);
+						final String iv = "4537823546456123";
 
-					final Cipher cipher = Cipher
-							.getInstance("AES/CBC/NoPadding");
-					final int blockSize = cipher.getBlockSize();
+						final Cipher cipher = Cipher
+								.getInstance("AES/CBC/NoPadding");
+						final int blockSize = cipher.getBlockSize();
 
-					final byte[] dataBytes = messageContent
-							.getBytes(Charsets.UTF_8);
-					int plaintextLength = dataBytes.length;
-					if (plaintextLength % blockSize != 0) {
-						plaintextLength = plaintextLength + blockSize
-								- plaintextLength % blockSize;
+						final byte[] dataBytes = messageContent
+								.getBytes(Charsets.UTF_8);
+						int plaintextLength = dataBytes.length;
+						if (plaintextLength % blockSize != 0) {
+							plaintextLength = plaintextLength + blockSize
+									- plaintextLength % blockSize;
+						}
+
+						final byte[] plaintext = new byte[plaintextLength];
+						System.arraycopy(dataBytes, 0, plaintext, 0,
+								dataBytes.length);
+
+						final SecretKeySpec keyspec = new SecretKeySpec(
+								key.getBytes(), "AES");
+						final IvParameterSpec ivspec = new IvParameterSpec(
+								iv.getBytes());
+
+						cipher.init(Cipher.ENCRYPT_MODE, keyspec, ivspec);
+						final byte[] encrypted = cipher.doFinal(plaintext);
+
+						messageToSend = Base64.getEncoder()
+								.encodeToString(encrypted);
+					} catch (final Exception e) {
+						log.error("Error at encoding message: ",
+								e.getMessage());
+						continue;
 					}
-
-					final byte[] plaintext = new byte[plaintextLength];
-					System.arraycopy(dataBytes, 0, plaintext, 0,
-							dataBytes.length);
-
-					final SecretKeySpec keyspec = new SecretKeySpec(
-							key.getBytes(), "AES");
-					final IvParameterSpec ivspec = new IvParameterSpec(
-							iv.getBytes());
-
-					cipher.init(Cipher.ENCRYPT_MODE, keyspec, ivspec);
-					final byte[] encrypted = cipher.doFinal(plaintext);
-
-					encryptedMessage = Base64.getEncoder()
-							.encodeToString(encrypted);
-				} catch (final Exception e) {
-					log.error("Error at encoding message: ", e.getMessage());
-					continue;
+				} else {
+					// Unencrypted message
+					messageEncryped = false;
+					messageToSend = messageContent;
 				}
 
 				if (iOSActive && unSplittedToken.startsWith(IOS_IDENTIFIER)) {
 					sendIOSPushNotification(dialogOption, unSplittedToken,
-							encryptedMessage);
+							messageToSend, messageEncryped,
+							messagesSentSinceLastLogout, subMessage);
 				} else if (androidActive
 						&& unSplittedToken.startsWith(ANDROID_IDENTIFIER)) {
 					sendAndroidPushNotification(dialogOption, unSplittedToken,
-							encryptedMessage);
+							messageToSend, messageEncryped,
+							messagesSentSinceLastLogout, subMessage);
 				}
 			}
 		}
@@ -218,21 +261,49 @@ public class PushNotificationService {
 	 * 
 	 * @param dialogOption
 	 * @param unSplittedToken
-	 * @param encryptedMessage
+	 * @param message
+	 * @param messageEncrypted
+	 * @param messagesSentSinceLastLogout
+	 * @param subMessage
 	 */
 	private void sendIOSPushNotification(final DialogOption dialogOption,
-			final String unSplittedToken, final String encryptedMessage) {
+			final String unSplittedToken, String message,
+			final boolean messageEncrypted,
+			final int messagesSentSinceLastLogout, final int subMessage) {
+
+		// Unencrypted messages only send out the first text
+		if (!messageEncrypted) {
+			if (messagesSentSinceLastLogout == 2) {
+				if (subMessage == 1) {
+					message = "...";
+				} else {
+					message = null;
+				}
+			} else if (messagesSentSinceLastLogout > 2) {
+				message = null;
+			}
+		}
+
 		val token = unSplittedToken.substring(IOS_IDENTIFIER.length());
 		log.debug("Trying to send iOS push notification to token {}", token);
 
 		final SimpleApnsPushNotification pushNotification;
 		{
 			final ApnsPayloadBuilder payloadBuilder = new ApnsPayloadBuilder();
-			payloadBuilder.addCustomProperty(BLOB, encryptedMessage);
-			payloadBuilder.addCustomProperty(KEY, dialogOption.getData()
-					.substring(dialogOption.getData().length() - 16));
 			payloadBuilder.setContentAvailable(true);
-			payloadBuilder.setBadgeNumber(0);
+
+			if (messageEncrypted) {
+				payloadBuilder.addCustomProperty(BLOB, message);
+				payloadBuilder.addCustomProperty(KEY, dialogOption.getData()
+						.substring(dialogOption.getData().length() - 16));
+				payloadBuilder.setBadgeNumber(0);
+			} else {
+				if (message != null) {
+					payloadBuilder.setAlertBody(message);
+					payloadBuilder.setSoundFileName(DEFAULT);
+				}
+				payloadBuilder.setBadgeNumber(messagesSentSinceLastLogout);
+			}
 
 			final String payload = payloadBuilder
 					.buildWithDefaultMaximumLength();
@@ -288,10 +359,29 @@ public class PushNotificationService {
 	 * 
 	 * @param dialogOption
 	 * @param unSplittedToken
-	 * @param encryptedMessage
+	 * @param message
+	 * @param messageEncrypted
+	 * @param messagesSentSinceLastLogout
+	 * @param subMessage
 	 */
 	private void sendAndroidPushNotification(final DialogOption dialogOption,
-			final String unSplittedToken, final String encryptedMessage) {
+			final String unSplittedToken, String message,
+			final boolean messageEncrypted,
+			final int messagesSentSinceLastLogout, final int subMessage) {
+
+		// Unencrypted messages only send out the first text
+		if (!messageEncrypted) {
+			if (messagesSentSinceLastLogout == 2) {
+				if (subMessage == 1) {
+					message = "...";
+				} else {
+					message = null;
+				}
+			} else if (messagesSentSinceLastLogout > 2) {
+				return;
+			}
+		}
+
 		val token = unSplittedToken.substring(ANDROID_IDENTIFIER.length());
 		log.debug("Trying to send Android push notification to token {}",
 				token);
@@ -312,11 +402,19 @@ public class PushNotificationService {
 			final JsonObject jsonObject = new JsonObject();
 
 			jsonObject.addProperty(TO, token);
-			final JsonObject info = new JsonObject();
-			info.addProperty(BLOB, encryptedMessage);
-			info.addProperty(KEY, dialogOption.getData()
-					.substring(dialogOption.getData().length() - 16));
-			jsonObject.add(DATA, info);
+
+			if (messageEncrypted) {
+				final JsonObject info = new JsonObject();
+				info.addProperty(BLOB, message);
+				info.addProperty(KEY, dialogOption.getData()
+						.substring(dialogOption.getData().length() - 16));
+				jsonObject.add(DATA, info);
+			} else {
+				final JsonObject notification = new JsonObject();
+				notification.addProperty(BODY, message);
+				notification.addProperty(SOUND, DEFAULT);
+				jsonObject.add(NOTIFICATION, notification);
+			}
 
 			@Cleanup
 			final OutputStreamWriter wr = new OutputStreamWriter(

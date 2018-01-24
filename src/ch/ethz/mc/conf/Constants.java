@@ -274,7 +274,11 @@ public class Constants {
 	@Getter
 	private static boolean		pushNotificationsIOSActive				= false;
 	@Getter
+	private static boolean		pushNotificationsIOSEncrypted			= false;
+	@Getter
 	private static boolean		pushNotificationsAndroidActive			= false;
+	@Getter
+	private static boolean		pushNotificationsAndroidEncrypted		= false;
 	@Getter
 	private static boolean		pushNotificationsProductionMode			= false;
 	@Getter

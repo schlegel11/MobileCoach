@@ -20,8 +20,8 @@ package ch.ethz.mc.tools;
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-import ch.ethz.mc.model.memory.DataTable;
-import ch.ethz.mc.model.memory.DataTable.DataEntry;
+import ch.ethz.mc.model.memory.ParticipantVariablesDataTable;
+import ch.ethz.mc.model.memory.ParticipantVariablesDataTable.DataEntry;
 import ch.ethz.mc.model.ui.results.UIVariableWithParticipantForResults;
 
 import com.googlecode.jcsv.writer.CSVEntryConverter;
@@ -31,7 +31,7 @@ import com.googlecode.jcsv.writer.CSVEntryConverter;
  * 
  * @author Andreas Filler
  */
-public class CSVDataTableEntryConverter
+public class CSVParticipantVariablesDataTableEntryConverter
 		implements CSVEntryConverter<DataEntry> {
 
 	@Override
@@ -39,7 +39,8 @@ public class CSVDataTableEntryConverter
 		return dataEntry.toStringArray();
 	}
 
-	public static DataEntry getHeaders(final DataTable dataTable) {
+	public static DataEntry getHeaders(
+			final ParticipantVariablesDataTable dataTable) {
 		return dataTable.getHeaders();
 	}
 

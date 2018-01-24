@@ -199,7 +199,9 @@ public class CommunicationManagerService {
 		if (pushNotificationsActive) {
 			pushNotificationService = PushNotificationService
 					.prepare(Constants.isPushNotificationsIOSActive(),
+							Constants.isPushNotificationsIOSEncrypted(),
 							Constants.isPushNotificationsAndroidActive(),
+							Constants.isPushNotificationsAndroidEncrypted(),
 							Constants.isPushNotificationsProductionMode(),
 							Constants.getPushNotificationsIOSAppIdentifier(),
 							Constants.getPushNotificationsIOSCertificateFile(),
@@ -324,11 +326,12 @@ public class CommunicationManagerService {
 				break;
 			case EXTERNAL_ID:
 			case SUPERVISOR_EXTERNAL_ID:
+				int visibleMessagesSentSinceLogout = 0;
 				if (dialogOption.getData().startsWith(
 						ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM)
 						&& deepstreamActive) {
 					try {
-						deepstreamCommunicationService
+						visibleMessagesSentSinceLogout = deepstreamCommunicationService
 								.asyncSendMessage(dialogOption,
 										dialogMessage.getId(), messageOrder,
 										message, dialogMessage.getAnswerType(),
@@ -347,11 +350,17 @@ public class CommunicationManagerService {
 							"No appropriate handler could be found for external id dialog option with data {}",
 							dialogOption.getData());
 				}
-				if (pushNotificationsActive && dialogMessage
-						.getType() != DialogMessageTypes.COMMAND) {
+				// Only send push notifications if
+				// (1) it is switched on in general
+				// (2) if the message was really sent to out
+				// (3) it is a visible message
+				if (pushNotificationsActive
+						&& visibleMessagesSentSinceLogout > 0 && dialogMessage
+								.getType() != DialogMessageTypes.COMMAND) {
 					try {
 						pushNotificationService.asyncSendPushNotification(
-								dialogOption, message);
+								dialogOption, message,
+								visibleMessagesSentSinceLogout);
 					} catch (final Exception e) {
 						log.warn("Could not send push notification: {}",
 								e.getMessage());

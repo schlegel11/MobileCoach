@@ -26,15 +26,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Required for in memory organization of variables for the CSV export
@@ -42,7 +41,7 @@ import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
  * @author Andreas Filler
  */
 @Log4j2
-public class DataTable {
+public class ParticipantVariablesDataTable {
 	private final List<ObjectId>													participantIds;
 	private final Hashtable<ObjectId, Participant>									participants;
 
@@ -52,8 +51,8 @@ public class DataTable {
 	private final Hashtable<ObjectId, Hashtable<String, String>>					statisticValuesOfParticipants;
 	private final Hashtable<ObjectId, Hashtable<String, AbstractVariableWithValue>>	variablesWithValuesOfParticipants;
 
-	public DataTable() {
-		log.debug("Creating new data table for export");
+	public ParticipantVariablesDataTable() {
+		log.debug("Creating new participant variables data table for export");
 		participantIds = new ArrayList<ObjectId>();
 		participants = new Hashtable<ObjectId, Participant>();
 

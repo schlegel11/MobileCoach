@@ -25,11 +25,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-
 import org.bson.types.ObjectId;
+
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.BeanContainer;
+import com.vaadin.data.util.BeanItem;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
@@ -41,17 +44,13 @@ import ch.ethz.mc.modules.AbstractModule;
 import ch.ethz.mc.tools.OnDemandFileDownloader;
 import ch.ethz.mc.tools.OnDemandFileDownloader.OnDemandStreamResource;
 import ch.ethz.mc.ui.components.basics.FileUploadComponentWithController;
-import ch.ethz.mc.ui.components.basics.ShortStringEditComponent;
 import ch.ethz.mc.ui.components.basics.FileUploadComponentWithController.UploadListener;
+import ch.ethz.mc.ui.components.basics.ShortStringEditComponent;
 import ch.ethz.mc.ui.components.helpers.CaseInsensitiveItemSorter;
 import ch.ethz.mc.ui.views.MainView;
-
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.BeanContainer;
-import com.vaadin.data.util.BeanItem;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Extends the all interventions tab component with a controller
@@ -140,7 +139,11 @@ public class AllInterventionsTabComponentWithController
 				}
 
 				allInterventionsEditComponent.adjust(
-						selectedUIIntervention != null, selectedModule != null);
+						selectedUIIntervention != null,
+						selectedUIIntervention != null && selectedUIIntervention
+								.getRelatedModelObject(Intervention.class)
+								.isMonitoringActive(),
+						selectedModule != null);
 			}
 		});
 
@@ -185,7 +188,11 @@ public class AllInterventionsTabComponentWithController
 				}
 
 				allInterventionsEditComponent.adjust(
-						selectedUIIntervention != null, selectedModule != null);
+						selectedUIIntervention != null,
+						selectedUIIntervention != null && selectedUIIntervention
+								.getRelatedModelObject(Intervention.class)
+								.isMonitoringActive(),
+						selectedModule != null);
 			}
 		});
 
@@ -197,10 +204,6 @@ public class AllInterventionsTabComponentWithController
 				.addClickListener(buttonClickListener);
 		allInterventionsEditComponent.getRenameButton()
 				.addClickListener(buttonClickListener);
-		allInterventionsEditComponent.getResultsButton()
-				.addClickListener(buttonClickListener);
-		allInterventionsEditComponent.getProblemsButton()
-				.addClickListener(buttonClickListener);
 		allInterventionsEditComponent.getEditButton()
 				.addClickListener(buttonClickListener);
 		allInterventionsEditComponent.getDuplicateButton()
@@ -208,6 +211,13 @@ public class AllInterventionsTabComponentWithController
 		allInterventionsEditComponent.getDeleteButton()
 				.addClickListener(buttonClickListener);
 		allInterventionsEditComponent.getOpenModuleButton()
+				.addClickListener(buttonClickListener);
+
+		allInterventionsEditComponent.getResultsButton()
+				.addClickListener(buttonClickListener);
+		allInterventionsEditComponent.getProblemsButton()
+				.addClickListener(buttonClickListener);
+		allInterventionsEditComponent.getI18nButton()
 				.addClickListener(buttonClickListener);
 
 		// Special handle for export button
@@ -303,6 +313,9 @@ public class AllInterventionsTabComponentWithController
 			} else if (event.getButton() == allInterventionsEditComponent
 					.getProblemsButton()) {
 				openProblems();
+			} else if (event.getButton() == allInterventionsEditComponent
+					.getI18nButton()) {
+				openI18N();
 			} else if (event.getButton() == allInterventionsEditComponent
 					.getEditButton()) {
 				editIntervention();
@@ -510,6 +523,17 @@ public class AllInterventionsTabComponentWithController
 
 		showModalClosableEditWindow(AdminMessageStrings.PROBLEMS__TITLE,
 				new InterventionProblemsComponentWithController(intervention),
+				null, intervention.getName());
+	}
+
+	public void openI18N() {
+		val intervention = selectedUIIntervention
+				.getRelatedModelObject(Intervention.class);
+
+		log.debug("Open i18n of intervention {}", intervention.getId());
+
+		showModalClosableEditWindow(AdminMessageStrings.I18N__TITLE,
+				new InterventionI18nComponentenWithController(intervention),
 				null, intervention.getName());
 	}
 

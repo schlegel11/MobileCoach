@@ -932,6 +932,19 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
+	public void monitoringMessageUpdateL18n(final ObjectId monitoringMessageId,
+			final LString textWithPlaceholders,
+			final LString answerOptionsWithPlaceholders) {
+		val monitoringMessage = getMonitoringMessage(monitoringMessageId);
+		if (monitoringMessage != null) {
+			monitoringMessage.setTextWithPlaceholders(textWithPlaceholders);
+			monitoringMessage.setAnswerOptionsWithPlaceholders(
+					answerOptionsWithPlaceholders);
+			databaseManagerService.saveModelObject(monitoringMessage);
+		}
+	}
+
+	@Synchronized
 	public MonitoringMessage monitoringMessageImport(final File file)
 			throws FileNotFoundException, IOException {
 		val importedModelObjects = modelObjectExchangeService
@@ -1292,6 +1305,20 @@ public class InterventionAdministrationManagerService {
 		}
 
 		databaseManagerService.saveModelObject(microDialogMessage);
+	}
+
+	@Synchronized
+	public void microDialogMessageUpdateL18n(
+			final ObjectId microDialogMessageId,
+			final LString textWithPlaceholders,
+			final LString answerOptionsWithPlaceholders) {
+		val microDialogMessage = getMicroDialogMessage(microDialogMessageId);
+		if (microDialogMessage != null) {
+			microDialogMessage.setTextWithPlaceholders(textWithPlaceholders);
+			microDialogMessage.setAnswerOptionsWithPlaceholders(
+					answerOptionsWithPlaceholders);
+			databaseManagerService.saveModelObject(microDialogMessage);
+		}
 	}
 
 	@Synchronized
@@ -2820,6 +2847,13 @@ public class InterventionAdministrationManagerService {
 				Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE,
 				Queries.MONITORING_MESSAGE_RULE__SORT_BY_ORDER_ASC,
 				monitoringMessageId);
+	}
+
+	@Synchronized
+	public MicroDialogMessage getMicroDialogMessage(
+			final ObjectId microDialogMessageId) {
+		return databaseManagerService.getModelObjectById(
+				MicroDialogMessage.class, microDialogMessageId);
 	}
 
 	@Synchronized

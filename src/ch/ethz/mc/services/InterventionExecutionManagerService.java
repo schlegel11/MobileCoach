@@ -1050,7 +1050,7 @@ public class InterventionExecutionManagerService {
 			} else {
 				// User did not answer so store default value for micro dialog
 				// messages
-				if (relatedMicroDialogMessage != null && StringUtils
+				if (relatedMicroDialogMessage != null && !StringUtils
 						.isBlank(relatedMicroDialogMessage.getNoReplyValue())) {
 					val variableToStore = relatedMicroDialogMessage
 							.getStoreValueToVariableWithName();
