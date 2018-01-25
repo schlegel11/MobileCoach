@@ -58,7 +58,7 @@ public class PushNotificationService {
 	final static String							NOTIFICATION		= "notification";
 	final static String							BODY				= "body";
 	final static String							SOUND				= "sound";
-	final static String							BADGES				= "badges";
+	final static String							BADGE				= "badge";
 	final static String							DEFAULT				= "default";
 	final static String							BAD_DEVICE_TOKEN	= "BadDeviceToken";
 
@@ -411,6 +411,7 @@ public class PushNotificationService {
 						.substring(dialogOption.getData().length() - 16));
 				final JsonObject data = new JsonObject();
 				data.add(DATA, dataContent);
+				data.addProperty(BADGE, "0");
 				jsonObject.add(DATA, data);
 			} else {
 				if (message != null) {
@@ -419,11 +420,9 @@ public class PushNotificationService {
 					notification.addProperty(SOUND, DEFAULT);
 					jsonObject.add(NOTIFICATION, notification);
 				}
-				final JsonObject dataContent = new JsonObject();
-				dataContent.addProperty(BADGES,
-						String.valueOf(messagesSentSinceLastLogout));
 				final JsonObject data = new JsonObject();
-				data.add(DATA, dataContent);
+				data.addProperty(BADGE,
+						String.valueOf(messagesSentSinceLastLogout));
 				jsonObject.add(DATA, data);
 			}
 
