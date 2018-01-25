@@ -405,21 +405,26 @@ public class PushNotificationService {
 			jsonObject.addProperty(TO, token);
 
 			if (messageEncrypted) {
-				final JsonObject info = new JsonObject();
-				info.addProperty(BLOB, message);
-				info.addProperty(KEY, dialogOption.getData()
+				final JsonObject dataContent = new JsonObject();
+				dataContent.addProperty(BLOB, message);
+				dataContent.addProperty(KEY, dialogOption.getData()
 						.substring(dialogOption.getData().length() - 16));
-				jsonObject.add(DATA, info);
+				final JsonObject data = new JsonObject();
+				data.add(DATA, dataContent);
+				jsonObject.add(DATA, data);
 			} else {
-				final JsonObject notification = new JsonObject();
 				if (message != null) {
+					final JsonObject notification = new JsonObject();
 					notification.addProperty(BODY, message);
 					notification.addProperty(SOUND, DEFAULT);
+					jsonObject.add(NOTIFICATION, notification);
 				}
-				jsonObject.add(NOTIFICATION, notification);
-				final JsonObject info = new JsonObject();
-				info.addProperty(BADGES, messagesSentSinceLastLogout);
-				jsonObject.add(DATA, info);
+				final JsonObject dataContent = new JsonObject();
+				dataContent.addProperty(BADGES,
+						String.valueOf(messagesSentSinceLastLogout));
+				final JsonObject data = new JsonObject();
+				data.add(DATA, dataContent);
+				jsonObject.add(DATA, data);
 			}
 
 			@Cleanup
