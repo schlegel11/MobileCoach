@@ -58,6 +58,7 @@ public class PushNotificationService {
 	final static String							NOTIFICATION		= "notification";
 	final static String							BODY				= "body";
 	final static String							SOUND				= "sound";
+	final static String							BADGES				= "badges";
 	final static String							DEFAULT				= "default";
 	final static String							BAD_DEVICE_TOKEN	= "BadDeviceToken";
 
@@ -378,7 +379,7 @@ public class PushNotificationService {
 					message = null;
 				}
 			} else if (messagesSentSinceLastLogout > 2) {
-				return;
+				message = null;
 			}
 		}
 
@@ -411,9 +412,14 @@ public class PushNotificationService {
 				jsonObject.add(DATA, info);
 			} else {
 				final JsonObject notification = new JsonObject();
-				notification.addProperty(BODY, message);
-				notification.addProperty(SOUND, DEFAULT);
+				if (message != null) {
+					notification.addProperty(BODY, message);
+					notification.addProperty(SOUND, DEFAULT);
+				}
 				jsonObject.add(NOTIFICATION, notification);
+				final JsonObject info = new JsonObject();
+				info.addProperty(BADGES, messagesSentSinceLastLogout);
+				jsonObject.add(DATA, info);
 			}
 
 			@Cleanup
