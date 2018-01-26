@@ -304,7 +304,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 						messagesSentSinceLastLogout = allUsersVisibleMessagesSentSinceLastLogout
 								.get(participantOrSupervisorIdentifier) + 1;
 					} else {
-						// User is not logged ind and not known
+						// User is not logged in and not known
 						messagesSentSinceLastLogout = 1;
 					}
 					allUsersVisibleMessagesSentSinceLastLogout.put(

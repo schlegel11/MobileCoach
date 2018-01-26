@@ -291,9 +291,9 @@ public class PushNotificationService {
 		final SimpleApnsPushNotification pushNotification;
 		{
 			final ApnsPayloadBuilder payloadBuilder = new ApnsPayloadBuilder();
-			payloadBuilder.setContentAvailable(true);
 
 			if (messageEncrypted) {
+				payloadBuilder.setContentAvailable(true);
 				payloadBuilder.addCustomProperty(BLOB, message);
 				payloadBuilder.addCustomProperty(KEY, dialogOption.getData()
 						.substring(dialogOption.getData().length() - 16));
