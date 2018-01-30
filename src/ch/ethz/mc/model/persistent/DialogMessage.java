@@ -86,6 +86,13 @@ public class DialogMessage extends ModelObject {
 	private DialogMessageTypes			type;
 
 	/**
+	 * The original id of the message on any client (if required)
+	 */
+	@Getter
+	@Setter
+	private String						clientId;
+
+	/**
 	 * The message sent to the {@link Participant}
 	 */
 	@Getter

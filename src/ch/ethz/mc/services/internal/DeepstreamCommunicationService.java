@@ -854,7 +854,13 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 														.get(DeepstreamConstants.RELATED_MESSAGE_ID)
 														.getAsInt()
 												: -1,
-								null, null, false);
+								null, null,
+								jsonData.has(DeepstreamConstants.CLIENT_ID)
+										? jsonData
+												.get(DeepstreamConstants.CLIENT_ID)
+												.getAsString()
+										: null,
+								false);
 
 						if (receivedSuccessful) {
 							rpcResponse.send(new JsonPrimitive(true));
@@ -891,6 +897,11 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 								jsonData.has(DeepstreamConstants.USER_CONTENT)
 										? jsonData
 												.get(DeepstreamConstants.USER_CONTENT)
+												.getAsString()
+										: null,
+								jsonData.has(DeepstreamConstants.CLIENT_ID)
+										? jsonData
+												.get(DeepstreamConstants.CLIENT_ID)
 												.getAsString()
 										: null,
 								true);
@@ -977,13 +988,15 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 	 * @param relatedMessageIdBasedOnOrder
 	 * @param intention
 	 * @param content
+	 * @param clientId
 	 * @param typeIntention
 	 * @return
 	 */
 	private boolean receiveMessage(final String participantId,
 			final String message, final long timestamp,
 			final int relatedMessageIdBasedOnOrder, final String intention,
-			final String content, final boolean typeIntention) {
+			final String content, final String clientId,
+			final boolean typeIntention) {
 		log.debug("Received {} message for participant {}",
 				typeIntention ? "intention" : "regular", participantId);
 
@@ -998,6 +1011,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 						+ participantId);
 		receivedMessage.setMessage(message);
 		receivedMessage.setTypeIntention(typeIntention);
+		receivedMessage.setClientId(clientId);
 		receivedMessage
 				.setRelatedMessageIdBasedOnOrder(relatedMessageIdBasedOnOrder);
 		receivedMessage.setIntention(intention);
