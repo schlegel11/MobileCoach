@@ -140,7 +140,7 @@ public class MattermostMessagingService implements MessagingService {
     			container.connectToServer(webSocketEndpoint, clientConfig, new URI(wsUrl + "users/websocket"));
     			return;
     		} catch (Exception e) {
-    			log.error(e);
+    			log.warn(e);
     			try {
     				log.debug("Waiting for "+sleepAmount+" msec.");
     				Thread.sleep(sleepAmount);
