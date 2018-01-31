@@ -212,12 +212,12 @@ public class MattermostMessagingService implements MessagingService {
 		if (pushOnly || post.getHidden() != true && wasLastMessageReceivedLongerAgoThan(channelId, 60 * 1000)){
 			
 			if(null == managementService.findOneSignalObject(recipient)){
-				log.error("Could not send push since OnSignal config missing: " + recipient);
+				log.info("Could not send push since OnSignal config missing: " + recipient);
 			} else {
 				try {
 					sendPushNotification(recipient, post, channelId, userId);
 				} catch (Exception e){
-					log.error("Error sending push notification: " + StringHelpers.getStackTraceAsLine(e), e);
+					log.warn("Error sending push notification: " + StringHelpers.getStackTraceAsLine(e), e);
 				}
 			}
 		}
@@ -279,7 +279,7 @@ public class MattermostMessagingService implements MessagingService {
 		headers.put("Authorization", "Basic " + Constants.getOneSignalApiKey());	
 		String url = "https://onesignal.com/api/v1/notifications";
 		
-		log.info("Sending push using key " + Constants.getOneSignalApiKey().substring(0, 5) + "... to " + recipients);
+		//log.info("Sending push using key " + Constants.getOneSignalApiKey().substring(0, 5) + "... to " + recipients);
 		
 		String message = post.getMessage();
 		if (message == null || "".equals(message)){
@@ -310,7 +310,7 @@ public class MattermostMessagingService implements MessagingService {
 		}.run();
 		
 		if (result != null){
-			log.error("Error sending push: " + result);
+			log.warn("Error sending push: " + result);
 		}
 	}
 	
