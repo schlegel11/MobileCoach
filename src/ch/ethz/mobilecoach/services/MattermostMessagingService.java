@@ -611,7 +611,7 @@ public class MattermostMessagingService implements MessagingService {
 		
 		@Override
 		public void onClose(Session session, CloseReason closeReason){
-			log.error("WebSocket connection closed. Reason: " + closeReason.toString());
+			log.warn("WebSocket connection closed. Reason: " + closeReason.toString());
 			if (onCloseListener != null){
 				onCloseListener.run();
 			}
@@ -619,7 +619,7 @@ public class MattermostMessagingService implements MessagingService {
 		
 		@Override
 		public void onError(Session session, Throwable thr){
-			log.error(thr.getMessage());
+			log.warn(thr.getMessage());
 		}
 		
 			
