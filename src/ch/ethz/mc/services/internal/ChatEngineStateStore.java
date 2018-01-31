@@ -42,8 +42,8 @@ public class ChatEngineStateStore implements ChatEngineStateStoreIfc {
 			return false;
 		} 
 		
-		// we consider it recent if it is newer than 24 hours
-		return System.currentTimeMillis() - chatEngineState.getTimeStamp() < 1000 * 3600 * 24;
+		// we consider it recent if it is newer than 3 * 24 hours
+		return System.currentTimeMillis() - chatEngineState.getTimeStamp() < 1000 * 3600 * 24 * 3;
 	}
 
 	@Override
