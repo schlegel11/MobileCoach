@@ -246,11 +246,12 @@ public class MattermostMessagingService implements MessagingService {
 		
         try {
 			webSocketEndpoint.sendMessage(message.toString());
-			seq++; 
+			
 		} catch (Exception e){
-			log.error("Error sending typing indicator: " + StringHelpers.getStackTraceAsLine(e), e);
+			//log.error("Error sending typing indicator: " + StringHelpers.getStackTraceAsLine(e), e);
 		}
         
+        seq++;
 	}
 
 	
