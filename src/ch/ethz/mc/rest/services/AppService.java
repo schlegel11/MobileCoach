@@ -75,8 +75,11 @@ public class AppService {
 		}
 
 		MattermostUserConfiguration userConfiguration = fetchUserConfiguration(userId);
+		
+		Participant p = restManagerService.getParticipant(userId);
+		String participantShortId = p != null ? p.getShortId() : "___";
 
-		return new Result(new MobileCoachAuthentication(userId.toHexString(), mctoken),
+		return new Result(new MobileCoachAuthentication(userId.toHexString(), participantShortId,  mctoken),
 				new UserConfigurationForAuthentication(userConfiguration),
 				getVariables(userId));
 	}
@@ -121,7 +124,7 @@ public class AppService {
 		String mctoken = restManagerService.createAppTokenForParticipant(userId);
 		MattermostUserConfiguration userConfiguration = fetchUserConfiguration(userId);
 
-		return new Result(new MobileCoachAuthentication(userId.toHexString(), mctoken),
+		return new Result(new MobileCoachAuthentication(userId.toHexString(), user.getShortId(), mctoken),
 				new UserConfigurationForAuthentication(userConfiguration),
 				getVariables(userId));
 	}
@@ -175,6 +178,8 @@ public class AppService {
 	private static class MobileCoachAuthentication {
 		@Getter
 		private final String participant_id;
+		@Getter
+		private final String participant_short_id;
 		@Getter
 		private final String token;
 

@@ -45,6 +45,7 @@ import ch.ethz.mc.model.persistent.FeedbackSlideRule;
 import ch.ethz.mc.model.persistent.IntermediateSurveyAndFeedbackParticipantShortURL;
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.MediaObject;
+import ch.ethz.mc.model.persistent.OneTimeToken;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
@@ -136,6 +137,7 @@ public class SurveyExecutionManagerService {
 		
 		final val participant = new Participant(
 				screeningSurvey.getIntervention(),
+				OneTimeToken.createToken(),
 				InternalDateTime.currentTimeMillis(), "",
 				locale, null,
 				screeningSurvey.getId(), screeningSurvey.getGlobalUniqueId(),
@@ -161,6 +163,7 @@ public class SurveyExecutionManagerService {
 	private Participant participantCreate(final ScreeningSurvey screeningSurvey) {
 		final val participant = new Participant(
 				screeningSurvey.getIntervention(),
+				OneTimeToken.createToken(),
 				InternalDateTime.currentTimeMillis(), "",
 				Constants.getInterventionLocales()[0], null,
 				screeningSurvey.getId(), screeningSurvey.getGlobalUniqueId(),

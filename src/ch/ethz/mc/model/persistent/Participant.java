@@ -60,6 +60,14 @@ public class Participant extends ModelObject {
 	@Setter
 	@NonNull
 	private ObjectId	intervention;
+	
+	
+	/**
+	 * The short id of the {@link Participant}
+	 */
+	@Getter
+	@Setter
+	private String		shortId;
 
 	/**
 	 * The timestamp when the {@link Participant} has been created

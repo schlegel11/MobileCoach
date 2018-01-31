@@ -415,6 +415,10 @@ public class RESTManagerService {
 		return tokenPersistenceService.consumeOneTimeToken(oneTimeToken);
 	}
 	
+	public Participant getParticipant(ObjectId participantId) {
+		return databaseManagerService.findOneModelObject(Participant.class, "{'id': #}", participantId);
+	}
+	
 	
 	public Map<String, String> getExternallyReadableVariableValues(final ObjectId participantId){
 		val participant = databaseManagerService.getModelObjectById(Participant.class, participantId);

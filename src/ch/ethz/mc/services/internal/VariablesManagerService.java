@@ -455,6 +455,8 @@ public class VariablesManagerService {
 				return appToken;
 			case participantId:
 				return participant.getId().toHexString();
+			case participantShortId:
+				return participant.getShortId() + "";
 		}
 		return null;
 	}

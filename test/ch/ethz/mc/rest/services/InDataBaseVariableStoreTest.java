@@ -67,6 +67,7 @@ public class InDataBaseVariableStoreTest {
 
 		participant = new Participant(
 				intervention,
+				null,
 				InternalDateTime.currentTimeMillis(), "",
 				Constants.getInterventionLocales()[0], null,
 				id, globalUniqueId,
