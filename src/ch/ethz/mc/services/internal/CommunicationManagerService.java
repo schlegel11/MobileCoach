@@ -223,17 +223,15 @@ public class CommunicationManagerService {
 	}
 
 	public void start(
-			final InterventionExecutionManagerService interventionExecutionManagerService,
-			final VariablesManagerService variablesManagerService)
+			final InterventionExecutionManagerService interventionExecutionManagerService)
 			throws Exception {
 		log.info("Starting service...");
 
 		this.interventionExecutionManagerService = interventionExecutionManagerService;
 
 		if (deepstreamActive) {
-			deepstreamCommunicationService.start(
-					interventionExecutionManagerService,
-					variablesManagerService);
+			deepstreamCommunicationService
+					.start(interventionExecutionManagerService);
 		}
 		if (pushNotificationsActive) {
 			pushNotificationService.start(interventionExecutionManagerService);

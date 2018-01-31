@@ -186,8 +186,7 @@ public class InterventionExecutionManagerService {
 
 				// Start communication manager service
 				try {
-					communicationManagerService.start(instance,
-							variablesManagerService);
+					communicationManagerService.start(instance);
 
 					// Start working threads
 					outgoingMessageWorker.start();
@@ -2429,6 +2428,39 @@ public class InterventionExecutionManagerService {
 		try {
 			variablesManagerService.writeVariableValueOfParticipant(
 					participant.getId(), variableName, variableValue);
+		} catch (final Exception e) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Enables the adjustment of variables values using services (e.g. specific
+	 * communication managers)
+	 * 
+	 * @param dialogOptionType
+	 * @param dialogOptionData
+	 * @param variableName
+	 * @param variableValue
+	 * @return
+	 */
+	@Synchronized
+	public boolean participantAdjustVariableValueExternallyBasedOnDialogOptionTypeAndData(
+			final DialogOptionTypes dialogOptionType,
+			final String dialogOptionData, final String variableName,
+			final String variableValue) {
+		val dialogOption = getDialogOptionByTypeAndDataOfActiveInterventions(
+				dialogOptionType, dialogOptionData);
+
+		if (dialogOption == null) {
+			return false;
+		}
+
+		try {
+			variablesManagerService.externallyWriteVariableForParticipant(
+					dialogOption.getParticipant(), variableName, variableValue,
+					false, true);
 		} catch (final Exception e) {
 			return false;
 		}

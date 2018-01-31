@@ -156,8 +156,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 	}
 
 	public void start(
-			final InterventionExecutionManagerService interventionExecutionManagerService,
-			final VariablesManagerService variablesManagerService)
+			final InterventionExecutionManagerService interventionExecutionManagerService)
 			throws Exception {
 		log.info("Starting service...");
 
@@ -790,7 +789,6 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 						log.warn("Error when requesting REST token: {}",
 								e.getMessage());
 						rpcResponse.send(JsonNull.INSTANCE);
-						return;
 					}
 				});
 		// Can be called by a "participant" or "supervisor" (role)
@@ -831,7 +829,6 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 						log.warn("Error when storing push token: {}",
 								e.getMessage());
 						rpcResponse.send(new JsonPrimitive(false));
-						return;
 					}
 				});
 		// Can only be called by a "participant" (role)
@@ -871,7 +868,6 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 						log.warn("Error when receiving message: {}",
 								e.getMessage());
 						rpcResponse.send(new JsonPrimitive(false));
-						return;
 					}
 				});
 		// Can only be called by a "participant" (role)
@@ -915,7 +911,33 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 						log.warn("Error when receiving intention message: {}",
 								e.getMessage());
 						rpcResponse.send(new JsonPrimitive(false));
-						return;
+					}
+				});
+		// Can only be called by a "participant" (role)
+		client.rpc.provide(DeepstreamConstants.RPC_USER_VARIABLE,
+				(rpcName, data, rpcResponse) -> {
+					final JsonObject jsonData = (JsonObject) gson
+							.toJsonTree(data);
+
+					try {
+						final boolean variableStored = writeVariableValue(
+								jsonData.get(DeepstreamConstants.USER)
+										.getAsString(),
+								jsonData.get(DeepstreamConstants.VARIABLE)
+										.getAsString(),
+								jsonData.get(DeepstreamConstants.VALUE)
+										.getAsString());
+
+						if (variableStored) {
+							rpcResponse.send(new JsonPrimitive(true));
+						} else {
+							rpcResponse.send(new JsonPrimitive(false));
+						}
+					} catch (final Exception e) {
+						log.warn(
+								"Error when writing variable value for participant: {}",
+								e.getMessage());
+						rpcResponse.send(new JsonPrimitive(false));
 					}
 				});
 		// Can be called by a "participant" or "supervisor" (role)
@@ -1029,6 +1051,31 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 			synchronized (receivedMessages) {
 				receivedMessages.add(receivedMessage);
 			}
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * @param participantId
+	 * @param variable
+	 * @param value
+	 * @return
+	 */
+	private boolean writeVariableValue(final String participantId,
+			final String variable, final String value) {
+		log.debug("Received new value for variable {} for participant {}",
+				variable, participantId);
+
+		final boolean variableStored = interventionExecutionManagerService
+				.participantAdjustVariableValueExternallyBasedOnDialogOptionTypeAndData(
+						DialogOptionTypes.EXTERNAL_ID,
+						ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+								+ participantId,
+						variable, value);
+
+		if (variableStored) {
 			return true;
 		} else {
 			return false;
