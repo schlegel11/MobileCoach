@@ -186,8 +186,7 @@ public class InterventionExecutionManagerService {
 
 				// Start communication manager service
 				try {
-					communicationManagerService.start(instance,
-							variablesManagerService);
+					communicationManagerService.start(instance);
 
 					// Start working threads
 					outgoingMessageWorker.start();
@@ -206,25 +205,41 @@ public class InterventionExecutionManagerService {
 	}
 
 	public void stop() throws Exception {
-		log.info("Stopping communication, workers and service...");
+		log.info(
+				"Stopping communication, workers and service (takes several seconds)...");
 
-		log.debug("Stopping master rule evaluation worker...");
+		log.info("Stopping master rule evaluation worker...");
 		synchronized (monitoringSchedulingWorker) {
 			monitoringSchedulingWorker.setShouldStop(true);
-			monitoringSchedulingWorker.interrupt();
-			monitoringSchedulingWorker.join();
+			Thread.sleep(2000);
+			try {
+				monitoringSchedulingWorker.interrupt();
+				monitoringSchedulingWorker.join();
+			} catch (final Exception e) {
+				// Do nothing
+			}
 		}
-		log.debug("Stopping incoming message worker...");
+		log.info("Stopping incoming message worker...");
 		synchronized (incomingMessageWorker) {
 			incomingMessageWorker.setShouldStop(true);
-			incomingMessageWorker.interrupt();
-			incomingMessageWorker.join();
+			Thread.sleep(2000);
+			try {
+				incomingMessageWorker.interrupt();
+				incomingMessageWorker.join();
+			} catch (final Exception e) {
+				// Do nothing
+			}
 		}
-		log.debug("Stopping outgoing message worker...");
+		log.info("Stopping outgoing message worker...");
 		synchronized (outgoingMessageWorker) {
 			outgoingMessageWorker.setShouldStop(true);
-			outgoingMessageWorker.interrupt();
-			outgoingMessageWorker.join();
+			Thread.sleep(2000);
+			try {
+				outgoingMessageWorker.interrupt();
+				outgoingMessageWorker.join();
+			} catch (final Exception e) {
+				// Do nothing
+			}
 		}
 
 		while (monitoringSchedulingWorker.isAlive()
@@ -304,8 +319,8 @@ public class InterventionExecutionManagerService {
 			final int minutesUntilHandledAsNotAnswered) {
 		log.debug("Create message and prepare for sending");
 		val dialogMessage = new DialogMessage(participant.getId(), 0,
-				DialogMessageStatusTypes.PREPARED_FOR_SENDING, type, message,
-				message, answerType, answerOptions, null, null, null,
+				DialogMessageStatusTypes.PREPARED_FOR_SENDING, type, null,
+				message, message, answerType, answerOptions, null, null, null,
 				timestampToSendMessage, -1, supervisorMessage, answerExpected,
 				-1, -1, null, null, false,
 				relatedMonitoringRule == null ? null
@@ -460,6 +475,21 @@ public class InterventionExecutionManagerService {
 	}
 
 	@Synchronized
+	private boolean dialogMessageCheckForDuplicateBasedOnClientId(
+			final ObjectId participant, final String clientId) {
+		val dialogMessage = databaseManagerService.findOneModelObject(
+				DialogMessage.class,
+				Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_CLIENT_ID,
+				participant, clientId);
+
+		if (dialogMessage == null) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	@Synchronized
 	public void dialogMessageSetMediaContentViewed(
 			final ObjectId dialogMessageId) {
 		val dialogMessage = databaseManagerService
@@ -486,7 +516,7 @@ public class InterventionExecutionManagerService {
 					dialogMessage.getAnswerReceivedTimestamp(),
 					StringHelpers.cleanReceivedMessageString(
 							newUncleanedButCorrectedResult),
-					dialogMessage.getAnswerReceivedRaw());
+					dialogMessage.getAnswerReceivedRaw(), null);
 		} else if (dialogMessage
 				.getStatus() == DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY) {
 			unexpectedDialogMessageSetProblemSolved(dialogMessage);
@@ -651,10 +681,11 @@ public class InterventionExecutionManagerService {
 		val dialogMessage = new DialogMessage(participantId, 0,
 				isTypeIntention ? DialogMessageStatusTypes.RECEIVED_AS_INTENTION
 						: DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY,
-				type, "", "", null, null, null, null, null, -1, -1, false,
-				false, -1, receivedMessage.getReceivedTimestamp(),
-				answerCleaned, answerRaw, isTypeIntention ? false : true, null,
-				null, null, null, false, false);
+				type, receivedMessage.getClientId(), "", "", null, null, null,
+				null, null, -1, -1, false, false, -1,
+				receivedMessage.getReceivedTimestamp(), answerCleaned,
+				answerRaw, isTypeIntention ? false : true, null, null, null,
+				null, false, false);
 
 		val highestOrderMessage = databaseManagerService
 				.findOneSortedModelObject(DialogMessage.class,
@@ -695,6 +726,7 @@ public class InterventionExecutionManagerService {
 	 * @param timeStampOfEvent
 	 * @param cleanedReceivedMessage
 	 * @param rawReceivedMessage
+	 * @param clientId
 	 */
 	@SuppressWarnings("incomplete-switch")
 	@Synchronized
@@ -702,11 +734,14 @@ public class InterventionExecutionManagerService {
 			final ObjectId dialogMessageId,
 			final DialogMessageStatusTypes newStatus,
 			final long timeStampOfEvent, final String cleanedReceivedMessage,
-			final String rawReceivedMessage) {
+			final String rawReceivedMessage, final String clientId) {
 		val dialogMessage = databaseManagerService
 				.getModelObjectById(DialogMessage.class, dialogMessageId);
 
 		dialogMessage.setStatus(newStatus);
+		if (!StringUtils.isBlank(clientId)) {
+			dialogMessage.setClientId(clientId);
+		}
 
 		switch (newStatus) {
 			case SENT_AND_WAITING_FOR_ANSWER:
@@ -1081,11 +1116,11 @@ public class InterventionExecutionManagerService {
 			if (userAnswered) {
 				dialogMessageStatusChangesAfterSending(dialogMessage.getId(),
 						DialogMessageStatusTypes.SENT_AND_ANSWERED_AND_PROCESSED,
-						InternalDateTime.currentTimeMillis(), null, null);
+						InternalDateTime.currentTimeMillis(), null, null, null);
 			} else {
 				dialogMessageStatusChangesAfterSending(dialogMessage.getId(),
 						DialogMessageStatusTypes.SENT_AND_NOT_ANSWERED_AND_PROCESSED,
-						InternalDateTime.currentTimeMillis(), null, null);
+						InternalDateTime.currentTimeMillis(), null, null, null);
 			}
 
 			// Inform about answering timeout
@@ -1402,6 +1437,17 @@ public class InterventionExecutionManagerService {
 			return null;
 		}
 
+		// Check for duplicate
+		if (!StringUtils.isBlank(receivedMessage.getClientId())) {
+			if (dialogMessageCheckForDuplicateBasedOnClientId(
+					dialogOption.getParticipant(),
+					receivedMessage.getClientId())) {
+				log.warn("Duplicate message received for participant {}",
+						dialogOption.getParticipant());
+				return null;
+			}
+		}
+
 		// Check type
 		val isTypeIntention = receivedMessage.isTypeIntention();
 
@@ -1659,7 +1705,8 @@ public class InterventionExecutionManagerService {
 							dialogMessage.getId(),
 							DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
 							receivedMessage.getReceivedTimestamp(),
-							cleanedMessageValue, receivedMessage.getMessage());
+							cleanedMessageValue, receivedMessage.getMessage(),
+							receivedMessage.getClientId());
 
 					return dialogMessage;
 				} else if (relatedMonitoringMessageGroup
@@ -1682,7 +1729,8 @@ public class InterventionExecutionManagerService {
 								dialogMessage.getId(),
 								DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
 								receivedMessage.getReceivedTimestamp(),
-								matcher.group(1), receivedMessage.getMessage());
+								matcher.group(1), receivedMessage.getMessage(),
+								receivedMessage.getClientId());
 
 						return dialogMessage;
 					} else {
@@ -1692,7 +1740,8 @@ public class InterventionExecutionManagerService {
 								DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
 								receivedMessage.getReceivedTimestamp(),
 								cleanedMessageValue,
-								receivedMessage.getMessage());
+								receivedMessage.getMessage(),
+								receivedMessage.getClientId());
 
 						return dialogMessage;
 					}
@@ -1702,7 +1751,8 @@ public class InterventionExecutionManagerService {
 							dialogMessage.getId(),
 							DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
 							receivedMessage.getReceivedTimestamp(),
-							cleanedMessageValue, receivedMessage.getMessage());
+							cleanedMessageValue, receivedMessage.getMessage(),
+							receivedMessage.getClientId());
 
 					return dialogMessage;
 				}
@@ -1714,7 +1764,8 @@ public class InterventionExecutionManagerService {
 						dialogMessage.getId(),
 						DialogMessageStatusTypes.SENT_AND_ANSWERED_BY_PARTICIPANT,
 						receivedMessage.getReceivedTimestamp(),
-						cleanedMessageValue, receivedMessage.getMessage());
+						cleanedMessageValue, receivedMessage.getMessage(),
+						receivedMessage.getClientId());
 
 				return dialogMessage;
 			}
@@ -2377,6 +2428,39 @@ public class InterventionExecutionManagerService {
 		try {
 			variablesManagerService.writeVariableValueOfParticipant(
 					participant.getId(), variableName, variableValue);
+		} catch (final Exception e) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Enables the adjustment of variables values using services (e.g. specific
+	 * communication managers)
+	 * 
+	 * @param dialogOptionType
+	 * @param dialogOptionData
+	 * @param variableName
+	 * @param variableValue
+	 * @return
+	 */
+	@Synchronized
+	public boolean participantAdjustVariableValueExternallyBasedOnDialogOptionTypeAndData(
+			final DialogOptionTypes dialogOptionType,
+			final String dialogOptionData, final String variableName,
+			final String variableValue) {
+		val dialogOption = getDialogOptionByTypeAndDataOfActiveInterventions(
+				dialogOptionType, dialogOptionData);
+
+		if (dialogOption == null) {
+			return false;
+		}
+
+		try {
+			variablesManagerService.externallyWriteVariableForParticipant(
+					dialogOption.getParticipant(), variableName, variableValue,
+					false, true);
 		} catch (final Exception e) {
 			return false;
 		}

@@ -51,6 +51,10 @@ public class ReceivedMessage {
 
 	@Getter
 	@Setter
+	private String				clientId;
+
+	@Getter
+	@Setter
 	private int					relatedMessageIdBasedOnOrder;
 
 	@Getter

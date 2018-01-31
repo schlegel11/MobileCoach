@@ -108,6 +108,9 @@ public class DataModelUpdateManager {
 				case 29:
 					updateToVersion29();
 					break;
+				case 30:
+					updateToVersion30();
+					break;
 			}
 
 			log.info("Update to version {} done", updateToVersionInThisStep);
@@ -480,5 +483,14 @@ public class DataModelUpdateManager {
 		}
 
 		log.info("Done.");
+	}
+
+	/**
+	 * Changes for version 30:
+	 */
+	private static void updateToVersion30() {
+		val dialogOptionCollection = jongo.getCollection("DialogMessage");
+		dialogOptionCollection.update(Queries.EVERYTHING).multi()
+				.with(Queries.UPDATE_VERSION_30__DIALOG_MESSAGE__CHANGE_1);
 	}
 }

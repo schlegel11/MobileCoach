@@ -58,6 +58,7 @@ public class PushNotificationService {
 	final static String							NOTIFICATION		= "notification";
 	final static String							BODY				= "body";
 	final static String							SOUND				= "sound";
+	final static String							BADGE				= "badge";
 	final static String							DEFAULT				= "default";
 	final static String							BAD_DEVICE_TOKEN	= "BadDeviceToken";
 
@@ -290,9 +291,9 @@ public class PushNotificationService {
 		final SimpleApnsPushNotification pushNotification;
 		{
 			final ApnsPayloadBuilder payloadBuilder = new ApnsPayloadBuilder();
-			payloadBuilder.setContentAvailable(true);
 
 			if (messageEncrypted) {
+				payloadBuilder.setContentAvailable(true);
 				payloadBuilder.addCustomProperty(BLOB, message);
 				payloadBuilder.addCustomProperty(KEY, dialogOption.getData()
 						.substring(dialogOption.getData().length() - 16));
@@ -378,7 +379,7 @@ public class PushNotificationService {
 					message = null;
 				}
 			} else if (messagesSentSinceLastLogout > 2) {
-				return;
+				message = null;
 			}
 		}
 
@@ -404,16 +405,25 @@ public class PushNotificationService {
 			jsonObject.addProperty(TO, token);
 
 			if (messageEncrypted) {
-				final JsonObject info = new JsonObject();
-				info.addProperty(BLOB, message);
-				info.addProperty(KEY, dialogOption.getData()
+				final JsonObject dataContent = new JsonObject();
+				dataContent.addProperty(BLOB, message);
+				dataContent.addProperty(KEY, dialogOption.getData()
 						.substring(dialogOption.getData().length() - 16));
-				jsonObject.add(DATA, info);
+				final JsonObject data = new JsonObject();
+				data.add(DATA, dataContent);
+				data.addProperty(BADGE, "0");
+				jsonObject.add(DATA, data);
 			} else {
-				final JsonObject notification = new JsonObject();
-				notification.addProperty(BODY, message);
-				notification.addProperty(SOUND, DEFAULT);
-				jsonObject.add(NOTIFICATION, notification);
+				if (message != null) {
+					final JsonObject notification = new JsonObject();
+					notification.addProperty(BODY, message);
+					notification.addProperty(SOUND, DEFAULT);
+					jsonObject.add(NOTIFICATION, notification);
+				}
+				final JsonObject data = new JsonObject();
+				data.addProperty(BADGE,
+						String.valueOf(messagesSentSinceLastLogout));
+				jsonObject.add(DATA, data);
 			}
 
 			@Cleanup

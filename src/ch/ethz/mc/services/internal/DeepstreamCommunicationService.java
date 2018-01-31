@@ -156,8 +156,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 	}
 
 	public void start(
-			final InterventionExecutionManagerService interventionExecutionManagerService,
-			final VariablesManagerService variablesManagerService)
+			final InterventionExecutionManagerService interventionExecutionManagerService)
 			throws Exception {
 		log.info("Starting service...");
 
@@ -304,7 +303,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 						messagesSentSinceLastLogout = allUsersVisibleMessagesSentSinceLastLogout
 								.get(participantOrSupervisorIdentifier) + 1;
 					} else {
-						// User is not logged ind and not known
+						// User is not logged in and not known
 						messagesSentSinceLastLogout = 1;
 					}
 					allUsersVisibleMessagesSentSinceLastLogout.put(
@@ -790,7 +789,6 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 						log.warn("Error when requesting REST token: {}",
 								e.getMessage());
 						rpcResponse.send(JsonNull.INSTANCE);
-						return;
 					}
 				});
 		// Can be called by a "participant" or "supervisor" (role)
@@ -831,7 +829,6 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 						log.warn("Error when storing push token: {}",
 								e.getMessage());
 						rpcResponse.send(new JsonPrimitive(false));
-						return;
 					}
 				});
 		// Can only be called by a "participant" (role)
@@ -854,7 +851,13 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 														.get(DeepstreamConstants.RELATED_MESSAGE_ID)
 														.getAsInt()
 												: -1,
-								null, null, false);
+								null, null,
+								jsonData.has(DeepstreamConstants.CLIENT_ID)
+										? jsonData
+												.get(DeepstreamConstants.CLIENT_ID)
+												.getAsString()
+										: null,
+								false);
 
 						if (receivedSuccessful) {
 							rpcResponse.send(new JsonPrimitive(true));
@@ -865,7 +868,6 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 						log.warn("Error when receiving message: {}",
 								e.getMessage());
 						rpcResponse.send(new JsonPrimitive(false));
-						return;
 					}
 				});
 		// Can only be called by a "participant" (role)
@@ -893,6 +895,11 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 												.get(DeepstreamConstants.USER_CONTENT)
 												.getAsString()
 										: null,
+								jsonData.has(DeepstreamConstants.CLIENT_ID)
+										? jsonData
+												.get(DeepstreamConstants.CLIENT_ID)
+												.getAsString()
+										: null,
 								true);
 
 						if (receivedSuccessful) {
@@ -904,7 +911,33 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 						log.warn("Error when receiving intention message: {}",
 								e.getMessage());
 						rpcResponse.send(new JsonPrimitive(false));
-						return;
+					}
+				});
+		// Can only be called by a "participant" (role)
+		client.rpc.provide(DeepstreamConstants.RPC_USER_VARIABLE,
+				(rpcName, data, rpcResponse) -> {
+					final JsonObject jsonData = (JsonObject) gson
+							.toJsonTree(data);
+
+					try {
+						final boolean variableStored = writeVariableValue(
+								jsonData.get(DeepstreamConstants.USER)
+										.getAsString(),
+								jsonData.get(DeepstreamConstants.VARIABLE)
+										.getAsString(),
+								jsonData.get(DeepstreamConstants.VALUE)
+										.getAsString());
+
+						if (variableStored) {
+							rpcResponse.send(new JsonPrimitive(true));
+						} else {
+							rpcResponse.send(new JsonPrimitive(false));
+						}
+					} catch (final Exception e) {
+						log.warn(
+								"Error when writing variable value for participant: {}",
+								e.getMessage());
+						rpcResponse.send(new JsonPrimitive(false));
 					}
 				});
 		// Can be called by a "participant" or "supervisor" (role)
@@ -977,13 +1010,15 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 	 * @param relatedMessageIdBasedOnOrder
 	 * @param intention
 	 * @param content
+	 * @param clientId
 	 * @param typeIntention
 	 * @return
 	 */
 	private boolean receiveMessage(final String participantId,
 			final String message, final long timestamp,
 			final int relatedMessageIdBasedOnOrder, final String intention,
-			final String content, final boolean typeIntention) {
+			final String content, final String clientId,
+			final boolean typeIntention) {
 		log.debug("Received {} message for participant {}",
 				typeIntention ? "intention" : "regular", participantId);
 
@@ -998,6 +1033,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 						+ participantId);
 		receivedMessage.setMessage(message);
 		receivedMessage.setTypeIntention(typeIntention);
+		receivedMessage.setClientId(clientId);
 		receivedMessage
 				.setRelatedMessageIdBasedOnOrder(relatedMessageIdBasedOnOrder);
 		receivedMessage.setIntention(intention);
@@ -1015,6 +1051,31 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 			synchronized (receivedMessages) {
 				receivedMessages.add(receivedMessage);
 			}
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * @param participantId
+	 * @param variable
+	 * @param value
+	 * @return
+	 */
+	private boolean writeVariableValue(final String participantId,
+			final String variable, final String value) {
+		log.debug("Received new value for variable {} for participant {}",
+				variable, participantId);
+
+		final boolean variableStored = interventionExecutionManagerService
+				.participantAdjustVariableValueExternallyBasedOnDialogOptionTypeAndData(
+						DialogOptionTypes.EXTERNAL_ID,
+						ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+								+ participantId,
+						variable, value);
+
+		if (variableStored) {
 			return true;
 		} else {
 			return false;

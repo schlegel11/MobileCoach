@@ -204,6 +204,7 @@ public class Queries {
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_UNANSWERED_AFTER_TIMESTAMP_LOWER																																	= "{'participant':#,'status':#,'isUnansweredAfterTimestamp':{$lt:#}}";
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_SHOULD_BE_SENT_TIMESTAMP_LOWER																																	= "{'participant':#,'status':#,'shouldBeSentTimestamp':{$lt:#}}";
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_RELATED_MONITORING_MESSAGE																																					= "{'participant':#,'relatedMonitoringMessage':#}";
+	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_CLIENT_ID																																									= "{'participant':#,'clientId':#}";
 	public static final String	DIALOG_MESSAGE__BY_STATUS																																														= "{'status':#}";
 	public static final String	DIALOG_MESSAGE__SORT_BY_ORDER_ASC																																												= "{'order':1}";
 	public static final String	DIALOG_MESSAGE__SORT_BY_ORDER_DESC																																												= "{'order':-1}";
@@ -254,4 +255,5 @@ public class Queries {
 	public static final String	UPDATE_VERSION_20__DIALOG_MESSAGE__CHANGE_2																																										= "{$set:{'relatedMicroDialogMessage':null}}";
 	public static final String	UPDATE_VERSION_24__DIALOG_OPTION__CHANGE_1																																										= "{$set:{'pushNotificationTokens':[]}}";
 	public static final String	UPDATE_VERSION_29__PARTICIPANT_VARIABLE_WITH_VAUE__CHANGE_1_SORT																																				= "{'timestamp':1}";
+	public static final String	UPDATE_VERSION_30__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'clientId':null}}";
 }
