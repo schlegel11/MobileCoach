@@ -316,13 +316,14 @@ public class InterventionExecutionManagerService {
 			final MicroDialog relatedMicroDialogForActivation,
 			final MicroDialogMessage relatedMicroDialogMessage,
 			final boolean supervisorMessage, final boolean answerExpected,
+			final boolean isSticky,
 			final int minutesUntilHandledAsNotAnswered) {
 		log.debug("Create message and prepare for sending");
 		val dialogMessage = new DialogMessage(participant.getId(), 0,
 				DialogMessageStatusTypes.PREPARED_FOR_SENDING, type, null,
 				message, message, answerType, answerOptions, null, null, null,
 				timestampToSendMessage, -1, supervisorMessage, answerExpected,
-				-1, -1, null, null, false,
+				isSticky, -1, -1, null, null, false,
 				relatedMonitoringRule == null ? null
 						: relatedMonitoringRule.getId(),
 				relatedMonitoringMessage == null ? null
@@ -682,7 +683,7 @@ public class InterventionExecutionManagerService {
 				isTypeIntention ? DialogMessageStatusTypes.RECEIVED_AS_INTENTION
 						: DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY,
 				type, receivedMessage.getClientId(), "", "", null, null, null,
-				null, null, -1, -1, false, false, -1,
+				null, null, -1, -1, false, false, false, -1,
 				receivedMessage.getReceivedTimestamp(), answerCleaned,
 				answerRaw, isTypeIntention ? false : true, null, null, null,
 				null, false, false);
@@ -1206,7 +1207,7 @@ public class InterventionExecutionManagerService {
 										? monitoringReplyRule
 												.isSendMessageToSupervisor()
 										: false,
-								false, 0);
+								false, false, 0);
 					}
 				}
 
@@ -1222,7 +1223,7 @@ public class InterventionExecutionManagerService {
 							AnswerTypes.CUSTOM, null, false,
 							InternalDateTime.currentTimeMillis(), null, null,
 							microDialogActivation.getMiroDialogToActivate(),
-							null, false, false, 0);
+							null, false, false, false, 0);
 				}
 			} else if (relatedMicroDialogMessage != null) {
 				log.debug("Caring for further micro dialog handling");
@@ -1372,7 +1373,7 @@ public class InterventionExecutionManagerService {
 										? monitoringRule
 												.isSendMessageToSupervisor()
 										: false,
-								monitoringMessageExpectsAnswer, 0);
+								monitoringMessageExpectsAnswer, false, 0);
 					}
 				}
 
@@ -1408,7 +1409,7 @@ public class InterventionExecutionManagerService {
 							AnswerTypes.CUSTOM, null, false,
 							timeToSendMessageInMillis, null, null,
 							microDialogActivation.getMiroDialogToActivate(),
-							null, false, false, 0);
+							null, false, false, false, 0);
 				}
 
 				if (!periodicCheck) {
@@ -1638,7 +1639,7 @@ public class InterventionExecutionManagerService {
 							monitoringRule != null
 									? monitoringRule.isSendMessageToSupervisor()
 									: false,
-							monitoringMessageExpectsAnswer, 0);
+							monitoringMessageExpectsAnswer, false, 0);
 				}
 			}
 
@@ -1672,7 +1673,7 @@ public class InterventionExecutionManagerService {
 						AnswerTypes.CUSTOM, null, false,
 						timeToSendMessageInMillis, null, null,
 						microDialogActivation.getMiroDialogToActivate(), null,
-						false, false, 0);
+						false, false, false, 0);
 			}
 
 			return dialogMessageCreated;
@@ -2063,7 +2064,8 @@ public class InterventionExecutionManagerService {
 						messageTextToSend, answerTypeToSend,
 						answerOptionsToSend, false, lastMessageSent, null, null,
 						microDialog, microDialogMessage, false,
-						microDialogMessage.isMessageExpectsAnswer(), 0);
+						microDialogMessage.isMessageExpectsAnswer(),
+						microDialogMessage.isMessageIsSticky(), 0);
 
 				// Proceed with micro dialog handling?
 				if (microDialogMessage
@@ -2131,7 +2133,7 @@ public class InterventionExecutionManagerService {
 							DialogMessageTypes.MICRO_DIALOG_ACTIVATION,
 							nextMicroDialog.getName(), AnswerTypes.CUSTOM, null,
 							false, lastMessageSent, null, null, nextMicroDialog,
-							null, false, false, 0);
+							null, false, false, false, 0);
 				}
 
 				// Variables need to be refreshed after performing rules
@@ -2346,7 +2348,7 @@ public class InterventionExecutionManagerService {
 		dialogMessageCreateManuallyOrByRulesIncludingMediaObject(participant,
 				DialogMessageTypes.PLAIN, messageTextToSend, null, null, true,
 				InternalDateTime.currentTimeMillis(), null, null, null, null,
-				advisorMessage, false, 0);
+				advisorMessage, false, false, 0);
 	}
 
 	/**
@@ -2406,7 +2408,7 @@ public class InterventionExecutionManagerService {
 				messageTextToSend, answerTypeToSend, answerOptionsToSend, true,
 				InternalDateTime.currentTimeMillis(), null,
 				determinedMonitoringMessageToSend, null, null, advisorMessage,
-				monitoringMessageGroup.isMessagesExpectAnswer(),
+				monitoringMessageGroup.isMessagesExpectAnswer(), false,
 				minutesUntilHandledAsNotAnswered);
 	}
 

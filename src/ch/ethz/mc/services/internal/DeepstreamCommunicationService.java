@@ -211,6 +211,7 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 	 * @param surveyLink
 	 * @param contentObjectLink
 	 * @param messageExpectsAnswer
+	 * @param messageIsSticky
 	 * @return Number of visible message sent to this user since the last logout
 	 *         or zero if no message has been sent
 	 */
@@ -220,8 +221,8 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 			final String message, final AnswerTypes answerType,
 			final String answerOptions,
 			final String textBasedMediaObjectContent, final String surveyLink,
-			final String contentObjectLink,
-			final boolean messageExpectsAnswer) {
+			final String contentObjectLink, final boolean messageExpectsAnswer,
+			final boolean messageIsSticky) {
 
 		val dialogMessage = interventionExecutionManagerService
 				.dialogMessageStatusChangesForSending(dialogMessageId,
@@ -282,6 +283,8 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 					messageExpectsAnswer);
 			messageObject.addProperty(DeepstreamConstants.LAST_MODIFIED,
 					timestamp);
+			messageObject.addProperty(DeepstreamConstants.STICKY,
+					messageIsSticky);
 
 			record.set(DeepstreamConstants.PATH_LIST
 					+ String.valueOf(messageOrder), messageObject);

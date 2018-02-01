@@ -292,6 +292,7 @@ public class CommunicationManagerService {
 				.getMessageWithForcedLinks();
 		final boolean messageExpectsAnswer = dialogMessage
 				.isMessageExpectsAnswer();
+		final boolean messageIsSticky = dialogMessage.isMessageIsSticky();
 
 		switch (dialogOption.getType()) {
 			case SMS:
@@ -338,7 +339,7 @@ public class CommunicationManagerService {
 												.getTextBasedMediaObjectContent(),
 										dialogMessage.getSurveyLink(),
 										dialogMessage.getMediaObjectLink(),
-										messageExpectsAnswer);
+										messageExpectsAnswer, messageIsSticky);
 					} catch (final Exception e) {
 						log.warn("Could not send message using deepstream: {}",
 								e.getMessage());

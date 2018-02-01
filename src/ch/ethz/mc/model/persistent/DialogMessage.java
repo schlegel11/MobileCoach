@@ -174,6 +174,13 @@ public class DialogMessage extends ModelObject {
 	private boolean						messageExpectsAnswer;
 
 	/**
+	 * Defines if this message should be sticky within a chat client
+	 */
+	@Getter
+	@Setter
+	private boolean						messageIsSticky;
+
+	/**
 	 * Timestamp when the {@link DialogMessage} is handled as unanswered
 	 */
 	@Getter

@@ -256,4 +256,6 @@ public class Queries {
 	public static final String	UPDATE_VERSION_24__DIALOG_OPTION__CHANGE_1																																										= "{$set:{'pushNotificationTokens':[]}}";
 	public static final String	UPDATE_VERSION_29__PARTICIPANT_VARIABLE_WITH_VAUE__CHANGE_1_SORT																																				= "{'timestamp':1}";
 	public static final String	UPDATE_VERSION_30__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'clientId':null}}";
+	public static final String	UPDATE_VERSION_31__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'messageIsSticky':false}}";
+	public static final String	UPDATE_VERSION_31__MICRO_DIALOG_MESSAGE__CHANGE_1																																								= "{$set:{'messageIsSticky':false}}";
 }
