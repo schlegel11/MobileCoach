@@ -263,12 +263,9 @@ public class MicroDialogsTabComponentWithController
 			getMicroDialogsTabSheet().setSelectedTab(newTab);
 			getAdminUI().showInformationNotification(
 					AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_DUPLICATED);
-
-			getAdminUI().showInformationNotification(
-					AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_MESSAGE_DUPLICATED);
 		} catch (final Exception e) {
 			getAdminUI().showWarningNotification(
-					AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_MESSAGE_DUPLICATION_FAILED);
+					AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_DUPLICATION_FAILED);
 		}
 
 		try {
