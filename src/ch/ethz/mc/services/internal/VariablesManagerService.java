@@ -1027,6 +1027,39 @@ public class VariablesManagerService {
 		return variables;
 	}
 
+	/**
+	 * Returns the personal variable value of a {@link Participant} or the
+	 * appropriate fallback value from {@link InterventionVariableWithValue}s
+	 * 
+	 * @param participant
+	 * @param variable
+	 * @return
+	 */
+	public String getParticipantOrInterventionVariableValueOfParticipant(
+			final Participant participant, final String variable) {
+		// Try to find variable value for participant
+		val participantVariableWithValue = databaseManagerService
+				.findOneModelObject(ParticipantVariableWithValue.class,
+						Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME,
+						participant.getId(), variable);
+
+		if (participantVariableWithValue != null) {
+			return participantVariableWithValue.getValue();
+		}
+
+		// Try to find intervention variable as fallback
+		val interventionVariable = databaseManagerService.findOneModelObject(
+				InterventionVariableWithValue.class,
+				Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME,
+				participant.getIntervention(), variable);
+
+		if (interventionVariable != null) {
+			return interventionVariable.getValue();
+		}
+
+		return null;
+	}
+
 	/*
 	 * External or service access methods
 	 */

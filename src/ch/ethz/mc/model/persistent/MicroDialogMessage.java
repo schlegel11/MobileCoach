@@ -114,6 +114,15 @@ public class MicroDialogMessage extends ModelObject
 	private boolean		messageExpectsAnswer;
 
 	/**
+	 * Defines if the {@link MicroDialogMessage} should be sticky within the
+	 * client
+	 *
+	 */
+	@Getter
+	@Setter
+	private boolean		messageIsSticky;
+
+	/**
 	 * Defines if the {@link MicroDialogMessage}s in the group expect to be
 	 * answeres by the {@link Participant}
 	 *

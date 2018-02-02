@@ -244,6 +244,20 @@ public class MicroDialogMessageEditComponentWithController
 					}
 				});
 
+		val isStickyCheckBox = getIsStickyMessageCheckBox();
+		isStickyCheckBox.setValue(microDialogMessage.isMessageIsSticky());
+
+		isStickyCheckBox.addValueChangeListener(new ValueChangeListener() {
+
+			@Override
+			public void valueChange(final ValueChangeEvent event) {
+				getInterventionAdministrationManagerService()
+						.microDialogMessageSetIsStickyMessage(
+								microDialogMessage,
+								(boolean) event.getProperty().getValue());
+			}
+		});
+
 		val messageExpectsAnswerCheckBox = getMessageExpectsAnswerCheckBox();
 		messageExpectsAnswerCheckBox
 				.setValue(microDialogMessage.isMessageExpectsAnswer());

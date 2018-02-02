@@ -316,13 +316,14 @@ public class InterventionExecutionManagerService {
 			final MicroDialog relatedMicroDialogForActivation,
 			final MicroDialogMessage relatedMicroDialogMessage,
 			final boolean supervisorMessage, final boolean answerExpected,
+			final boolean isSticky,
 			final int minutesUntilHandledAsNotAnswered) {
 		log.debug("Create message and prepare for sending");
 		val dialogMessage = new DialogMessage(participant.getId(), 0,
 				DialogMessageStatusTypes.PREPARED_FOR_SENDING, type, null,
 				message, message, answerType, answerOptions, null, null, null,
 				timestampToSendMessage, -1, supervisorMessage, answerExpected,
-				-1, -1, null, null, false,
+				isSticky, -1, -1, null, null, false,
 				relatedMonitoringRule == null ? null
 						: relatedMonitoringRule.getId(),
 				relatedMonitoringMessage == null ? null
@@ -682,7 +683,7 @@ public class InterventionExecutionManagerService {
 				isTypeIntention ? DialogMessageStatusTypes.RECEIVED_AS_INTENTION
 						: DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY,
 				type, receivedMessage.getClientId(), "", "", null, null, null,
-				null, null, -1, -1, false, false, -1,
+				null, null, -1, -1, false, false, false, -1,
 				receivedMessage.getReceivedTimestamp(), answerCleaned,
 				answerRaw, isTypeIntention ? false : true, null, null, null,
 				null, false, false);
@@ -1206,7 +1207,7 @@ public class InterventionExecutionManagerService {
 										? monitoringReplyRule
 												.isSendMessageToSupervisor()
 										: false,
-								false, 0);
+								false, false, 0);
 					}
 				}
 
@@ -1222,7 +1223,7 @@ public class InterventionExecutionManagerService {
 							AnswerTypes.CUSTOM, null, false,
 							InternalDateTime.currentTimeMillis(), null, null,
 							microDialogActivation.getMiroDialogToActivate(),
-							null, false, false, 0);
+							null, false, false, false, 0);
 				}
 			} else if (relatedMicroDialogMessage != null) {
 				log.debug("Caring for further micro dialog handling");
@@ -1336,16 +1337,22 @@ public class InterventionExecutionManagerService {
 
 						// Calculate time to send message
 						long timeToSendMessageInMillis;
-						final int hourToSendMessage = monitoringRule
-								.getHourToSendMessageOrActivateMicroDialog();
+						final double hourToSendMessage = calculateHourTeSendMessageOrActivateMicroDialog(
+								participant, monitoringRule);
 						if (hourToSendMessage > 0) {
+							final int hourPart = new Double(
+									Math.floor(hourToSendMessage)).intValue();
+							final int minutePart = new Double(Math
+									.floor((hourToSendMessage - hourPart) * 60))
+											.intValue();
+
 							final Calendar timeToSendMessage = Calendar
 									.getInstance();
 							timeToSendMessage.setTimeInMillis(
 									InternalDateTime.currentTimeMillis());
 							timeToSendMessage.set(Calendar.HOUR_OF_DAY,
-									hourToSendMessage);
-							timeToSendMessage.set(Calendar.MINUTE, 0);
+									hourPart);
+							timeToSendMessage.set(Calendar.MINUTE, minutePart);
 							timeToSendMessage.set(Calendar.SECOND, 0);
 							timeToSendMessage.set(Calendar.MILLISECOND, 0);
 							timeToSendMessageInMillis = timeToSendMessage
@@ -1372,7 +1379,7 @@ public class InterventionExecutionManagerService {
 										? monitoringRule
 												.isSendMessageToSupervisor()
 										: false,
-								monitoringMessageExpectsAnswer, 0);
+								monitoringMessageExpectsAnswer, false, 0);
 					}
 				}
 
@@ -1381,16 +1388,21 @@ public class InterventionExecutionManagerService {
 						.getMicroDialogsToActivate()) {
 					// Calculate time to send message
 					long timeToSendMessageInMillis;
-					final int hourToSendMessage = microDialogActivation
+					final double hourToSendMessage = microDialogActivation
 							.getHourToActivateMicroDialog();
 					if (hourToSendMessage > 0) {
+						final int hourPart = new Double(
+								Math.floor(hourToSendMessage)).intValue();
+						final int minutePart = new Double(
+								Math.floor((hourToSendMessage - hourPart) * 60))
+										.intValue();
+
 						final Calendar timeToSendMessage = Calendar
 								.getInstance();
 						timeToSendMessage.setTimeInMillis(
 								InternalDateTime.currentTimeMillis());
-						timeToSendMessage.set(Calendar.HOUR_OF_DAY,
-								hourToSendMessage);
-						timeToSendMessage.set(Calendar.MINUTE, 0);
+						timeToSendMessage.set(Calendar.HOUR_OF_DAY, hourPart);
+						timeToSendMessage.set(Calendar.MINUTE, minutePart);
 						timeToSendMessage.set(Calendar.SECOND, 0);
 						timeToSendMessage.set(Calendar.MILLISECOND, 0);
 						timeToSendMessageInMillis = timeToSendMessage
@@ -1408,7 +1420,7 @@ public class InterventionExecutionManagerService {
 							AnswerTypes.CUSTOM, null, false,
 							timeToSendMessageInMillis, null, null,
 							microDialogActivation.getMiroDialogToActivate(),
-							null, false, false, 0);
+							null, false, false, false, 0);
 				}
 
 				if (!periodicCheck) {
@@ -1604,16 +1616,21 @@ public class InterventionExecutionManagerService {
 
 					// Calculate time to send message
 					long timeToSendMessageInMillis;
-					final int hourToSendMessage = monitoringRule
-							.getHourToSendMessageOrActivateMicroDialog();
+					final double hourToSendMessage = calculateHourTeSendMessageOrActivateMicroDialog(
+							participant, monitoringRule);
 					if (hourToSendMessage > 0) {
+						final int hourPart = new Double(
+								Math.floor(hourToSendMessage)).intValue();
+						final int minutePart = new Double(
+								Math.floor((hourToSendMessage - hourPart) * 60))
+										.intValue();
+
 						final Calendar timeToSendMessage = Calendar
 								.getInstance();
 						timeToSendMessage.setTimeInMillis(
 								InternalDateTime.currentTimeMillis());
-						timeToSendMessage.set(Calendar.HOUR_OF_DAY,
-								hourToSendMessage);
-						timeToSendMessage.set(Calendar.MINUTE, 0);
+						timeToSendMessage.set(Calendar.HOUR_OF_DAY, hourPart);
+						timeToSendMessage.set(Calendar.MINUTE, minutePart);
 						timeToSendMessage.set(Calendar.SECOND, 0);
 						timeToSendMessage.set(Calendar.MILLISECOND, 0);
 						timeToSendMessageInMillis = timeToSendMessage
@@ -1638,7 +1655,7 @@ public class InterventionExecutionManagerService {
 							monitoringRule != null
 									? monitoringRule.isSendMessageToSupervisor()
 									: false,
-							monitoringMessageExpectsAnswer, 0);
+							monitoringMessageExpectsAnswer, false, 0);
 				}
 			}
 
@@ -1647,15 +1664,20 @@ public class InterventionExecutionManagerService {
 					.getMicroDialogsToActivate()) {
 				// Calculate time to send message
 				long timeToSendMessageInMillis;
-				final int hourToSendMessage = microDialogActivation
+				final double hourToSendMessage = microDialogActivation
 						.getHourToActivateMicroDialog();
 				if (hourToSendMessage > 0) {
+					final int hourPart = new Double(
+							Math.floor(hourToSendMessage)).intValue();
+					final int minutePart = new Double(
+							Math.floor((hourToSendMessage - hourPart) * 60))
+									.intValue();
+
 					final Calendar timeToSendMessage = Calendar.getInstance();
 					timeToSendMessage.setTimeInMillis(
 							InternalDateTime.currentTimeMillis());
-					timeToSendMessage.set(Calendar.HOUR_OF_DAY,
-							hourToSendMessage);
-					timeToSendMessage.set(Calendar.MINUTE, 0);
+					timeToSendMessage.set(Calendar.HOUR_OF_DAY, hourPart);
+					timeToSendMessage.set(Calendar.MINUTE, minutePart);
 					timeToSendMessage.set(Calendar.SECOND, 0);
 					timeToSendMessage.set(Calendar.MILLISECOND, 0);
 					timeToSendMessageInMillis = timeToSendMessage
@@ -1672,7 +1694,7 @@ public class InterventionExecutionManagerService {
 						AnswerTypes.CUSTOM, null, false,
 						timeToSendMessageInMillis, null, null,
 						microDialogActivation.getMiroDialogToActivate(), null,
-						false, false, 0);
+						false, false, false, 0);
 			}
 
 			return dialogMessageCreated;
@@ -2063,7 +2085,8 @@ public class InterventionExecutionManagerService {
 						messageTextToSend, answerTypeToSend,
 						answerOptionsToSend, false, lastMessageSent, null, null,
 						microDialog, microDialogMessage, false,
-						microDialogMessage.isMessageExpectsAnswer(), 0);
+						microDialogMessage.isMessageExpectsAnswer(),
+						microDialogMessage.isMessageIsSticky(), 0);
 
 				// Proceed with micro dialog handling?
 				if (microDialogMessage
@@ -2131,7 +2154,7 @@ public class InterventionExecutionManagerService {
 							DialogMessageTypes.MICRO_DIALOG_ACTIVATION,
 							nextMicroDialog.getName(), AnswerTypes.CUSTOM, null,
 							false, lastMessageSent, null, null, nextMicroDialog,
-							null, false, false, 0);
+							null, false, false, false, 0);
 				}
 
 				// Variables need to be refreshed after performing rules
@@ -2346,7 +2369,7 @@ public class InterventionExecutionManagerService {
 		dialogMessageCreateManuallyOrByRulesIncludingMediaObject(participant,
 				DialogMessageTypes.PLAIN, messageTextToSend, null, null, true,
 				InternalDateTime.currentTimeMillis(), null, null, null, null,
-				advisorMessage, false, 0);
+				advisorMessage, false, false, 0);
 	}
 
 	/**
@@ -2406,7 +2429,7 @@ public class InterventionExecutionManagerService {
 				messageTextToSend, answerTypeToSend, answerOptionsToSend, true,
 				InternalDateTime.currentTimeMillis(), null,
 				determinedMonitoringMessageToSend, null, null, advisorMessage,
-				monitoringMessageGroup.isMessagesExpectAnswer(),
+				monitoringMessageGroup.isMessagesExpectAnswer(), false,
 				minutesUntilHandledAsNotAnswered);
 	}
 
@@ -2726,6 +2749,61 @@ public class InterventionExecutionManagerService {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Calculates appropriate hour for sending out message or activate micro
+	 * dialog
+	 * 
+	 * @param participant
+	 * @param monitoringRule
+	 * @return
+	 */
+	@Synchronized
+	public double calculateHourTeSendMessageOrActivateMicroDialog(
+			final Participant participant,
+			final MonitoringRule monitoringRule) {
+
+		if (monitoringRule
+				.getVariableForDecimalHourToSendMessageOrActivateMicroDialog() == null) {
+			return monitoringRule.getHourToSendMessageOrActivateMicroDialog();
+		} else {
+			val variable = monitoringRule
+					.getVariableForDecimalHourToSendMessageOrActivateMicroDialog();
+
+			val stringValue = variablesManagerService
+					.getParticipantOrInterventionVariableValueOfParticipant(
+							participant, variable);
+
+			if (stringValue == null) {
+				log.warn(
+						"Could not find variable {} for participant {} to calculate hour to send message or activate micro dialog",
+						variable, participant.getId());
+
+				return ImplementationConstants.FALLBACK_HOUR_TO_SEND_MESSAGE;
+			} else {
+				double doubleValue = ImplementationConstants.FALLBACK_HOUR_TO_SEND_MESSAGE;
+
+				try {
+					doubleValue = Double.parseDouble(stringValue);
+				} catch (final Exception e) {
+					log.warn(
+							"Could not parse variable {} value {} for participant {} to calculate hour to send message or activate micro dialog: {}",
+							variable, stringValue, participant.getId(),
+							e.getMessage());
+
+					return ImplementationConstants.FALLBACK_HOUR_TO_SEND_MESSAGE;
+				}
+
+				if (doubleValue < ImplementationConstants.HOUR_TO_SEND_MESSAGE_MIN) {
+					doubleValue = ImplementationConstants.HOUR_TO_SEND_MESSAGE_MIN;
+				} else if (doubleValue > ImplementationConstants.HOUR_TO_SEND_MESSAGE_MAX) {
+					doubleValue = ImplementationConstants.HOUR_TO_SEND_MESSAGE_MAX;
+				}
+
+				return doubleValue;
+			}
+		}
 	}
 
 	/*

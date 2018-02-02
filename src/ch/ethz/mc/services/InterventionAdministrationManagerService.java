@@ -1134,8 +1134,8 @@ public class InterventionAdministrationManagerService {
 	public MicroDialogMessage microDialogMessageCreate(
 			final ObjectId microDialogId) {
 		val microDialogMessage = new MicroDialogMessage(microDialogId, 0,
-				new LString(), false, null, null, false, false, null, null,
-				AnswerTypes.FREE_TEXT,
+				new LString(), false, null, null, false, false, false, null,
+				null, AnswerTypes.FREE_TEXT,
 				ImplementationConstants.DEFAULT_MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED,
 				new LString());
 
@@ -1188,6 +1188,15 @@ public class InterventionAdministrationManagerService {
 			final MicroDialogMessage microDialogMessage,
 			final boolean isCommandMessage) {
 		microDialogMessage.setCommandMessage(isCommandMessage);
+
+		databaseManagerService.saveModelObject(microDialogMessage);
+	}
+
+	@Synchronized
+	public void microDialogMessageSetIsStickyMessage(
+			final MicroDialogMessage microDialogMessage,
+			final boolean isStickyMessage) {
+		microDialogMessage.setMessageIsSticky(isStickyMessage);
 
 		databaseManagerService.saveModelObject(microDialogMessage);
 	}
@@ -2159,6 +2168,16 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
+	public void monitoringRuleSetHourVariableToSendMessageOrActivateMicroDialog(
+			final MonitoringRule monitoringRule, final String variable) {
+		monitoringRule
+				.setVariableForDecimalHourToSendMessageOrActivateMicroDialog(
+						variable);
+
+		databaseManagerService.saveModelObject(monitoringRule);
+	}
+
+	@Synchronized
 	public void monitoringRuleSetHourToSendMessageOrActivateMicroDialog(
 			final MonitoringRule monitoringRule, final int newValue) {
 		monitoringRule.setHourToSendMessageOrActivateMicroDialog(newValue);
@@ -3059,6 +3078,33 @@ public class InterventionAdministrationManagerService {
 
 		variables.addAll(
 				variablesManagerService.getAllSystemReservedVariableNames());
+
+		variables.addAll(variablesManagerService
+				.getAllInterventionVariableNamesOfIntervention(interventionId));
+		variables.addAll(variablesManagerService
+				.getAllSurveyVariableNamesOfIntervention(interventionId));
+		variables.addAll(variablesManagerService
+				.getAllMonitoringMessageVariableNamesOfIntervention(
+						interventionId));
+		variables.addAll(variablesManagerService
+				.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(
+						interventionId));
+		variables.addAll(variablesManagerService
+				.getAllMicroDialogMessageVariableNamesOfIntervention(
+						interventionId));
+		variables.addAll(variablesManagerService
+				.getAllMicroDialogRuleVariableNamesOfIntervention(
+						interventionId));
+
+		Collections.sort(variables);
+
+		return variables;
+	}
+
+	@Synchronized
+	public List<String> getAllAppropriateMonitoringRuleVariablesOfInterventionForTiming(
+			final ObjectId interventionId) {
+		val variables = new ArrayList<String>();
 
 		variables.addAll(variablesManagerService
 				.getAllInterventionVariableNamesOfIntervention(interventionId));

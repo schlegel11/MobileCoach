@@ -111,6 +111,12 @@ public class DataModelUpdateManager {
 				case 30:
 					updateToVersion30();
 					break;
+				case 31:
+					updateToVersion31();
+					break;
+				case 32:
+					updateToVersion32();
+					break;
 			}
 
 			log.info("Update to version {} done", updateToVersionInThisStep);
@@ -489,8 +495,30 @@ public class DataModelUpdateManager {
 	 * Changes for version 30:
 	 */
 	private static void updateToVersion30() {
-		val dialogOptionCollection = jongo.getCollection("DialogMessage");
-		dialogOptionCollection.update(Queries.EVERYTHING).multi()
+		val dialogMessageCollection = jongo.getCollection("DialogMessage");
+		dialogMessageCollection.update(Queries.EVERYTHING).multi()
 				.with(Queries.UPDATE_VERSION_30__DIALOG_MESSAGE__CHANGE_1);
+	}
+
+	/**
+	 * Changes for version 31:
+	 */
+	private static void updateToVersion31() {
+		val dialogMessageCollection = jongo.getCollection("DialogMessage");
+		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+				.with(Queries.UPDATE_VERSION_31__DIALOG_MESSAGE__CHANGE_1);
+		val microDialogMessageCollection = jongo
+				.getCollection("MicroDialogMessage");
+		microDialogMessageCollection.update(Queries.EVERYTHING).multi().with(
+				Queries.UPDATE_VERSION_31__MICRO_DIALOG_MESSAGE__CHANGE_1);
+	}
+
+	/**
+	 * Changes for version 32:
+	 */
+	private static void updateToVersion32() {
+		val monitoringRuleCollection = jongo.getCollection("MonitoringRule");
+		monitoringRuleCollection.update(Queries.EVERYTHING).multi()
+				.with(Queries.UPDATE_VERSION_32__MONITORING_RULE__CHANGE_1);
 	}
 }

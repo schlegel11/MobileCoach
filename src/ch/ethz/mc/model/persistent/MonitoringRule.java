@@ -105,6 +105,16 @@ public class MonitoringRule extends AbstractMonitoringRule {
 
 	/**
 	 * <strong>OPTIONAL if sendMessageIfTrue and activateMicroDialogIfTrue are
+	 * both false:</strong> The hour the message should be sent defined as
+	 * variable; if this value is set the integer value
+	 * (hourToSendMessageOrActivateMicroDialog) will be ignored
+	 */
+	@Getter
+	@Setter
+	private String				variableForDecimalHourToSendMessageOrActivateMicroDialog;
+
+	/**
+	 * <strong>OPTIONAL if sendMessageIfTrue and activateMicroDialogIfTrue are
 	 * both false:</strong> The hour the message should be sent
 	 */
 	@Getter

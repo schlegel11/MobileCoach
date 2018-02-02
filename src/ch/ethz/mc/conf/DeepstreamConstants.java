@@ -85,6 +85,7 @@ public class DeepstreamConstants {
 	public static final String	USER_CONTENT						= "user-content";
 	public static final String	CLIENT_ID							= "client-id";
 	public static final String	LAST_MODIFIED						= "last-modified";
+	public static final String	STICKY								= "sticky";
 	public static final String	CONTAINS_SURVEY						= "contains-survey";
 	public static final String	EXPECTS_ANSWER						= "expects-answer";
 	public static final String	MESSAGE_TIMESTAMP					= "message-timestamp";

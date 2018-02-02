@@ -43,6 +43,7 @@ public class ImplementationConstants {
 	public static final int		HOUR_TO_SEND_MESSAGE_MIN															= 0;
 	public static final int		HOUR_TO_SEND_MESSAGE_MAX															= 23;
 	public static final int		DEFAULT_HOUR_TO_SEND_MESSAGE														= 0;
+	public static final int		FALLBACK_HOUR_TO_SEND_MESSAGE														= 12;
 
 	public static final long	MINUTES_TO_TIME_IN_MILLIS_MULTIPLICATOR												= 60
 			* 1000;
