@@ -1124,6 +1124,55 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
+	public MicroDialog microDialogImport(final File file)
+			throws FileNotFoundException, IOException {
+		val importedModelObjects = modelObjectExchangeService
+				.importModelObjects(file,
+						ModelObjectExchangeFormatTypes.MICRO_DIALOG);
+
+		for (val modelObject : importedModelObjects) {
+			if (modelObject instanceof MicroDialog) {
+				val microDialog = (MicroDialog) modelObject;
+
+				// Adjust order
+				microDialog.setOrder(0);
+
+				val highestOrderMicroDialog = databaseManagerService
+						.findOneSortedModelObject(MicroDialog.class,
+								Queries.MICRO_DIALOG__BY_INTERVENTION,
+								Queries.MICRO_DIALOG__SORT_BY_ORDER_DESC,
+								microDialog.getIntervention());
+
+				if (highestOrderMicroDialog != null) {
+					microDialog
+							.setOrder(highestOrderMicroDialog.getOrder() + 1);
+				}
+
+				databaseManagerService.saveModelObject(microDialog);
+
+				return microDialog;
+			}
+		}
+
+		return null;
+	}
+
+	@Synchronized
+	public File microDialogExport(final MicroDialog microDialog) {
+		final List<ModelObject> modelObjectsToExport = new ArrayList<ModelObject>();
+
+		log.debug(
+				"Recursively collect all model objects related to the micro dialog");
+		microDialog.collectThisAndRelatedModelObjectsForExport(
+				modelObjectsToExport);
+
+		log.debug("Export micro dialog");
+		return modelObjectExchangeService.exportModelObjects(
+				modelObjectsToExport,
+				ModelObjectExchangeFormatTypes.MICRO_DIALOG);
+	}
+
+	@Synchronized
 	public void microDialogDelete(final MicroDialog microDialogToDelete) {
 
 		databaseManagerService.deleteModelObject(microDialogToDelete);

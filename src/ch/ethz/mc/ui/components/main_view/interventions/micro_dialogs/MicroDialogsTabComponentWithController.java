@@ -1,5 +1,6 @@
 package ch.ethz.mc.ui.components.main_view.interventions.micro_dialogs;
 
+import java.io.File;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -117,6 +118,7 @@ public class MicroDialogsTabComponentWithController
 		val buttonClickListener = new ButtonClickListener();
 		getNewDialogButton().addClickListener(buttonClickListener);
 		getRenameDialogButton().addClickListener(buttonClickListener);
+		getDuplicateDialogButton().addClickListener(buttonClickListener);
 		getMoveDialogLeftButton().addClickListener(buttonClickListener);
 		getMoveDialogRightButton().addClickListener(buttonClickListener);
 		getDeleteDialogButton().addClickListener(buttonClickListener);
@@ -133,6 +135,8 @@ public class MicroDialogsTabComponentWithController
 				moveDialog(false);
 			} else if (event.getButton() == getRenameDialogButton()) {
 				renameDialog();
+			} else if (event.getButton() == getDuplicateDialogButton()) {
+				duplicateDialog();
 			} else if (event.getButton() == getDeleteDialogButton()) {
 				deleteDialog();
 			}
@@ -231,6 +235,47 @@ public class MicroDialogsTabComponentWithController
 						closeWindow();
 					}
 				}, null);
+	}
+
+	public void duplicateDialog() {
+		log.debug("Duplicate dialog");
+
+		File temporaryBackupFile = null;
+		try {
+			temporaryBackupFile = getInterventionAdministrationManagerService()
+					.microDialogExport(selectedMicroDialog);
+
+			final MicroDialog importedMicroDialog = getInterventionAdministrationManagerService()
+					.microDialogImport(temporaryBackupFile);
+
+			if (importedMicroDialog == null) {
+				throw new Exception("Imported element not found in import");
+			}
+
+			// Adapt UI
+			val newTab = addTabComponent(importedMicroDialog, intervention);
+
+			tabsWithObjectIdsOfMicroDialog.put(newTab,
+					importedMicroDialog.getId());
+
+			selectedMicroDialog = importedMicroDialog;
+
+			getMicroDialogsTabSheet().setSelectedTab(newTab);
+			getAdminUI().showInformationNotification(
+					AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_DUPLICATED);
+
+			getAdminUI().showInformationNotification(
+					AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_MESSAGE_DUPLICATED);
+		} catch (final Exception e) {
+			getAdminUI().showWarningNotification(
+					AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_MESSAGE_DUPLICATION_FAILED);
+		}
+
+		try {
+			temporaryBackupFile.delete();
+		} catch (final Exception f) {
+			// Do nothing
+		}
 	}
 
 	public void deleteDialog() {
