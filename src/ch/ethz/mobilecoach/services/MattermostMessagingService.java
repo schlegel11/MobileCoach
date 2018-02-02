@@ -274,9 +274,13 @@ public class MattermostMessagingService implements MessagingService {
 			recipients += playerIds[ind] + " ";
 		}
 
+		RepositoryReader repoReader = new RepositoryReader(pathObj);
+		String oneSignalAPIKey = (repoReader.oneSignalAPIKey) ? repoReader.oneSignalAPIKey : Constants.getOneSignalApiKey();
+		String oneSignalAppId = (repoReader.oneSignalAppId) ? repoReader.oneSignalAppId : Constants.getOneSignalAppId();
+
 		LinkedHashMap<String, String> headers = new LinkedHashMap<>();
 		headers.put("Content-Type", "application/json");
-		headers.put("Authorization", "Basic " + Constants.getOneSignalApiKey());
+		headers.put("Authorization", "Basic " + oneSignalAPIKey);
 		String url = "https://onesignal.com/api/v1/notifications";
 
 		//log.info("Sending push using key " + Constants.getOneSignalApiKey().substring(0, 5) + "... to " + recipients);
@@ -291,7 +295,7 @@ public class MattermostMessagingService implements MessagingService {
 		data.put("message_id", post.getId());
 
 		JSONObject json2 = new JSONObject()
-				.put("app_id", Constants.getOneSignalAppId())
+				.put("app_id", oneSignalAppId)
 				.put("contents", new JSONObject().put("en", message))
 				.put("include_player_ids", playerIds)
 				.put("data", data)
