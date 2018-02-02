@@ -258,4 +258,5 @@ public class Queries {
 	public static final String	UPDATE_VERSION_30__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'clientId':null}}";
 	public static final String	UPDATE_VERSION_31__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'messageIsSticky':false}}";
 	public static final String	UPDATE_VERSION_31__MICRO_DIALOG_MESSAGE__CHANGE_1																																								= "{$set:{'messageIsSticky':false}}";
+	public static final String	UPDATE_VERSION_32__MONITORING_RULE__CHANGE_1																																									= "{$set:{'variableForDecimalHourToSendMessageOrActivateMicroDialog':null}}";
 }

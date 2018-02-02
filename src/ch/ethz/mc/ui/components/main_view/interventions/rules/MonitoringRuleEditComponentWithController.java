@@ -188,6 +188,35 @@ public class MonitoringRuleEditComponentWithController
 			}
 		});
 
+		val allVariablesAppropriateForMessageTiming = getInterventionAdministrationManagerService()
+				.getAllAppropriateMonitoringRuleVariablesOfInterventionForTiming(
+						interventionId);
+		val decimalHourVariableToSendMessageComboBox = getDecimalHourVariableToSendMessageComboBox();
+		for (val variable : allVariablesAppropriateForMessageTiming) {
+			decimalHourVariableToSendMessageComboBox.addItem(variable);
+			if (variable.equals(monitoringRule
+					.getVariableForDecimalHourToSendMessageOrActivateMicroDialog())) {
+				decimalHourVariableToSendMessageComboBox.select(variable);
+			}
+		}
+		decimalHourVariableToSendMessageComboBox
+				.addValueChangeListener(new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						val variable = (String) event.getProperty().getValue();
+
+						log.debug(
+								"Adjust variable for decimal hour to send message to {}",
+								variable);
+						getInterventionAdministrationManagerService()
+								.monitoringRuleSetHourVariableToSendMessageOrActivateMicroDialog(
+										monitoringRule, variable);
+
+						adjust();
+					}
+				});
+
 		// Handle sliders
 		final val valueChangeListener = new SliderValueChangeListener();
 
@@ -520,10 +549,17 @@ public class MonitoringRuleEditComponentWithController
 		if (monitoringRule.isSendMessageIfTrue()
 				|| monitoringRule.isActivateMicroDialogIfTrue()) {
 			getHourToSendMessageLabel().setEnabled(true);
-			getHourToSendMessageSlider().setEnabled(true);
+			if (getDecimalHourVariableToSendMessageComboBox()
+					.getValue() == null) {
+				getHourToSendMessageSlider().setEnabled(true);
+			} else {
+				getHourToSendMessageSlider().setEnabled(false);
+			}
+			getDecimalHourVariableToSendMessageComboBox().setEnabled(true);
 		} else {
 			getHourToSendMessageLabel().setEnabled(false);
 			getHourToSendMessageSlider().setEnabled(false);
+			getDecimalHourVariableToSendMessageComboBox().setEnabled(false);
 		}
 
 		// Adjust sliders

@@ -175,7 +175,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 
 		@Getter
 		@Setter
-		private int			hourToActivateMicroDialog;
+		private double		hourToActivateMicroDialog;
 	}
 
 	// Solution for MonitoringRules
@@ -400,11 +400,13 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				val microDialog = databaseManagerService
 						.getModelObjectById(MicroDialog.class, microDialogId);
 
-				int hourToActivateMicroDialog = 0;
+				double hourToActivateMicroDialog = 0d;
 
 				if (ruleToCheckForMicroDialogActivation instanceof MonitoringRule) {
-					hourToActivateMicroDialog = ((MonitoringRule) ruleToCheckForMicroDialogActivation)
-							.getHourToSendMessageOrActivateMicroDialog();
+					hourToActivateMicroDialog = interventionExecutionManagerService
+							.calculateHourTeSendMessageOrActivateMicroDialog(
+									participant,
+									(MonitoringRule) ruleToCheckForMicroDialogActivation);
 				}
 
 				if (microDialog != null) {

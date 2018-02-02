@@ -114,6 +114,9 @@ public class DataModelUpdateManager {
 				case 31:
 					updateToVersion31();
 					break;
+				case 32:
+					updateToVersion32();
+					break;
 			}
 
 			log.info("Update to version {} done", updateToVersionInThisStep);
@@ -508,5 +511,14 @@ public class DataModelUpdateManager {
 				.getCollection("MicroDialogMessage");
 		microDialogMessageCollection.update(Queries.EVERYTHING).multi().with(
 				Queries.UPDATE_VERSION_31__MICRO_DIALOG_MESSAGE__CHANGE_1);
+	}
+
+	/**
+	 * Changes for version 32:
+	 */
+	private static void updateToVersion32() {
+		val monitoringRuleCollection = jongo.getCollection("MonitoringRule");
+		monitoringRuleCollection.update(Queries.EVERYTHING).multi()
+				.with(Queries.UPDATE_VERSION_32__MONITORING_RULE__CHANGE_1);
 	}
 }

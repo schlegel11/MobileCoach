@@ -2168,6 +2168,16 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
+	public void monitoringRuleSetHourVariableToSendMessageOrActivateMicroDialog(
+			final MonitoringRule monitoringRule, final String variable) {
+		monitoringRule
+				.setVariableForDecimalHourToSendMessageOrActivateMicroDialog(
+						variable);
+
+		databaseManagerService.saveModelObject(monitoringRule);
+	}
+
+	@Synchronized
 	public void monitoringRuleSetHourToSendMessageOrActivateMicroDialog(
 			final MonitoringRule monitoringRule, final int newValue) {
 		monitoringRule.setHourToSendMessageOrActivateMicroDialog(newValue);
@@ -3068,6 +3078,33 @@ public class InterventionAdministrationManagerService {
 
 		variables.addAll(
 				variablesManagerService.getAllSystemReservedVariableNames());
+
+		variables.addAll(variablesManagerService
+				.getAllInterventionVariableNamesOfIntervention(interventionId));
+		variables.addAll(variablesManagerService
+				.getAllSurveyVariableNamesOfIntervention(interventionId));
+		variables.addAll(variablesManagerService
+				.getAllMonitoringMessageVariableNamesOfIntervention(
+						interventionId));
+		variables.addAll(variablesManagerService
+				.getAllMonitoringRuleAndReplyRuleVariableNamesOfIntervention(
+						interventionId));
+		variables.addAll(variablesManagerService
+				.getAllMicroDialogMessageVariableNamesOfIntervention(
+						interventionId));
+		variables.addAll(variablesManagerService
+				.getAllMicroDialogRuleVariableNamesOfIntervention(
+						interventionId));
+
+		Collections.sort(variables);
+
+		return variables;
+	}
+
+	@Synchronized
+	public List<String> getAllAppropriateMonitoringRuleVariablesOfInterventionForTiming(
+			final ObjectId interventionId) {
+		val variables = new ArrayList<String>();
 
 		variables.addAll(variablesManagerService
 				.getAllInterventionVariableNamesOfIntervention(interventionId));
