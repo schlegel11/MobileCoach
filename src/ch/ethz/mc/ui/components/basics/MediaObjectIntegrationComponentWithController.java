@@ -27,22 +27,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-
 import org.apache.commons.io.FileUtils;
 import org.bson.types.ObjectId;
-
-import ch.ethz.mc.conf.AdminMessageStrings;
-import ch.ethz.mc.conf.ImplementationConstants;
-import ch.ethz.mc.conf.ThemeImageStrings;
-import ch.ethz.mc.model.ModelObject;
-import ch.ethz.mc.model.persistent.MediaObject;
-import ch.ethz.mc.model.persistent.types.MediaObjectTypes;
-import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
-import ch.ethz.mc.tools.StringHelpers;
-import ch.ethz.mc.ui.NotificationMessageException;
 
 import com.vaadin.server.ErrorHandler;
 import com.vaadin.server.ExternalResource;
@@ -57,6 +43,19 @@ import com.vaadin.ui.Upload.StartedEvent;
 import com.vaadin.ui.Upload.StartedListener;
 import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.Upload.SucceededListener;
+
+import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.conf.ThemeImageStrings;
+import ch.ethz.mc.model.ModelObject;
+import ch.ethz.mc.model.persistent.MediaObject;
+import ch.ethz.mc.model.persistent.types.MediaObjectTypes;
+import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
+import ch.ethz.mc.tools.StringHelpers;
+import ch.ethz.mc.ui.NotificationMessageException;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Extends the media object integration component with a controller
@@ -213,7 +212,7 @@ public class MediaObjectIntegrationComponentWithController
 		log.debug("Create empty HTML object");
 
 		try {
-			val temporaryFile = File.createTempFile("HTML-snippet", "html");
+			val temporaryFile = File.createTempFile("HTML-snippet", ".html");
 
 			createMediaObjectForFile(temporaryFile, "HTML-snippet.html",
 					MediaObjectTypes.HTML_TEXT);
@@ -230,6 +229,10 @@ public class MediaObjectIntegrationComponentWithController
 	private void createMediaObjectForFile(final File temporaryFile,
 			final String originalFileName,
 			final MediaObjectTypes originalFileType) {
+		log.debug(
+				"Create media object for file {} with original file name {} and type {}",
+				temporaryFile, originalFileName, originalFileType);
+
 		val newMediaObject = getInterventionAdministrationManagerService()
 				.mediaObjectCreateWithFile(temporaryFile, originalFileName,
 						originalFileType);
@@ -243,6 +246,8 @@ public class MediaObjectIntegrationComponentWithController
 	}
 
 	private void createOrUpdateMediaObjectForURL(final String url) {
+		log.debug("Create media object for URL {}", url);
+
 		if (mediaObject != null) {
 			val mediaObjectToDelete = mediaObject;
 			mediaObject = null;
