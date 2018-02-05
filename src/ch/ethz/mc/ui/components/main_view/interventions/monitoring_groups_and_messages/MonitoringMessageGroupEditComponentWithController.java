@@ -22,22 +22,21 @@ package ch.ethz.mc.ui.components.main_view.interventions.monitoring_groups_and_m
  */
 import java.io.File;
 
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-
 import org.bson.types.ObjectId;
-
-import ch.ethz.mc.conf.AdminMessageStrings;
-import ch.ethz.mc.model.persistent.MonitoringMessage;
-import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
-import ch.ethz.mc.model.ui.UIMonitoringMessage;
-import ch.ethz.mc.ui.components.basics.ShortStringEditComponent;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+
+import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.model.persistent.MonitoringMessage;
+import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
+import ch.ethz.mc.model.ui.UIMonitoringMessage;
+import ch.ethz.mc.ui.components.basics.ShortStringEditComponent;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Provides the monitoring message group edit component with a controller
@@ -269,7 +268,7 @@ public class MonitoringMessageGroupEditComponentWithController
 
 		try {
 			final MonitoringMessage importedMonitoringMessage = getInterventionAdministrationManagerService()
-					.monitoringMessageImport(temporaryBackupFile);
+					.monitoringMessageImport(temporaryBackupFile, true);
 
 			if (importedMonitoringMessage == null) {
 				throw new Exception("Imported message not found in import");

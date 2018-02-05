@@ -25,8 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-import org.bson.types.ObjectId;
-
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 
@@ -53,13 +51,16 @@ import lombok.extern.log4j.Log4j2;
 public class InterventionI18nComponentenWithController
 		extends InterventionI18nComponent {
 
-	private final InterventionAdministrationManagerService ias;
+	private final InterventionAdministrationManagerService	ias;
+
+	private Intervention									intervention;
 
 	public InterventionI18nComponentenWithController(
 			final Intervention intervention) {
 		super();
 
 		ias = getInterventionAdministrationManagerService();
+		this.intervention = intervention;
 
 		// Handle buttons
 		val buttonClickListener = new ButtonClickListener();
@@ -85,9 +86,9 @@ public class InterventionI18nComponentenWithController
 
 							for (val monitoringMessage : monitoringMessages) {
 								val i18nStringsObject = new I18nStringsObject();
-								i18nStringsObject
-										.setId("mm-" + monitoringMessage.getId()
-												.toHexString() + "-#");
+								i18nStringsObject.setId("mm_"
+										+ monitoringMessage.getI18nIdentifier()
+										+ "_#");
 								i18nStringsObject.setDescription(
 										monitoringMessageGroup.getName());
 
@@ -112,9 +113,9 @@ public class InterventionI18nComponentenWithController
 
 							for (val microDialogMessage : microDialogMessages) {
 								val i18nStringsObject = new I18nStringsObject();
-								i18nStringsObject
-										.setId("dm-" + microDialogMessage
-												.getId().toHexString() + "-#");
+								i18nStringsObject.setId("dm_"
+										+ microDialogMessage.getI18nIdentifier()
+										+ "_#");
 								i18nStringsObject
 										.setDescription(microDialog.getName());
 
@@ -173,36 +174,50 @@ public class InterventionI18nComponentenWithController
 			@Override
 			public void fileUploadReceived(final File file) {
 				log.debug(
-						"File upload sucessful, starting conversation of i18n string objects");
+						"File upload successful, starting conversation of i18n string objects");
 				try {
 					val i18nStringObjects = CSVImporter
 							.convertCSVToI18nStringsObjects(file);
 
-					for (val i18nStringObject : i18nStringObjects) {
-						val typeAndId = i18nStringObject.getId().split("-");
-						val type = typeAndId[0];
-						val id = typeAndId[1];
-						val objectId = new ObjectId(id);
+					int updates = 0;
 
-						switch (type) {
-							case "mm":
-								ias.monitoringMessageUpdateL18n(objectId,
-										i18nStringObject.getText(),
-										i18nStringObject.getAnswerOptions());
-								break;
-							case "dm":
-								ias.microDialogMessageUpdateL18n(objectId,
-										i18nStringObject.getText(),
-										i18nStringObject.getAnswerOptions());
-								break;
+					log.debug("{} objects found in i18n import",
+							i18nStringObjects.size());
+
+					for (val i18nStringObject : i18nStringObjects) {
+						val typeAndId = i18nStringObject.getId().split("_");
+						val type = typeAndId[0];
+						val i18nIdentifier = typeAndId[1];
+						val check = typeAndId[2];
+
+						if (check.equals("#")) {
+							switch (type) {
+								case "mm":
+									updates += ias.monitoringMessageUpdateL18n(
+											intervention.getId(),
+											i18nIdentifier,
+											i18nStringObject.getText(),
+											i18nStringObject
+													.getAnswerOptions());
+									break;
+								case "dm":
+									updates += ias.microDialogMessageUpdateL18n(
+											intervention.getId(),
+											i18nIdentifier,
+											i18nStringObject.getText(),
+											i18nStringObject
+													.getAnswerOptions());
+									break;
+							}
 						}
 					}
 
+					log.debug("{} objects updated", updates);
 					getAdminUI().showInformationNotification(
-							AdminMessageStrings.NOTIFICATION__L18N_IMPORTED);
+							AdminMessageStrings.NOTIFICATION__I18N_IMPORTED);
 				} catch (final Exception e) {
 					getAdminUI().showWarningNotification(
-							AdminMessageStrings.NOTIFICATION__L18N_IMPORT_FAILED);
+							AdminMessageStrings.NOTIFICATION__I18N_IMPORT_FAILED);
 				} finally {
 					try {
 						file.delete();
@@ -213,7 +228,7 @@ public class InterventionI18nComponentenWithController
 			}
 		});
 		showModalClosableEditWindow(
-				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__IMPORT_L18N,
+				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__IMPORT_I18N,
 				fileUploadComponentWithController, null);
 	}
 

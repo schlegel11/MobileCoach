@@ -246,7 +246,7 @@ public class MicroDialogsTabComponentWithController
 					.microDialogExport(selectedMicroDialog);
 
 			final MicroDialog importedMicroDialog = getInterventionAdministrationManagerService()
-					.microDialogImport(temporaryBackupFile);
+					.microDialogImport(temporaryBackupFile, true);
 
 			if (importedMicroDialog == null) {
 				throw new Exception("Imported element not found in import");

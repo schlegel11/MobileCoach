@@ -240,7 +240,7 @@ public class MicroDialogEditComponentWithController
 										MicroDialogMessage.class));
 
 				importedMicroDialogElement = getInterventionAdministrationManagerService()
-						.microDialogMessageImport(temporaryBackupFile);
+						.microDialogMessageImport(temporaryBackupFile, true);
 			} else {
 				temporaryBackupFile = getInterventionAdministrationManagerService()
 						.microDialogDecisionPointExport(

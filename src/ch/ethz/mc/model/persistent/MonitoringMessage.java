@@ -144,6 +144,14 @@ public class MonitoringMessage extends ModelObject {
 	@NonNull
 	private LString		answerOptionsWithPlaceholders;
 
+	/**
+	 * <strong>The unique identifier used for i18n
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private String		i18nIdentifier;
+
 	/*
 	 * (non-Javadoc)
 	 * 

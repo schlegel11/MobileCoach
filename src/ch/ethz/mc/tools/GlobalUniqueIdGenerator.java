@@ -39,4 +39,16 @@ public class GlobalUniqueIdGenerator {
 		final String partTwo = RandomStringUtils.randomAlphanumeric(200);
 		return partOne + "-" + partTwo;
 	}
+
+	/**
+	 * Creates an Id that has a very, very high chance to be unique
+	 *
+	 * @return
+	 */
+	public static String createSimpleGlobalUniqueId() {
+		final String partOne = String
+				.valueOf(InternalDateTime.currentTimeMillis());
+		final String partTwo = RandomStringUtils.randomAlphanumeric(36);
+		return partOne + "-" + partTwo;
+	}
 }
