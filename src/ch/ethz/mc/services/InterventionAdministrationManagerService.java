@@ -85,6 +85,7 @@ import ch.ethz.mc.services.internal.ModelObjectExchangeService;
 import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.services.types.ModelObjectExchangeFormatTypes;
 import ch.ethz.mc.tools.BCrypt;
+import ch.ethz.mc.tools.GlobalUniqueIdGenerator;
 import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mc.tools.ListMerger;
 import ch.ethz.mc.tools.StringHelpers;
@@ -781,7 +782,8 @@ public class InterventionAdministrationManagerService {
 			final ObjectId monitoringMessageGroupId) {
 		val monitoringMessage = new MonitoringMessage(monitoringMessageGroupId,
 				new LString(), false, 0, null, null, null,
-				AnswerTypes.FREE_TEXT, new LString());
+				AnswerTypes.FREE_TEXT, new LString(),
+				GlobalUniqueIdGenerator.createSimpleGlobalUniqueId());
 
 		val highestOrderMessage = databaseManagerService
 				.findOneSortedModelObject(MonitoringMessage.class,
@@ -932,21 +934,39 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void monitoringMessageUpdateL18n(final ObjectId monitoringMessageId,
-			final LString textWithPlaceholders,
+	public int monitoringMessageUpdateL18n(final ObjectId interventionId,
+			final String i18nIdentifier, final LString textWithPlaceholders,
 			final LString answerOptionsWithPlaceholders) {
-		val monitoringMessage = getMonitoringMessage(monitoringMessageId);
-		if (monitoringMessage != null) {
-			monitoringMessage.setTextWithPlaceholders(textWithPlaceholders);
-			monitoringMessage.setAnswerOptionsWithPlaceholders(
-					answerOptionsWithPlaceholders);
-			databaseManagerService.saveModelObject(monitoringMessage);
+
+		int updates = 0;
+
+		val monitoringMessageGroups = getAllMonitoringMessageGroupsOfIntervention(
+				interventionId);
+
+		for (val monitoringMessageGroup : monitoringMessageGroups) {
+			val monitoringMessages = getAllMonitoringMessagesOfMonitoringMessageGroup(
+					monitoringMessageGroup.getId());
+
+			for (val monitoringMessage : monitoringMessages) {
+				if (monitoringMessage.getI18nIdentifier()
+						.equals(i18nIdentifier)) {
+					monitoringMessage
+							.setTextWithPlaceholders(textWithPlaceholders);
+					monitoringMessage.setAnswerOptionsWithPlaceholders(
+							answerOptionsWithPlaceholders);
+					databaseManagerService.saveModelObject(monitoringMessage);
+
+					updates++;
+				}
+			}
 		}
+
+		return updates;
 	}
 
 	@Synchronized
-	public MonitoringMessage monitoringMessageImport(final File file)
-			throws FileNotFoundException, IOException {
+	public MonitoringMessage monitoringMessageImport(final File file,
+			final boolean duplicate) throws FileNotFoundException, IOException {
 		val importedModelObjects = modelObjectExchangeService
 				.importModelObjects(file,
 						ModelObjectExchangeFormatTypes.MONITORING_MESSAGE);
@@ -954,6 +974,11 @@ public class InterventionAdministrationManagerService {
 		for (val modelObject : importedModelObjects) {
 			if (modelObject instanceof MonitoringMessage) {
 				val monitoringMessage = (MonitoringMessage) modelObject;
+
+				if (duplicate) {
+					monitoringMessage.setI18nIdentifier(GlobalUniqueIdGenerator
+							.createSimpleGlobalUniqueId());
+				}
 
 				// Adjust order
 				monitoringMessage.setOrder(0);
@@ -1124,6 +1149,64 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
+	public MicroDialog microDialogImport(final File file,
+			final boolean duplicate) throws FileNotFoundException, IOException {
+		val importedModelObjects = modelObjectExchangeService
+				.importModelObjects(file,
+						ModelObjectExchangeFormatTypes.MICRO_DIALOG);
+
+		MicroDialog microDialog = null;
+
+		for (val modelObject : importedModelObjects) {
+			if (modelObject instanceof MicroDialog) {
+				microDialog = (MicroDialog) modelObject;
+
+				// Adjust order
+				microDialog.setOrder(0);
+
+				val highestOrderMicroDialog = databaseManagerService
+						.findOneSortedModelObject(MicroDialog.class,
+								Queries.MICRO_DIALOG__BY_INTERVENTION,
+								Queries.MICRO_DIALOG__SORT_BY_ORDER_DESC,
+								microDialog.getIntervention());
+
+				if (highestOrderMicroDialog != null) {
+					microDialog
+							.setOrder(highestOrderMicroDialog.getOrder() + 1);
+				}
+
+				databaseManagerService.saveModelObject(microDialog);
+			}
+
+			if (duplicate && modelObject instanceof MicroDialogMessage) {
+				val microDialogMessage = (MicroDialogMessage) modelObject;
+
+				microDialogMessage.setI18nIdentifier(
+						GlobalUniqueIdGenerator.createSimpleGlobalUniqueId());
+
+				databaseManagerService.saveModelObject(microDialogMessage);
+			}
+		}
+
+		return microDialog;
+	}
+
+	@Synchronized
+	public File microDialogExport(final MicroDialog microDialog) {
+		final List<ModelObject> modelObjectsToExport = new ArrayList<ModelObject>();
+
+		log.debug(
+				"Recursively collect all model objects related to the micro dialog");
+		microDialog.collectThisAndRelatedModelObjectsForExport(
+				modelObjectsToExport);
+
+		log.debug("Export micro dialog");
+		return modelObjectExchangeService.exportModelObjects(
+				modelObjectsToExport,
+				ModelObjectExchangeFormatTypes.MICRO_DIALOG);
+	}
+
+	@Synchronized
 	public void microDialogDelete(final MicroDialog microDialogToDelete) {
 
 		databaseManagerService.deleteModelObject(microDialogToDelete);
@@ -1137,7 +1220,8 @@ public class InterventionAdministrationManagerService {
 				new LString(), false, null, null, false, false, false, null,
 				null, AnswerTypes.FREE_TEXT,
 				ImplementationConstants.DEFAULT_MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED,
-				new LString());
+				new LString(),
+				GlobalUniqueIdGenerator.createSimpleGlobalUniqueId());
 
 		int newOrder = 0;
 		val highestOrderMessage = databaseManagerService
@@ -1317,22 +1401,38 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void microDialogMessageUpdateL18n(
-			final ObjectId microDialogMessageId,
-			final LString textWithPlaceholders,
+	public int microDialogMessageUpdateL18n(final ObjectId interventionId,
+			final String i18nIdentifier, final LString textWithPlaceholders,
 			final LString answerOptionsWithPlaceholders) {
-		val microDialogMessage = getMicroDialogMessage(microDialogMessageId);
-		if (microDialogMessage != null) {
-			microDialogMessage.setTextWithPlaceholders(textWithPlaceholders);
-			microDialogMessage.setAnswerOptionsWithPlaceholders(
-					answerOptionsWithPlaceholders);
-			databaseManagerService.saveModelObject(microDialogMessage);
+
+		int updates = 0;
+
+		val microDialogs = getAllMicroDialogsOfIntervention(interventionId);
+
+		for (val microDialog : microDialogs) {
+			val microDialogMessages = getAllMicroDialogMessagesOfMicroDialog(
+					microDialog.getId());
+
+			for (val microDialogMessage : microDialogMessages) {
+				if (microDialogMessage.getI18nIdentifier()
+						.equals(i18nIdentifier)) {
+					microDialogMessage
+							.setTextWithPlaceholders(textWithPlaceholders);
+					microDialogMessage.setAnswerOptionsWithPlaceholders(
+							answerOptionsWithPlaceholders);
+					databaseManagerService.saveModelObject(microDialogMessage);
+
+					updates++;
+				}
+			}
 		}
+
+		return updates;
 	}
 
 	@Synchronized
-	public MicroDialogMessage microDialogMessageImport(final File file)
-			throws FileNotFoundException, IOException {
+	public MicroDialogMessage microDialogMessageImport(final File file,
+			final boolean duplicate) throws FileNotFoundException, IOException {
 		val importedModelObjects = modelObjectExchangeService
 				.importModelObjects(file,
 						ModelObjectExchangeFormatTypes.MICRO_DIALOG_MESSAGE);
@@ -1340,6 +1440,11 @@ public class InterventionAdministrationManagerService {
 		for (val modelObject : importedModelObjects) {
 			if (modelObject instanceof MicroDialogMessage) {
 				val microDialogMessage = (MicroDialogMessage) modelObject;
+
+				if (duplicate) {
+					microDialogMessage.setI18nIdentifier(GlobalUniqueIdGenerator
+							.createSimpleGlobalUniqueId());
+				}
 
 				// Adjust order
 				microDialogMessage.setOrder(0);

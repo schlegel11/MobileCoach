@@ -22,13 +22,9 @@ package ch.ethz.mc.services.internal;
  */
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.HashSet;
 
-import lombok.Getter;
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import ch.ethz.mc.conf.Constants;
@@ -37,8 +33,9 @@ import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.MediaObject;
 import ch.ethz.mc.model.persistent.ParticipantVariableWithValue;
-
-import com.google.gwt.thirdparty.guava.common.io.Files;
+import lombok.Getter;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class FileStorageManagerService {
@@ -301,8 +298,8 @@ public class FileStorageManagerService {
 
 		final File destinationFile = new File(folder, fileName);
 		try {
-			Files.copy(file, destinationFile);
-		} catch (final IOException e) {
+			FileUtils.copyFile(file, destinationFile);
+		} catch (final Exception e) {
 			log.warn("File {} could not be copied to folder {}: {}",
 					file.getAbsoluteFile(), destinationFile.getAbsoluteFile(),
 					e.getMessage());

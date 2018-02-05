@@ -1,5 +1,26 @@
 package ch.ethz.mc.ui;
 
+import com.vaadin.annotations.Theme;
+import com.vaadin.navigator.Navigator;
+import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.server.ClientConnector.DetachListener;
+import com.vaadin.server.DefaultErrorHandler;
+import com.vaadin.server.Page.BrowserWindowResizeEvent;
+import com.vaadin.server.Page.BrowserWindowResizeListener;
+import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.VaadinServletRequest;
+import com.vaadin.server.VaadinSession;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.UI;
+
+import ch.ethz.mc.MC;
+import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.conf.Constants;
+import ch.ethz.mc.conf.Messages;
+import ch.ethz.mc.services.internal.LockingService;
+import ch.ethz.mc.ui.views.ErrorView;
+import ch.ethz.mc.ui.views.LoginView;
+import ch.ethz.mc.ui.views.MainView;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -23,27 +44,6 @@ package ch.ethz.mc.ui;
 import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
-import ch.ethz.mc.MC;
-import ch.ethz.mc.conf.AdminMessageStrings;
-import ch.ethz.mc.conf.Constants;
-import ch.ethz.mc.conf.Messages;
-import ch.ethz.mc.services.internal.LockingService;
-import ch.ethz.mc.ui.views.ErrorView;
-import ch.ethz.mc.ui.views.LoginView;
-import ch.ethz.mc.ui.views.MainView;
-
-import com.vaadin.annotations.Theme;
-import com.vaadin.navigator.Navigator;
-import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.server.ClientConnector.DetachListener;
-import com.vaadin.server.DefaultErrorHandler;
-import com.vaadin.server.Page.BrowserWindowResizeEvent;
-import com.vaadin.server.Page.BrowserWindowResizeListener;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinServletRequest;
-import com.vaadin.server.VaadinSession;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
 
 /**
  * Navigates between views and cares for session management (login/logout)
@@ -60,8 +60,9 @@ public class AdminNavigatorUI extends UI
 
 	public AdminNavigatorUI() {
 		val session = VaadinSession.getCurrent().getSession();
-		log.debug("Creating new UI session based on session {}",
+		log.debug("Creating new UI Session object based on session {}",
 				session.getId());
+
 		uiSession = new UISession(session);
 	}
 
@@ -150,7 +151,7 @@ public class AdminNavigatorUI extends UI
 
 	@Synchronized
 	protected void resetSession() {
-		log.debug("Resetting UI session");
+		log.debug("Resetting UI session object");
 
 		String baseURL = null;
 		if (uiSession != null) {
@@ -161,7 +162,7 @@ public class AdminNavigatorUI extends UI
 		}
 
 		val session = VaadinSession.getCurrent().getSession();
-		log.debug("Creating new UI session based on session {}",
+		log.debug("Creating new UI session object based on session {}",
 				session.getId());
 		uiSession = new UISession(session);
 		uiSession.setBaseURL(baseURL);

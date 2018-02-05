@@ -60,9 +60,9 @@ public class CSVI18nStringsObjectEntryConverter {
 	}
 
 	public static I18nStringsObject convertEntry(final CSVRecord csvRecord) {
-		if ((csvRecord.get(0).startsWith("mm-")
-				|| csvRecord.get(0).startsWith("dm-"))
-				&& csvRecord.get(0).endsWith("-#")) {
+		if ((csvRecord.get(0).startsWith("mm_")
+				|| csvRecord.get(0).startsWith("dm_"))
+				&& csvRecord.get(0).endsWith("_#")) {
 			val locales = Constants.getInterventionLocales();
 			val i18nStringsObject = new I18nStringsObject();
 

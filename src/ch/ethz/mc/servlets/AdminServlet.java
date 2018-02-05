@@ -25,17 +25,9 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
 
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-import ch.ethz.mc.MC;
-import ch.ethz.mc.conf.AdminMessageStrings;
-import ch.ethz.mc.conf.Constants;
-import ch.ethz.mc.conf.ImplementationConstants;
-import ch.ethz.mc.conf.Messages;
-import ch.ethz.mc.ui.AdminNavigatorUI;
-
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.CustomizedSystemMessages;
+import com.vaadin.server.DeploymentConfiguration;
 import com.vaadin.server.ServiceException;
 import com.vaadin.server.SessionDestroyEvent;
 import com.vaadin.server.SessionDestroyListener;
@@ -45,6 +37,15 @@ import com.vaadin.server.SystemMessages;
 import com.vaadin.server.SystemMessagesInfo;
 import com.vaadin.server.SystemMessagesProvider;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.server.WrappedSession;
+
+import ch.ethz.mc.MC;
+import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.conf.Constants;
+import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.conf.Messages;
+import ch.ethz.mc.ui.AdminNavigatorUI;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Andreas Filler
@@ -128,26 +129,24 @@ public class AdminServlet extends VaadinServlet
 	@Override
 	public void sessionInit(final SessionInitEvent event)
 			throws ServiceException {
-		log.debug("Setting new session timeout");
+		log.debug("Session started - setting timeouts");
 
-		event.getSession().getSession().setMaxInactiveInterval(
+		final DeploymentConfiguration conf = event.getSession()
+				.getConfiguration();
+
+		final WrappedSession session = event.getSession().getSession();
+
+		session.setMaxInactiveInterval(
 				ImplementationConstants.UI_SESSION_TIMEOUT_IN_SECONDS);
 
-		event.getSession().getSession().setAttribute(
-				ImplementationConstants.UI_SESSION_ATTRIBUTE_DETECTOR, true);
+		log.debug("Max inactive interval: {}",
+				session.getMaxInactiveInterval());
+		log.debug("Heartbeat interval: {}", conf.getHeartbeatInterval());
+		log.debug("Close idle sessions: {}", conf.isCloseIdleSessions());
 	}
 
 	@Override
 	public void sessionDestroy(final SessionDestroyEvent event) {
-		try {
-			val sessionId = event.getSession().getSession().getId();
-
-			log.debug("Session {} destroyed", sessionId);
-
-			MC.getInstance().getLockingService()
-					.releaseAllLocksOfSession(sessionId);
-		} catch (final NullPointerException e) {
-			// Session was no UI session
-		}
+		log.debug("Session destroyed");
 	}
 }

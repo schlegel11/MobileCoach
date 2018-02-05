@@ -117,6 +117,9 @@ public class DataModelUpdateManager {
 				case 32:
 					updateToVersion32();
 					break;
+				case 33:
+					updateToVersion33();
+					break;
 			}
 
 			log.info("Update to version {} done", updateToVersionInThisStep);
@@ -520,5 +523,36 @@ public class DataModelUpdateManager {
 		val monitoringRuleCollection = jongo.getCollection("MonitoringRule");
 		monitoringRuleCollection.update(Queries.EVERYTHING).multi()
 				.with(Queries.UPDATE_VERSION_32__MONITORING_RULE__CHANGE_1);
+	}
+
+	/**
+	 * Changes for version 33:
+	 */
+	private static void updateToVersion33() {
+		val mongoDriverMonitoringMessageCollection = jongo.getDatabase()
+				.getCollection("MonitoringMessage");
+		val monitoringMessageCollection = jongo
+				.getCollection("MonitoringMessage");
+
+		for (final DBObject document : mongoDriverMonitoringMessageCollection
+				.find().snapshot()) {
+			monitoringMessageCollection.update((ObjectId) document.get("_id"))
+					.with(Queries.UPDATE_VERSION_33__MONITORING_MESSAGE__CHANGE_1,
+							GlobalUniqueIdGenerator
+									.createSimpleGlobalUniqueId());
+		}
+
+		val mongoDriverMicroDialogMessageCollection = jongo.getDatabase()
+				.getCollection("MicroDialogMessage");
+		val microDialogMessageCollection = jongo
+				.getCollection("MicroDialogMessage");
+
+		for (final DBObject document : mongoDriverMicroDialogMessageCollection
+				.find().snapshot()) {
+			microDialogMessageCollection.update((ObjectId) document.get("_id"))
+					.with(Queries.UPDATE_VERSION_33__MICRO_DIALOG_MESSAGE__CHANGE_1,
+							GlobalUniqueIdGenerator
+									.createSimpleGlobalUniqueId());
+		}
 	}
 }
