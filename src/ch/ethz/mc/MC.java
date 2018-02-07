@@ -23,8 +23,6 @@ package ch.ethz.mc;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import lombok.Getter;
-import lombok.extern.log4j.Log4j2;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.services.InterventionAdministrationManagerService;
@@ -41,6 +39,8 @@ import ch.ethz.mc.services.internal.ModelObjectExchangeService;
 import ch.ethz.mc.services.internal.ReportGeneratorService;
 import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.tools.InternalDateTime;
+import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Andreas Filler
@@ -138,7 +138,7 @@ public class MC implements ServletContextListener {
 							communicationManagerService,
 							interventionAdministrationManagerService,
 							surveyExecutionManagerService);
-			restManagerService = RESTManagerService.start(
+			restManagerService = RESTManagerService.startThreadedService(
 					databaseManagerService, fileStorageManagerService,
 					variablesManagerService, communicationManagerService);
 
@@ -175,7 +175,7 @@ public class MC implements ServletContextListener {
 		try {
 			lockingService.stop();
 			reportGeneratorService.stop();
-			restManagerService.stop();
+			restManagerService.stopThreadedService();
 			surveyExecutionManagerService.stop();
 			interventionExecutionManagerService.stop();
 			surveyAdministrationManagerService.stop();

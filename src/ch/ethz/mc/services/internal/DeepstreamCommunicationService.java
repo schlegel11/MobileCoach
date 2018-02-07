@@ -76,10 +76,14 @@ import lombok.extern.log4j.Log4j2;
  * @author Andreas Filler
  */
 @Log4j2
-public class DeepstreamCommunicationService implements PresenceEventListener,
-		DeepstreamRuntimeErrorHandler, ConnectionStateListener {
+public class DeepstreamCommunicationService extends Thread
+		implements PresenceEventListener, DeepstreamRuntimeErrorHandler,
+		ConnectionStateListener {
 	@Getter
 	private static DeepstreamCommunicationService	instance			= null;
+
+	private boolean									running				= true;
+	private boolean									shouldStop			= false;
 
 	private InterventionExecutionManagerService		interventionExecutionManagerService;
 
@@ -150,12 +154,17 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 			instance = new DeepstreamCommunicationService(deepstreamHost,
 					deepstreamServerRole, deepstreamServerPassword,
 					deepstreamParticipantRole, deepstreamSupervisorRole);
+
+			instance.setName(
+					DeepstreamCommunicationService.class.getSimpleName());
+			instance.start();
 		}
 		log.info("Prepared.");
 		return instance;
 	}
 
-	public void start(
+	@Synchronized
+	public void startThreadedService(
 			final InterventionExecutionManagerService interventionExecutionManagerService)
 			throws Exception {
 		log.info("Starting service...");
@@ -170,15 +179,37 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 		log.info("Started.");
 	}
 
-	public void stop() throws Exception {
-		log.info("Stopping service...");
+	@Override
+	public void run() {
+		while (!shouldStop) {
+			try {
+				sleep(500);
+			} catch (final InterruptedException e) {
+				// Do nothing
+			}
+		}
 
+		// Stop service
 		try {
 			cleanupClient();
 			client = null;
 		} catch (final Exception e) {
 			log.warn("Could not close deepstream connection: {}",
 					e.getMessage());
+		}
+
+		running = false;
+	}
+
+	@Synchronized
+	public void stopThreadedService() throws Exception {
+		log.info("Stopping service...");
+
+		shouldStop = true;
+		interrupt();
+
+		while (running) {
+			sleep(500);
 		}
 
 		log.info("Stopped.");
@@ -1135,10 +1166,15 @@ public class DeepstreamCommunicationService implements PresenceEventListener,
 			client.rpc.unprovide(DeepstreamConstants.RPC_USER_MESSAGE);
 			client.rpc.unprovide(DeepstreamConstants.RPC_USER_INTENTION);
 			client.rpc.unprovide(DeepstreamConstants.RPC_MESSAGE_DIFF);
+
+			client.close();
+			client = null;
 		} catch (final Exception e) {
 			log.warn("Problems when cleaning up client: {}", e.getMessage());
 		} finally {
-			client.close();
+			if (client != null) {
+				client.close();
+			}
 		}
 	}
 
