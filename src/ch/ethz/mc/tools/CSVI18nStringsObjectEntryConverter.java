@@ -38,6 +38,12 @@ import lombok.val;
  */
 public class CSVI18nStringsObjectEntryConverter {
 
+	/**
+	 * Convert entry for import
+	 * 
+	 * @param i18nStringsObject
+	 * @return
+	 */
 	public static List<String> convertEntry(
 			final I18nStringsObject i18nStringsObject) {
 		val locales = Constants.getInterventionLocales();
@@ -50,15 +56,21 @@ public class CSVI18nStringsObjectEntryConverter {
 		entry.add(i18nStringsObject.getDescription());
 
 		for (val locale : locales) {
-			entry.add(text.get(locale));
+			entry.add(cleanLinebreaks(text.get(locale), true));
 		}
 		for (val locale : locales) {
-			entry.add(answerOptions.get(locale));
+			entry.add(cleanLinebreaks(answerOptions.get(locale), true));
 		}
 
 		return entry;
 	}
 
+	/**
+	 * Convert entry for export
+	 * 
+	 * @param csvRecord
+	 * @return
+	 */
 	public static I18nStringsObject convertEntry(final CSVRecord csvRecord) {
 		if ((csvRecord.get(0).startsWith("mm_")
 				|| csvRecord.get(0).startsWith("dm_"))
@@ -76,13 +88,14 @@ public class CSVI18nStringsObjectEntryConverter {
 			int i = 2;
 			for (val locale : locales) {
 				if (!StringUtils.isBlank(csvRecord.get(i))) {
-					text.set(locale, csvRecord.get(i));
+					text.set(locale, cleanLinebreaks(csvRecord.get(i), false));
 				}
 				i++;
 			}
 			for (val locale : locales) {
 				if (!StringUtils.isBlank(csvRecord.get(i))) {
-					answerOptions.set(locale, csvRecord.get(i));
+					answerOptions.set(locale,
+							cleanLinebreaks(csvRecord.get(i), false));
 				}
 				i++;
 			}
@@ -108,5 +121,13 @@ public class CSVI18nStringsObjectEntryConverter {
 		}
 
 		return entry.toArray(new String[0]);
+	}
+
+	private static String cleanLinebreaks(String string, boolean forWindows) {
+		if (forWindows) {
+			return string.replaceAll("(\r\n|\r|\n)", "\r\n");
+		} else {
+			return string.replaceAll("(\r\n|\r|\n)", "\n");
+		}
 	}
 }
