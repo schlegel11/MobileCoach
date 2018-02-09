@@ -64,10 +64,13 @@ import lombok.extern.log4j.Log4j2;
  * @author Andreas Filler
  */
 @Log4j2
-public class RESTManagerService {
+public class RESTManagerService extends Thread {
 	private final Object							$lock;
 
 	private static RESTManagerService				instance	= null;
+
+	private boolean									running		= true;
+	private boolean									shouldStop	= false;
 
 	private final ConcurrentHashMap<String, String>	externalParticipantsTokenHashMap;
 
@@ -116,7 +119,8 @@ public class RESTManagerService {
 		log.info("Started.");
 	}
 
-	public static RESTManagerService start(
+	@Synchronized
+	public static RESTManagerService startThreadedService(
 			final DatabaseManagerService databaseManagerService,
 			final FileStorageManagerService fileStorageManagerService,
 			final VariablesManagerService variablesManagerService,
@@ -126,12 +130,37 @@ public class RESTManagerService {
 			instance = new RESTManagerService(databaseManagerService,
 					fileStorageManagerService, variablesManagerService,
 					communicationManagerService);
+
+			instance.setName(RESTManagerService.class.getSimpleName());
+			instance.start();
 		}
+
 		return instance;
 	}
 
-	public void stop() throws Exception {
+	@Override
+	public void run() {
+		while (!shouldStop) {
+			try {
+				sleep(500);
+			} catch (final InterruptedException e) {
+				// Do nothing
+			}
+		}
+
+		running = false;
+	}
+
+	@Synchronized
+	public void stopThreadedService() throws Exception {
 		log.info("Stopping service...");
+
+		shouldStop = true;
+		interrupt();
+
+		while (running) {
+			sleep(500);
+		}
 
 		log.info("Stopped.");
 	}

@@ -231,7 +231,7 @@ public class CommunicationManagerService {
 
 		if (deepstreamActive) {
 			deepstreamCommunicationService
-					.start(interventionExecutionManagerService);
+					.startThreadedService(interventionExecutionManagerService);
 		}
 		if (pushNotificationsActive) {
 			pushNotificationService.start(interventionExecutionManagerService);
@@ -246,7 +246,7 @@ public class CommunicationManagerService {
 		if (deepstreamActive) {
 			log.debug("Stopping deepstream service...");
 			try {
-				deepstreamCommunicationService.stop();
+				deepstreamCommunicationService.stopThreadedService();
 			} catch (final Exception e) {
 				log.warn("Error when stopping deepstream service: {}",
 						e.getMessage());
