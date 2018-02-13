@@ -253,10 +253,19 @@ public class RichConversationService {
 		ConversationUI ui = new CommunicationSwitch(mattermostConnector, participant);
 		HelpersRepository helpers = new HelpersRepository();
 		
+		double dialogSpeedup = 1.0;
+		
+		if (variableStore.containsVariable("$dialog_speedup")){
+			try {
+				dialogSpeedup = Double.parseDouble(variableStore.get("$dialog_speedup"));
+			} catch (Exception e){
+				log.error("Error parsing $dialog_speedup", e);
+			}
+		}
 		
 		Translator translator = prepareTranslator(participant.getLanguage(), repository, variableStore);
 		ChatEngine engine = new ChatEngine(repository, ui, variableStore, mediaLibrary,
-				helpers, translator, chatEngineStateStore, new TimingCalculatorAdvanced());
+				helpers, translator, chatEngineStateStore, new TimingCalculatorAdvanced(dialogSpeedup));
 		engine.sendExceptionAsMessage = false;
 		
 		engine.setLogger(logger);
