@@ -15,6 +15,12 @@ public class MattermostTool {
 
 	public static void main(String[] args) {
 		
+		if (args.length < 3){
+			System.out.println("No valid command given. Examples: ");
+			System.out.println("https://www.pm.c4dhi-ac.ethz.ch:8443/api/v3/ admin create-team clara Clara");
+			System.out.println("https://www.pm.c4dhi-ac.ethz.ch:8443/api/v3/ admin create-user [team-id] clara-coach");
+		}
+		
 		String url = args[0];
 		String adminName = args[1];		
 		String operation = args[2];
