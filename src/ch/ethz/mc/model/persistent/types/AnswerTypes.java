@@ -84,4 +84,25 @@ public enum AnswerTypes {
 				return false;
 		}
 	}
+
+	/**
+	 * Key-values-based answer types are converted to JSON
+	 * 
+	 * @return
+	 */
+	public boolean isKeyValueBased() {
+		switch (this) {
+			case LIKERT:
+			case LIKERT_SILENT:
+			case LIKERT_SLIDER:
+			case SELECT_ONE:
+			case SELECT_MANY:
+			case SELECT_ONE_IMAGES:
+			case SELECT_MANY_IMAGES:
+			case CUSTOM:
+				return true;
+			default:
+				return false;
+		}
+	}
 }
