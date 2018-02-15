@@ -303,8 +303,13 @@ public class DeepstreamCommunicationService extends Thread
 				val answerTypeMessageObject = new JsonObject();
 				answerTypeMessageObject.addProperty(DeepstreamConstants.TYPE,
 						answerType.toJSONField());
-				answerTypeMessageObject.add(DeepstreamConstants.OPTIONS,
-						gson.fromJson(answerOptions, JsonElement.class));
+				if (answerType.isKeyValueBased()) {
+					answerTypeMessageObject.add(DeepstreamConstants.OPTIONS,
+							gson.fromJson(answerOptions, JsonElement.class));
+				} else {
+					answerTypeMessageObject.addProperty(
+							DeepstreamConstants.OPTIONS, answerOptions);
+				}
 				messageObject.add(DeepstreamConstants.ANSWER_FORMAT,
 						answerTypeMessageObject);
 			}

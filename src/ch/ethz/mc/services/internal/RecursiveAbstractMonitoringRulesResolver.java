@@ -374,12 +374,22 @@ public class RecursiveAbstractMonitoringRulesResolver {
 					answerTypeToSend = determinedMonitoringMessageToSend
 							.getAnswerType();
 
-					answerOptionsToSend = StringHelpers
-							.parseColonSeparatedMultiLineStringToJSON(
-									determinedMonitoringMessageToSend
-											.getAnswerOptionsWithPlaceholders(),
-									participant.getLanguage(),
-									variablesWithValues.values());
+					if (answerTypeToSend.isKeyValueBased()) {
+						answerOptionsToSend = StringHelpers
+								.parseColonSeparatedMultiLineStringToJSON(
+										determinedMonitoringMessageToSend
+												.getAnswerOptionsWithPlaceholders(),
+										participant.getLanguage(),
+										variablesWithValues.values());
+					} else {
+						answerOptionsToSend = VariableStringReplacer
+								.findVariablesAndReplaceWithTextValues(
+										participant.getLanguage(),
+										determinedMonitoringMessageToSend
+												.getAnswerOptionsWithPlaceholders()
+												.get(participant),
+										variablesWithValues.values(), "");
+					}
 				}
 
 				resultToCreateMessageFor

@@ -2054,13 +2054,25 @@ public class InterventionExecutionManagerService {
 				if (microDialogMessage.isMessageExpectsAnswer()) {
 					answerTypeToSend = microDialogMessage.getAnswerType();
 
-					answerOptionsToSend = StringHelpers
-							.parseColonSeparatedMultiLineStringToJSON(
-									microDialogMessage
-											.getAnswerOptionsWithPlaceholders(),
-									participant.getLanguage(),
-									variablesWithValuesForMessageGeneration
-											.values());
+					if (answerTypeToSend.isKeyValueBased()) {
+						answerOptionsToSend = StringHelpers
+								.parseColonSeparatedMultiLineStringToJSON(
+										microDialogMessage
+												.getAnswerOptionsWithPlaceholders(),
+										participant.getLanguage(),
+										variablesWithValuesForMessageGeneration
+												.values());
+					} else {
+						answerOptionsToSend = VariableStringReplacer
+								.findVariablesAndReplaceWithTextValues(
+										participant.getLanguage(),
+										microDialogMessage
+												.getAnswerOptionsWithPlaceholders()
+												.get(participant),
+										variablesWithValuesForMessageGeneration
+												.values(),
+										"");
+					}
 				}
 
 				// Ensure higher timestamp
@@ -2414,12 +2426,22 @@ public class InterventionExecutionManagerService {
 			answerTypeToSend = determinedMonitoringMessageToSend
 					.getAnswerType();
 
-			answerOptionsToSend = StringHelpers
-					.parseColonSeparatedMultiLineStringToJSON(
-							determinedMonitoringMessageToSend
-									.getAnswerOptionsWithPlaceholders(),
-							participant.getLanguage(),
-							variablesWithValues.values());
+			if (answerTypeToSend.isKeyValueBased()) {
+				answerOptionsToSend = StringHelpers
+						.parseColonSeparatedMultiLineStringToJSON(
+								determinedMonitoringMessageToSend
+										.getAnswerOptionsWithPlaceholders(),
+								participant.getLanguage(),
+								variablesWithValues.values());
+			} else {
+				answerOptionsToSend = VariableStringReplacer
+						.findVariablesAndReplaceWithTextValues(
+								participant.getLanguage(),
+								determinedMonitoringMessageToSend
+										.getAnswerOptionsWithPlaceholders()
+										.get(participant),
+								variablesWithValues.values(), "");
+			}
 		}
 
 		// Create dialog message
