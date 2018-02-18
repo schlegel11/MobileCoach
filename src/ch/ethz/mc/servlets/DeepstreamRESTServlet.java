@@ -1,4 +1,4 @@
-package ch.ethz.mc.rest.services.v02;
+package ch.ethz.mc.servlets;
 
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
@@ -20,61 +20,90 @@ package ch.ethz.mc.rest.services.v02;
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import java.io.IOException;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
+import org.apache.commons.io.Charsets;
+import org.apache.commons.io.IOUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import ch.ethz.mc.MC;
+import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.DeepstreamConstants;
+import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.services.RESTManagerService;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * REST-based services required for the interplay with deepstream
- *
+ * Servlet to enable registration and authorization for the deepstream server
+ * 
  * @author Andreas Filler
  */
-@Path("/v02/deepstream")
+@SuppressWarnings("serial")
+@WebServlet(displayName = "Deepstream Registration and Authorization", urlPatterns = "/"
+		+ ImplementationConstants.DEEPSTREAM_SERVLET_PATH
+		+ "/*", asyncSupported = true, loadOnStartup = 1)
 @Log4j2
-public class DeepstreamServiceV02 extends AbstractServiceV02 {
-	private final Gson gson;
+public class DeepstreamRESTServlet extends HttpServlet {
+	private RESTManagerService	restManagerService;
 
-	public DeepstreamServiceV02(final RESTManagerService restManagerService) {
-		super(restManagerService);
+	private Gson				gson;
+
+	/**
+	 * @see Servlet#init(ServletConfig)
+	 */
+	@Override
+	public void init(final ServletConfig servletConfig)
+			throws ServletException {
+		super.init(servletConfig);
+		// Only start servlet if context is ready
+		if (!MC.getInstance().isReady()) {
+			log.error("Servlet {} can't be started. Context is not ready!",
+					this.getClass());
+			throw new ServletException("Context is not ready!");
+		}
+
+		log.info("Initializing servlet...");
+
+		restManagerService = MC.getInstance().getRestManagerService();
 
 		gson = new Gson();
 
 		restManagerService.informDeepstreamAboutStartup();
+
+		log.info("Servlet initialized.");
 	}
 
-	@Data
-	@AllArgsConstructor
-	private class connectionData {
-		private AuthData	authData;
-		private AuthData	connectionData;
-	}
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
+	 *      response)
+	 */
+	@Override
+	protected void doPost(final HttpServletRequest request,
+			final HttpServletResponse response)
+			throws ServletException, IOException {
+		log.debug("Deepstream servlet call");
 
-	@Data
-	@AllArgsConstructor
-	private class AuthData {
-		private String	user;
-		private String	secret;
-	}
-
-	@POST
-	@Path("/authorize")
-	@Produces("application/json")
-	public Response authorize(final String stringPayload) {
 		checkDeepstreamAvailability();
+
+		request.setCharacterEncoding("UTF-8");
+
+		val stringPayload = IOUtils.toString(request.getReader());
 
 		try {
 			final JsonElement jsonElement = gson.fromJson(stringPayload,
@@ -129,10 +158,11 @@ public class DeepstreamServiceV02 extends AbstractServiceV02 {
 								role);
 
 				if (externalRegistration == null) {
-					throw new WebApplicationException(
-							Response.status(Status.FORBIDDEN)
-									.entity("Could not create participant/supervisor for deepstream access")
-									.build());
+					log.warn(
+							"Could not create participant/supervisor for deepstream access");
+
+					response.sendError(HttpServletResponse.SC_FORBIDDEN);
+					return;
 				}
 
 				user = externalRegistration.getExternalId();
@@ -160,8 +190,13 @@ public class DeepstreamServiceV02 extends AbstractServiceV02 {
 				responseData.add(DeepstreamConstants.DS_FIELD_SERVER_DATA,
 						responseServerData);
 
-				return Response.status(Status.OK)
-						.entity(gson.toJson(responseData)).build();
+				val responseAsBytes = gson.toJson(responseData)
+						.getBytes(Charsets.UTF_8);
+
+				response.setContentType(MediaType.APPLICATION_JSON);
+				response.setContentLength(responseAsBytes.length);
+
+				response.getOutputStream().write(responseAsBytes);
 			} else {
 				// Check access
 				log.debug(
@@ -172,7 +207,8 @@ public class DeepstreamServiceV02 extends AbstractServiceV02 {
 						interventionPassword);
 
 				if (!accessGranted) {
-					return Response.status(Status.FORBIDDEN).build();
+					response.sendError(HttpServletResponse.SC_FORBIDDEN);
+					return;
 				}
 
 				// Send response
@@ -188,75 +224,31 @@ public class DeepstreamServiceV02 extends AbstractServiceV02 {
 				responseData.add(DeepstreamConstants.DS_FIELD_SERVER_DATA,
 						responseServerData);
 
-				return Response.status(Status.OK)
-						.entity(gson.toJson(responseData)).build();
+				val responseAsBytes = gson.toJson(responseData)
+						.getBytes(Charsets.UTF_8);
+
+				response.setContentType(MediaType.APPLICATION_JSON);
+				response.setContentLength(responseAsBytes.length);
+
+				response.getOutputStream().write(responseAsBytes);
 			}
 		} catch (final Exception e) {
-			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
-					.entity("Could not register ort authorize server/participant/supervisor for deepstream access: "
-							+ e.getMessage())
-					.build());
+			log.warn(
+					"Could not register or authorize server/participant/supervisor for deepstream access: ",
+					e.getMessage());
+
+			response.sendError(HttpServletResponse.SC_FORBIDDEN);
+			return;
 		}
 	}
 
-	@POST
-	@Path("/register")
-	@Produces("application/json")
-	public Response register(final String stringPayload) {
-		checkDeepstreamAvailability();
-
-		try {
-			final JsonElement jsonElement = gson.fromJson(stringPayload,
-					JsonElement.class);
-			final JsonObject jsonPayload = jsonElement.getAsJsonObject();
-
-			String nickname = null;
-			if (jsonPayload.has(DeepstreamConstants.REST_FIELD_NICKNAME)) {
-				nickname = jsonPayload
-						.get(DeepstreamConstants.REST_FIELD_NICKNAME)
-						.getAsString();
-			}
-			String relatedParticipant = null;
-			if (jsonPayload.has(DeepstreamConstants.REST_FIELD_PARTICIPANT)) {
-				relatedParticipant = jsonPayload
-						.get(DeepstreamConstants.REST_FIELD_PARTICIPANT)
-						.getAsString();
-			}
-			val interventionPattern = jsonPayload
-					.get(DeepstreamConstants.REST_FIELD_INTERVENTION_PATTERN)
-					.getAsString();
-			val interventionPassword = jsonPayload
-					.get(DeepstreamConstants.REST_FIELD_INTERVENTION_PASSWORD)
-					.getAsString();
-			val requestedRole = jsonPayload
-					.get(DeepstreamConstants.REST_FIELD_ROLE).getAsString();
-
-			// Create participant or supervisor
-			val externalRegistration = restManagerService.createDeepstreamUser(
-					nickname, relatedParticipant, interventionPattern,
-					interventionPassword, requestedRole);
-
-			if (externalRegistration == null) {
-				throw new WebApplicationException(
-						Response.status(Status.FORBIDDEN)
-								.entity("Could not create participant/supervisor for deepstream access")
-								.build());
-			}
-
-			// Send response
-			val responseData = new JsonObject();
-			responseData.addProperty(DeepstreamConstants.REST_FIELD_USER,
-					externalRegistration.getExternalId());
-			responseData.addProperty(DeepstreamConstants.REST_FIELD_SECRET,
-					externalRegistration.getSecret());
-
-			return Response.status(Status.OK).entity(gson.toJson(responseData))
-					.build();
-		} catch (final Exception e) {
+	/**
+	 * Checks deepstream availability and throws exception if it's not available
+	 */
+	private void checkDeepstreamAvailability() {
+		if (!Constants.isDeepstreamActive()) {
 			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
-					.entity("Could not create participant/supervisor for deepstream access: "
-							+ e.getMessage())
-					.build());
+					.entity("Deepstream is not active on this server").build());
 		}
 	}
 }
