@@ -58,6 +58,8 @@ public class PushNotificationService {
 	final static String							NOTIFICATION		= "notification";
 	final static String							BODY				= "body";
 	final static String							SOUND				= "sound";
+	final static String							ICON				= "icon";
+	final static String							ICON_NAME			= "ic_notification";
 	final static String							BADGE				= "badge";
 	final static String							DEFAULT				= "default";
 	final static String							BAD_DEVICE_TOKEN	= "BadDeviceToken";
@@ -417,6 +419,7 @@ public class PushNotificationService {
 				if (message != null) {
 					final JsonObject notification = new JsonObject();
 					notification.addProperty(BODY, message);
+					notification.addProperty(ICON, ICON_NAME);
 					notification.addProperty(SOUND, DEFAULT);
 					jsonObject.add(NOTIFICATION, notification);
 				}
