@@ -145,6 +145,9 @@
 		<!-- Apache HttpAsyncClient -->
 		<dependency org="org.apache.httpcomponents" name="httpasyncclient" rev="4.1.2"/>
 		
+		<!-- Apache commons-math3 -->
+		<dependency org="org.apache.commons" name="commons-math3" rev="3.6.1"/>
+		
 		<!-- RestFb -->
 		<dependency org="com.restfb" name="restfb" rev="2.1.1"/>
 		
