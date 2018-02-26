@@ -145,5 +145,8 @@
 		<!-- Apache HttpAsyncClient -->
 		<dependency org="org.apache.httpcomponents" name="httpasyncclient" rev="4.1.2"/>
 		
+		<!-- RestFb -->
+		<dependency org="com.restfb" name="restfb" rev="2.1.1"/>
+		
 	</dependencies>
 </ivy-module>

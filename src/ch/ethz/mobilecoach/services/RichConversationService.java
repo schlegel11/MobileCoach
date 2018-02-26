@@ -217,7 +217,11 @@ public class RichConversationService {
 		}
 		
 		// update channel name
-		messagingService.setChannelName(recipient);
+		try {
+			messagingService.setChannelName(recipient);
+		} catch (Exception e){
+			log.error(e);
+		}
 	}
 
 	private ChatEngine prepareChatEngine(Participant participant,
