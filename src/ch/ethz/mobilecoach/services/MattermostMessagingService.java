@@ -267,11 +267,15 @@ public class MattermostMessagingService implements MessagingService {
 		
 		String[] playerIds = new String[oneSignalUserConfiguration.getPlayerIds().size()];
 		
+		if (oneSignalUserConfiguration.getPlayerIds().isEmpty()){
+			return;
+		}
+
 		String recipients = "";
 		
 		for(int ind = 0; ind < oneSignalUserConfiguration.getPlayerIds().size(); ind++){
 			playerIds[ind] = oneSignalUserConfiguration.getPlayerIds().get(ind);
-			recipients += playerIds[ind] + " ";
+			recipients = recipients + playerIds[ind] + " ";
 		}
 
 		LinkedHashMap<String, String> headers = new LinkedHashMap<>();
