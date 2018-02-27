@@ -416,7 +416,7 @@ public class RESTManagerService {
 	}
 	
 	public Participant getParticipant(ObjectId participantId) {
-		return databaseManagerService.findOneModelObject(Participant.class, "{'id': #}", participantId);
+		return databaseManagerService.findOneModelObject(Participant.class, "{'_id': #}", participantId);
 	}
 	
 	
