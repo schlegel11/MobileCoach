@@ -12,11 +12,12 @@ import ch.ethz.mobilecoach.interventions.util.TimedValue;
 
 
 public class PersonalityChangeTest {
+	
+	static long DAY = 3600 * 24 * 1000;
 
     @Test
     public void testTrafficLightCalculation() {
     	long now = System.currentTimeMillis();
-    	long DAY = 3600 * 24 * 1000;
     	
     	// try with no values
     	List<TimedValue> values = new ArrayList<TimedValue>();
@@ -47,5 +48,31 @@ public class PersonalityChangeTest {
     	values.add(new TimedValue("-2.0", now - DAY * 3));
     	assertEquals(PersonalityChange.TL_RED, PersonalityChange.calculateTrafficLight(values));
     }
+    
+    @Test
+    public void testTrafficLightCalculation2() {
+    	List<TimedValue> values = new ArrayList<TimedValue>();
+    	values.add(new TimedValue("4", 1519734761928L - DAY * 7));
+    	values.add(new TimedValue("4", 1519734789424L - DAY * 7));
+    	values.add(new TimedValue("4", 1519734801311L - DAY * 7));
+    	values.add(new TimedValue("4", 1519734844232L - DAY * 7));
+    	values.add(new TimedValue("4", 1519734949834L - DAY * 7));
+    	values.add(new TimedValue("5", System.currentTimeMillis()));
+    	
+    	assertEquals(PersonalityChange.TL_GREEN, PersonalityChange.calculateTrafficLight(values));
+    }
+    
+    @Test
+    public void testTrafficLightCalculation3() {
+    	List<TimedValue> values = new ArrayList<TimedValue>();
+    	values.add(new TimedValue("4", 1519734761928L - DAY * 7));
+    	values.add(new TimedValue("4", 1519734789424L - DAY * 7));
+    	values.add(new TimedValue("4", 1519734801311L - DAY * 7));
+    	values.add(new TimedValue("4", 1519734844232L - DAY * 7));
+    	values.add(new TimedValue("4", 1519734949834L - DAY * 7));
+    	
+    	assertEquals(PersonalityChange.TL_NOT_ENOUGH_RECENT_VALUES, PersonalityChange.calculateTrafficLight(values));
+    }
+
 
 }
