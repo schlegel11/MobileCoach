@@ -36,7 +36,7 @@ public class PersonalityChange extends AbstractIntervention {
 	}
 	
 	private Iterable<ParticipantVariableWithValue> getValuesSince(long timestamp, String variableName, ObjectId participantId){
-		String query = "{participantId: #, name: #, timestamp: {$gte: #}}";
+		String query = "{participant: #, name: #, timestamp: {$gte: #}}";
 		return db.findSortedModelObjects(ParticipantVariableWithValue.class, query, "{timestamp: -1}", participantId, variableName, timestamp);
 	}
 
@@ -54,9 +54,10 @@ public class PersonalityChange extends AbstractIntervention {
 		
 		// trait traffic light
 		val traitValues = new ArrayList<TimedValue>();
-		for (val v: getValuesSince(0, traitVariable, participantId)){
+		for (val v: getValuesSince(0L, traitVariable, participantId)){
 			traitValues.add(new TimedValue(v.getValue(), v.getTimestamp()));
 		}
+		result.put("trait_values", traitValues); // for debugging
 		result.put("trait_light", calculateTrafficLight(traitValues));
 		
 		// opportunities: past 15 days
