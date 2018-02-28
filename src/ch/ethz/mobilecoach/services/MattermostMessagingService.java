@@ -204,8 +204,28 @@ public class MattermostMessagingService implements MessagingService {
 	        json.put("user_id", userId);
 	        json.put("channel_id", channelId);
 	        
-			new MattermostTask<Void>(managementService.api_url + "teams/" + teamId + "/channels/" + channelId + "/posts/create", json)
+	        try {
+				new MattermostTask<Void>(managementService.api_url + "teams/" + teamId + "/channels/" + channelId + "/posts/create", json)
+					.setToken(mcUserToken).run();
+	        } catch (Exception e){
+	        	
+	        	// add user to channel
+	        	try {
+	        		managementService.addUserToTeam(managementService.getCoachUserId(), teamId);
+	        	} catch (Exception e1){
+	        		// do nothing
+	        	}
+	        	
+	        	try {
+	        		managementService.addUserToChannel(managementService.getCoachUserId(), channelId, teamId);
+	        	} catch (Exception e2){
+	        		// do nothing
+	        	}
+	        	
+	        	// try again
+				new MattermostTask<Void>(managementService.api_url + "teams/" + teamId + "/channels/" + channelId + "/posts/create", json)
 				.setToken(mcUserToken).run();
+	        }
         }
 		
         // send push notifications only after 1 minute after the last message was received, unless the message is push-only

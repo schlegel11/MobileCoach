@@ -274,7 +274,7 @@ public class MattermostManagementService {
 		return new MattermostChannel(nameForUser, type, channelId);
 	}
 
-	private void addUserToChannel(String userId, String channelId, String teamId){
+	public void addUserToChannel(String userId, String channelId, String teamId){
 
 		JSONObject json = new JSONObject()
 				.put("user_id", userId);
@@ -335,7 +335,7 @@ public class MattermostManagementService {
 				timestamp, timestamp);
 	}
 
-	private void addUserToTeam(String userId, String teamId){
+	public void addUserToTeam(String userId, String teamId){
 		JSONObject json = new JSONObject().put("user_id", userId);
 		new MattermostTask<Void>(api_url + "teams/" + teamId + "/add_user_to_team", json).setToken(adminUserToken).run();
 	}
