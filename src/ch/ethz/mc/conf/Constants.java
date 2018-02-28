@@ -262,6 +262,10 @@ public class Constants {
 	@Getter
 	public static boolean	mattermostAllowOnlyConfiguredTeams	= true;
 	
+	@Getter
+	// use this to list additional team ids (comma-separated) where the coach should react to new messages
+	public static String	mattermostAdditionalTeamIds				= "";
+	
 	
 	/**
 	 * General Mailing configuration

@@ -3,10 +3,12 @@ package ch.ethz.mobilecoach.services;
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
@@ -526,9 +528,21 @@ public class MattermostMessagingService implements MessagingService {
 		
 		List<Channel> channelsToUpdate = new LinkedList<>();
 		
+		Set<String> teamIds = new HashSet<>();
 		for (MattermostManagementService.TeamConfiguration tc: managementService.getTeamConfigurations()){
+			teamIds.add(tc.teamId);
+		}
+		
+		for (String activeId: Constants.getMattermostAdditionalTeamIds().split(",")){
+			String trimmed = activeId.trim();
+			if (trimmed.length() > 5){
+				teamIds.add(trimmed);
+			}
+		}
+		
+		for (String teamId: teamIds){
         
-	        GetMethod request = new GetMethod(managementService.api_url + "teams/" + tc.teamId + "/channels/");
+	        GetMethod request = new GetMethod(managementService.api_url + "teams/" + teamId + "/channels/");
 			request.setRequestHeader("Authorization", "Bearer " + mcUserToken);
 			
 			String channelsResponse = "[]";
@@ -558,7 +572,7 @@ public class MattermostMessagingService implements MessagingService {
 					long lastUpdateAt = jo.getLong("last_post_at");
 					
 					if (this.mayChannelHaveNewMessages(id, lastUpdateAt)){
-						channelsToUpdate.add(new Channel(id, tc.teamId));
+						channelsToUpdate.add(new Channel(id, teamId));
 					}
 				}
 			}
