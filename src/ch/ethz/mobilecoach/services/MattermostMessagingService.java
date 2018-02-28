@@ -188,7 +188,7 @@ public class MattermostMessagingService implements MessagingService {
         String userId = config.getUserId();
         
                
-        if (!managementService.isValidTeamId(teamId)){
+        if (!managementService.isValidTeamId(teamId) && Constants.isMattermostAllowOnlyConfiguredTeams()){
         	// This caused sending requests to fail with error 403: Forbidden
         	// We abort and accept that after changing the teamId, conversations on the older team cannot continue.
         	log.error("Could not send message to conversation using unused teamId: " + teamId);

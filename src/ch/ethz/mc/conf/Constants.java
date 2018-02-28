@@ -259,6 +259,9 @@ public class Constants {
 	@Getter
 	private static String	mattermostManagerUserPassword_fr	= "";
 	
+	@Getter
+	public static boolean	mattermostAllowOnlyConfiguredTeams	= true;
+	
 	
 	/**
 	 * General Mailing configuration

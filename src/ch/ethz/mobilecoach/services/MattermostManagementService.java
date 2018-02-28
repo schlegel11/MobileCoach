@@ -61,7 +61,6 @@ public class MattermostManagementService {
 	private final String adminUserPassword = Constants.getMattermostAdminUserPassword();
 	private final String adminUserName = Constants.getMattermostAdminUserName();
 	private String adminUserToken = null;
-	private String locale = "de";
 
 	@Getter
 	private String observerUserId = null;
