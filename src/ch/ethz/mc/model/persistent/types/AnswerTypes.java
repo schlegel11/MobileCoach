@@ -39,6 +39,9 @@ public enum AnswerTypes {
 	SELECT_MANY,
 	SELECT_ONE_IMAGES,
 	SELECT_MANY_IMAGES,
+	DATE,
+	TIME,
+	DATE_AND_TIME,
 	CUSTOM;
 
 	@Override
@@ -78,6 +81,9 @@ public enum AnswerTypes {
 			case SELECT_MANY:
 			case SELECT_ONE_IMAGES:
 			case SELECT_MANY_IMAGES:
+			case DATE:
+			case TIME:
+			case DATE_AND_TIME:
 			case CUSTOM:
 				return true;
 			default:
@@ -99,6 +105,9 @@ public enum AnswerTypes {
 			case SELECT_MANY:
 			case SELECT_ONE_IMAGES:
 			case SELECT_MANY_IMAGES:
+			case DATE:
+			case TIME:
+			case DATE_AND_TIME:
 			case CUSTOM:
 				return true;
 			default:
