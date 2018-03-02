@@ -635,16 +635,21 @@ public class DeepstreamCommunicationService extends Thread
 			final String interventionPattern, final String interventionPassword,
 			final boolean supervisorRequest) {
 
-		// Prepare deepstream and reserve unique ID
-		String participantOrSupervisorExternalId;
-		final String secret = RandomStringUtils.randomAlphanumeric(128);
-		synchronized (client) {
-			do {
-				participantOrSupervisorExternalId = RandomStringUtils
-						.randomAlphanumeric(32);
-			} while (client.record.has(DeepstreamConstants.PATH_MESSAGES
-					+ participantOrSupervisorExternalId).getResult());
+		// TODO: No check anymore. Former implementation lead to freeze on DS
+		// side.
+		// do {
+		// participantOrSupervisorExternalId = RandomStringUtils
+		// .randomAlphanumeric(32);
+		// } while (client.record.has(DeepstreamConstants.PATH_MESSAGES
+		// + participantOrSupervisorExternalId).getResult());
 
+		// Prepare deepstream and reserve unique ID
+		final String participantOrSupervisorExternalId = RandomStringUtils
+				.randomAlphanumeric(25) + System.currentTimeMillis()
+				+ RandomStringUtils.randomAlphanumeric(25);
+		final String secret = RandomStringUtils.randomAlphanumeric(128);
+
+		synchronized (client) {
 			val record = client.record
 					.getRecord(DeepstreamConstants.PATH_MESSAGES
 							+ participantOrSupervisorExternalId);
