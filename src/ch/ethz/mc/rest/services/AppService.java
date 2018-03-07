@@ -24,6 +24,7 @@ import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mc.services.SurveyExecutionManagerService;
+import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
 import ch.ethz.mobilecoach.model.persistent.MediaLibraryEntry;
 import ch.ethz.mobilecoach.services.MattermostManagementService;
@@ -86,7 +87,7 @@ public class AppService {
 					new UserConfigurationForAuthentication(userConfiguration),
 					getVariables(userId));
 		} catch (Exception e){
-			log.error("getconfig error: " + e.getMessage());
+			log.error("getconfig error: " + e.getMessage() + StringHelpers.getStackTraceAsLine(e));
 			throw e;
 		}
 	}
