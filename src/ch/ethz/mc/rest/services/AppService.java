@@ -30,6 +30,7 @@ import ch.ethz.mobilecoach.services.MattermostManagementService;
 import ch.ethz.mobilecoach.services.MattermostManagementService.UserConfigurationForAuthentication;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Service to read/write variables using REST
@@ -37,6 +38,7 @@ import lombok.Getter;
  * @author Filipe Barata
  */
 @Path("/app/v01")
+@Log4j2
 public class AppService {
 
 	private RESTManagerService restManagerService;
@@ -58,30 +60,35 @@ public class AppService {
 			throw new WebApplicationException(Response.status(400).entity("Missing header 'Authentication'.").build());
 		}
 
-		ObjectId userId = null;
-		String mctoken = null;
-		if (OneTimeToken.isOneTimeToken(token)){
-			// handle OneTimeToken: invalidate and create AppToken
-			userId = restManagerService.consumeOneTimeToken(token);
-			if (userId != null) mctoken = restManagerService.createAppTokenForParticipant(userId);
-		} else if (AppToken.isAppToken(token)){
-			// handle AppToken: use the supplied token
-			userId = restManagerService.findParticipantIdForAppToken(token);
-			mctoken = token;
+		try {
+			ObjectId userId = null;
+			String mctoken = null;
+			if (OneTimeToken.isOneTimeToken(token)){
+				// handle OneTimeToken: invalidate and create AppToken
+				userId = restManagerService.consumeOneTimeToken(token);
+				if (userId != null) mctoken = restManagerService.createAppTokenForParticipant(userId);
+			} else if (AppToken.isAppToken(token)){
+				// handle AppToken: use the supplied token
+				userId = restManagerService.findParticipantIdForAppToken(token);
+				mctoken = token;
+			}
+			
+			if (userId == null) {
+				throw new WebApplicationException(Response.status(403).entity("Invalid Token supplied").build());
+			}
+	
+			MattermostUserConfiguration userConfiguration = fetchUserConfiguration(userId);
+			
+			Participant p = restManagerService.getParticipant(userId);
+			String participantShortId = p != null ? p.getShortId() : "___";
+	
+			return new Result(new MobileCoachAuthentication(userId.toHexString(), participantShortId,  mctoken),
+					new UserConfigurationForAuthentication(userConfiguration),
+					getVariables(userId));
+		} catch (Exception e){
+			log.error("getconfig error: " + e.getMessage());
+			throw e;
 		}
-		
-		if (userId == null) {
-			throw new WebApplicationException(Response.status(403).entity("Invalid Token supplied").build());
-		}
-
-		MattermostUserConfiguration userConfiguration = fetchUserConfiguration(userId);
-		
-		Participant p = restManagerService.getParticipant(userId);
-		String participantShortId = p != null ? p.getShortId() : "___";
-
-		return new Result(new MobileCoachAuthentication(userId.toHexString(), participantShortId,  mctoken),
-				new UserConfigurationForAuthentication(userConfiguration),
-				getVariables(userId));
 	}
 	
 	
