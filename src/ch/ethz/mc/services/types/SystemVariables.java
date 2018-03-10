@@ -26,7 +26,7 @@ import ch.ethz.mc.conf.ImplementationConstants;
  */
 public class SystemVariables {
 	public enum READ_ONLY_SYSTEM_VARIABLES {
-		systemDayOfMonth, systemMonth, systemYear, systemDayInWeek, systemLinkedSurvey, systemLinkedMediaObject, systemIPAddress, systemTimestamp;
+		systemDayOfMonth, systemMonth, systemYear, systemDayInWeek, systemLinkedSurvey, systemLinkedMediaObject, systemIPAddress, systemTimestamp, systemHour;
 
 		public String toVariableName() {
 			return ImplementationConstants.VARIABLE_PREFIX + toString();

@@ -20,6 +20,7 @@ import java.net.UnknownHostException;
  * limitations under the License.
  */
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -403,7 +404,8 @@ public class VariablesManagerService {
 				}
 			case systemTimestamp:
 				return new Long(System.currentTimeMillis()).toString();
-				
+			case systemHour:
+				return new Integer(LocalDateTime.now().getHour()).toString();
 		}
 		return null;
 	}
