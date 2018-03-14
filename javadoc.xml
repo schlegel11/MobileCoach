@@ -5,7 +5,7 @@
 	</description>
 
 	<path id="ivy-libs">
-		<fileset dir="ivy-libs" includes="*.jar" />
+		<fileset dir="ant-libs" includes="*.jar" />
 	</path>
 	<path id="ivy-lib" />
 
