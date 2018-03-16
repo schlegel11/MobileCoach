@@ -22,22 +22,21 @@ package ch.ethz.mc.model.persistent;
  */
 import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.Setter;
-import lombok.val;
-
 import org.bson.types.ObjectId;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.subelements.LString;
 import ch.ethz.mc.model.ui.UIFeedback;
 import ch.ethz.mc.model.ui.UIModelObject;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.val;
 
 /**
  * {@link ModelObject} to represent an {@link Feedback}
@@ -83,6 +82,14 @@ public class Feedback extends ModelObject {
 	@Setter
 	@NonNull
 	private String		templatePath;
+
+	/**
+	 * <strong>The unique identifier used for i18n
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private String		i18nIdentifier;
 
 	/*
 	 * (non-Javadoc)

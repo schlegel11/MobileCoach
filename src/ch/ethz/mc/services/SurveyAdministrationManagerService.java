@@ -128,7 +128,8 @@ public class SurveyAdministrationManagerService {
 			final ObjectId interventionId) {
 		val screeningSurvey = new ScreeningSurvey(
 				GlobalUniqueIdGenerator.createGlobalUniqueId(), interventionId,
-				name, "", null, false, false);
+				name, "", null, false, false,
+				GlobalUniqueIdGenerator.createSimpleGlobalUniqueId());
 
 		if (name.isEmpty()) {
 			screeningSurvey.setName(new LString(DEFAULT_OBJECT_NAME));
@@ -345,7 +346,8 @@ public class SurveyAdministrationManagerService {
 				GlobalUniqueIdGenerator.createGlobalUniqueId(),
 				screeningSurveyId, 0, new LString(), "",
 				ScreeningSurveySlideQuestionTypes.TEXT_ONLY, "", questions,
-				null, null, false, null, new LString());
+				null, null, false, null, new LString(),
+				GlobalUniqueIdGenerator.createSimpleGlobalUniqueId());
 
 		val question = new ScreeningSurveySlide.Question(new LString(),
 				new LString[0], new String[0], -1, null, "");
@@ -896,7 +898,8 @@ public class SurveyAdministrationManagerService {
 	@Synchronized
 	public FeedbackSlide feedbackSlideCreate(final ObjectId feedbackId) {
 		val feedbackSlide = new FeedbackSlide(feedbackId, 0, new LString(), "",
-				"", null, new LString());
+				"", null, new LString(),
+				GlobalUniqueIdGenerator.createSimpleGlobalUniqueId());
 
 		val highestOrderSlide = databaseManagerService.findOneSortedModelObject(
 				FeedbackSlide.class, Queries.FEEDBACK_SLIDE__BY_FEEDBACK,
@@ -1077,7 +1080,8 @@ public class SurveyAdministrationManagerService {
 			final ObjectId screeningSurveyId) {
 		val feedback = new Feedback(
 				GlobalUniqueIdGenerator.createGlobalUniqueId(),
-				screeningSurveyId, name, "");
+				screeningSurveyId, name, "",
+				GlobalUniqueIdGenerator.createSimpleGlobalUniqueId());
 
 		if (name.isEmpty()) {
 			feedback.setName(new LString(DEFAULT_OBJECT_NAME));

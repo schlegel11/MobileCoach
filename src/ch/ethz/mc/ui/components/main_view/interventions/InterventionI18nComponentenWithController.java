@@ -36,6 +36,7 @@ import ch.ethz.mc.tools.CSVExporter;
 import ch.ethz.mc.tools.CSVImporter;
 import ch.ethz.mc.tools.OnDemandFileDownloader;
 import ch.ethz.mc.tools.OnDemandFileDownloader.OnDemandStreamResource;
+import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.ui.components.basics.FileUploadComponentWithController;
 import ch.ethz.mc.ui.components.basics.FileUploadComponentWithController.UploadListener;
 import lombok.val;
@@ -67,7 +68,7 @@ public class InterventionI18nComponentenWithController
 		getImportButton().addClickListener(buttonClickListener);
 
 		// Special handle for export buttons
-		val allDataExportOnDemandFileDownloader = new OnDemandFileDownloader(
+		val exportSurveysAndFeedbacksOnDemandFileDownloader = new OnDemandFileDownloader(
 				new OnDemandStreamResource() {
 
 					@Override
@@ -137,7 +138,7 @@ public class InterventionI18nComponentenWithController
 							log.error("Error at creating CSV: {}",
 									e.getMessage());
 						} finally {
-							getExportButton().setEnabled(true);
+							getExportSurveyFeedbacksButton().setEnabled(true);
 						}
 
 						return null;
@@ -145,13 +146,103 @@ public class InterventionI18nComponentenWithController
 
 					@Override
 					public String getFilename() {
-						return "Internationalization_Strings_" + intervention
-								.getName().replaceAll("[^A-Za-z0-9_. ]+", "_")
+						return "Internationalization_Strings_Surveys_Feedbacks_"
+								+ StringHelpers.cleanFilenameString(
+										intervention.getName())
 								+ ".csv";
 					}
 				});
-		allDataExportOnDemandFileDownloader.extend(getExportButton());
-		getExportButton().setDisableOnClick(true);
+		exportSurveysAndFeedbacksOnDemandFileDownloader
+				.extend(getExportSurveyFeedbacksButton());
+		getExportSurveyFeedbacksButton().setDisableOnClick(true);
+
+		val exportMessagesAndDialogsOnDemandFileDownloader = new OnDemandFileDownloader(
+				new OnDemandStreamResource() {
+
+					@Override
+					public InputStream getStream() {
+						val i18nStringsObjectList = new ArrayList<I18nStringsObject>();
+
+						// Dialog Messages
+						val monitoringMessageGroups = ias
+								.getAllMonitoringMessageGroupsOfIntervention(
+										intervention.getId());
+
+						for (val monitoringMessageGroup : monitoringMessageGroups) {
+							val monitoringMessages = ias
+									.getAllMonitoringMessagesOfMonitoringMessageGroup(
+											monitoringMessageGroup.getId());
+
+							for (val monitoringMessage : monitoringMessages) {
+								val i18nStringsObject = new I18nStringsObject();
+								i18nStringsObject.setId("mm_"
+										+ monitoringMessage.getI18nIdentifier()
+										+ "_#");
+								i18nStringsObject.setDescription(
+										monitoringMessageGroup.getName());
+
+								i18nStringsObject.setText(monitoringMessage
+										.getTextWithPlaceholders());
+								i18nStringsObject
+										.setAnswerOptions(monitoringMessage
+												.getAnswerOptionsWithPlaceholders());
+
+								i18nStringsObjectList.add(i18nStringsObject);
+							}
+						}
+
+						// Micro Dialogs
+						val microDialogs = ias.getAllMicroDialogsOfIntervention(
+								intervention.getId());
+
+						for (val microDialog : microDialogs) {
+							val microDialogMessages = ias
+									.getAllMicroDialogMessagesOfMicroDialog(
+											microDialog.getId());
+
+							for (val microDialogMessage : microDialogMessages) {
+								val i18nStringsObject = new I18nStringsObject();
+								i18nStringsObject.setId("dm_"
+										+ microDialogMessage.getI18nIdentifier()
+										+ "_#");
+								i18nStringsObject
+										.setDescription(microDialog.getName());
+
+								i18nStringsObject.setText(microDialogMessage
+										.getTextWithPlaceholders());
+								i18nStringsObject
+										.setAnswerOptions(microDialogMessage
+												.getAnswerOptionsWithPlaceholders());
+
+								i18nStringsObjectList.add(i18nStringsObject);
+							}
+						}
+
+						try {
+							log.info("Converting table to CSV...");
+							return CSVExporter.convertI18nStringsObjectsToCSV(
+									i18nStringsObjectList);
+						} catch (final IOException e) {
+							log.error("Error at creating CSV: {}",
+									e.getMessage());
+						} finally {
+							getExportMessagesDialogsButton().setEnabled(true);
+						}
+
+						return null;
+					}
+
+					@Override
+					public String getFilename() {
+						return "Internationalization_Strings_Messages_Dialogs_"
+								+ StringHelpers.cleanFilenameString(
+										intervention.getName())
+								+ ".csv";
+					}
+				});
+		exportMessagesAndDialogsOnDemandFileDownloader
+				.extend(getExportMessagesDialogsButton());
+		getExportMessagesDialogsButton().setDisableOnClick(true);
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {

@@ -48,6 +48,7 @@ import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.ui.UIParticipant;
 import ch.ethz.mc.tools.OnDemandFileDownloader;
 import ch.ethz.mc.tools.OnDemandFileDownloader.OnDemandStreamResource;
+import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.tools.StringValidator;
 import ch.ethz.mc.ui.components.basics.FileUploadComponentWithController;
 import ch.ethz.mc.ui.components.basics.FileUploadComponentWithController.UploadListener;
@@ -167,8 +168,8 @@ public class ParticipantsTabComponentWithController
 					@Override
 					public String getFilename() {
 						return "Intervention_"
-								+ intervention.getName()
-										.replaceAll("[^A-Za-z0-9_. ]+", "_")
+								+ StringHelpers.cleanFilenameString(
+										intervention.getName())
 								+ "_Participants"
 								+ Constants.getFileExtension();
 					}
