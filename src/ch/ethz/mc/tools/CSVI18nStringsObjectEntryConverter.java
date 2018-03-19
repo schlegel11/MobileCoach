@@ -27,12 +27,12 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 
 import ch.ethz.mc.conf.Constants;
-import ch.ethz.mc.model.memory.I18nStringsObject;
+import ch.ethz.mc.model.memory.MessagesDialogsI18nStringsObject;
 import ch.ethz.mc.model.persistent.subelements.LString;
 import lombok.val;
 
 /**
- * Converter to convert {@link I18nStringsObject} to CSV and back
+ * Converter to convert {@link MessagesDialogsI18nStringsObject} to CSV and back
  * 
  * @author Andreas Filler
  */
@@ -45,7 +45,7 @@ public class CSVI18nStringsObjectEntryConverter {
 	 * @return
 	 */
 	public static List<String> convertEntry(
-			final I18nStringsObject i18nStringsObject) {
+			final MessagesDialogsI18nStringsObject i18nStringsObject) {
 		val locales = Constants.getInterventionLocales();
 		val entry = new ArrayList<String>();
 
@@ -71,12 +71,12 @@ public class CSVI18nStringsObjectEntryConverter {
 	 * @param csvRecord
 	 * @return
 	 */
-	public static I18nStringsObject convertEntry(final CSVRecord csvRecord) {
+	public static MessagesDialogsI18nStringsObject convertMessagesDialogsEntry(final CSVRecord csvRecord) {
 		if ((csvRecord.get(0).startsWith("mm_")
 				|| csvRecord.get(0).startsWith("dm_"))
 				&& csvRecord.get(0).endsWith("_#")) {
 			val locales = Constants.getInterventionLocales();
-			val i18nStringsObject = new I18nStringsObject();
+			val i18nStringsObject = new MessagesDialogsI18nStringsObject();
 
 			i18nStringsObject.setId(csvRecord.get(0));
 
@@ -106,7 +106,7 @@ public class CSVI18nStringsObjectEntryConverter {
 		}
 	}
 
-	public static String[] getHeaders() {
+	public static String[] getMessagesDialogsHeaders() {
 		val locales = Constants.getInterventionLocales();
 		val entry = new ArrayList<String>();
 

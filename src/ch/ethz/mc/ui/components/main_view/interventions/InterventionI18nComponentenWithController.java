@@ -29,7 +29,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
-import ch.ethz.mc.model.memory.I18nStringsObject;
+import ch.ethz.mc.model.memory.MessagesDialogsI18nStringsObject;
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.services.InterventionAdministrationManagerService;
 import ch.ethz.mc.tools.CSVExporter;
@@ -73,7 +73,7 @@ public class InterventionI18nComponentenWithController
 
 					@Override
 					public InputStream getStream() {
-						val i18nStringsObjectList = new ArrayList<I18nStringsObject>();
+						val i18nStringsObjectList = new ArrayList<MessagesDialogsI18nStringsObject>();
 
 						// Dialog Messages
 						val monitoringMessageGroups = ias
@@ -86,7 +86,7 @@ public class InterventionI18nComponentenWithController
 											monitoringMessageGroup.getId());
 
 							for (val monitoringMessage : monitoringMessages) {
-								val i18nStringsObject = new I18nStringsObject();
+								val i18nStringsObject = new MessagesDialogsI18nStringsObject();
 								i18nStringsObject.setId("mm_"
 										+ monitoringMessage.getI18nIdentifier()
 										+ "_#");
@@ -113,7 +113,7 @@ public class InterventionI18nComponentenWithController
 											microDialog.getId());
 
 							for (val microDialogMessage : microDialogMessages) {
-								val i18nStringsObject = new I18nStringsObject();
+								val i18nStringsObject = new MessagesDialogsI18nStringsObject();
 								i18nStringsObject.setId("dm_"
 										+ microDialogMessage.getI18nIdentifier()
 										+ "_#");
@@ -138,7 +138,7 @@ public class InterventionI18nComponentenWithController
 							log.error("Error at creating CSV: {}",
 									e.getMessage());
 						} finally {
-							getExportSurveyFeedbacksButton().setEnabled(true);
+							getExportSurveysFeedbacksButton().setEnabled(true);
 						}
 
 						return null;
@@ -153,15 +153,15 @@ public class InterventionI18nComponentenWithController
 					}
 				});
 		exportSurveysAndFeedbacksOnDemandFileDownloader
-				.extend(getExportSurveyFeedbacksButton());
-		getExportSurveyFeedbacksButton().setDisableOnClick(true);
+				.extend(getExportSurveysFeedbacksButton());
+		getExportSurveysFeedbacksButton().setDisableOnClick(true);
 
 		val exportMessagesAndDialogsOnDemandFileDownloader = new OnDemandFileDownloader(
 				new OnDemandStreamResource() {
 
 					@Override
 					public InputStream getStream() {
-						val i18nStringsObjectList = new ArrayList<I18nStringsObject>();
+						val i18nStringsObjectList = new ArrayList<MessagesDialogsI18nStringsObject>();
 
 						// Dialog Messages
 						val monitoringMessageGroups = ias
@@ -174,7 +174,7 @@ public class InterventionI18nComponentenWithController
 											monitoringMessageGroup.getId());
 
 							for (val monitoringMessage : monitoringMessages) {
-								val i18nStringsObject = new I18nStringsObject();
+								val i18nStringsObject = new MessagesDialogsI18nStringsObject();
 								i18nStringsObject.setId("mm_"
 										+ monitoringMessage.getI18nIdentifier()
 										+ "_#");
@@ -201,7 +201,7 @@ public class InterventionI18nComponentenWithController
 											microDialog.getId());
 
 							for (val microDialogMessage : microDialogMessages) {
-								val i18nStringsObject = new I18nStringsObject();
+								val i18nStringsObject = new MessagesDialogsI18nStringsObject();
 								i18nStringsObject.setId("dm_"
 										+ microDialogMessage.getI18nIdentifier()
 										+ "_#");

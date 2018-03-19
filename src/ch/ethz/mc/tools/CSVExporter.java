@@ -31,7 +31,7 @@ import org.apache.commons.csv.CSVFormat;
 import com.googlecode.jcsv.writer.CSVWriter;
 import com.googlecode.jcsv.writer.internal.CSVWriterBuilder;
 
-import ch.ethz.mc.model.memory.I18nStringsObject;
+import ch.ethz.mc.model.memory.MessagesDialogsI18nStringsObject;
 import ch.ethz.mc.model.memory.ParticipantVariablesDataTable;
 import ch.ethz.mc.model.persistent.subelements.LString;
 import ch.ethz.mc.model.ui.UIModelObject;
@@ -129,11 +129,12 @@ public class CSVExporter {
 	 * @throws IOException
 	 */
 	public static InputStream convertI18nStringsObjectsToCSV(
-			final List<I18nStringsObject> items) throws IOException {
+			final List<MessagesDialogsI18nStringsObject> items)
+			throws IOException {
 		final StringWriter stringWriter = new StringWriter();
 
-		val csvPrinter = CSVFormat.EXCEL.withDelimiter(';')
-				.withHeader(CSVI18nStringsObjectEntryConverter.getHeaders())
+		val csvPrinter = CSVFormat.EXCEL.withDelimiter(';').withHeader(
+				CSVI18nStringsObjectEntryConverter.getMessagesDialogsHeaders())
 				.print(stringWriter);
 
 		for (val item : items) {

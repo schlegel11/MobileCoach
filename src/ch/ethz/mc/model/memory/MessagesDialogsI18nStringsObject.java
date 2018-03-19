@@ -7,13 +7,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Wrapper for LStrings in combination with keys for i18n export/import
+ * Wrapper for LStrings in combination with keys for i18n export/import of
+ * messages and dialogs
  * 
  * @author Andreas Filler
  */
 @NoArgsConstructor
 @AllArgsConstructor
-public class I18nStringsObject {
+public class MessagesDialogsI18nStringsObject {
 	@Getter
 	@Setter
 	private String	id;
