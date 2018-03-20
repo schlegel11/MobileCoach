@@ -45,23 +45,47 @@ public class MattermostTool {
 			String teamName = args[3];
 			String teamDisplayName = args.length > 4 ? args[4] : args[3];
 			
-	        JSONObject json = new JSONObject();
-	        json.put("name", teamName);
-	        json.put("display_name", teamDisplayName);
-	        json.put("type", "O");
-	          
-			String teamId = new MattermostTask<String>(url + "teams/create", json){
-				@Override
-				protected String handleResponse(HttpMethodBase method) throws JSONException, IOException {
-					return new JSONObject(method.getResponseBodyAsString()).getString("id");
-				}
-			}.run();
+			String teamId = createTeam(teamName, teamDisplayName, url, token);
+		} else if ("new-team".equals(operation)){
+			try {
+			String teamDisplayName = readFromConsole("Team Display Name");
+			String teamName = readFromConsole("Team id name");
 			
-			System.out.println("mattermostTeamId = " + teamId);
-			System.out.println();
+			String teamId = createTeam(teamName, teamDisplayName, url, token);
+			
+			String userId;
+			do {
+				userId = readFromConsole("Id of user to add to team");
+				addUserToTeam(url, token, userId, teamId);
+				
+			} while (!"".equals(userId));
+			
+			} catch (IOException e){
+				e.printStackTrace();
+			}
+			
 		}
 		
 		System.out.println("Done.");
+	}
+	
+	private static String createTeam(String teamName, String teamDisplayName, String url, String token){
+        JSONObject json = new JSONObject();
+        json.put("name", teamName);
+        json.put("display_name", teamDisplayName);
+        json.put("type", "O");
+          
+		String teamId = new MattermostTask<String>(url + "teams/create", json){
+			@Override
+			protected String handleResponse(HttpMethodBase method) throws JSONException, IOException {
+				return new JSONObject(method.getResponseBodyAsString()).getString("id");
+			}
+		}.setToken(token).run();
+		
+		System.out.println("mattermostTeamId = " + teamId);
+		System.out.println();
+		
+		return teamId;
 	}
 
 	private static void createUser(String token, String team, String username, String url, String adminName, String ouputPrefix) {
@@ -87,6 +111,12 @@ public class MattermostTool {
 		System.out.println(ouputPrefix + "UserId = " + userId);
 		System.out.println(ouputPrefix + "UserName = " + username);
 		System.out.println(ouputPrefix + "UserPassword = " + password);
+	}
+	
+	private static String readFromConsole(String prompt) throws IOException{
+		System.out.print(prompt+": ");
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        return br.readLine();
 	}
 	
 	private static String getPasswordFromConsole() throws IOException{
