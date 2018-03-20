@@ -321,6 +321,8 @@ public class MattermostMessagingService implements MessagingService {
 				.put("contents", new JSONObject().put("en", message))
 				.put("include_player_ids", playerIds)
 				.put("data", data)
+				.put("ios_badgeType", "SetTo")
+				.put("ios_badgeCount", 1)
 				.put("collapse_id", userId);
 
 		String result = new OneSignalTask<String>(url, json2, headers){
