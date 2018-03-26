@@ -132,6 +132,7 @@ public class CSVExporter {
 			final List<I18nStringsObject> items) throws IOException {
 		final StringWriter stringWriter = new StringWriter();
 
+		stringWriter.append('\ufeff'); // Adds UTF-8 BOM
 		val csvPrinter = CSVFormat.EXCEL.withDelimiter(';')
 				.withHeader(CSVI18nStringsObjectEntryConverter.getHeaders())
 				.print(stringWriter);
