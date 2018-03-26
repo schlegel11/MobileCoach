@@ -90,8 +90,18 @@ public class Post {
 	@Setter
 	private String id;
 	
-	
 	@Getter
 	@Setter
 	private String channelId;
+	
+	@Getter
+	@Setter
+	private String conversation;
+	
+	@Setter
+	private String trackingTag;
+	
+	public String getTracking_tag(){
+		return trackingTag;
+	}
 }

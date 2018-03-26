@@ -531,6 +531,9 @@ public class RichConversationService {
 				
 				post.getParameters().putAll(message.parameters);
 				post.setHidden(message.hidden);
+				
+				post.setConversation(message.conversation);
+				post.setTrackingTag(message.trackingTag);
 
 				messagingService.sendMessage(sender, recipient, post, Boolean.TRUE.equals(message.isReminder));
 			}
