@@ -177,7 +177,7 @@ public class MainViewComponent extends AbstractCustomComponent {
 		// titleLabel
 		titleLabel = new Label();
 		titleLabel.setStyleName("title-label");
-		titleLabel.setIcon(new ThemeResource("img/pm_logo_smaller.png"));
+		titleLabel.setIcon(new ThemeResource("img/mc_logo_smaller.png"));
 		titleLabel.setImmediate(false);
 		titleLabel.setWidth("100.0%");
 		titleLabel.setHeight("32px");

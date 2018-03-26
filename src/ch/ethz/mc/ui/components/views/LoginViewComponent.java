@@ -182,7 +182,7 @@ public class LoginViewComponent extends AbstractCustomComponent {
 		// titleLabel
 		titleLabel = new Label();
 		titleLabel.setStyleName("title-label");
-		titleLabel.setIcon(new ThemeResource("img/pm_logo_small.png"));
+		titleLabel.setIcon(new ThemeResource("img/mc_logo_small.png"));
 		titleLabel.setImmediate(false);
 		titleLabel.setWidth("100.0%");
 		titleLabel.setHeight("35px");

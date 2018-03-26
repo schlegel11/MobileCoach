@@ -59,7 +59,7 @@ This can be set in the "JRE" tab when configuring an ANT task in the eclipse GUI
 		</if>
 
 		<!-- Create .war file -->
-		<war destfile="out/PMCP.war" webxml="WebContent/WEB-INF/web.xml" update="true">
+		<war destfile="out/MC.war" webxml="WebContent/WEB-INF/web.xml" update="true">
 			<classes dir="build/classes" />
 			<lib dir="lib" />
 			<fileset dir="WebContent">
