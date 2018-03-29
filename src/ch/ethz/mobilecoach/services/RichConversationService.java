@@ -232,21 +232,23 @@ public class RichConversationService {
 			throw new IOException("Repository not found: " + interventionId);
 		}
 		
+		final String participantId = participant.getId().toHexString();
+		
 		Logger logger = new Logger() {
 
 			@Override
 			public void logError(String message) {
-				log.error(message);
+				log.error(participantId + ": " + message);
 			}
 
 			@Override
 			public void logDebug(String message) {
-				log.debug(message);
+				log.debug(participantId + ": " + message);
 			}
 
 			@Override
 			public void logInfo(String message) {
-				log.info(message);
+				log.info(participantId + ": " + message);
 			}
 		};
 
