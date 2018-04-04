@@ -122,7 +122,7 @@ public class CSVExporter {
 	}
 
 	/**
-	 * Exports {@link LString}s with keys for i18n
+	 * Exports {@link LString}s with keys for i18n of message dialogs
 	 * 
 	 * @param items
 	 * @return
@@ -133,6 +133,7 @@ public class CSVExporter {
 			throws IOException {
 		final StringWriter stringWriter = new StringWriter();
 
+		stringWriter.append('\ufeff'); // Adds UTF-8 BOM
 		val csvPrinter = CSVFormat.EXCEL.withDelimiter(';').withHeader(
 				CSVI18nStringsObjectEntryConverter.getMessagesDialogsHeaders())
 				.print(stringWriter);

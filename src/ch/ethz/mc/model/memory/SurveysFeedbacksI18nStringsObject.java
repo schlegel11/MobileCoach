@@ -8,7 +8,7 @@ import lombok.Setter;
 
 /**
  * Wrapper for LStrings in combination with keys for i18n export/import of
- * messages and dialogs
+ * surveys and feedback
  * 
  * @author Andreas Filler
  */
