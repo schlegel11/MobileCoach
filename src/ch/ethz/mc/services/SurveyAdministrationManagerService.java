@@ -240,6 +240,27 @@ public class SurveyAdministrationManagerService {
 	}
 
 	@Synchronized
+	public int screeningSurveyUpdateL18n(final ObjectId interventionId,
+			final String i18nIdentifier, final LString name) {
+
+		int updates = 0;
+
+		val screeningSurveys = getAllScreeningSurveysOfIntervention(
+				interventionId);
+
+		for (val screeningSurvey : screeningSurveys) {
+			if (screeningSurvey.getI18nIdentifier().equals(i18nIdentifier)) {
+				screeningSurvey.setName(name);
+				databaseManagerService.saveModelObject(screeningSurvey);
+
+				updates++;
+			}
+		}
+
+		return updates;
+	}
+
+	@Synchronized
 	public ScreeningSurvey screeningSurveyImport(final File file,
 			final ObjectId interventionId, final boolean duplicate)
 			throws FileNotFoundException, IOException {
@@ -414,6 +435,106 @@ public class SurveyAdministrationManagerService {
 				GlobalUniqueIdGenerator.createGlobalUniqueId());
 
 		databaseManagerService.saveModelObject(screeningSurveySlide);
+	}
+
+	@Synchronized
+	public int screeningSurveySlideUpdateL18n(final ObjectId interventionId,
+			final String i18nIdentifier, final LString titleWithPlaceholders,
+			final LString validationErrorMessage) {
+
+		int updates = 0;
+
+		val screeningSurveys = getAllScreeningSurveysOfIntervention(
+				interventionId);
+
+		for (val screeningSurvey : screeningSurveys) {
+			val screeningSurveySlides = getAllScreeningSurveySlidesOfScreeningSurvey(
+					screeningSurvey.getId());
+			for (val screeningSurveySlide : screeningSurveySlides) {
+				if (screeningSurveySlide.getI18nIdentifier()
+						.equals(i18nIdentifier)) {
+					screeningSurveySlide
+							.setTitleWithPlaceholders(titleWithPlaceholders);
+					screeningSurveySlide
+							.setValidationErrorMessage(validationErrorMessage);
+					databaseManagerService
+							.saveModelObject(screeningSurveySlide);
+
+					updates++;
+				}
+			}
+		}
+
+		return updates;
+	}
+
+	@Synchronized
+	public int screeningSurveySlideQuestionUpdateL18n(
+			final ObjectId interventionId, final String i18nIdentifier,
+			final int arrayPosition, final LString questionWithPlaceholders) {
+
+		int updates = 0;
+
+		val screeningSurveys = getAllScreeningSurveysOfIntervention(
+				interventionId);
+
+		for (val screeningSurvey : screeningSurveys) {
+			val screeningSurveySlides = getAllScreeningSurveySlidesOfScreeningSurvey(
+					screeningSurvey.getId());
+			for (val screeningSurveySlide : screeningSurveySlides) {
+				if (screeningSurveySlide.getI18nIdentifier()
+						.equals(i18nIdentifier)
+						&& screeningSurveySlide.getQuestions()
+								.size() > arrayPosition) {
+					screeningSurveySlide.getQuestions().get(arrayPosition)
+							.setQuestionWithPlaceholders(
+									questionWithPlaceholders);
+					databaseManagerService
+							.saveModelObject(screeningSurveySlide);
+
+					updates++;
+				}
+			}
+		}
+
+		return updates;
+	}
+
+	@Synchronized
+	public int screeningSurveySlideQuestionAnswerUpdateL18n(
+			final ObjectId interventionId, final String i18nIdentifier,
+			final int arrayPosition, final int subArrayPosition,
+			final LString answerWithPlaceholder) {
+
+		int updates = 0;
+
+		val screeningSurveys = getAllScreeningSurveysOfIntervention(
+				interventionId);
+
+		for (val screeningSurvey : screeningSurveys) {
+			val screeningSurveySlides = getAllScreeningSurveySlidesOfScreeningSurvey(
+					screeningSurvey.getId());
+			for (val screeningSurveySlide : screeningSurveySlides) {
+				if (screeningSurveySlide.getI18nIdentifier()
+						.equals(i18nIdentifier)
+						&& screeningSurveySlide.getQuestions()
+								.size() > arrayPosition) {
+					val question = screeningSurveySlide.getQuestions()
+							.get(arrayPosition);
+
+					if (question
+							.getAnswersWithPlaceholders().length > subArrayPosition) {
+						question.getAnswersWithPlaceholders()[subArrayPosition] = answerWithPlaceholder;
+						databaseManagerService
+								.saveModelObject(screeningSurveySlide);
+
+						updates++;
+					}
+				}
+			}
+		}
+
+		return updates;
 	}
 
 	@Synchronized
@@ -1018,6 +1139,42 @@ public class SurveyAdministrationManagerService {
 		databaseManagerService.deleteModelObject(feedbackSlide);
 	}
 
+	@Synchronized
+	public int feedbackSlideUpdateL18n(final ObjectId interventionId,
+			final String i18nIdentifier, final LString titleWithPlaceholders,
+			final LString textWithPlaceholders) {
+
+		int updates = 0;
+
+		val screeningSurveys = getAllScreeningSurveysOfIntervention(
+				interventionId);
+
+		for (val screeningSurvey : screeningSurveys) {
+			val feedbacks = getAllFeedbacksOfScreeningSurvey(
+					screeningSurvey.getId());
+
+			for (val feedback : feedbacks) {
+				val feedbackSlides = getAllFeedbackSlidesOfFeedback(
+						feedback.getId());
+
+				for (val feedbackSlide : feedbackSlides) {
+					if (feedbackSlide.getI18nIdentifier()
+							.equals(i18nIdentifier)) {
+						feedbackSlide.setTitleWithPlaceholders(
+								titleWithPlaceholders);
+						feedbackSlide
+								.setTextWithPlaceholders(textWithPlaceholders);
+						databaseManagerService.saveModelObject(feedbackSlide);
+
+						updates++;
+					}
+				}
+			}
+		}
+
+		return updates;
+	}
+
 	// Feedback Slide Rule
 	@Synchronized
 	public FeedbackSlideRule feedbackSlideRuleCreate(
@@ -1160,6 +1317,32 @@ public class SurveyAdministrationManagerService {
 	@Synchronized
 	public void feedbackDelete(final Feedback feedback) {
 		databaseManagerService.deleteModelObject(feedback);
+	}
+
+	@Synchronized
+	public int feedbackUpdateL18n(final ObjectId interventionId,
+			final String i18nIdentifier, final LString name) {
+
+		int updates = 0;
+
+		val screeningSurveys = getAllScreeningSurveysOfIntervention(
+				interventionId);
+
+		for (val screeningSurvey : screeningSurveys) {
+			val feedbacks = getAllFeedbacksOfScreeningSurvey(
+					screeningSurvey.getId());
+
+			for (val feedback : feedbacks) {
+				if (feedback.getI18nIdentifier().equals(i18nIdentifier)) {
+					feedback.setName(name);
+					databaseManagerService.saveModelObject(feedback);
+
+					updates++;
+				}
+			}
+		}
+
+		return updates;
 	}
 
 	/*

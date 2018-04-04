@@ -30,8 +30,10 @@ import com.vaadin.ui.Button.ClickEvent;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.model.memory.MessagesDialogsI18nStringsObject;
+import ch.ethz.mc.model.memory.SurveysFeedbacksI18nStringsObject;
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.services.InterventionAdministrationManagerService;
+import ch.ethz.mc.services.SurveyAdministrationManagerService;
 import ch.ethz.mc.tools.CSVExporter;
 import ch.ethz.mc.tools.CSVImporter;
 import ch.ethz.mc.tools.OnDemandFileDownloader;
@@ -53,6 +55,7 @@ public class InterventionI18nComponentenWithController
 		extends InterventionI18nComponent {
 
 	private final InterventionAdministrationManagerService	ias;
+	private final SurveyAdministrationManagerService		sas;
 
 	private Intervention									intervention;
 
@@ -61,101 +64,15 @@ public class InterventionI18nComponentenWithController
 		super();
 
 		ias = getInterventionAdministrationManagerService();
+		sas = getSurveyAdministrationManagerService();
 		this.intervention = intervention;
 
 		// Handle buttons
 		val buttonClickListener = new ButtonClickListener();
-		getImportButton().addClickListener(buttonClickListener);
+		getImportMessagesDialogsButton().addClickListener(buttonClickListener);
+		getImportSurveysFeedbacksButton().addClickListener(buttonClickListener);
 
 		// Special handle for export buttons
-		val exportSurveysAndFeedbacksOnDemandFileDownloader = new OnDemandFileDownloader(
-				new OnDemandStreamResource() {
-
-					@Override
-					public InputStream getStream() {
-						val i18nStringsObjectList = new ArrayList<MessagesDialogsI18nStringsObject>();
-
-						// Dialog Messages
-						val monitoringMessageGroups = ias
-								.getAllMonitoringMessageGroupsOfIntervention(
-										intervention.getId());
-
-						for (val monitoringMessageGroup : monitoringMessageGroups) {
-							val monitoringMessages = ias
-									.getAllMonitoringMessagesOfMonitoringMessageGroup(
-											monitoringMessageGroup.getId());
-
-							for (val monitoringMessage : monitoringMessages) {
-								val i18nStringsObject = new MessagesDialogsI18nStringsObject();
-								i18nStringsObject.setId("mm_"
-										+ monitoringMessage.getI18nIdentifier()
-										+ "_#");
-								i18nStringsObject.setDescription(
-										monitoringMessageGroup.getName());
-
-								i18nStringsObject.setText(monitoringMessage
-										.getTextWithPlaceholders());
-								i18nStringsObject
-										.setAnswerOptions(monitoringMessage
-												.getAnswerOptionsWithPlaceholders());
-
-								i18nStringsObjectList.add(i18nStringsObject);
-							}
-						}
-
-						// Micro Dialogs
-						val microDialogs = ias.getAllMicroDialogsOfIntervention(
-								intervention.getId());
-
-						for (val microDialog : microDialogs) {
-							val microDialogMessages = ias
-									.getAllMicroDialogMessagesOfMicroDialog(
-											microDialog.getId());
-
-							for (val microDialogMessage : microDialogMessages) {
-								val i18nStringsObject = new MessagesDialogsI18nStringsObject();
-								i18nStringsObject.setId("dm_"
-										+ microDialogMessage.getI18nIdentifier()
-										+ "_#");
-								i18nStringsObject
-										.setDescription(microDialog.getName());
-
-								i18nStringsObject.setText(microDialogMessage
-										.getTextWithPlaceholders());
-								i18nStringsObject
-										.setAnswerOptions(microDialogMessage
-												.getAnswerOptionsWithPlaceholders());
-
-								i18nStringsObjectList.add(i18nStringsObject);
-							}
-						}
-
-						try {
-							log.info("Converting table to CSV...");
-							return CSVExporter.convertI18nStringsObjectsToCSV(
-									i18nStringsObjectList);
-						} catch (final IOException e) {
-							log.error("Error at creating CSV: {}",
-									e.getMessage());
-						} finally {
-							getExportSurveysFeedbacksButton().setEnabled(true);
-						}
-
-						return null;
-					}
-
-					@Override
-					public String getFilename() {
-						return "Internationalization_Strings_Surveys_Feedbacks_"
-								+ StringHelpers.cleanFilenameString(
-										intervention.getName())
-								+ ".csv";
-					}
-				});
-		exportSurveysAndFeedbacksOnDemandFileDownloader
-				.extend(getExportSurveysFeedbacksButton());
-		getExportSurveysFeedbacksButton().setDisableOnClick(true);
-
 		val exportMessagesAndDialogsOnDemandFileDownloader = new OnDemandFileDownloader(
 				new OnDemandStreamResource() {
 
@@ -163,7 +80,7 @@ public class InterventionI18nComponentenWithController
 					public InputStream getStream() {
 						val i18nStringsObjectList = new ArrayList<MessagesDialogsI18nStringsObject>();
 
-						// Dialog Messages
+						// Monitoring Messages
 						val monitoringMessageGroups = ias
 								.getAllMonitoringMessageGroupsOfIntervention(
 										intervention.getId());
@@ -219,9 +136,11 @@ public class InterventionI18nComponentenWithController
 						}
 
 						try {
-							log.info("Converting table to CSV...");
-							return CSVExporter.convertI18nStringsObjectsToCSV(
-									i18nStringsObjectList);
+							log.info(
+									"Converting messages and dialogs to CSV...");
+							return CSVExporter
+									.convertMessagesDialogsI18nStringsObjectsToCSV(
+											i18nStringsObjectList);
 						} catch (final IOException e) {
 							log.error("Error at creating CSV: {}",
 									e.getMessage());
@@ -234,7 +153,7 @@ public class InterventionI18nComponentenWithController
 
 					@Override
 					public String getFilename() {
-						return "Internationalization_Strings_Messages_Dialogs_"
+						return "Internationalization_Strings_Messages_and_Dialogs_"
 								+ StringHelpers.cleanFilenameString(
 										intervention.getName())
 								+ ".csv";
@@ -243,6 +162,161 @@ public class InterventionI18nComponentenWithController
 		exportMessagesAndDialogsOnDemandFileDownloader
 				.extend(getExportMessagesDialogsButton());
 		getExportMessagesDialogsButton().setDisableOnClick(true);
+
+		val exportSurveysAndFeedbacksOnDemandFileDownloader = new OnDemandFileDownloader(
+				new OnDemandStreamResource() {
+
+					@Override
+					public InputStream getStream() {
+						val i18nStringsObjectList = new ArrayList<SurveysFeedbacksI18nStringsObject>();
+
+						// Surveys
+						val screeningSurveys = sas
+								.getAllScreeningSurveysOfIntervention(
+										intervention.getId());
+
+						for (val screeningSurvey : screeningSurveys) {
+							SurveysFeedbacksI18nStringsObject i18nStringsObject = new SurveysFeedbacksI18nStringsObject();
+							i18nStringsObject.setId(
+									"su_" + screeningSurvey.getI18nIdentifier()
+											+ "_#");
+							i18nStringsObject.setDescription(
+									screeningSurvey.isIntermediateSurvey()
+											? "Intermediate Survey"
+											: "Screening Survey");
+							i18nStringsObject
+									.setTitle(screeningSurvey.getName());
+
+							i18nStringsObjectList.add(i18nStringsObject);
+
+							// Survey Slides
+							val surveySlides = sas
+									.getAllScreeningSurveySlidesOfScreeningSurvey(
+											screeningSurvey.getId());
+
+							for (val surveySlide : surveySlides) {
+								i18nStringsObject = new SurveysFeedbacksI18nStringsObject();
+								i18nStringsObject.setId(
+										"ss_" + surveySlide.getI18nIdentifier()
+												+ "_#");
+								i18nStringsObject.setDescription("Survey Slide "
+										+ surveySlide.getComment());
+								i18nStringsObject.setTitle(
+										surveySlide.getTitleWithPlaceholders());
+								i18nStringsObject.setErrorMessage(surveySlide
+										.getValidationErrorMessage());
+
+								i18nStringsObjectList.add(i18nStringsObject);
+
+								val questions = surveySlide.getQuestions();
+								for (int i = 0; i < questions.size(); i++) {
+									val question = questions.get(i);
+
+									i18nStringsObject = new SurveysFeedbacksI18nStringsObject();
+									i18nStringsObject.setId("sq_"
+											+ surveySlide.getI18nIdentifier()
+											+ "." + i + "_#");
+									i18nStringsObject.setDescription("Question "
+											+ (i + 1) + " of Survey Slide "
+											+ surveySlide.getComment());
+									i18nStringsObject.setText(question
+											.getQuestionWithPlaceholders());
+
+									i18nStringsObjectList
+											.add(i18nStringsObject);
+
+									val answers = question
+											.getAnswersWithPlaceholders();
+
+									for (int j = 0; j < answers.length; j++) {
+										val answer = answers[j];
+
+										i18nStringsObject = new SurveysFeedbacksI18nStringsObject();
+										i18nStringsObject.setId("qa_"
+												+ surveySlide
+														.getI18nIdentifier()
+												+ "." + i + "." + j + "_#");
+										i18nStringsObject.setDescription(
+												"Answer " + (j + 1)
+														+ " of Question "
+														+ (i + 1)
+														+ " of Survey Slide "
+														+ surveySlide
+																.getComment());
+										i18nStringsObject.setText(answer);
+
+										i18nStringsObjectList
+												.add(i18nStringsObject);
+									}
+								}
+
+							}
+
+							// Feedbacks
+							val feedbacks = sas
+									.getAllFeedbacksOfScreeningSurvey(
+											screeningSurvey.getId());
+
+							for (val feedback : feedbacks) {
+								i18nStringsObject = new SurveysFeedbacksI18nStringsObject();
+								i18nStringsObject.setId("fb_"
+										+ feedback.getI18nIdentifier() + "_#");
+								i18nStringsObject.setDescription("Feedback");
+								i18nStringsObject.setTitle(feedback.getName());
+
+								i18nStringsObjectList.add(i18nStringsObject);
+
+								// Feedback Slides
+								val feedbackSlides = sas
+										.getAllFeedbackSlidesOfFeedback(
+												feedback.getId());
+
+								for (val feedbackSlide : feedbackSlides) {
+									i18nStringsObject = new SurveysFeedbacksI18nStringsObject();
+									i18nStringsObject.setId("fs_"
+											+ feedbackSlide.getI18nIdentifier()
+											+ "_#");
+									i18nStringsObject.setDescription(
+											"Feedback Slide " + feedbackSlide
+													.getComment());
+									i18nStringsObject.setTitle(feedbackSlide
+											.getTitleWithPlaceholders());
+									i18nStringsObject.setText(feedbackSlide
+											.getTextWithPlaceholders());
+
+									i18nStringsObjectList
+											.add(i18nStringsObject);
+								}
+							}
+						}
+
+						try {
+							log.info(
+									"Converting surveys and feedbacks to CSV...");
+							return CSVExporter
+									.convertSurveysFeedbacksI18nStringsObjectsToCSV(
+											i18nStringsObjectList);
+						} catch (final IOException e) {
+							log.error("Error at creating CSV: {}",
+									e.getMessage());
+						} finally {
+							getExportSurveysFeedbacksButton().setEnabled(true);
+						}
+
+						return null;
+					}
+
+					@Override
+					public String getFilename() {
+						return "Internationalization_Strings_Surveys_and_Feedbacks_"
+								+ StringHelpers.cleanFilenameString(
+										intervention.getName())
+								+ ".csv";
+					}
+				});
+		exportSurveysAndFeedbacksOnDemandFileDownloader
+				.extend(getExportSurveysFeedbacksButton());
+		getExportSurveysFeedbacksButton().setDisableOnClick(true);
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
@@ -250,13 +324,15 @@ public class InterventionI18nComponentenWithController
 		@Override
 		public void buttonClick(final ClickEvent event) {
 
-			if (event.getButton() == getImportButton()) {
-				importI18nCSV();
+			if (event.getButton() == getImportMessagesDialogsButton()) {
+				importMessagesDialogsI18nCSV();
+			} else if (event.getButton() == getImportSurveysFeedbacksButton()) {
+				importSurveysFeedbacksI18nCSV();
 			}
 		}
 	}
 
-	public void importI18nCSV() {
+	public void importMessagesDialogsI18nCSV() {
 		log.debug("Import i18n CSV");
 
 		val fileUploadComponentWithController = new FileUploadComponentWithController(
@@ -265,10 +341,11 @@ public class InterventionI18nComponentenWithController
 			@Override
 			public void fileUploadReceived(final File file) {
 				log.debug(
-						"File upload successful, starting conversation of i18n string objects");
+						"File upload successful, starting conversation of i18n string objects for messages and dialogs");
 				try {
 					val i18nStringObjects = CSVImporter
-							.convertCSVToI18nStringsObjects(file);
+							.convertCSVToI18nMessagesDialogsStringsObjects(
+									file);
 
 					int updates = 0;
 
@@ -298,6 +375,114 @@ public class InterventionI18nComponentenWithController
 											i18nStringObject.getText(),
 											i18nStringObject
 													.getAnswerOptions());
+									break;
+							}
+						}
+					}
+
+					log.debug("{} objects updated", updates);
+					getAdminUI().showInformationNotification(
+							AdminMessageStrings.NOTIFICATION__I18N_IMPORTED);
+				} catch (final Exception e) {
+					getAdminUI().showWarningNotification(
+							AdminMessageStrings.NOTIFICATION__I18N_IMPORT_FAILED);
+				} finally {
+					try {
+						file.delete();
+					} catch (final Exception f) {
+						// Do nothing
+					}
+				}
+			}
+		});
+		showModalClosableEditWindow(
+				AdminMessageStrings.ABSTRACT_CLOSABLE_EDIT_WINDOW__IMPORT_I18N,
+				fileUploadComponentWithController, null);
+	}
+
+	public void importSurveysFeedbacksI18nCSV() {
+		log.debug("Import i18n CSV");
+
+		val fileUploadComponentWithController = new FileUploadComponentWithController(
+				".csv");
+		fileUploadComponentWithController.setListener(new UploadListener() {
+			@Override
+			public void fileUploadReceived(final File file) {
+				log.debug(
+						"File upload successful, starting conversation of i18n string objects for surveys and feedbacks");
+				try {
+					val i18nStringObjects = CSVImporter
+							.convertCSVToI18nSurveysFeedbacksStringsObjects(
+									file);
+
+					int updates = 0;
+
+					log.debug("{} objects found in i18n import",
+							i18nStringObjects.size());
+
+					for (val i18nStringObject : i18nStringObjects) {
+						val typeAndId = i18nStringObject.getId().split("_");
+						val type = typeAndId[0];
+						val i18nIdentifierAndOthers = typeAndId[1].split("\\.");
+						val i18nIdentifier = i18nIdentifierAndOthers[0];
+						int arrayPosition = 0;
+						int subArrayPosition = 0;
+						if (i18nIdentifierAndOthers.length > 1) {
+							arrayPosition = Integer
+									.parseInt(i18nIdentifierAndOthers[1]);
+						}
+						if (i18nIdentifierAndOthers.length > 2) {
+							subArrayPosition = Integer
+									.parseInt(i18nIdentifierAndOthers[2]);
+						}
+						val check = typeAndId[2];
+
+						if (check.equals("#")) {
+							switch (type) {
+								case "su":
+									updates += sas.screeningSurveyUpdateL18n(
+											intervention.getId(),
+											i18nIdentifier,
+											i18nStringObject.getTitle());
+									break;
+								case "ss":
+									updates += sas
+											.screeningSurveySlideUpdateL18n(
+													intervention.getId(),
+													i18nIdentifier,
+													i18nStringObject.getTitle(),
+													i18nStringObject
+															.getErrorMessage());
+									break;
+								case "sq":
+									updates += sas
+											.screeningSurveySlideQuestionUpdateL18n(
+													intervention.getId(),
+													i18nIdentifier,
+													arrayPosition,
+													i18nStringObject.getText());
+									break;
+								case "qa":
+									updates += sas
+											.screeningSurveySlideQuestionAnswerUpdateL18n(
+													intervention.getId(),
+													i18nIdentifier,
+													arrayPosition,
+													subArrayPosition,
+													i18nStringObject.getText());
+									break;
+								case "fb":
+									updates += sas.feedbackUpdateL18n(
+											intervention.getId(),
+											i18nIdentifier,
+											i18nStringObject.getTitle());
+									break;
+								case "fs":
+									updates += sas.feedbackSlideUpdateL18n(
+											intervention.getId(),
+											i18nIdentifier,
+											i18nStringObject.getTitle(),
+											i18nStringObject.getText());
 									break;
 							}
 						}

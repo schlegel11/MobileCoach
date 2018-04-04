@@ -25,9 +25,13 @@ public class SurveysFeedbacksI18nStringsObject {
 
 	@Getter
 	@Setter
+	private LString	title;
+
+	@Getter
+	@Setter
 	private LString	text;
 
 	@Getter
 	@Setter
-	private LString	answerOptions;
+	private LString	errorMessage;
 }
