@@ -24,6 +24,7 @@ import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mc.services.SurveyExecutionManagerService;
+import ch.ethz.mc.services.internal.VariablesManagerService.ExternallyWriteProtectedVariableException;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
 import ch.ethz.mobilecoach.model.persistent.MediaLibraryEntry;
@@ -55,7 +56,8 @@ public class AppService {
 	@Path("/getconfig")
 	@Produces("application/json")
 	public Result getConfig(@Context final HttpServletRequest request,
-			@HeaderParam("Authentication") final String token) throws BadRequestException {
+			@HeaderParam("Authentication") final String token,
+			@HeaderParam("DevicePlatform") final String devicePlatform) throws BadRequestException {
 
 		if (token == null) {
 			throw new WebApplicationException(Response.status(400).entity("Missing header 'Authentication'.").build());
@@ -82,6 +84,8 @@ public class AppService {
 			
 			Participant p = restManagerService.getParticipant(userId);
 			String participantShortId = p != null ? p.getShortId() : "___";
+			
+			setDevicePlatform(p, devicePlatform);
 	
 			return new Result(new MobileCoachAuthentication(userId.toHexString(), participantShortId,  mctoken),
 					new UserConfigurationForAuthentication(userConfiguration),
@@ -98,7 +102,8 @@ public class AppService {
 	@Produces("application/json")
 	public Result createParticipant(@Context final HttpServletRequest request, 
 			@HeaderParam("Survey") final String surveyId,
-			@HeaderParam("Locale") final String locale) throws BadRequestException {
+			@HeaderParam("Locale") final String locale,
+			@HeaderParam("DevicePlatform") final String devicePlatform) throws BadRequestException {
 		
 		// validate locale
 		Locale localeObj = null;
@@ -131,10 +136,24 @@ public class AppService {
 		
 		String mctoken = restManagerService.createAppTokenForParticipant(userId);
 		MattermostUserConfiguration userConfiguration = fetchUserConfiguration(userId);
+		
+		setDevicePlatform(user, devicePlatform);
 
 		return new Result(new MobileCoachAuthentication(userId.toHexString(), user.getShortId(), mctoken),
 				new UserConfigurationForAuthentication(userConfiguration),
 				getVariables(userId));
+	}
+	
+	
+	private void setDevicePlatform(Participant participant, String platform){
+		String variable = "devicePlatform";
+		if (platform != null && participant != null){
+			try {
+				restManagerService.writeVariable(participant.getId(), variable, platform, false, false);
+			} catch (Exception e) {
+				log.error(e.getMessage());
+			}
+		}
 	}
 	
 	
