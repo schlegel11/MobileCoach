@@ -235,6 +235,12 @@ public class TestServlet extends HttpServlet {
 		variables.add(new InterventionVariableWithValue(null, "$impins", "7,3",
 				InterventionVariableWithValuePrivacyTypes.PRIVATE,
 				InterventionVariableWithValueAccessTypes.INTERNAL));
+		variables.add(new InterventionVariableWithValue(null, "$time", "4.3",
+				InterventionVariableWithValuePrivacyTypes.PRIVATE,
+				InterventionVariableWithValueAccessTypes.INTERNAL));
+		variables.add(new InterventionVariableWithValue(null, "$date", "1.2.",
+				InterventionVariableWithValuePrivacyTypes.PRIVATE,
+				InterventionVariableWithValueAccessTypes.INTERNAL));
 
 		val rule1 = new MonitoringMessageRule(null, 0,
 				"position($sex,position($auditGT0Digit,position($alterkDigit,26,16,15,24),position($alterkDigit,53,60,63,53),position($alterkDigit,21,25,23,24)),position($auditGT0Digit,position($alterkDigit,21,14,13,14),position($alterkDigit,47,45,52,52),position($alterkDigit,33,42,35,34)))",
@@ -306,6 +312,20 @@ public class TestServlet extends HttpServlet {
 		final val result11 = RuleEvaluator.evaluateRule(null, null, rule10,
 				variables);
 		log.debug(">> " + result11.getTextRuleValue());
+		log.debug(
+				"Exception is correct here! Comma required for several other formats.");
+
+		val rule11 = new MonitoringMessageRule(null, 0, "ABC",
+				RuleEquationSignTypes.TEXT_VALUE_EQUALS, "$time{#t} Uhr", "");
+		final val result12 = RuleEvaluator.evaluateRule(null, null, rule11,
+				variables);
+		log.debug(">> " + result12.getTextRuleComparisonTermValue());
+
+		val rule12 = new MonitoringMessageRule(null, 0, "ABC",
+				RuleEquationSignTypes.TEXT_VALUE_EQUALS, "$date{#d} :-)", "");
+		final val result13 = RuleEvaluator.evaluateRule(null, null, rule12,
+				variables);
+		log.debug(">> " + result13.getTextRuleComparisonTermValue());
 	}
 
 	@SuppressWarnings("unused")

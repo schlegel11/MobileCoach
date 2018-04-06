@@ -21,6 +21,7 @@ package ch.ethz.mc.tools;
  * the License.
  */
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
@@ -50,12 +51,18 @@ import lombok.val;
  * @author Andreas Filler
  */
 public class StringHelpers {
-	private static SimpleDateFormat	simpleDateFormat	= new SimpleDateFormat(
+	private static SimpleDateFormat	simpleDateFormat			= new SimpleDateFormat(
 			"yyyy-MM-dd");
-	private static SimpleDateFormat	longDateFormat		= new SimpleDateFormat(
+	private static SimpleDateFormat	longDateFormat				= new SimpleDateFormat(
 			"yyyy-MM-dd HH:mm:ss");
 
-	private static Gson				gson				= new Gson();
+	private static SimpleDateFormat	internalDateRepresentation	= new SimpleDateFormat(
+			"dd.MM.yyyy");
+
+	private static SimpleDateFormat	internalTimeRepresentation	= new SimpleDateFormat(
+			"HH:mm");
+
+	private static Gson				gson						= new Gson();
 
 	/**
 	 * Creates a readable name representation of a rule's name
@@ -160,6 +167,77 @@ public class StringHelpers {
 		val date = new Date(timeStamp);
 
 		return longDateFormat.format(date);
+	}
+
+	/**
+	 * Formats given date String to clean date representation, e.g. 26.7. to
+	 * 26.07.2017 in 2017
+	 * 
+	 * @param dateString
+	 * @return
+	 */
+	public static String formatDateString(String dateString) {
+		return internalDateRepresentation
+				.format(createInternalDateCalendarRepresentation(dateString).getTime());
+	}
+
+	/**
+	 * Formats given decimal time String to clean time representation, e.g. 4.3
+	 * to 04:18
+	 * 
+	 * @param timeString
+	 * @return
+	 */
+	public static String formatTimeString(String timeString) {
+		// Create calendar instance
+		val calendar = Calendar.getInstance(); 
+		calendar.setTimeInMillis(InternalDateTime.currentTimeMillis());
+
+		// Convert value
+		val timeValue = Double.parseDouble(timeString);
+
+		val hour = Math.floor(timeValue);
+		calendar.set(Calendar.HOUR_OF_DAY, (int) hour);
+		calendar.set(Calendar.MINUTE,
+				(int) (Math.round((timeValue - hour) * 60))); 
+
+		return internalTimeRepresentation.format(calendar.getTime());
+	}
+
+	/**
+	 * Creates calendar representation of given date string, e.g. 1.4. as Calendar representation of 01.04.2017 in 2017
+	 * 
+	 * @param dateString
+	 * @return
+	 */
+	public static Calendar createInternalDateCalendarRepresentation(
+			String dateString) {
+		// Create instance of "now"
+		val calendarNow = Calendar.getInstance();
+		calendarNow.setTimeInMillis(InternalDateTime.currentTimeMillis());
+
+		// Create empty calendar
+		val calendar = Calendar.getInstance();
+
+		// Prevent problems with daylight saving time
+		calendar.set(Calendar.HOUR_OF_DAY, 12);
+
+		val dateParts = dateString.trim().split("\\.");
+		if (dateParts.length > 2 && dateParts[2].length() > 2) {
+			calendar.set(Integer.parseInt(dateParts[2]),
+					Integer.parseInt(dateParts[1]) - 1,
+					Integer.parseInt(dateParts[0]));
+		} else if (dateParts.length > 2 && dateParts[2].length() == 2) {
+			calendar.set(Integer.parseInt(dateParts[2]) + 2000,
+					Integer.parseInt(dateParts[1]) - 1,
+					Integer.parseInt(dateParts[0]));
+		} else {
+			calendar.set(calendarNow.get(Calendar.YEAR),
+					Integer.parseInt(dateParts[1]) - 1,
+					Integer.parseInt(dateParts[0]));
+		}
+
+		return calendar;
 	}
 
 	/**

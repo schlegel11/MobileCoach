@@ -26,11 +26,11 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Replaces variables in Strings with the according values
@@ -240,14 +240,34 @@ public class VariableStringReplacer {
 								+ ImplementationConstants.VARIABLE_VALUE_MODIFIER_START
 								+ modifier
 								+ ImplementationConstants.VARIABLE_VALUE_MODIFIER_END;
+
 						try {
 							String formattedValue;
-							if (locale == null) {
-								formattedValue = String.format(modifier,
-										Double.parseDouble(value));
+							if (modifier.startsWith("#")) {
+								// Own formatter
+								switch (modifier) {
+									case "#d":
+										formattedValue = StringHelpers
+												.formatDateString(value);
+										break;
+									case "#t":
+										formattedValue = StringHelpers
+												.formatTimeString(value);
+										break;
+									default:
+										formattedValue = modifier;
+										break;
+								}
 							} else {
-								formattedValue = String.format(locale, modifier,
-										Double.parseDouble(value));
+								if (locale == null) {
+									// Regular Java formatter
+									formattedValue = String.format(modifier,
+											Double.parseDouble(value));
+								} else {
+									formattedValue = String.format(locale,
+											modifier,
+											Double.parseDouble(value));
+								}
 							}
 							stringWithVariables = stringWithVariables
 									.replace(formattedVariable, formattedValue);
