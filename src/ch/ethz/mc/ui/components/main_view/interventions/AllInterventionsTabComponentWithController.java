@@ -43,6 +43,7 @@ import ch.ethz.mc.model.ui.UIModule;
 import ch.ethz.mc.modules.AbstractModule;
 import ch.ethz.mc.tools.OnDemandFileDownloader;
 import ch.ethz.mc.tools.OnDemandFileDownloader.OnDemandStreamResource;
+import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.ui.components.basics.FileUploadComponentWithController;
 import ch.ethz.mc.ui.components.basics.FileUploadComponentWithController.UploadListener;
 import ch.ethz.mc.ui.components.basics.ShortStringEditComponent;
@@ -246,8 +247,9 @@ public class AllInterventionsTabComponentWithController
 					@Override
 					public String getFilename() {
 						return "Intervention_"
-								+ selectedUIIntervention.getInterventionName()
-										.replaceAll("[^A-Za-z0-9_. ]+", "_")
+								+ StringHelpers.cleanFilenameString(
+										selectedUIIntervention
+												.getInterventionName())
 								+ Constants.getFileExtension();
 					}
 				});
@@ -282,8 +284,9 @@ public class AllInterventionsTabComponentWithController
 					@Override
 					public String getFilename() {
 						return "Intervention_"
-								+ selectedUIIntervention.getInterventionName()
-										.replaceAll("[^A-Za-z0-9_. ]+", "_")
+								+ StringHelpers.cleanFilenameString(
+										selectedUIIntervention
+												.getInterventionName())
 								+ ".html";
 					}
 				});

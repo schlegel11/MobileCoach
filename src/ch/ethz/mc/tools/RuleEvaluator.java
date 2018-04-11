@@ -209,6 +209,10 @@ public class RuleEvaluator {
 				}
 			}
 
+			// Objects
+			final Calendar calendarDiff1;
+			final Calendar calendarDiff2;
+
 			// Evaluate equation sign
 			ruleEvaluationResult.setRuleMatchesEquationSign(false);
 			switch (rule.getRuleEquationSign()) {
@@ -438,41 +442,26 @@ public class RuleEvaluator {
 
 					break;
 				case DATE_DIFFERENCE_VALUE_EQUALS:
-					val calendarDiff = Calendar.getInstance();
+					calendarDiff1 = StringHelpers
+							.createInternalDateCalendarRepresentation(
+									ruleEvaluationResult.getTextRuleValue());
 
-					// Prevent problems with daylight saving time
-					calendarDiff.set(Calendar.HOUR_OF_DAY, 12);
-
-					val dateParts = ruleEvaluationResult.getTextRuleValue()
-							.trim().split("\\.");
-					val calendar2 = Calendar.getInstance();
-					calendar2.setTimeInMillis(
+					calendarDiff2 = Calendar.getInstance();
+					calendarDiff2.setTimeInMillis(
 							InternalDateTime.currentTimeMillis());
-					if (dateParts.length > 2 && dateParts[2].length() > 2) {
-						calendarDiff.set(Integer.parseInt(dateParts[2]),
-								Integer.parseInt(dateParts[1]) - 1,
-								Integer.parseInt(dateParts[0]));
-					} else if (dateParts.length > 2
-							&& dateParts[2].length() == 2) {
-						calendarDiff.set(Integer.parseInt(dateParts[2]) + 2000,
-								Integer.parseInt(dateParts[1]) - 1,
-								Integer.parseInt(dateParts[0]));
-					} else {
-						calendarDiff.set(calendar2.get(Calendar.YEAR),
-								Integer.parseInt(dateParts[1]) - 1,
-								Integer.parseInt(dateParts[0]));
-					}
-					calendar2.set(Calendar.HOUR_OF_DAY,
-							calendarDiff.get(Calendar.HOUR_OF_DAY));
-					calendar2.set(Calendar.MINUTE,
-							calendarDiff.get(Calendar.MINUTE));
-					calendar2.set(Calendar.SECOND,
-							calendarDiff.get(Calendar.SECOND));
-					calendar2.set(Calendar.MILLISECOND,
-							calendarDiff.get(Calendar.MILLISECOND));
+
+					calendarDiff2.set(Calendar.HOUR_OF_DAY,
+							calendarDiff1.get(Calendar.HOUR_OF_DAY));
+					calendarDiff2.set(Calendar.MINUTE,
+							calendarDiff1.get(Calendar.MINUTE));
+					calendarDiff2.set(Calendar.SECOND,
+							calendarDiff1.get(Calendar.SECOND));
+					calendarDiff2.set(Calendar.MILLISECOND,
+							calendarDiff1.get(Calendar.MILLISECOND));
+					calendarDiff2.setTimeZone(calendarDiff1.getTimeZone());
 
 					final int equalDiff = calculateDaysBetweenDates(
-							calendarDiff, calendar2);
+							calendarDiff1, calendarDiff2);
 					log.debug("Difference is {}", equalDiff);
 
 					if (equalDiff == Integer.parseInt(ruleEvaluationResult
@@ -482,49 +471,14 @@ public class RuleEvaluator {
 					break;
 				case CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_TRUE_IF_ZERO:
 				case CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_ALWAYS_TRUE:
-					val calendarNow = Calendar.getInstance();
-					val calendarDiff1 = Calendar.getInstance();
-					val calendarDiff2 = Calendar.getInstance();
+					calendarDiff1 = StringHelpers
+							.createInternalDateCalendarRepresentation(
+									ruleEvaluationResult.getTextRuleValue());
+					calendarDiff2 = StringHelpers
+							.createInternalDateCalendarRepresentation(
+									ruleEvaluationResult
+											.getTextRuleComparisonTermValue());
 
-					// Prevent problems with daylight saving time
-					calendarDiff1.set(Calendar.HOUR_OF_DAY, 12);
-
-					val dateParts1 = ruleEvaluationResult.getTextRuleValue()
-							.trim().split("\\.");
-					val dateParts2 = ruleEvaluationResult
-							.getTextRuleComparisonTermValue().trim()
-							.split("\\.");
-
-					if (dateParts1.length > 2 && dateParts1[2].length() > 2) {
-						calendarDiff1.set(Integer.parseInt(dateParts1[2]),
-								Integer.parseInt(dateParts1[1]) - 1,
-								Integer.parseInt(dateParts1[0]));
-					} else if (dateParts1.length > 2
-							&& dateParts1[2].length() == 2) {
-						calendarDiff1.set(
-								Integer.parseInt(dateParts1[2]) + 2000,
-								Integer.parseInt(dateParts1[1]) - 1,
-								Integer.parseInt(dateParts1[0]));
-					} else {
-						calendarDiff1.set(calendarNow.get(Calendar.YEAR),
-								Integer.parseInt(dateParts1[1]) - 1,
-								Integer.parseInt(dateParts1[0]));
-					}
-					if (dateParts2.length > 2 && dateParts2[2].length() > 2) {
-						calendarDiff2.set(Integer.parseInt(dateParts2[2]),
-								Integer.parseInt(dateParts2[1]) - 1,
-								Integer.parseInt(dateParts2[0]));
-					} else if (dateParts2.length > 2
-							&& dateParts2[2].length() == 2) {
-						calendarDiff2.set(
-								Integer.parseInt(dateParts2[2]) + 2000,
-								Integer.parseInt(dateParts2[1]) - 1,
-								Integer.parseInt(dateParts2[0]));
-					} else {
-						calendarDiff2.set(calendarNow.get(Calendar.YEAR),
-								Integer.parseInt(dateParts2[1]) - 1,
-								Integer.parseInt(dateParts2[0]));
-					}
 					calendarDiff2.set(Calendar.HOUR_OF_DAY,
 							calendarDiff1.get(Calendar.HOUR_OF_DAY));
 					calendarDiff2.set(Calendar.MINUTE,

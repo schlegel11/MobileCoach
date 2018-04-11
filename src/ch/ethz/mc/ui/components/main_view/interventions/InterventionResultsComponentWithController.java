@@ -52,6 +52,7 @@ import ch.ethz.mc.model.ui.results.UIVariableWithParticipantForResults;
 import ch.ethz.mc.tools.CSVExporter;
 import ch.ethz.mc.tools.OnDemandFileDownloader;
 import ch.ethz.mc.tools.OnDemandFileDownloader.OnDemandStreamResource;
+import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.tools.StringValidator;
 import ch.ethz.mc.ui.components.basics.PlaceholderStringEditWithMessageGroupSelectionComponent;
 import ch.ethz.mc.ui.components.basics.ShortStringEditComponent;
@@ -227,8 +228,8 @@ public class InterventionResultsComponentWithController
 					@Override
 					public String getFilename() {
 						return "Intervention_"
-								+ intervention.getName()
-										.replaceAll("[^A-Za-z0-9_. ]+", "_")
+								+ StringHelpers.cleanFilenameString(
+										intervention.getName())
 								+ "_Participant_All_Data.csv";
 					}
 				});
@@ -264,8 +265,8 @@ public class InterventionResultsComponentWithController
 					@Override
 					public String getFilename() {
 						return "Intervention_"
-								+ intervention.getName()
-										.replaceAll("[^A-Za-z0-9_. ]+", "_")
+								+ StringHelpers.cleanFilenameString(
+										intervention.getName())
 								+ "_Participant_Variable_Results.csv";
 					}
 				});
@@ -303,8 +304,8 @@ public class InterventionResultsComponentWithController
 					@Override
 					public String getFilename() {
 						return "Intervention_"
-								+ intervention.getName()
-										.replaceAll("[^A-Za-z0-9_. ]+", "_")
+								+ StringHelpers.cleanFilenameString(
+										intervention.getName())
 								+ "_Participant_Message_Dialog_Results.csv";
 					}
 				});

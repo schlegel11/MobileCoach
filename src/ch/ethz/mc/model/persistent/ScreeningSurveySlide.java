@@ -23,14 +23,9 @@ package ch.ethz.mc.model.persistent;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.Setter;
-import lombok.val;
-
 import org.bson.types.ObjectId;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
@@ -43,8 +38,12 @@ import ch.ethz.mc.model.persistent.types.ScreeningSurveySlideQuestionTypes;
 import ch.ethz.mc.model.ui.UIModelObject;
 import ch.ethz.mc.model.ui.UIScreeningSurveySlide;
 import ch.ethz.mc.tools.StringHelpers;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.val;
 
 /**
  * {@link ModelObject} to represent an {@link ScreeningSurveySlide}
@@ -253,6 +252,14 @@ public class ScreeningSurveySlide extends ModelObject {
 	@Setter
 	@NonNull
 	private LString								validationErrorMessage;
+
+	/**
+	 * <strong>The unique identifier used for i18n
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private String								i18nIdentifier;
 
 	/*
 	 * (non-Javadoc)

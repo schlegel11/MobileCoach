@@ -31,8 +31,9 @@ import org.apache.commons.csv.CSVFormat;
 import com.googlecode.jcsv.writer.CSVWriter;
 import com.googlecode.jcsv.writer.internal.CSVWriterBuilder;
 
-import ch.ethz.mc.model.memory.I18nStringsObject;
+import ch.ethz.mc.model.memory.MessagesDialogsI18nStringsObject;
 import ch.ethz.mc.model.memory.ParticipantVariablesDataTable;
+import ch.ethz.mc.model.memory.SurveysFeedbacksI18nStringsObject;
 import ch.ethz.mc.model.persistent.subelements.LString;
 import ch.ethz.mc.model.ui.UIModelObject;
 import ch.ethz.mc.model.ui.results.UIDialogMessageWithParticipantForResults;
@@ -46,6 +47,8 @@ import lombok.val;
  */
 public class CSVExporter {
 	/**
+	 * Converts participants variables data table to CSV
+	 * 
 	 * @param dataTable
 	 * @return
 	 * @throws IOException
@@ -71,6 +74,8 @@ public class CSVExporter {
 	}
 
 	/**
+	 * Converts participants variables to CSV
+	 * 
 	 * @param items
 	 * @return
 	 * @throws IOException
@@ -97,6 +102,8 @@ public class CSVExporter {
 	}
 
 	/**
+	 * Converts dialogs messages to CSV
+	 * 
 	 * @param items
 	 * @return
 	 * @throws IOException
@@ -122,24 +129,54 @@ public class CSVExporter {
 	}
 
 	/**
-	 * Exports {@link LString}s with keys for i18n
+	 * Exports {@link LString}s with keys for i18n of messages and dialogs
 	 * 
 	 * @param items
 	 * @return
 	 * @throws IOException
 	 */
-	public static InputStream convertI18nStringsObjectsToCSV(
-			final List<I18nStringsObject> items) throws IOException {
+	public static InputStream convertMessagesDialogsI18nStringsObjectsToCSV(
+			final List<MessagesDialogsI18nStringsObject> items)
+			throws IOException {
 		final StringWriter stringWriter = new StringWriter();
 
 		stringWriter.append('\ufeff'); // Adds UTF-8 BOM
-		val csvPrinter = CSVFormat.EXCEL.withDelimiter(';')
-				.withHeader(CSVI18nStringsObjectEntryConverter.getHeaders())
+		val csvPrinter = CSVFormat.EXCEL.withDelimiter(';').withHeader(
+				CSVI18nStringsObjectEntryConverter.getMessagesDialogsHeaders())
 				.print(stringWriter);
 
 		for (val item : items) {
-			csvPrinter.printRecord(
-					CSVI18nStringsObjectEntryConverter.convertEntry(item));
+			csvPrinter.printRecord(CSVI18nStringsObjectEntryConverter
+					.convertMessagesDialogsEntry(item));
+		}
+
+		csvPrinter.flush();
+		csvPrinter.close();
+
+		return new ByteArrayInputStream(
+				stringWriter.toString().getBytes("UTF-8"));
+	}
+
+	/**
+	 * Exports {@link LString}s with keys for i18n of surveys and feedbacks
+	 * 
+	 * @param items
+	 * @return
+	 * @throws IOException
+	 */
+	public static InputStream convertSurveysFeedbacksI18nStringsObjectsToCSV(
+			final List<SurveysFeedbacksI18nStringsObject> items)
+			throws IOException {
+		final StringWriter stringWriter = new StringWriter();
+
+		stringWriter.append('\ufeff'); // Adds UTF-8 BOM
+		val csvPrinter = CSVFormat.EXCEL.withDelimiter(';').withHeader(
+				CSVI18nStringsObjectEntryConverter.getSurvevsFeedbacksHeaders())
+				.print(stringWriter);
+
+		for (val item : items) {
+			csvPrinter.printRecord(CSVI18nStringsObjectEntryConverter
+					.convertSurveysFeedbacksEntry(item));
 		}
 
 		csvPrinter.flush();

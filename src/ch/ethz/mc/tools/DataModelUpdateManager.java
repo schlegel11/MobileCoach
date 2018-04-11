@@ -120,6 +120,9 @@ public class DataModelUpdateManager {
 				case 33:
 					updateToVersion33();
 					break;
+				case 35:
+					updateToVersion35();
+					break;
 			}
 
 			log.info("Update to version {} done", updateToVersionInThisStep);
@@ -553,6 +556,59 @@ public class DataModelUpdateManager {
 					.with(Queries.UPDATE_VERSION_33__MICRO_DIALOG_MESSAGE__CHANGE_1,
 							GlobalUniqueIdGenerator
 									.createSimpleGlobalUniqueId());
+		}
+	}
+
+	/**
+	 * Changes for version 35:
+	 */
+	private static void updateToVersion35() {
+		val mongoDriverScreeningSurveyCollection = jongo.getDatabase()
+				.getCollection("ScreeningSurvey");
+		val screeningSurveyCollection = jongo.getCollection("ScreeningSurvey");
+
+		for (final DBObject document : mongoDriverScreeningSurveyCollection
+				.find().snapshot()) {
+			screeningSurveyCollection.update((ObjectId) document.get("_id"))
+					.with(Queries.UPDATE_VERSION_35__SCREENING_SURVEY__CHANGE_1,
+							GlobalUniqueIdGenerator
+									.createSimpleGlobalUniqueId());
+		}
+
+		val mongoDriverScreeningSurveySlideCollection = jongo.getDatabase()
+				.getCollection("ScreeningSurveySlide");
+		val screeningSurveySlideCollection = jongo
+				.getCollection("ScreeningSurveySlide");
+
+		for (final DBObject document : mongoDriverScreeningSurveySlideCollection
+				.find().snapshot()) {
+			screeningSurveySlideCollection
+					.update((ObjectId) document.get("_id"))
+					.with(Queries.UPDATE_VERSION_35__SCREENING_SURVEY_SLIDE__CHANGE_1,
+							GlobalUniqueIdGenerator
+									.createSimpleGlobalUniqueId());
+		}
+
+		val mongoDriverFeedbackCollection = jongo.getDatabase()
+				.getCollection("Feedback");
+		val feedbackCollection = jongo.getCollection("Feedback");
+
+		for (final DBObject document : mongoDriverFeedbackCollection.find()
+				.snapshot()) {
+			feedbackCollection.update((ObjectId) document.get("_id")).with(
+					Queries.UPDATE_VERSION_35__FEEDBACK__CHANGE_1,
+					GlobalUniqueIdGenerator.createSimpleGlobalUniqueId());
+		}
+
+		val mongoDriverFeedbackSlideCollection = jongo.getDatabase()
+				.getCollection("FeedbackSlide");
+		val feedbackSlideCollection = jongo.getCollection("FeedbackSlide");
+
+		for (final DBObject document : mongoDriverFeedbackSlideCollection.find()
+				.snapshot()) {
+			feedbackSlideCollection.update((ObjectId) document.get("_id")).with(
+					Queries.UPDATE_VERSION_35__FEEDBACK_SLIDE__CHANGE_1,
+					GlobalUniqueIdGenerator.createSimpleGlobalUniqueId());
 		}
 	}
 }

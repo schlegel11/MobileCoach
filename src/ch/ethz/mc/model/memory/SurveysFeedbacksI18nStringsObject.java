@@ -7,13 +7,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Wrapper for LStrings in combination with keys for i18n export/import
+ * Wrapper for LStrings in combination with keys for i18n export/import of
+ * surveys and feedback
  * 
  * @author Andreas Filler
  */
 @NoArgsConstructor
 @AllArgsConstructor
-public class I18nStringsObject {
+public class SurveysFeedbacksI18nStringsObject {
 	@Getter
 	@Setter
 	private String	id;
@@ -24,9 +25,13 @@ public class I18nStringsObject {
 
 	@Getter
 	@Setter
+	private LString	title;
+
+	@Getter
+	@Setter
 	private LString	text;
 
 	@Getter
 	@Setter
-	private LString	answerOptions;
+	private LString	errorMessage;
 }

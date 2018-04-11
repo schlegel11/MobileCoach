@@ -261,4 +261,8 @@ public class Queries {
 	public static final String	UPDATE_VERSION_32__MONITORING_RULE__CHANGE_1																																									= "{$set:{'variableForDecimalHourToSendMessageOrActivateMicroDialog':null}}";
 	public static final String	UPDATE_VERSION_33__MONITORING_MESSAGE__CHANGE_1																																									= "{$set:{'i18nIdentifier':#}}";
 	public static final String	UPDATE_VERSION_33__MICRO_DIALOG_MESSAGE__CHANGE_1																																								= "{$set:{'i18nIdentifier':#}}";
+	public static final String	UPDATE_VERSION_35__SCREENING_SURVEY__CHANGE_1																																									= "{$set:{'i18nIdentifier':#}}";
+	public static final String	UPDATE_VERSION_35__SCREENING_SURVEY_SLIDE__CHANGE_1																																								= "{$set:{'i18nIdentifier':#}}";
+	public static final String	UPDATE_VERSION_35__FEEDBACK__CHANGE_1																																											= "{$set:{'i18nIdentifier':#}}";
+	public static final String	UPDATE_VERSION_35__FEEDBACK_SLIDE__CHANGE_1																																										= "{$set:{'i18nIdentifier':#}}";
 }

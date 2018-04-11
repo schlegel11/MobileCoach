@@ -26,11 +26,14 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Collection;
 
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-
 import org.bson.types.ObjectId;
+
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.BeanContainer;
+import com.vaadin.data.util.BeanItem;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
@@ -41,16 +44,13 @@ import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.ui.UIScreeningSurvey;
 import ch.ethz.mc.tools.OnDemandFileDownloader;
 import ch.ethz.mc.tools.OnDemandFileDownloader.OnDemandStreamResource;
+import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.ui.components.basics.FileUploadComponentWithController;
-import ch.ethz.mc.ui.components.basics.LocalizedShortStringEditComponent;
 import ch.ethz.mc.ui.components.basics.FileUploadComponentWithController.UploadListener;
-
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.BeanContainer;
-import com.vaadin.data.util.BeanItem;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
+import ch.ethz.mc.ui.components.basics.LocalizedShortStringEditComponent;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Extends the intervention screening surveys tab component with a controller
@@ -182,12 +182,12 @@ public class InterventionScreeningSurveysTabComponentWithController
 					@Override
 					public String getFilename() {
 						return "Intervention_"
-								+ intervention.getName()
-										.replaceAll("[^A-Za-z0-9_. ]+", "_")
+								+ StringHelpers.cleanFilenameString(
+										intervention.getName())
 								+ "_Survey_"
-								+ selectedUIScreeningSurvey
-										.getScreeningSurveyName()
-										.replaceAll("[^A-Za-z0-9_. ]+", "_")
+								+ StringHelpers.cleanFilenameString(
+										selectedUIScreeningSurvey
+												.getScreeningSurveyName())
 								+ Constants.getFileExtension();
 					}
 				});
