@@ -189,8 +189,13 @@ public class RichConversationService {
 					// participants... re-set it
 					engine = chatEngines.get(participant.getId());
 					
+					ConversationRepository repository = conversationManagementService.getRepository(interventionId);
+					
+					// re-initialize translator
+					Translator translator = prepareTranslator(participant.getLanguage(), repository, engine.getVariableStore());
+					
 					// get the newest conversation repository and start
-					engine.startConversation(conversation, conversationManagementService.getRepository(interventionId));
+					engine.startConversation(conversation, repository, translator);
 				} else {
 					engine = prepareChatEngine(participant, chatEngineStateStore, interventionId);
 					if (start){

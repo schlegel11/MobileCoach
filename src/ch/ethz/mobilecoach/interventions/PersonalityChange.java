@@ -14,6 +14,8 @@ import org.bson.types.ObjectId;
 import ch.ethz.mc.model.persistent.ParticipantVariableWithValue;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.VariablesManagerService;
+import ch.ethz.mc.services.internal.VariablesManagerService.InvalidVariableNameException;
+import ch.ethz.mc.services.internal.VariablesManagerService.WriteProtectedVariableException;
 import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mobilecoach.interventions.util.TimedValue;
 import lombok.val;
@@ -58,7 +60,8 @@ public class PersonalityChange extends AbstractIntervention {
 			traitValues.add(new TimedValue(v.getValue(), v.getTimestamp()));
 		}
 		result.put("trait_values", traitValues); // for debugging
-		result.put("trait_light", calculateTrafficLight(traitValues));
+		String trafficLightValue = calculateTrafficLight(traitValues);
+		result.put("trait_light", trafficLightValue);
 		
 		// opportunities: past 15 days
 		val opportunityValues = new ArrayList<TimedValue>();
@@ -72,7 +75,14 @@ public class PersonalityChange extends AbstractIntervention {
 		for (val v: getValuesSince(now - 15 * DAY, implementedVariable, participantId)){
 			implementedValues.add(new TimedValue(v.getValue(), v.getTimestamp()));
 		}
-		result.put("implemented", implementedValues);		
+		result.put("implemented", implementedValues);
+		
+		// log traffic light status to variable
+		try {
+			vars.writeVariableValueOfParticipant(participantId, "$dashboard_trafficlight", trafficLightValue);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 		return result;
 	}
