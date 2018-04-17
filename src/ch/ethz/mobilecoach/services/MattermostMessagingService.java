@@ -311,6 +311,10 @@ public class MattermostMessagingService implements MessagingService {
 		if (message == null || "".equals(message)){
 			message = "New message"; // TODO: translate
 		}
+		
+		if (Constants.getPushMessage() != null){
+			message = Constants.getPushMessage();
+		}
 
 		JSONObject data = new JSONObject();
 		data.put("channel_id", channelId);

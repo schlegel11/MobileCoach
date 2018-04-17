@@ -215,6 +215,9 @@ public class Constants {
 	@Getter
 	private static String	oneSignalAppId						= "325068aa-fc63-411c-a07e-b3e73c455e8e";
 	
+	@Getter
+	private static String	pushMessage							= "";
+	
 	
 	/**
 	 * Mattermost configuration
