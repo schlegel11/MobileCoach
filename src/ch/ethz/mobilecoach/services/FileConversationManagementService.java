@@ -159,9 +159,8 @@ public class FileConversationManagementService implements
 	
 	
 	public void loadResourceFile(File file, ConversationRepository repository, ReferenceChecker referenceChecker) throws Exception {
-		InputStream stream = new FileInputStream(file);
 		DomParser parser = new DomParser(repository, null, referenceChecker);
-		parser.parse(stream);
+		parser.parseWithLineNumbers(file);
 	}
 
 	@Override
