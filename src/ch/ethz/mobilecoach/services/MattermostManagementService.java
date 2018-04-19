@@ -27,6 +27,7 @@ import ch.ethz.mobilecoach.model.persistent.subelements.MattermostChannel;
 import ch.ethz.mobilecoach.model.persistent.subelements.MattermostUser;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.val;
 import lombok.extern.log4j.Log4j;
 
 /**
@@ -402,8 +403,15 @@ public class MattermostManagementService {
 
 		return config;
 	}
-
-
+	
+	public long getParticipantCreationTimestamp(ObjectId participantId){
+		val participant = databaseManagerService.getModelObjectById(Participant.class, participantId);
+		if (participant != null) {
+			return participant.getCreatedTimestamp();
+		} else {
+			return 0L;
+		}
+	}
 
 	/*
 	 * 		Authentication

@@ -232,14 +232,16 @@ public class MattermostMessagingService implements MessagingService {
 		
         // send push notifications only after 1 minute after the last message was received, unless the message is push-only
 		if (pushOnly || post.getHidden() != true && wasLastMessageReceivedLongerAgoThan(channelId, 60 * 1000)){
-			
-			if(null == managementService.findOneSignalObject(recipient)){
-				log.info("Could not send push since OnSignal config missing: " + recipient);
-			} else {
-				try {
-					sendPushNotification(recipient, post, channelId, userId);
-				} catch (Exception e){
-					log.warn("Error sending push notification: " + StringHelpers.getStackTraceAsLine(e), e);
+			long participantCreationTimestamp = managementService.getParticipantCreationTimestamp(recipient);
+			if (System.currentTimeMillis() > participantCreationTimestamp + 30 * 1000){ // only send push after 30 seconds after creation of participant
+				if(null == managementService.findOneSignalObject(recipient)){
+					log.info("Could not send push since OnSignal config missing: " + recipient);
+				} else {
+					try {
+						sendPushNotification(recipient, post, channelId, userId);
+					} catch (Exception e){
+						log.warn("Error sending push notification: " + StringHelpers.getStackTraceAsLine(e), e);
+					}
 				}
 			}
 		}
