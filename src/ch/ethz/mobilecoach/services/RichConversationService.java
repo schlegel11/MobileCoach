@@ -584,7 +584,11 @@ public class RichConversationService {
 
 		@Override
 		public void cancelDelay() {
-			timer.cancelAll();
+			try {
+				timer.cancelAll();
+			} catch (Exception e){
+				log.error("Error cancelling timer: " + e.getMessage());
+			}
 		}
 
 		/**
