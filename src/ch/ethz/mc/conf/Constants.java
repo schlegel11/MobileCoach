@@ -218,6 +218,9 @@ public class Constants {
 	@Getter
 	private static String	pushMessage							= "";
 	
+	@Getter
+	private static String	teamPushMessage						= "";
+	
 	
 	/**
 	 * Mattermost configuration

@@ -56,6 +56,7 @@ import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
 import ch.ethz.mobilecoach.model.persistent.OneSignalUserConfiguration;
 import ch.ethz.mobilecoach.model.persistent.UserLastMessage;
 import ch.ethz.mobilecoach.model.persistent.subelements.MattermostChannel;
+import ch.ethz.mobilecoach.services.MattermostManagementService.NewParticipantListener;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -101,6 +102,14 @@ public class MattermostMessagingService implements MessagingService {
 		this.managementService = managementService;
 		this.databaseManagerService = databaseManagerService;
 		this.variablesManagerService = variablesManagerService;
+		
+		this.managementService.setNewParticipantListener(new NewParticipantListener() {
+			
+			@Override
+			public void onNewParticipant(MattermostUserConfiguration config) {
+				observeTeamChannel(config);
+			}
+		});
 	}	
 	
 	public static MattermostMessagingService start(MattermostManagementService managementService, 
@@ -117,35 +126,50 @@ public class MattermostMessagingService implements MessagingService {
 		resync(); // TODO: remove this. instead, getUnreceivedMessages() should be called with the channelIds of ongoing conversations
 	}
 	
+	/*
+	 * 		Observation of team channels for sending push notifications
+	 */
+	
+	LinkedHashMap<String, MessageListener> teamChannelListeners = new LinkedHashMap<>();
+	LinkedHashMap<String, ObjectId> teamChannelToParticipant = new LinkedHashMap<>();
+	
 	public void observeTeamChannels(){
 		for (MattermostUserConfiguration config: managementService.getAllUserConfigurations()){
-			if (config.getChannels() != null){
-				for (MattermostChannel c: config.getChannels()){
-					if ("HUMAN".equals(c.getType())){
-						observeTeamChannel(c.getId());
-					}
+			observeTeamChannel(config);
+		}
+	}
+	
+	public void observeTeamChannel(MattermostUserConfiguration config){
+		if (config.getChannels() != null){
+			for (MattermostChannel c: config.getChannels()){
+				if ("HUMAN".equals(c.getType())){
+					observeTeamChannel(c.getId(), config.getParticipantId());
 				}
 			}
 		}
 	}
 	
-	public void observeTeamChannel(String channelId){
-		for (MattermostManagementService.TeamConfiguration tc: managementService.getTeamConfigurations()){
-			if (tc.managerUserId != null){
+	public void observeTeamChannel(String channelId, ObjectId participantId){
 				
-				
-				
-				
-				
-				
+		teamChannelToParticipant.put(channelId, participantId);
+		teamChannelListeners.put(channelId, new MessageListener(){
+
+			@Override
+			public void receivePost(Post post) {
+				if(null == managementService.findOneSignalObject(participantId)){
+					log.info("Could not send push since OnSignal config missing: " + participantId);
+				} else {
+					try {
+						sendPushNotification(participantId, post, channelId, "team", true);
+					} catch (Exception e){
+						log.warn("Error sending push notification: " + StringHelpers.getStackTraceAsLine(e), e);
+					}
+				}
 			}
 			
+				
+		});
 			
-		}
-		
-		
-		
-		
 	}
 	
 	
@@ -231,6 +255,8 @@ public class MattermostMessagingService implements MessagingService {
         	return;
         }
         
+        managementService.fixAnyProblemsWithUserConfiguration(config);
+        
         senderIdToRecipient.put(userId, recipient);
         
         if (!pushOnly){
@@ -272,7 +298,7 @@ public class MattermostMessagingService implements MessagingService {
 					log.info("Could not send push since OnSignal config missing: " + recipient);
 				} else {
 					try {
-						sendPushNotification(recipient, post, channelId, userId);
+						sendPushNotification(recipient, post, channelId, userId, false);
 					} catch (Exception e){
 						log.warn("Error sending push notification: " + StringHelpers.getStackTraceAsLine(e), e);
 					}
@@ -314,7 +340,7 @@ public class MattermostMessagingService implements MessagingService {
 
 	
 	
-	public void sendPushNotification(ObjectId recipient, Post post, String channelId, String userId) {
+	public void sendPushNotification(ObjectId recipient, Post post, String channelId, String collapseId, boolean isTeamChannel) {
 
 		OneSignalUserConfiguration oneSignalUserConfiguration = managementService.findOneSignalObject(recipient);
 		
@@ -348,7 +374,11 @@ public class MattermostMessagingService implements MessagingService {
 			message = "New message"; // TODO: translate
 		}
 		
-		if (Constants.getPushMessage() != null){
+		if (isTeamChannel){
+			if (!"".equals(Constants.getTeamPushMessage())){
+				message = Constants.getTeamPushMessage();
+			}
+		} else if (!"".equals(Constants.getPushMessage())){
 			message = Constants.getPushMessage();
 		}
 
@@ -363,7 +393,7 @@ public class MattermostMessagingService implements MessagingService {
 				.put("data", data)
 				.put("ios_badgeType", "SetTo")
 				.put("ios_badgeCount", 1)
-				.put("collapse_id", userId);
+				.put("collapse_id", collapseId);
 
 		String result = new OneSignalTask<String>(url, json2, headers){
 			@Override
@@ -429,8 +459,11 @@ public class MattermostMessagingService implements MessagingService {
 	}
 	
 
-	private void receiveMessage(String senderId, Post post){
-		if (senderIdToRecipient.containsKey(senderId)){
+	private void receiveMessage(String senderId, String channelId, Post post){
+		boolean isTeamChannel = teamChannelToParticipant.containsKey(channelId);
+		
+		// messages from the user
+		if (!isTeamChannel && senderIdToRecipient.containsKey(senderId)){
 			ObjectId recipient = senderIdToRecipient.get(senderId);
 			if (listenerForSender.containsKey(recipient)){
 				synchronized (recipient){
@@ -442,6 +475,26 @@ public class MattermostMessagingService implements MessagingService {
 						// mark this message as processed
 						this.saveUserLastMessage(recipient, post.getChannelId(), post.getId(), post.getCreateAt());
 						log.debug("Marked message as processed: '" + post.getMessage() + "' "+ post.getId());
+					}
+				}
+			}
+		}
+		
+		// messages from the team
+		if (teamChannelListeners.containsKey(channelId) && !senderIdToRecipient.containsKey(senderId) && isTeamChannel){
+			// if the message is from a team channel but not from the participant
+			
+			ObjectId recipient = teamChannelToParticipant.get(channelId);
+			if (listenerForSender.containsKey(recipient)){
+				synchronized (recipient){ // sync by participant
+					if (this.wasMessageNotProcessedYet(recipient, post.getChannelId(), post.getId(), post.getCreateAt())){
+						log.debug("Team message accepted for processing: '" + post.getMessage() + "' "+ post.getId() + " to " + recipient + " at " + post.getCreateAt() + " on channel " + post.getChannelId());
+					
+						teamChannelListeners.get(channelId).receivePost(post);
+						
+						// mark this message as processed
+						this.saveUserLastMessage(recipient, post.getChannelId(), post.getId(), post.getCreateAt());
+						log.debug("Team message marked as processed: '" + post.getMessage() + "' "+ post.getId());
 					}
 				}
 			}
@@ -523,7 +576,7 @@ public class MattermostMessagingService implements MessagingService {
 	                        		if (post.optString("type").equals("")){ // for normal posts, type should be empty
 		    							String userId = post.getString("user_id");
 		    							Post postObject = MattermostMessagingService.JSONtoPost(post);
-		    							receiveMessage(userId, postObject);
+		    							receiveMessage(userId, channel.channelId, postObject);
 	                        		}
 	                        	}
                         	} catch (Exception e) {
@@ -677,8 +730,8 @@ public class MattermostMessagingService implements MessagingService {
 		 * @param senderId
 		 * @param post
 		 */
-		private void receiveMessageAtEndpoint(String senderId, Post post){
-			receiveMessage(senderId, post);
+		private void receiveMessageAtEndpoint(String senderId, String channelId, Post post){
+			receiveMessage(senderId, channelId, post);
 		}
 		
 		public void test_close(){
@@ -742,7 +795,8 @@ public class MattermostMessagingService implements MessagingService {
 							Post postObject = MattermostMessagingService.JSONtoPost(post);
 							
 							String userId = post.getString("user_id");
-							receiveMessageAtEndpoint(userId, postObject);	
+							String channelId = post.getString("channel_id");
+							receiveMessageAtEndpoint(userId, channelId, postObject);	
 						
 						} catch (Exception e){
 							log.error(StringHelpers.getStackTraceAsLine(e), e);
@@ -770,14 +824,20 @@ public class MattermostMessagingService implements MessagingService {
 	}
 	
 	private boolean wasMessageNotProcessedYet(ObjectId participantId, String channelId, String lastMessageId, long timestamp){
-		UserLastMessage record = this.databaseManagerService.findOneModelObject(UserLastMessage.class, "{participantId:#, channelId:#}", participantId, channelId);
+		if (timestamp > 1524325031671L){ // don't send push for old messages. TODO: update before deployment
+			
+			UserLastMessage record = this.databaseManagerService.findOneModelObject(UserLastMessage.class, "{participantId:#, channelId:#}", participantId, channelId);
 		
-		if (record == null){
-			return true;
+			if (record == null){
+				return true;
+			}
+			
+			return record.getLastMessageTimestamp() < timestamp || 
+					(record.getLastMessageTimestamp() == timestamp && !record.getLastMessageId().equals(lastMessageId));
+			
+		} else {
+			return false; // consider it already processed
 		}
-		
-		return record.getLastMessageTimestamp() < timestamp || 
-				(record.getLastMessageTimestamp() == timestamp && !record.getLastMessageId().equals(lastMessageId));
 	}
 	
 	private boolean mayChannelHaveNewMessages(String channelId, long lastUpdateAt){
