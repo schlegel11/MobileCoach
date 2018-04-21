@@ -61,7 +61,7 @@ public class MonitoringRule extends AbstractMonitoringRule {
 			final int order, final String storeValueToVariableWithName,
 			final boolean sendMessageIfTrue,
 			final ObjectId relatedMonitoringMessageGroup,
-			final ObjectId intervention, final int hourToSendMessage,
+			final ObjectId intervention, final double hourToSendMessage,
 			final int hoursUntilMessageIsHandledAsUnanswered,
 			final boolean stopInterventionWhenTrue) {
 		super(ruleWithPlaceholders, ruleEquationSign,
@@ -89,7 +89,7 @@ public class MonitoringRule extends AbstractMonitoringRule {
 	 */
 	@Getter
 	@Setter
-	private int			hourToSendMessage;
+	private double		hourToSendMessage;
 
 	/**
 	 * <strong>OPTIONAL if sendMessageIfTrue is false:</strong> The hours a

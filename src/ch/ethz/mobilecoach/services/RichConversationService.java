@@ -8,13 +8,17 @@ import java.time.LocalTime;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 
 import org.bson.types.ObjectId;
 import org.mockito.exceptions.verification.NeverWantedButInvoked;
 
+import ch.ethz.mc.MC;
+import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.Participant;
+import ch.ethz.mc.services.SurveyExecutionManagerService;
 import ch.ethz.mc.services.internal.ChatEngineStateStore;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.InDataBaseVariableStore;
@@ -26,6 +30,7 @@ import ch.ethz.mobilecoach.app.Option;
 import ch.ethz.mobilecoach.app.Post;
 import ch.ethz.mobilecoach.chatlib.engine.ChatEngine;
 import ch.ethz.mobilecoach.chatlib.engine.ConversationRepository;
+import ch.ethz.mobilecoach.chatlib.engine.Evaluator;
 import ch.ethz.mobilecoach.chatlib.engine.ExecutionException;
 import ch.ethz.mobilecoach.chatlib.engine.HelpersRepository;
 import ch.ethz.mobilecoach.chatlib.engine.Input;
@@ -35,12 +40,14 @@ import ch.ethz.mobilecoach.chatlib.engine.conversation.UserReplyListener;
 import ch.ethz.mobilecoach.chatlib.engine.helpers.IncrementVariableHelper;
 import ch.ethz.mobilecoach.chatlib.engine.helpers.MinusVariableHelper;
 import ch.ethz.mobilecoach.chatlib.engine.helpers.SumVariablesHelper;
+import ch.ethz.mobilecoach.chatlib.engine.media.MediaLibrary;
 import ch.ethz.mobilecoach.chatlib.engine.model.AnswerOption;
 import ch.ethz.mobilecoach.chatlib.engine.model.Message;
 import ch.ethz.mobilecoach.chatlib.engine.timing.TimingCalculatorAdvanced;
 import ch.ethz.mobilecoach.chatlib.engine.translation.SimpleTranslator;
 import ch.ethz.mobilecoach.chatlib.engine.translation.Translator;
 import ch.ethz.mobilecoach.chatlib.engine.translation.VariantSelector;
+import ch.ethz.mobilecoach.chatlib.engine.translation.VariantSelectorLegacy;
 import ch.ethz.mobilecoach.chatlib.engine.variables.InMemoryVariableStore;
 import ch.ethz.mobilecoach.chatlib.engine.variables.VariableException;
 import ch.ethz.mobilecoach.chatlib.engine.variables.VariableStore;
@@ -53,20 +60,23 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class RichConversationService {
 
-	private MessagingService					messagingService;
+	private MessagingService		messagingService;
+	
 	private ConversationManagementService		conversationManagementService;
 
 	private VariablesManagerService				variablesManagerService;
 	private DatabaseManagerService				dBManagerService;
+	private SurveyExecutionManagerService		surveyService;
 	private LinkedHashMap<ObjectId, ChatEngine>	chatEngines	= new LinkedHashMap<>();
 
-	private RichConversationService(MessagingService mattermostMessagingService,
+	private RichConversationService(MessagingService messagingService,
 			ConversationManagementService conversationManagementService,
 			VariablesManagerService variablesManagerService,
-			DatabaseManagerService dBManagerService) throws Exception {
-		this.messagingService = mattermostMessagingService;
+			DatabaseManagerService dBManagerService,
+			SurveyExecutionManagerService surveyService) throws Exception {
+		this.messagingService = messagingService;
 		this.conversationManagementService = conversationManagementService;
-
+		this.surveyService = surveyService;
 		this.variablesManagerService = variablesManagerService;
 		this.dBManagerService = dBManagerService;
 		continueConversation();
@@ -76,10 +86,11 @@ public class RichConversationService {
 			MessagingService messagingService,
 			ConversationManagementService conversationManagementService,
 			VariablesManagerService variablesManagerService,
-			DatabaseManagerService dBManagerService) throws Exception {
+			DatabaseManagerService dBManagerService,
+			SurveyExecutionManagerService surveyService) throws Exception {
 		RichConversationService service = new RichConversationService(
 				messagingService, conversationManagementService,
-				variablesManagerService, dBManagerService);
+				variablesManagerService, dBManagerService, surveyService);
 		return service;
 	}
 
@@ -90,6 +101,8 @@ public class RichConversationService {
 
 		while (iterator.hasNext()) {
 			ChatEnginePersistentState ces = iterator.next();
+			
+			boolean deleteIt = false;
 
 			if (ChatEngineStateStore.containsARecentChatEngineState(ces)) {
 
@@ -121,26 +134,36 @@ public class RichConversationService {
 					ces.setStatus("Not Found");
 				}
 			} else {
+				// Outdated => delete state
 				ces.setStatus("Outdated");
+				deleteIt = true;
 			}
 			
 			// update status
-			dBManagerService.saveModelObject(ces);
+			if (!deleteIt){
+				dBManagerService.saveModelObject(ces);
+			} else {
+				dBManagerService.deleteModelObject(ces);
+			}
 		}
 
-		this.messagingService.startReceiving(); // now that all the listeners
-												// have been set, we can start
-												// receiving
+		this.messagingService.startReceiving();
+		// now that all the listeners have been set, we can start receiving
 	}
 
 	public void sendMessage(String sender, ObjectId recipient, String message) throws ExecutionException {
 
 		final String START_CONVERSATION_PREFIX = "start-conversation:";
-		if (message.startsWith(START_CONVERSATION_PREFIX)) {
+		final String CONSIDER_CONVERSATION_PREFIX = "consider-conversation:";
+		
+		boolean start = message.startsWith(START_CONVERSATION_PREFIX);
+		boolean consider = message.startsWith(CONSIDER_CONVERSATION_PREFIX);
+		
+		if (start || consider) {
 			
 			String interventionId = null;
 			String conversation;
-			String restString = message.substring(START_CONVERSATION_PREFIX.length());
+			String restString = message.substring(START_CONVERSATION_PREFIX.length()).trim();
 			int slashIndex = restString.indexOf("/");
 			if (slashIndex > -1){
 				interventionId = restString.substring(0, slashIndex);
@@ -166,16 +189,27 @@ public class RichConversationService {
 					// participants... re-set it
 					engine = chatEngines.get(participant.getId());
 					
+					ConversationRepository repository = conversationManagementService.getRepository(interventionId);
+					
+					// re-initialize translator
+					Translator translator = prepareTranslator(participant.getLanguage(), repository, engine.getVariableStore());
+					
 					// get the newest conversation repository and start
-					engine.startConversation(conversation, conversationManagementService.getRepository(interventionId));
+					engine.startConversation(conversation, repository, translator);
 				} else {
 					engine = prepareChatEngine(participant, chatEngineStateStore, interventionId);
-					engine.startConversation(conversation);
+					if (start){
+						engine.startConversation(conversation);
+					} else {
+						engine.considerConversation(conversation);
+					}
 				}
 			} catch (Exception e) {
 				log.error(e.getMessage() + " " + StringHelpers.getStackTraceAsLine(e), e);
 				log.error("Could not start conversation: " + restString);
 			}
+			
+			
 
 		} else {
 			// stop conversation
@@ -185,6 +219,13 @@ public class RichConversationService {
 
 			// send a message
 			messagingService.sendMessage(sender, recipient, message);
+		}
+		
+		// update channel name
+		try {
+			messagingService.setChannelName(recipient);
+		} catch (Exception e){
+			log.error(e);
 		}
 	}
 
@@ -196,33 +237,46 @@ public class RichConversationService {
 			throw new IOException("Repository not found: " + interventionId);
 		}
 		
+		final String participantId = participant.getId().toHexString();
+		
 		Logger logger = new Logger() {
 
 			@Override
 			public void logError(String message) {
-				log.error(message);
+				log.error(participantId + ": " + message);
 			}
 
 			@Override
 			public void logDebug(String message) {
-				log.debug(message);
+				log.debug(participantId + ": " + message);
 			}
 
 			@Override
 			public void logInfo(String message) {
-				log.info(message);
+				log.info(participantId + ": " + message);
 			}
 		};
 
 		VariableStore variableStore = createVariableStore(participant.getId());
+		MediaLibrary mediaLibrary = new InDataBaseMediaLibrary(dBManagerService, surveyService, participant.getId(), participant.getIntervention());
 
-		MattermostConnector ui = new MattermostConnector(participant.getId());
+		MattermostConnector mattermostConnector = new MattermostConnector(participant.getId());
+		ConversationUI ui = new CommunicationSwitch(mattermostConnector, participant);
 		HelpersRepository helpers = new HelpersRepository();
 		
+		double dialogSpeedup = 1.0;
+		
+		if (variableStore.containsVariable("$dialog_speedup")){
+			try {
+				dialogSpeedup = Double.parseDouble(variableStore.get("$dialog_speedup"));
+			} catch (Exception e){
+				log.error("Error parsing $dialog_speedup", e);
+			}
+		}
 		
 		Translator translator = prepareTranslator(participant.getLanguage(), repository, variableStore);
-		ChatEngine engine = new ChatEngine(repository, ui, variableStore, 
-				helpers, translator, chatEngineStateStore, new TimingCalculatorAdvanced());
+		ChatEngine engine = new ChatEngine(repository, ui, variableStore, mediaLibrary,
+				helpers, translator, chatEngineStateStore, new TimingCalculatorAdvanced(dialogSpeedup));
 		engine.sendExceptionAsMessage = false;
 		
 		engine.setLogger(logger);
@@ -259,13 +313,13 @@ public class RichConversationService {
 		
 		new TestHelpersFactory(engine, ui).addHelpers(helpers);
 
-		messagingService.setListener(participant.getId(), ui);
+		messagingService.setListener(participant.getId(), mattermostConnector);
 
 		ui.setUserReplyListener(new UserReplyListener() {
 			@Override
 			public void userReplied(Input input) {
 
-				ObjectId participantId = ui.getRecipient();
+				ObjectId participantId = mattermostConnector.getRecipient();
 
 				if (chatEngines.containsKey(participantId)) {
 					// make sure this is handled in another thread, so that we can continue immediately
@@ -306,6 +360,13 @@ public class RichConversationService {
 	
 	public Translator prepareTranslator(Locale language, ConversationRepository repository, VariableStore variables){
 		
+		// use Variator if available
+		
+		if (repository.getVariator() != null){
+			return new VariantSelector(repository.getVariator(), variables);
+		}
+		
+		
 		// Try to use variant selection
 			
 		Properties properties = getRepositoryProperties(repository);
@@ -316,7 +377,7 @@ public class RichConversationService {
 			
 			if (variantFile != null){// && variantMapping != null){
 				try {
-					return new VariantSelector(repository.getPath() + "/" + variantFile, null, variables);
+					return new VariantSelectorLegacy(repository.getPath() + "/" + variantFile, null, variables);
 				} catch (IOException e) {
 					log.error(e);
 				}
@@ -363,6 +424,65 @@ public class RichConversationService {
 					participantId, participant);
 		}
 		return variableStore;
+	}
+	
+	private class CommunicationSwitch implements ConversationUI {
+		
+		private final MattermostConnector mattermostConnector;
+		private final Participant participant;
+		
+		public CommunicationSwitch(MattermostConnector mattermostConnector, Participant participant){
+			this.mattermostConnector = mattermostConnector;
+			this.participant = participant;
+		}
+
+		@Override
+		public void showMessage(Message message) {
+			if ("EmailOrSMS".equals(message.channel)){
+				MC.getInstance().getInterventionExecutionManagerService().sendMessageOutsideOfApp(participant, false, message.text);
+			} else if ("EmailOrSMS-Supervisor".equals(message.channel)){
+				MC.getInstance().getInterventionExecutionManagerService().sendMessageOutsideOfApp(participant, true, message.text);
+			} else {
+				mattermostConnector.showMessage(message);
+			}
+		}
+
+		@Override
+		public void showTyping(String sender) {
+			mattermostConnector.showTyping(sender);
+		}
+
+		@Override
+		public void setUserReplyListener(UserReplyListener listener) {
+			mattermostConnector.setUserReplyListener(listener);
+		}
+
+		@Override
+		public void delay(Runnable callback, Long milliseconds) {
+			mattermostConnector.delay(callback, milliseconds);
+		}
+
+		@Override
+		public void cancelDelay() {
+			mattermostConnector.cancelDelay();
+			
+		}
+
+		@Override
+		public void setDelayEnabled(boolean enabled) {
+			mattermostConnector.setDelayEnabled(enabled);
+		}
+
+		@Override
+		public long getMillisecondsUntil(LocalTime time) {
+			return mattermostConnector.getMillisecondsUntil(time);
+		}
+
+		@Override
+		public boolean supportsReminders() {
+			return mattermostConnector.supportsReminders();
+		}
+		
 	}
 
 	// WebSocket Listener
@@ -412,11 +532,17 @@ public class RichConversationService {
 					post.setPostType(Post.POST_TYPE_REQUEST);
 					post.setRequestType(message.requestType);
 				}
-
+				
+				post.setMediaType(message.mediaType);
+				post.setMediaUrl(message.mediaUrl);				
+				
 				post.getParameters().putAll(message.parameters);
 				post.setHidden(message.hidden);
+				
+				post.setConversation(message.conversation);
+				post.setTrackingTag(message.trackingTag);
 
-				messagingService.sendMessage(sender, recipient, post);
+				messagingService.sendMessage(sender, recipient, post, Boolean.TRUE.equals(message.isReminder));
 			}
 		}
 
@@ -458,7 +584,11 @@ public class RichConversationService {
 
 		@Override
 		public void cancelDelay() {
-			timer.cancelAll();
+			try {
+				timer.cancelAll();
+			} catch (Exception e){
+				log.error("Error cancelling timer: " + e.getMessage());
+			}
 		}
 
 		/**

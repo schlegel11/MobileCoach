@@ -20,8 +20,12 @@ package ch.ethz.mc.services;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
 import lombok.Getter;
 import lombok.Synchronized;
@@ -50,6 +54,7 @@ import ch.ethz.mc.services.internal.FileStorageManagerService;
 import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.services.internal.VariablesManagerService.ExternallyReadProtectedVariableException;
 import ch.ethz.mc.services.internal.VariablesManagerService.ExternallyWriteProtectedVariableException;
+import ch.ethz.mobilecoach.model.persistent.MediaLibraryEntry;
 
 /**
  * Cares for the orchestration of all REST calls
@@ -410,6 +415,10 @@ public class RESTManagerService {
 		return tokenPersistenceService.consumeOneTimeToken(oneTimeToken);
 	}
 	
+	public Participant getParticipant(ObjectId participantId) {
+		return databaseManagerService.findOneModelObject(Participant.class, "{'_id': #}", participantId);
+	}
+	
 	
 	public Map<String, String> getExternallyReadableVariableValues(final ObjectId participantId){
 		val participant = databaseManagerService.getModelObjectById(Participant.class, participantId);
@@ -419,6 +428,34 @@ public class RESTManagerService {
 			result.put(v.getName(), v.getValue());
 		}
 		return result;
+	}
+	
+	public List<MediaLibraryEntry> getMediaLibrary(final ObjectId participantId){
+		List<MediaLibraryEntry> result = new LinkedList<MediaLibraryEntry>();
+		
+		val all = databaseManagerService.findModelObjects(MediaLibraryEntry.class, "{participantId:#}", participantId).iterator();
+		while (all.hasNext()) {
+			result.add(all.next());
+	    }
+		
+		return result;
+	}
+	
+	public ObjectId checkTokenAndGetParticipantId(String token){
+		if (token == null) {
+			throw new WebApplicationException(Response.status(400).entity("Missing header 'Authentication'.").build());
+		}
+		
+		ObjectId userId = null;
+		if (AppToken.isAppToken(token)){
+			userId = findParticipantIdForAppToken(token);
+		}
+		
+		if (userId == null) {
+			throw new WebApplicationException(Response.status(403).entity("Invalid Token supplied").build());
+		}
+		
+		return userId;
 	}
 
 	/*

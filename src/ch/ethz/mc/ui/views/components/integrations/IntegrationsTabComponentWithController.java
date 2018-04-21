@@ -57,9 +57,17 @@ public class IntegrationsTabComponentWithController extends
 		
 		StringBuilder sb = new StringBuilder();
 		
+		sb.append("\nMattermost: "+ mmManagementService.api_url.replace("api/v3/", "") + "\n");
+		
 		sb.append("\nTeams:\n");
 		for (TeamConfiguration c: mmManagementService.getTeamConfigurations()){
 			sb.append(c.toString() + ", " + mmManagementService.getTeamName(c.teamId) + "\n"); 
+		}
+		
+		if (mmManagementService.getObserverUserId() != null){
+			sb.append("\nObserver:");
+			sb.append("\nUsername: " + mmManagementService.getObserverUserName());
+			sb.append("\nPassword: " + mmManagementService.getObserverUserPassword());
 		}
 		
 		this.getTextArea().setValue(sb.toString());

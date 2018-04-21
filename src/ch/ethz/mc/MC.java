@@ -44,6 +44,7 @@ import ch.ethz.mobilecoach.services.MattermostMessagingService;
 import ch.ethz.mobilecoach.services.RichConversationService;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 
@@ -59,12 +60,13 @@ public class MC implements ServletContextListener {
 	private boolean								ready	= false;
 
 	// Internal services
+	@Getter
 	DatabaseManagerService						databaseManagerService;
 	FileStorageManagerService					fileStorageManagerService;
 
 	@Getter
 	ImageCachingService							imageCachingService;
-
+	@Getter
 	VariablesManagerService						variablesManagerService;
 
 	CommunicationManagerService					communicationManagerService;
@@ -129,24 +131,21 @@ public class MC implements ServletContextListener {
 					.start(fileStorageManagerService.getMediaCacheFolder());
 			variablesManagerService = VariablesManagerService
 					.start(databaseManagerService);
-
-			
-			mattermostManagementService = MattermostManagementService.start(databaseManagerService, variablesManagerService);
-			mattermostMessagingService = MattermostMessagingService.start(mattermostManagementService, databaseManagerService, variablesManagerService);
-			
+					
 			tokenPersistenceService = new TokenPersistenceService(databaseManagerService);
 
 			fileConversationManagementService = FileConversationManagementService.start(Constants.getXmlScriptsFolder());
-			richConversationService = RichConversationService.start(mattermostMessagingService, fileConversationManagementService, variablesManagerService, databaseManagerService);
-
-			communicationManagerService = CommunicationManagerService.start(richConversationService);
+			
+			restManagerService = RESTManagerService.start(
+					databaseManagerService, fileStorageManagerService,
+					variablesManagerService);
 
 			modelObjectExchangeService = ModelObjectExchangeService.start(
 					databaseManagerService, fileStorageManagerService);
 			reportGeneratorService = ReportGeneratorService
 					.start(databaseManagerService);
 			lockingService = LockingService.start();
-
+			
 			// Controller services
 			surveyAdministrationManagerService = SurveyAdministrationManagerService
 					.start(databaseManagerService, fileStorageManagerService,
@@ -160,14 +159,24 @@ public class MC implements ServletContextListener {
 					.start(databaseManagerService, fileStorageManagerService,
 							variablesManagerService,
 							interventionAdministrationManagerService);
+			
+			// Communication
+			mattermostManagementService = MattermostManagementService.start(databaseManagerService, variablesManagerService);
+			mattermostMessagingService = MattermostMessagingService.start(mattermostManagementService, databaseManagerService, variablesManagerService);
+			richConversationService = RichConversationService.start(
+					mattermostMessagingService, fileConversationManagementService, variablesManagerService, 
+					databaseManagerService, surveyExecutionManagerService);
+			communicationManagerService = CommunicationManagerService.start(richConversationService);
+			
+			
+			// Execution
+			
 			interventionExecutionManagerService = InterventionExecutionManagerService
 					.start(databaseManagerService, variablesManagerService,
 							communicationManagerService,
 							interventionAdministrationManagerService,
 							surveyExecutionManagerService);
-			restManagerService = RESTManagerService.start(
-					databaseManagerService, fileStorageManagerService,
-					variablesManagerService);
+			
 
 		} catch (final Exception e) {
 			noErrorsOccurred = false;

@@ -46,9 +46,9 @@ public class OneSignalTask<RESULT> {
 	            	throw new Exception("Status " + new Integer(responseCode) + ": " + post.getResponseBodyAsString());
 	            }
 			} catch (Exception e) {
-				log.error("Error completing OneSignal task", e);
 				numberOfTriesCompleted++;
 				if (MAX_TRIES <= numberOfTriesCompleted){
+					log.error("Error completing OneSignal task: " + e.getMessage(), e);
 					throw new RuntimeException(e);
 				}
 			}

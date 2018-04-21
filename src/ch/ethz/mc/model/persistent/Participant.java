@@ -38,6 +38,7 @@ import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.ui.UIModelObject;
 import ch.ethz.mc.model.ui.UIParticipant;
+import ch.ethz.mc.services.internal.VariablesManagerService;
 
 /**
  * {@link ModelObject} to represent an {@link Participant}
@@ -59,6 +60,14 @@ public class Participant extends ModelObject {
 	@Setter
 	@NonNull
 	private ObjectId	intervention;
+	
+	
+	/**
+	 * The short id of the {@link Participant}
+	 */
+	@Getter
+	@Setter
+	private String		shortId;
 
 	/**
 	 * The timestamp when the {@link Participant} has been created
@@ -277,6 +286,11 @@ public class Participant extends ModelObject {
 	 */
 	@Override
 	public void performOnDelete() {
+		
+		// Invalidate variables cache
+		MC.getInstance().getVariablesManagerService()
+				.participantInvalidateVariableCache(getId());
+		
 		// Delete dialog options
 		val dialogOptionsToDelete = ModelObject.find(DialogOption.class,
 				Queries.DIALOG_OPTION__BY_PARTICIPANT, getId());

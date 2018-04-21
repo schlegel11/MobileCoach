@@ -386,6 +386,7 @@ AllInterventionsTabComponent {
 					.showInformationNotification(
 							AdminMessageStrings.NOTIFICATION__INTERVENTION_DUPLICATED);
 				} catch (final Exception e) {
+					log.error("Intervention duplication failed.", e);
 					getAdminUI()
 					.showWarningNotification(
 							AdminMessageStrings.NOTIFICATION__INTERVENTION_DUPLICATION_FAILED);
@@ -434,6 +435,7 @@ AllInterventionsTabComponent {
 					.showInformationNotification(
 							AdminMessageStrings.NOTIFICATION__INTERVENTION_IMPORTED);
 				} catch (final Exception e) {
+					log.error("Intervention import failed.", e);
 					getAdminUI()
 					.showWarningNotification(
 							AdminMessageStrings.NOTIFICATION__INTERVENTION_IMPORT_FAILED);

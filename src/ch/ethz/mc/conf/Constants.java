@@ -140,6 +140,8 @@ public class Constants {
 	@Getter
 	private static String	mediaUploadFolder					= "/mc_data/MediaUpload";
 	@Getter
+	private static String	mediaDirectFolder				= "/mc_data/MediaDirectFiles";
+	@Getter
 	private static String	mediaCacheFolder					= "/mc_data/MediaCache";
 	@Getter
 	private static String	templatesFolder						= "/mc_data/templates";
@@ -205,6 +207,19 @@ public class Constants {
 	
 	
 	/**
+	 * OneSignal configuration
+	 */
+	@Getter
+	private static String	oneSignalApiKey						= "ZjA3ZTkzNDEtYmRjMi00Y2M2LWEwOWItZTk2MzE2YTQ0NWQw";
+	
+	@Getter
+	private static String	oneSignalAppId						= "325068aa-fc63-411c-a07e-b3e73c455e8e";
+	
+	@Getter
+	private static String	pushMessage							= "";
+	
+	
+	/**
 	 * Mattermost configuration
 	 */
 	@Getter
@@ -222,11 +237,19 @@ public class Constants {
 	@Getter
 	private static String	mattermostManagerUserPassword		= "";
 	@Getter
+	private static String	mattermostMonitoringUserId			= "";
+	@Getter
+	private static String	mattermostMonitoringUserName		= "support-monitoring";
+	@Getter
+	private static String	mattermostMonitoringUserPassword	= "";
+	@Getter
 	private static String	mattermostCoachUserId				= "";
 	@Getter
 	private static String	mattermostCoachUserName				= "";
 	@Getter
 	private static String	mattermostCoachUserPassword			= "";
+	@Getter
+	private static String	mattermostChannelName				= "000 $participantId";
 	
 	
 	// french configuration
@@ -238,6 +261,13 @@ public class Constants {
 	private static String	mattermostManagerUserName_fr		= "support-team-fr";
 	@Getter
 	private static String	mattermostManagerUserPassword_fr	= "";
+	
+	@Getter
+	public static boolean	mattermostAllowOnlyConfiguredTeams	= true;
+	
+	@Getter
+	// use this to list additional team ids (comma-separated) where the coach should react to new messages
+	public static String	mattermostAdditionalTeamIds				= "";
 	
 	
 	/**

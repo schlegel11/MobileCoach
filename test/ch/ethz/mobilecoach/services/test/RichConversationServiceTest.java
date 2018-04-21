@@ -26,7 +26,7 @@ public class RichConversationServiceTest {
     	MessagingServiceMock ms = new MessagingServiceMock();
     	
     	ConversationManagementServiceMock conversationManagementService = new ConversationManagementServiceMock();
-    	RichConversationService service = RichConversationService.start(ms, conversationManagementService, null, null);
+    	RichConversationService service = RichConversationService.start(ms, conversationManagementService, null, null, null);
     	
     	service.sendMessage("dummy", new ObjectId(), "start-conversation:test-conversation1");
    	
@@ -48,7 +48,7 @@ public class RichConversationServiceTest {
 		}
 
 		@Override
-		public void sendMessage(String sender, ObjectId recipient, Post post) {
+		public void sendMessage(String sender, ObjectId recipient, Post post, boolean pushOnly) {
 			
 		}
 
@@ -60,6 +60,12 @@ public class RichConversationServiceTest {
 
 		@Override
 		public void startReceiving() {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void setChannelName(ObjectId recipient) {
 			// TODO Auto-generated method stub
 			
 		}
@@ -78,6 +84,12 @@ public class RichConversationServiceTest {
 		@Override
 		public ConversationRepository getRepository(String interventionId) {
 			return repository;
+		}
+
+		@Override
+		public void refresh() {
+			// TODO Auto-generated method stub
+			
 		}
     }
     

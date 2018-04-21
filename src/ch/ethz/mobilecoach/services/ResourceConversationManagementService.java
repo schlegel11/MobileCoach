@@ -48,6 +48,12 @@ public class ResourceConversationManagementService implements
 		parser.parse(stream);
 	}
 
+	@Override
+	public void refresh() {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 
 }

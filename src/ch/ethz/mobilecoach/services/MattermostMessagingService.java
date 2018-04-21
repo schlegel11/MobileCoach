@@ -3,10 +3,12 @@ package ch.ethz.mobilecoach.services;
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
@@ -37,13 +39,19 @@ import org.bson.types.ObjectId;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.Queries;
+import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
+import ch.ethz.mc.services.internal.InDataBaseVariableStore;
 import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mobilecoach.app.Post;
 import ch.ethz.mobilecoach.app.Results;
+import ch.ethz.mobilecoach.chatlib.engine.Evaluator;
 import ch.ethz.mobilecoach.chatlib.engine.Input;
+import ch.ethz.mobilecoach.chatlib.engine.variables.InMemoryVariableStore;
+import ch.ethz.mobilecoach.chatlib.engine.variables.VariableStore;
 import ch.ethz.mobilecoach.model.persistent.MattermostUserConfiguration;
 import ch.ethz.mobilecoach.model.persistent.OneSignalUserConfiguration;
 import ch.ethz.mobilecoach.model.persistent.UserLastMessage;
@@ -168,7 +176,7 @@ public class MattermostMessagingService implements MessagingService {
     			container.connectToServer(webSocketEndpoint, clientConfig, new URI(wsUrl + "users/websocket"));
     			return;
     		} catch (Exception e) {
-    			log.error(e);
+    			log.warn(e);
     			try {
     				log.debug("Waiting for "+sleepAmount+" msec.");
     				Thread.sleep(sleepAmount);
@@ -189,7 +197,7 @@ public class MattermostMessagingService implements MessagingService {
 		Post post = new Post();
 		post.setId(UUID.randomUUID().toString());
 		post.setMessage(message);
-		sendMessage(sender, recipient, post);
+		sendMessage(sender, recipient, post, false);
 	}
 	
 	public void ensureParticipantExists(ObjectId recipient){
@@ -199,7 +207,7 @@ public class MattermostMessagingService implements MessagingService {
 	}
 	
 
-	public void sendMessage(String sender, ObjectId recipient, Post post){
+	public void sendMessage(String sender, ObjectId recipient, Post post, boolean pushOnly){
 		ensureLoggedIn();
 		ensureParticipantExists(recipient);	
 		
@@ -216,7 +224,7 @@ public class MattermostMessagingService implements MessagingService {
         String userId = config.getUserId();
         
                
-        if (!managementService.isValidTeamId(teamId)){
+        if (!managementService.isValidTeamId(teamId) && Constants.isMattermostAllowOnlyConfiguredTeams()){
         	// This caused sending requests to fail with error 403: Forbidden
         	// We abort and accept that after changing the teamId, conversations on the older team cannot continue.
         	log.error("Could not send message to conversation using unused teamId: " + teamId);
@@ -225,26 +233,50 @@ public class MattermostMessagingService implements MessagingService {
         
         senderIdToRecipient.put(userId, recipient);
         
-        JSONObject json = new JSONObject();
-        json.put("props", new JSONObject(post));
-        json.put("message", post.getMessage());
-        json.put("user_id", userId);
-        json.put("channel_id", channelId);
-        
-		new MattermostTask<Void>(managementService.api_url + "teams/" + teamId + "/channels/" + channelId + "/posts/create", json)
-			.setToken(mcUserToken).run();
+        if (!pushOnly){
+	        JSONObject json = new JSONObject();
+	        json.put("props", new JSONObject(post));
+	        json.put("message", post.getMessage());
+	        json.put("user_id", userId);
+	        json.put("channel_id", channelId);
+	        
+	        try {
+				new MattermostTask<Void>(managementService.api_url + "teams/" + teamId + "/channels/" + channelId + "/posts/create", json)
+					.setToken(mcUserToken).run();
+	        } catch (Exception e){
+	        	
+	        	// add user to channel
+	        	try {
+	        		managementService.addUserToTeam(managementService.getCoachUserId(), teamId);
+	        	} catch (Exception e1){
+	        		// do nothing
+	        	}
+	        	
+	        	try {
+	        		managementService.addUserToChannel(managementService.getCoachUserId(), channelId, teamId);
+	        	} catch (Exception e2){
+	        		// do nothing
+	        	}
+	        	
+	        	// try again
+				new MattermostTask<Void>(managementService.api_url + "teams/" + teamId + "/channels/" + channelId + "/posts/create", json)
+				.setToken(mcUserToken).run();
+	        }
+        }
 		
-		if(null == managementService.findOneSignalObject(recipient)){
-			log.error("Could not send push since OnSignal config missing: " + recipient);
-			return;
-		}
-		
-		if (post.getHidden() != true && wasLastMessageReceivedLongerAgoThan(channelId, 60 * 1000)){
-			// send push notifications only after 1 minute after the last message was received
-			try {
-				sendPushNotification(recipient, post, channelId, userId);
-			} catch (Exception e){
-				log.error("Error sending push notification: " + StringHelpers.getStackTraceAsLine(e), e);
+        // send push notifications only after 1 minute after the last message was received, unless the message is push-only
+		if (pushOnly || post.getHidden() != true && wasLastMessageReceivedLongerAgoThan(channelId, 60 * 1000)){
+			long participantCreationTimestamp = managementService.getParticipantCreationTimestamp(recipient);
+			if (System.currentTimeMillis() > participantCreationTimestamp + 30 * 1000){ // only send push after 30 seconds after creation of participant
+				if(null == managementService.findOneSignalObject(recipient)){
+					log.info("Could not send push since OnSignal config missing: " + recipient);
+				} else {
+					try {
+						sendPushNotification(recipient, post, channelId, userId);
+					} catch (Exception e){
+						log.warn("Error sending push notification: " + StringHelpers.getStackTraceAsLine(e), e);
+					}
+				}
 			}
 		}
 	}
@@ -272,11 +304,12 @@ public class MattermostMessagingService implements MessagingService {
 		
         try {
 			webSocketEndpoint.sendMessage(message.toString());
-			seq++; 
+			
 		} catch (Exception e){
-			log.error("Error sending typing indicator: " + StringHelpers.getStackTraceAsLine(e), e);
+			//log.error("Error sending typing indicator: " + StringHelpers.getStackTraceAsLine(e), e);
 		}
         
+        seq++;
 	}
 
 	
@@ -292,18 +325,31 @@ public class MattermostMessagingService implements MessagingService {
 		
 		String[] playerIds = new String[oneSignalUserConfiguration.getPlayerIds().size()];
 		
+		if (oneSignalUserConfiguration.getPlayerIds().isEmpty()){
+			return;
+		}
+
+		String recipients = "";
+		
 		for(int ind = 0; ind < oneSignalUserConfiguration.getPlayerIds().size(); ind++){
 			playerIds[ind] = oneSignalUserConfiguration.getPlayerIds().get(ind);
+			recipients = recipients + playerIds[ind] + " ";
 		}
 
 		LinkedHashMap<String, String> headers = new LinkedHashMap<>();
 		headers.put("Content-Type", "application/json");
-		headers.put("Authorization", "Basic ZjA3ZTkzNDEtYmRjMi00Y2M2LWEwOWItZTk2MzE2YTQ0NWQw");	
+		headers.put("Authorization", "Basic " + Constants.getOneSignalApiKey());	
 		String url = "https://onesignal.com/api/v1/notifications";
+		
+		//log.info("Sending push using key " + Constants.getOneSignalApiKey().substring(0, 5) + "... to " + recipients);
 		
 		String message = post.getMessage();
 		if (message == null || "".equals(message)){
 			message = "New message"; // TODO: translate
+		}
+		
+		if (Constants.getPushMessage() != null){
+			message = Constants.getPushMessage();
 		}
 
 		JSONObject data = new JSONObject();
@@ -311,19 +357,29 @@ public class MattermostMessagingService implements MessagingService {
 		data.put("message_id", post.getId());
 		
 		JSONObject json2 = new JSONObject()
-				.put("app_id", MattermostManagementService.appID)     
+				.put("app_id", Constants.getOneSignalAppId())     
 				.put("contents", new JSONObject().put("en", message))
 				.put("include_player_ids", playerIds)
 				.put("data", data)
+				.put("ios_badgeType", "SetTo")
+				.put("ios_badgeCount", 1)
 				.put("collapse_id", userId);
 
-		new OneSignalTask<String>(url, json2, headers){
+		String result = new OneSignalTask<String>(url, json2, headers){
 			@Override
 			protected
 			String handleResponse(PostMethod method) throws Exception {
-				return new JSONObject(method.getResponseBodyAsString()).getString("id");
+				log.info("Response from OneSignal: " + method.getResponseBodyAsString(100));
+				if (method.getStatusCode() == 200){
+					return null;
+				}
+				return "HTTP " + method.getStatusCode() + ": " + method.getResponseBodyAsString(200);
 			}
-		}.run();	
+		}.run();
+		
+		if (result != null){
+			log.warn("Error sending push: " + result);
+		}
 	}
 	
 	
@@ -339,7 +395,7 @@ public class MattermostMessagingService implements MessagingService {
 		this.mcUserToken = new MattermostTask<String>(managementService.api_url + "users/login", json){
 
 			@Override
-			String handleResponse(HttpMethodBase method){
+			protected String handleResponse(HttpMethodBase method){
 				return method.getResponseHeader("Token").getValue();
 			}
 		}.run();
@@ -514,9 +570,21 @@ public class MattermostMessagingService implements MessagingService {
 		
 		List<Channel> channelsToUpdate = new LinkedList<>();
 		
+		Set<String> teamIds = new HashSet<>();
 		for (MattermostManagementService.TeamConfiguration tc: managementService.getTeamConfigurations()){
+			teamIds.add(tc.teamId);
+		}
+		
+		for (String activeId: Constants.getMattermostAdditionalTeamIds().split(",")){
+			String trimmed = activeId.trim();
+			if (trimmed.length() > 5){
+				teamIds.add(trimmed);
+			}
+		}
+		
+		for (String teamId: teamIds){
         
-	        GetMethod request = new GetMethod(managementService.api_url + "teams/" + tc.teamId + "/channels/");
+	        GetMethod request = new GetMethod(managementService.api_url + "teams/" + teamId + "/channels/");
 			request.setRequestHeader("Authorization", "Bearer " + mcUserToken);
 			
 			String channelsResponse = "[]";
@@ -546,7 +614,7 @@ public class MattermostMessagingService implements MessagingService {
 					long lastUpdateAt = jo.getLong("last_post_at");
 					
 					if (this.mayChannelHaveNewMessages(id, lastUpdateAt)){
-						channelsToUpdate.add(new Channel(id, tc.teamId));
+						channelsToUpdate.add(new Channel(id, teamId));
 					}
 				}
 			}
@@ -623,7 +691,7 @@ public class MattermostMessagingService implements MessagingService {
 		
 		@Override
 		public void onClose(Session session, CloseReason closeReason){
-			log.error("WebSocket connection closed. Reason: " + closeReason.toString());
+			log.warn("WebSocket connection closed. Reason: " + closeReason.toString());
 			if (onCloseListener != null){
 				onCloseListener.run();
 			}
@@ -631,7 +699,7 @@ public class MattermostMessagingService implements MessagingService {
 		
 		@Override
 		public void onError(Session session, Throwable thr){
-			log.error(thr.getMessage());
+			log.warn(thr.getMessage());
 		}
 		
 			
@@ -748,6 +816,15 @@ public class MattermostMessagingService implements MessagingService {
 			}, 
 			10000 
 		);
+		
+	}
+
+	
+	@Override
+	public void setChannelName(ObjectId recipient) {
+		
+		// update channel name
+		managementService.updateChannelName(recipient);
 		
 	}
 }

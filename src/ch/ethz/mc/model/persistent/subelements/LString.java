@@ -73,6 +73,15 @@ public class LString {
 
 		return this;
 	}
+	
+	public boolean anyLocaleValueEquals(String value){
+		for (val locale : Constants.getInterventionLocales()) {
+			if (values.containsKey(locale) && values.get(locale).equals(value)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	@JsonIgnore
 	public boolean isEmpty() {

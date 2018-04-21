@@ -143,6 +143,7 @@ public class CommunicationManagerService {
 		properties.setProperty("mail.pop3.host", mailhostIncoming);
 		properties.setProperty("mail.smtp.host", mailhostOutgoing);
 		properties.setProperty("mail.smtp.starttls.enable", "true"); // this was needed to connect to the eth mail server
+		properties.setProperty("mail.smtp.port", "587"); // use port 587
 		if (useAuthentication) {
 			properties.setProperty("mail.pop3.auth", "true");
 			properties.setProperty("mail.smtp.auth", "true");

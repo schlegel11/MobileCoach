@@ -65,9 +65,9 @@ public class MattermostTask<RESULT> {
 	            	throw new Exception("Status " + new Integer(responseCode) + ": " + method.getResponseBodyAsString());
 	            }
 			} catch (Exception e) {
-				log.error("Error completing Mattermost task: " + url + " " + payload, e);
 				numberOfTriesCompleted++;
 				if (MAX_TRIES <= numberOfTriesCompleted){
+					log.error("Error completing Mattermost task: " + url + " " + payload + " " + e.getMessage(), e);
 					throw new RuntimeException(e);
 				}
 			}
@@ -76,7 +76,7 @@ public class MattermostTask<RESULT> {
 		return null;
 	}
 	
-	RESULT handleResponse(HttpMethodBase method) throws Exception {
+	protected RESULT handleResponse(HttpMethodBase method) throws Exception {
 		return null;
 	};
 	

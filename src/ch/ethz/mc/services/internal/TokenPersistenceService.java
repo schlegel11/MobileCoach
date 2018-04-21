@@ -6,6 +6,7 @@ import org.bson.types.ObjectId;
 
 import ch.ethz.mc.model.persistent.AppToken;
 import ch.ethz.mc.model.persistent.OneTimeToken;
+import ch.ethz.mc.model.persistent.Participant;
 
 public class TokenPersistenceService {
 
@@ -84,5 +85,4 @@ public class TokenPersistenceService {
 		dbService.deleteModelObject(oneTimeToken);
 		return participantId;
 	}
-
 }

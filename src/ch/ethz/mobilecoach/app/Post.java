@@ -53,6 +53,19 @@ public class Post {
 		return requestType;
 	}
 	
+	@Setter
+	private String mediaType;
+	
+	public String getMedia_type(){
+		return mediaType;
+	}
+	
+	@Setter
+	private String mediaUrl;
+	
+	public String getMedia_url(){
+		return mediaUrl;
+	}
 	
 	@Getter
 	@Setter
@@ -77,8 +90,18 @@ public class Post {
 	@Setter
 	private String id;
 	
-	
 	@Getter
 	@Setter
 	private String channelId;
+	
+	@Getter
+	@Setter
+	private String conversation;
+	
+	@Setter
+	private String trackingTag;
+	
+	public String getTracking_tag(){
+		return trackingTag;
+	}
 }

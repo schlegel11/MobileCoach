@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import ch.ethz.mobilecoach.chatlib.engine.ConversationRepository;
 import ch.ethz.mobilecoach.chatlib.engine.checking.ReferenceChecker;
+import ch.ethz.mobilecoach.chatlib.engine.variation.Variator;
 import ch.ethz.mobilecoach.chatlib.engine.xml.DomParser;
 import lombok.extern.log4j.Log4j2;
 
@@ -32,16 +33,18 @@ public class FileConversationManagementService implements
 	
 	Map<String, ConversationRepository> repositoryByName = new HashMap<>();
 	Map<String, ConversationRepository> repositoryByHash = new HashMap<>();
+	String interventionPath = null;
 	
 	private final String DEFAULT_REPOSITORY_NAME = "pathmate2";
 	
-	private FileConversationManagementService(){
+	private FileConversationManagementService(String interventionPath){
+		this.interventionPath = interventionPath;
 	}
 	
-	public static FileConversationManagementService start(String interventionPath) {
-		FileConversationManagementService result = new FileConversationManagementService();
+	public static FileConversationManagementService start(String interventionPath){
+		FileConversationManagementService result = new FileConversationManagementService(interventionPath);
 		try {
-			result.loadFromFolder(interventionPath);
+			result.loadFromFolder();
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
@@ -77,7 +80,9 @@ public class FileConversationManagementService implements
 		return result;
 	}
 	
-	public void loadFromFolder(String path) throws Exception {
+	public void loadFromFolder() throws Exception {
+		String path = this.interventionPath;
+		
 		// List all folders
 		List<Path> paths = Files.list(Paths.get(path)).filter(Files::isDirectory).collect(Collectors.toList());
 		for (Path p : paths){
@@ -85,6 +90,7 @@ public class FileConversationManagementService implements
 			String interventionId = dirName;
 			
 			ConversationRepository repository = new ConversationRepository(p.toString());
+			repository.setVariator(loadVariator(p));
 
 			try {
 				loadRepositoryFromFolder(p, repository);
@@ -97,6 +103,19 @@ public class FileConversationManagementService implements
 			}
 		}
 		
+	}
+	
+	public Variator loadVariator(Path path){
+		Path variations = path.resolve("variations.csv");
+		if (Files.exists(variations)){
+			try {
+				return new Variator(variations.toString());
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+		}
+		
+		return null;
 	}
 	
 	public void loadRepositoryFromFolder(Path path, ConversationRepository repository) throws Exception{
@@ -140,8 +159,16 @@ public class FileConversationManagementService implements
 	
 	
 	public void loadResourceFile(File file, ConversationRepository repository, ReferenceChecker referenceChecker) throws Exception {
-		InputStream stream = new FileInputStream(file);
 		DomParser parser = new DomParser(repository, null, referenceChecker);
-		parser.parse(stream);
+		parser.parseWithLineNumbers(file);
+	}
+
+	@Override
+	public void refresh() {
+		try {
+			loadFromFolder();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
 	}
 }

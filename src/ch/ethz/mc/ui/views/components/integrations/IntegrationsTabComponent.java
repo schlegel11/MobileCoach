@@ -71,7 +71,7 @@ public abstract class IntegrationsTabComponent extends AbstractCustomComponent {
 		textArea = new TextArea("Mattermost");
 		textArea.setWordwrap(false);
 		textArea.setWidth(100, Unit.PERCENTAGE);
-		textArea.setHeight(10, Unit.EM);
+		textArea.setHeight(30, Unit.EM);
 		
 		mainLayout.addComponent(textArea);
 

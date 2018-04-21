@@ -28,6 +28,7 @@ import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.rest.services.AppAuthenticationService;
 import ch.ethz.mc.rest.services.AppService;
 import ch.ethz.mc.rest.services.CreditsService;
+import ch.ethz.mc.rest.services.CustomServices;
 import ch.ethz.mc.rest.services.ImageUploadService;
 import ch.ethz.mc.rest.services.OneSignalAppService;
 import ch.ethz.mc.rest.services.VariableAccessService;
@@ -52,15 +53,19 @@ public class RESTServiceApplication extends Application {
 
 		final val restManagerService = MC.getInstance().getRestManagerService();
 		final val matterMostService = MC.getInstance().getMattermostManagementService();
+		final val dbManagerService = MC.getInstance().getDatabaseManagerService();
+		final val variablesService = MC.getInstance().getVariablesManagerService();
+		final val surveyExecutionService = MC.getInstance().getSurveyExecutionManagerService();
 
 		// Variable access service
 		services.add(new CreditsService(restManagerService));
 		services.add(new ImageUploadService(restManagerService));
 		services.add(new VariableAccessService(restManagerService));
 		services.add(new VotingService(restManagerService));
-		services.add(new AppService(restManagerService, matterMostService));
+		services.add(new AppService(restManagerService, matterMostService, surveyExecutionService));
 		services.add(new OneSignalAppService(restManagerService, matterMostService));
 		services.add(new AppAuthenticationService(restManagerService));
+		services.add(new CustomServices(restManagerService, dbManagerService, variablesService));
 
 		log.info("Started.");
 	}

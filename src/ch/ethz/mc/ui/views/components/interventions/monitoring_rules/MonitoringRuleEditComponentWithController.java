@@ -153,6 +153,7 @@ MonitoringRuleEditComponent {
 		.setMin(ImplementationConstants.HOUR_TO_SEND_MESSAGE_MIN);
 		hourToSendSlider
 		.setMax(ImplementationConstants.HOUR_TO_SEND_MESSAGE_MAX);
+		hourToSendSlider.setResolution(1);
 		hourToSendSlider.addValueChangeListener(valueChangeListener);
 
 		val hoursUntilHandledAsNotAnsweredSlider = getHoursUntilHandledAsNotAnsweredSlider();
@@ -196,6 +197,25 @@ MonitoringRuleEditComponent {
 						}
 
 						adjust();
+					}
+				});
+		
+		getSendOutsideOfAppComboBox().setValue(monitoringRule.isSendOutsideOfApp());
+		getSendOutsideOfAppComboBox().addValueChangeListener(
+				new ValueChangeListener() {
+					
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+
+						val newValue = (boolean) event.getProperty().getValue();
+	
+						getInterventionAdministrationManagerService()
+						.monitoringRuleChangeSendOutsideOfApp(
+								monitoringRule, newValue);
+						
+						getSendOutsideOfAppComboBox().setValue(newValue);
+						adjust();
+						
 					}
 				});
 
@@ -343,11 +363,17 @@ MonitoringRuleEditComponent {
 			.getRulesTree().setEnabled(false);
 		}
 
+		/*
 		// Adjust sliders
 		localize(
 				getHourToSendMessageSlider(),
 				AdminMessageStrings.MONITORING_RULE_EDITING__HOUR_TO_SEND_MESSAGE_VALUE,
 				monitoringRule.getHourToSendMessage());
+				
+		*/
+		
+		getHourToSendMessageSlider().setCaption(String.format("%.2f", monitoringRule.getHourToSendMessage()));
+		
 		try {
 			getHourToSendMessageSlider().setValue(
 					(double) monitoringRule.getHourToSendMessage());
@@ -414,8 +440,7 @@ MonitoringRuleEditComponent {
 				getInterventionAdministrationManagerService()
 				.monitoringRuleChangeHourToSendMessage(
 						monitoringRule,
-						((Double) event.getProperty().getValue())
-						.intValue());
+						((Double) event.getProperty().getValue()));
 			} else if (event.getProperty() == getHoursUntilHandledAsNotAnsweredSlider()) {
 				getInterventionAdministrationManagerService()
 				.monitoringRuleChangeHoursUntilMessageIsHandledAsUnanswered(

@@ -495,6 +495,7 @@ InterventionParticipantsTabComponent {
 												placeholderStringEditWithCheckboxComponent
 														.getUniversalCheckBox()
 														.getValue(),
+												false,
 												getStringValue());
 							}
 						}

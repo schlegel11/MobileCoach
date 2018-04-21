@@ -60,8 +60,7 @@ public class OutgoingMessageWorker extends Thread {
 			try {
 				interventionExecutionManagerService.handleOutgoingMessages();
 			} catch (final Exception e) {
-				log.error("Could not send all prepared messages: {}",
-						e.getMessage());
+				log.error("Could not send all prepared messages: {}", e.getMessage());
 			}
 
 			log.info(
