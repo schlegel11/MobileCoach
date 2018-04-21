@@ -208,8 +208,6 @@ public class RichConversationService {
 				log.error(e.getMessage() + " " + StringHelpers.getStackTraceAsLine(e), e);
 				log.error("Could not start conversation: " + restString);
 			}
-			
-			
 
 		} else {
 			// stop conversation
@@ -222,11 +220,7 @@ public class RichConversationService {
 		}
 		
 		// update channel name
-		try {
-			messagingService.setChannelName(recipient);
-		} catch (Exception e){
-			log.error(e);
-		}
+		updateChannelName(recipient);
 	}
 
 	private ChatEngine prepareChatEngine(Participant participant,
@@ -343,6 +337,8 @@ public class RichConversationService {
 				}
 			}
 		});
+		
+		final ObjectId participantObjId = participant.getId();
 
 		engine.setOnTerminated(new Runnable() {
 
@@ -351,11 +347,23 @@ public class RichConversationService {
 				// TODO: clean up the engine
 				// - unregister listeners (web socket and timer) to release the
 				// engine for garbage collection
+				
+				// update channel name after a conversation has terminated
+				updateChannelName(participantObjId);
 			}
 
 		});
 
 		return engine;
+	}
+	
+	private void updateChannelName(ObjectId participantId){
+		// update channel name
+		try {
+			messagingService.setChannelName(participantId);
+		} catch (Exception e){
+			log.error(e);
+		}
 	}
 	
 	public Translator prepareTranslator(Locale language, ConversationRepository repository, VariableStore variables){
