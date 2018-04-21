@@ -147,6 +147,9 @@ public class MattermostMessagingService implements MessagingService {
 				}
 			}
 		}
+		
+		// TODO: remove this line after it has been deployed once (speed up the startup phase)
+		managementService.fixAnyProblemsWithUserConfiguration(config);
 	}
 	
 	public void observeTeamChannel(String channelId, ObjectId participantId){
