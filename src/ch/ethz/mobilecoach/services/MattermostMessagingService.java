@@ -827,7 +827,7 @@ public class MattermostMessagingService implements MessagingService {
 	}
 	
 	private boolean wasMessageNotProcessedYet(ObjectId participantId, String channelId, String lastMessageId, long timestamp){
-		if (timestamp > 1524325031671L){ // don't send push for old messages. TODO: update before deployment
+		if (timestamp > 1524355585408L){ // don't send push for old messages.
 			
 			UserLastMessage record = this.databaseManagerService.findOneModelObject(UserLastMessage.class, "{participantId:#, channelId:#}", participantId, channelId);
 		
