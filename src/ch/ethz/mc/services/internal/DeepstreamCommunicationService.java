@@ -621,9 +621,11 @@ public class DeepstreamCommunicationService extends Thread
 
 	/**
 	 * Creates a deepstream participant/supervisor and the belonging
-	 * intervention participant structures or returns null if not allowed
+	 * intervention participant structures (or reuses them if they already
+	 * exist); Returns null if not allowed
 	 * 
 	 * @param nickname
+	 * @param participantIdToCreateUserFor
 	 * @param relatedParticipantExternalId
 	 * @param interventionPattern
 	 * @param interventionPassword
@@ -631,6 +633,7 @@ public class DeepstreamCommunicationService extends Thread
 	 * @return
 	 */
 	public ExternalRegistration registerUser(final String nickname,
+			final ObjectId participantIdToCreateUserFor,
 			final String relatedParticipantExternalId,
 			final String interventionPattern, final String interventionPassword,
 			final boolean supervisorRequest) {
@@ -666,15 +669,28 @@ public class DeepstreamCommunicationService extends Thread
 			record = client.record.getRecord(DeepstreamConstants.PATH_MESSAGES
 					+ participantOrSupervisorExternalId);
 
-			createdSucessfully = interventionExecutionManagerService
-					.checkAccessRightsAndRegisterParticipantOrSupervisorExternallyWithoutSurvey(
-							nickname,
-							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
-									+ relatedParticipantExternalId,
-							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
-									+ participantOrSupervisorExternalId,
-							interventionPattern, interventionPassword,
-							supervisorRequest);
+			if (participantIdToCreateUserFor != null) {
+				// Extend existing participant
+				createdSucessfully = interventionExecutionManagerService
+						.registerExternalDialogOptionForParticipantOrSupervisor(
+								participantIdToCreateUserFor,
+								ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+										+ relatedParticipantExternalId,
+								ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+										+ participantOrSupervisorExternalId,
+								supervisorRequest);
+			} else {
+				// Create new participant
+				createdSucessfully = interventionExecutionManagerService
+						.checkAccessRightsAndRegisterParticipantOrSupervisorExternallyWithoutSurvey(
+								nickname,
+								ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+										+ relatedParticipantExternalId,
+								ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+										+ participantOrSupervisorExternalId,
+								interventionPattern, interventionPassword,
+								supervisorRequest);
+			}
 		} finally {
 			// Cleanup prepared user if registration was not possible
 			if (!createdSucessfully) {

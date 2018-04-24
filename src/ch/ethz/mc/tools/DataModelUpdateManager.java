@@ -123,6 +123,9 @@ public class DataModelUpdateManager {
 				case 35:
 					updateToVersion35();
 					break;
+				case 36:
+					updateToVersion36();
+					break;
 			}
 
 			log.info("Update to version {} done", updateToVersionInThisStep);
@@ -610,5 +613,15 @@ public class DataModelUpdateManager {
 					Queries.UPDATE_VERSION_35__FEEDBACK_SLIDE__CHANGE_1,
 					GlobalUniqueIdGenerator.createSimpleGlobalUniqueId());
 		}
+	}
+
+	/**
+	 * Changes for version 36:
+	 */
+	private static void updateToVersion36() {
+		val screeningSurveySlideCollection = jongo
+				.getCollection("ScreeningSurveySlide");
+		screeningSurveySlideCollection.update(Queries.EVERYTHING).multi().with(
+				Queries.UPDATE_VERSION_36__SCREENING_SURVEY_SLIDE__CHANGE_1);
 	}
 }
