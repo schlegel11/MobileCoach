@@ -43,6 +43,7 @@ import ch.ethz.mobilecoach.chatlib.engine.helpers.SumVariablesHelper;
 import ch.ethz.mobilecoach.chatlib.engine.media.MediaLibrary;
 import ch.ethz.mobilecoach.chatlib.engine.model.AnswerOption;
 import ch.ethz.mobilecoach.chatlib.engine.model.Message;
+import ch.ethz.mobilecoach.chatlib.engine.timing.TimingCalculator;
 import ch.ethz.mobilecoach.chatlib.engine.timing.TimingCalculatorAdvanced;
 import ch.ethz.mobilecoach.chatlib.engine.translation.SimpleTranslator;
 import ch.ethz.mobilecoach.chatlib.engine.translation.Translator;
@@ -68,6 +69,7 @@ public class RichConversationService {
 	private DatabaseManagerService				dBManagerService;
 	private SurveyExecutionManagerService		surveyService;
 	private LinkedHashMap<ObjectId, ChatEngine>	chatEngines	= new LinkedHashMap<>();
+	private LinkedHashMap<ObjectId, TimingCalculatorAdvanced>	timingCalculators	= new LinkedHashMap<>();
 
 	private RichConversationService(MessagingService messagingService,
 			ConversationManagementService conversationManagementService,
@@ -189,6 +191,9 @@ public class RichConversationService {
 					// participants... re-set it
 					engine = chatEngines.get(participant.getId());
 					
+					// update engine
+					updateEngine(engine);
+					
 					ConversationRepository repository = conversationManagementService.getRepository(interventionId);
 					
 					// re-initialize translator
@@ -258,23 +263,15 @@ public class RichConversationService {
 		ConversationUI ui = new CommunicationSwitch(mattermostConnector, participant);
 		HelpersRepository helpers = new HelpersRepository();
 		
-		double dialogSpeedup = 1.0;
-		
-		if (variableStore.containsVariable("$dialog_speedup")){
-			try {
-				dialogSpeedup = Double.parseDouble(variableStore.get("$dialog_speedup"));
-			} catch (Exception e){
-				log.error("Error parsing $dialog_speedup", e);
-			}
-		}
-		
 		Translator translator = prepareTranslator(participant.getLanguage(), repository, variableStore);
 		ChatEngine engine = new ChatEngine(repository, ui, variableStore, mediaLibrary,
-				helpers, translator, chatEngineStateStore, new TimingCalculatorAdvanced(dialogSpeedup));
+				helpers, translator, chatEngineStateStore, new TimingCalculatorAdvanced());
 		engine.sendExceptionAsMessage = false;
 		
 		engine.setLogger(logger);
 		chatEngines.put(participant.getId(), engine);
+		
+		updateEngine(engine);
 
 		// add helpers for PathMate intervention
 		helpers.addHelper("PM-add-1-to-total_keys",
@@ -357,6 +354,33 @@ public class RichConversationService {
 		return engine;
 	}
 	
+	public void updateEngine(ChatEngine engine) {
+		// --------------------
+		// update dialogSpeedup
+		// --------------------		
+		try {
+		
+			double dialogSpeedup = 1.0;
+			VariableStore variableStore = engine.getVariableStore();
+		
+			if (variableStore.containsVariable("$dialog_speedup")){
+				try {
+					dialogSpeedup = Double.parseDouble(variableStore.get("$dialog_speedup"));
+				} catch (Exception e){
+					log.error("Error parsing $dialog_speedup", e);
+				}
+			}
+			
+			TimingCalculator t = engine.getTimingCalculator();
+			if (t instanceof TimingCalculatorAdvanced){
+				((TimingCalculatorAdvanced) t).setSpeedUp(dialogSpeedup);
+			}
+		} catch (Exception e){
+			log.error("Error setting SpeedUp", e);
+		}
+		
+	}
+
 	private void updateChannelName(ObjectId participantId){
 		// update channel name
 		try {
