@@ -54,6 +54,7 @@ import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlideRule;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
+import ch.ethz.mc.services.internal.DeepstreamCommunicationService;
 import ch.ethz.mc.services.internal.FileStorageManagerService;
 import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.services.types.FeedbackSessionAttributeTypes;
@@ -691,8 +692,43 @@ public class SurveyExecutionManagerService {
 			}
 		}
 
-		// Adjust dialog status
+		// Handle dialog status for screenings
 		if (isScreening) {
+			// Create external id for specific service, if requested
+			if (nextSlide != null && nextSlide
+					.getProvideExternalIdDialologOptionAccessData() != null) {
+
+				switch (nextSlide
+						.getProvideExternalIdDialologOptionAccessData()) {
+					case DEEPSTREAM_PARTICIPANT:
+						if (Constants.isDeepstreamActive()) {
+							val externalRegistration = DeepstreamCommunicationService
+									.getInstance().registerUser(
+											ImplementationConstants.DEFAULT_PARTICIPANT_NICKNAME_FOR_SURVEY_GENERATION_FOR_DEEPSTREAM,
+											participantId, null, null, null,
+											false);
+
+							if (externalRegistration != null) {
+								log.debug(
+										"External Id registration for deepstream successful");
+
+								templateVariables.put(
+										SurveySlideTemplateFieldTypes.EXTERNAL_ID
+												.toVariable(),
+										externalRegistration.getExternalId());
+								templateVariables.put(
+										SurveySlideTemplateFieldTypes.EXTERNAL_SECRET
+												.toVariable(),
+										externalRegistration.getSecret());
+							}
+						}
+						break;
+
+				}
+			}
+
+			// Adjust dialog status (and set data for monitoring available if
+			// appropriate)
 			dialogStatusUpdateAfterDeterminingNextSlide(participantId,
 					formerSlide, true);
 		}

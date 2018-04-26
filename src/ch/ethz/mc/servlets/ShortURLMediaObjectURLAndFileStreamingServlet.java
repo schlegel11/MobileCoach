@@ -1,5 +1,6 @@
 package ch.ethz.mc.servlets;
 
+import java.io.File;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -38,6 +39,7 @@ import ch.ethz.mc.model.persistent.MediaObject;
 import ch.ethz.mc.model.persistent.MediaObjectParticipantShortURL;
 import ch.ethz.mc.services.InterventionAdministrationManagerService;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
+import ch.ethz.mc.services.internal.ImageCachingService;
 import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
 
 /**
@@ -65,6 +67,8 @@ public class ShortURLMediaObjectURLAndFileStreamingServlet extends HttpServlet {
 	private InterventionAdministrationManagerService	interventionAdministrationManagerService;
 	private InterventionExecutionManagerService			interventionExecutionManagerService;
 
+	private ImageCachingService							imageCachingService;
+
 	private FileServletWrapper							fileServletWrapper;
 
 	@Override
@@ -76,6 +80,8 @@ public class ShortURLMediaObjectURLAndFileStreamingServlet extends HttpServlet {
 				.getInterventionAdministrationManagerService();
 		interventionExecutionManagerService = MC.getInstance()
 				.getInterventionExecutionManagerService();
+
+		imageCachingService = MC.getInstance().getImageCachingService();
 
 		fileServletWrapper = new FileServletWrapper();
 		fileServletWrapper.init(getServletContext());
@@ -98,6 +104,10 @@ public class ShortURLMediaObjectURLAndFileStreamingServlet extends HttpServlet {
 			throws ServletException, IOException {
 		// Determine requested system unique id
 		MediaObjectParticipantShortURL mediaObjectParticipantShortURL = null;
+		int width = 0;
+		int height = 0;
+		boolean withWatermark = false;
+		boolean withCropping = false;
 		try {
 			final val pathParts = request.getPathInfo().split("/");
 
@@ -106,6 +116,18 @@ public class ShortURLMediaObjectURLAndFileStreamingServlet extends HttpServlet {
 
 			mediaObjectParticipantShortURL = interventionExecutionManagerService
 					.getMediaObjectParticipantShortURLByShortId(shortId);
+
+			// Additional, optional image parameters
+			if (pathParts.length >= 4) {
+				width = Integer.parseInt(pathParts[2]);
+				height = Integer.parseInt(pathParts[3]);
+			}
+			if (pathParts.length >= 5) {
+				withWatermark = Boolean.parseBoolean(pathParts[4]);
+			}
+			if (pathParts.length >= 6) {
+				withCropping = Boolean.parseBoolean(pathParts[5]);
+			}
 		} catch (final Exception e) {
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 			return;
@@ -136,27 +158,69 @@ public class ShortURLMediaObjectURLAndFileStreamingServlet extends HttpServlet {
 		// Handle file or URL based media objects
 		if (mediaObject.getFileReference() != null) {
 			// Retrieve file from media object
-			final val file = interventionAdministrationManagerService
+			final File file = interventionAdministrationManagerService
 					.getFileByReference(mediaObject.getFileReference(),
 							FILE_STORES.STORAGE);
-			log.debug("Serving file {}", file.getAbsoluteFile());
+			File cachedFile = null;
 
-			// Check if file actually exists in filesystem
-			if (!file.exists()) {
+			// Check if file actually exists in file system
+			if (file == null || !file.exists()) {
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				return;
 			}
+
+			// Retrieve cached/resized version of image if it is an image and
+			// additional resizing parameters are given
+			val fileExtension = file.getName()
+					.substring(file.getName().lastIndexOf(".")).toLowerCase();
+			if (ImplementationConstants.ACCEPTED_IMAGE_FORMATS
+					.contains(fileExtension) && width > 0 && height > 0) {
+				if (width > ImplementationConstants.IMAGE_MAX_WIDTH
+						|| height > ImplementationConstants.IMAGE_MAX_HEIGHT) {
+					log.debug(
+							"Image is requested in a bigger size than the allowed maximum size");
+					response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+					return;
+				}
+
+				try {
+					cachedFile = imageCachingService.requestCacheImage(file,
+							width, height, withWatermark, withCropping);
+				} catch (final Exception e) {
+					log.warn("Error at requesting cached image: {}",
+							e.getMessage());
+					response.sendError(
+							HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+					return;
+				}
+
+				// Check if file actually exists in file system
+				if (cachedFile == null || !cachedFile.exists()) {
+					response.sendError(HttpServletResponse.SC_NOT_FOUND);
+					return;
+				}
+			}
+
+			final File fileToWrap;
+
+			if (cachedFile != null) {
+				fileToWrap = cachedFile;
+			} else {
+				fileToWrap = file;
+			}
+
+			log.debug("Serving file {}", fileToWrap.getAbsoluteFile());
 
 			// Wrapping request
 			val wrapped = new HttpServletRequestWrapper(request) {
 				@Override
 				public String getPathInfo() {
-					return file.getAbsolutePath();
+					return fileToWrap.getAbsolutePath();
 				}
 			};
 
 			if (headerOnly) {
-				fileServletWrapper.doGet(wrapped, response);
+				fileServletWrapper.doHead(wrapped, response);
 			} else {
 				fileServletWrapper.doGet(wrapped, response);
 			}

@@ -47,7 +47,6 @@ import ch.ethz.mc.model.memory.ReceivedMessage;
 import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.Participant;
-import ch.ethz.mc.model.persistent.types.AnswerTypes;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogMessageTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
@@ -234,26 +233,12 @@ public class DeepstreamCommunicationService extends Thread
 	 * 
 	 * @param dialogOption
 	 * @param dialogMessageId
-	 * @param messageOrder
-	 * @param message
-	 * @param answerType
-	 * @param answerOptions
-	 * @param textBasedMediaObjectContent
-	 * @param surveyLink
-	 * @param contentObjectLink
-	 * @param messageExpectsAnswer
-	 * @param messageIsSticky
 	 * @return Number of visible message sent to this user since the last logout
 	 *         or zero if no message has been sent
 	 */
 	@Synchronized
 	public int asyncSendMessage(final DialogOption dialogOption,
-			final ObjectId dialogMessageId, final int messageOrder,
-			final String message, final AnswerTypes answerType,
-			final String answerOptions,
-			final String textBasedMediaObjectContent, final String surveyLink,
-			final String contentObjectLink, final boolean messageExpectsAnswer,
-			final boolean messageIsSticky) {
+			final ObjectId dialogMessageId) {
 
 		val dialogMessage = interventionExecutionManagerService
 				.dialogMessageStatusChangesForSending(dialogMessageId,
@@ -275,7 +260,8 @@ public class DeepstreamCommunicationService extends Thread
 					.getType() == DialogMessageTypes.COMMAND;
 
 			val messageObject = new JsonObject();
-			messageObject.addProperty(DeepstreamConstants.ID, messageOrder);
+			messageObject.addProperty(DeepstreamConstants.ID,
+					dialogMessage.getOrder());
 			messageObject.addProperty(DeepstreamConstants.STATUS,
 					DeepstreamConstants.STATUS_SENT_BY_SERVER);
 			messageObject.addProperty(DeepstreamConstants.TYPE,
@@ -289,20 +275,27 @@ public class DeepstreamCommunicationService extends Thread
 				messageObject.addProperty(DeepstreamConstants.CONTAINS_MEDIA,
 						dialogMessage.getMediaObjectLink());
 			}
+			if (dialogMessage.getMediaObjectType() != null) {
+				messageObject.addProperty(DeepstreamConstants.MEDIA_TYPE,
+						dialogMessage.getMediaObjectType().toJSONField());
+			}
 			if (isCommand) {
-				if (!StringUtils.isBlank(textBasedMediaObjectContent)) {
+				if (!StringUtils.isBlank(
+						dialogMessage.getTextBasedMediaObjectContent())) {
 					messageObject.addProperty(DeepstreamConstants.CONTENT,
-							textBasedMediaObjectContent);
+							dialogMessage.getTextBasedMediaObjectContent());
 				} else {
 					messageObject.addProperty(DeepstreamConstants.CONTENT, "");
 				}
 			}
 			messageObject.addProperty(DeepstreamConstants.SERVER_MESSAGE,
-					message);
+					dialogMessage.getMessage());
+			val answerType = dialogMessage.getAnswerType();
 			if (answerType != null) {
 				val answerTypeMessageObject = new JsonObject();
 				answerTypeMessageObject.addProperty(DeepstreamConstants.TYPE,
 						answerType.toJSONField());
+				val answerOptions = dialogMessage.getAnswerOptions();
 				if (answerType.isKeyValueBased()) {
 					answerTypeMessageObject.add(DeepstreamConstants.OPTIONS,
 							gson.fromJson(answerOptions, JsonElement.class));
@@ -316,14 +309,16 @@ public class DeepstreamCommunicationService extends Thread
 			messageObject.addProperty(DeepstreamConstants.MESSAGE_TIMESTAMP,
 					timestamp);
 			messageObject.addProperty(DeepstreamConstants.EXPECTS_ANSWER,
-					messageExpectsAnswer);
+					dialogMessage.isMessageExpectsAnswer());
 			messageObject.addProperty(DeepstreamConstants.LAST_MODIFIED,
 					timestamp);
 			messageObject.addProperty(DeepstreamConstants.STICKY,
-					messageIsSticky);
+					dialogMessage.isMessageIsSticky());
 
-			record.set(DeepstreamConstants.PATH_LIST
-					+ String.valueOf(messageOrder), messageObject);
+			record.set(
+					DeepstreamConstants.PATH_LIST
+							+ String.valueOf(dialogMessage.getOrder()),
+					messageObject);
 
 			client.event.emit(DeepstreamConstants.PATH_MESSAGE_UPDATE
 					+ participantOrSupervisorIdentifier, messageObject);
@@ -366,7 +361,7 @@ public class DeepstreamCommunicationService extends Thread
 			}
 		}
 
-		if (messageExpectsAnswer) {
+		if (dialogMessage.isMessageExpectsAnswer()) {
 			interventionExecutionManagerService
 					.dialogMessageStatusChangesForSending(dialogMessageId,
 							DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
@@ -621,9 +616,11 @@ public class DeepstreamCommunicationService extends Thread
 
 	/**
 	 * Creates a deepstream participant/supervisor and the belonging
-	 * intervention participant structures or returns null if not allowed
+	 * intervention participant structures (or reuses them if they already
+	 * exist); Returns null if not allowed
 	 * 
 	 * @param nickname
+	 * @param participantIdToCreateUserFor
 	 * @param relatedParticipantExternalId
 	 * @param interventionPattern
 	 * @param interventionPassword
@@ -631,6 +628,7 @@ public class DeepstreamCommunicationService extends Thread
 	 * @return
 	 */
 	public ExternalRegistration registerUser(final String nickname,
+			final ObjectId participantIdToCreateUserFor,
 			final String relatedParticipantExternalId,
 			final String interventionPattern, final String interventionPassword,
 			final boolean supervisorRequest) {
@@ -666,15 +664,28 @@ public class DeepstreamCommunicationService extends Thread
 			record = client.record.getRecord(DeepstreamConstants.PATH_MESSAGES
 					+ participantOrSupervisorExternalId);
 
-			createdSucessfully = interventionExecutionManagerService
-					.checkAccessRightsAndRegisterParticipantOrSupervisorExternallyWithoutSurvey(
-							nickname,
-							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
-									+ relatedParticipantExternalId,
-							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
-									+ participantOrSupervisorExternalId,
-							interventionPattern, interventionPassword,
-							supervisorRequest);
+			if (participantIdToCreateUserFor != null) {
+				// Extend existing participant
+				createdSucessfully = interventionExecutionManagerService
+						.registerExternalDialogOptionForParticipantOrSupervisor(
+								participantIdToCreateUserFor,
+								ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+										+ relatedParticipantExternalId,
+								ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+										+ participantOrSupervisorExternalId,
+								supervisorRequest);
+			} else {
+				// Create new participant
+				createdSucessfully = interventionExecutionManagerService
+						.checkAccessRightsAndRegisterParticipantOrSupervisorExternallyWithoutSurvey(
+								nickname,
+								ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+										+ relatedParticipantExternalId,
+								ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+										+ participantOrSupervisorExternalId,
+								interventionPattern, interventionPassword,
+								supervisorRequest);
+			}
 		} finally {
 			// Cleanup prepared user if registration was not possible
 			if (!createdSucessfully) {

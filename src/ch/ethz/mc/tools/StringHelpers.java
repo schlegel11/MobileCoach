@@ -177,8 +177,8 @@ public class StringHelpers {
 	 * @return
 	 */
 	public static String formatDateString(String dateString) {
-		return internalDateRepresentation
-				.format(createInternalDateCalendarRepresentation(dateString).getTime());
+		return internalDateRepresentation.format(
+				createInternalDateCalendarRepresentation(dateString).getTime());
 	}
 
 	/**
@@ -190,7 +190,7 @@ public class StringHelpers {
 	 */
 	public static String formatTimeString(String timeString) {
 		// Create calendar instance
-		val calendar = Calendar.getInstance(); 
+		val calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(InternalDateTime.currentTimeMillis());
 
 		// Convert value
@@ -199,13 +199,14 @@ public class StringHelpers {
 		val hour = Math.floor(timeValue);
 		calendar.set(Calendar.HOUR_OF_DAY, (int) hour);
 		calendar.set(Calendar.MINUTE,
-				(int) (Math.round((timeValue - hour) * 60))); 
+				(int) (Math.round((timeValue - hour) * 60)));
 
 		return internalTimeRepresentation.format(calendar.getTime());
 	}
 
 	/**
-	 * Creates calendar representation of given date string, e.g. 1.4. as Calendar representation of 01.04.2017 in 2017
+	 * Creates calendar representation of given date string, e.g. 1.4. as
+	 * Calendar representation of 01.04.2017 in 2017
 	 * 
 	 * @param dateString
 	 * @return

@@ -32,6 +32,7 @@ import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.types.AnswerTypes;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogMessageTypes;
+import ch.ethz.mc.model.persistent.types.MediaObjectTypes;
 import ch.ethz.mc.model.ui.UIDialogMessageProblemViewWithParticipant;
 import ch.ethz.mc.model.ui.UIDialogMessageWithParticipant;
 import ch.ethz.mc.model.ui.results.UIDialogMessageWithParticipantForResults;
@@ -136,6 +137,13 @@ public class DialogMessage extends ModelObject {
 	@Getter
 	@Setter
 	private String						mediaObjectLink;
+
+	/**
+	 * Optional type of media object linked in message
+	 */
+	@Getter
+	@Setter
+	private MediaObjectTypes			mediaObjectType;
 
 	/**
 	 * Optional text based media object content
