@@ -126,6 +126,9 @@ public class DataModelUpdateManager {
 				case 36:
 					updateToVersion36();
 					break;
+				case 37:
+					updateToVersion37();
+					break;
 			}
 
 			log.info("Update to version {} done", updateToVersionInThisStep);
@@ -623,5 +626,14 @@ public class DataModelUpdateManager {
 				.getCollection("ScreeningSurveySlide");
 		screeningSurveySlideCollection.update(Queries.EVERYTHING).multi().with(
 				Queries.UPDATE_VERSION_36__SCREENING_SURVEY_SLIDE__CHANGE_1);
+	}
+
+	/**
+	 * Changes for version 36:
+	 */
+	private static void updateToVersion37() {
+		val dialogMessageCollection = jongo.getCollection("DialogMessage");
+		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+				.with(Queries.UPDATE_VERSION_37__DIALOG_MESSAGE__CHANGE_1);
 	}
 }

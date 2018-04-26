@@ -266,4 +266,5 @@ public class Queries {
 	public static final String	UPDATE_VERSION_35__FEEDBACK__CHANGE_1																																											= "{$set:{'i18nIdentifier':#}}";
 	public static final String	UPDATE_VERSION_35__FEEDBACK_SLIDE__CHANGE_1																																										= "{$set:{'i18nIdentifier':#}}";
 	public static final String	UPDATE_VERSION_36__SCREENING_SURVEY_SLIDE__CHANGE_1																																								= "{$set:{'provideExternalIdDialologOptionAccessData':null}}";
+	public static final String	UPDATE_VERSION_37__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'mediaObjectType':null}}";
 }
