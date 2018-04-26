@@ -30,10 +30,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-import net.balusc.webapp.FileServletWrapper;
-
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.MC;
@@ -42,6 +38,9 @@ import ch.ethz.mc.model.persistent.MediaObject;
 import ch.ethz.mc.services.InterventionAdministrationManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
 import ch.ethz.mc.services.internal.ImageCachingService;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
+import net.balusc.webapp.FileServletWrapper;
 
 /**
  * The {@link MediaObjectFileStreamingServlet} serves files contained in
@@ -108,6 +107,7 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 			val pathParts = request.getPathInfo().split("/");
 			requestedElement = pathParts[1];
 
+			// Additional, optional image parameters
 			if (pathParts.length >= 4) {
 				width = Integer.parseInt(pathParts[2]);
 				height = Integer.parseInt(pathParts[3]);
@@ -138,31 +138,6 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				return null;
 			}
-
-			// Retrieve cached/resized version of image if an image is requested
-			val fileExtension = file.getName()
-					.substring(file.getName().lastIndexOf(".")).toLowerCase();
-			if (ImplementationConstants.ACCEPTED_IMAGE_FORMATS
-					.contains(fileExtension) && width > 0 && height > 0) {
-				if (width > ImplementationConstants.IMAGE_MAX_WIDTH
-						|| height > ImplementationConstants.IMAGE_MAX_HEIGHT) {
-					log.debug(
-							"Image is requested in a bigger size than the allowed maximum size");
-					response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-					return null;
-				}
-
-				try {
-					file = imageCachingService.requestCacheImage(file, width,
-							height, withWatermark, withCropping);
-				} catch (final Exception e) {
-					log.warn("Error at requesting cached image: {}",
-							e.getMessage());
-					response.sendError(
-							HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-					return null;
-				}
-			}
 		} else {
 			// Determine requested media object
 			ObjectId mediaObjectId = null;
@@ -187,6 +162,32 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 			// Retrieve file from media object
 			file = interventionAdministrationManagerService.getFileByReference(
 					mediaObject.getFileReference(), FILE_STORES.STORAGE);
+		}
+
+		// Retrieve cached/resized version of image if it is an image and
+		// additional resizing parameters are given
+		val fileExtension = file.getName()
+				.substring(file.getName().lastIndexOf(".")).toLowerCase();
+		if (ImplementationConstants.ACCEPTED_IMAGE_FORMATS
+				.contains(fileExtension) && width > 0 && height > 0) {
+			if (width > ImplementationConstants.IMAGE_MAX_WIDTH
+					|| height > ImplementationConstants.IMAGE_MAX_HEIGHT) {
+				log.debug(
+						"Image is requested in a bigger size than the allowed maximum size");
+				response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+				return null;
+			}
+
+			try {
+				file = imageCachingService.requestCacheImage(file, width,
+						height, withWatermark, withCropping);
+			} catch (final Exception e) {
+				log.warn("Error at requesting cached image: {}",
+						e.getMessage());
+				response.sendError(
+						HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				return null;
+			}
 		}
 
 		// Check if file actually exists in file system.
