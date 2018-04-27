@@ -580,7 +580,7 @@ public class MattermostMessagingService implements MessagingService {
 	                        		}
 	                        	}
                         	} catch (Exception e) {
-								log.error("Error parsing response: " + e.getMessage(), e);
+								log.error("Error parsing response: " + e.getMessage() + " " + StringHelpers.getStackTraceAsLine(e), e);
 								log.error("Error parsing: " + responseContent);
 							}
 
