@@ -116,6 +116,8 @@ public class Constants {
 	private static String	defaultAdminUsername				= "admin";
 	@Getter
 	private static String	defaultAdminPassword				= "admin";
+	@Getter
+	private static String	apiKey								= "";
 
 	/**
 	 * CAUTION: Do NEVER activate this on public servers! It's only for

@@ -1,5 +1,6 @@
 package ch.ethz.mc.rest.services;
 
+import java.io.InputStream;
 /*
  * Copyright (C) 2013-2016 MobileCoach Team at the Health-IS Lab
  * 
@@ -37,13 +38,19 @@ import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 
+import ch.ethz.mc.MC;
+import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.model.memory.DataTable;
+import ch.ethz.mc.model.persistent.Participant;
+import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.rest.CollectionOfExtendedListVariables;
 import ch.ethz.mc.model.rest.CollectionOfExtendedVariables;
 import ch.ethz.mc.model.rest.VariableAverage;
 import ch.ethz.mc.model.rest.Variable;
 import ch.ethz.mc.model.rest.CollectionOfVariables;
 import ch.ethz.mc.services.RESTManagerService;
+import ch.ethz.mc.tools.CSVExporter;
 import ch.ethz.mc.tools.StringValidator;
 
 /**
@@ -407,4 +414,46 @@ public class VariableAccessService extends AbstractService {
 
 		return Response.ok("OK").build();
 	}
+	
+	@GET
+	@Path("/export/{apikey}/{surveyid}.csv")
+	@Produces("application/text")
+	public InputStream export(
+			@PathParam("apikey") final String apiKey,
+			@PathParam("surveyid") final String surveyid,
+			@Context final HttpServletRequest request) {
+		
+		// check API key
+		if (Constants.getApiKey() == null || Constants.getApiKey().length() < 20 || !Constants.getApiKey().equals(apiKey)){
+			throw new WebApplicationException(Response.status(Status.FORBIDDEN).build());
+		}
+		
+		final DataTable dataTable = new DataTable();
+		
+		ScreeningSurvey survey = MC.getInstance().getDatabaseManagerService().findOneModelObject(ScreeningSurvey.class, "{_id: #}", new ObjectId(surveyid));
+		val allParticipants = MC.getInstance().getInterventionAdministrationManagerService().getAllParticipantsOfIntervention(survey.getIntervention());
+
+		for (Participant participant : allParticipants) {
+			ObjectId participantId = participant.getId();
+
+			val variablesWithValuesOfParticipant = MC.getInstance().getInterventionAdministrationManagerService()
+					.getAllVariablesWithValuesOfParticipantAndSystem(
+							participantId);
+			val statisticValuesOfParticipant = MC.getInstance().getInterventionAdministrationManagerService()
+					.getAllStatisticValuesOfParticipant(
+							participantId);
+			dataTable.addEntry(participantId, participant,
+					statisticValuesOfParticipant,
+					variablesWithValuesOfParticipant);
+		}
+
+		try {
+			return CSVExporter.convertDataTableToCSV(dataTable);
+		} catch (final Exception e) {
+			throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR)
+					.entity("Could not retrieve data: " + e.getMessage())
+					.build());
+		}
+	}	
+	
 }
