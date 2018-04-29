@@ -490,6 +490,11 @@ public class RichConversationService {
 		public boolean supportsReminders() {
 			return mattermostConnector.supportsReminders();
 		}
+
+		@Override
+		public void showNotification() {
+			mattermostConnector.showNotification();
+		}
 		
 	}
 
@@ -610,6 +615,13 @@ public class RichConversationService {
 		@Override
 		public boolean supportsReminders() {
 			return true;
+		}
+
+		@Override
+		public void showNotification() {
+			Post post = new Post();
+			post.setMessage("Please answer to continue! Thanks :)"); // TODO: send translated text
+			messagingService.sendMessage(sender, recipient, post, true);
 		}
 
 	}
