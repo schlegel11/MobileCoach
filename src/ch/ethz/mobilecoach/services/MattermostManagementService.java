@@ -1,6 +1,7 @@
 package ch.ethz.mobilecoach.services;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -232,6 +233,9 @@ public class MattermostManagementService {
 		addUserToChannel(config.getUserId(), managerChannel.getId(), team.teamId);
 		addUserToChannel(team.managerUserId, managerChannel.getId(), team.teamId);
 		
+		// add coach to channel, so that it can send push notifications on behalf of the team
+		addUserToChannel(coachUserId, managerChannel.getId(), team.teamId);
+		
 		if (Constants.getMattermostMonitoringUserId().length() > 0){
 			addUserToChannel(Constants.getMattermostMonitoringUserId(), coachingChannel.getId(), team.teamId);
 		}
@@ -244,6 +248,10 @@ public class MattermostManagementService {
 
 		config.setParticipantId(participantId);
 		databaseManagerService.saveModelObject(config);
+		
+		if (newParticipantListener != null){
+			newParticipantListener.onNewParticipant(config);
+		}
 
 		return config;
 	}
@@ -404,6 +412,10 @@ public class MattermostManagementService {
 		return config;
 	}
 	
+	public Iterable<MattermostUserConfiguration> getAllUserConfigurations(){
+		return databaseManagerService.findModelObjects(MattermostUserConfiguration.class, "{'participantId': {'$type': 7}}");
+	}
+
 	public long getParticipantCreationTimestamp(ObjectId participantId){
 		val participant = databaseManagerService.getModelObjectById(Participant.class, participantId);
 		if (participant != null) {
@@ -569,4 +581,44 @@ public class MattermostManagementService {
 			new MattermostTask<Void>(api_url + "teams/"+teamId+"/channels/update", json).setToken(adminUserToken).run();
 		}
 	}
+	
+	/*
+	 *  Problem fixing.
+	 *  
+	 *  Run this only once per user after restart.
+	 */
+	
+	HashSet<ObjectId> alreadyRunForParticipant = new HashSet<ObjectId>();	
+
+	public void fixAnyProblemsWithUserConfiguration(MattermostUserConfiguration config) {
+		
+		if (!alreadyRunForParticipant.contains(config.getParticipantId())){
+			
+			// make sure the coach user is part of the team chat channel
+			try {
+				String channelId = config.getChannels().get(1).getId();
+				addUserToChannel(coachUserId, channelId, config.getTeamId());
+			} catch (Exception e){
+				log.error("Unable to run Mattermost config fix: " + e.getMessage(), e);
+			}
+			
+			alreadyRunForParticipant.add(config.getParticipantId());
+		}
+	}
+	
+	/*
+	 * Listening to new-participant events (for mattermost messaging service)
+	 */
+	
+	NewParticipantListener newParticipantListener = null;
+	
+	public interface NewParticipantListener {
+		
+		public void onNewParticipant(MattermostUserConfiguration config);
+	}
+	
+	public void setNewParticipantListener(NewParticipantListener listener){
+		this.newParticipantListener = listener;
+	}
+	
 }

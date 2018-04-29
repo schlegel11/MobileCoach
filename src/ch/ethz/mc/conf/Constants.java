@@ -116,6 +116,8 @@ public class Constants {
 	private static String	defaultAdminUsername				= "admin";
 	@Getter
 	private static String	defaultAdminPassword				= "admin";
+	@Getter
+	private static String	apiKey								= "";
 
 	/**
 	 * CAUTION: Do NEVER activate this on public servers! It's only for
@@ -217,6 +219,9 @@ public class Constants {
 	
 	@Getter
 	private static String	pushMessage							= "";
+	
+	@Getter
+	private static String	teamPushMessage						= "";
 	
 	
 	/**
