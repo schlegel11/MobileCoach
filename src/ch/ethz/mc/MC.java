@@ -106,6 +106,9 @@ public class MC implements ServletContextListener {
 					.start(Constants.DATA_MODEL_VERSION);
 			fileStorageManagerService = FileStorageManagerService
 					.start(databaseManagerService);
+
+			databaseManagerService.ensureDatabaseConsistency();
+
 			imageCachingService = ImageCachingService
 					.start(fileStorageManagerService.getMediaCacheFolder());
 			variablesManagerService = VariablesManagerService

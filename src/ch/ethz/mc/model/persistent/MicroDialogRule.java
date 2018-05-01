@@ -185,6 +185,19 @@ public class MicroDialogRule extends AbstractMonitoringRule {
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see ch.ethz.mc.model.ModelObject#performOnDelete()
+	 */
+	@Override
+	public void performOnDelete() {
+		// Delete sub rules
+		val microDialogRulesToDelete = ModelObject.find(MicroDialogRule.class,
+				Queries.MICRO_DIALOG_RULE__BY_PARENT, getId());
+		ModelObject.delete(microDialogRulesToDelete);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see ch.ethz.mc.model.AbstractSerializableTable#toTable()
 	 */
 	@Override

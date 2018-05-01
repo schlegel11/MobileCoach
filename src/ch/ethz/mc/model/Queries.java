@@ -98,6 +98,7 @@ public class Queries {
 	public static final String	MICRO_DIALOG_RULE__BY_MICRO_DIALOG_DECISION_POINT																																								= "{'microDialogDecisionPoint':#}";
 	public static final String	MICRO_DIALOG_RULE__BY_MICRO_DIALOG_DECISION_POINT_AND_PARENT																																					= "{'microDialogDecisionPoint':#,'isSubRuleOfMonitoringRule':#}";
 	public static final String	MICRO_DIALOG_RULE__BY_MICRO_DIALOG_DECISION_POINT_AND_PARENT_AND_ORDER_HIGHER																																	= "{'microDialogDecisionPoint':#,'isSubRuleOfMonitoringRule':#,'order':{$gt:#}}";
+	public static final String	MICRO_DIALOG_RULE__BY_PARENT																																													= "{'isSubRuleOfMonitoringRule':#}";
 	public static final String	MICRO_DIALOG_RULE__BY_NEXT_MICRO_DIALOG_MESSAGE_WHEN_TRUE																																						= "{'nextMicroDialogMessageWhenTrue':#}";
 	public static final String	MICRO_DIALOG_RULE__BY_NEXT_MICRO_DIALOG_MESSAGE_WHEN_FALSE																																						= "{'nextMicroDialogMessageWhenFalse':#}";
 	public static final String	MICRO_DIALOG_RULE__SORT_BY_ORDER_ASC																																											= "{'order':1}";
