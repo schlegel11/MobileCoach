@@ -288,8 +288,13 @@ public class DeepstreamCommunicationService extends Thread
 					messageObject.addProperty(DeepstreamConstants.CONTENT, "");
 				}
 			}
-			messageObject.addProperty(DeepstreamConstants.SERVER_MESSAGE,
-					dialogMessage.getMessage());
+			if (isCommand) {
+				messageObject.addProperty(DeepstreamConstants.SERVER_MESSAGE,
+						dialogMessage.getMessageWithForcedLinks());
+			} else {
+				messageObject.addProperty(DeepstreamConstants.SERVER_MESSAGE,
+						dialogMessage.getMessage());
+			}
 			val answerType = dialogMessage.getAnswerType();
 			if (answerType != null) {
 				val answerTypeMessageObject = new JsonObject();
