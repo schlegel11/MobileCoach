@@ -57,10 +57,18 @@ public class CSVI18nStringsObjectEntryConverter {
 		entry.add(i18nStringsObject.getDescription());
 
 		for (val locale : locales) {
-			entry.add(cleanLinebreaks(text.get(locale), true));
+			if (text != null) {
+				entry.add(cleanLinebreaks(text.get(locale), true));
+			} else {
+				entry.add("");
+			}
 		}
 		for (val locale : locales) {
-			entry.add(cleanLinebreaks(answerOptions.get(locale), true));
+			if (text != null) {
+				entry.add(cleanLinebreaks(answerOptions.get(locale), true));
+			} else {
+				entry.add("");
+			}
 		}
 
 		return entry;
