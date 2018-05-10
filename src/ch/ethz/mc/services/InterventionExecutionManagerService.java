@@ -2134,10 +2134,8 @@ public class InterventionExecutionManagerService {
 				 * Care for rule execution results
 				 */
 				if (recursiveRuleResolver.isStopMicroDialogWhenTrue()) {
+					log.debug("Completely stop micro dialog");
 					return;
-				} else if (recursiveRuleResolver
-						.isLeaveDecisionPointWhenTrue()) {
-					stopMicroDialogHandling = true;
 				} else if (recursiveRuleResolver
 						.getNextMicroDialogMessage() != null) {
 					val nextMicroDialogMessage = recursiveRuleResolver
