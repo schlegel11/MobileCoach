@@ -131,6 +131,16 @@ public enum SurveySlideTemplateFieldTypes {
 	 */
 	INTERMEDIATE_SURVEY_URL,
 	/**
+	 * <strong>OPTIONAL:</strong> Can contain the external id to externally
+	 * access the system as participant
+	 */
+	EXTERNAL_ID,
+	/**
+	 * <strong>OPTIONAL:</strong> Can contain the external id secret which is
+	 * required in combination with the external id
+	 */
+	EXTERNAL_SECRET,
+	/**
 	 * Is true, when the slide is the last slide of the screening survey
 	 */
 	IS_LAST_SLIDE;

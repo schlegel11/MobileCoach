@@ -286,21 +286,14 @@ public class CommunicationManagerService {
 	public void sendMessage(final DialogOption dialogOption,
 			final DialogMessage dialogMessage, final String messageSender) {
 
-		final int messageOrder = dialogMessage.getOrder();
-		final String message = dialogMessage.getMessage();
-		final String messageWithForcedLinks = dialogMessage
-				.getMessageWithForcedLinks();
-		final boolean messageExpectsAnswer = dialogMessage
-				.isMessageExpectsAnswer();
-		final boolean messageIsSticky = dialogMessage.isMessageIsSticky();
-
 		switch (dialogOption.getType()) {
 			case SMS:
 			case SUPERVISOR_SMS:
 				if (smsActive) {
 					val mailingThread = new MailingThread(dialogOption,
 							dialogMessage.getId(), messageSender,
-							messageWithForcedLinks, messageExpectsAnswer);
+							dialogMessage.getMessageWithForcedLinks(),
+							dialogMessage.isMessageExpectsAnswer());
 
 					synchronized (runningMailingThreads) {
 						runningMailingThreads.add(mailingThread);
@@ -314,7 +307,8 @@ public class CommunicationManagerService {
 				if (emailActive) {
 					val mailingThread = new MailingThread(dialogOption,
 							dialogMessage.getId(), messageSender,
-							messageWithForcedLinks, messageExpectsAnswer);
+							dialogMessage.getMessageWithForcedLinks(),
+							dialogMessage.isMessageExpectsAnswer());
 
 					synchronized (runningMailingThreads) {
 						runningMailingThreads.add(mailingThread);
@@ -332,14 +326,7 @@ public class CommunicationManagerService {
 					try {
 						visibleMessagesSentSinceLogout = deepstreamCommunicationService
 								.asyncSendMessage(dialogOption,
-										dialogMessage.getId(), messageOrder,
-										message, dialogMessage.getAnswerType(),
-										dialogMessage.getAnswerOptions(),
-										dialogMessage
-												.getTextBasedMediaObjectContent(),
-										dialogMessage.getSurveyLink(),
-										dialogMessage.getMediaObjectLink(),
-										messageExpectsAnswer, messageIsSticky);
+										dialogMessage.getId());
 					} catch (final Exception e) {
 						log.warn("Could not send message using deepstream: {}",
 								e.getMessage());
@@ -358,7 +345,7 @@ public class CommunicationManagerService {
 								.getType() != DialogMessageTypes.COMMAND) {
 					try {
 						pushNotificationService.asyncSendPushNotification(
-								dialogOption, message,
+								dialogOption, dialogMessage.getMessage(),
 								visibleMessagesSentSinceLogout);
 					} catch (final Exception e) {
 						log.warn("Could not send push notification: {}",

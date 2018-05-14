@@ -34,6 +34,7 @@ import ch.ethz.mc.model.AbstractSerializableTable;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.subelements.LString;
+import ch.ethz.mc.model.persistent.types.ExternalIdDialogOptionTypes;
 import ch.ethz.mc.model.persistent.types.ScreeningSurveySlideQuestionTypes;
 import ch.ethz.mc.model.ui.UIModelObject;
 import ch.ethz.mc.model.ui.UIScreeningSurveySlide;
@@ -117,6 +118,7 @@ public class ScreeningSurveySlide extends ModelObject {
 		@Getter
 		@Setter
 		@NonNull
+
 		private String		defaultValue;
 
 		@Override
@@ -252,6 +254,15 @@ public class ScreeningSurveySlide extends ModelObject {
 	@Setter
 	@NonNull
 	private LString								validationErrorMessage;
+
+	/**
+	 * <strong>OPTIONAL:</strong> The value the variable should have if the
+	 * screening survey is executed automatically, because the participant
+	 * stopped filling it manually
+	 */
+	@Getter
+	@Setter
+	private ExternalIdDialogOptionTypes			provideExternalIdDialologOptionAccessData;
 
 	/**
 	 * <strong>The unique identifier used for i18n

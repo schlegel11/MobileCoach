@@ -51,6 +51,7 @@ import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.persistent.MediaObject;
 import ch.ethz.mc.model.persistent.types.MediaObjectTypes;
 import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
+import ch.ethz.mc.tools.FileHelpers;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.ui.NotificationMessageException;
 import lombok.SneakyThrows;
@@ -334,20 +335,9 @@ public class MediaObjectIntegrationComponentWithController
 
 			originalFileName = filename;
 
-			if (temporaryFileExtension.equals(".png")
-					|| temporaryFileExtension.equals(".jpg")
-					|| temporaryFileExtension.equals(".jpeg")
-					|| temporaryFileExtension.equals(".gif")) {
-				originalFileType = MediaObjectTypes.IMAGE;
-			} else if (temporaryFileExtension.equals(".mp4")) {
-				originalFileType = MediaObjectTypes.VIDEO;
-			} else if (temporaryFileExtension.equals(".aac")
-					|| temporaryFileExtension.equals(".m4a")) {
-				originalFileType = MediaObjectTypes.AUDIO;
-			} else if (temporaryFileExtension.equals(".htm")
-					|| temporaryFileExtension.equals(".html")) {
-				originalFileType = MediaObjectTypes.HTML_TEXT;
-			} else {
+			originalFileType = FileHelpers
+					.getMediaObjectTypeForFileExtension(temporaryFileExtension);
+			if (originalFileType == null) {
 				return null;
 			}
 

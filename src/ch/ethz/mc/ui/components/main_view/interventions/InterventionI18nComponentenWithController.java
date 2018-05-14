@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 
@@ -32,6 +34,8 @@ import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.model.memory.MessagesDialogsI18nStringsObject;
 import ch.ethz.mc.model.memory.SurveysFeedbacksI18nStringsObject;
 import ch.ethz.mc.model.persistent.Intervention;
+import ch.ethz.mc.model.persistent.MicroDialogDecisionPoint;
+import ch.ethz.mc.model.persistent.MicroDialogMessage;
 import ch.ethz.mc.services.InterventionAdministrationManagerService;
 import ch.ethz.mc.services.SurveyAdministrationManagerService;
 import ch.ethz.mc.tools.CSVExporter;
@@ -113,25 +117,75 @@ public class InterventionI18nComponentenWithController
 								intervention.getId());
 
 						for (val microDialog : microDialogs) {
-							val microDialogMessages = ias
-									.getAllMicroDialogMessagesOfMicroDialog(
+							val microDialogElements = ias
+									.getAllMicroDialogElementsOfMicroDialog(
 											microDialog.getId());
 
-							for (val microDialogMessage : microDialogMessages) {
-								val i18nStringsObject = new MessagesDialogsI18nStringsObject();
-								i18nStringsObject.setId("dm_"
-										+ microDialogMessage.getI18nIdentifier()
-										+ "_#");
-								i18nStringsObject
-										.setDescription(microDialog.getName());
+							for (val microDialogElement : microDialogElements) {
+								if (microDialogElement instanceof MicroDialogMessage) {
+									// Micro dialog message
+									val microDialogMessage = (MicroDialogMessage) microDialogElement;
 
-								i18nStringsObject.setText(microDialogMessage
-										.getTextWithPlaceholders());
-								i18nStringsObject
-										.setAnswerOptions(microDialogMessage
-												.getAnswerOptionsWithPlaceholders());
+									val i18nStringsObject = new MessagesDialogsI18nStringsObject();
+									i18nStringsObject.setId("dm_"
+											+ microDialogMessage
+													.getI18nIdentifier()
+											+ "_#");
 
-								i18nStringsObjectList.add(i18nStringsObject);
+									final StringBuffer constraints = new StringBuffer();
+									val microDialogMessageRules = ias
+											.getAllMicroDialogMessageRulesOfMicroDialogMessage(
+													microDialogMessage.getId());
+
+									for (val microDialogMessageRule : microDialogMessageRules) {
+										if (constraints.length() > 0) {
+											constraints.append(" and ");
+										}
+
+										constraints.append("["
+												+ StringHelpers.createRuleName(
+														microDialogMessageRule,
+														true)
+												+ "]");
+									}
+
+									i18nStringsObject.setDescription(
+											microDialog.getName()
+													+ (constraints.length() > 0
+															? " only when "
+																	+ constraints
+																			.toString()
+															: ""));
+
+									i18nStringsObject.setText(microDialogMessage
+											.getTextWithPlaceholders());
+									i18nStringsObject
+											.setAnswerOptions(microDialogMessage
+													.getAnswerOptionsWithPlaceholders());
+
+									i18nStringsObjectList
+											.add(i18nStringsObject);
+								} else if (microDialogElement instanceof MicroDialogDecisionPoint) {
+									// Micro dialog decision point
+									val microDialogDecisionPoint = (MicroDialogDecisionPoint) microDialogElement;
+
+									val i18nStringsObject = new MessagesDialogsI18nStringsObject();
+									i18nStringsObject.setId("dp");
+									i18nStringsObject.setDescription(microDialog
+											.getName()
+											+ " Decision Point"
+											+ (!StringUtils.isBlank(
+													microDialogDecisionPoint
+															.getComment())
+																	? " [" + microDialogDecisionPoint
+																			.getComment()
+																			+ "]"
+																	: ""));
+
+									i18nStringsObjectList
+											.add(i18nStringsObject);
+								}
+
 							}
 						}
 

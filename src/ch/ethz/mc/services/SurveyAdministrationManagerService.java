@@ -47,6 +47,7 @@ import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
 import ch.ethz.mc.model.persistent.ScreeningSurveySlideRule;
 import ch.ethz.mc.model.persistent.subelements.LString;
+import ch.ethz.mc.model.persistent.types.ExternalIdDialogOptionTypes;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import ch.ethz.mc.model.persistent.types.ScreeningSurveySlideQuestionTypes;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
@@ -367,7 +368,7 @@ public class SurveyAdministrationManagerService {
 				GlobalUniqueIdGenerator.createGlobalUniqueId(),
 				screeningSurveyId, 0, new LString(), "",
 				ScreeningSurveySlideQuestionTypes.TEXT_ONLY, "", questions,
-				null, null, false, null, new LString(),
+				null, null, false, null, new LString(), null,
 				GlobalUniqueIdGenerator.createSimpleGlobalUniqueId());
 
 		val question = new ScreeningSurveySlide.Question(new LString(),
@@ -722,6 +723,16 @@ public class SurveyAdministrationManagerService {
 
 			databaseManagerService.saveModelObject(screeningSurveySlide);
 		}
+	}
+
+	@Synchronized
+	public void screeningSurveySlideChangeProvideExternalIdDialologOptionAccessData(
+			final ScreeningSurveySlide screeningSurveySlide,
+			final ExternalIdDialogOptionTypes externalIdDialogOptionType) {
+		screeningSurveySlide.setProvideExternalIdDialologOptionAccessData(
+				externalIdDialogOptionType);
+
+		databaseManagerService.saveModelObject(screeningSurveySlide);
 	}
 
 	@Synchronized

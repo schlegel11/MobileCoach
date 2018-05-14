@@ -99,6 +99,20 @@ public class MonitoringReplyRule extends AbstractMonitoringRule {
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see ch.ethz.mc.model.ModelObject#performOnDelete()
+	 */
+	@Override
+	public void performOnDelete() {
+		// Delete sub rules
+		val monitoringReplyRulesToDelete = ModelObject.find(
+				MonitoringReplyRule.class,
+				Queries.MONITORING_REPLY_RULE__BY_PARENT, getId());
+		ModelObject.delete(monitoringReplyRulesToDelete);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see
 	 * ch.ethz.mc.model.ModelObject#collectThisAndRelatedModelObjectsForExport
 	 * (java.util.List)

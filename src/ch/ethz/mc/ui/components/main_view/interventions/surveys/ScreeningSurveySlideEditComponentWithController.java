@@ -1,5 +1,38 @@
 package ch.ethz.mc.ui.components.main_view.interventions.surveys;
 
+import org.bson.types.ObjectId;
+
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.BeanContainer;
+import com.vaadin.data.util.BeanItem;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Table;
+
+import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.conf.Messages;
+import ch.ethz.mc.model.persistent.Feedback;
+import ch.ethz.mc.model.persistent.ScreeningSurvey;
+import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
+import ch.ethz.mc.model.persistent.ScreeningSurveySlideRule;
+import ch.ethz.mc.model.persistent.subelements.LString;
+import ch.ethz.mc.model.persistent.types.ExternalIdDialogOptionTypes;
+import ch.ethz.mc.model.persistent.types.ScreeningSurveySlideQuestionTypes;
+import ch.ethz.mc.model.ui.UIAnswer;
+import ch.ethz.mc.model.ui.UIFeedback;
+import ch.ethz.mc.model.ui.UIQuestion;
+import ch.ethz.mc.model.ui.UIScreeningSurvey;
+import ch.ethz.mc.model.ui.UIScreeningSurveySlideRule;
+import ch.ethz.mc.tools.StringValidator;
+import ch.ethz.mc.ui.NotificationMessageException;
+import ch.ethz.mc.ui.components.basics.LocalizedPlaceholderStringEditComponent;
+import ch.ethz.mc.ui.components.basics.MediaObjectIntegrationComponentWithController.MediaObjectCreationOrDeleteionListener;
+import ch.ethz.mc.ui.components.basics.PlaceholderStringEditComponent;
+import ch.ethz.mc.ui.components.basics.ShortPlaceholderStringEditComponent;
+import ch.ethz.mc.ui.components.basics.ShortStringEditComponent;
+import ch.ethz.mc.ui.components.helpers.CaseInsensitiveItemSorter;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -22,39 +55,6 @@ package ch.ethz.mc.ui.components.main_view.interventions.surveys;
  */
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
-
-import org.bson.types.ObjectId;
-
-import ch.ethz.mc.conf.AdminMessageStrings;
-import ch.ethz.mc.conf.ImplementationConstants;
-import ch.ethz.mc.conf.Messages;
-import ch.ethz.mc.model.persistent.Feedback;
-import ch.ethz.mc.model.persistent.ScreeningSurvey;
-import ch.ethz.mc.model.persistent.ScreeningSurveySlide;
-import ch.ethz.mc.model.persistent.ScreeningSurveySlideRule;
-import ch.ethz.mc.model.persistent.subelements.LString;
-import ch.ethz.mc.model.persistent.types.ScreeningSurveySlideQuestionTypes;
-import ch.ethz.mc.model.ui.UIAnswer;
-import ch.ethz.mc.model.ui.UIFeedback;
-import ch.ethz.mc.model.ui.UIQuestion;
-import ch.ethz.mc.model.ui.UIScreeningSurvey;
-import ch.ethz.mc.model.ui.UIScreeningSurveySlideRule;
-import ch.ethz.mc.tools.StringValidator;
-import ch.ethz.mc.ui.NotificationMessageException;
-import ch.ethz.mc.ui.components.basics.LocalizedPlaceholderStringEditComponent;
-import ch.ethz.mc.ui.components.basics.PlaceholderStringEditComponent;
-import ch.ethz.mc.ui.components.basics.ShortPlaceholderStringEditComponent;
-import ch.ethz.mc.ui.components.basics.ShortStringEditComponent;
-import ch.ethz.mc.ui.components.basics.MediaObjectIntegrationComponentWithController.MediaObjectCreationOrDeleteionListener;
-import ch.ethz.mc.ui.components.helpers.CaseInsensitiveItemSorter;
-
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.BeanContainer;
-import com.vaadin.data.util.BeanItem;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Table;
 
 /**
  * Provides the screening survey slide rule edit component with a controller
@@ -331,6 +331,33 @@ public class ScreeningSurveySlideEditComponentWithController
 				adjust(false);
 			}
 		});
+
+		val externalAccessDataComboBox = getProvideExternalIdDialologOptionAccessDataComboBox();
+		for (val externalIDdialogOptionType : ExternalIdDialogOptionTypes
+				.values()) {
+			externalAccessDataComboBox.addItem(externalIDdialogOptionType);
+			if (screeningSurveySlide
+					.getProvideExternalIdDialologOptionAccessData() == externalIDdialogOptionType) {
+				externalAccessDataComboBox.select(externalIDdialogOptionType);
+			}
+		}
+		externalAccessDataComboBox
+				.addValueChangeListener(new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						val selectedExternalIdDialogOptionType = (ExternalIdDialogOptionTypes) event
+								.getProperty().getValue();
+
+						log.debug(
+								"Adjust provide external id dialog option access data to {}",
+								selectedExternalIdDialogOptionType);
+						getSurveyAdministrationManagerService()
+								.screeningSurveySlideChangeProvideExternalIdDialologOptionAccessData(
+										screeningSurveySlide,
+										selectedExternalIdDialogOptionType);
+					}
+				});
 
 		// Handle checkbox
 		getIsLastSlideCheckbox()

@@ -21,14 +21,15 @@ package ch.ethz.mc.model.persistent.types;
  * the License.
  */
 /**
- * Supported {@link MediaObjectTypes}
+ * Supported external ID dialog option types
  *
  * @author Andreas Filler
  */
-public enum MediaObjectTypes {
-	HTML_TEXT, URL, IMAGE, AUDIO, VIDEO;
+public enum ExternalIdDialogOptionTypes {
+	DEEPSTREAM_PARTICIPANT;
 
-	public String toJSONField() {
-		return name().toLowerCase().replace("_", "-");
+	@Override
+	public String toString() {
+		return name().toLowerCase().replace("_", " ");
 	}
 }

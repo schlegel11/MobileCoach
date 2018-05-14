@@ -793,7 +793,7 @@ public class RESTManagerService extends Thread {
 			}
 			if (deepstreamCommunicationService != null) {
 				return deepstreamCommunicationService.registerUser(nickname,
-						relatedParticipant, interventionPattern,
+						null, relatedParticipant, interventionPattern,
 						interventionPassword, false);
 			} else {
 				return null;
@@ -804,7 +804,7 @@ public class RESTManagerService extends Thread {
 			}
 			if (deepstreamCommunicationService != null) {
 				return deepstreamCommunicationService.registerUser(nickname,
-						relatedParticipant, interventionPattern,
+						null, relatedParticipant, interventionPattern,
 						interventionPassword, true);
 			} else {
 				return null;

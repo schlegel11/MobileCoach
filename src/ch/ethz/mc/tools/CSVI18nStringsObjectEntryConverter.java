@@ -57,10 +57,18 @@ public class CSVI18nStringsObjectEntryConverter {
 		entry.add(i18nStringsObject.getDescription());
 
 		for (val locale : locales) {
-			entry.add(cleanLinebreaks(text.get(locale), true));
+			if (text != null) {
+				entry.add(cleanLinebreaks(text.get(locale), true));
+			} else {
+				entry.add("");
+			}
 		}
 		for (val locale : locales) {
-			entry.add(cleanLinebreaks(answerOptions.get(locale), true));
+			if (text != null) {
+				entry.add(cleanLinebreaks(answerOptions.get(locale), true));
+			} else {
+				entry.add("");
+			}
 		}
 
 		return entry;
@@ -263,7 +271,7 @@ public class CSVI18nStringsObjectEntryConverter {
 		if (forWindows) {
 			return string.replaceAll("(\r\n|\r|\n)", "\r\n");
 		} else {
-			return string.replaceAll("(\r\n|\r|\n)", "\n");
+			return string.replaceAll("(\r\n|\r|\n)", "\n").replaceAll("\u2028", "");
 		}
 	}
 }

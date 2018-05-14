@@ -322,8 +322,8 @@ public class InterventionExecutionManagerService {
 		val dialogMessage = new DialogMessage(participant.getId(), 0,
 				DialogMessageStatusTypes.PREPARED_FOR_SENDING, type, null,
 				message, message, answerType, answerOptions, null, null, null,
-				timestampToSendMessage, -1, supervisorMessage, answerExpected,
-				isSticky, -1, -1, null, null, false,
+				null, timestampToSendMessage, -1, supervisorMessage,
+				answerExpected, isSticky, -1, -1, null, null, false,
 				relatedMonitoringRule == null ? null
 						: relatedMonitoringRule.getId(),
 				relatedMonitoringMessage == null ? null
@@ -411,6 +411,8 @@ public class InterventionExecutionManagerService {
 
 				dialogMessage.setMediaObjectLink(
 						mediaObjectParticipantShortURLString);
+				dialogMessage.setMediaObjectType(linkedMediaObject.getType());
+
 				if (message.contains(
 						ImplementationConstants.PLACEHOLDER_LINKED_MEDIA_OBJECT)) {
 					messageWithForcedLinks = messageWithForcedLinks.replace(
@@ -683,7 +685,7 @@ public class InterventionExecutionManagerService {
 				isTypeIntention ? DialogMessageStatusTypes.RECEIVED_AS_INTENTION
 						: DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY,
 				type, receivedMessage.getClientId(), "", "", null, null, null,
-				null, null, -1, -1, false, false, false, -1,
+				null, null, null, -1, -1, false, false, false, -1,
 				receivedMessage.getReceivedTimestamp(), answerCleaned,
 				answerRaw, isTypeIntention ? false : true, null, null, null,
 				null, false, false);
@@ -2132,10 +2134,8 @@ public class InterventionExecutionManagerService {
 				 * Care for rule execution results
 				 */
 				if (recursiveRuleResolver.isStopMicroDialogWhenTrue()) {
+					log.debug("Completely stop micro dialog");
 					return;
-				} else if (recursiveRuleResolver
-						.isLeaveDecisionPointWhenTrue()) {
-					stopMicroDialogHandling = true;
 				} else if (recursiveRuleResolver
 						.getNextMicroDialogMessage() != null) {
 					val nextMicroDialogMessage = recursiveRuleResolver
@@ -2649,7 +2649,7 @@ public class InterventionExecutionManagerService {
 
 	/**
 	 * Creates a participant or assigns a supervisor and adapts the belonging
-	 * intervention structures
+	 * intervention structures without prior survey participation
 	 * 
 	 * @param nickname
 	 * @param relatedParticipant
@@ -2766,6 +2766,77 @@ public class InterventionExecutionManagerService {
 			databaseManagerService.saveModelObject(dialogStatus);
 
 			log.debug("Created participant {}", participant);
+
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Registers a new participant or supervisor external id for an existing
+	 * {@link Participant}
+	 * 
+	 * @param participantIdToCreateUserFor
+	 * @param relatedParticipantExternalId
+	 * @param externalIdDialogOptionData
+	 * @param supervisorRequest
+	 * @return
+	 */
+	@Synchronized
+	public boolean registerExternalDialogOptionForParticipantOrSupervisor(
+			final ObjectId participantIdToCreateUserFor,
+			final String relatedParticipantExternalId,
+			final String externalIdDialogOptionData,
+			final boolean supervisorRequest) {
+		if (participantIdToCreateUserFor == null) {
+			log.error(
+					"Should never happen: No user given for the creation of external id dialog option");
+			return false;
+		}
+
+		if (supervisorRequest) {
+			val dialogOption = databaseManagerService.findOneModelObject(
+					DialogOption.class, Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
+					DialogOptionTypes.EXTERNAL_ID,
+					relatedParticipantExternalId);
+
+			if (dialogOption != null) {
+				if (!dialogOption.getParticipant()
+						.equals(participantIdToCreateUserFor)) {
+					log.error(
+							"Should never occur: Attempt to create supervisor for wrong/not fitting participant was made and rejected");
+					return false;
+				}
+
+				try {
+					variablesManagerService.writeVariableValueOfParticipant(
+							dialogOption.getParticipant(),
+							SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES.participantSupervisorDialogOptionExternalID
+									.toVariableName(),
+							externalIdDialogOptionData, false, false);
+				} catch (final Exception e) {
+					log.error(
+							"Should never occur: Error at writing participant dialog option external ID: {}",
+							e.getMessage());
+					return false;
+				}
+
+				return true;
+			}
+		} else {
+			try {
+				variablesManagerService.writeVariableValueOfParticipant(
+						participantIdToCreateUserFor,
+						SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES.participantDialogOptionExternalID
+								.toVariableName(),
+						externalIdDialogOptionData, false, false);
+			} catch (final Exception e) {
+				log.error(
+						"Should never occur: Error at writing participant dialog option external ID: {}",
+						e.getMessage());
+				return false;
+			}
 
 			return true;
 		}

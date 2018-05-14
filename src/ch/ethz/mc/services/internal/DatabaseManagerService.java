@@ -35,6 +35,9 @@ import ch.ethz.mc.model.Indices;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.Author;
+import ch.ethz.mc.model.persistent.MicroDialogRule;
+import ch.ethz.mc.model.persistent.MonitoringReplyRule;
+import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.consistency.DataModelConfiguration;
 import ch.ethz.mc.tools.BCrypt;
 import ch.ethz.mc.tools.DataModelUpdateManager;
@@ -197,6 +200,75 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 
 	/*
 	 * Class methods
+	 */
+	/**
+	 * Ensure database consistency
+	 */
+	public void ensureDatabaseConsistency() {
+		log.info("Ensuring database consistency...");
+
+		// Check recursive data model structures for inconsistencies or obsolete
+		// objects
+
+		int rulesChecked = 0;
+
+		val allMonitoringRules = findModelObjects(MonitoringRule.class,
+				Queries.ALL);
+		for (val monitoringRule : allMonitoringRules) {
+			rulesChecked++;
+
+			if (monitoringRule.getIsSubRuleOfMonitoringRule() != null) {
+				val relatedRule = getModelObjectById(MonitoringRule.class,
+						monitoringRule.getIsSubRuleOfMonitoringRule());
+				if (relatedRule == null) {
+					log.warn("Deleting unlinked rule with id {}",
+							monitoringRule.getId());
+					deleteModelObject(monitoringRule);
+				}
+			}
+		}
+
+		val allMonitoringReplyRules = findModelObjects(
+				MonitoringReplyRule.class, Queries.ALL);
+		for (val monitoringReplyRule : allMonitoringReplyRules) {
+			rulesChecked++;
+
+			if (monitoringReplyRule.getIsSubRuleOfMonitoringRule() != null) {
+				val relatedRule = getModelObjectById(MonitoringReplyRule.class,
+						monitoringReplyRule.getIsSubRuleOfMonitoringRule());
+				if (relatedRule == null) {
+					log.warn("Deleting unlinked rule with id {}",
+							monitoringReplyRule.getId());
+					deleteModelObject(monitoringReplyRule);
+				}
+			}
+		}
+
+		val allMicroDialogRules = findModelObjects(MicroDialogRule.class,
+				Queries.ALL);
+		for (val microDialogRule : allMicroDialogRules) {
+			rulesChecked++;
+
+			if (microDialogRule.getIsSubRuleOfMonitoringRule() != null) {
+				val relatedRule = getModelObjectById(MicroDialogRule.class,
+						microDialogRule.getIsSubRuleOfMonitoringRule());
+				if (relatedRule == null) {
+					log.warn("Deleting unlinked rule with id {}",
+							microDialogRule.getId());
+					deleteModelObject(microDialogRule);
+				}
+			}
+		}
+
+		log.info("{} rules checked.", rulesChecked);
+
+		log.info("Database consistency ensured.");
+	}
+
+	/**
+	 * Remove inconsistent {@link ModelObject}s
+	 * 
+	 * @param modelObject
 	 */
 	public void collectGarbage(final ModelObject modelObject) {
 		log.error(

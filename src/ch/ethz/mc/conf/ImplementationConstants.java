@@ -155,6 +155,7 @@ public class ImplementationConstants {
 	public static final String	REGULAR_EXPRESSION_TO_FIND_BOLD_STRING_PARTS						= "\\*([\\w\\s]+)\\*";
 
 	public static final String	DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM								= "ds:";
+	public static final String	DEFAULT_PARTICIPANT_NICKNAME_FOR_SURVEY_GENERATION_FOR_DEEPSTREAM	= "Participant";
 
 	public static final String	REPORT_TABLE														= "<table class=\"automatic\">|</table>";
 	public static final String	REPORT_TABLE_ROW													= "<tr #>|</tr>";

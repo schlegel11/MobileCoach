@@ -80,7 +80,7 @@ import ch.ethz.mc.tools.StringValidator;
 @Log4j2
 public class VariablesManagerService {
 	@Getter
-	private static VariablesManagerService										instance			= null;
+	private static VariablesManagerService										instance				= null;
 
 	private final DatabaseManagerService										databaseManagerService;
 
@@ -95,15 +95,17 @@ public class VariablesManagerService {
 	private final ConcurrentHashMap<String, Hashtable<String, MemoryVariable>>	participantsVariablesCache;
 	private final int															maxVariableHistory;
 
-	private static SimpleDateFormat												hourOfDayFormatter	= new SimpleDateFormat(
+	private static SimpleDateFormat												minuteOfHourFormatter	= new SimpleDateFormat(
+			"m");
+	private static SimpleDateFormat												hourOfDayFormatter		= new SimpleDateFormat(
 			"H");
-	private static SimpleDateFormat												dayInWeekFormatter	= new SimpleDateFormat(
+	private static SimpleDateFormat												dayInWeekFormatter		= new SimpleDateFormat(
 			"u");
-	private static SimpleDateFormat												dayOfMonthFormatter	= new SimpleDateFormat(
+	private static SimpleDateFormat												dayOfMonthFormatter		= new SimpleDateFormat(
 			"d");
-	private static SimpleDateFormat												monthFormatter		= new SimpleDateFormat(
+	private static SimpleDateFormat												monthFormatter			= new SimpleDateFormat(
 			"M");
-	private static SimpleDateFormat												yearFormatter		= new SimpleDateFormat(
+	private static SimpleDateFormat												yearFormatter			= new SimpleDateFormat(
 			"yyyy");
 
 	private VariablesManagerService(
@@ -469,6 +471,12 @@ public class VariablesManagerService {
 			MonitoringMessage relatedMonitoringMessage,
 			MicroDialogMessage relatedMicroDialogMessage) {
 		switch (variable) {
+			case systemDecimalMinuteOfHour:
+				return String.valueOf(
+						Double.parseDouble(minuteOfHourFormatter.format(date))
+								/ 60);
+			case systemMinuteOfHour:
+				return minuteOfHourFormatter.format(date);
 			case systemHourOfDay:
 				return hourOfDayFormatter.format(date);
 			case systemDayInWeek:
