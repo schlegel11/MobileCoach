@@ -54,6 +54,7 @@ public class PushNotificationService {
 	final static String							BLOB				= "blob";
 	final static String							KEY					= "key";
 	final static String							TO					= "to";
+	final static String							PRIORITY			= "priority";
 	final static String							DATA				= "data";
 	final static String							NOTIFICATION		= "notification";
 	final static String							BODY				= "body";
@@ -62,6 +63,7 @@ public class PushNotificationService {
 	final static String							ICON_NAME			= "ic_notification";
 	final static String							BADGE				= "badge";
 	final static String							DEFAULT				= "default";
+	final static String							PRIORITY_VALUE		= "high";
 	final static String							BAD_DEVICE_TOKEN	= "BadDeviceToken";
 
 	public final static String					GOOGLE_FCM_API_URL	= "https://fcm.googleapis.com/fcm/send";
@@ -405,6 +407,7 @@ public class PushNotificationService {
 			final JsonObject jsonObject = new JsonObject();
 
 			jsonObject.addProperty(TO, token);
+			jsonObject.addProperty(PRIORITY, PRIORITY_VALUE);
 
 			if (messageEncrypted) {
 				final JsonObject dataContent = new JsonObject();
