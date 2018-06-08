@@ -89,7 +89,7 @@
 			<AppenderRef ref="File" level="WARN" />
 			<AppenderRef ref="RollingFile" level="${sys:mc_logging_rolling_file_level}" />
 		</Logger>
-		<Logger name="ch.ethz.mc.tools.VariableStringReplacer" level="INFO"
+		<Logger name="ch.ethz.mc.tools.VariableStringReplacer" level="DEBUG"
 			additivity="false">
 			<AppenderRef ref="Console" level="${sys:mc_logging_console_level}" />
 			<AppenderRef ref="File" level="WARN" />

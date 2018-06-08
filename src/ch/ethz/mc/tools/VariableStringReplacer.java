@@ -201,18 +201,18 @@ public class VariableStringReplacer {
 					.matcher(stringWithVariables
 							.substring(variableFindMatcher.end()));
 
+			String modifier;
 			if (variableModifierFindMatcher.find()
 					&& variableModifierFindMatcher.start() == 0) {
-				variablesFoundInRuleModifiers
-						.add(variableModifierFindMatcher.group().substring(1,
-								variableModifierFindMatcher.group().length()
-										- 1));
+				modifier = variableModifierFindMatcher.group().substring(1,
+						variableModifierFindMatcher.group().length() - 1);
 			} else {
-				variablesFoundInRuleModifiers.add(null);
+				modifier = null;
 			}
+			variablesFoundInRuleModifiers.add(modifier);
 
-			log.debug("Found variable {} in string {}",
-					variableFindMatcher.group(), stringWithVariables);
+			log.debug("Found variable {} with modifier {} in string {}",
+					variableFindMatcher.group(), modifier, stringWithVariables);
 		}
 
 		// Find variable values and put value into rule
@@ -271,6 +271,8 @@ public class VariableStringReplacer {
 							}
 							stringWithVariables = stringWithVariables
 									.replace(formattedVariable, formattedValue);
+							log.debug("Replaced formatted variable {} with {}",
+									formattedVariable, formattedValue);
 						} catch (final Exception e) {
 							log.warn(
 									"Could not modify string {} with modifier {}",
@@ -281,10 +283,11 @@ public class VariableStringReplacer {
 					} else {
 						// Replace variable with value in rule
 						stringWithVariables = stringWithVariables
-								.replace(variable, value);
+								.replaceAll(variable + "[^\\}]?", value);
+						log.debug("Replaced unformatted variable {} with {}",
+								variable, value);
 					}
 
-					log.debug("Replaced {} with {}", variable, value);
 					continue variableSearchLoop;
 				}
 			}

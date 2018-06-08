@@ -68,7 +68,7 @@ public class Constants {
 	 * CAUTION: Can NOT be defined in configuration file
 	 */
 	// TODO RELEASE Switch always to "false" before release
-	public static final boolean	RUN_TESTS_AT_STARTUP				= false;
+	public static final boolean	RUN_TESTS_AT_STARTUP				= true;
 
 	/**
 	 * Data model version
