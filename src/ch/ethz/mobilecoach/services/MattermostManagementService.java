@@ -594,12 +594,14 @@ public class MattermostManagementService {
 		
 		if (!alreadyRunForParticipant.contains(config.getParticipantId())){
 			
-			// make sure the coach user is part of the team chat channel
-			try {
-				String channelId = config.getChannels().get(1).getId();
-				addUserToChannel(coachUserId, channelId, config.getTeamId());
-			} catch (Exception e){
-				log.error("Unable to run Mattermost config fix: " + e.getMessage(), e);
+			if(Constants.isFixChannelsForTeamPushAtStartup()){
+				// make sure the coach user is part of the team chat channel
+				try {
+					String channelId = config.getChannels().get(1).getId();
+					addUserToChannel(coachUserId, channelId, config.getTeamId());
+				} catch (Exception e){
+					log.error("Unable to run Mattermost config fix: " + e.getMessage(), e);
+				}
 			}
 			
 			alreadyRunForParticipant.add(config.getParticipantId());

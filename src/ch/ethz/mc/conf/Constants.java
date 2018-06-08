@@ -223,6 +223,11 @@ public class Constants {
 	@Getter
 	private static String	teamPushMessage						= "";
 	
+	@Getter
+	private static int		teamPushMessageEnabledAtUnixTime	= 0;	// when upgrading to team push message support, 
+																		// set this time (in seconds) for avoiding sending push notification for old messages
+	@Getter
+	private static boolean	fixChannelsForTeamPushAtStartup		= false; // enable this once when upgrading to team push support
 	
 	/**
 	 * Mattermost configuration
