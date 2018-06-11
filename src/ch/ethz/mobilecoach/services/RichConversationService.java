@@ -101,9 +101,6 @@ public class RichConversationService {
 
 		while (iterator.hasNext()) {
 			ChatEnginePersistentState ces = iterator.next();
-			
-			boolean deleteIt = false;
-
 			if (ChatEngineStateStore.containsARecentChatEngineState(ces)) {
 
 				log.debug("Restoring chat engine state: " + new Date(ces.getTimeStamp()) + " " 
@@ -134,17 +131,10 @@ public class RichConversationService {
 					ces.setStatus("Not Found");
 				}
 			} else {
-				// Outdated => delete state
 				ces.setStatus("Outdated");
-				deleteIt = true;
 			}
-			
-			// update status
-			if (!deleteIt){
-				dBManagerService.saveModelObject(ces);
-			} else {
-				dBManagerService.deleteModelObject(ces);
-			}
+
+			dBManagerService.saveModelObject(ces);
 		}
 
 		this.messagingService.startReceiving();

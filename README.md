@@ -1,3 +1,13 @@
+
+IMPORTANT NOTE:
+
+For the CAMP project, we use the following version of ScriptEngine (never change a running system...):
+
+c6558f57846f4c805caf30f10e2c0e4d781d2da0
+Date:   Wed Jan 31 13:12:50 2018 +0100
+
+
+
 # Welcome to the *MobileCoach*!
 
 *MobileCoach* is the Open Source Behavioral Intervention Platform designed by **ETH Zurich**, the **University of St. Gallen** and the **Swiss Research Institute for Public Health and Addiction**.

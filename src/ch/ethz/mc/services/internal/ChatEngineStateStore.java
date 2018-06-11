@@ -40,10 +40,12 @@ public class ChatEngineStateStore implements ChatEngineStateStoreIfc {
 		
 		if(chatEngineState == null){
 			return false;
-		} 
+		}
+		
+		return true; // deactivate this optimization: conversations can be continued forever
 		
 		// we consider it recent if it is newer than 3 * 24 hours
-		return System.currentTimeMillis() - chatEngineState.getTimeStamp() < 1000 * 3600 * 24 * 3;
+		//return System.currentTimeMillis() - chatEngineState.getTimeStamp() < 1000 * 3600 * 24 * 3;
 	}
 
 	@Override
