@@ -22,6 +22,7 @@ package ch.ethz.mc.tools;
  */
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -189,11 +190,9 @@ public class VariableStringReplacer {
 		final Matcher variableFindMatcher = variableFindPattern
 				.matcher(stringWithVariables);
 
-		val variablesFoundInRule = new ArrayList<String>();
-		val variablesFoundInRuleModifiers = new ArrayList<String>();
+		val variablesFoundInRule = new LinkedList<String>();
+		val variablesFoundInRuleModifiers = new LinkedList<String>();
 		while (variableFindMatcher.find()) {
-			variablesFoundInRule.add(variableFindMatcher.group());
-
 			// Check for modifiers
 			val variableModifierFindPattern = Pattern.compile(
 					ImplementationConstants.REGULAR_EXPRESSION_TO_MATCH_VALUE_MODIFIER);
@@ -209,7 +208,17 @@ public class VariableStringReplacer {
 			} else {
 				modifier = null;
 			}
-			variablesFoundInRuleModifiers.add(modifier);
+
+			// Variables with modifiers need to be replaced before other
+			// variables to avoid wrong replacement of variables with modifiers
+			// by regular values
+			if (modifier == null) {
+				variablesFoundInRule.add(variableFindMatcher.group());
+				variablesFoundInRuleModifiers.add(modifier);
+			} else {
+				variablesFoundInRule.add(0, variableFindMatcher.group());
+				variablesFoundInRuleModifiers.add(0, modifier);
+			}
 
 			log.debug("Found variable {} with modifier {} in string {}",
 					variableFindMatcher.group(), modifier, stringWithVariables);
@@ -283,7 +292,7 @@ public class VariableStringReplacer {
 					} else {
 						// Replace variable with value in rule
 						stringWithVariables = stringWithVariables
-								.replaceAll(variable + "[^\\}]?", value);
+								.replace(variable, value);
 						log.debug("Replaced unformatted variable {} with {}",
 								variable, value);
 					}
