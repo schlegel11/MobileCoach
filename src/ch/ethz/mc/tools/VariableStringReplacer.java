@@ -22,6 +22,7 @@ package ch.ethz.mc.tools;
  */
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -189,11 +190,9 @@ public class VariableStringReplacer {
 		final Matcher variableFindMatcher = variableFindPattern
 				.matcher(stringWithVariables);
 
-		val variablesFoundInRule = new ArrayList<String>();
-		val variablesFoundInRuleModifiers = new ArrayList<String>();
+		val variablesFoundInRule = new LinkedList<String>();
+		val variablesFoundInRuleModifiers = new LinkedList<String>();
 		while (variableFindMatcher.find()) {
-			variablesFoundInRule.add(variableFindMatcher.group());
-
 			// Check for modifiers
 			val variableModifierFindPattern = Pattern.compile(
 					ImplementationConstants.REGULAR_EXPRESSION_TO_MATCH_VALUE_MODIFIER);
@@ -201,18 +200,28 @@ public class VariableStringReplacer {
 					.matcher(stringWithVariables
 							.substring(variableFindMatcher.end()));
 
+			String modifier;
 			if (variableModifierFindMatcher.find()
 					&& variableModifierFindMatcher.start() == 0) {
-				variablesFoundInRuleModifiers
-						.add(variableModifierFindMatcher.group().substring(1,
-								variableModifierFindMatcher.group().length()
-										- 1));
+				modifier = variableModifierFindMatcher.group().substring(1,
+						variableModifierFindMatcher.group().length() - 1);
 			} else {
-				variablesFoundInRuleModifiers.add(null);
+				modifier = null;
 			}
 
-			log.debug("Found variable {} in string {}",
-					variableFindMatcher.group(), stringWithVariables);
+			// Variables with modifiers need to be replaced before other
+			// variables to avoid wrong replacement of variables with modifiers
+			// by regular values
+			if (modifier == null) {
+				variablesFoundInRule.add(variableFindMatcher.group());
+				variablesFoundInRuleModifiers.add(modifier);
+			} else {
+				variablesFoundInRule.add(0, variableFindMatcher.group());
+				variablesFoundInRuleModifiers.add(0, modifier);
+			}
+
+			log.debug("Found variable {} with modifier {} in string {}",
+					variableFindMatcher.group(), modifier, stringWithVariables);
 		}
 
 		// Find variable values and put value into rule
@@ -271,6 +280,8 @@ public class VariableStringReplacer {
 							}
 							stringWithVariables = stringWithVariables
 									.replace(formattedVariable, formattedValue);
+							log.debug("Replaced formatted variable {} with {}",
+									formattedVariable, formattedValue);
 						} catch (final Exception e) {
 							log.warn(
 									"Could not modify string {} with modifier {}",
@@ -282,9 +293,10 @@ public class VariableStringReplacer {
 						// Replace variable with value in rule
 						stringWithVariables = stringWithVariables
 								.replace(variable, value);
+						log.debug("Replaced unformatted variable {} with {}",
+								variable, value);
 					}
 
-					log.debug("Replaced {} with {}", variable, value);
 					continue variableSearchLoop;
 				}
 			}
