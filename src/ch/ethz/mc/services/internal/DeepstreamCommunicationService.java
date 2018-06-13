@@ -362,7 +362,11 @@ public class DeepstreamCommunicationService extends Thread
 			return 0;
 		} finally {
 			if (record != null) {
-				record.discard();
+				try {
+					record.discard();
+				} catch (final Exception e) {
+					log.warn("Could not discard record on message sending");
+				}
 			}
 		}
 
@@ -507,7 +511,12 @@ public class DeepstreamCommunicationService extends Thread
 					receivedMessage.getSender(), e.getMessage());
 		} finally {
 			if (record != null) {
-				record.discard();
+				try {
+					record.discard();
+				} catch (final Exception e) {
+					log.warn(
+							"Could not discard record on acknoledging message");
+				}
 			}
 		}
 	}
@@ -557,7 +566,12 @@ public class DeepstreamCommunicationService extends Thread
 					e.getMessage());
 		} finally {
 			if (record != null) {
-				record.discard();
+				try {
+					record.discard();
+				} catch (final Exception e) {
+					log.warn(
+							"Could not discard record on sending answering timeout");
+				}
 			}
 		}
 	}
@@ -613,7 +627,11 @@ public class DeepstreamCommunicationService extends Thread
 					participantOrSupervisorIdentifier);
 		} finally {
 			if (record != null) {
-				record.discard();
+				try {
+					record.discard();
+				} catch (final Exception e) {
+					log.warn("Could not discard record on secret check");
+				}
 			}
 		}
 		return true;
@@ -699,7 +717,12 @@ public class DeepstreamCommunicationService extends Thread
 				return null;
 			} else {
 				if (record != null) {
-					record.discard();
+					try {
+						record.discard();
+					} catch (final Exception e) {
+						log.warn(
+								"Could not discard record on user registration");
+					}
 				}
 			}
 		}
@@ -749,7 +772,11 @@ public class DeepstreamCommunicationService extends Thread
 					participantOrSupervisorId);
 		} finally {
 			if (record != null) {
-				record.discard();
+				try {
+					record.discard();
+				} catch (final Exception e) {
+					log.warn("Could not discard record on cleanup");
+				}
 			}
 		}
 	}
@@ -1199,7 +1226,11 @@ public class DeepstreamCommunicationService extends Thread
 			log.warn("Problems when cleaning up client: {}", e.getMessage());
 		} finally {
 			if (client != null) {
-				client.close();
+				try {
+					client.close();
+				} catch (final Exception e) {
+					log.warn("Could not close client on cleanup");
+				}
 			}
 		}
 	}

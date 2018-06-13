@@ -271,7 +271,8 @@ public class CSVI18nStringsObjectEntryConverter {
 		if (forWindows) {
 			return string.replaceAll("(\r\n|\r|\n)", "\r\n");
 		} else {
-			return string.replaceAll("(\r\n|\r|\n)", "\n").replaceAll("\u2028", "");
+			return string.replaceAll("(\r\n|\r|\n)", "\n").replaceAll("\u2028",
+					"");
 		}
 	}
 }
