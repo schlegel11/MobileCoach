@@ -458,6 +458,10 @@ public class DataModelUpdateManager {
 		val participantVariableWithValueCollection = jongo
 				.getCollection("ParticipantVariableWithValue");
 
+		log.info("Creating index...");
+		participantVariableWithValueCollection.ensureIndex(
+				Queries.UPDATE_VERSION_29__PARTICIPANT_VARIABLE_WITH_VAUE__CHANGE_1_SORT);
+
 		for (val participantVariableWithValue : participantVariableWithValueCollection
 				.find(Queries.ALL)
 				.sort(Queries.UPDATE_VERSION_29__PARTICIPANT_VARIABLE_WITH_VAUE__CHANGE_1_SORT)
@@ -490,6 +494,10 @@ public class DataModelUpdateManager {
 				cache.put(key, newParticipantVariableWithValue);
 			}
 		}
+
+		log.info("Removing index...");
+		participantVariableWithValueCollection.dropIndex(
+				Queries.UPDATE_VERSION_29__PARTICIPANT_VARIABLE_WITH_VAUE__CHANGE_1_SORT);
 
 		log.info("Clearing all variables...");
 		participantVariableWithValueCollection.remove(Queries.ALL);
