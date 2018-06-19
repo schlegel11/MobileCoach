@@ -165,9 +165,7 @@ public class MattermostMessagingService implements MessagingService {
 	}
 	
 	public void ensureParticipantExists(ObjectId recipient){
-		if (!managementService.existsUserForParticipant(recipient)){
-			managementService.createParticipantUser(recipient);
-		}
+		managementService.createParticipantUserIfNotExists(recipient);
 	}
 	
 

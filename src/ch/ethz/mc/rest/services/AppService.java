@@ -147,13 +147,7 @@ public class AppService {
 	
 
 	private MattermostUserConfiguration fetchUserConfiguration(final ObjectId participantId) {
-		MattermostUserConfiguration userConfig;
-		if (mattMgmtService.existsUserForParticipant(participantId)) {
-			userConfig = mattMgmtService.getUserConfiguration(participantId);
-		} else {
-			userConfig = mattMgmtService.createParticipantUser(participantId);
-		}
-		return userConfig;
+		return mattMgmtService.createParticipantUserIfNotExists(participantId);
 	}
 	
 	private Map<String, String> getVariables(final ObjectId participantId) {

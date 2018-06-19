@@ -178,7 +178,14 @@ public class MattermostManagementService {
 
 		databaseManagerService.saveModelObject(config);	
 	}
-
+	
+	public synchronized MattermostUserConfiguration createParticipantUserIfNotExists(ObjectId participantId){
+		if (existsUserForParticipant(participantId)) {
+			return getUserConfiguration(participantId);
+		} else {
+			return createParticipantUser(participantId);
+		}
+	}
 
 	public MattermostUserConfiguration createParticipantUser(ObjectId participantId){
 		ensureAuthentication();
