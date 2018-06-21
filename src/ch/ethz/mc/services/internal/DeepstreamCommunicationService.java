@@ -842,6 +842,11 @@ public class DeepstreamCommunicationService extends Thread
 			for (val user : client.presence.getAll()) {
 				loggedInUsers.add(user);
 				allUsersVisibleMessagesSentSinceLastLogout.put(user, 0);
+				interventionExecutionManagerService
+						.participantRememberLoginBasedOnDialogOptionTypeAndData(
+								DialogOptionTypes.EXTERNAL_ID,
+								ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+										+ user);
 			}
 
 			client.presence.subscribe(this);
@@ -1243,6 +1248,11 @@ public class DeepstreamCommunicationService extends Thread
 	@Override
 	public void onClientLogin(final String user) {
 		loggedInUsers.add(user);
+		interventionExecutionManagerService
+				.participantRememberLoginBasedOnDialogOptionTypeAndData(
+						DialogOptionTypes.EXTERNAL_ID,
+						ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+								+ user);
 	}
 
 	/*
@@ -1254,6 +1264,11 @@ public class DeepstreamCommunicationService extends Thread
 	public void onClientLogout(final String user) {
 		loggedInUsers.remove(user);
 		allUsersVisibleMessagesSentSinceLastLogout.put(user, 0);
+		interventionExecutionManagerService
+				.participantRememberLogoutBasedOnDialogOptionTypeAndData(
+						DialogOptionTypes.EXTERNAL_ID,
+						ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+								+ user);
 	}
 
 	@Override

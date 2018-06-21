@@ -51,18 +51,26 @@ import lombok.val;
  * @author Andreas Filler
  */
 public class StringHelpers {
-	private static SimpleDateFormat	simpleDateFormat			= new SimpleDateFormat(
+	private static SimpleDateFormat	simpleDateFormat				= new SimpleDateFormat(
 			"yyyy-MM-dd");
-	private static SimpleDateFormat	longDateFormat				= new SimpleDateFormat(
+	private static SimpleDateFormat	longDateFormat					= new SimpleDateFormat(
 			"yyyy-MM-dd HH:mm:ss");
 
-	private static SimpleDateFormat	internalDateRepresentation	= new SimpleDateFormat(
+	private static SimpleDateFormat	internalDateRepresentation		= new SimpleDateFormat(
 			"dd.MM.yyyy");
 
-	private static SimpleDateFormat	internalTimeRepresentation	= new SimpleDateFormat(
+	private static SimpleDateFormat	internalHourRepresentation		= new SimpleDateFormat(
+			"HH");
+	private static SimpleDateFormat	internalMinuteRepresentation	= new SimpleDateFormat(
+			"mm");
+
+	private static SimpleDateFormat	cleanDateRepresentation			= new SimpleDateFormat(
+			"dd.MM.yyyy");
+
+	private static SimpleDateFormat	cleanTimeRepresentation			= new SimpleDateFormat(
 			"HH:mm");
 
-	private static Gson				gson						= new Gson();
+	private static Gson				gson							= new Gson();
 
 	/**
 	 * Creates a readable name representation of a rule's name
@@ -158,15 +166,39 @@ public class StringHelpers {
 		return simpleDateFormat.format(date);
 	}
 
-	public static String createStringTimeStamp(final long timeStamp) {
-		if (timeStamp <= 0) {
+	public static String createStringTimestamp(final long timestamp) {
+		if (timestamp <= 0) {
 			return Messages
 					.getAdminString(AdminMessageStrings.UI_MODEL__NOT_SET);
 		}
 
-		val date = new Date(timeStamp);
+		val date = new Date(timestamp);
 
 		return longDateFormat.format(date);
+	}
+
+	/**
+	 * Formats given timestamp to an internal date representation, e.g.
+	 * 26.07.2017
+	 * 
+	 * @param dateString
+	 * @return
+	 */
+	public static String formatInternalDate(long timestamp) {
+		return internalDateRepresentation.format(timestamp);
+	}
+
+	/**
+	 * Formats given timestamp to an internal time representation, e.g. 04.5
+	 * 
+	 * @param timeString
+	 * @return
+	 */
+	public static String formatInternalTime(long timestamp) {
+		return internalHourRepresentation.format(timestamp) + "."
+				+ Math.floor(Integer.parseInt(
+						internalMinuteRepresentation.format(timestamp)) / 60
+						* 100);
 	}
 
 	/**
@@ -177,7 +209,7 @@ public class StringHelpers {
 	 * @return
 	 */
 	public static String formatDateString(String dateString) {
-		return internalDateRepresentation.format(
+		return cleanDateRepresentation.format(
 				createInternalDateCalendarRepresentation(dateString).getTime());
 	}
 
@@ -201,7 +233,7 @@ public class StringHelpers {
 		calendar.set(Calendar.MINUTE,
 				(int) (Math.round((timeValue - hour) * 60)));
 
-		return internalTimeRepresentation.format(calendar.getTime());
+		return cleanTimeRepresentation.format(calendar.getTime());
 	}
 
 	/**

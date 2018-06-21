@@ -3366,47 +3366,47 @@ public class InterventionAdministrationManagerService {
 		values.put(
 				Messages.getAdminString(
 						AdminMessageStrings.STATISTICS__CREATED),
-				StringHelpers.createStringTimeStamp(
+				StringHelpers.createStringTimestamp(
 						participant.getCreatedTimestamp()));
 
 		if (dialogStatus != null) {
 			values.put(
 					Messages.getAdminString(
 							AdminMessageStrings.STATISTICS__SCREENING_SURVEY_STARTED),
-					StringHelpers.createStringTimeStamp(
+					StringHelpers.createStringTimestamp(
 							dialogStatus.getScreeningSurveyStartedTimestamp()));
 			values.put(
 					Messages.getAdminString(
 							AdminMessageStrings.STATISTICS__SCREENING_SURVEY_PERFORMED),
-					StringHelpers.createStringTimeStamp(dialogStatus
+					StringHelpers.createStringTimestamp(dialogStatus
 							.getScreeningSurveyPerformedTimestamp()));
 			values.put(
 					Messages.getAdminString(
 							AdminMessageStrings.STATISTICS__MONITORING_STARTED),
-					StringHelpers.createStringTimeStamp(
+					StringHelpers.createStringTimestamp(
 							dialogStatus.getMonitoringStartedTimestamp()));
 			values.put(
 					Messages.getAdminString(
 							AdminMessageStrings.STATISTICS__MONITORING_PERFORMED),
-					StringHelpers.createStringTimeStamp(
+					StringHelpers.createStringTimestamp(
 							dialogStatus.getMonitoringPerformedTimestamp()));
 		} else {
 			values.put(
 					Messages.getAdminString(
 							AdminMessageStrings.STATISTICS__SCREENING_SURVEY_STARTED),
-					StringHelpers.createStringTimeStamp(0));
+					StringHelpers.createStringTimestamp(0));
 			values.put(
 					Messages.getAdminString(
 							AdminMessageStrings.STATISTICS__SCREENING_SURVEY_PERFORMED),
-					StringHelpers.createStringTimeStamp(0));
+					StringHelpers.createStringTimestamp(0));
 			values.put(
 					Messages.getAdminString(
 							AdminMessageStrings.STATISTICS__MONITORING_STARTED),
-					StringHelpers.createStringTimeStamp(0));
+					StringHelpers.createStringTimestamp(0));
 			values.put(
 					Messages.getAdminString(
 							AdminMessageStrings.STATISTICS__MONITORING_PERFORMED),
-					StringHelpers.createStringTimeStamp(0));
+					StringHelpers.createStringTimestamp(0));
 		}
 
 		// Message counts

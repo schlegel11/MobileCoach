@@ -37,6 +37,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.bson.types.ObjectId;
 
+import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.Queries;
@@ -79,6 +80,8 @@ import ch.ethz.mc.tools.StringValidator;
  */
 @Log4j2
 public class VariablesManagerService {
+	private final Object														$lock;
+
 	@Getter
 	private static VariablesManagerService										instance				= null;
 
@@ -111,6 +114,8 @@ public class VariablesManagerService {
 	private VariablesManagerService(
 			final DatabaseManagerService databaseManagerService)
 			throws Exception {
+		$lock = MC.getInstance();
+
 		log.info("Starting service...");
 
 		this.databaseManagerService = databaseManagerService;
@@ -199,8 +204,8 @@ public class VariablesManagerService {
 
 	public Hashtable<String, AbstractVariableWithValue> getAllVariablesWithValuesOfParticipantAndSystem(
 			final Participant participant,
-			MonitoringMessage relatedMonitoringMessage,
-			MicroDialogMessage relatedMicroDialogMessage) {
+			final MonitoringMessage relatedMonitoringMessage,
+			final MicroDialogMessage relatedMicroDialogMessage) {
 		val variablesWithValues = new Hashtable<String, AbstractVariableWithValue>();
 
 		// Add all read/write participant variables
@@ -335,7 +340,7 @@ public class VariablesManagerService {
 			final String variableName) {
 
 		// Get relevant interventions
-		List<ObjectId> interventionsToCheck = new ArrayList<ObjectId>();
+		final List<ObjectId> interventionsToCheck = new ArrayList<ObjectId>();
 
 		val participant = databaseManagerService
 				.getModelObjectById(Participant.class, participantId);
@@ -468,8 +473,8 @@ public class VariablesManagerService {
 
 	private String getReadOnlySystemVariableValue(final Date date,
 			final READ_ONLY_SYSTEM_VARIABLES variable,
-			MonitoringMessage relatedMonitoringMessage,
-			MicroDialogMessage relatedMicroDialogMessage) {
+			final MonitoringMessage relatedMonitoringMessage,
+			final MicroDialogMessage relatedMicroDialogMessage) {
 		switch (variable) {
 			case systemDecimalMinuteOfHour:
 				return String.valueOf(
@@ -552,6 +557,19 @@ public class VariablesManagerService {
 					}
 				}
 				return participantFeedbackURL;
+			case participantLastLoginDate:
+				return StringHelpers.formatInternalDate(
+						participant.getLastLoginTimestamp());
+			case participantLastLoginTime:
+				return StringHelpers.formatInternalTime(
+						participant.getLastLoginTimestamp());
+			case participantLastLogoutDate:
+				return StringHelpers.formatInternalDate(
+						participant.getLastLogoutTimestamp());
+			case participantLastLogoutTime:
+				return StringHelpers.formatInternalTime(
+						participant.getLastLogoutTimestamp());
+
 		}
 		return null;
 	}
@@ -1085,7 +1103,8 @@ public class VariablesManagerService {
 	public String externallyReadVariableValueForParticipant(
 			final ObjectId participantId, final String variable,
 			final InterventionVariableWithValuePrivacyTypes requestPrivacyType,
-			boolean isService) throws ExternallyReadProtectedVariableException {
+			final boolean isService)
+			throws ExternallyReadProtectedVariableException {
 
 		if (allSystemReservedVariableNames.contains(variable)) {
 			// It's a reserved variable
@@ -1237,7 +1256,7 @@ public class VariablesManagerService {
 	public void externallyWriteVariableForParticipant(
 			final ObjectId participantId, final String variable,
 			final String value, final boolean describesMediaUpload,
-			boolean isService)
+			final boolean isService)
 			throws ExternallyWriteProtectedVariableException {
 		if (allSystemReservedVariableNames.contains(variable)) {
 			// It's a reserved variable; these can't be written in general from
@@ -1312,7 +1331,7 @@ public class VariablesManagerService {
 	 */
 	public void serviceWriteVotingFromParticipantForParticipant(
 			final ObjectId participantId, final ObjectId receivingParticipantId,
-			final String variable, boolean addVote)
+			final String variable, final boolean addVote)
 			throws ExternallyWriteProtectedVariableException {
 		if (allSystemReservedVariableNames.contains(variable)) {
 			// It's a reserved variable; these can't be written in general from
@@ -1481,7 +1500,7 @@ public class VariablesManagerService {
 	 * @throws ExternallyWriteProtectedVariableException
 	 */
 	public void serviceWriteCreditWithNameForParticipantToVariable(
-			final ObjectId participantId, String creditName,
+			final ObjectId participantId, final String creditName,
 			final String variable)
 			throws ExternallyWriteProtectedVariableException {
 		if (allSystemReservedVariableNames.contains(variable)) {
