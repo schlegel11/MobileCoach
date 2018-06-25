@@ -581,6 +581,7 @@ public class DeepstreamCommunicationService extends Thread
 	 * 
 	 * @return
 	 */
+	@Synchronized
 	public List<ReceivedMessage> getReceivedMessages() {
 		val newReceivedMessages = new ArrayList<ReceivedMessage>();
 
@@ -599,19 +600,17 @@ public class DeepstreamCommunicationService extends Thread
 	 * @param secret
 	 * @return
 	 */
+	@Synchronized
 	public boolean checkSecret(final String participantOrSupervisorIdentifier,
 			final String secret) {
 		Record record = null;
 		try {
 			String secretFromRecord;
-			synchronized (client) {
-				record = client.record
-						.getRecord(DeepstreamConstants.PATH_MESSAGES
-								+ participantOrSupervisorIdentifier);
+			record = client.record.getRecord(DeepstreamConstants.PATH_MESSAGES
+					+ participantOrSupervisorIdentifier);
 
-				secretFromRecord = record.get(DeepstreamConstants.SECRET)
-						.getAsString();
-			}
+			secretFromRecord = record.get(DeepstreamConstants.SECRET)
+					.getAsString();
 
 			if (StringUtils.isBlank(secretFromRecord)) {
 				return false;
@@ -650,6 +649,7 @@ public class DeepstreamCommunicationService extends Thread
 	 * @param supervisorRequest
 	 * @return
 	 */
+	@Synchronized
 	public ExternalRegistration registerUser(final String nickname,
 			final ObjectId participantIdToCreateUserFor,
 			final String relatedParticipantExternalId,
@@ -670,18 +670,16 @@ public class DeepstreamCommunicationService extends Thread
 				+ RandomStringUtils.randomAlphanumeric(25);
 		final String secret = RandomStringUtils.randomAlphanumeric(128);
 
-		synchronized (client) {
-			val record = client.record
-					.getRecord(DeepstreamConstants.PATH_MESSAGES
-							+ participantOrSupervisorExternalId);
-			record.set(DeepstreamConstants.SECRET, secret);
-			record.set(DeepstreamConstants.ROLE,
-					supervisorRequest ? supervisorRole : participantRole);
+		Record record = client.record
+				.getRecord(DeepstreamConstants.PATH_MESSAGES
+						+ participantOrSupervisorExternalId);
+		record.set(DeepstreamConstants.SECRET, secret);
+		record.set(DeepstreamConstants.ROLE,
+				supervisorRequest ? supervisorRole : participantRole);
 
-			record.discard();
-		}
+		record.discard();
 
-		Record record = null;
+		record = null;
 		boolean createdSucessfully = false;
 		try {
 			record = client.record.getRecord(DeepstreamConstants.PATH_MESSAGES
@@ -737,6 +735,7 @@ public class DeepstreamCommunicationService extends Thread
 	 * @param participantId
 	 * @return
 	 */
+	@Synchronized
 	public boolean checkIfParticipantIsConnected(final String participantId) {
 		if (loggedInUsers.contains(participantId)) {
 			return true;
@@ -750,6 +749,7 @@ public class DeepstreamCommunicationService extends Thread
 	 * 
 	 * @param participantOrSupervisorId
 	 */
+	@Synchronized
 	public void cleanupForParticipantOrSupervisor(
 			final String participantOrSupervisorId) {
 
@@ -759,13 +759,10 @@ public class DeepstreamCommunicationService extends Thread
 					ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
 							+ participantOrSupervisorId);
 
-			synchronized (client) {
-				record = client.record
-						.getRecord(DeepstreamConstants.PATH_MESSAGES
-								+ participantOrSupervisorId);
+			record = client.record.getRecord(DeepstreamConstants.PATH_MESSAGES
+					+ participantOrSupervisorId);
 
-				record.delete();
-			}
+			record.delete();
 		} catch (final Exception e) {
 			log.warn(
 					"Could not cleanup deepstream for participant/supervisor {}",
@@ -789,6 +786,7 @@ public class DeepstreamCommunicationService extends Thread
 	 * 
 	 * @throws Exception
 	 */
+	@Synchronized
 	private boolean connectOrReconnect() throws Exception {
 		if (!reconnecting) {
 			while (!restStartupComplete) {
@@ -860,6 +858,7 @@ public class DeepstreamCommunicationService extends Thread
 	/**
 	 * Provide RPC methods
 	 */
+	@Synchronized
 	private void provideMethods() {
 		// Can only be called by a "participant" (role)
 		client.rpc.provide(DeepstreamConstants.RPC_REST_TOKEN,
@@ -1056,6 +1055,7 @@ public class DeepstreamCommunicationService extends Thread
 	 * @param participantId
 	 * @return
 	 */
+	@Synchronized
 	private String createRESTToken(final String participantId) {
 		return restManagerService.createToken(
 				ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
@@ -1068,6 +1068,7 @@ public class DeepstreamCommunicationService extends Thread
 	 * @param participantOrSupervisorId
 	 * @return
 	 */
+	@Synchronized
 	private boolean storePushToken(final String participantOrSupervisorId,
 			final PushNotificationTypes pushNotificationType,
 			final String pushToken) {
@@ -1101,6 +1102,7 @@ public class DeepstreamCommunicationService extends Thread
 	 * @param typeIntention
 	 * @return
 	 */
+	@Synchronized
 	private boolean receiveMessage(final String participantId,
 			final String message, final long timestamp,
 			final int relatedMessageIdBasedOnOrder, final String intention,
@@ -1150,6 +1152,7 @@ public class DeepstreamCommunicationService extends Thread
 	 * @param value
 	 * @return
 	 */
+	@Synchronized
 	private boolean writeVariableValue(final String participantId,
 			final String variable, final String value) {
 		log.debug("Received new value for variable {} for participant {}",
@@ -1174,6 +1177,7 @@ public class DeepstreamCommunicationService extends Thread
 	 * @param timestamp
 	 * @return
 	 */
+	@Synchronized
 	private JsonObject getMessageDiff(final String participantOrSupervisorId,
 			final long timestamp) {
 		log.debug(
@@ -1210,6 +1214,7 @@ public class DeepstreamCommunicationService extends Thread
 		return jsonObject;
 	}
 
+	@Synchronized
 	private void cleanupClient() throws Exception {
 		try {
 			client.setRuntimeErrorHandler(null);
