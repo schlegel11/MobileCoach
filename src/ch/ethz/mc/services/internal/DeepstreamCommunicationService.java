@@ -239,6 +239,7 @@ public class DeepstreamCommunicationService extends Thread
 	@Synchronized
 	public int asyncSendMessage(final DialogOption dialogOption,
 			final ObjectId dialogMessageId) {
+		log.debug("Sending message {}", dialogMessageId);
 
 		val dialogMessage = interventionExecutionManagerService
 				.dialogMessageStatusChangesForSending(dialogMessageId,
@@ -249,123 +250,136 @@ public class DeepstreamCommunicationService extends Thread
 		int messagesSentSinceLastLogout = 0;
 
 		Record record = null;
-		try {
-			val participantOrSupervisorIdentifier = dialogOption.getData()
-					.substring(substringLength);
+		synchronized (client) {
+			try {
+				val participantOrSupervisorIdentifier = dialogOption.getData()
+						.substring(substringLength);
 
-			record = client.record.getRecord(DeepstreamConstants.PATH_MESSAGES
-					+ participantOrSupervisorIdentifier);
+				val isCommand = dialogMessage
+						.getType() == DialogMessageTypes.COMMAND;
 
-			val isCommand = dialogMessage
-					.getType() == DialogMessageTypes.COMMAND;
-
-			val messageObject = new JsonObject();
-			messageObject.addProperty(DeepstreamConstants.ID,
-					dialogMessage.getOrder());
-			messageObject.addProperty(DeepstreamConstants.STATUS,
-					DeepstreamConstants.STATUS_SENT_BY_SERVER);
-			messageObject.addProperty(DeepstreamConstants.TYPE,
-					isCommand ? DeepstreamConstants.TYPE_COMMAND
-							: DeepstreamConstants.TYPE_PLAIN);
-			if (!StringUtils.isBlank(dialogMessage.getSurveyLink())) {
-				messageObject.addProperty(DeepstreamConstants.CONTAINS_SURVEY,
-						dialogMessage.getSurveyLink());
-			}
-			if (!StringUtils.isBlank(dialogMessage.getMediaObjectLink())) {
-				messageObject.addProperty(DeepstreamConstants.CONTAINS_MEDIA,
-						dialogMessage.getMediaObjectLink());
-			}
-			if (dialogMessage.getMediaObjectType() != null) {
-				messageObject.addProperty(DeepstreamConstants.MEDIA_TYPE,
-						dialogMessage.getMediaObjectType().toJSONField());
-			}
-			if (isCommand) {
-				if (!StringUtils.isBlank(
-						dialogMessage.getTextBasedMediaObjectContent())) {
-					messageObject.addProperty(DeepstreamConstants.CONTENT,
-							dialogMessage.getTextBasedMediaObjectContent());
-				} else {
-					messageObject.addProperty(DeepstreamConstants.CONTENT, "");
+				val messageObject = new JsonObject();
+				messageObject.addProperty(DeepstreamConstants.ID,
+						dialogMessage.getOrder());
+				messageObject.addProperty(DeepstreamConstants.STATUS,
+						DeepstreamConstants.STATUS_SENT_BY_SERVER);
+				messageObject.addProperty(DeepstreamConstants.TYPE,
+						isCommand ? DeepstreamConstants.TYPE_COMMAND
+								: DeepstreamConstants.TYPE_PLAIN);
+				if (!StringUtils.isBlank(dialogMessage.getSurveyLink())) {
+					messageObject.addProperty(
+							DeepstreamConstants.CONTAINS_SURVEY,
+							dialogMessage.getSurveyLink());
 				}
-			}
-			if (isCommand) {
-				messageObject.addProperty(DeepstreamConstants.SERVER_MESSAGE,
-						dialogMessage.getMessageWithForcedLinks());
-			} else {
-				messageObject.addProperty(DeepstreamConstants.SERVER_MESSAGE,
-						dialogMessage.getMessage());
-			}
-			val answerType = dialogMessage.getAnswerType();
-			if (answerType != null) {
-				val answerTypeMessageObject = new JsonObject();
-				answerTypeMessageObject.addProperty(DeepstreamConstants.TYPE,
-						answerType.toJSONField());
-				val answerOptions = dialogMessage.getAnswerOptions();
-				if (answerType.isKeyValueBased()) {
-					answerTypeMessageObject.add(DeepstreamConstants.OPTIONS,
-							gson.fromJson(answerOptions, JsonElement.class));
-				} else {
-					answerTypeMessageObject.addProperty(
-							DeepstreamConstants.OPTIONS, answerOptions);
+				if (!StringUtils.isBlank(dialogMessage.getMediaObjectLink())) {
+					messageObject.addProperty(
+							DeepstreamConstants.CONTAINS_MEDIA,
+							dialogMessage.getMediaObjectLink());
 				}
-				messageObject.add(DeepstreamConstants.ANSWER_FORMAT,
-						answerTypeMessageObject);
-			}
-			messageObject.addProperty(DeepstreamConstants.MESSAGE_TIMESTAMP,
-					timestamp);
-			messageObject.addProperty(DeepstreamConstants.EXPECTS_ANSWER,
-					dialogMessage.isMessageExpectsAnswer());
-			messageObject.addProperty(DeepstreamConstants.LAST_MODIFIED,
-					timestamp);
-			messageObject.addProperty(DeepstreamConstants.STICKY,
-					dialogMessage.isMessageIsSticky());
-
-			record.set(
-					DeepstreamConstants.PATH_LIST
-							+ String.valueOf(dialogMessage.getOrder()),
-					messageObject);
-
-			client.event.emit(DeepstreamConstants.PATH_MESSAGE_UPDATE
-					+ participantOrSupervisorIdentifier, messageObject);
-
-			// If it's not a visible message ignore it
-			if (!isCommand) {
-				synchronized (allUsersVisibleMessagesSentSinceLastLogout) {
-					if (loggedInUsers
-							.contains(participantOrSupervisorIdentifier)) {
-						// If user is logged in remember as one (for late logout
-						// users)
-						messagesSentSinceLastLogout = 1;
-					} else if (allUsersVisibleMessagesSentSinceLastLogout
-							.containsKey(participantOrSupervisorIdentifier)) {
-						// User is not logged in and well known
-						messagesSentSinceLastLogout = allUsersVisibleMessagesSentSinceLastLogout
-								.get(participantOrSupervisorIdentifier) + 1;
+				if (dialogMessage.getMediaObjectType() != null) {
+					messageObject.addProperty(DeepstreamConstants.MEDIA_TYPE,
+							dialogMessage.getMediaObjectType().toJSONField());
+				}
+				if (isCommand) {
+					if (!StringUtils.isBlank(
+							dialogMessage.getTextBasedMediaObjectContent())) {
+						messageObject.addProperty(DeepstreamConstants.CONTENT,
+								dialogMessage.getTextBasedMediaObjectContent());
 					} else {
-						// User is not logged in and not known
-						messagesSentSinceLastLogout = 1;
+						messageObject.addProperty(DeepstreamConstants.CONTENT,
+								"");
 					}
-					allUsersVisibleMessagesSentSinceLastLogout.put(
-							participantOrSupervisorIdentifier,
-							messagesSentSinceLastLogout);
 				}
-			}
-		} catch (final Exception e) {
-			log.warn("Could not send message to {}: {}", dialogOption.getData(),
-					e.getMessage());
+				if (isCommand) {
+					messageObject.addProperty(
+							DeepstreamConstants.SERVER_MESSAGE,
+							dialogMessage.getMessageWithForcedLinks());
+				} else {
+					messageObject.addProperty(
+							DeepstreamConstants.SERVER_MESSAGE,
+							dialogMessage.getMessage());
+				}
+				val answerType = dialogMessage.getAnswerType();
+				if (answerType != null) {
+					val answerTypeMessageObject = new JsonObject();
+					answerTypeMessageObject.addProperty(
+							DeepstreamConstants.TYPE, answerType.toJSONField());
+					val answerOptions = dialogMessage.getAnswerOptions();
+					if (answerType.isKeyValueBased()) {
+						answerTypeMessageObject.add(DeepstreamConstants.OPTIONS,
+								gson.fromJson(answerOptions,
+										JsonElement.class));
+					} else {
+						answerTypeMessageObject.addProperty(
+								DeepstreamConstants.OPTIONS, answerOptions);
+					}
+					messageObject.add(DeepstreamConstants.ANSWER_FORMAT,
+							answerTypeMessageObject);
+				}
+				messageObject.addProperty(DeepstreamConstants.MESSAGE_TIMESTAMP,
+						timestamp);
+				messageObject.addProperty(DeepstreamConstants.EXPECTS_ANSWER,
+						dialogMessage.isMessageExpectsAnswer());
+				messageObject.addProperty(DeepstreamConstants.LAST_MODIFIED,
+						timestamp);
+				messageObject.addProperty(DeepstreamConstants.STICKY,
+						dialogMessage.isMessageIsSticky());
 
-			interventionExecutionManagerService
-					.dialogMessageStatusChangesForSending(dialogMessageId,
-							DialogMessageStatusTypes.PREPARED_FOR_SENDING,
-							timestamp);
+				record = client.record
+						.getRecord(DeepstreamConstants.PATH_MESSAGES
+								+ participantOrSupervisorIdentifier);
 
-			return 0;
-		} finally {
-			if (record != null) {
-				try {
-					record.discard();
-				} catch (final Exception e) {
-					log.warn("Could not discard record on message sending");
+				record.set(
+						DeepstreamConstants.PATH_LIST
+								+ String.valueOf(dialogMessage.getOrder()),
+						messageObject);
+
+				client.event.emit(
+						DeepstreamConstants.PATH_MESSAGE_UPDATE
+								+ participantOrSupervisorIdentifier,
+						messageObject);
+
+				// If it's not a visible message ignore it
+				if (!isCommand) {
+					synchronized (allUsersVisibleMessagesSentSinceLastLogout) {
+						if (loggedInUsers
+								.contains(participantOrSupervisorIdentifier)) {
+							// If user is logged in remember as one (for late
+							// logout
+							// users)
+							messagesSentSinceLastLogout = 1;
+						} else if (allUsersVisibleMessagesSentSinceLastLogout
+								.containsKey(
+										participantOrSupervisorIdentifier)) {
+							// User is not logged in and well known
+							messagesSentSinceLastLogout = allUsersVisibleMessagesSentSinceLastLogout
+									.get(participantOrSupervisorIdentifier) + 1;
+						} else {
+							// User is not logged in and not known
+							messagesSentSinceLastLogout = 1;
+						}
+						allUsersVisibleMessagesSentSinceLastLogout.put(
+								participantOrSupervisorIdentifier,
+								messagesSentSinceLastLogout);
+					}
+				}
+			} catch (final Exception e) {
+				log.warn("Could not send message to {}: {}",
+						dialogOption.getData(), e.getMessage());
+
+				interventionExecutionManagerService
+						.dialogMessageStatusChangesForSending(dialogMessageId,
+								DialogMessageStatusTypes.PREPARED_FOR_SENDING,
+								timestamp);
+
+				return 0;
+			} finally {
+				if (record != null) {
+					try {
+						record.discard();
+					} catch (final Exception e) {
+						log.warn("Could not discard record on message sending");
+					}
 				}
 			}
 		}
@@ -382,6 +396,8 @@ public class DeepstreamCommunicationService extends Thread
 							timestamp);
 		}
 
+		log.debug("Message {} sent", dialogMessageId);
+
 		return messagesSentSinceLastLogout;
 	}
 
@@ -394,131 +410,139 @@ public class DeepstreamCommunicationService extends Thread
 	@Synchronized
 	public void asyncAcknowledgeMessage(final DialogMessage dialogMessage,
 			final ReceivedMessage receivedMessage) {
+		log.debug("Acknowledging message {}", dialogMessage.getId());
 
 		Record record = null;
-		try {
-			val timestamp = InternalDateTime.currentTimeMillis();
+		synchronized (client) {
+			try {
+				val timestamp = InternalDateTime.currentTimeMillis();
 
-			val participantIdentifier = receivedMessage.getSender()
-					.substring(substringLength);
+				val participantIdentifier = receivedMessage.getSender()
+						.substring(substringLength);
 
-			record = client.record.getRecord(
-					DeepstreamConstants.PATH_MESSAGES + participantIdentifier);
+				record = client.record
+						.getRecord(DeepstreamConstants.PATH_MESSAGES
+								+ participantIdentifier);
 
-			val messageOrder = dialogMessage.getOrder();
+				val messageOrder = dialogMessage.getOrder();
 
-			val retrievedMessageObject = record
-					.get(DeepstreamConstants.PATH_LIST
-							+ String.valueOf(messageOrder));
+				val retrievedMessageObject = record
+						.get(DeepstreamConstants.PATH_LIST
+								+ String.valueOf(messageOrder));
 
-			final JsonObject messageConfirmationObject;
-			final JsonObject messageObject;
-			if (retrievedMessageObject instanceof JsonNull) {
-				// No separate confirmation required
-				messageConfirmationObject = null;
+				final JsonObject messageConfirmationObject;
+				final JsonObject messageObject;
+				if (retrievedMessageObject instanceof JsonNull) {
+					// No separate confirmation required
+					messageConfirmationObject = null;
 
-				// No related former message by user
-				messageObject = new JsonObject();
+					// No related former message by user
+					messageObject = new JsonObject();
 
-				messageObject.addProperty(DeepstreamConstants.STATUS,
-						DeepstreamConstants.STATUS_SENT_BY_USER);
-				switch (dialogMessage.getType()) {
-					case PLAIN:
-						messageObject.addProperty(DeepstreamConstants.TYPE,
-								DeepstreamConstants.TYPE_PLAIN);
-						break;
-					case INTENTION:
-						messageObject.addProperty(DeepstreamConstants.TYPE,
-								DeepstreamConstants.TYPE_INTENTION);
-						break;
-					default:
-						log.error(
-								"A message of a type {} should never be acknowledged",
-								dialogMessage.getType());
-						break;
+					messageObject.addProperty(DeepstreamConstants.STATUS,
+							DeepstreamConstants.STATUS_SENT_BY_USER);
+					switch (dialogMessage.getType()) {
+						case PLAIN:
+							messageObject.addProperty(DeepstreamConstants.TYPE,
+									DeepstreamConstants.TYPE_PLAIN);
+							break;
+						case INTENTION:
+							messageObject.addProperty(DeepstreamConstants.TYPE,
+									DeepstreamConstants.TYPE_INTENTION);
+							break;
+						default:
+							log.error(
+									"A message of a type {} should never be acknowledged",
+									dialogMessage.getType());
+							break;
+					}
+					messageObject.addProperty(DeepstreamConstants.ID,
+							messageOrder);
+				} else {
+					// Prepare confirmation for message
+					messageConfirmationObject = new JsonObject();
+
+					messageConfirmationObject.addProperty(
+							DeepstreamConstants.STATUS,
+							DeepstreamConstants.STATUS_SENT_BY_USER);
+					switch (dialogMessage.getType()) {
+						case PLAIN:
+							messageConfirmationObject.addProperty(
+									DeepstreamConstants.TYPE,
+									DeepstreamConstants.TYPE_PLAIN);
+							break;
+						case INTENTION:
+							messageConfirmationObject.addProperty(
+									DeepstreamConstants.TYPE,
+									DeepstreamConstants.TYPE_INTENTION);
+							break;
+						default:
+							log.error(
+									"A message of a type {} should never be acknowledged",
+									dialogMessage.getType());
+							break;
+					}
+					messageConfirmationObject.addProperty(
+							DeepstreamConstants.ID,
+							"c-" + receivedMessage.getReceivedTimestamp());
+
+					// Former message will be extended afterwards
+					messageObject = (JsonObject) retrievedMessageObject;
+					messageObject.addProperty(DeepstreamConstants.STATUS,
+							DeepstreamConstants.STATUS_ANSWERED_BY_USER);
 				}
-				messageObject.addProperty(DeepstreamConstants.ID, messageOrder);
-			} else {
-				// Prepare confirmation for message
-				messageConfirmationObject = new JsonObject();
 
-				messageConfirmationObject.addProperty(
-						DeepstreamConstants.STATUS,
-						DeepstreamConstants.STATUS_SENT_BY_USER);
-				switch (dialogMessage.getType()) {
-					case PLAIN:
-						messageConfirmationObject.addProperty(
-								DeepstreamConstants.TYPE,
-								DeepstreamConstants.TYPE_PLAIN);
-						break;
-					case INTENTION:
-						messageConfirmationObject.addProperty(
-								DeepstreamConstants.TYPE,
-								DeepstreamConstants.TYPE_INTENTION);
-						break;
-					default:
-						log.error(
-								"A message of a type {} should never be acknowledged",
-								dialogMessage.getType());
-						break;
-				}
-				messageConfirmationObject.addProperty(DeepstreamConstants.ID,
-						"c-" + receivedMessage.getReceivedTimestamp());
-
-				// Former message will be extended afterwards
-				messageObject = (JsonObject) retrievedMessageObject;
-				messageObject.addProperty(DeepstreamConstants.STATUS,
-						DeepstreamConstants.STATUS_ANSWERED_BY_USER);
-			}
-
-			messageObject.addProperty(DeepstreamConstants.USER_MESSAGE,
-					receivedMessage.getMessage());
-			messageObject.addProperty(DeepstreamConstants.USER_TIMESTAMP,
-					receivedMessage.getReceivedTimestamp());
-			messageObject.addProperty(DeepstreamConstants.LAST_MODIFIED,
-					timestamp);
-
-			if (messageConfirmationObject != null) {
-				messageConfirmationObject.addProperty(
-						DeepstreamConstants.USER_MESSAGE,
+				messageObject.addProperty(DeepstreamConstants.USER_MESSAGE,
 						receivedMessage.getMessage());
-				messageConfirmationObject.addProperty(
-						DeepstreamConstants.USER_TIMESTAMP,
+				messageObject.addProperty(DeepstreamConstants.USER_TIMESTAMP,
 						receivedMessage.getReceivedTimestamp());
-				messageConfirmationObject.addProperty(
-						DeepstreamConstants.LAST_MODIFIED, timestamp);
-			}
+				messageObject.addProperty(DeepstreamConstants.LAST_MODIFIED,
+						timestamp);
 
-			if (messageConfirmationObject != null) {
-				record.set(
-						DeepstreamConstants.PATH_LIST
-								+ String.valueOf("c-" + timestamp),
-						messageConfirmationObject);
+				if (messageConfirmationObject != null) {
+					messageConfirmationObject.addProperty(
+							DeepstreamConstants.USER_MESSAGE,
+							receivedMessage.getMessage());
+					messageConfirmationObject.addProperty(
+							DeepstreamConstants.USER_TIMESTAMP,
+							receivedMessage.getReceivedTimestamp());
+					messageConfirmationObject.addProperty(
+							DeepstreamConstants.LAST_MODIFIED, timestamp);
+				}
 
-				client.event.emit(
-						DeepstreamConstants.PATH_MESSAGE_UPDATE
-								+ participantIdentifier,
-						messageConfirmationObject);
-			}
+				if (messageConfirmationObject != null) {
+					record.set(
+							DeepstreamConstants.PATH_LIST
+									+ String.valueOf("c-" + timestamp),
+							messageConfirmationObject);
 
-			record.set(DeepstreamConstants.PATH_LIST
-					+ String.valueOf(messageOrder), messageObject);
+					client.event.emit(
+							DeepstreamConstants.PATH_MESSAGE_UPDATE
+									+ participantIdentifier,
+							messageConfirmationObject);
+				}
 
-			client.event.emit(DeepstreamConstants.PATH_MESSAGE_UPDATE
-					+ participantIdentifier, messageObject);
-		} catch (final Exception e) {
-			log.warn("Could not acknowledge message to {}: {}",
-					receivedMessage.getSender(), e.getMessage());
-		} finally {
-			if (record != null) {
-				try {
-					record.discard();
-				} catch (final Exception e) {
-					log.warn(
-							"Could not discard record on acknoledging message");
+				record.set(DeepstreamConstants.PATH_LIST
+						+ String.valueOf(messageOrder), messageObject);
+
+				client.event.emit(DeepstreamConstants.PATH_MESSAGE_UPDATE
+						+ participantIdentifier, messageObject);
+			} catch (final Exception e) {
+				log.warn("Could not acknowledge message to {}: {}",
+						receivedMessage.getSender(), e.getMessage());
+			} finally {
+				if (record != null) {
+					try {
+						record.discard();
+					} catch (final Exception e) {
+						log.warn(
+								"Could not discard record on acknoledging message");
+					}
 				}
 			}
 		}
+
+		log.debug("Message {} acknowledged", dialogMessage.getId());
 	}
 
 	/**
@@ -531,49 +555,57 @@ public class DeepstreamCommunicationService extends Thread
 	public void asyncInformAboutAnsweringTimeout(
 			final DialogOption dialogOption,
 			final DialogMessage dialogMessage) {
+		log.debug("Informing about timeout of message {}",
+				dialogMessage.getId());
 
 		Record record = null;
-		try {
-			val timestamp = InternalDateTime.currentTimeMillis();
+		synchronized (client) {
+			try {
+				val timestamp = InternalDateTime.currentTimeMillis();
 
-			val participantIdentifier = dialogOption.getData()
-					.substring(substringLength);
+				val participantIdentifier = dialogOption.getData()
+						.substring(substringLength);
 
-			record = client.record.getRecord(
-					DeepstreamConstants.PATH_MESSAGES + participantIdentifier);
+				record = client.record
+						.getRecord(DeepstreamConstants.PATH_MESSAGES
+								+ participantIdentifier);
 
-			val messageOrder = dialogMessage.getOrder();
+				val messageOrder = dialogMessage.getOrder();
 
-			val retrievedMessageObject = record
-					.get(DeepstreamConstants.PATH_LIST
-							+ String.valueOf(messageOrder));
+				val retrievedMessageObject = record
+						.get(DeepstreamConstants.PATH_LIST
+								+ String.valueOf(messageOrder));
 
-			// Former message will be extended
-			val messageObject = (JsonObject) retrievedMessageObject;
+				// Former message will be extended
+				val messageObject = (JsonObject) retrievedMessageObject;
 
-			messageObject.addProperty(DeepstreamConstants.STATUS,
-					DeepstreamConstants.STATUS_NOT_ANSWERED_BY_USER);
-			messageObject.addProperty(DeepstreamConstants.LAST_MODIFIED,
-					timestamp);
+				messageObject.addProperty(DeepstreamConstants.STATUS,
+						DeepstreamConstants.STATUS_NOT_ANSWERED_BY_USER);
+				messageObject.addProperty(DeepstreamConstants.LAST_MODIFIED,
+						timestamp);
 
-			record.set(DeepstreamConstants.PATH_LIST
-					+ String.valueOf(messageOrder), messageObject);
+				record.set(DeepstreamConstants.PATH_LIST
+						+ String.valueOf(messageOrder), messageObject);
 
-			client.event.emit(DeepstreamConstants.PATH_MESSAGE_UPDATE
-					+ participantIdentifier, messageObject);
-		} catch (final Exception e) {
-			log.warn("Could not inform about answering timeout: {}",
-					e.getMessage());
-		} finally {
-			if (record != null) {
-				try {
-					record.discard();
-				} catch (final Exception e) {
-					log.warn(
-							"Could not discard record on sending answering timeout");
+				client.event.emit(DeepstreamConstants.PATH_MESSAGE_UPDATE
+						+ participantIdentifier, messageObject);
+			} catch (final Exception e) {
+				log.warn("Could not inform about answering timeout: {}",
+						e.getMessage());
+			} finally {
+				if (record != null) {
+					try {
+						record.discard();
+					} catch (final Exception e) {
+						log.warn(
+								"Could not discard record on sending answering timeout");
+					}
 				}
 			}
 		}
+
+		log.debug("Informed about timeout of message {}",
+				dialogMessage.getId());
 	}
 
 	/**
@@ -601,6 +633,8 @@ public class DeepstreamCommunicationService extends Thread
 	 */
 	public boolean checkSecret(final String participantOrSupervisorIdentifier,
 			final String secret) {
+		log.debug("Checking secret for {}", participantOrSupervisorIdentifier);
+
 		Record record = null;
 		try {
 			String secretFromRecord;
@@ -614,12 +648,18 @@ public class DeepstreamCommunicationService extends Thread
 			}
 
 			if (StringUtils.isBlank(secretFromRecord)) {
+				log.debug("Secret check for {} returns {}",
+						participantOrSupervisorIdentifier, false);
 				return false;
 			}
 
 			if (secretFromRecord.equals(secret)) {
+				log.debug("Secret check for {} returns {}",
+						participantOrSupervisorIdentifier, true);
 				return true;
 			} else {
+				log.debug("Secret check for {} returns {}",
+						participantOrSupervisorIdentifier, false);
 				return false;
 			}
 		} catch (final Exception e) {
@@ -634,6 +674,8 @@ public class DeepstreamCommunicationService extends Thread
 				}
 			}
 		}
+		log.debug("Secret check for {} returns {}",
+				participantOrSupervisorIdentifier, true);
 		return true;
 	}
 
@@ -655,6 +697,8 @@ public class DeepstreamCommunicationService extends Thread
 			final String relatedParticipantExternalId,
 			final String interventionPattern, final String interventionPassword,
 			final boolean supervisorRequest) {
+		log.debug("Trying to register user for {}",
+				participantIdToCreateUserFor);
 
 		// TODO: No check anymore. Former implementation lead to freeze on DS
 		// side.
@@ -670,23 +714,29 @@ public class DeepstreamCommunicationService extends Thread
 				+ RandomStringUtils.randomAlphanumeric(25);
 		final String secret = RandomStringUtils.randomAlphanumeric(128);
 
+		Record record = null;
 		synchronized (client) {
-			val record = client.record
-					.getRecord(DeepstreamConstants.PATH_MESSAGES
-							+ participantOrSupervisorExternalId);
-			record.set(DeepstreamConstants.SECRET, secret);
-			record.set(DeepstreamConstants.ROLE,
-					supervisorRequest ? supervisorRole : participantRole);
-
-			record.discard();
+			try {
+				record = client.record
+						.getRecord(DeepstreamConstants.PATH_MESSAGES
+								+ participantOrSupervisorExternalId);
+				record.set(DeepstreamConstants.SECRET, secret);
+				record.set(DeepstreamConstants.ROLE,
+						supervisorRequest ? supervisorRole : participantRole);
+			} finally {
+				if (record != null) {
+					try {
+						record.discard();
+					} catch (final Exception e) {
+						log.warn(
+								"Could not discard record on user registration");
+					}
+				}
+			}
 		}
 
-		Record record = null;
 		boolean createdSucessfully = false;
 		try {
-			record = client.record.getRecord(DeepstreamConstants.PATH_MESSAGES
-					+ participantOrSupervisorExternalId);
-
 			if (participantIdToCreateUserFor != null) {
 				// Extend existing participant
 				createdSucessfully = interventionExecutionManagerService
@@ -712,20 +762,32 @@ public class DeepstreamCommunicationService extends Thread
 		} finally {
 			// Cleanup prepared user if registration was not possible
 			if (!createdSucessfully) {
-				record.delete();
+				record = null;
+				synchronized (client) {
+					try {
+						record = client.record
+								.getRecord(DeepstreamConstants.PATH_MESSAGES
+										+ participantOrSupervisorExternalId);
+
+						record.delete();
+					} finally {
+						if (record != null) {
+							try {
+								record.discard();
+							} catch (final Exception e) {
+								log.warn(
+										"Could not discard record on user registration");
+							}
+						}
+					}
+
+				}
 
 				return null;
-			} else {
-				if (record != null) {
-					try {
-						record.discard();
-					} catch (final Exception e) {
-						log.warn(
-								"Could not discard record on user registration");
-					}
-				}
 			}
 		}
+
+		log.debug("User registered for {}", participantIdToCreateUserFor);
 
 		return new ExternalRegistration(participantOrSupervisorExternalId,
 				secret);
@@ -754,28 +816,28 @@ public class DeepstreamCommunicationService extends Thread
 			final String participantOrSupervisorId) {
 
 		Record record = null;
-		try {
-			restManagerService.destroyToken(
-					ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
-							+ participantOrSupervisorId);
+		synchronized (client) {
+			try {
+				restManagerService.destroyToken(
+						ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+								+ participantOrSupervisorId);
 
-			synchronized (client) {
 				record = client.record
 						.getRecord(DeepstreamConstants.PATH_MESSAGES
 								+ participantOrSupervisorId);
 
 				record.delete();
-			}
-		} catch (final Exception e) {
-			log.warn(
-					"Could not cleanup deepstream for participant/supervisor {}",
-					participantOrSupervisorId);
-		} finally {
-			if (record != null) {
-				try {
-					record.discard();
-				} catch (final Exception e) {
-					log.warn("Could not discard record on cleanup");
+			} catch (final Exception e) {
+				log.warn(
+						"Could not cleanup deepstream for participant/supervisor {}",
+						participantOrSupervisorId);
+			} finally {
+				if (record != null) {
+					try {
+						record.discard();
+					} catch (final Exception e) {
+						log.warn("Could not discard record on cleanup");
+					}
 				}
 			}
 		}
@@ -794,12 +856,21 @@ public class DeepstreamCommunicationService extends Thread
 			while (!restStartupComplete) {
 				log.debug("Waiting for REST interface to come up...");
 
-				Thread.sleep(1000);
+				try {
+					Thread.sleep(1000);
+				} catch (final Exception e) {
+					// Ignore
+				}
 			}
 			log.info("Connecting to deepstream...");
 		} else {
 			log.info("Reconnecting to deepstream...");
-			Thread.sleep(1000);
+
+			try {
+				Thread.sleep(1000);
+			} catch (final Exception e) {
+				// Ignore
+			}
 		}
 
 		final Properties properties = new Properties();
@@ -807,8 +878,10 @@ public class DeepstreamCommunicationService extends Thread
 				"0");
 
 		client = new DeepstreamClient(host, properties);
-		client.setRuntimeErrorHandler(this);
-		client.addConnectionChangeListener(this);
+		synchronized (client) {
+			client.setRuntimeErrorHandler(this);
+			client.addConnectionChangeListener(this);
+		}
 
 		LoginResult result = null;
 		log.debug("Trying to login...");
@@ -821,40 +894,48 @@ public class DeepstreamCommunicationService extends Thread
 			if (startupAttempt < 10) {
 				startupAttempt++;
 				log.info("Retrying attempt {}...", startupAttempt);
-				Thread.sleep(1000);
+
+				try {
+					Thread.sleep(1000);
+				} catch (final Exception e) {
+					// Ignore
+				}
+
 				return connectOrReconnect();
 			} else {
 				return false;
 			}
 		}
 
-		log.debug("Login successful.");
+		synchronized (client) {
+			log.debug("Login successful.");
 
-		if (client.getConnectionState() != ConnectionState.OPEN) {
-			log.error("Could not login to deepstream server: {}");
-			return false;
-		}
-
-		log.debug("Caching presence information...");
-		synchronized (loggedInUsers) {
-			loggedInUsers.clear();
-
-			for (val user : client.presence.getAll()) {
-				loggedInUsers.add(user);
-				allUsersVisibleMessagesSentSinceLastLogout.put(user, 0);
+			if (client.getConnectionState() != ConnectionState.OPEN) {
+				log.error("Could not login to deepstream server: {}");
+				return false;
 			}
 
-			client.presence.subscribe(this);
+			log.debug("Caching presence information...");
+			synchronized (loggedInUsers) {
+				loggedInUsers.clear();
+
+				for (val user : client.presence.getAll()) {
+					loggedInUsers.add(user);
+					allUsersVisibleMessagesSentSinceLastLogout.put(user, 0);
+				}
+
+				client.presence.subscribe(this);
+			}
+
+			startupComplete = true;
+			reconnecting = false;
+
+			log.info("Connection to deepstream established.");
+
+			provideMethods();
+
+			return true;
 		}
-
-		startupComplete = true;
-		reconnecting = false;
-
-		log.info("Connection to deepstream established.");
-
-		provideMethods();
-
-		return true;
 	}
 
 	/**
@@ -862,192 +943,203 @@ public class DeepstreamCommunicationService extends Thread
 	 */
 	private void provideMethods() {
 		// Can only be called by a "participant" (role)
-		client.rpc.provide(DeepstreamConstants.RPC_REST_TOKEN,
-				(rpcName, data, rpcResponse) -> {
-					final JsonObject jsonData = (JsonObject) gson
-							.toJsonTree(data);
+		synchronized (client) {
+			client.rpc.provide(DeepstreamConstants.RPC_REST_TOKEN,
+					(rpcName, data, rpcResponse) -> {
+						final JsonObject jsonData = (JsonObject) gson
+								.toJsonTree(data);
 
-					try {
-						final String restToken = createRESTToken(jsonData
-								.get(DeepstreamConstants.USER).getAsString());
+						try {
+							final String restToken = createRESTToken(
+									jsonData.get(DeepstreamConstants.USER)
+											.getAsString());
 
-						rpcResponse.send(restToken);
-					} catch (final Exception e) {
-						log.warn("Error when requesting REST token: {}",
-								e.getMessage());
-						rpcResponse.send(JsonNull.INSTANCE);
-					}
-				});
-		// Can be called by a "participant" or "supervisor" (role)
-		client.rpc.provide(DeepstreamConstants.RPC_PUSH_TOKEN,
-				(rpcName, data, rpcResponse) -> {
-					final JsonObject jsonData = (JsonObject) gson
-							.toJsonTree(data);
-
-					try {
-						val platform = jsonData
-								.get(DeepstreamConstants.PLATFORM)
-								.getAsString();
-
-						PushNotificationTypes platformType;
-						if (platform.equals(DeepstreamConstants.PLATFORM_IOS)) {
-							platformType = PushNotificationTypes.IOS;
-						} else if (platform
-								.equals(DeepstreamConstants.PLATFORM_ANDROID)) {
-							platformType = PushNotificationTypes.ANDROID;
-						} else {
-							throw new Exception("Given platform " + platform
-									+ " is not supported");
+							rpcResponse.send(restToken);
+						} catch (final Exception e) {
+							log.warn("Error when requesting REST token: {}",
+									e.getMessage());
+							rpcResponse.send(JsonNull.INSTANCE);
 						}
+					});
+			// Can be called by a "participant" or "supervisor" (role)
+			client.rpc.provide(DeepstreamConstants.RPC_PUSH_TOKEN,
+					(rpcName, data, rpcResponse) -> {
+						final JsonObject jsonData = (JsonObject) gson
+								.toJsonTree(data);
 
-						final boolean storedSuccessful = storePushToken(
-								jsonData.get(DeepstreamConstants.USER)
-										.getAsString(),
-								platformType,
-								jsonData.get(DeepstreamConstants.TOKEN)
-										.getAsString());
+						try {
+							val platform = jsonData
+									.get(DeepstreamConstants.PLATFORM)
+									.getAsString();
 
-						if (storedSuccessful) {
-							rpcResponse.send(new JsonPrimitive(true));
-						} else {
+							PushNotificationTypes platformType;
+							if (platform
+									.equals(DeepstreamConstants.PLATFORM_IOS)) {
+								platformType = PushNotificationTypes.IOS;
+							} else if (platform.equals(
+									DeepstreamConstants.PLATFORM_ANDROID)) {
+								platformType = PushNotificationTypes.ANDROID;
+							} else {
+								throw new Exception("Given platform " + platform
+										+ " is not supported");
+							}
+
+							final boolean storedSuccessful = storePushToken(
+									jsonData.get(DeepstreamConstants.USER)
+											.getAsString(),
+									platformType,
+									jsonData.get(DeepstreamConstants.TOKEN)
+											.getAsString());
+
+							if (storedSuccessful) {
+								rpcResponse.send(new JsonPrimitive(true));
+							} else {
+								rpcResponse.send(new JsonPrimitive(false));
+							}
+						} catch (final Exception e) {
+							log.warn("Error when storing push token: {}",
+									e.getMessage());
 							rpcResponse.send(new JsonPrimitive(false));
 						}
-					} catch (final Exception e) {
-						log.warn("Error when storing push token: {}",
-								e.getMessage());
-						rpcResponse.send(new JsonPrimitive(false));
-					}
-				});
-		// Can only be called by a "participant" (role)
-		client.rpc.provide(DeepstreamConstants.RPC_USER_MESSAGE,
-				(rpcName, data, rpcResponse) -> {
-					final JsonObject jsonData = (JsonObject) gson
-							.toJsonTree(data);
+					});
+			// Can only be called by a "participant" (role)
+			client.rpc.provide(DeepstreamConstants.RPC_USER_MESSAGE,
+					(rpcName, data, rpcResponse) -> {
+						final JsonObject jsonData = (JsonObject) gson
+								.toJsonTree(data);
 
-					try {
-						final boolean receivedSuccessful = receiveMessage(
-								jsonData.get(DeepstreamConstants.USER)
-										.getAsString(),
-								jsonData.get(DeepstreamConstants.USER_MESSAGE)
-										.getAsString(),
-								jsonData.get(DeepstreamConstants.USER_TIMESTAMP)
-										.getAsLong(),
-								jsonData.has(
-										DeepstreamConstants.RELATED_MESSAGE_ID)
-												? jsonData
-														.get(DeepstreamConstants.RELATED_MESSAGE_ID)
-														.getAsInt()
-												: -1,
-								null, null,
-								jsonData.has(DeepstreamConstants.CLIENT_ID)
-										? jsonData
-												.get(DeepstreamConstants.CLIENT_ID)
-												.getAsString()
-										: null,
-								false);
+						try {
+							final boolean receivedSuccessful = receiveMessage(
+									jsonData.get(DeepstreamConstants.USER)
+											.getAsString(),
+									jsonData.get(
+											DeepstreamConstants.USER_MESSAGE)
+											.getAsString(),
+									jsonData.get(
+											DeepstreamConstants.USER_TIMESTAMP)
+											.getAsLong(),
+									jsonData.has(
+											DeepstreamConstants.RELATED_MESSAGE_ID)
+													? jsonData
+															.get(DeepstreamConstants.RELATED_MESSAGE_ID)
+															.getAsInt()
+													: -1,
+									null, null,
+									jsonData.has(DeepstreamConstants.CLIENT_ID)
+											? jsonData
+													.get(DeepstreamConstants.CLIENT_ID)
+													.getAsString()
+											: null,
+									false);
 
-						if (receivedSuccessful) {
-							rpcResponse.send(new JsonPrimitive(true));
-						} else {
+							if (receivedSuccessful) {
+								rpcResponse.send(new JsonPrimitive(true));
+							} else {
+								rpcResponse.send(new JsonPrimitive(false));
+							}
+						} catch (final Exception e) {
+							log.warn("Error when receiving message: {}",
+									e.getMessage());
 							rpcResponse.send(new JsonPrimitive(false));
 						}
-					} catch (final Exception e) {
-						log.warn("Error when receiving message: {}",
-								e.getMessage());
-						rpcResponse.send(new JsonPrimitive(false));
-					}
-				});
-		// Can only be called by a "participant" (role)
-		client.rpc.provide(DeepstreamConstants.RPC_USER_INTENTION,
-				(rpcName, data, rpcResponse) -> {
-					final JsonObject jsonData = (JsonObject) gson
-							.toJsonTree(data);
+					});
+			// Can only be called by a "participant" (role)
+			client.rpc.provide(DeepstreamConstants.RPC_USER_INTENTION,
+					(rpcName, data, rpcResponse) -> {
+						final JsonObject jsonData = (JsonObject) gson
+								.toJsonTree(data);
 
-					try {
-						final boolean receivedSuccessful = receiveMessage(
-								jsonData.get(DeepstreamConstants.USER)
-										.getAsString(),
-								jsonData.has(DeepstreamConstants.USER_MESSAGE)
-										? jsonData
-												.get(DeepstreamConstants.USER_MESSAGE)
-												.getAsString()
-										: null,
-								jsonData.get(DeepstreamConstants.USER_TIMESTAMP)
-										.getAsLong(),
-								-1,
-								jsonData.get(DeepstreamConstants.USER_INTENTION)
-										.getAsString(),
-								jsonData.has(DeepstreamConstants.USER_CONTENT)
-										? jsonData
-												.get(DeepstreamConstants.USER_CONTENT)
-												.getAsString()
-										: null,
-								jsonData.has(DeepstreamConstants.CLIENT_ID)
-										? jsonData
-												.get(DeepstreamConstants.CLIENT_ID)
-												.getAsString()
-										: null,
-								true);
+						try {
+							final boolean receivedSuccessful = receiveMessage(
+									jsonData.get(DeepstreamConstants.USER)
+											.getAsString(),
+									jsonData.has(
+											DeepstreamConstants.USER_MESSAGE)
+													? jsonData
+															.get(DeepstreamConstants.USER_MESSAGE)
+															.getAsString()
+													: null,
+									jsonData.get(
+											DeepstreamConstants.USER_TIMESTAMP)
+											.getAsLong(),
+									-1,
+									jsonData.get(
+											DeepstreamConstants.USER_INTENTION)
+											.getAsString(),
+									jsonData.has(
+											DeepstreamConstants.USER_CONTENT)
+													? jsonData
+															.get(DeepstreamConstants.USER_CONTENT)
+															.getAsString()
+													: null,
+									jsonData.has(DeepstreamConstants.CLIENT_ID)
+											? jsonData
+													.get(DeepstreamConstants.CLIENT_ID)
+													.getAsString()
+											: null,
+									true);
 
-						if (receivedSuccessful) {
-							rpcResponse.send(new JsonPrimitive(true));
-						} else {
+							if (receivedSuccessful) {
+								rpcResponse.send(new JsonPrimitive(true));
+							} else {
+								rpcResponse.send(new JsonPrimitive(false));
+							}
+						} catch (final Exception e) {
+							log.warn(
+									"Error when receiving intention message: {}",
+									e.getMessage());
 							rpcResponse.send(new JsonPrimitive(false));
 						}
-					} catch (final Exception e) {
-						log.warn("Error when receiving intention message: {}",
-								e.getMessage());
-						rpcResponse.send(new JsonPrimitive(false));
-					}
-				});
-		// Can only be called by a "participant" (role)
-		client.rpc.provide(DeepstreamConstants.RPC_USER_VARIABLE,
-				(rpcName, data, rpcResponse) -> {
-					final JsonObject jsonData = (JsonObject) gson
-							.toJsonTree(data);
+					});
+			// Can only be called by a "participant" (role)
+			client.rpc.provide(DeepstreamConstants.RPC_USER_VARIABLE,
+					(rpcName, data, rpcResponse) -> {
+						final JsonObject jsonData = (JsonObject) gson
+								.toJsonTree(data);
 
-					try {
-						final boolean variableStored = writeVariableValue(
-								jsonData.get(DeepstreamConstants.USER)
-										.getAsString(),
-								jsonData.get(DeepstreamConstants.VARIABLE)
-										.getAsString(),
-								jsonData.get(DeepstreamConstants.VALUE)
-										.getAsString());
+						try {
+							final boolean variableStored = writeVariableValue(
+									jsonData.get(DeepstreamConstants.USER)
+											.getAsString(),
+									jsonData.get(DeepstreamConstants.VARIABLE)
+											.getAsString(),
+									jsonData.get(DeepstreamConstants.VALUE)
+											.getAsString());
 
-						if (variableStored) {
-							rpcResponse.send(new JsonPrimitive(true));
-						} else {
+							if (variableStored) {
+								rpcResponse.send(new JsonPrimitive(true));
+							} else {
+								rpcResponse.send(new JsonPrimitive(false));
+							}
+						} catch (final Exception e) {
+							log.warn(
+									"Error when writing variable value for participant: {}",
+									e.getMessage());
 							rpcResponse.send(new JsonPrimitive(false));
 						}
-					} catch (final Exception e) {
-						log.warn(
-								"Error when writing variable value for participant: {}",
-								e.getMessage());
-						rpcResponse.send(new JsonPrimitive(false));
-					}
-				});
-		// Can be called by a "participant" or "supervisor" (role)
-		client.rpc.provide(DeepstreamConstants.RPC_MESSAGE_DIFF,
-				(rpcName, data, rpcResponse) -> {
-					final JsonObject jsonData = (JsonObject) gson
-							.toJsonTree(data);
+					});
+			// Can be called by a "participant" or "supervisor" (role)
+			client.rpc.provide(DeepstreamConstants.RPC_MESSAGE_DIFF,
+					(rpcName, data, rpcResponse) -> {
+						final JsonObject jsonData = (JsonObject) gson
+								.toJsonTree(data);
 
-					try {
-						final JsonObject messageDiff = getMessageDiff(
-								jsonData.get(DeepstreamConstants.USER)
-										.getAsString(),
-								jsonData.get(
-										DeepstreamConstants.SERVER_TIMESTAMP)
-										.getAsLong());
+						try {
+							final JsonObject messageDiff = getMessageDiff(
+									jsonData.get(DeepstreamConstants.USER)
+											.getAsString(),
+									jsonData.get(
+											DeepstreamConstants.SERVER_TIMESTAMP)
+											.getAsLong());
 
-						rpcResponse.send(messageDiff);
-					} catch (final Exception e) {
-						rpcResponse.send(JsonNull.INSTANCE);
-						log.warn("Error when calculating message diff: {}",
-								e.getMessage());
-					}
-				});
+							rpcResponse.send(messageDiff);
+						} catch (final Exception e) {
+							rpcResponse.send(JsonNull.INSTANCE);
+							log.warn("Error when calculating message diff: {}",
+									e.getMessage());
+						}
+					});
+		}
 	}
 
 	/**
@@ -1207,21 +1299,27 @@ public class DeepstreamCommunicationService extends Thread
 		jsonObject.add("list", jsonObjects);
 		jsonObject.addProperty("latest-timestamp", newestTimestamp);
 
+		log.debug("Message diff calculated");
+
 		return jsonObject;
 	}
 
 	private void cleanupClient() throws Exception {
-		try {
-			client.setRuntimeErrorHandler(null);
-			client.removeConnectionChangeListener(this);
-			client.presence.unsubscribe(this);
-			client.rpc.unprovide(DeepstreamConstants.RPC_REST_TOKEN);
-			client.rpc.unprovide(DeepstreamConstants.RPC_USER_MESSAGE);
-			client.rpc.unprovide(DeepstreamConstants.RPC_USER_INTENTION);
-			client.rpc.unprovide(DeepstreamConstants.RPC_MESSAGE_DIFF);
+		log.debug("Cleaning up client...");
 
-			client.close();
-			client = null;
+		try {
+			synchronized (client) {
+				client.setRuntimeErrorHandler(null);
+				client.removeConnectionChangeListener(this);
+				client.presence.unsubscribe(this);
+				client.rpc.unprovide(DeepstreamConstants.RPC_REST_TOKEN);
+				client.rpc.unprovide(DeepstreamConstants.RPC_USER_MESSAGE);
+				client.rpc.unprovide(DeepstreamConstants.RPC_USER_INTENTION);
+				client.rpc.unprovide(DeepstreamConstants.RPC_MESSAGE_DIFF);
+
+				client.close();
+				client = null;
+			}
 		} catch (final Exception e) {
 			log.warn("Problems when cleaning up client: {}", e.getMessage());
 		} finally {
@@ -1233,6 +1331,8 @@ public class DeepstreamCommunicationService extends Thread
 				}
 			}
 		}
+
+		log.debug("Cleaning up done.");
 	}
 
 	/*
