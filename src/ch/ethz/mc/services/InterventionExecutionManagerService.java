@@ -2514,6 +2514,74 @@ public class InterventionExecutionManagerService {
 	}
 
 	/**
+	 * Enables to remember last user login using services (e.g. specific
+	 * communication managers)
+	 * 
+	 * @param dialogOptionType
+	 * @param dialogOptionData
+	 */
+	public boolean participantRememberLoginBasedOnDialogOptionTypeAndData(
+			final DialogOptionTypes dialogOptionType,
+			final String dialogOptionData) {
+		val dialogOption = getDialogOptionByTypeAndDataOfActiveInterventions(
+				dialogOptionType, dialogOptionData);
+
+		if (dialogOption == null) {
+			return false;
+		}
+
+		try {
+			val participant = databaseManagerService.getModelObjectById(
+					Participant.class, dialogOption.getParticipant());
+
+			if (participant != null) {
+				participant.setLastLoginTimestamp(
+						InternalDateTime.currentTimeMillis());
+
+				databaseManagerService.saveModelObject(participant);
+			}
+		} catch (final Exception e) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Enables to remember last user logout using services (e.g. specific
+	 * communication managers)
+	 * 
+	 * @param dialogOptionType
+	 * @param dialogOptionData
+	 */
+	public boolean participantRememberLogoutBasedOnDialogOptionTypeAndData(
+			final DialogOptionTypes dialogOptionType,
+			final String dialogOptionData) {
+		val dialogOption = getDialogOptionByTypeAndDataOfActiveInterventions(
+				dialogOptionType, dialogOptionData);
+
+		if (dialogOption == null) {
+			return false;
+		}
+
+		try {
+			val participant = databaseManagerService.getModelObjectById(
+					Participant.class, dialogOption.getParticipant());
+
+			if (participant != null) {
+				participant.setLastLogoutTimestamp(
+						InternalDateTime.currentTimeMillis());
+
+				databaseManagerService.saveModelObject(participant);
+			}
+		} catch (final Exception e) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Create a statistics file
 	 * 
 	 * @param statisticsFile
@@ -2730,9 +2798,11 @@ public class InterventionExecutionManagerService {
 					"Creating particpant externally without survey participation (intervention: {})",
 					appropriateIntervention.getId());
 
+			val creationTimestamp = InternalDateTime.currentTimeMillis();
+
 			final val participant = new Participant(
-					appropriateIntervention.getId(),
-					InternalDateTime.currentTimeMillis(), "",
+					appropriateIntervention.getId(), creationTimestamp,
+					creationTimestamp, creationTimestamp, "",
 					Constants.getInterventionLocales()[0], null, null, null,
 					null, null, true, "", "");
 

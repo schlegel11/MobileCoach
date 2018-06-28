@@ -136,12 +136,15 @@ public class SurveyExecutionManagerService {
 	/*
 	 * Modification methods
 	 */
+	// Participant
 	@Synchronized
 	private Participant participantCreate(
 			final ScreeningSurvey screeningSurvey) {
+		val creationTimestamp = InternalDateTime.currentTimeMillis();
+
 		final val participant = new Participant(
-				screeningSurvey.getIntervention(),
-				InternalDateTime.currentTimeMillis(), "",
+				screeningSurvey.getIntervention(), creationTimestamp,
+				creationTimestamp, creationTimestamp, "",
 				Constants.getInterventionLocales()[0], null,
 				screeningSurvey.getId(), screeningSurvey.getGlobalUniqueId(),
 				null, null, true, "", "");
