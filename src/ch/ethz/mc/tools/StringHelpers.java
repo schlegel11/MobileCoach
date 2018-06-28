@@ -195,10 +195,10 @@ public class StringHelpers {
 	 * @return
 	 */
 	public static String formatInternalTime(long timestamp) {
-		return internalHourRepresentation.format(timestamp) + "."
-				+ Math.floor(Integer.parseInt(
-						internalMinuteRepresentation.format(timestamp)) / 60
-						* 100);
+		return String.valueOf(Integer
+				.parseInt(internalHourRepresentation.format(timestamp))
+				+ Double.parseDouble(
+						internalMinuteRepresentation.format(timestamp)) / 60);
 	}
 
 	/**
