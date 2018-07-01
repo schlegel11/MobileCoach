@@ -25,10 +25,14 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+
+import javax.script.ScriptEngineManager;
 
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang3.RandomUtils;
@@ -90,9 +94,11 @@ public class RuleEvaluator {
 		});
 	}
 
+	private static ScriptEngineManager		scriptEngineManager	= new ScriptEngineManager();
+
 	@Setter
 	@Getter(value = AccessLevel.PRIVATE)
-	private static VariablesManagerService variablesManagerService;
+	private static VariablesManagerService	variablesManagerService;
 
 	/**
 	 * Evaluates an {@link AbstractRule} including the given
@@ -159,8 +165,8 @@ public class RuleEvaluator {
 				final String ruleResult;
 				try {
 					ruleResult = evaluateTextRuleTerm(locale,
-							rule.getRuleWithPlaceholders(),
-							variablesWithValues);
+							rule.getRuleWithPlaceholders(), variablesWithValues,
+							false);
 					ruleEvaluationResult.setTextRuleValue(ruleResult);
 				} catch (final Exception e) {
 					throw new Exception(
@@ -178,6 +184,21 @@ public class RuleEvaluator {
 					throw new Exception(
 							"Could not parse rule comparision term: It's not a valid variable name");
 				}
+			} else if (rule.getRuleEquationSign().isJavaScriptBasedRule()) {
+				log.debug("It's a javascript based rule");
+				ruleEvaluationResult.setCalculatedRule(false);
+
+				// Evaluate rule
+				final String ruleResult;
+				try {
+					ruleResult = evaluateTextRuleTerm(locale,
+							rule.getRuleWithPlaceholders(), variablesWithValues,
+							true);
+					ruleEvaluationResult.setTextRuleValue(ruleResult);
+				} catch (final Exception e) {
+					throw new Exception(
+							"Could not parse rule: " + e.getMessage());
+				}
 			} else {
 				log.debug("It's a text based rule");
 				ruleEvaluationResult.setCalculatedRule(false);
@@ -186,8 +207,8 @@ public class RuleEvaluator {
 				final String ruleResult;
 				try {
 					ruleResult = evaluateTextRuleTerm(locale,
-							rule.getRuleWithPlaceholders(),
-							variablesWithValues);
+							rule.getRuleWithPlaceholders(), variablesWithValues,
+							false);
 					ruleEvaluationResult.setTextRuleValue(ruleResult);
 				} catch (final Exception e) {
 					throw new Exception(
@@ -199,7 +220,7 @@ public class RuleEvaluator {
 				try {
 					ruleComparisonTermResult = evaluateTextRuleTerm(locale,
 							rule.getRuleComparisonTermWithPlaceholders(),
-							variablesWithValues);
+							variablesWithValues, false);
 					ruleEvaluationResult.setTextRuleComparisonTermValue(
 							ruleComparisonTermResult);
 				} catch (final Exception e) {
@@ -520,6 +541,22 @@ public class RuleEvaluator {
 							.setRuleMatchesEquationSign(duplicateFound);
 
 					break;
+				case EXECUTE_JAVASCRIPT_IN_X_AND_STORE_VALUES_BUT_RESULT_IS_ALWAYS_TRUE:
+					val scriptExecutionValues = executeJavaScript(
+							ruleEvaluationResult.getTextRuleValue());
+
+					for (val entry : scriptExecutionValues.entrySet()) {
+						variablesManagerService
+								.writeVariableValueOfParticipant(participantId,
+										ImplementationConstants.VARIABLE_PREFIX
+												+ entry.getKey(),
+										entry.getValue());
+					}
+
+					ruleEvaluationResult.setRuleMatchesEquationSign(true);
+					break;
+				default:
+					break;
 			}
 
 			// Evaluation of rule was successful
@@ -532,6 +569,35 @@ public class RuleEvaluator {
 		}
 
 		return ruleEvaluationResult;
+	}
+
+	/**
+	 * Executes given script and returns result values, if provided in variable
+	 * results as Map
+	 * 
+	 * @param script
+	 * @return
+	 * @throws Exception
+	 */
+	private static Map<String, String> executeJavaScript(final String script)
+			throws Exception {
+		val resultValuesMap = new HashMap<String, String>();
+
+		val jsEngine = scriptEngineManager.getEngineByName("JavaScript");
+
+		val scriptResultValues = jsEngine.eval(script);
+
+		if (scriptResultValues != null) {
+			@SuppressWarnings("unchecked")
+			final Map<String, Object> scriptResultValuesMap = (Map<String, Object>) scriptResultValues;
+
+			for (val entry : scriptResultValuesMap.entrySet()) {
+				resultValuesMap.put(entry.getKey().toString(),
+						entry.getValue().toString());
+			}
+		}
+
+		return resultValuesMap;
 	}
 
 	/**
@@ -852,12 +918,14 @@ public class RuleEvaluator {
 	 * @param variablesWithValues
 	 *            List of {@link AbstractVariableWithValue}s to replace in rule
 	 *            before evaluation
+	 * @param withJavaScriptEscapedQuotes
+	 *            If set all quotes with be escaped for JavaScript
 	 * @return Value of the rule evaluation
 	 */
 	private static String evaluateTextRuleTerm(final Locale locale,
 			final String ruleWithPlaceholders,
-			final Collection<AbstractVariableWithValue> variablesWithValues)
-			throws Exception {
+			final Collection<AbstractVariableWithValue> variablesWithValues,
+			final boolean withJavaScriptEscapedQuotes) throws Exception {
 		final String rule = ruleWithPlaceholders;
 
 		// Prevent null pointer exceptions
@@ -871,7 +939,7 @@ public class RuleEvaluator {
 		// Replace variables with their according values
 		val result = VariableStringReplacer
 				.findVariablesAndReplaceWithTextValues(locale, rule,
-						variablesWithValues, "");
+						variablesWithValues, "", withJavaScriptEscapedQuotes);
 
 		log.debug("Result of rule {} is {}", rule, result);
 

@@ -155,9 +155,37 @@ public class VariableStringReplacer {
 	 * @return The String filled with variable values
 	 */
 	public static String findVariablesAndReplaceWithTextValues(
-			final Locale locale, String stringWithVariables,
+			final Locale locale, final String stringWithVariables,
 			final Collection<AbstractVariableWithValue> variablesWithValues,
 			final String notFoundReplacer) {
+		return findVariablesAndReplaceWithTextValues(locale,
+				stringWithVariables, variablesWithValues, notFoundReplacer,
+				false);
+	}
+
+	/**
+	 * Finds variables within the given {@link String} and replaces them with
+	 * the appropriate text variable values
+	 *
+	 * @param locale
+	 *            The {@link Locale} of the {@link Participant}
+	 * @param stringWithVariables
+	 *            The {@link String} to search for variables
+	 * @param variablesWithValues
+	 *            The variables that can be used for the replacement process
+	 * @param notFoundReplacer
+	 *            The replacement {@link String} if a variable value could not
+	 *            be found, or null if the variable should not be replaced if no
+	 *            variable with the appropriate name could be found
+	 * @param withJavaScriptEscapedQuotes
+	 *            If set all quotes with be escaped for JavaScript
+	 * @return The String filled with variable values
+	 */
+	public static String findVariablesAndReplaceWithTextValues(
+			final Locale locale, String stringWithVariables,
+			final Collection<AbstractVariableWithValue> variablesWithValues,
+			final String notFoundReplacer,
+			final boolean withJavaScriptEscapedQuotes) {
 		// Prevent null pointer exceptions
 		if (stringWithVariables == null || stringWithVariables.equals("")) {
 			log.debug("It's an empty string");
@@ -240,6 +268,14 @@ public class VariableStringReplacer {
 					// Correct value
 					if (value == null) {
 						value = "";
+					}
+
+					// Care for JavaScript characters
+					if (withJavaScriptEscapedQuotes) {
+						value = value.replace("\"", "\\x22");
+						value = value.replace("'", "\\x27");
+						value = value.replace("\r", "\\r");
+						value = value.replace("\n", "\\n");
 					}
 
 					// Check if variable has modifiers

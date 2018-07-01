@@ -55,7 +55,8 @@ public enum RuleEquationSignTypes {
 	CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_ALWAYS_TRUE,
 	STARTS_ITERATION_FROM_X_UP_TO_Y_AND_RESULT_IS_CURRENT,
 	STARTS_REVERSE_ITERATION_FROM_X_DOWN_TO_Y_AND_RESULT_IS_CURRENT,
-	CHECK_VALUE_IN_VARIABLE_ACROSS_INVTERVENTIONS_AND_TRUE_IF_DUPLICATE_FOUND;
+	CHECK_VALUE_IN_VARIABLE_ACROSS_INVTERVENTIONS_AND_TRUE_IF_DUPLICATE_FOUND,
+	EXECUTE_JAVASCRIPT_IN_X_AND_STORE_VALUES_BUT_RESULT_IS_ALWAYS_TRUE;
 
 	private static List<RuleEquationSignTypes>	calculatedEquationSigns	= null;
 	private static List<RuleEquationSignTypes>	iteratorEquationSigns	= null;
@@ -122,6 +123,14 @@ public enum RuleEquationSignTypes {
 
 	public synchronized boolean isACrossInterventionVariableComparisionBasedEquationSignType() {
 		if (this == CHECK_VALUE_IN_VARIABLE_ACROSS_INVTERVENTIONS_AND_TRUE_IF_DUPLICATE_FOUND) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public synchronized boolean isJavaScriptBasedRule() {
+		if (this == RuleEquationSignTypes.EXECUTE_JAVASCRIPT_IN_X_AND_STORE_VALUES_BUT_RESULT_IS_ALWAYS_TRUE) {
 			return true;
 		} else {
 			return false;
