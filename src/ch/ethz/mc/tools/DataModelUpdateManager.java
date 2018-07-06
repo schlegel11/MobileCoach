@@ -129,6 +129,9 @@ public class DataModelUpdateManager {
 				case 37:
 					updateToVersion37();
 					break;
+				case 38:
+					updateToVersion38();
+					break;
 			}
 
 			log.info("Update to version {} done", updateToVersionInThisStep);
@@ -458,6 +461,10 @@ public class DataModelUpdateManager {
 		val participantVariableWithValueCollection = jongo
 				.getCollection("ParticipantVariableWithValue");
 
+		log.info("Creating index...");
+		participantVariableWithValueCollection.ensureIndex(
+				Queries.UPDATE_VERSION_29__PARTICIPANT_VARIABLE_WITH_VAUE__CHANGE_1_SORT);
+
 		for (val participantVariableWithValue : participantVariableWithValueCollection
 				.find(Queries.ALL)
 				.sort(Queries.UPDATE_VERSION_29__PARTICIPANT_VARIABLE_WITH_VAUE__CHANGE_1_SORT)
@@ -490,6 +497,10 @@ public class DataModelUpdateManager {
 				cache.put(key, newParticipantVariableWithValue);
 			}
 		}
+
+		log.info("Removing index...");
+		participantVariableWithValueCollection.dropIndex(
+				Queries.UPDATE_VERSION_29__PARTICIPANT_VARIABLE_WITH_VAUE__CHANGE_1_SORT);
 
 		log.info("Clearing all variables...");
 		participantVariableWithValueCollection.remove(Queries.ALL);
@@ -629,11 +640,27 @@ public class DataModelUpdateManager {
 	}
 
 	/**
-	 * Changes for version 36:
+	 * Changes for version 37:
 	 */
 	private static void updateToVersion37() {
 		val dialogMessageCollection = jongo.getCollection("DialogMessage");
 		dialogMessageCollection.update(Queries.EVERYTHING).multi()
 				.with(Queries.UPDATE_VERSION_37__DIALOG_MESSAGE__CHANGE_1);
+	}
+
+	/**
+	 * Changes for version 38:
+	 */
+	private static void updateToVersion38() {
+		val participantCollection = jongo.getCollection("Participant");
+
+		val currentTimestamp = InternalDateTime.currentTimeMillis();
+
+		participantCollection.update(Queries.EVERYTHING).multi().with(
+				Queries.UPDATE_VERSION_38__PARTICIPANT__CHANGE_1,
+				currentTimestamp);
+		participantCollection.update(Queries.EVERYTHING).multi().with(
+				Queries.UPDATE_VERSION_38__PARTICIPANT__CHANGE_2,
+				currentTimestamp);
 	}
 }

@@ -46,6 +46,7 @@ import ch.ethz.mc.model.persistent.types.InterventionVariableWithValuePrivacyTyp
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import ch.ethz.mc.tools.RuleEvaluator;
 import ch.ethz.mc.tools.StringHelpers;
+import ch.ethz.mc.tools.VariableStringReplacer;
 import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -140,6 +141,7 @@ public class TestServlet extends HttpServlet {
 		// TODO TESTING Test cases can be defined here
 
 		// stringTests();
+		// varibalesStringReplacerTests();
 		// dateCalculationTests();
 		// languageStringSerializationTest();
 		// ruleTests();
@@ -150,6 +152,28 @@ public class TestServlet extends HttpServlet {
 	private void stringTests() {
 		val s = "Hallo Welt :-) 12,3 11.2";
 		log.debug(">>" + StringHelpers.cleanReceivedMessageString(s));
+	}
+
+	@SuppressWarnings("unused")
+	private void varibalesStringReplacerTests() {
+		val variables = new ArrayList<AbstractVariableWithValue>();
+		variables.add(new InterventionVariableWithValue(null, "$kekSe", "14.5",
+				InterventionVariableWithValuePrivacyTypes.PRIVATE,
+				InterventionVariableWithValueAccessTypes.INTERNAL));
+
+		log.debug(">>" + VariableStringReplacer
+				.findVariablesAndReplaceWithTextValues(Locale.GERMAN,
+						"$kekSe{#t} ist $kekSe Uhr ist $kekSe{#t}", variables,
+						""));
+		log.debug(">>" + VariableStringReplacer
+				.findVariablesAndReplaceWithTextValues(Locale.GERMAN,
+						"$kekSe ist $kekSe{#t} Uhr ist $kekSe{#t}", variables,
+						""));
+		log.debug(">>" + VariableStringReplacer
+				.findVariablesAndReplaceWithTextValues(Locale.GERMAN,
+						"$kekSe{#t} ist $kekSe{#t} Uhr ist $kekSe{#t}",
+						variables, ""));
+
 	}
 
 	@SuppressWarnings("unused")

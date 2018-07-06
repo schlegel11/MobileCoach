@@ -328,8 +328,8 @@ public class DialogMessage extends ModelObject {
 						? Messages.getAdminString(
 								AdminMessageStrings.UI_MODEL__NOT_SET)
 						: message,
-				StringHelpers.createStringTimeStamp(shouldBeSentTimestamp),
-				StringHelpers.createStringTimeStamp(sentTimestamp),
+				StringHelpers.createStringTimestamp(shouldBeSentTimestamp),
+				StringHelpers.createStringTimestamp(sentTimestamp),
 				answerReceived == null || answerReceived.equals("")
 						? Messages.getAdminString(
 								AdminMessageStrings.UI_MODEL__NOT_SET)
@@ -338,7 +338,7 @@ public class DialogMessage extends ModelObject {
 						? Messages.getAdminString(
 								AdminMessageStrings.UI_MODEL__NOT_SET)
 						: answerReceivedRaw,
-				StringHelpers.createStringTimeStamp(answerReceivedTimestamp),
+				StringHelpers.createStringTimestamp(answerReceivedTimestamp),
 				manuallySent
 						? Messages.getAdminString(
 								AdminMessageStrings.UI_MODEL__YES)

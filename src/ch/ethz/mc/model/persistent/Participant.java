@@ -71,6 +71,20 @@ public class Participant extends ModelObject {
 	private long		createdTimestamp;
 
 	/**
+	 * The timestamp when the {@link Participant} has logged in the last time
+	 */
+	@Getter
+	@Setter
+	private long		lastLoginTimestamp;
+
+	/**
+	 * The timestamp when the {@link Participant} has logged out the last time
+	 */
+	@Getter
+	@Setter
+	private long		lastLogoutTimestamp;
+
+	/**
 	 * The nickname of the {@link Participant}
 	 */
 	@Getter

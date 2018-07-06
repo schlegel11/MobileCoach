@@ -655,7 +655,7 @@ public class MonitoringRuleEditComponentWithController
 					.getProperty() == getMinutesUntilHandledAsNotAnsweredSlider()) {
 				int newValue = ((Double) event.getProperty().getValue())
 						.intValue();
-				if (newValue > ImplementationConstants.MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX_MICRO_DIALOG_MESSAGE) {
+				if (newValue > ImplementationConstants.MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED_MAX_MONITORING_MESSAGE) {
 					newValue = Integer.MAX_VALUE;
 				}
 

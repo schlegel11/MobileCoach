@@ -22,6 +22,7 @@ package ch.ethz.mc.tools;
  */
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -154,9 +155,37 @@ public class VariableStringReplacer {
 	 * @return The String filled with variable values
 	 */
 	public static String findVariablesAndReplaceWithTextValues(
-			final Locale locale, String stringWithVariables,
+			final Locale locale, final String stringWithVariables,
 			final Collection<AbstractVariableWithValue> variablesWithValues,
 			final String notFoundReplacer) {
+		return findVariablesAndReplaceWithTextValues(locale,
+				stringWithVariables, variablesWithValues, notFoundReplacer,
+				false);
+	}
+
+	/**
+	 * Finds variables within the given {@link String} and replaces them with
+	 * the appropriate text variable values
+	 *
+	 * @param locale
+	 *            The {@link Locale} of the {@link Participant}
+	 * @param stringWithVariables
+	 *            The {@link String} to search for variables
+	 * @param variablesWithValues
+	 *            The variables that can be used for the replacement process
+	 * @param notFoundReplacer
+	 *            The replacement {@link String} if a variable value could not
+	 *            be found, or null if the variable should not be replaced if no
+	 *            variable with the appropriate name could be found
+	 * @param withJavaScriptEscapedQuotes
+	 *            If set all quotes with be escaped for JavaScript
+	 * @return The String filled with variable values
+	 */
+	public static String findVariablesAndReplaceWithTextValues(
+			final Locale locale, String stringWithVariables,
+			final Collection<AbstractVariableWithValue> variablesWithValues,
+			final String notFoundReplacer,
+			final boolean withJavaScriptEscapedQuotes) {
 		// Prevent null pointer exceptions
 		if (stringWithVariables == null || stringWithVariables.equals("")) {
 			log.debug("It's an empty string");
@@ -189,11 +218,9 @@ public class VariableStringReplacer {
 		final Matcher variableFindMatcher = variableFindPattern
 				.matcher(stringWithVariables);
 
-		val variablesFoundInRule = new ArrayList<String>();
-		val variablesFoundInRuleModifiers = new ArrayList<String>();
+		val variablesFoundInRule = new LinkedList<String>();
+		val variablesFoundInRuleModifiers = new LinkedList<String>();
 		while (variableFindMatcher.find()) {
-			variablesFoundInRule.add(variableFindMatcher.group());
-
 			// Check for modifiers
 			val variableModifierFindPattern = Pattern.compile(
 					ImplementationConstants.REGULAR_EXPRESSION_TO_MATCH_VALUE_MODIFIER);
@@ -201,18 +228,28 @@ public class VariableStringReplacer {
 					.matcher(stringWithVariables
 							.substring(variableFindMatcher.end()));
 
+			String modifier;
 			if (variableModifierFindMatcher.find()
 					&& variableModifierFindMatcher.start() == 0) {
-				variablesFoundInRuleModifiers
-						.add(variableModifierFindMatcher.group().substring(1,
-								variableModifierFindMatcher.group().length()
-										- 1));
+				modifier = variableModifierFindMatcher.group().substring(1,
+						variableModifierFindMatcher.group().length() - 1);
 			} else {
-				variablesFoundInRuleModifiers.add(null);
+				modifier = null;
 			}
 
-			log.debug("Found variable {} in string {}",
-					variableFindMatcher.group(), stringWithVariables);
+			// Variables with modifiers need to be replaced before other
+			// variables to avoid wrong replacement of variables with modifiers
+			// by regular values
+			if (modifier == null) {
+				variablesFoundInRule.add(variableFindMatcher.group());
+				variablesFoundInRuleModifiers.add(modifier);
+			} else {
+				variablesFoundInRule.add(0, variableFindMatcher.group());
+				variablesFoundInRuleModifiers.add(0, modifier);
+			}
+
+			log.debug("Found variable {} with modifier {} in string {}",
+					variableFindMatcher.group(), modifier, stringWithVariables);
 		}
 
 		// Find variable values and put value into rule
@@ -231,6 +268,14 @@ public class VariableStringReplacer {
 					// Correct value
 					if (value == null) {
 						value = "";
+					}
+
+					// Care for JavaScript characters
+					if (withJavaScriptEscapedQuotes) {
+						value = value.replace("\"", "\\x22");
+						value = value.replace("'", "\\x27");
+						value = value.replace("\r", "\\r");
+						value = value.replace("\n", "\\n");
 					}
 
 					// Check if variable has modifiers
@@ -271,6 +316,8 @@ public class VariableStringReplacer {
 							}
 							stringWithVariables = stringWithVariables
 									.replace(formattedVariable, formattedValue);
+							log.debug("Replaced formatted variable {} with {}",
+									formattedVariable, formattedValue);
 						} catch (final Exception e) {
 							log.warn(
 									"Could not modify string {} with modifier {}",
@@ -282,9 +329,10 @@ public class VariableStringReplacer {
 						// Replace variable with value in rule
 						stringWithVariables = stringWithVariables
 								.replace(variable, value);
+						log.debug("Replaced unformatted variable {} with {}",
+								variable, value);
 					}
 
-					log.debug("Replaced {} with {}", variable, value);
 					continue variableSearchLoop;
 				}
 			}
