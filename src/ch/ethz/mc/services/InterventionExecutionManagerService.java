@@ -873,8 +873,13 @@ public class InterventionExecutionManagerService {
 	 * 
 	 * Important: For performance reasons this method is NOT synchronized
 	 * anymore.
+	 * 
+	 * @return Count of participants the messaging has been performed for
+	 * @throws Exception
 	 */
-	public void performMessaging() throws Exception {
+	public long performMessaging() throws Exception {
+		long messagingPerformedForParticipants = 0;
+
 		log.debug(
 				"Create a list of all relevant participants to perfom messaging");
 		val participants = getAllParticipantsRelevantForAnsweredInTimeChecksAndMonitoringScheduling();
@@ -931,6 +936,8 @@ public class InterventionExecutionManagerService {
 					 * The following steps should always be performed in this
 					 * order to retain data consistency
 					 */
+					messagingPerformedForParticipants++;
+
 					try {
 						log.debug("React on unanswered messages");
 						reactOnAnsweredAndUnansweredMessages(participant,
@@ -970,6 +977,8 @@ public class InterventionExecutionManagerService {
 				}
 			}
 		}
+
+		return messagingPerformedForParticipants;
 	}
 
 	@Synchronized
