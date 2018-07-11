@@ -22,10 +22,11 @@ package ch.ethz.mc.services.threads;
  */
 import java.util.concurrent.TimeUnit;
 
+import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.model.memory.SystemLoad;
+import ch.ethz.mc.services.InterventionExecutionManagerService;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
-import ch.ethz.mc.conf.ImplementationConstants;
-import ch.ethz.mc.services.InterventionExecutionManagerService;
 
 /**
  * Manages the handling of outgoing messages
@@ -34,6 +35,8 @@ import ch.ethz.mc.services.InterventionExecutionManagerService;
  */
 @Log4j2
 public class OutgoingMessageWorker extends Thread {
+	private final SystemLoad							systemLoad;
+
 	private final InterventionExecutionManagerService	interventionExecutionManagerService;
 
 	@Setter
@@ -43,6 +46,8 @@ public class OutgoingMessageWorker extends Thread {
 			final InterventionExecutionManagerService interventionExecutionManagerService) {
 		setName("Outgoing Message Worker");
 		setPriority(NORM_PRIORITY - 2);
+
+		systemLoad = SystemLoad.getInstance();
 
 		this.interventionExecutionManagerService = interventionExecutionManagerService;
 	}
@@ -69,6 +74,8 @@ public class OutgoingMessageWorker extends Thread {
 						e.getMessage());
 			}
 
+			systemLoad.setOutgoingMessageWorkerRequiredMillis(
+					System.currentTimeMillis() - startingTime);
 			log.debug(
 					"Executing new run of outgoing message worker...done ({} milliseconds)",
 					System.currentTimeMillis() - startingTime);

@@ -44,6 +44,7 @@ import ch.ethz.mc.conf.DeepstreamConstants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.memory.ExternalRegistration;
 import ch.ethz.mc.model.memory.ReceivedMessage;
+import ch.ethz.mc.model.memory.SystemLoad;
 import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.Participant;
@@ -81,6 +82,8 @@ public class DeepstreamCommunicationService extends Thread
 	@Getter
 	private static DeepstreamCommunicationService	instance			= null;
 
+	private final SystemLoad						systemLoad;
+
 	private boolean									running				= true;
 	private boolean									shouldStop			= false;
 
@@ -114,6 +117,8 @@ public class DeepstreamCommunicationService extends Thread
 			final String deepstreamServerPassword,
 			final String deepstreamParticipantRole,
 			final String deepstreamSupervisorRole) {
+		systemLoad = SystemLoad.getInstance();
+
 		loggedInUsers = new HashSet<String>();
 		allUsersVisibleMessagesSentSinceLastLogout = new Hashtable<String, Integer>();
 
@@ -180,11 +185,22 @@ public class DeepstreamCommunicationService extends Thread
 
 	@Override
 	public void run() {
+		int nextLoadInfo = 0;
+
 		while (!shouldStop) {
 			try {
 				sleep(500);
 			} catch (final InterruptedException e) {
 				// Do nothing
+			}
+
+			// Update load info every 10 seconds
+			nextLoadInfo++;
+			if (nextLoadInfo == 20) {
+				nextLoadInfo = 0;
+				systemLoad.setLoggedInUsers(
+						ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM,
+						loggedInUsers.size());
 			}
 		}
 
@@ -931,6 +947,10 @@ public class DeepstreamCommunicationService extends Thread
 
 				client.presence.subscribe(this);
 			}
+
+			systemLoad.setLoggedInUsers(
+					ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM,
+					loggedInUsers.size());
 
 			startupComplete = true;
 			reconnecting = false;
