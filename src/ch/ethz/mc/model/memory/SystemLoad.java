@@ -102,7 +102,7 @@ public class SystemLoad {
 					"Finish unfinished screening surveys required millis:          {}",
 					getFinishingUnfinishedScreeningSurveysRequiredMillis());
 			log.info(
-					"Perform continuous messaging required millis:                            {}",
+					"Perform continuous messaging required millis:                 {}",
 					getPerformContinuousMessagingRequiredMillis());
 			log.info(
 					"-----------------------------------------------------------------------");
