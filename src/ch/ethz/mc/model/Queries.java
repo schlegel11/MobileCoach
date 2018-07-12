@@ -209,7 +209,6 @@ public class Queries {
 	public static final String	DIALOG_MESSAGE__BY_STATUS																																														= "{'status':#}";
 	public static final String	DIALOG_MESSAGE__SORT_BY_ORDER_ASC																																												= "{'order':1}";
 	public static final String	DIALOG_MESSAGE__SORT_BY_ORDER_DESC																																												= "{'order':-1}";
-	public static final String	DIALOG_MESSAGE__SORT_BY_SENT_TIMESTAMP_DESC																																										= "{'sentTimestamp':-1}";
 
 	// Special
 	public static final String	EVERYTHING																																																		= "{}";
