@@ -36,7 +36,7 @@ public class SystemLoad {
 		outgoingMessageWorkerRequiredMillis = 0;
 		statisticsCreationRequiredMillis = 0;
 		finishingUnfinishedScreeningSurveysRequiredMillis = 0;
-		performMessagingRequiredMillis = 0;
+		performContinuousMessagingRequiredMillis = 0;
 	}
 
 	@Synchronized
@@ -77,7 +77,7 @@ public class SystemLoad {
 
 	@Getter
 	@Setter
-	long	performMessagingRequiredMillis;
+	long	performContinuousMessagingRequiredMillis;
 
 	public void log() {
 		synchronized (log) {
@@ -102,8 +102,8 @@ public class SystemLoad {
 					"Finish unfinished screening surveys required millis:          {}",
 					getFinishingUnfinishedScreeningSurveysRequiredMillis());
 			log.info(
-					"Perform messaging required millis:                            {}",
-					getPerformMessagingRequiredMillis());
+					"Perform continuous messaging required millis:                            {}",
+					getPerformContinuousMessagingRequiredMillis());
 			log.info(
 					"-----------------------------------------------------------------------");
 		}

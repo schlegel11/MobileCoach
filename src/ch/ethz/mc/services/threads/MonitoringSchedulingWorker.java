@@ -73,7 +73,8 @@ public class MonitoringSchedulingWorker extends Thread {
 
 	@Override
 	public void run() {
-		int nextLoadInfo = 0;
+		long nextLoadInfo = System.currentTimeMillis() + 30000;
+
 		try {
 			TimeUnit.MILLISECONDS.sleep(
 					ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_MILLISECONDS_SLEEP_BETWEEN_CHECK_CYCLES);
@@ -85,10 +86,8 @@ public class MonitoringSchedulingWorker extends Thread {
 
 		while (!isInterrupted() && !shouldStop) {
 			// Update load info every 30 seconds
-			nextLoadInfo++;
-			if (nextLoadInfo == 30000
-					/ ImplementationConstants.MASTER_RULE_EVALUTION_WORKER_MILLISECONDS_SLEEP_BETWEEN_CHECK_CYCLES) {
-				nextLoadInfo = 0;
+			if (nextLoadInfo < System.currentTimeMillis()) {
+				nextLoadInfo = System.currentTimeMillis() + 30000;
 				systemLoad.log();
 			}
 
@@ -158,7 +157,7 @@ public class MonitoringSchedulingWorker extends Thread {
 
 					systemLoad.setMessagingPerformedForParticipants(count);
 
-					systemLoad.setPerformMessagingRequiredMillis(
+					systemLoad.setPerformContinuousMessagingRequiredMillis(
 							System.currentTimeMillis() - taskStartingTime);
 				} catch (final Exception e) {
 					log.error("Could not perform messaging: {}",

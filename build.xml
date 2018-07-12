@@ -13,7 +13,7 @@ This can be set in the "JRE" tab when configuring an ANT task in the eclipse GUI
 		MobileCoach WAR creation
 	</description>
 
-	<property name="ensure-https" value="true" />
+	<property name="ensure-https" value="false" />
 
 	<path id="ivy-libs">
 		<fileset dir="ant-libs" includes="ivy-*.jar" />

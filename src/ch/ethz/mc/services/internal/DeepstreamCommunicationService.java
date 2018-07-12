@@ -185,7 +185,7 @@ public class DeepstreamCommunicationService extends Thread
 
 	@Override
 	public void run() {
-		int nextLoadInfo = 0;
+		long nextLoadInfo = System.currentTimeMillis() + 10000;
 
 		while (!shouldStop) {
 			try {
@@ -195,9 +195,8 @@ public class DeepstreamCommunicationService extends Thread
 			}
 
 			// Update load info every 10 seconds
-			nextLoadInfo++;
-			if (nextLoadInfo == 20) {
-				nextLoadInfo = 0;
+			if (nextLoadInfo < System.currentTimeMillis()) {
+				nextLoadInfo = System.currentTimeMillis() + 10000;
 				systemLoad.setLoggedInUsers(
 						ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM,
 						loggedInUsers.size());
