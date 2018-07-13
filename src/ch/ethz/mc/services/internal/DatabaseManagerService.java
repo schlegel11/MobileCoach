@@ -56,6 +56,7 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 	// API
 	@SuppressWarnings("deprecation")
 	private DatabaseManagerService(final int expectedVersion) throws Exception {
+		super();
 		log.info("Starting service...");
 		try {
 			// Creating MongoDB driver object
@@ -129,6 +130,9 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 							BCrypt.gensalt()));
 			saveModelObject(author);
 		}
+
+		// Clear cache to ensure stable state after DB update
+		clearCache();
 
 		log.info("Started.");
 	}

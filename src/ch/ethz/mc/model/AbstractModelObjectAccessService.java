@@ -1,5 +1,7 @@
 package ch.ethz.mc.model;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -23,14 +25,28 @@ package ch.ethz.mc.model;
 import org.bson.types.ObjectId;
 import org.jongo.Jongo;
 
+import lombok.val;
+
 /**
  * Provides all methods to modify model objects
  * 
  * @author Andreas Filler
  */
 public abstract class AbstractModelObjectAccessService {
+	private final ConcurrentHashMap<String, ModelObject> modelObjectsCache;
+
+	protected AbstractModelObjectAccessService() {
+		modelObjectsCache = new ConcurrentHashMap<String, ModelObject>();
+	}
+
 	protected void configure(final Jongo db) {
 		ModelObject.configure(db);
+	}
+
+	protected void clearCache() {
+		synchronized (modelObjectsCache) {
+			modelObjectsCache.clear();
+		}
 	}
 
 	/**
@@ -43,9 +59,27 @@ public abstract class AbstractModelObjectAccessService {
 	/**
 	 * @see ModelObject#get(Class, ObjectId)
 	 */
+	@SuppressWarnings("unchecked")
 	public <ModelObjectSubclass extends ModelObject> ModelObjectSubclass getModelObjectById(
 			final Class<ModelObjectSubclass> clazz, final ObjectId id) {
-		return ModelObject.get(clazz, id);
+
+		ModelObjectSubclass modelObject = null;
+
+		val hexId = id.toHexString();
+		modelObject = (ModelObjectSubclass) modelObjectsCache.get(hexId);
+
+		if (modelObject != null) {
+			return modelObject;
+		}
+
+		modelObject = ModelObject.get(clazz, id);
+
+		if (modelObject != null) {
+			modelObjectsCache.put(modelObject.getId().toHexString(),
+					modelObject);
+		}
+
+		return modelObject;
 	}
 
 	/**
@@ -54,6 +88,8 @@ public abstract class AbstractModelObjectAccessService {
 	public void deleteModelObject(final Class<? extends ModelObject> clazz,
 			final ObjectId id) {
 		ModelObject.delete(clazz, id);
+
+		modelObjectsCache.remove(id.toHexString());
 	}
 
 	/**
@@ -61,6 +97,8 @@ public abstract class AbstractModelObjectAccessService {
 	 */
 	public void deleteModelObject(final ModelObject modelObject) {
 		ModelObject.delete(modelObject);
+
+		modelObjectsCache.remove(modelObject.getId().toHexString());
 	}
 
 	/**
