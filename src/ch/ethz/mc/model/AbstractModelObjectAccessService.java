@@ -54,18 +54,12 @@ public abstract class AbstractModelObjectAccessService {
 	 * @see ModelObject#save()
 	 */
 	public void saveModelObject(final ModelObject modelObject) {
-		modelObject.save();
-
-		// Don't cache ParticipantVariableWithValue (because they have their own
-		// caching)
-		if (!(modelObject instanceof ParticipantVariableWithValue)) {
-			val hexId = modelObject.getId().toHexString();
-			synchronized (modelObjectsCache) {
-				if (modelObjectsCache.containsKey(hexId)) {
-					modelObjectsCache.put(hexId, modelObject);
-				}
-			}
+		// Force new fetch from database after change
+		if (modelObject != null && modelObject.getId() != null) {
+			modelObjectsCache.remove(modelObject.getId().toHexString());
 		}
+
+		modelObject.save();
 	}
 
 	/**
@@ -77,20 +71,19 @@ public abstract class AbstractModelObjectAccessService {
 
 		ModelObjectSubclass modelObject = null;
 
-		// Don't cache ParticipantVariableWithValue (because they have their own
-		// caching)
-		if (!(modelObject instanceof ParticipantVariableWithValue)) {
-			val hexId = id.toHexString();
-			modelObject = (ModelObjectSubclass) modelObjectsCache.get(hexId);
+		val hexId = id.toHexString();
+		modelObject = (ModelObjectSubclass) modelObjectsCache.get(hexId);
 
-			if (modelObject != null) {
-				return modelObject;
-			}
+		if (modelObject != null) {
+			return modelObject;
 		}
 
 		modelObject = ModelObject.get(clazz, id);
 
-		if (modelObject != null) {
+		// Don't cache ParticipantVariableWithValue (because they have their own
+		// caching)
+		if (modelObject != null
+				&& !(modelObject instanceof ParticipantVariableWithValue)) {
 			modelObjectsCache.put(modelObject.getId().toHexString(),
 					modelObject);
 		}
@@ -105,7 +98,9 @@ public abstract class AbstractModelObjectAccessService {
 			final ObjectId id) {
 		ModelObject.delete(clazz, id);
 
-		modelObjectsCache.remove(id.toHexString());
+		if (id != null) {
+			modelObjectsCache.remove(id.toHexString());
+		}
 	}
 
 	/**
@@ -114,7 +109,9 @@ public abstract class AbstractModelObjectAccessService {
 	public void deleteModelObject(final ModelObject modelObject) {
 		ModelObject.delete(modelObject);
 
-		modelObjectsCache.remove(modelObject.getId().toHexString());
+		if (modelObject != null && modelObject.getId() != null) {
+			modelObjectsCache.remove(modelObject.getId().toHexString());
+		}
 	}
 
 	/**
