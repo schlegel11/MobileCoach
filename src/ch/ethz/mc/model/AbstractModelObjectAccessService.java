@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.bson.types.ObjectId;
 import org.jongo.Jongo;
 
+import ch.ethz.mc.model.persistent.ParticipantVariableWithValue;
 import lombok.val;
 
 /**
@@ -54,6 +55,17 @@ public abstract class AbstractModelObjectAccessService {
 	 */
 	public void saveModelObject(final ModelObject modelObject) {
 		modelObject.save();
+
+		// Don't cache ParticipantVariableWithValue (because they have their own
+		// caching)
+		if (!(modelObject instanceof ParticipantVariableWithValue)) {
+			val hexId = modelObject.getId().toHexString();
+			synchronized (modelObjectsCache) {
+				if (modelObjectsCache.containsKey(hexId)) {
+					modelObjectsCache.put(hexId, modelObject);
+				}
+			}
+		}
 	}
 
 	/**
@@ -65,11 +77,15 @@ public abstract class AbstractModelObjectAccessService {
 
 		ModelObjectSubclass modelObject = null;
 
-		val hexId = id.toHexString();
-		modelObject = (ModelObjectSubclass) modelObjectsCache.get(hexId);
+		// Don't cache ParticipantVariableWithValue (because they have their own
+		// caching)
+		if (!(modelObject instanceof ParticipantVariableWithValue)) {
+			val hexId = id.toHexString();
+			modelObject = (ModelObjectSubclass) modelObjectsCache.get(hexId);
 
-		if (modelObject != null) {
-			return modelObject;
+			if (modelObject != null) {
+				return modelObject;
+			}
 		}
 
 		modelObject = ModelObject.get(clazz, id);
