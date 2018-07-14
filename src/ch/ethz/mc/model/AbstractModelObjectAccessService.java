@@ -65,14 +65,13 @@ public abstract class AbstractModelObjectAccessService {
 	/**
 	 * @see ModelObject#get(Class, ObjectId)
 	 */
-	@SuppressWarnings("unchecked")
 	public <ModelObjectSubclass extends ModelObject> ModelObjectSubclass getModelObjectById(
 			final Class<ModelObjectSubclass> clazz, final ObjectId id) {
 
 		ModelObjectSubclass modelObject = null;
 
 		val hexId = id.toHexString();
-		modelObject = (ModelObjectSubclass) modelObjectsCache.get(hexId);
+		modelObject = clazz.cast(modelObjectsCache.get(hexId));
 
 		if (modelObject != null) {
 			return modelObject;

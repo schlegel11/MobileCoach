@@ -1,5 +1,6 @@
 package ch.ethz.mc.services.internal;
 
+import java.io.File;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -87,6 +88,8 @@ public class DeepstreamCommunicationService extends Thread
 	private boolean									running				= true;
 	private boolean									shouldStop			= false;
 
+	private final File								connectionStateFile;
+
 	private InterventionExecutionManagerService		interventionExecutionManagerService;
 
 	private RESTManagerService						restManagerService;
@@ -121,6 +124,19 @@ public class DeepstreamCommunicationService extends Thread
 
 		loggedInUsers = new HashSet<String>();
 		allUsersVisibleMessagesSentSinceLastLogout = new Hashtable<String, Integer>();
+
+		// Care for connection state file
+		connectionStateFile = new File(
+				new File(Constants.getStatisticsFile()).getParentFile(),
+				"ds_connected");
+		if (connectionStateFile.exists()) {
+			try {
+				connectionStateFile.delete();
+			} catch (final Exception e) {
+				log.warn("Error when deleting connection state file: {}",
+						e.getMessage());
+			}
+		}
 
 		host = deepstreamHost;
 
@@ -218,6 +234,16 @@ public class DeepstreamCommunicationService extends Thread
 	@Synchronized
 	public void stopThreadedService() throws Exception {
 		log.info("Stopping service...");
+
+		// Care for connection state file
+		if (connectionStateFile.exists()) {
+			try {
+				connectionStateFile.delete();
+			} catch (final Exception e) {
+				log.warn("Error when deleting connection state file: {}",
+						e.getMessage());
+			}
+		}
 
 		shouldStop = true;
 		interrupt();
@@ -958,6 +984,16 @@ public class DeepstreamCommunicationService extends Thread
 
 			provideMethods();
 
+			// Care for connection state file
+			if (!connectionStateFile.exists()) {
+				try {
+					connectionStateFile.createNewFile();
+				} catch (final Exception e) {
+					log.warn("Error when creating connection state file: {}",
+							e.getMessage());
+				}
+			}
+
 			return true;
 		}
 	}
@@ -1398,6 +1434,16 @@ public class DeepstreamCommunicationService extends Thread
 				log.warn("Deepstream connection still lost...");
 			} else {
 				log.warn("Deepstream connection lost!");
+			}
+
+			// Care for connection state file
+			if (connectionStateFile.exists()) {
+				try {
+					connectionStateFile.delete();
+				} catch (final Exception e) {
+					log.warn("Error when deleting connection state file: {}",
+							e.getMessage());
+				}
 			}
 
 			try {
