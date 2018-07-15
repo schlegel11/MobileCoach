@@ -45,7 +45,7 @@ public abstract class AbstractModelObjectAccessService {
 		ModelObject.configure(db);
 	}
 
-	protected void clearCache() {
+	public void clearCache() {
 		synchronized (modelObjectsCache) {
 			modelObjectsCache.clear();
 		}
