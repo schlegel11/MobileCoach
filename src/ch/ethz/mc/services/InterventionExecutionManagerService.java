@@ -926,10 +926,14 @@ public class InterventionExecutionManagerService {
 				// - the participant not finished the monitoring
 				val dialogStatus = databaseManagerService.findOneModelObject(
 						DialogStatus.class,
-						Queries.DIALOG_STATUS__BY_PARTICIPANT_AND_DATA_FOR_MONITORING_PARTICIPATION_AVAILABLE_TRUE_AND_SCREENING_SURVEY_PERFORMED_TRUE_AND_MONITORING_PERFORMED_FALSE,
+						Queries.DIALOG_STATUS__BY_PARTICIPANT,
 						participant.getId());
 
-				if (dialogStatus != null) {
+				if (dialogStatus != null
+						&& dialogStatus
+								.isDataForMonitoringParticipationAvailable()
+						&& dialogStatus.isScreeningSurveyPerformed()
+						&& !dialogStatus.isMonitoringPerformed()) {
 					/*
 					 * Participant is relevant for messaging
 					 * 
@@ -3009,10 +3013,14 @@ public class InterventionExecutionManagerService {
 				if (participantId != null) {
 					val dialogStatus = databaseManagerService
 							.findOneModelObject(DialogStatus.class,
-									Queries.DIALOG_STATUS__BY_PARTICIPANT_AND_DATA_FOR_MONITORING_PARTICIPATION_AVAILABLE_TRUE_AND_SCREENING_SURVEY_PERFORMED_TRUE_AND_MONITORING_PERFORMED_FALSE,
+									Queries.DIALOG_STATUS__BY_PARTICIPANT,
 									participantId);
 
-					if (dialogStatus != null) {
+					if (dialogStatus != null
+							&& dialogStatus
+									.isDataForMonitoringParticipationAvailable()
+							&& dialogStatus.isScreeningSurveyPerformed()
+							&& !dialogStatus.isMonitoringPerformed()) {
 						val dialogMessagesWaitingToBeSendOfParticipant = databaseManagerService
 								.findModelObjects(DialogMessage.class,
 										Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS,
@@ -3069,11 +3077,13 @@ public class InterventionExecutionManagerService {
 		}
 
 		val dialogStatus = databaseManagerService.findOneModelObject(
-				DialogStatus.class,
-				Queries.DIALOG_STATUS__BY_PARTICIPANT_AND_DATA_FOR_MONITORING_PARTICIPATION_AVAILABLE_TRUE_AND_SCREENING_SURVEY_PERFORMED_TRUE_AND_MONITORING_PERFORMED_FALSE,
+				DialogStatus.class, Queries.DIALOG_STATUS__BY_PARTICIPANT,
 				participantId);
 
-		if (dialogStatus != null) {
+		if (dialogStatus != null
+				&& dialogStatus.isDataForMonitoringParticipationAvailable()
+				&& dialogStatus.isScreeningSurveyPerformed()
+				&& !dialogStatus.isMonitoringPerformed()) {
 			val dialogMessagesWaitingToBeSendOfParticipant = databaseManagerService
 					.findSortedModelObjects(DialogMessage.class,
 							Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_SHOULD_BE_SENT_TIMESTAMP_LOWER,

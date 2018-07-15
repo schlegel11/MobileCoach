@@ -22,6 +22,12 @@ package ch.ethz.mc.model.persistent;
  */
 import java.io.File;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import ch.ethz.mc.model.ModelObject;
+import ch.ethz.mc.model.Queries;
+import ch.ethz.mc.model.persistent.types.MediaObjectTypes;
+import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,12 +35,6 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
-import ch.ethz.mc.model.ModelObject;
-import ch.ethz.mc.model.Queries;
-import ch.ethz.mc.model.persistent.types.MediaObjectTypes;
-import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * {@link ModelObject} to represent an {@link MediaObject}
@@ -49,6 +49,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @AllArgsConstructor
 @Log4j2
 public class MediaObject extends ModelObject {
+	private static final long	serialVersionUID	= -1319450594327240988L;
+
 	/**
 	 * The type of the {@link MediaObject}
 	 */

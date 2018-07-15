@@ -22,21 +22,20 @@ package ch.ethz.mc.model.persistent;
  */
 import java.util.List;
 
+import org.bson.types.ObjectId;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import ch.ethz.mc.model.ModelObject;
+import ch.ethz.mc.model.Queries;
+import ch.ethz.mc.model.ui.UIModelObject;
+import ch.ethz.mc.model.ui.UIMonitoringMessageGroup;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.val;
-
-import org.bson.types.ObjectId;
-
-import ch.ethz.mc.model.ModelObject;
-import ch.ethz.mc.model.Queries;
-import ch.ethz.mc.model.ui.UIModelObject;
-import ch.ethz.mc.model.ui.UIMonitoringMessageGroup;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * {@link ModelObject} to represent an {@link MonitoringMessageGroup}
@@ -50,13 +49,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MonitoringMessageGroup extends ModelObject {
+	private static final long	serialVersionUID	= -5596373582325438233L;
+
 	/**
 	 * The {@link Intervention} the {@link MonitoringMessageGroup} belongs to
 	 */
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId	intervention;
+	private ObjectId			intervention;
 
 	/**
 	 * The name of the {@link MonitoringMessageGroup} as shown in the backend
@@ -64,14 +65,14 @@ public class MonitoringMessageGroup extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String		name;
+	private String				name;
 
 	/**
 	 * Regular expression to validate result
 	 */
 	@Getter
 	@Setter
-	private String		validationExpression;
+	private String				validationExpression;
 
 	/**
 	 * The position of the {@link MonitoringMessageGroup} compared to all other
@@ -79,7 +80,7 @@ public class MonitoringMessageGroup extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private int			order;
+	private int					order;
 
 	/**
 	 * Defines if the {@link MonitoringMessage}s in the group will be sent in
@@ -88,7 +89,7 @@ public class MonitoringMessageGroup extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private boolean		sendInRandomOrder;
+	private boolean				sendInRandomOrder;
 	/**
 	 * Defines if the message is sent from the same position in this
 	 * {@link MonitoringMessageGroup} as the original message if
@@ -96,7 +97,7 @@ public class MonitoringMessageGroup extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private boolean		sendSamePositionIfSendingAsReply;
+	private boolean				sendSamePositionIfSendingAsReply;
 
 	/**
 	 * Defines if the {@link MonitoringMessage}s in the group expect to be
@@ -105,7 +106,7 @@ public class MonitoringMessageGroup extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private boolean		messagesExpectAnswer;
+	private boolean				messagesExpectAnswer;
 
 	/*
 	 * (non-Javadoc)

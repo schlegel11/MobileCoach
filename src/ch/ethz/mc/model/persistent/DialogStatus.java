@@ -22,15 +22,14 @@ package ch.ethz.mc.model.persistent;
  */
 import java.util.List;
 
+import org.bson.types.ObjectId;
+
+import ch.ethz.mc.model.ModelObject;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
-
-import org.bson.types.ObjectId;
-
-import ch.ethz.mc.model.ModelObject;
 
 /**
  * {@link ModelObject} to represent an {@link DialogStatus}
@@ -43,13 +42,15 @@ import ch.ethz.mc.model.ModelObject;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DialogStatus extends ModelObject {
+	private static final long	serialVersionUID	= -961410122505516257L;
+
 	/**
 	 * The {@link Participant} which belongs to this {@link DialogStatus}
 	 */
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId	participant;
+	private ObjectId			participant;
 
 	/**
 	 * Daily unique {@link String} used to check if the {@link Participant} has
@@ -58,14 +59,14 @@ public class DialogStatus extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String		dateIndexOfLastDailyMonitoringProcessing;
+	private String				dateIndexOfLastDailyMonitoringProcessing;
 
 	/**
 	 * The last {@link ScreeningSurveySlide} the {@link Participant} visited
 	 */
 	@Getter
 	@Setter
-	private ObjectId	lastVisitedScreeningSurveySlide;
+	private ObjectId			lastVisitedScreeningSurveySlide;
 
 	/**
 	 * Stores the reference to the {@link ScreeningSurveySlide} last visited by
@@ -75,7 +76,7 @@ public class DialogStatus extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private String		lastVisitedScreeningSurveySlideGlobalUniqueId;
+	private String				lastVisitedScreeningSurveySlideGlobalUniqueId;
 
 	/**
 	 * The timestamp when the last {@link ScreeningSurveySlide} was visited by
@@ -83,7 +84,7 @@ public class DialogStatus extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private long		lastVisitedScreeningSurveySlideTimestamp;
+	private long				lastVisitedScreeningSurveySlideTimestamp;
 
 	/**
 	 * Stores if the {@link Participant} has all information stored that are
@@ -91,21 +92,21 @@ public class DialogStatus extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private boolean		dataForMonitoringParticipationAvailable;
+	private boolean				dataForMonitoringParticipationAvailable;
 
 	/**
 	 * Timestamp when the user started the {@link ScreeningSurvey}
 	 */
 	@Getter
 	@Setter
-	private long		screeningSurveyStartedTimestamp;
+	private long				screeningSurveyStartedTimestamp;
 
 	/**
 	 * Timestamp when the user finished the {@link ScreeningSurvey}
 	 */
 	@Getter
 	@Setter
-	private long		screeningSurveyPerformedTimestamp;
+	private long				screeningSurveyPerformedTimestamp;
 
 	/**
 	 * Stores if the {@link Participant} already performed a
@@ -113,35 +114,35 @@ public class DialogStatus extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private boolean		screeningSurveyPerformed;
+	private boolean				screeningSurveyPerformed;
 
 	/**
 	 * Timestamp when the user started the monitoring
 	 */
 	@Getter
 	@Setter
-	private long		monitoringStartedTimestamp;
+	private long				monitoringStartedTimestamp;
 
 	/**
 	 * Timestamp when the user finished the monitoring
 	 */
 	@Getter
 	@Setter
-	private long		monitoringPerformedTimestamp;
+	private long				monitoringPerformedTimestamp;
 
 	/**
 	 * Stores if the {@link Participant} performed the whole monitoring process
 	 */
 	@Getter
 	@Setter
-	private boolean		monitoringPerformed;
+	private boolean				monitoringPerformed;
 
 	/**
 	 * Number of days the {@link Participant} participated in the monitoring
 	 */
 	@Getter
 	@Setter
-	private int			monitoringDaysParticipated;
+	private int					monitoringDaysParticipated;
 
 	/*
 	 * (non-Javadoc)

@@ -189,7 +189,6 @@ public class Queries {
 
 	public static final String	DIALOG_STATUS__BY_PARTICIPANT																																													= "{'participant':#}";
 	public static final String	DIALOG_STATUS__BY_PARTICIPANT_AND_LAST_VISITED_SCREENING_SURVEY_SLIDE_TIMESTAMP_LOWER_AND_DATA_FOR_MONITORING_PARTICIPATION_AVAILABLE_TRUE_AND_SCREENING_SURVEY_PERFORMED_FALSE_AND_MONITORING_PERFORMED_FALSE	= "{'participant':#,'lastVisitedScreeningSurveySlideTimestamp':{$lt:#},'dataForMonitoringParticipationAvailable':true,'screeningSurveyPerformed':false,'monitoringPerformed':false}";
-	public static final String	DIALOG_STATUS__BY_PARTICIPANT_AND_DATA_FOR_MONITORING_PARTICIPATION_AVAILABLE_TRUE_AND_SCREENING_SURVEY_PERFORMED_TRUE_AND_MONITORING_PERFORMED_FALSE															= "{'participant':#,'dataForMonitoringParticipationAvailable':true,'screeningSurveyPerformed':true,'monitoringPerformed':false}";
 
 	public static final String	PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT																																									= "{'participant':#}";
 	public static final String	PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME																																						= "{'participant':#,'name':#}";

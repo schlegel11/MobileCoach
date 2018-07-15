@@ -1,5 +1,8 @@
 package ch.ethz.mc.model.persistent.concepts;
 
+import ch.ethz.mc.model.ModelObject;
+import ch.ethz.mc.model.persistent.Participant;
+import ch.ethz.mc.model.ui.results.UIVariableWithParticipantForResults;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -25,9 +28,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
-import ch.ethz.mc.model.ModelObject;
-import ch.ethz.mc.model.persistent.Participant;
-import ch.ethz.mc.model.ui.results.UIVariableWithParticipantForResults;
 
 /**
  * {@link ModelObject} to represent a variable value combination
@@ -39,13 +39,15 @@ import ch.ethz.mc.model.ui.results.UIVariableWithParticipantForResults;
 @NoArgsConstructor
 @AllArgsConstructor
 public abstract class AbstractVariableWithValue extends ModelObject {
+	private static final long	serialVersionUID	= 3769136523060772191L;
+
 	/**
 	 * Name of the variable
 	 */
 	@Getter
 	@Setter
 	@NonNull
-	private String	name;
+	private String				name;
 
 	/**
 	 * Value of the variable
@@ -53,7 +55,7 @@ public abstract class AbstractVariableWithValue extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String	value;
+	private String				value;
 
 	/**
 	 * Creates a {@link UIVariableWithParticipantForResults} with the belonging

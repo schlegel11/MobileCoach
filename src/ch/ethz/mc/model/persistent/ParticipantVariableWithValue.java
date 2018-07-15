@@ -55,6 +55,8 @@ import lombok.extern.log4j.Log4j2;
 @NoArgsConstructor
 @Log4j2
 public class ParticipantVariableWithValue extends AbstractVariableWithValue {
+	private static final long serialVersionUID = 2109551204186856678L;
+
 	/**
 	 * Default constructor
 	 */

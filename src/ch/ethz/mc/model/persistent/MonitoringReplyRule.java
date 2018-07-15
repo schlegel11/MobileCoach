@@ -52,9 +52,8 @@ import lombok.val;
  */
 @NoArgsConstructor
 public class MonitoringReplyRule extends AbstractMonitoringRule {
-	/**
-	 * Default constructor
-	 */
+	private static final long serialVersionUID = 7943510395800773759L;
+
 	public MonitoringReplyRule(final String ruleWithPlaceholders,
 			final RuleEquationSignTypes ruleEquationSign,
 			final String ruleComparisonTermWithPlaceholders,

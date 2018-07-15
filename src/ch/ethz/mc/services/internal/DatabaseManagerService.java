@@ -91,6 +91,9 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 				val clazz = indicesHashtableKeys.nextElement();
 				final String[] indices = indicesHashtable.get(clazz);
 				val collection = jongo.getCollection(clazz.getSimpleName());
+
+				collection.dropIndexes();
+
 				for (final String index : indices) {
 					log.debug("Creating/ensuring index {} on collection {}",
 							index, clazz.getSimpleName());

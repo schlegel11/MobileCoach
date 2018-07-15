@@ -50,6 +50,8 @@ import lombok.val;
  */
 @NoArgsConstructor
 public class MicroDialogMessageRule extends AbstractRule {
+	private static final long serialVersionUID = 4266506810684596781L;
+
 	/**
 	 * Default constructor
 	 */

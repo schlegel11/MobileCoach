@@ -44,6 +44,8 @@ import lombok.Setter;
  */
 @NoArgsConstructor
 public abstract class AbstractMonitoringRule extends AbstractRule {
+	private static final long serialVersionUID = -3271775900725942369L;
+
 	/**
 	 * Default constructor
 	 */

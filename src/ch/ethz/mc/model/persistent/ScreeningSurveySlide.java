@@ -58,6 +58,8 @@ import lombok.val;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ScreeningSurveySlide extends ModelObject {
+	private static final long serialVersionUID = 7586979542802646476L;
+
 	/**
 	 * Consists of all attributes related to a {@link Question} within a
 	 * {@link ScreeningSurveySlide}

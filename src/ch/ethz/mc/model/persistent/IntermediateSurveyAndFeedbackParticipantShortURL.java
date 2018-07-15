@@ -1,5 +1,11 @@
 package ch.ethz.mc.model.persistent;
 
+import org.bson.types.ObjectId;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import ch.ethz.mc.conf.Constants;
+import ch.ethz.mc.model.ModelObject;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -27,13 +33,6 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.val;
 
-import org.bson.types.ObjectId;
-
-import ch.ethz.mc.conf.Constants;
-import ch.ethz.mc.model.ModelObject;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 /**
  * {@link ModelObject} to represent an
  * {@link IntermediateSurveyAndFeedbackParticipantShortURL}
@@ -48,30 +47,32 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @AllArgsConstructor
 public class IntermediateSurveyAndFeedbackParticipantShortURL
 		extends ModelObject {
+	private static final long	serialVersionUID	= -2095457989980080066L;
+
 	/**
 	 * The short id defining this
 	 * {@link IntermediateSurveyAndFeedbackParticipantShortURL}
 	 */
 	@Getter
 	@Setter
-	private long		shortId;
+	private long				shortId;
 
 	@Getter
 	@Setter
-	private String		secret;
+	private String				secret;
 
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId	participant;
+	private ObjectId			participant;
 
 	@Getter
 	@Setter
-	private ObjectId	survey;
+	private ObjectId			survey;
 
 	@Getter
 	@Setter
-	private ObjectId	feedback;
+	private ObjectId			feedback;
 
 	/**
 	 * Calculates a URL that can be checked for validity

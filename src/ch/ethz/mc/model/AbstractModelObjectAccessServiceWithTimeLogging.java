@@ -28,16 +28,20 @@ import org.jongo.Jongo;
 
 import ch.ethz.mc.model.persistent.ParticipantVariableWithValue;
 import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Provides all methods to modify model objects
  * 
  * @author Andreas Filler
  */
-public abstract class AbstractModelObjectAccessService {
-	private final ConcurrentHashMap<String, byte[]> modelObjectsCache;
+@Log4j2
+public abstract class AbstractModelObjectAccessServiceWithTimeLogging {
+	private final ConcurrentHashMap<String, byte[]>	modelObjectsCache;
 
-	protected AbstractModelObjectAccessService() {
+	private final long								longQueryThreshold	= 10;
+
+	protected AbstractModelObjectAccessServiceWithTimeLogging() {
 		modelObjectsCache = new ConcurrentHashMap<String, byte[]>();
 	}
 
@@ -124,7 +128,18 @@ public abstract class AbstractModelObjectAccessService {
 	public <ModelObjectSubclass extends ModelObject> ModelObjectSubclass findOneModelObject(
 			final Class<ModelObjectSubclass> clazz, final String query,
 			final Object... parameters) {
-		return ModelObject.findOne(clazz, query, parameters);
+
+		final long timestamp = System.currentTimeMillis();
+
+		val result = ModelObject.findOne(clazz, query, parameters);
+
+		final long duration = System.currentTimeMillis() - timestamp;
+		if (duration > longQueryThreshold) {
+			log.warn("Slow query findOneModelObject: {} ms, {}, {}", duration,
+					clazz, query);
+		}
+
+		return result;
 	}
 
 	/**
@@ -133,7 +148,18 @@ public abstract class AbstractModelObjectAccessService {
 	public <ModelObjectSubclass extends ModelObject> ModelObjectSubclass findOneSortedModelObject(
 			final Class<ModelObjectSubclass> clazz, final String query,
 			final String sort, final Object... parameters) {
-		return ModelObject.findOneSorted(clazz, query, sort, parameters);
+
+		final long timestamp = System.currentTimeMillis();
+
+		val result = ModelObject.findOneSorted(clazz, query, sort, parameters);
+
+		final long duration = System.currentTimeMillis() - timestamp;
+		if (duration > longQueryThreshold) {
+			log.warn("Slow query findOneSortedModelObject: {} ms, {}, {}, {}",
+					duration, clazz, query, sort);
+		}
+
+		return result;
 	}
 
 	/**
@@ -142,7 +168,18 @@ public abstract class AbstractModelObjectAccessService {
 	public <ModelObjectSubclass extends ModelObject> Iterable<ModelObjectSubclass> findModelObjects(
 			final Class<ModelObjectSubclass> clazz, final String query,
 			final Object... parameters) {
-		return ModelObject.find(clazz, query, parameters);
+
+		final long timestamp = System.currentTimeMillis();
+
+		val result = ModelObject.find(clazz, query, parameters);
+
+		final long duration = System.currentTimeMillis() - timestamp;
+		if (duration > longQueryThreshold) {
+			log.warn("Slow query findModelObjects: {} ms, {}, {}", duration,
+					clazz, query);
+		}
+
+		return result;
 	}
 
 	/**
@@ -151,7 +188,18 @@ public abstract class AbstractModelObjectAccessService {
 	public Iterable<ObjectId> findModelObjectIds(
 			final Class<? extends ModelObject> clazz, final String query,
 			final Object... parameters) {
-		return ModelObject.findIds(clazz, query, parameters);
+
+		final long timestamp = System.currentTimeMillis();
+
+		val result = ModelObject.findIds(clazz, query, parameters);
+
+		final long duration = System.currentTimeMillis() - timestamp;
+		if (duration > longQueryThreshold) {
+			log.warn("Slow query findModelObjectIds: {} ms, {}, {}", duration,
+					clazz, query);
+		}
+
+		return result;
 	}
 
 	/**
@@ -160,6 +208,17 @@ public abstract class AbstractModelObjectAccessService {
 	public <ModelObjectSubclass extends ModelObject> Iterable<ModelObjectSubclass> findSortedModelObjects(
 			final Class<ModelObjectSubclass> clazz, final String query,
 			final String sort, final Object... parameters) {
-		return ModelObject.findSorted(clazz, query, sort, parameters);
+
+		final long timestamp = System.currentTimeMillis();
+
+		val result = ModelObject.findSorted(clazz, query, sort, parameters);
+
+		final long duration = System.currentTimeMillis() - timestamp;
+		if (duration > longQueryThreshold) {
+			log.warn("Slow query findSortedModelObjects: {} ms, {}, {}, {}",
+					duration, clazz, query, sort);
+		}
+
+		return result;
 	}
 }
