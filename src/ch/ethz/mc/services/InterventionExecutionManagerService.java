@@ -919,11 +919,8 @@ public class InterventionExecutionManagerService {
 					priorityParticipantsIds.clear();
 				}
 
-				if (priorityParticipantsIdsArray.length > 0) {
-					log.warn(
-							"Performing priority messaging for {} participants",
-							priorityParticipantsIdsArray.length);
-				}
+				log.debug("Performing priority messaging for {} participants",
+						priorityParticipantsIdsArray.length);
 
 				for (val priorityParticipantToCheckStringId : priorityParticipantsIdsArray) {
 					val priotiryParticipantToCheckId = new ObjectId(
