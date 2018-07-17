@@ -30,6 +30,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
@@ -126,6 +127,8 @@ public class InterventionExecutionManagerService {
 	private final OutgoingMessageWorker					outgoingMessageWorker;
 	private final MonitoringSchedulingWorker			monitoringSchedulingWorker;
 
+	private final HashSet<String>						priorityParticipantsIds;
+
 	private InterventionExecutionManagerService(
 			final DatabaseManagerService databaseManagerService,
 			final VariablesManagerService variablesManagerService,
@@ -144,6 +147,9 @@ public class InterventionExecutionManagerService {
 		this.surveyExecutionManagerService = surveyExecutionManagerService;
 
 		simulatorActive = Constants.isSimulatedDateAndTime();
+
+		// Initialize cache
+		priorityParticipantsIds = new HashSet<String>();
 
 		// Remember stop words
 		acceptedStopWords = Constants.getAcceptedStopWords();
@@ -899,9 +905,41 @@ public class InterventionExecutionManagerService {
 			periodicScheduling = false;
 		}
 
+		int i = 0;
 		for (val participantToCheck : participants) {
+			// Perform messaging for priority participants every 100
+			// participants
+			if (i % 100 == 0) {
+				final String[] priorityParticipantsIdsArray;
+				synchronized (priorityParticipantsIds) {
+					priorityParticipantsIdsArray = new String[priorityParticipantsIds
+							.size()];
+					priorityParticipantsIds
+							.toArray(priorityParticipantsIdsArray);
+					priorityParticipantsIds.clear();
+				}
+
+				if (priorityParticipantsIdsArray.length > 0) {
+					log.warn(
+							"Performing priority messaging for {} participants",
+							priorityParticipantsIdsArray.length);
+				}
+
+				for (val priorityParticipantToCheckStringId : priorityParticipantsIdsArray) {
+					val priotiryParticipantToCheckId = new ObjectId(
+							priorityParticipantToCheckStringId);
+
+					// Synchronization is only be done on participant level
+					if (performMessagingForParticipant(
+							priotiryParticipantToCheckId, false)) {
+						messagingPerformedForParticipants++;
+					}
+				}
+			}
+			i++;
+
 			// Synchronization is only be done on participant level
-			if (performMessagingForParticipant(participantToCheck,
+			if (performMessagingForParticipant(participantToCheck.getId(),
 					periodicScheduling)) {
 				messagingPerformedForParticipants++;
 			}
@@ -919,7 +957,7 @@ public class InterventionExecutionManagerService {
 	 */
 	@Synchronized
 	private boolean performMessagingForParticipant(
-			final Participant participantToCheck,
+			final ObjectId participantIdToCheck,
 			final boolean periodicScheduling) {
 		boolean messagingPerformed = false;
 
@@ -928,7 +966,7 @@ public class InterventionExecutionManagerService {
 			// to potential inconsistency because of missing
 			// synchronization)
 			val participant = databaseManagerService.getModelObjectById(
-					Participant.class, participantToCheck.getId());
+					Participant.class, participantIdToCheck);
 
 			if (participant == null || !participant.isMonitoringActive()) {
 				return messagingPerformed;
@@ -1529,6 +1567,12 @@ public class InterventionExecutionManagerService {
 					return dialogMessage;
 				}
 			}
+		}
+
+		// Put participant on priority list for faster rules management
+		synchronized (priorityParticipantsIds) {
+			priorityParticipantsIds
+					.add(dialogOption.getParticipant().toHexString());
 		}
 
 		// Check for intention messages or reply cases (message reply or micro
