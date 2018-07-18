@@ -42,6 +42,10 @@ public enum AnswerTypes {
 	DATE,
 	TIME,
 	DATE_AND_TIME,
+	IMAGE,
+	AUDIO,
+	VIDEO,
+	GRAPHICAL_CODE,
 	CUSTOM;
 
 	@Override
