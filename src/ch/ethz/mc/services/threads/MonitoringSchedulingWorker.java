@@ -60,7 +60,7 @@ public class MonitoringSchedulingWorker extends Thread {
 			final InterventionExecutionManagerService interventionExecutionManagerService,
 			final SurveyExecutionManagerService screeningSurveyExecutionManagerService) {
 		setName("Monitoring Scheduling Worker");
-		setPriority(NORM_PRIORITY + 1);
+		setPriority(NORM_PRIORITY - 1);
 
 		systemLoad = SystemLoad.getInstance();
 

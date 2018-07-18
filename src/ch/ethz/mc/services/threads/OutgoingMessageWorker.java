@@ -45,7 +45,7 @@ public class OutgoingMessageWorker extends Thread {
 	public OutgoingMessageWorker(
 			final InterventionExecutionManagerService interventionExecutionManagerService) {
 		setName("Outgoing Message Worker");
-		setPriority(NORM_PRIORITY + 1);
+		setPriority(NORM_PRIORITY - 1);
 
 		systemLoad = SystemLoad.getInstance();
 

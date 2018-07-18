@@ -49,7 +49,7 @@ public class IncomingMessageWorker extends Thread {
 			final InterventionExecutionManagerService interventionExecutionManagerService,
 			final CommunicationManagerService communicationManagerService) {
 		setName("Incoming Message Worker");
-		setPriority(NORM_PRIORITY + 1);
+		setPriority(NORM_PRIORITY - 1);
 
 		systemLoad = SystemLoad.getInstance();
 
