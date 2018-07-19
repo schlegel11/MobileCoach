@@ -1,5 +1,6 @@
 package ch.ethz.mc.model;
 
+import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.SerializationUtils;
@@ -37,19 +38,21 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public abstract class AbstractModelObjectAccessService {
-	private final boolean							longQueryLogging			= false;
-	private final long								longQueryThresholdInMillis	= 50;
+	private final boolean										longQueryLogging			= false;
+	private final long											longQueryThresholdInMillis	= 50;
 
-	private final ConcurrentHashMap<String, byte[]>	idBasedModelObjectsCache;
+	private final ConcurrentHashMap<String, byte[]>				idBasedIdToModelObjectCache;
 
-	private final ConcurrentHashMap<String, String>	queryBasedModelObjectsCacheIdToQueryMapping;
-	private final ConcurrentHashMap<String, byte[]>	queryBasedModelObjectsCache;
+	private final ConcurrentHashMap<String, HashSet<String>>	queryBasedIdToQueriesCache;
+	private final ConcurrentHashMap<String, String>				queryBasedQueryToIdCache;
+	private final ConcurrentHashMap<String, byte[]>				queryBasedIdToModelObjectCache;
 
 	protected AbstractModelObjectAccessService() {
-		idBasedModelObjectsCache = new ConcurrentHashMap<String, byte[]>();
+		idBasedIdToModelObjectCache = new ConcurrentHashMap<String, byte[]>();
 
-		queryBasedModelObjectsCacheIdToQueryMapping = new ConcurrentHashMap<String, String>();
-		queryBasedModelObjectsCache = new ConcurrentHashMap<String, byte[]>();
+		queryBasedIdToQueriesCache = new ConcurrentHashMap<String, HashSet<String>>();
+		queryBasedQueryToIdCache = new ConcurrentHashMap<String, String>();
+		queryBasedIdToModelObjectCache = new ConcurrentHashMap<String, byte[]>();
 	}
 
 	protected void configure(final Jongo db) {
@@ -57,14 +60,18 @@ public abstract class AbstractModelObjectAccessService {
 	}
 
 	public void clearCache() {
-		synchronized (idBasedModelObjectsCache) {
-			idBasedModelObjectsCache.clear();
+		log.debug("Clearing all caches...");
+		synchronized (idBasedIdToModelObjectCache) {
+			idBasedIdToModelObjectCache.clear();
 		}
 
-		synchronized (queryBasedModelObjectsCacheIdToQueryMapping) {
-			synchronized (queryBasedModelObjectsCache) {
-				queryBasedModelObjectsCacheIdToQueryMapping.clear();
-				queryBasedModelObjectsCache.clear();
+		synchronized (queryBasedIdToQueriesCache) {
+			synchronized (queryBasedQueryToIdCache) {
+				synchronized (queryBasedIdToModelObjectCache) {
+					queryBasedIdToQueriesCache.clear();
+					queryBasedQueryToIdCache.clear();
+					queryBasedIdToModelObjectCache.clear();
+				}
 			}
 		}
 	}
@@ -75,18 +82,24 @@ public abstract class AbstractModelObjectAccessService {
 	public void saveModelObject(final ModelObject modelObject) {
 		// Force new fetch from database after change
 		if (modelObject != null && modelObject.getId() != null) {
-			val hexId = modelObject.getId().toHexString();
+			val hexIdKey = modelObject.getId().toHexString();
+			log.debug("Removing {} from cache (while saving)...", hexIdKey);
 
-			idBasedModelObjectsCache.remove(hexId);
+			idBasedIdToModelObjectCache.remove(hexIdKey);
 
-			synchronized (queryBasedModelObjectsCacheIdToQueryMapping) {
-				synchronized (queryBasedModelObjectsCache) {
-					String queryToDelete = null;
-					if ((queryToDelete = queryBasedModelObjectsCacheIdToQueryMapping
-							.get(hexId)) != null) {
-						queryBasedModelObjectsCacheIdToQueryMapping
-								.remove(hexId);
-						queryBasedModelObjectsCache.remove(queryToDelete);
+			synchronized (queryBasedIdToQueriesCache) {
+				synchronized (queryBasedQueryToIdCache) {
+					synchronized (queryBasedIdToModelObjectCache) {
+
+						HashSet<String> queryKeys = null;
+						if ((queryKeys = queryBasedIdToQueriesCache
+								.get(hexIdKey)) != null) {
+							queryKeys.forEach(
+									queryKey -> queryBasedQueryToIdCache
+											.remove(queryKey));
+							queryBasedIdToQueriesCache.remove(hexIdKey);
+							queryBasedIdToModelObjectCache.remove(hexIdKey);
+						}
 					}
 				}
 			}
@@ -105,7 +118,8 @@ public abstract class AbstractModelObjectAccessService {
 
 		val hexId = id.toHexString();
 
-		final byte[] modelObjectByteArray = idBasedModelObjectsCache.get(hexId);
+		final byte[] modelObjectByteArray = idBasedIdToModelObjectCache
+				.get(hexId);
 
 		if (modelObjectByteArray != null) {
 			modelObject = clazz
@@ -120,7 +134,7 @@ public abstract class AbstractModelObjectAccessService {
 		// caching)
 		if (modelObject != null
 				&& !(modelObject instanceof ParticipantVariableWithValue)) {
-			idBasedModelObjectsCache.put(modelObject.getId().toHexString(),
+			idBasedIdToModelObjectCache.put(modelObject.getId().toHexString(),
 					SerializationUtils.serialize(modelObject));
 		}
 
@@ -136,18 +150,24 @@ public abstract class AbstractModelObjectAccessService {
 		ModelObject.delete(clazz, id);
 
 		if (id != null) {
-			val hexId = id.toHexString();
+			val hexIdKey = id.toHexString();
+			log.debug("Removing {} from cache...", hexIdKey);
 
-			idBasedModelObjectsCache.remove(hexId);
+			idBasedIdToModelObjectCache.remove(hexIdKey);
 
-			synchronized (queryBasedModelObjectsCacheIdToQueryMapping) {
-				synchronized (queryBasedModelObjectsCache) {
-					String queryToDelete = null;
-					if ((queryToDelete = queryBasedModelObjectsCacheIdToQueryMapping
-							.get(hexId)) != null) {
-						queryBasedModelObjectsCacheIdToQueryMapping
-								.remove(hexId);
-						queryBasedModelObjectsCache.remove(queryToDelete);
+			synchronized (queryBasedIdToQueriesCache) {
+				synchronized (queryBasedQueryToIdCache) {
+					synchronized (queryBasedIdToModelObjectCache) {
+
+						HashSet<String> queryKeys = null;
+						if ((queryKeys = queryBasedIdToQueriesCache
+								.get(hexIdKey)) != null) {
+							queryKeys.forEach(
+									queryKey -> queryBasedQueryToIdCache
+											.remove(queryKey));
+							queryBasedIdToQueriesCache.remove(hexIdKey);
+							queryBasedIdToModelObjectCache.remove(hexIdKey);
+						}
 					}
 				}
 			}
@@ -162,18 +182,24 @@ public abstract class AbstractModelObjectAccessService {
 		ModelObject.delete(modelObject);
 
 		if (modelObject != null && modelObject.getId() != null) {
-			val hexId = modelObject.getId().toHexString();
+			val hexIdKey = modelObject.getId().toHexString();
+			log.debug("Removing {} from cache...", hexIdKey);
 
-			idBasedModelObjectsCache.remove(hexId);
+			idBasedIdToModelObjectCache.remove(hexIdKey);
 
-			synchronized (queryBasedModelObjectsCacheIdToQueryMapping) {
-				synchronized (queryBasedModelObjectsCache) {
-					String queryToDelete = null;
-					if ((queryToDelete = queryBasedModelObjectsCacheIdToQueryMapping
-							.get(hexId)) != null) {
-						queryBasedModelObjectsCacheIdToQueryMapping
-								.remove(hexId);
-						queryBasedModelObjectsCache.remove(queryToDelete);
+			synchronized (queryBasedIdToQueriesCache) {
+				synchronized (queryBasedQueryToIdCache) {
+					synchronized (queryBasedIdToModelObjectCache) {
+
+						HashSet<String> queryKeys = null;
+						if ((queryKeys = queryBasedIdToQueriesCache
+								.get(hexIdKey)) != null) {
+							queryKeys.forEach(
+									queryKey -> queryBasedQueryToIdCache
+											.remove(queryKey));
+							queryBasedIdToQueriesCache.remove(hexIdKey);
+							queryBasedIdToModelObjectCache.remove(hexIdKey);
+						}
 					}
 				}
 			}
@@ -196,49 +222,74 @@ public abstract class AbstractModelObjectAccessService {
 			// Caching case
 			final long timestamp = System.currentTimeMillis();
 
-			synchronized (queryBasedModelObjectsCacheIdToQueryMapping) {
-				synchronized (queryBasedModelObjectsCache) {
-					val key = clazz.getName() + query
-							+ ((ObjectId) parameters[0]).toHexString();
-					val hexId = queryBasedModelObjectsCacheIdToQueryMapping
-							.get(key);
+			synchronized (queryBasedIdToQueriesCache) {
+				synchronized (queryBasedQueryToIdCache) {
+					synchronized (queryBasedIdToModelObjectCache) {
+						val queryKey = clazz.getName() + query
+								+ ((ObjectId) parameters[0]).toHexString();
+						String hexIdKey = queryBasedQueryToIdCache
+								.get(queryKey);
 
-					if (hexId != null) {
-						final byte[] modelObjectByteArray = queryBasedModelObjectsCache
-								.get(hexId);
+						if (hexIdKey != null) {
+							final byte[] modelObjectByteArray = queryBasedIdToModelObjectCache
+									.get(hexIdKey);
 
-						if (modelObjectByteArray != null) {
-							modelObject = clazz.cast(SerializationUtils
-									.deserialize(modelObjectByteArray));
+							if (modelObjectByteArray != null) {
+								modelObject = clazz.cast(SerializationUtils
+										.deserialize(modelObjectByteArray));
 
-							if (longQueryLogging) {
-								final long duration = System.currentTimeMillis()
-										- timestamp;
-								if (duration > longQueryThresholdInMillis) {
-									log.warn(
-											"Slow CACHED query findOneModelObject: {} ms, {}, {}",
-											duration, clazz, query);
+								if (longQueryLogging) {
+									final long duration = System
+											.currentTimeMillis() - timestamp;
+									if (duration > longQueryThresholdInMillis) {
+										log.warn(
+												"Slow CACHED query findOneModelObject: {} ms, {}, {}",
+												duration, clazz, query);
+									}
 								}
+
+								log.debug("Returning {} {} from cache",
+										clazz.getName(), hexIdKey);
+
+								return modelObject;
+							}
+						}
+
+						modelObject = ModelObject.findOne(clazz, query,
+								parameters);
+
+						// Don't cache ParticipantVariableWithValue (because
+						// they
+						// have their
+						// own
+						// caching)
+						if (modelObject != null
+								&& !(modelObject instanceof ParticipantVariableWithValue)) {
+
+							if (hexIdKey == null) {
+								hexIdKey = modelObject.getId().toHexString();
 							}
 
-							return modelObject;
+							log.debug("Caching {} {}...", clazz.getName(),
+									hexIdKey);
+
+							HashSet<String> queryKeys = null;
+							if ((queryKeys = queryBasedIdToQueriesCache
+									.get(hexIdKey)) == null) {
+								queryKeys = new HashSet<String>();
+								queryBasedIdToQueriesCache.put(hexIdKey,
+										queryKeys);
+							}
+							queryKeys.add(queryKey);
+
+							if (queryKeys.size() > 1) {
+								System.err.println(" --> " + queryKeys.size());
+							}
+
+							queryBasedQueryToIdCache.put(queryKey, hexIdKey);
+							queryBasedIdToModelObjectCache.put(hexIdKey,
+									SerializationUtils.serialize(modelObject));
 						}
-					}
-
-					modelObject = ModelObject.findOne(clazz, query, parameters);
-
-					// Don't cache ParticipantVariableWithValue (because they
-					// have their
-					// own
-					// caching)
-					if (modelObject != null
-							&& !(modelObject instanceof ParticipantVariableWithValue)) {
-						val newHexId = modelObject.getId().toHexString();
-
-						queryBasedModelObjectsCacheIdToQueryMapping.put(key,
-								newHexId);
-						queryBasedModelObjectsCache.put(newHexId,
-								SerializationUtils.serialize(modelObject));
 					}
 				}
 			}
