@@ -37,7 +37,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public abstract class AbstractModelObjectAccessService {
-	private final boolean							longQueryLogging			= true;
+	private final boolean							longQueryLogging			= false;
 	private final long								longQueryThresholdInMillis	= 50;
 
 	private final ConcurrentHashMap<String, byte[]>	idBasedModelObjectsCache;
