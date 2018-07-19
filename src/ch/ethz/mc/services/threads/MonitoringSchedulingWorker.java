@@ -170,8 +170,15 @@ public class MonitoringSchedulingWorker extends Thread {
 
 					systemLoad.setMessagingPerformedForParticipants(count);
 
+					val duration = System.currentTimeMillis()
+							- taskStartingTime;
+
 					systemLoad.setPerformContinuousMessagingRequiredMillis(
-							System.currentTimeMillis() - taskStartingTime);
+							duration);
+
+					systemLoad
+							.setPerformContinuousMessagingRequiredMillisPerParticipant(
+									(double) duration / count);
 				} catch (final Exception e) {
 					log.error("Could not perform messaging: {}",
 							e.getMessage());
