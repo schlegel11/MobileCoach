@@ -38,17 +38,17 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public abstract class AbstractModelObjectAccessService {
 	private final boolean							longQueryLogging			= true;
-	private final long								longQueryThresholdInMillis	= 10;
+	private final long								longQueryThresholdInMillis	= 50;
 
 	private final ConcurrentHashMap<String, byte[]>	idBasedModelObjectsCache;
 
-	private final ConcurrentHashMap<String, String>	queryBasedModelObjectsMapping;
+	private final ConcurrentHashMap<String, String>	queryBasedModelObjectsCacheIdToQueryMapping;
 	private final ConcurrentHashMap<String, byte[]>	queryBasedModelObjectsCache;
 
 	protected AbstractModelObjectAccessService() {
 		idBasedModelObjectsCache = new ConcurrentHashMap<String, byte[]>();
 
-		queryBasedModelObjectsMapping = new ConcurrentHashMap<String, String>();
+		queryBasedModelObjectsCacheIdToQueryMapping = new ConcurrentHashMap<String, String>();
 		queryBasedModelObjectsCache = new ConcurrentHashMap<String, byte[]>();
 	}
 
@@ -61,9 +61,9 @@ public abstract class AbstractModelObjectAccessService {
 			idBasedModelObjectsCache.clear();
 		}
 
-		synchronized (queryBasedModelObjectsMapping) {
+		synchronized (queryBasedModelObjectsCacheIdToQueryMapping) {
 			synchronized (queryBasedModelObjectsCache) {
-				queryBasedModelObjectsMapping.clear();
+				queryBasedModelObjectsCacheIdToQueryMapping.clear();
 				queryBasedModelObjectsCache.clear();
 			}
 		}
@@ -79,11 +79,13 @@ public abstract class AbstractModelObjectAccessService {
 
 			idBasedModelObjectsCache.remove(hexId);
 
-			synchronized (queryBasedModelObjectsMapping) {
+			synchronized (queryBasedModelObjectsCacheIdToQueryMapping) {
 				synchronized (queryBasedModelObjectsCache) {
-					if (queryBasedModelObjectsMapping.containsKey(hexId)) {
-						val queryToDelete = queryBasedModelObjectsMapping
-								.get(hexId);
+					String queryToDelete = null;
+					if ((queryToDelete = queryBasedModelObjectsCacheIdToQueryMapping
+							.get(hexId)) != null) {
+						queryBasedModelObjectsCacheIdToQueryMapping
+								.remove(hexId);
 						queryBasedModelObjectsCache.remove(queryToDelete);
 					}
 				}
@@ -138,12 +140,13 @@ public abstract class AbstractModelObjectAccessService {
 
 			idBasedModelObjectsCache.remove(hexId);
 
-			synchronized (queryBasedModelObjectsMapping) {
+			synchronized (queryBasedModelObjectsCacheIdToQueryMapping) {
 				synchronized (queryBasedModelObjectsCache) {
-					if (queryBasedModelObjectsMapping.containsKey(hexId)) {
-						val queryToDelete = queryBasedModelObjectsMapping
-								.get(hexId);
-						queryBasedModelObjectsMapping.remove(hexId);
+					String queryToDelete = null;
+					if ((queryToDelete = queryBasedModelObjectsCacheIdToQueryMapping
+							.get(hexId)) != null) {
+						queryBasedModelObjectsCacheIdToQueryMapping
+								.remove(hexId);
 						queryBasedModelObjectsCache.remove(queryToDelete);
 					}
 				}
@@ -163,12 +166,13 @@ public abstract class AbstractModelObjectAccessService {
 
 			idBasedModelObjectsCache.remove(hexId);
 
-			synchronized (queryBasedModelObjectsMapping) {
+			synchronized (queryBasedModelObjectsCacheIdToQueryMapping) {
 				synchronized (queryBasedModelObjectsCache) {
-					if (queryBasedModelObjectsMapping.containsKey(hexId)) {
-						val queryToDelete = queryBasedModelObjectsMapping
-								.get(hexId);
-						queryBasedModelObjectsMapping.remove(hexId);
+					String queryToDelete = null;
+					if ((queryToDelete = queryBasedModelObjectsCacheIdToQueryMapping
+							.get(hexId)) != null) {
+						queryBasedModelObjectsCacheIdToQueryMapping
+								.remove(hexId);
 						queryBasedModelObjectsCache.remove(queryToDelete);
 					}
 				}
@@ -192,11 +196,12 @@ public abstract class AbstractModelObjectAccessService {
 			// Caching case
 			final long timestamp = System.currentTimeMillis();
 
-			synchronized (queryBasedModelObjectsMapping) {
+			synchronized (queryBasedModelObjectsCacheIdToQueryMapping) {
 				synchronized (queryBasedModelObjectsCache) {
 					val key = clazz.getName() + query
 							+ ((ObjectId) parameters[0]).toHexString();
-					val hexId = queryBasedModelObjectsMapping.get(key);
+					val hexId = queryBasedModelObjectsCacheIdToQueryMapping
+							.get(key);
 
 					if (hexId != null) {
 						final byte[] modelObjectByteArray = queryBasedModelObjectsCache
@@ -230,7 +235,8 @@ public abstract class AbstractModelObjectAccessService {
 							&& !(modelObject instanceof ParticipantVariableWithValue)) {
 						val newHexId = modelObject.getId().toHexString();
 
-						queryBasedModelObjectsMapping.put(key, newHexId);
+						queryBasedModelObjectsCacheIdToQueryMapping.put(key,
+								newHexId);
 						queryBasedModelObjectsCache.put(newHexId,
 								SerializationUtils.serialize(modelObject));
 					}
