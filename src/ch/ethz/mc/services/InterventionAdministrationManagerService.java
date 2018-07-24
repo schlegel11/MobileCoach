@@ -976,6 +976,7 @@ public class InterventionAdministrationManagerService {
 				val monitoringMessage = (MonitoringMessage) modelObject;
 
 				if (duplicate) {
+					// Recreate I18n identifier
 					monitoringMessage.setI18nIdentifier(GlobalUniqueIdGenerator
 							.createSimpleGlobalUniqueId());
 				}
@@ -1181,6 +1182,7 @@ public class InterventionAdministrationManagerService {
 			if (duplicate && modelObject instanceof MicroDialogMessage) {
 				val microDialogMessage = (MicroDialogMessage) modelObject;
 
+				// Recreate I18n identifier
 				microDialogMessage.setI18nIdentifier(
 						GlobalUniqueIdGenerator.createSimpleGlobalUniqueId());
 
@@ -1442,6 +1444,7 @@ public class InterventionAdministrationManagerService {
 				val microDialogMessage = (MicroDialogMessage) modelObject;
 
 				if (duplicate) {
+					// Recreate I18n identifier
 					microDialogMessage.setI18nIdentifier(GlobalUniqueIdGenerator
 							.createSimpleGlobalUniqueId());
 				}

@@ -79,10 +79,14 @@ public class SystemLoad {
 	@Setter
 	long	performContinuousMessagingRequiredMillis;
 
+	@Getter
+	@Setter
+	double	performContinuousMessagingRequiredMillisPerParticipant;
+
 	public void log() {
 		synchronized (log) {
 			log.info(
-					"-----------------------------------------------------------------------");
+					"--------------------------------------------------------------------------------");
 			log.info(
 					"Logged in users:                                              {}",
 					getLoggedInUsers());
@@ -105,7 +109,10 @@ public class SystemLoad {
 					"Perform continuous messaging required millis:                 {}",
 					getPerformContinuousMessagingRequiredMillis());
 			log.info(
-					"-----------------------------------------------------------------------");
+					"Perform continuous messaging required millis per participant: {}",
+					getPerformContinuousMessagingRequiredMillisPerParticipant());
+			log.info(
+					"--------------------------------------------------------------------------------");
 		}
 	}
 }
