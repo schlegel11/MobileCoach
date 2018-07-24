@@ -34,9 +34,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-
 import org.bson.types.ObjectId;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
@@ -47,32 +44,37 @@ import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
 import ch.ethz.mc.services.internal.VariablesManagerService.ExternallyWriteProtectedVariableException;
 import ch.ethz.mc.tools.StringValidator;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
- * Service to allow upload of images using REST
+ * Service to allow upload of media content using REST
  *
  * @author Andreas Filler
  */
 @Path("/v02/image")
 @Log4j2
-public class ImageUploadServiceV02 extends AbstractFileUploadServiceV02 {
+public class MediaUploadServiceV02 extends AbstractFileUploadServiceV02 {
 	RESTManagerService restManagerService;
 
-	public ImageUploadServiceV02(final RESTManagerService restManagerService) {
+	public MediaUploadServiceV02(final RESTManagerService restManagerService) {
 		super(restManagerService);
 		this.restManagerService = restManagerService;
 	}
 
 	@POST
-	@Path("/upload/{variable}")
+	@Path("/upload/{mediaType}/{variable}")
 	@Consumes("multipart/form-data")
 	@Produces("application/json")
-	public Response imageUpload(@HeaderParam("user") final String user,
+	public Response mediaUpload(@HeaderParam("user") final String user,
 			@HeaderParam("token") final String token,
+			@PathParam("mediaType") final ACCEPTED_MEDIA_UPLOAD_TYPES mediaType,
 			@PathParam("variable") final String variable,
 			@Context final HttpServletRequest request,
 			final MultipartFormDataInput input) {
-		log.debug("Token {}: Upload image to variable {}", token, variable);
+
+		log.debug("Token {}: Upload {} to variable {}", token, mediaType,
+				variable);
 		ObjectId participantId;
 		try {
 			participantId = checkExternalParticipantAccessAndReturnParticipantId(
@@ -81,19 +83,32 @@ public class ImageUploadServiceV02 extends AbstractFileUploadServiceV02 {
 			throw e;
 		}
 
-		log.debug("Size of image upload: {}", request.getContentLength());
-		if (request
-				.getContentLength() > ImplementationConstants.MAX_UPLOAD_SIZE_IN_BYTE) {
+		log.debug("Size of media upload: {}", request.getContentLength());
+
+		int maxUploadSize = 0;
+		switch (mediaType) {
+			case IMAGE:
+				maxUploadSize = ImplementationConstants.MAX_IMAGE_UPLOAD_SIZE_IN_BYTE;
+				break;
+			case VIDEO:
+				maxUploadSize = ImplementationConstants.MAX_VIDEO_UPLOAD_SIZE_IN_BYTE;
+				break;
+			case AUDIO:
+				maxUploadSize = ImplementationConstants.MAX_AUDIO_UPLOAD_SIZE_IN_BYTE;
+				break;
+		}
+
+		if (request.getContentLength() > maxUploadSize) {
 			throw new WebApplicationException(
 					Response.status(Status.BAD_REQUEST)
-							.entity("Could not upload image: The image file is too big")
+							.entity("Could not upload media file: The file is too big")
 							.build());
 		}
 
 		if (!StringValidator.isValidVariableName(
 				ImplementationConstants.VARIABLE_PREFIX + variable.trim())) {
 			throw new WebApplicationException(Response.serverError()
-					.entity("Could not upload image: The variable name is not valid")
+					.entity("Could not media file image: The variable name is not valid")
 					.build());
 		}
 
@@ -108,7 +123,6 @@ public class ImageUploadServiceV02 extends AbstractFileUploadServiceV02 {
 		}
 
 		// Do upload to temporary file
-		val mediaType = ACCEPTED_MEDIA_UPLOAD_TYPES.IMAGE;
 		File temporaryFile = null;
 		try {
 			temporaryFile = handleUpload(input, mediaType);
@@ -125,7 +139,7 @@ public class ImageUploadServiceV02 extends AbstractFileUploadServiceV02 {
 			}
 
 			throw new WebApplicationException(Response.serverError()
-					.entity("Could not upload image: " + e.getMessage())
+					.entity("Could not upload media file: " + e.getMessage())
 					.build());
 		}
 
@@ -142,7 +156,8 @@ public class ImageUploadServiceV02 extends AbstractFileUploadServiceV02 {
 
 		if (fileReference == null) {
 			throw new WebApplicationException(Response.serverError()
-					.entity("Image could not be moved to repository").build());
+					.entity("Media file could not be moved to repository")
+					.build());
 		}
 
 		// Store reference to variable

@@ -43,8 +43,8 @@ public enum AnswerTypes {
 	TIME,
 	DATE_AND_TIME,
 	IMAGE,
-	AUDIO,
 	VIDEO,
+	AUDIO,
 	GRAPHICAL_CODE,
 	CUSTOM;
 
@@ -88,6 +88,10 @@ public enum AnswerTypes {
 			case DATE:
 			case TIME:
 			case DATE_AND_TIME:
+			case IMAGE:
+			case VIDEO:
+			case AUDIO:
+			case GRAPHICAL_CODE:
 			case CUSTOM:
 				return true;
 			default:
@@ -112,6 +116,9 @@ public enum AnswerTypes {
 			case DATE:
 			case TIME:
 			case DATE_AND_TIME:
+			case IMAGE:
+			case VIDEO:
+			case AUDIO:
 			case CUSTOM:
 				return true;
 			default:
