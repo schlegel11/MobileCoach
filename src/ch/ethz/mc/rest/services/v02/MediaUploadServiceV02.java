@@ -52,7 +52,7 @@ import lombok.extern.log4j.Log4j2;
  *
  * @author Andreas Filler
  */
-@Path("/v02/image")
+@Path("/v02/media")
 @Log4j2
 public class MediaUploadServiceV02 extends AbstractFileUploadServiceV02 {
 	RESTManagerService restManagerService;
