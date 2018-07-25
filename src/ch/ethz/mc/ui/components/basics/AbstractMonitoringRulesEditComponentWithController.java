@@ -714,8 +714,10 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 			final ObjectId sameLevelTargetItemId) {
 		log.debug("Moving {} {} (parent: {} / same level target: {} )",
 				sourceItemId, movement, parentItemId, sameLevelTargetItemId);
-		if (sameLevelTargetItemId != null
-				&& sourceItemId.equals(sameLevelTargetItemId)) {
+		if (movement.ordinal() == 0 && parentItemId != null
+				&& sourceItemId.equals(parentItemId)
+				|| movement.ordinal() > 0 && sameLevelTargetItemId != null
+						&& sourceItemId.equals(sameLevelTargetItemId)) {
 			log.debug("Can't move item on itself");
 			return;
 		}
