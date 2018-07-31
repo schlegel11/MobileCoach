@@ -97,10 +97,10 @@ public class StringHelpers {
 					val simulatorActive = Constants.isSimulatedDateAndTime();
 					name.append(Messages.getAdminString(
 							AdminMessageStrings.UI_MODEL__PERIODIC_RULE,
-							String.valueOf((int) (simulatorActive
+							String.valueOf((int) ((simulatorActive
 									? ImplementationConstants.PERIODIC_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITH_SIMULATOR
-									: ImplementationConstants.PERIODIC_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITHOUT_SIMULATOR
-											/ 60))));
+									: ImplementationConstants.PERIODIC_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITHOUT_SIMULATOR)
+									/ 60))));
 					break;
 				case UNEXPECTED_MESSAGE:
 					name.append(Messages.getAdminString(
