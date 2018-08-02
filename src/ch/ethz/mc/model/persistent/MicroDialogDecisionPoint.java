@@ -55,13 +55,15 @@ import lombok.val;
 @AllArgsConstructor
 public class MicroDialogDecisionPoint extends ModelObject
 		implements MicroDialogElementInterface {
+	private static final long	serialVersionUID	= 4059444409285460396L;
+
 	/**
 	 * A comment for the author, not visible to any participant
 	 */
 	@Getter
 	@Setter
 	@NonNull
-	private String		comment;
+	private String				comment;
 
 	/**
 	 * The {@link MicroDialog} this {@link MicroDialogDecisionPoint} belongs to
@@ -69,7 +71,7 @@ public class MicroDialogDecisionPoint extends ModelObject
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId	microDialog;
+	private ObjectId			microDialog;
 
 	/**
 	 * The position of the {@link MicroDialogDecisionPoint} compared to all
@@ -78,7 +80,7 @@ public class MicroDialogDecisionPoint extends ModelObject
 	 */
 	@Getter
 	@Setter
-	private int			order;
+	private int					order;
 
 	/*
 	 * (non-Javadoc)

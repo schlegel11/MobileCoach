@@ -1,5 +1,11 @@
 package ch.ethz.mc.model.persistent;
 
+import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.conf.Messages;
+import ch.ethz.mc.model.ModelObject;
+import ch.ethz.mc.model.Queries;
+import ch.ethz.mc.model.ui.UIAuthor;
+import ch.ethz.mc.model.ui.UIModelObject;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -26,12 +32,6 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.val;
-import ch.ethz.mc.conf.AdminMessageStrings;
-import ch.ethz.mc.conf.Messages;
-import ch.ethz.mc.model.ModelObject;
-import ch.ethz.mc.model.Queries;
-import ch.ethz.mc.model.ui.UIAuthor;
-import ch.ethz.mc.model.ui.UIModelObject;
 
 /**
  * {@link ModelObject} to represent an {@link Author}
@@ -44,12 +44,14 @@ import ch.ethz.mc.model.ui.UIModelObject;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Author extends ModelObject {
+	private static final long	serialVersionUID	= 9068910637074662586L;
+
 	/**
 	 * Admin rights of {@link Author}
 	 */
 	@Getter
 	@Setter
-	private boolean	admin;
+	private boolean				admin;
 
 	/**
 	 * Username of {@link Author} required to authenticate
@@ -57,7 +59,7 @@ public class Author extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String	username;
+	private String				username;
 
 	/**
 	 * Hash of password of {@link Author} required to authenticate
@@ -65,7 +67,7 @@ public class Author extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String	passwordHash;
+	private String				passwordHash;
 
 	/*
 	 * (non-Javadoc)

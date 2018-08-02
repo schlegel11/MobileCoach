@@ -67,5 +67,9 @@ public class ReceivedMessage {
 
 	@Getter
 	@Setter
+	private String				text;
+
+	@Getter
+	@Setter
 	private long				receivedTimestamp;
 }

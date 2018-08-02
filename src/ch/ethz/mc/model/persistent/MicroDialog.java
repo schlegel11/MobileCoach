@@ -49,13 +49,15 @@ import lombok.val;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MicroDialog extends ModelObject {
+	private static final long	serialVersionUID	= -8890934986782742689L;
+
 	/**
 	 * The {@link Intervention} the {@link MicroDialog} belongs to
 	 */
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId	intervention;
+	private ObjectId			intervention;
 
 	/**
 	 * The name of the {@link MicroDialog} as shown in the backend
@@ -63,7 +65,7 @@ public class MicroDialog extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String		name;
+	private String				name;
 
 	/**
 	 * The position of the {@link MicroDialog} compared to all other
@@ -71,7 +73,7 @@ public class MicroDialog extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private int			order;
+	private int					order;
 
 	/*
 	 * (non-Javadoc)

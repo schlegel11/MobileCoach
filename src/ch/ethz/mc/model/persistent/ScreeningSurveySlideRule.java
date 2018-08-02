@@ -22,14 +22,10 @@ package ch.ethz.mc.model.persistent;
  */
 import java.util.List;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.Setter;
-import lombok.val;
-
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
@@ -41,8 +37,11 @@ import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import ch.ethz.mc.model.ui.UIModelObject;
 import ch.ethz.mc.model.ui.UIScreeningSurveySlideRule;
 import ch.ethz.mc.tools.StringHelpers;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.val;
 
 /**
  * {@link ModelObject} to represent an {@link ScreeningSurveySlideRule}
@@ -56,6 +55,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 @NoArgsConstructor
 public class ScreeningSurveySlideRule extends AbstractRule {
+	private static final long serialVersionUID = 4639890109473843451L;
+
 	/**
 	 * Default constructor
 	 */

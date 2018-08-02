@@ -78,13 +78,17 @@ public class ImplementationConstants {
 	public static final int		UI_SESSION_TIMEOUT_IN_SECONDS														= 900;
 	public static final String	UI_SESSION_ATTRIBUTE_DETECTOR														= "mc.vaadin.is_vaadin_session";
 
-	public static final int		MAX_UPLOAD_SIZE_IN_BYTE																= 5000000;
-
 	public static enum ACCEPTED_MEDIA_UPLOAD_TYPES {
-		IMAGE
+		IMAGE, VIDEO, AUDIO
 	};
 
 	public static final String	ACCEPTED_IMAGE_FORMATS												= ".png|.jpg|.jpeg|.gif";
+	public static final String	ACCEPTED_VIDEO_FORMATS												= ".mp4|.mov|.m4v";
+	public static final String	ACCEPTED_AUDIO_FORMATS												= ".aac";
+
+	public static int			MAX_IMAGE_UPLOAD_SIZE_IN_BYTE										= 5000000;
+	public static int			MAX_VIDEO_UPLOAD_SIZE_IN_BYTE										= 50000000;
+	public static int			MAX_AUDIO_UPLOAD_SIZE_IN_BYTE										= 25000000;
 
 	public static final String	IMAGE_WATERMARK_TEXT												= "MobileCoach";
 	public static final Object	IMAGE_JPEG_RENDERING												= RenderingHints.VALUE_RENDER_DEFAULT;

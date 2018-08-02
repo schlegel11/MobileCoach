@@ -55,6 +55,8 @@ import lombok.val;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MonitoringMessage extends ModelObject {
+	private static final long	serialVersionUID	= -8135818586097915678L;
+
 	/**
 	 * The {@link MonitoringMessageGroup} this {@link MonitoringMessage} belongs
 	 * to
@@ -62,7 +64,7 @@ public class MonitoringMessage extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId	monitoringMessageGroup;
+	private ObjectId			monitoringMessageGroup;
 
 	/**
 	 * The message text containing placeholders for variables
@@ -70,14 +72,14 @@ public class MonitoringMessage extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private LString		textWithPlaceholders;
+	private LString				textWithPlaceholders;
 
 	/**
 	 * The message itself is a command for the client
 	 */
 	@Getter
 	@Setter
-	private boolean		commandMessage;
+	private boolean				commandMessage;
 
 	/**
 	 * The position of the {@link MonitoringMessage} compared to all other
@@ -85,7 +87,7 @@ public class MonitoringMessage extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private int			order;
+	private int					order;
 
 	/**
 	 * <strong>OPTIONAL:</strong> The {@link MediaObject} used/presented in this
@@ -93,7 +95,7 @@ public class MonitoringMessage extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private ObjectId	linkedMediaObject;
+	private ObjectId			linkedMediaObject;
 
 	/**
 	 * <strong>OPTIONAL:</strong> The intermediate {@link ScreeningSurvey}
@@ -101,7 +103,7 @@ public class MonitoringMessage extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private ObjectId	linkedIntermediateSurvey;
+	private ObjectId			linkedIntermediateSurvey;
 
 	/**
 	 * <strong>OPTIONAL:</strong> If the result of the {@link MonitoringMessage}
@@ -109,7 +111,7 @@ public class MonitoringMessage extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private String		storeValueToVariableWithName;
+	private String				storeValueToVariableWithName;
 
 	/**
 	 * The type the answer (if required) should have.
@@ -117,7 +119,7 @@ public class MonitoringMessage extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private AnswerTypes	answerType;
+	private AnswerTypes			answerType;
 
 	/**
 	 * The answer options required to display the answer selection properly; the
@@ -142,7 +144,7 @@ public class MonitoringMessage extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private LString		answerOptionsWithPlaceholders;
+	private LString				answerOptionsWithPlaceholders;
 
 	/**
 	 * <strong>The unique identifier used for i18n
@@ -150,7 +152,7 @@ public class MonitoringMessage extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String		i18nIdentifier;
+	private String				i18nIdentifier;
 
 	/*
 	 * (non-Javadoc)

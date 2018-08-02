@@ -25,10 +25,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import lombok.Getter;
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
@@ -36,6 +32,9 @@ import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mc.services.types.GeneralSessionAttributeTypes;
 import ch.ethz.mc.services.types.GeneralSessionAttributeValidatorTypes;
+import lombok.Getter;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Abstract class for all REST services
@@ -79,8 +78,9 @@ public abstract class AbstractServiceV02 {
 		if (participantId == null) {
 			log.debug(
 					"REST access denied: External participant or token not matching or unknown");
-			throw new WebApplicationException(Response.notAcceptable(null)
-					.entity("Wrong access token").build());
+			throw new WebApplicationException(
+					Response.status(Status.UNAUTHORIZED)
+							.entity("Wrong access token").build());
 		} else {
 			return participantId;
 		}

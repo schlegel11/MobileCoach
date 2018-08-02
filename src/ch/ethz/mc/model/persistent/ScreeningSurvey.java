@@ -55,6 +55,8 @@ import lombok.val;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ScreeningSurvey extends ModelObject {
+	private static final long	serialVersionUID	= -6739579250701299408L;
+
 	/**
 	 * A absolutely unique Id to enable to reference a {@link ScreeningSurvey}
 	 * also after independent export/import to/from another system
@@ -62,7 +64,7 @@ public class ScreeningSurvey extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String		globalUniqueId;
+	private String				globalUniqueId;
 
 	/**
 	 * The {@link Intervention} the {@link ScreeningSurvey} belongs to
@@ -70,7 +72,7 @@ public class ScreeningSurvey extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId	intervention;
+	private ObjectId			intervention;
 
 	/**
 	 * The name of the {@link ScreeningSurvey} as displayed in the backend
@@ -78,7 +80,7 @@ public class ScreeningSurvey extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private LString		name;
+	private LString				name;
 
 	/**
 	 * The path of the template for the {@link ScreeningSurveySlide}s
@@ -86,7 +88,7 @@ public class ScreeningSurvey extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String		templatePath;
+	private String				templatePath;
 
 	/**
 	 * <strong>OPTIONAL:</strong> The password required to participate in the
@@ -94,14 +96,14 @@ public class ScreeningSurvey extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private String		password;
+	private String				password;
 
 	/**
 	 * Defines if the {@link ScreeningSurvey} is an intermediate survey
 	 */
 	@Getter
 	@Setter
-	private boolean		intermediateSurvey;
+	private boolean				intermediateSurvey;
 
 	/**
 	 * Defines if the {@link ScreeningSurvey} is open for new
@@ -109,7 +111,7 @@ public class ScreeningSurvey extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private boolean		active;
+	private boolean				active;
 
 	/**
 	 * <strong>The unique identifier used for i18n
@@ -117,7 +119,7 @@ public class ScreeningSurvey extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String		i18nIdentifier;
+	private String				i18nIdentifier;
 
 	/*
 	 * (non-Javadoc)

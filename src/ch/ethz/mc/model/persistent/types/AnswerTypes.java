@@ -42,6 +42,10 @@ public enum AnswerTypes {
 	DATE,
 	TIME,
 	DATE_AND_TIME,
+	IMAGE,
+	VIDEO,
+	AUDIO,
+	GRAPHICAL_CODE,
 	CUSTOM;
 
 	@Override
@@ -84,6 +88,10 @@ public enum AnswerTypes {
 			case DATE:
 			case TIME:
 			case DATE_AND_TIME:
+			case IMAGE:
+			case VIDEO:
+			case AUDIO:
+			case GRAPHICAL_CODE:
 			case CUSTOM:
 				return true;
 			default:
@@ -108,6 +116,9 @@ public enum AnswerTypes {
 			case DATE:
 			case TIME:
 			case DATE_AND_TIME:
+			case IMAGE:
+			case VIDEO:
+			case AUDIO:
 			case CUSTOM:
 				return true;
 			default:

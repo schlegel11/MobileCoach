@@ -33,7 +33,7 @@ import ch.ethz.mc.rest.services.v01.ImageUploadServiceV01;
 import ch.ethz.mc.rest.services.v01.VariableAccessServiceV01;
 import ch.ethz.mc.rest.services.v01.VotingServiceV01;
 import ch.ethz.mc.rest.services.v02.CreditsServiceV02;
-import ch.ethz.mc.rest.services.v02.ImageUploadServiceV02;
+import ch.ethz.mc.rest.services.v02.MediaUploadServiceV02;
 import ch.ethz.mc.rest.services.v02.VariableAccessServiceV02;
 import ch.ethz.mc.rest.services.v02.VotingServiceV02;
 import lombok.val;
@@ -64,7 +64,7 @@ public class RESTServiceApplication extends Application {
 
 		// v02 Services
 		services.add(new CreditsServiceV02(restManagerService));
-		services.add(new ImageUploadServiceV02(restManagerService));
+		services.add(new MediaUploadServiceV02(restManagerService));
 		services.add(new VariableAccessServiceV02(restManagerService));
 		services.add(new VotingServiceV02(restManagerService));
 

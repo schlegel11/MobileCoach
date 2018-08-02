@@ -1,5 +1,6 @@
 package ch.ethz.mc.model.persistent;
 
+import java.io.Serializable;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -58,6 +59,8 @@ import lombok.val;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ScreeningSurveySlide extends ModelObject {
+	private static final long serialVersionUID = 7586979542802646476L;
+
 	/**
 	 * Consists of all attributes related to a {@link Question} within a
 	 * {@link ScreeningSurveySlide}
@@ -66,7 +69,10 @@ public class ScreeningSurveySlide extends ModelObject {
 	 */
 	@NoArgsConstructor
 	@AllArgsConstructor
-	public static class Question extends AbstractSerializableTable {
+	public static class Question extends AbstractSerializableTable
+			implements Serializable {
+		private static final long	serialVersionUID	= -5775121499638727953L;
+
 		/**
 		 * The question presented to the {@link Participant} containing
 		 * placeholders for variables
@@ -74,7 +80,7 @@ public class ScreeningSurveySlide extends ModelObject {
 		@Getter
 		@Setter
 		@NonNull
-		private LString		questionWithPlaceholders;
+		private LString				questionWithPlaceholders;
 
 		/**
 		 * <strong>OPTIONAL:</strong> The answers presented to the
@@ -82,7 +88,7 @@ public class ScreeningSurveySlide extends ModelObject {
 		 */
 		@Getter
 		@Setter
-		private LString[]	answersWithPlaceholders;
+		private LString[]			answersWithPlaceholders;
 
 		/**
 		 * <strong>OPTIONAL:</strong> The return values of the answers presented
@@ -91,7 +97,7 @@ public class ScreeningSurveySlide extends ModelObject {
 		 */
 		@Getter
 		@Setter
-		private String[]	answerValues;
+		private String[]			answerValues;
 
 		/**
 		 * <strong>OPTIONAL:</strong> The answer that is preselected when the
@@ -99,7 +105,7 @@ public class ScreeningSurveySlide extends ModelObject {
 		 */
 		@Getter
 		@Setter
-		private int			preSelectedAnswer;
+		private int					preSelectedAnswer;
 
 		/**
 		 * <strong>OPTIONAL:</strong> The name of the variable in which the
@@ -108,7 +114,7 @@ public class ScreeningSurveySlide extends ModelObject {
 		 */
 		@Getter
 		@Setter
-		private String		storeValueToVariableWithName;
+		private String				storeValueToVariableWithName;
 
 		/**
 		 * <strong>OPTIONAL:</strong> The value the variable should have if the
@@ -119,7 +125,7 @@ public class ScreeningSurveySlide extends ModelObject {
 		@Setter
 		@NonNull
 
-		private String		defaultValue;
+		private String				defaultValue;
 
 		@Override
 		@JsonIgnore

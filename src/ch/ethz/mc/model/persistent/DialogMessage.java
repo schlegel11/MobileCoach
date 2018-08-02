@@ -52,6 +52,8 @@ import lombok.val;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DialogMessage extends ModelObject {
+	private static final long			serialVersionUID	= 1929639243199456022L;
+
 	/**
 	 * The recipient of the {@link DialogMessage}
 	 */

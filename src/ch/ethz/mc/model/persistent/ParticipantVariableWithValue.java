@@ -1,5 +1,6 @@
 package ch.ethz.mc.model.persistent;
 
+import java.io.Serializable;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -55,6 +56,8 @@ import lombok.extern.log4j.Log4j2;
 @NoArgsConstructor
 @Log4j2
 public class ParticipantVariableWithValue extends AbstractVariableWithValue {
+	private static final long serialVersionUID = 2109551204186856678L;
+
 	/**
 	 * Default constructor
 	 */
@@ -69,19 +72,21 @@ public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 
 	@NoArgsConstructor
 	@AllArgsConstructor
-	public static class FormerVariableValue {
+	public static class FormerVariableValue implements Serializable {
+		private static final long	serialVersionUID	= -8122702756200214420L;
+
 		@Getter
 		@Setter
-		private long	timestamp;
+		private long				timestamp;
 
 		@Getter
 		@Setter
 		@NonNull
-		private String	value;
+		private String				value;
 
 		@Getter
 		@Setter
-		private boolean	describesMediaUpload;
+		private boolean				describesMediaUpload;
 	}
 
 	/**

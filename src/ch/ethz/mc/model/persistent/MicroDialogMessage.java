@@ -57,13 +57,15 @@ import lombok.val;
 @AllArgsConstructor
 public class MicroDialogMessage extends ModelObject
 		implements MicroDialogElementInterface {
+	private static final long	serialVersionUID	= 3521006469896647527L;
+
 	/**
 	 * The {@link MicroDialog} this {@link MicroDialogMessage} belongs to
 	 */
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId	microDialog;
+	private ObjectId			microDialog;
 
 	/**
 	 * The position of the {@link MicroDialogMessage} compared to all other
@@ -71,7 +73,7 @@ public class MicroDialogMessage extends ModelObject
 	 */
 	@Getter
 	@Setter
-	private int			order;
+	private int					order;
 
 	/**
 	 * The message text containing placeholders for variables
@@ -79,14 +81,14 @@ public class MicroDialogMessage extends ModelObject
 	@Getter
 	@Setter
 	@NonNull
-	private LString		textWithPlaceholders;
+	private LString				textWithPlaceholders;
 
 	/**
 	 * The message itself is a command for the client
 	 */
 	@Getter
 	@Setter
-	private boolean		commandMessage;
+	private boolean				commandMessage;
 
 	/**
 	 * <strong>OPTIONAL:</strong> The {@link MediaObject} used/presented in this
@@ -94,7 +96,7 @@ public class MicroDialogMessage extends ModelObject
 	 */
 	@Getter
 	@Setter
-	private ObjectId	linkedMediaObject;
+	private ObjectId			linkedMediaObject;
 
 	/**
 	 * <strong>OPTIONAL:</strong> The intermediate {@link ScreeningSurvey}
@@ -102,7 +104,7 @@ public class MicroDialogMessage extends ModelObject
 	 */
 	@Getter
 	@Setter
-	private ObjectId	linkedIntermediateSurvey;
+	private ObjectId			linkedIntermediateSurvey;
 
 	/**
 	 * Defines if the {@link MicroDialogMessage} expects to be answered by the
@@ -111,7 +113,7 @@ public class MicroDialogMessage extends ModelObject
 	 */
 	@Getter
 	@Setter
-	private boolean		messageExpectsAnswer;
+	private boolean				messageExpectsAnswer;
 
 	/**
 	 * Defines if the {@link MicroDialogMessage} should be sticky within the
@@ -120,7 +122,7 @@ public class MicroDialogMessage extends ModelObject
 	 */
 	@Getter
 	@Setter
-	private boolean		messageIsSticky;
+	private boolean				messageIsSticky;
 
 	/**
 	 * Defines if the {@link MicroDialogMessage}s in the group expect to be
@@ -129,7 +131,7 @@ public class MicroDialogMessage extends ModelObject
 	 */
 	@Getter
 	@Setter
-	private boolean		messageBlocksMicroDialogUntilAnswered;
+	private boolean				messageBlocksMicroDialogUntilAnswered;
 
 	/**
 	 * <strong>OPTIONAL:</strong> If the result of the
@@ -138,7 +140,7 @@ public class MicroDialogMessage extends ModelObject
 	 */
 	@Getter
 	@Setter
-	private String		storeValueToVariableWithName;
+	private String				storeValueToVariableWithName;
 
 	/**
 	 * <strong>OPTIONAL:</strong> The value the variable should have if the user
@@ -146,7 +148,7 @@ public class MicroDialogMessage extends ModelObject
 	 */
 	@Getter
 	@Setter
-	private String		noReplyValue;
+	private String				noReplyValue;
 
 	/**
 	 * The type the answer (if required) should have.
@@ -154,7 +156,7 @@ public class MicroDialogMessage extends ModelObject
 	@Getter
 	@Setter
 	@NonNull
-	private AnswerTypes	answerType;
+	private AnswerTypes			answerType;
 
 	/**
 	 * <strong>OPTIONAL if sendMessageIfTrue is false:</strong> The minutes a
@@ -163,7 +165,7 @@ public class MicroDialogMessage extends ModelObject
 	 */
 	@Getter
 	@Setter
-	private int			minutesUntilMessageIsHandledAsUnanswered;
+	private int					minutesUntilMessageIsHandledAsUnanswered;
 
 	/**
 	 * The answer options required to display the answer selection properly; the
@@ -188,7 +190,7 @@ public class MicroDialogMessage extends ModelObject
 	@Getter
 	@Setter
 	@NonNull
-	private LString		answerOptionsWithPlaceholders;
+	private LString				answerOptionsWithPlaceholders;
 
 	/**
 	 * <strong>The unique identifier used for i18n
@@ -196,7 +198,7 @@ public class MicroDialogMessage extends ModelObject
 	@Getter
 	@Setter
 	@NonNull
-	private String		i18nIdentifier;
+	private String				i18nIdentifier;
 
 	/*
 	 * (non-Javadoc)

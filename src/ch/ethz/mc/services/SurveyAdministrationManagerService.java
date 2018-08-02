@@ -290,11 +290,44 @@ public class SurveyAdministrationManagerService {
 
 				databaseManagerService.saveModelObject(screeningSurvey);
 			}
+
+			if (duplicate && modelObject instanceof ScreeningSurveySlide) {
+				val screeningSurveySlide = (ScreeningSurveySlide) modelObject;
+
+				// Recreate I18n identifier
+				screeningSurveySlide.setI18nIdentifier(
+						GlobalUniqueIdGenerator.createSimpleGlobalUniqueId());
+
+				databaseManagerService.saveModelObject(screeningSurveySlide);
+			} else if (duplicate && modelObject instanceof Feedback) {
+				val feedback = (Feedback) modelObject;
+
+				// Recreate I18n identifier
+				feedback.setI18nIdentifier(
+						GlobalUniqueIdGenerator.createSimpleGlobalUniqueId());
+
+				databaseManagerService.saveModelObject(feedback);
+			} else if (duplicate && modelObject instanceof FeedbackSlide) {
+				val feedbackSlide = (FeedbackSlide) modelObject;
+
+				// Recreate I18n identifier
+				feedbackSlide.setI18nIdentifier(
+						GlobalUniqueIdGenerator.createSimpleGlobalUniqueId());
+
+				databaseManagerService.saveModelObject(feedbackSlide);
+			}
 		}
 
 		if (duplicate && importedScreeningSurvey != null) {
+			// Recreate global unique ID
 			importedScreeningSurvey = screeningSurveyRecreateGlobalUniqueId(
 					importedScreeningSurvey);
+
+			// Recreate I18n identifier
+			importedScreeningSurvey.setI18nIdentifier(
+					GlobalUniqueIdGenerator.createSimpleGlobalUniqueId());
+
+			databaseManagerService.saveModelObject(importedScreeningSurvey);
 		}
 
 		return importedScreeningSurvey;
@@ -553,6 +586,10 @@ public class SurveyAdministrationManagerService {
 					// Recreate global unique ID
 					slide.setGlobalUniqueId(
 							GlobalUniqueIdGenerator.createGlobalUniqueId());
+
+					// Recreate I18n identifier
+					slide.setI18nIdentifier(GlobalUniqueIdGenerator
+							.createSimpleGlobalUniqueId());
 				}
 
 				// Adjust order
@@ -1270,6 +1307,12 @@ public class SurveyAdministrationManagerService {
 		for (val modelObject : importedModelObjects) {
 			if (modelObject instanceof FeedbackSlide) {
 				val slide = (FeedbackSlide) modelObject;
+
+				if (duplicate) {
+					// Recreate I18n identifier
+					slide.setI18nIdentifier(GlobalUniqueIdGenerator
+							.createSimpleGlobalUniqueId());
+				}
 
 				slide.setOrder(0);
 

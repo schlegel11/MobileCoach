@@ -55,34 +55,36 @@ import lombok.val;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Participant extends ModelObject {
+	private static final long	serialVersionUID	= -6590770882490356836L;
+
 	/**
 	 * The {@link Intervention} the {@link Participant} participates in
 	 */
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId	intervention;
+	private ObjectId			intervention;
 
 	/**
 	 * The timestamp when the {@link Participant} has been created
 	 */
 	@Getter
 	@Setter
-	private long		createdTimestamp;
+	private long				createdTimestamp;
 
 	/**
 	 * The timestamp when the {@link Participant} has logged in the last time
 	 */
 	@Getter
 	@Setter
-	private long		lastLoginTimestamp;
+	private long				lastLoginTimestamp;
 
 	/**
 	 * The timestamp when the {@link Participant} has logged out the last time
 	 */
 	@Getter
 	@Setter
-	private long		lastLogoutTimestamp;
+	private long				lastLogoutTimestamp;
 
 	/**
 	 * The nickname of the {@link Participant}
@@ -90,7 +92,7 @@ public class Participant extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String		nickname;
+	private String				nickname;
 
 	/**
 	 * The language of the {@link Participant}
@@ -98,21 +100,21 @@ public class Participant extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private Locale		language;
+	private Locale				language;
 
 	/**
 	 * The participation group of the {@link Participant}
 	 */
 	@Getter
 	@Setter
-	private String		group;
+	private String				group;
 
 	/**
 	 * The {@link ScreeningSurvey} the {@link Participant} participates in
 	 */
 	@Getter
 	@Setter
-	private ObjectId	assignedScreeningSurvey;
+	private ObjectId			assignedScreeningSurvey;
 
 	/**
 	 * Stores the reference to the {@link ScreeningSurvey} started by the
@@ -122,14 +124,14 @@ public class Participant extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private String		assignedScreeningSurveyGlobalUniqueId;
+	private String				assignedScreeningSurveyGlobalUniqueId;
 
 	/**
 	 * The {@link Feedback} the {@link Participant} participates in
 	 */
 	@Getter
 	@Setter
-	private ObjectId	assignedFeedback;
+	private ObjectId			assignedFeedback;
 
 	/**
 	 * Stores the reference to the {@link Feedback} started by the
@@ -139,7 +141,7 @@ public class Participant extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private String		assignedFeedbackGlobalUniqueId;
+	private String				assignedFeedbackGlobalUniqueId;
 
 	/**
 	 * Stores if the {@link Participant} is activated for the rule-based
@@ -149,7 +151,7 @@ public class Participant extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private boolean		monitoringActive;
+	private boolean				monitoringActive;
 
 	/**
 	 * The organization the {@link Participant} belongs to; can e.g. be used for
@@ -158,7 +160,7 @@ public class Participant extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String		organization;
+	private String				organization;
 
 	/**
 	 * The organization unit the {@link Participant} belongs to; can e.g. be
@@ -167,7 +169,7 @@ public class Participant extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String		organizationUnit;
+	private String				organizationUnit;
 
 	/*
 	 * (non-Javadoc)

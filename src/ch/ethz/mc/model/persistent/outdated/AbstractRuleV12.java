@@ -36,6 +36,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public abstract class AbstractRuleV12 extends ModelObject {
+	private static final long		serialVersionUID	= 4006871903463626376L;
+
 	/**
 	 * Rule containing placeholders for variables
 	 */

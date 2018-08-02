@@ -30,6 +30,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
@@ -126,6 +127,8 @@ public class InterventionExecutionManagerService {
 	private final OutgoingMessageWorker					outgoingMessageWorker;
 	private final MonitoringSchedulingWorker			monitoringSchedulingWorker;
 
+	private final HashSet<String>						priorityParticipantsIds;
+
 	private InterventionExecutionManagerService(
 			final DatabaseManagerService databaseManagerService,
 			final VariablesManagerService variablesManagerService,
@@ -144,6 +147,9 @@ public class InterventionExecutionManagerService {
 		this.surveyExecutionManagerService = surveyExecutionManagerService;
 
 		simulatorActive = Constants.isSimulatedDateAndTime();
+
+		// Initialize cache
+		priorityParticipantsIds = new HashSet<String>();
 
 		// Remember stop words
 		acceptedStopWords = Constants.getAcceptedStopWords();
@@ -873,8 +879,13 @@ public class InterventionExecutionManagerService {
 	 * 
 	 * Important: For performance reasons this method is NOT synchronized
 	 * anymore.
+	 * 
+	 * @return Count of participants the messaging has been performed for
+	 * @throws Exception
 	 */
-	public void performMessaging() throws Exception {
+	public long performMessaging() throws Exception {
+		long messagingPerformedForParticipants = 0;
+
 		log.debug(
 				"Create a list of all relevant participants to perfom messaging");
 		val participants = getAllParticipantsRelevantForAnsweredInTimeChecksAndMonitoringScheduling();
@@ -894,82 +905,138 @@ public class InterventionExecutionManagerService {
 			periodicScheduling = false;
 		}
 
+		int i = 0;
 		for (val participantToCheck : participants) {
-			// Synchronization is only be done on participant level
-			synchronized ($lock) {
-				// Participant and intervention check has to be done again (due
-				// to potential inconsistency because of missing
-				// synchronization)
-				val participant = databaseManagerService.getModelObjectById(
-						Participant.class, participantToCheck.getId());
-
-				if (participant == null || !participant.isMonitoringActive()) {
-					continue;
+			// Perform messaging for priority participants every 100
+			// participants
+			if (i % 100 == 0) {
+				final String[] priorityParticipantsIdsArray;
+				synchronized (priorityParticipantsIds) {
+					priorityParticipantsIdsArray = new String[priorityParticipantsIds
+							.size()];
+					priorityParticipantsIds
+							.toArray(priorityParticipantsIdsArray);
+					priorityParticipantsIds.clear();
 				}
 
-				val intervention = databaseManagerService.getModelObjectById(
-						Intervention.class, participant.getIntervention());
+				log.debug("Performing priority messaging for {} participants",
+						priorityParticipantsIdsArray.length);
 
-				if (intervention == null || !intervention.isActive()
-						|| !intervention.isMonitoringActive()) {
-					continue;
-				}
+				for (val priorityParticipantToCheckStringId : priorityParticipantsIdsArray) {
+					val priotiryParticipantToCheckId = new ObjectId(
+							priorityParticipantToCheckStringId);
 
-				// Check dialog status:
-				// - the participant has all data for monitoring available
-				// - the participant has finished the screening survey
-				// - the participant not finished the monitoring
-				val dialogStatus = databaseManagerService.findOneModelObject(
-						DialogStatus.class,
-						Queries.DIALOG_STATUS__BY_PARTICIPANT_AND_DATA_FOR_MONITORING_PARTICIPATION_AVAILABLE_TRUE_AND_SCREENING_SURVEY_PERFORMED_TRUE_AND_MONITORING_PERFORMED_FALSE,
-						participant.getId());
-
-				if (dialogStatus != null) {
-					/*
-					 * Participant is relevant for messaging
-					 * 
-					 * The following steps should always be performed in this
-					 * order to retain data consistency
-					 */
-					try {
-						log.debug("React on unanswered messages");
-						reactOnAnsweredAndUnansweredMessages(participant,
-								dialogStatus, false);
-					} catch (final Exception e) {
-						log.error("Could not react on unanswered messages: {}",
-								e.getMessage());
-					}
-					try {
-						log.debug("React on answered messages");
-						reactOnAnsweredAndUnansweredMessages(participant,
-								dialogStatus, true);
-					} catch (final Exception e) {
-						log.error("Could not react on answered messages: {}",
-								e.getMessage());
-					}
-					try {
-						log.debug("Scheduling new messages (daily)");
-						scheduleMessagesForSending(participant, dialogStatus,
-								false);
-					} catch (final Exception e) {
-						log.error(
-								"Could not schedule new monitoring messages (daily): {}",
-								e.getMessage());
-					}
-					try {
-						if (periodicScheduling) {
-							log.debug("Scheduling of new messages (periodic)");
-							scheduleMessagesForSending(participant,
-									dialogStatus, true);
-						}
-					} catch (final Exception e) {
-						log.error(
-								"Could not schedule new monitoring messages (periodic): {}",
-								e.getMessage());
+					// Synchronization is only be done on participant level
+					if (performMessagingForParticipant(
+							priotiryParticipantToCheckId, false)) {
+						messagingPerformedForParticipants++;
 					}
 				}
 			}
+			i++;
+
+			// Synchronization is only be done on participant level
+			if (performMessagingForParticipant(participantToCheck.getId(),
+					periodicScheduling)) {
+				messagingPerformedForParticipants++;
+			}
 		}
+
+		return messagingPerformedForParticipants;
+	}
+
+	/**
+	 * Performs the messaging for the given {@link Participant}
+	 * 
+	 * @param participantToCheck
+	 * @param periodicScheduling
+	 * @return
+	 */
+	@Synchronized
+	private boolean performMessagingForParticipant(
+			final ObjectId participantIdToCheck,
+			final boolean periodicScheduling) {
+		boolean messagingPerformed = false;
+
+		synchronized ($lock) {
+			// Participant and intervention check has to be done again (due
+			// to potential inconsistency because of missing
+			// synchronization)
+			val participant = databaseManagerService.getModelObjectById(
+					Participant.class, participantIdToCheck);
+
+			if (participant == null || !participant.isMonitoringActive()) {
+				return messagingPerformed;
+			}
+
+			val intervention = databaseManagerService.getModelObjectById(
+					Intervention.class, participant.getIntervention());
+
+			if (intervention == null || !intervention.isActive()
+					|| !intervention.isMonitoringActive()) {
+				return messagingPerformed;
+			}
+
+			// Check dialog status:
+			// - the participant has all data for monitoring available
+			// - the participant has finished the screening survey
+			// - the participant not finished the monitoring
+			val dialogStatus = databaseManagerService.findOneModelObject(
+					DialogStatus.class, Queries.DIALOG_STATUS__BY_PARTICIPANT,
+					participant.getId());
+
+			if (dialogStatus != null
+					&& dialogStatus.isDataForMonitoringParticipationAvailable()
+					&& dialogStatus.isScreeningSurveyPerformed()
+					&& !dialogStatus.isMonitoringPerformed()) {
+				/*
+				 * Participant is relevant for messaging
+				 * 
+				 * The following steps should always be performed in this order
+				 * to retain data consistency
+				 */
+				messagingPerformed = true;
+
+				try {
+					log.debug("React on unanswered messages");
+					reactOnAnsweredAndUnansweredMessages(participant,
+							dialogStatus, false);
+				} catch (final Exception e) {
+					log.error("Could not react on unanswered messages: {}",
+							e.getMessage());
+				}
+				try {
+					log.debug("React on answered messages");
+					reactOnAnsweredAndUnansweredMessages(participant,
+							dialogStatus, true);
+				} catch (final Exception e) {
+					log.error("Could not react on answered messages: {}",
+							e.getMessage());
+				}
+				try {
+					log.debug("Scheduling new messages (daily)");
+					scheduleMessagesForSending(participant, dialogStatus,
+							false);
+				} catch (final Exception e) {
+					log.error(
+							"Could not schedule new monitoring messages (daily): {}",
+							e.getMessage());
+				}
+				try {
+					if (periodicScheduling) {
+						log.debug("Scheduling of new messages (periodic)");
+						scheduleMessagesForSending(participant, dialogStatus,
+								true);
+					}
+				} catch (final Exception e) {
+					log.error(
+							"Could not schedule new monitoring messages (periodic): {}",
+							e.getMessage());
+				}
+			}
+		}
+
+		return messagingPerformed;
 	}
 
 	@Synchronized
@@ -1497,6 +1564,12 @@ public class InterventionExecutionManagerService {
 					return dialogMessage;
 				}
 			}
+		}
+
+		// Put participant on priority list for faster rules management
+		synchronized (priorityParticipantsIds) {
+			priorityParticipantsIds
+					.add(dialogOption.getParticipant().toHexString());
 		}
 
 		// Check for intention messages or reply cases (message reply or micro
@@ -3000,10 +3073,14 @@ public class InterventionExecutionManagerService {
 				if (participantId != null) {
 					val dialogStatus = databaseManagerService
 							.findOneModelObject(DialogStatus.class,
-									Queries.DIALOG_STATUS__BY_PARTICIPANT_AND_DATA_FOR_MONITORING_PARTICIPATION_AVAILABLE_TRUE_AND_SCREENING_SURVEY_PERFORMED_TRUE_AND_MONITORING_PERFORMED_FALSE,
+									Queries.DIALOG_STATUS__BY_PARTICIPANT,
 									participantId);
 
-					if (dialogStatus != null) {
+					if (dialogStatus != null
+							&& dialogStatus
+									.isDataForMonitoringParticipationAvailable()
+							&& dialogStatus.isScreeningSurveyPerformed()
+							&& !dialogStatus.isMonitoringPerformed()) {
 						val dialogMessagesWaitingToBeSendOfParticipant = databaseManagerService
 								.findModelObjects(DialogMessage.class,
 										Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS,
@@ -3060,11 +3137,13 @@ public class InterventionExecutionManagerService {
 		}
 
 		val dialogStatus = databaseManagerService.findOneModelObject(
-				DialogStatus.class,
-				Queries.DIALOG_STATUS__BY_PARTICIPANT_AND_DATA_FOR_MONITORING_PARTICIPATION_AVAILABLE_TRUE_AND_SCREENING_SURVEY_PERFORMED_TRUE_AND_MONITORING_PERFORMED_FALSE,
+				DialogStatus.class, Queries.DIALOG_STATUS__BY_PARTICIPANT,
 				participantId);
 
-		if (dialogStatus != null) {
+		if (dialogStatus != null
+				&& dialogStatus.isDataForMonitoringParticipationAvailable()
+				&& dialogStatus.isScreeningSurveyPerformed()
+				&& !dialogStatus.isMonitoringPerformed()) {
 			val dialogMessagesWaitingToBeSendOfParticipant = databaseManagerService
 					.findSortedModelObjects(DialogMessage.class,
 							Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_SHOULD_BE_SENT_TIMESTAMP_LOWER,
@@ -3234,5 +3313,13 @@ public class InterventionExecutionManagerService {
 		}
 
 		return relevantParticipants;
+	}
+
+	/**
+	 * Clear cache
+	 */
+	@Synchronized
+	public void clearCache() {
+		databaseManagerService.clearCache();
 	}
 }

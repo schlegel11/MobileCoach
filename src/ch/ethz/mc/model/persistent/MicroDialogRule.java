@@ -52,6 +52,8 @@ import lombok.val;
  */
 @NoArgsConstructor
 public class MicroDialogRule extends AbstractMonitoringRule {
+	private static final long serialVersionUID = -954409194772554660L;
+
 	/**
 	 * Default constructor
 	 */

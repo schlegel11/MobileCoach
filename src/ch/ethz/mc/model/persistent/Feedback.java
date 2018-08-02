@@ -50,6 +50,8 @@ import lombok.val;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Feedback extends ModelObject {
+	private static final long	serialVersionUID	= 3990454830063560539L;
+
 	/**
 	 * A absolutely unique Id to enable to reference a {@link Feedback} also
 	 * after independent export/import to/from another system
@@ -57,7 +59,7 @@ public class Feedback extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String		globalUniqueId;
+	private String				globalUniqueId;
 
 	/**
 	 * The {@link ScreeningSurvey} the {@link Feedback} belongs to
@@ -65,7 +67,7 @@ public class Feedback extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId	screeningSurvey;
+	private ObjectId			screeningSurvey;
 
 	/**
 	 * The name of the {@link Feedback} as displayed in the backend
@@ -73,7 +75,7 @@ public class Feedback extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private LString		name;
+	private LString				name;
 
 	/**
 	 * The path of the template for the {@link FeedbackSlide}s
@@ -81,7 +83,7 @@ public class Feedback extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String		templatePath;
+	private String				templatePath;
 
 	/**
 	 * <strong>The unique identifier used for i18n
@@ -89,7 +91,7 @@ public class Feedback extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String		i18nIdentifier;
+	private String				i18nIdentifier;
 
 	/*
 	 * (non-Javadoc)

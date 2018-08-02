@@ -16,6 +16,8 @@ import lombok.Setter;
  */
 @NoArgsConstructor
 public class ParticipantVariableWithValueV28 extends AbstractVariableWithValue {
+	private static final long serialVersionUID = 4556566163793166655L;
+
 	/**
 	 * Default constructor
 	 */

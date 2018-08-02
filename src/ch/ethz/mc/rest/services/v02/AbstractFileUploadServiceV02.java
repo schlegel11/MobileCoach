@@ -31,10 +31,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
-import lombok.Cleanup;
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-
 import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
@@ -44,6 +40,9 @@ import ch.ethz.mc.conf.ImplementationConstants.ACCEPTED_MEDIA_UPLOAD_TYPES;
 import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
+import lombok.Cleanup;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Allows the upload of files to the system
@@ -139,7 +138,25 @@ public abstract class AbstractFileUploadServiceV02 extends AbstractServiceV02 {
 					case IMAGE:
 						if (!ImplementationConstants.ACCEPTED_IMAGE_FORMATS
 								.contains(temporaryFileExtension)) {
-							throw new Exception("File type is not supported");
+							throw new Exception(
+									"File type is not supported for image: "
+											+ temporaryFileExtension);
+						}
+						break;
+					case VIDEO:
+						if (!ImplementationConstants.ACCEPTED_VIDEO_FORMATS
+								.contains(temporaryFileExtension)) {
+							throw new Exception(
+									"File type is not supported for video: "
+											+ temporaryFileExtension);
+						}
+						break;
+					case AUDIO:
+						if (!ImplementationConstants.ACCEPTED_AUDIO_FORMATS
+								.contains(temporaryFileExtension)) {
+							throw new Exception(
+									"File type is not supported for audio: "
+											+ temporaryFileExtension);
 						}
 						break;
 				}
