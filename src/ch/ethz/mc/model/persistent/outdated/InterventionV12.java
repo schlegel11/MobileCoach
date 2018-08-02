@@ -37,20 +37,22 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class InterventionV12 extends ModelObject {
+	private static final long	serialVersionUID	= -7616106521786215356L;
+
 	/**
 	 * The name of the {@link InterventionV12} as shown in the backend
 	 */
 	@Getter
 	@Setter
 	@NonNull
-	private String		name;
+	private String				name;
 
 	/**
 	 * Timestamp when the {@link InterventionV12} has been created
 	 */
 	@Getter
 	@Setter
-	private long		created;
+	private long				created;
 
 	/**
 	 * Defines if the whole intervention is active. If this value is false, also
@@ -59,7 +61,7 @@ public class InterventionV12 extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private boolean		active;
+	private boolean				active;
 
 	/**
 	 * Defines if the monitoring in this {@link InterventionV12} is active. If
@@ -68,14 +70,14 @@ public class InterventionV12 extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private boolean		monitoringActive;
+	private boolean				monitoringActive;
 
 	/**
 	 * Defines if the dashboard of the intervention can be accessed.
 	 */
 	@Getter
 	@Setter
-	private boolean		dashboardEnabled;
+	private boolean				dashboardEnabled;
 
 	/**
 	 * The path of the template for the dashboard
@@ -83,7 +85,7 @@ public class InterventionV12 extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String		dashboardTemplatePath;
+	private String				dashboardTemplatePath;
 
 	/**
 	 * <strong>OPTIONAL:</strong> The password pattern (containing regular
@@ -91,7 +93,7 @@ public class InterventionV12 extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private String		dashboardPasswordPattern;
+	private String				dashboardPasswordPattern;
 
 	/**
 	 * <strong>OPTIONAL:</strong> The password required to access the deepstream
@@ -99,7 +101,7 @@ public class InterventionV12 extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private String		deepstreamPassword;
+	private String				deepstreamPassword;
 
 	/**
 	 * Defines if {@link ScreeningSurvey}s of participants where all relevant
@@ -107,7 +109,7 @@ public class InterventionV12 extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private boolean		automaticallyFinishScreeningSurveys;
+	private boolean				automaticallyFinishScreeningSurveys;
 
 	/**
 	 * Defines which other interventions on a specific server instance should be
@@ -115,14 +117,14 @@ public class InterventionV12 extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private String[]	interventionsToCheckForUniqueness;
+	private String[]			interventionsToCheckForUniqueness;
 
 	/**
 	 * Defines the monitoring starting days of the intervention
 	 */
 	@Getter
 	@Setter
-	private int[]		monitoringStartingDays;
+	private int[]				monitoringStartingDays;
 
 	/**
 	 * The sender identification used to send messages to the
@@ -130,5 +132,5 @@ public class InterventionV12 extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private String		assignedSenderIdentification;
+	private String				assignedSenderIdentification;
 }

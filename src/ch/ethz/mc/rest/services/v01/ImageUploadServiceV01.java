@@ -34,9 +34,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-
 import org.bson.types.ObjectId;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
@@ -47,6 +44,8 @@ import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
 import ch.ethz.mc.services.internal.VariablesManagerService.ExternallyWriteProtectedVariableException;
 import ch.ethz.mc.tools.StringValidator;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Service to allow upload of images using REST
@@ -82,7 +81,7 @@ public class ImageUploadServiceV01 extends AbstractFileUploadServiceV01 {
 
 		log.debug("Size of image upload: {}", request.getContentLength());
 		if (request
-				.getContentLength() > ImplementationConstants.MAX_UPLOAD_SIZE_IN_BYTE) {
+				.getContentLength() > ImplementationConstants.MAX_IMAGE_UPLOAD_SIZE_IN_BYTE) {
 			throw new WebApplicationException(
 					Response.status(Status.BAD_REQUEST)
 							.entity("Could not upload image: The image file is too big")

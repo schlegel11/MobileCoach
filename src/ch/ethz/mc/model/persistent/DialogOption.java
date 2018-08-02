@@ -47,6 +47,8 @@ import lombok.val;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DialogOption extends ModelObject {
+	private static final long	serialVersionUID	= -1281955047718719223L;
+
 	/**
 	 * The {@link Participant} which provides this {@link DialogOption}
 	 */

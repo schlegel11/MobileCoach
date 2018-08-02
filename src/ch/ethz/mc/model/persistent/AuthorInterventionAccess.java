@@ -1,5 +1,8 @@
 package ch.ethz.mc.model.persistent;
 
+import org.bson.types.ObjectId;
+
+import ch.ethz.mc.model.ModelObject;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -26,10 +29,6 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 
-import org.bson.types.ObjectId;
-
-import ch.ethz.mc.model.ModelObject;
-
 /**
  * {@link ModelObject} to represent an {@link AuthorInterventionAccess}
  * 
@@ -41,13 +40,15 @@ import ch.ethz.mc.model.ModelObject;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuthorInterventionAccess extends ModelObject {
+	private static final long	serialVersionUID	= -2686891854353434099L;
+
 	/**
 	 * {@link Author} who is allowed to administrate {@link Intervention}
 	 */
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId	author;
+	private ObjectId			author;
 
 	/**
 	 * {@link Intervention} that can be administrated by the {@link Author}
@@ -55,5 +56,5 @@ public class AuthorInterventionAccess extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId	intervention;
+	private ObjectId			intervention;
 }

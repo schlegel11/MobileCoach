@@ -22,12 +22,13 @@ package ch.ethz.mc.services.threads;
  */
 import java.util.concurrent.TimeUnit;
 
+import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.model.memory.SystemLoad;
+import ch.ethz.mc.services.InterventionExecutionManagerService;
+import ch.ethz.mc.services.internal.CommunicationManagerService;
 import lombok.Setter;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
-import ch.ethz.mc.conf.ImplementationConstants;
-import ch.ethz.mc.services.InterventionExecutionManagerService;
-import ch.ethz.mc.services.internal.CommunicationManagerService;
 
 /**
  * Manages the handling of incoming messages
@@ -36,6 +37,8 @@ import ch.ethz.mc.services.internal.CommunicationManagerService;
  */
 @Log4j2
 public class IncomingMessageWorker extends Thread {
+	private final SystemLoad							systemLoad;
+
 	private final InterventionExecutionManagerService	interventionExecutionManagerService;
 	private final CommunicationManagerService			communicationManagerService;
 
@@ -46,7 +49,9 @@ public class IncomingMessageWorker extends Thread {
 			final InterventionExecutionManagerService interventionExecutionManagerService,
 			final CommunicationManagerService communicationManagerService) {
 		setName("Incoming Message Worker");
-		setPriority(NORM_PRIORITY - 2);
+		setPriority(NORM_PRIORITY - 1);
+
+		systemLoad = SystemLoad.getInstance();
 
 		this.interventionExecutionManagerService = interventionExecutionManagerService;
 		this.communicationManagerService = communicationManagerService;
@@ -90,6 +95,8 @@ public class IncomingMessageWorker extends Thread {
 						e.getMessage());
 			}
 
+			systemLoad.setIncomingMessageWorkerRequiredMillis(
+					System.currentTimeMillis() - startingTime);
 			log.debug(
 					"Executing new run of incoming message worker...done ({} milliseconds)",
 					System.currentTimeMillis() - startingTime);

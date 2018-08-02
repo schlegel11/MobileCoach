@@ -22,13 +22,9 @@ package ch.ethz.mc.model.persistent;
  */
 import java.util.List;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.Setter;
-import lombok.val;
-
 import org.bson.types.ObjectId;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.persistent.concepts.AbstractRule;
@@ -36,8 +32,11 @@ import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import ch.ethz.mc.model.ui.UIFeedbackSlideRule;
 import ch.ethz.mc.model.ui.UIModelObject;
 import ch.ethz.mc.tools.StringHelpers;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.val;
 
 /**
  * {@link ModelObject} to represent an {@link FeedbackSlideRule}
@@ -50,6 +49,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 @NoArgsConstructor
 public class FeedbackSlideRule extends AbstractRule {
+	private static final long serialVersionUID = -4582903243084282634L;
+
 	/**
 	 * Default constructor
 	 */

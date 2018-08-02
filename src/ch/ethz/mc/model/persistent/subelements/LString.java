@@ -1,5 +1,6 @@
 package ch.ethz.mc.model.persistent.subelements;
 
+import java.io.Serializable;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -23,14 +24,14 @@ package ch.ethz.mc.model.persistent.subelements;
 import java.util.HashMap;
 import java.util.Locale;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import ch.ethz.mc.conf.Constants;
+import ch.ethz.mc.model.persistent.Participant;
 import lombok.NoArgsConstructor;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
-import ch.ethz.mc.conf.Constants;
-import ch.ethz.mc.model.persistent.Participant;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Class to represent a localized {@link String}
@@ -39,10 +40,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @Log4j2
 @NoArgsConstructor
-public class LString {
+public class LString implements Serializable {
+	private static final long				serialVersionUID	= 8460278615011849182L;
+
 	// Contains all values in different values in different languages
 	@JsonProperty
-	private final HashMap<Locale, String> values = new HashMap<Locale, String>();
+	private final HashMap<Locale, String>	values				= new HashMap<Locale, String>();
 
 	@JsonIgnore
 	public LString(final String defaultValue) {

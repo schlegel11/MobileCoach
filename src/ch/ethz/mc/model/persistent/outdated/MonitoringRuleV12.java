@@ -1,5 +1,11 @@
 package ch.ethz.mc.model.persistent.outdated;
 
+import org.bson.types.ObjectId;
+
+import ch.ethz.mc.model.persistent.Intervention;
+import ch.ethz.mc.model.persistent.Participant;
+import ch.ethz.mc.model.persistent.types.MonitoringRuleTypes;
+import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -25,13 +31,6 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 
-import org.bson.types.ObjectId;
-
-import ch.ethz.mc.model.persistent.Intervention;
-import ch.ethz.mc.model.persistent.Participant;
-import ch.ethz.mc.model.persistent.types.MonitoringRuleTypes;
-import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
-
 /**
  * CAUTION: Will only be used for conversion from data model 11 to 12
  *
@@ -39,6 +38,8 @@ import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
  */
 @NoArgsConstructor
 public class MonitoringRuleV12 extends AbstractMonitoringRuleV12 {
+	private static final long serialVersionUID = -2675541242988438072L;
+
 	/**
 	 * Default constructor
 	 */

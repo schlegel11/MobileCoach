@@ -1,5 +1,6 @@
 package ch.ethz.mc.services.internal;
 
+import java.io.File;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -44,6 +45,7 @@ import ch.ethz.mc.conf.DeepstreamConstants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.memory.ExternalRegistration;
 import ch.ethz.mc.model.memory.ReceivedMessage;
+import ch.ethz.mc.model.memory.SystemLoad;
 import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.Participant;
@@ -81,8 +83,12 @@ public class DeepstreamCommunicationService extends Thread
 	@Getter
 	private static DeepstreamCommunicationService	instance			= null;
 
+	private final SystemLoad						systemLoad;
+
 	private boolean									running				= true;
 	private boolean									shouldStop			= false;
+
+	private final File								connectionStateFile;
 
 	private InterventionExecutionManagerService		interventionExecutionManagerService;
 
@@ -114,8 +120,23 @@ public class DeepstreamCommunicationService extends Thread
 			final String deepstreamServerPassword,
 			final String deepstreamParticipantRole,
 			final String deepstreamSupervisorRole) {
+		systemLoad = SystemLoad.getInstance();
+
 		loggedInUsers = new HashSet<String>();
 		allUsersVisibleMessagesSentSinceLastLogout = new Hashtable<String, Integer>();
+
+		// Care for connection state file
+		connectionStateFile = new File(
+				new File(Constants.getStatisticsFile()).getParentFile(),
+				"ds_connected");
+		if (connectionStateFile.exists()) {
+			try {
+				connectionStateFile.delete();
+			} catch (final Exception e) {
+				log.warn("Error when deleting connection state file: {}",
+						e.getMessage());
+			}
+		}
 
 		host = deepstreamHost;
 
@@ -180,11 +201,21 @@ public class DeepstreamCommunicationService extends Thread
 
 	@Override
 	public void run() {
+		long nextLoadInfo = System.currentTimeMillis() + 10000;
+
 		while (!shouldStop) {
 			try {
 				sleep(500);
 			} catch (final InterruptedException e) {
 				// Do nothing
+			}
+
+			// Update load info every 10 seconds
+			if (nextLoadInfo < System.currentTimeMillis()) {
+				nextLoadInfo = System.currentTimeMillis() + 10000;
+				systemLoad.setLoggedInUsers(
+						ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM,
+						loggedInUsers.size());
 			}
 		}
 
@@ -203,6 +234,16 @@ public class DeepstreamCommunicationService extends Thread
 	@Synchronized
 	public void stopThreadedService() throws Exception {
 		log.info("Stopping service...");
+
+		// Care for connection state file
+		if (connectionStateFile.exists()) {
+			try {
+				connectionStateFile.delete();
+			} catch (final Exception e) {
+				log.warn("Error when deleting connection state file: {}",
+						e.getMessage());
+			}
+		}
 
 		shouldStop = true;
 		interrupt();
@@ -492,17 +533,49 @@ public class DeepstreamCommunicationService extends Thread
 							DeepstreamConstants.STATUS_ANSWERED_BY_USER);
 				}
 
-				messageObject.addProperty(DeepstreamConstants.USER_MESSAGE,
-						receivedMessage.getMessage());
+				if (receivedMessage.getMessage() != null) {
+					messageObject.addProperty(DeepstreamConstants.USER_MESSAGE,
+							receivedMessage.getMessage());
+				}
+				if (receivedMessage.getIntention() != null) {
+					messageObject.addProperty(
+							DeepstreamConstants.USER_INTENTION,
+							receivedMessage.getMessage());
+				}
+				if (receivedMessage.getContent() != null) {
+					messageObject.addProperty(DeepstreamConstants.USER_CONTENT,
+							receivedMessage.getContent());
+				}
+				if (receivedMessage.getText() != null) {
+					messageObject.addProperty(DeepstreamConstants.USER_TEXT,
+							receivedMessage.getText());
+				}
 				messageObject.addProperty(DeepstreamConstants.USER_TIMESTAMP,
 						receivedMessage.getReceivedTimestamp());
 				messageObject.addProperty(DeepstreamConstants.LAST_MODIFIED,
 						timestamp);
 
 				if (messageConfirmationObject != null) {
-					messageConfirmationObject.addProperty(
-							DeepstreamConstants.USER_MESSAGE,
-							receivedMessage.getMessage());
+					if (receivedMessage.getMessage() != null) {
+						messageConfirmationObject.addProperty(
+								DeepstreamConstants.USER_MESSAGE,
+								receivedMessage.getMessage());
+					}
+					if (receivedMessage.getIntention() != null) {
+						messageConfirmationObject.addProperty(
+								DeepstreamConstants.USER_INTENTION,
+								receivedMessage.getMessage());
+					}
+					if (receivedMessage.getContent() != null) {
+						messageConfirmationObject.addProperty(
+								DeepstreamConstants.USER_CONTENT,
+								receivedMessage.getContent());
+					}
+					if (receivedMessage.getText() != null) {
+						messageConfirmationObject.addProperty(
+								DeepstreamConstants.USER_TEXT,
+								receivedMessage.getText());
+					}
 					messageConfirmationObject.addProperty(
 							DeepstreamConstants.USER_TIMESTAMP,
 							receivedMessage.getReceivedTimestamp());
@@ -932,12 +1005,26 @@ public class DeepstreamCommunicationService extends Thread
 				client.presence.subscribe(this);
 			}
 
+			systemLoad.setLoggedInUsers(
+					ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM,
+					loggedInUsers.size());
+
 			startupComplete = true;
 			reconnecting = false;
 
 			log.info("Connection to deepstream established.");
 
 			provideMethods();
+
+			// Care for connection state file
+			if (!connectionStateFile.exists()) {
+				try {
+					connectionStateFile.createNewFile();
+				} catch (final Exception e) {
+					log.warn("Error when creating connection state file: {}",
+							e.getMessage());
+				}
+			}
 
 			return true;
 		}
@@ -1020,6 +1107,12 @@ public class DeepstreamCommunicationService extends Thread
 									jsonData.get(
 											DeepstreamConstants.USER_MESSAGE)
 											.getAsString(),
+									null, null,
+									jsonData.has(DeepstreamConstants.USER_TEXT)
+											? jsonData
+													.get(DeepstreamConstants.USER_TEXT)
+													.getAsString()
+											: null,
 									jsonData.get(
 											DeepstreamConstants.USER_TIMESTAMP)
 											.getAsLong(),
@@ -1029,7 +1122,6 @@ public class DeepstreamCommunicationService extends Thread
 															.get(DeepstreamConstants.RELATED_MESSAGE_ID)
 															.getAsInt()
 													: -1,
-									null, null,
 									jsonData.has(DeepstreamConstants.CLIENT_ID)
 											? jsonData
 													.get(DeepstreamConstants.CLIENT_ID)
@@ -1058,16 +1150,7 @@ public class DeepstreamCommunicationService extends Thread
 							final boolean receivedSuccessful = receiveMessage(
 									jsonData.get(DeepstreamConstants.USER)
 											.getAsString(),
-									jsonData.has(
-											DeepstreamConstants.USER_MESSAGE)
-													? jsonData
-															.get(DeepstreamConstants.USER_MESSAGE)
-															.getAsString()
-													: null,
-									jsonData.get(
-											DeepstreamConstants.USER_TIMESTAMP)
-											.getAsLong(),
-									-1,
+									null,
 									jsonData.get(
 											DeepstreamConstants.USER_INTENTION)
 											.getAsString(),
@@ -1077,6 +1160,15 @@ public class DeepstreamCommunicationService extends Thread
 															.get(DeepstreamConstants.USER_CONTENT)
 															.getAsString()
 													: null,
+									jsonData.has(DeepstreamConstants.USER_TEXT)
+											? jsonData
+													.get(DeepstreamConstants.USER_TEXT)
+													.getAsString()
+											: null,
+									jsonData.get(
+											DeepstreamConstants.USER_TIMESTAMP)
+											.getAsLong(),
+									-1,
 									jsonData.has(DeepstreamConstants.CLIENT_ID)
 											? jsonData
 													.get(DeepstreamConstants.CLIENT_ID)
@@ -1190,18 +1282,19 @@ public class DeepstreamCommunicationService extends Thread
 	/**
 	 * @param participantId
 	 * @param message
-	 * @param timestamp
-	 * @param relatedMessageIdBasedOnOrder
 	 * @param intention
 	 * @param content
+	 * @param text
+	 * @param timestamp
+	 * @param relatedMessageIdBasedOnOrder
 	 * @param clientId
 	 * @param typeIntention
 	 * @return
 	 */
 	private boolean receiveMessage(final String participantId,
-			final String message, final long timestamp,
-			final int relatedMessageIdBasedOnOrder, final String intention,
-			final String content, final String clientId,
+			final String message, final String intention, final String content,
+			final String text, final long timestamp,
+			final int relatedMessageIdBasedOnOrder, final String clientId,
 			final boolean typeIntention) {
 		log.debug("Received {} message for participant {}",
 				typeIntention ? "intention" : "regular", participantId);
@@ -1215,14 +1308,15 @@ public class DeepstreamCommunicationService extends Thread
 		receivedMessage.setSender(
 				ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
 						+ participantId);
-		receivedMessage.setMessage(message);
 		receivedMessage.setTypeIntention(typeIntention);
 		receivedMessage.setClientId(clientId);
-		receivedMessage
-				.setRelatedMessageIdBasedOnOrder(relatedMessageIdBasedOnOrder);
+		receivedMessage.setMessage(message);
 		receivedMessage.setIntention(intention);
 		receivedMessage.setContent(content);
+		receivedMessage.setText(text);
 		receivedMessage.setReceivedTimestamp(timestamp);
+		receivedMessage
+				.setRelatedMessageIdBasedOnOrder(relatedMessageIdBasedOnOrder);
 
 		if (typeIntention && receivedMessage.getIntention() != null
 				&& receivedMessage.getSender() != null) {
@@ -1379,6 +1473,16 @@ public class DeepstreamCommunicationService extends Thread
 				log.warn("Deepstream connection still lost...");
 			} else {
 				log.warn("Deepstream connection lost!");
+			}
+
+			// Care for connection state file
+			if (connectionStateFile.exists()) {
+				try {
+					connectionStateFile.delete();
+				} catch (final Exception e) {
+					log.warn("Error when deleting connection state file: {}",
+							e.getMessage());
+				}
 			}
 
 			try {

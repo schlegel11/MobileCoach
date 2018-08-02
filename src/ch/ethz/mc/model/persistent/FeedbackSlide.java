@@ -53,13 +53,15 @@ import lombok.val;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FeedbackSlide extends ModelObject {
+	private static final long	serialVersionUID	= -9082543270118187016L;
+
 	/**
 	 * The {@link Feedback} the {@link FeedbackSlide} belongs to
 	 */
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId	feedback;
+	private ObjectId			feedback;
 
 	/**
 	 * The position of the {@link FeedbackSlide} compared to all other
@@ -69,7 +71,7 @@ public class FeedbackSlide extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private int			order;
+	private int					order;
 
 	/**
 	 * The title of the {@link FeedbackSlide} presented to the
@@ -78,7 +80,7 @@ public class FeedbackSlide extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private LString		titleWithPlaceholders;
+	private LString				titleWithPlaceholders;
 
 	/**
 	 * A comment for the author, not visible to any participant
@@ -86,7 +88,7 @@ public class FeedbackSlide extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String		comment;
+	private String				comment;
 
 	/**
 	 * Enables to add an optional layout attribute for the template generation
@@ -95,7 +97,7 @@ public class FeedbackSlide extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private String		optionalLayoutAttributeWithPlaceholders;
+	private String				optionalLayoutAttributeWithPlaceholders;
 
 	/**
 	 * <strong>OPTIONAL:</strong> A {@link MediaObject} can be linked to be
@@ -103,7 +105,7 @@ public class FeedbackSlide extends ModelObject {
 	 */
 	@Getter
 	@Setter
-	private ObjectId	linkedMediaObject;
+	private ObjectId			linkedMediaObject;
 
 	/**
 	 * The text presented to the {@link Participant} containing placeholders for
@@ -112,7 +114,7 @@ public class FeedbackSlide extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private LString		textWithPlaceholders;
+	private LString				textWithPlaceholders;
 
 	/**
 	 * <strong>The unique identifier used for i18n
@@ -120,7 +122,7 @@ public class FeedbackSlide extends ModelObject {
 	@Getter
 	@Setter
 	@NonNull
-	private String		i18nIdentifier;
+	private String				i18nIdentifier;
 
 	/*
 	 * (non-Javadoc)

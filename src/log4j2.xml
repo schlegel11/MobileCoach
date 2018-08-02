@@ -95,7 +95,19 @@
 			<AppenderRef ref="File" level="WARN" />
 			<AppenderRef ref="RollingFile" level="${sys:mc_logging_rolling_file_level}" />
 		</Logger>
-		<Logger name="ch.ethz.mc.services.internal.DeepstreamCommunicationService" level="DEBUG"
+		<Logger name="ch.ethz.mc.model.AbstractModelObjectAccessService" level="INFO"
+			additivity="false">
+			<AppenderRef ref="Console" level="${sys:mc_logging_console_level}" />
+			<AppenderRef ref="File" level="WARN" />
+			<AppenderRef ref="RollingFile" level="${sys:mc_logging_rolling_file_level}" />
+		</Logger>
+		<Logger name="ch.ethz.mc.services.internal.DeepstreamCommunicationService"
+			level="DEBUG" additivity="false">
+			<AppenderRef ref="Console" level="DEBUG" />
+			<AppenderRef ref="File" level="WARN" />
+			<AppenderRef ref="RollingFile" level="DEBUG" />
+		</Logger>
+		<Logger name="ch.ethz.mc.model.memory.SystemLoad" level="DEBUG"
 			additivity="false">
 			<AppenderRef ref="Console" level="DEBUG" />
 			<AppenderRef ref="File" level="WARN" />

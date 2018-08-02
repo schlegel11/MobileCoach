@@ -21,15 +21,10 @@ package ch.ethz.mc.model;
  * the License.
  */
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.List;
 import java.util.NoSuchElementException;
-
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Synchronized;
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -39,13 +34,18 @@ import org.jongo.Jongo;
 import org.jongo.MongoCollection;
 import org.jongo.marshall.jackson.oid.MongoId;
 
-import ch.ethz.mc.model.ui.UIModelObject;
-import ch.ethz.mc.services.internal.FileStorageManagerService;
-import ch.ethz.mc.tools.CustomObjectMapper;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import ch.ethz.mc.model.ui.UIModelObject;
+import ch.ethz.mc.services.internal.FileStorageManagerService;
+import ch.ethz.mc.tools.CustomObjectMapper;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Synchronized;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Basic class for model objects that should be stored in the database or
@@ -54,7 +54,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Andreas Filler
  */
 @Log4j2
-public abstract class ModelObject extends AbstractSerializableTable {
+public abstract class ModelObject extends AbstractSerializableTable
+		implements Serializable {
+
+	private static final long					serialVersionUID	= 3224792309794391228L;
+
 	/**
 	 * The id of the {@link ModelObject}
 	 */
@@ -67,7 +71,7 @@ public abstract class ModelObject extends AbstractSerializableTable {
 	 * {@link ObjectMapper} required for JSON generation
 	 */
 	@JsonIgnore
-	private static ObjectMapper					objectMapper	= new CustomObjectMapper();
+	private static ObjectMapper					objectMapper		= new CustomObjectMapper();
 
 	/**
 	 * {@link Jongo} object required for database access

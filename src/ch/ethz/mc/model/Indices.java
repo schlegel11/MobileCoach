@@ -64,7 +64,7 @@ public class Indices {
 	private static final String[]	dialogOptionIndices										= new String[] {
 			"{'participant':1,'type':1}", "{'type':1,'data':1}" };
 	private static final String[]	dialogStatusIndices										= new String[] {
-			"{'participant':1,'dataForMonitoringParticipationAvailable':1,'screeningSurveyPerformed':1,'monitoringPerformed':1}",
+			"{'participant':1}",
 			"{'participant':1,'lastVisitedScreeningSurveySlideTimestamp':1}" };
 
 	private static final String[]	participantIndices										= new String[] {

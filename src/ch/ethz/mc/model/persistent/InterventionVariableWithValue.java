@@ -22,13 +22,9 @@ package ch.ethz.mc.model.persistent;
  */
 import java.util.List;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.Setter;
-import lombok.val;
-
 import org.bson.types.ObjectId;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
@@ -36,8 +32,11 @@ import ch.ethz.mc.model.persistent.types.InterventionVariableWithValueAccessType
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValuePrivacyTypes;
 import ch.ethz.mc.model.ui.UIInterventionVariable;
 import ch.ethz.mc.model.ui.UIModelObject;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.val;
 
 /**
  * {@link ModelObject} to represent an {@link InterventionVariableWithValue}
@@ -49,6 +48,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 @NoArgsConstructor
 public class InterventionVariableWithValue extends AbstractVariableWithValue {
+	private static final long serialVersionUID = -8148624003571719902L;
+
 	/**
 	 * Default constructor
 	 */

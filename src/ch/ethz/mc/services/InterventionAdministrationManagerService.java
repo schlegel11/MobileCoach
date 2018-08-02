@@ -976,6 +976,7 @@ public class InterventionAdministrationManagerService {
 				val monitoringMessage = (MonitoringMessage) modelObject;
 
 				if (duplicate) {
+					// Recreate I18n identifier
 					monitoringMessage.setI18nIdentifier(GlobalUniqueIdGenerator
 							.createSimpleGlobalUniqueId());
 				}
@@ -1052,7 +1053,7 @@ public class InterventionAdministrationManagerService {
 	public MonitoringMessageRule monitoringMessageRuleMove(
 			final MonitoringMessageRule monitoringMessageRule,
 			final boolean moveUp) {
-		// Find feedback slide rule to swap with
+		// Find rule to swap with
 		val monitoringMessageRuleToSwapWith = databaseManagerService
 				.findOneSortedModelObject(MonitoringMessageRule.class,
 						moveUp ? Queries.MONITORING_MESSAGE_RULE__BY_MONITORING_MESSAGE_AND_ORDER_LOWER
@@ -1181,6 +1182,7 @@ public class InterventionAdministrationManagerService {
 			if (duplicate && modelObject instanceof MicroDialogMessage) {
 				val microDialogMessage = (MicroDialogMessage) modelObject;
 
+				// Recreate I18n identifier
 				microDialogMessage.setI18nIdentifier(
 						GlobalUniqueIdGenerator.createSimpleGlobalUniqueId());
 
@@ -1442,6 +1444,7 @@ public class InterventionAdministrationManagerService {
 				val microDialogMessage = (MicroDialogMessage) modelObject;
 
 				if (duplicate) {
+					// Recreate I18n identifier
 					microDialogMessage.setI18nIdentifier(GlobalUniqueIdGenerator
 							.createSimpleGlobalUniqueId());
 				}
@@ -1549,7 +1552,7 @@ public class InterventionAdministrationManagerService {
 	public MicroDialogMessageRule microDialogMessageRuleMove(
 			final MicroDialogMessageRule microDialogMessageRule,
 			final boolean moveUp) {
-		// Find feedback slide rule to swap with
+		// Find rule to swap with
 		val microDialogMessageRuleToSwapWith = databaseManagerService
 				.findOneSortedModelObject(MicroDialogMessageRule.class,
 						moveUp ? Queries.MICRO_DIALOG_MESSAGE_RULE__BY_MICRO_DIALOG_MESSAGE_AND_ORDER_LOWER

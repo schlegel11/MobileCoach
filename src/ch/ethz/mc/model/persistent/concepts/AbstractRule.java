@@ -1,5 +1,7 @@
 package ch.ethz.mc.model.persistent.concepts;
 
+import ch.ethz.mc.model.ModelObject;
+import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -25,8 +27,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
-import ch.ethz.mc.model.ModelObject;
-import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 
 /**
  * {@link ModelObject} to represent a rule
@@ -40,6 +40,8 @@ import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 @NoArgsConstructor
 @AllArgsConstructor
 public abstract class AbstractRule extends ModelObject {
+	private static final long		serialVersionUID	= -7315110731575684687L;
+
 	/**
 	 * Rule containing placeholders for variables
 	 */
