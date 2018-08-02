@@ -79,10 +79,11 @@ public class DeepstreamConstants {
 	public static final String	VALUE								= "value";
 	public static final String	SERVER_TIMESTAMP					= "server-timestamp";
 	public static final String	RELATED_MESSAGE_ID					= "related-message-id";
-	public static final String	USER_INTENTION						= "user-intention";
-	public static final String	USER_TIMESTAMP						= "user-timestamp";
 	public static final String	USER_MESSAGE						= "user-message";
+	public static final String	USER_INTENTION						= "user-intention";
 	public static final String	USER_CONTENT						= "user-content";
+	public static final String	USER_TEXT							= "user-text";
+	public static final String	USER_TIMESTAMP						= "user-timestamp";
 	public static final String	CLIENT_ID							= "client-id";
 	public static final String	LAST_MODIFIED						= "last-modified";
 	public static final String	STICKY								= "sticky";
