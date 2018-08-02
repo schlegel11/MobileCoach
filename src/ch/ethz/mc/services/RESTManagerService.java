@@ -663,7 +663,7 @@ public class RESTManagerService extends Thread {
 			}
 		} else if (role.equals(deepstreamParticipantRole)
 				|| role.equals(deepstreamObserverRole)) {
-			// Check participant access
+			// Check participant or observer access
 			val dialogOption = databaseManagerService.findOneModelObject(
 					DialogOption.class, Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
 					DialogOptionTypes.EXTERNAL_ID,
@@ -702,8 +702,8 @@ public class RESTManagerService extends Thread {
 			}
 
 			if (deepstreamCommunicationService != null
-					&& deepstreamCommunicationService.checkSecret(user,
-							secret)) {
+					&& deepstreamCommunicationService.checkSecret(user, secret,
+							role.equals(deepstreamObserverRole))) {
 				log.debug(
 						"Participant with deepstream id {} authorized for deepstream access",
 						user);

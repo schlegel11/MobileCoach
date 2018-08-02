@@ -731,6 +731,21 @@ public class DeepstreamCommunicationService extends Thread
 	 */
 	public boolean checkSecret(final String participantOrSupervisorIdentifier,
 			final String secret) {
+		return checkSecret(participantOrSupervisorIdentifier, secret, false);
+	}
+
+	/**
+	 * Check secret of user using deepstream
+	 * 
+	 * @param participantOrSupervisorIdentifier
+	 * @param secret
+	 * @param observerCheck
+	 *            The observer check only compares the first 64 characters of
+	 *            the secret
+	 * @return
+	 */
+	public boolean checkSecret(final String participantOrSupervisorIdentifier,
+			final String secret, final boolean observerCheck) {
 		log.debug("Checking secret for {}", participantOrSupervisorIdentifier);
 
 		Record record = null;
@@ -751,7 +766,8 @@ public class DeepstreamCommunicationService extends Thread
 				return false;
 			}
 
-			if (secretFromRecord.equals(secret)) {
+			if (observerCheck ? secretFromRecord.substring(0, 64).equals(secret)
+					: secretFromRecord.equals(secret)) {
 				log.debug("Secret check for {} returns {}",
 						participantOrSupervisorIdentifier, true);
 				return true;
