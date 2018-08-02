@@ -811,19 +811,22 @@ public class VariablesManagerService {
 	private void dialogOptionCreate(final ObjectId participantId,
 			final DialogOptionTypes dialogOptionType,
 			final String dialogOptionData) {
-		DialogOption dialogOption = databaseManagerService.findOneModelObject(
-				DialogOption.class,
-				Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE, participantId,
-				dialogOptionType);
+		DialogOption dialogOptionToDelete = databaseManagerService
+				.findOneModelObject(DialogOption.class,
+						Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE,
+						participantId, dialogOptionType);
 
-		if (dialogOption == null) {
-			dialogOption = new DialogOption(participantId, dialogOptionType,
-					dialogOptionData, new String[] {});
+		if (dialogOptionToDelete != null) {
+			databaseManagerService.deleteModelObject(dialogOptionToDelete);
 		}
+
+		val dialogOption = new DialogOption(participantId, dialogOptionType,
+				dialogOptionData, new String[] {});
 
 		dialogOption.setData(dialogOptionData);
 
 		databaseManagerService.saveModelObject(dialogOption);
+
 	}
 
 	/*

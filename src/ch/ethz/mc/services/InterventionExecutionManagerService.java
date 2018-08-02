@@ -2960,7 +2960,7 @@ public class InterventionExecutionManagerService {
 							externalIdDialogOptionData, false, false);
 				} catch (final Exception e) {
 					log.error(
-							"Should never occur: Error at writing participant dialog option external ID: {}",
+							"Should never occur: Error at writing participant supervisor dialog option external ID: {}",
 							e.getMessage());
 					return false;
 				}

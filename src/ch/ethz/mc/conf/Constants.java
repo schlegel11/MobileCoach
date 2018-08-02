@@ -258,6 +258,8 @@ public class Constants {
 	@Getter
 	private static String		deepstreamSupervisorRole				= "supervisor";
 	@Getter
+	private static String		deepstreamObserverRole					= "observer";
+	@Getter
 	private static int			deepstreamMinClientVersion				= 1;
 	@Getter
 	private static int			deepstreamMaxClientVersion				= 1;

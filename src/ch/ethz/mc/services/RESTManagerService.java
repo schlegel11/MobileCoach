@@ -84,6 +84,7 @@ public class RESTManagerService extends Thread {
 	private final String							deepstreamServerRole;
 	private final String							deepstreamParticipantRole;
 	private final String							deepstreamSuperviserRole;
+	private final String							deepstreamObserverRole;
 	private final int								deepstreamMinClientVersion;
 	private final int								deepstreamMaxClientVersion;
 
@@ -111,6 +112,7 @@ public class RESTManagerService extends Thread {
 		deepstreamServerRole = Constants.getDeepstreamServerRole();
 		deepstreamParticipantRole = Constants.getDeepstreamParticipantRole();
 		deepstreamSuperviserRole = Constants.getDeepstreamSupervisorRole();
+		deepstreamObserverRole = Constants.getDeepstreamObserverRole();
 		deepstreamMinClientVersion = Constants.getDeepstreamMinClientVersion();
 		deepstreamMaxClientVersion = Constants.getDeepstreamMaxClientVersion();
 
@@ -659,7 +661,8 @@ public class RESTManagerService extends Thread {
 				log.debug("Server not authorized for deepstream access");
 				return false;
 			}
-		} else if (role.equals(deepstreamParticipantRole)) {
+		} else if (role.equals(deepstreamParticipantRole)
+				|| role.equals(deepstreamObserverRole)) {
 			// Check participant access
 			val dialogOption = databaseManagerService.findOneModelObject(
 					DialogOption.class, Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
