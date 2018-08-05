@@ -44,8 +44,8 @@ import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
-import ch.ethz.mc.model.persistent.Author;
-import ch.ethz.mc.model.persistent.AuthorInterventionAccess;
+import ch.ethz.mc.model.persistent.BackendUser;
+import ch.ethz.mc.model.persistent.BackendUserInterventionAccess;
 import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogStatus;
 import ch.ethz.mc.model.persistent.Feedback;
@@ -71,6 +71,7 @@ import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 import ch.ethz.mc.model.persistent.concepts.MicroDialogElementInterface;
 import ch.ethz.mc.model.persistent.subelements.LString;
 import ch.ethz.mc.model.persistent.types.AnswerTypes;
+import ch.ethz.mc.model.persistent.types.BackendUserTypes;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValueAccessTypes;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValuePrivacyTypes;
@@ -96,7 +97,7 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * Cares for the creation of the {@link Author}s, {@link Participant}s and
+ * Cares for the creation of the {@link BackendUser}s, {@link Participant}s and
  * {@link Intervention}s as well as all related {@link ModelObject}s
  *
  * @author Andreas Filler
@@ -200,31 +201,37 @@ public class InterventionAdministrationManagerService {
 		}
 	}
 
-	// Author
+	// Backend User
 	@Synchronized
-	public Author authorCreate(final String username) {
-		val author = new Author(false, username, BCrypt.hashpw(
-				RandomStringUtils.randomAlphanumeric(128), BCrypt.gensalt()));
+	public BackendUser backendUserCreate(final String username) {
+		val backendUser = new BackendUser(BackendUserTypes.NO_RIGHTS, username,
+				BCrypt.hashpw(RandomStringUtils.randomAlphanumeric(128),
+						BCrypt.gensalt()));
 
-		databaseManagerService.saveModelObject(author);
+		databaseManagerService.saveModelObject(backendUser);
 
-		return author;
+		return backendUser;
 	}
 
 	@Synchronized
-	public Author authorAuthenticateAndReturn(final String username,
-			final String password) {
-		val author = databaseManagerService.findOneModelObject(Author.class,
-				Queries.AUTHOR__BY_USERNAME, username);
+	public BackendUser backendUserAuthenticateForEditingBackendAndReturn(
+			final String username, final String password) {
+		val backendUser = databaseManagerService.findOneModelObject(
+				BackendUser.class, Queries.BACKEND_USER__BY_USERNAME, username);
 
-		if (author == null) {
+		if (backendUser == null) {
 			log.debug("Username '{}' not found.", username);
 			return null;
 		}
 
-		if (BCrypt.checkpw(password, author.getPasswordHash())) {
-			log.debug("Author with fitting password found");
-			return author;
+		if (!backendUser.hasEditingBackendAccess()) {
+			log.debug("Username '{}' has no access to the editing backend.");
+			return null;
+		}
+
+		if (BCrypt.checkpw(password, backendUser.getPasswordHash())) {
+			log.debug("Backend user with fitting password found");
+			return backendUser;
 		} else {
 			log.debug("Wrong password provided");
 			return null;
@@ -232,68 +239,92 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void authorSetAdmin(final Author author) {
-		author.setAdmin(true);
+	public BackendUser backendUserAuthenticateForDashboardBackendAndReturn(
+			final String username, final String password) {
+		val backendUser = databaseManagerService.findOneModelObject(
+				BackendUser.class, Queries.BACKEND_USER__BY_USERNAME, username);
 
-		databaseManagerService.saveModelObject(author);
+		if (backendUser == null) {
+			log.debug("Username '{}' not found.", username);
+			return null;
+		}
+
+		if (!backendUser.hasDashboardBackendAccess()) {
+			log.debug("Username '{}' has no access to the dashboard backend.");
+			return null;
+		}
+
+		if (BCrypt.checkpw(password, backendUser.getPasswordHash())) {
+			log.debug("Backend user with fitting password found");
+			return backendUser;
+		} else {
+			log.debug("Wrong password provided");
+			return null;
+		}
 	}
 
 	@Synchronized
-	public void authorSetAuthor(final Author author,
-			final ObjectId currentAuthor) throws NotificationMessageException {
-		if (author.getUsername().equals(Constants.getDefaultAdminUsername())) {
+	public void backendUserSetType(final BackendUser backendUser,
+			final BackendUserTypes type, final ObjectId currentBackendUser)
+			throws NotificationMessageException {
+
+		if (backendUser.getUsername()
+				.equals(Constants.getDefaultAdminUsername())) {
 			throw new NotificationMessageException(
-					AdminMessageStrings.NOTIFICATION__DEFAULT_ADMIN_CANT_BE_SET_AS_AUTHOR);
+					AdminMessageStrings.NOTIFICATION__DEFAULT_ADMIN_CANT_BE_DOWNGRADED);
 		}
-		if (author.getId().equals(currentAuthor)) {
+		if (backendUser.getId().equals(currentBackendUser)) {
 			throw new NotificationMessageException(
 					AdminMessageStrings.NOTIFICATION__CANT_DOWNGRADE_YOURSELF);
 		}
 
-		author.setAdmin(false);
+		backendUser.setType(type);
 
-		databaseManagerService.saveModelObject(author);
+		databaseManagerService.saveModelObject(backendUser);
 	}
 
 	@Synchronized
-	public void authorSetPassword(final Author author, final String newPassword)
-			throws NotificationMessageException {
+	public void backendUserSetPassword(final BackendUser backendUser,
+			final String newPassword) throws NotificationMessageException {
 		if (newPassword.length() < 5) {
 			throw new NotificationMessageException(
 					AdminMessageStrings.NOTIFICATION__THE_GIVEN_PASSWORD_IS_NOT_SAFE);
 		}
 
-		author.setPasswordHash(BCrypt.hashpw(newPassword, BCrypt.gensalt()));
-		databaseManagerService.saveModelObject(author);
+		backendUser
+				.setPasswordHash(BCrypt.hashpw(newPassword, BCrypt.gensalt()));
+		databaseManagerService.saveModelObject(backendUser);
 	}
 
 	@Synchronized
-	public void authorDelete(final ObjectId currentAuthorId,
-			final Author authorToDelete) throws NotificationMessageException {
-		if (authorToDelete.getId().equals(currentAuthorId)) {
+	public void backendUserDelete(final ObjectId currentBackendUserId,
+			final BackendUser backendUserToDelete)
+			throws NotificationMessageException {
+		if (backendUserToDelete.getId().equals(currentBackendUserId)) {
 			throw new NotificationMessageException(
 					AdminMessageStrings.NOTIFICATION__CANT_DELETE_YOURSELF);
 		}
-		if (authorToDelete.getUsername()
+		if (backendUserToDelete.getUsername()
 				.equals(Constants.getDefaultAdminUsername())) {
 			throw new NotificationMessageException(
 					AdminMessageStrings.NOTIFICATION__DEFAULT_ADMIN_CANT_BE_DELETED);
 		}
 
-		databaseManagerService.deleteModelObject(authorToDelete);
+		databaseManagerService.deleteModelObject(backendUserToDelete);
 	}
 
 	@Synchronized
-	public void authorCheckValidAndUnique(final String newUsername)
+	public void backendUserCheckValidAndUnique(final String newUsername)
 			throws NotificationMessageException {
 		if (newUsername.length() < 3) {
 			throw new NotificationMessageException(
 					AdminMessageStrings.NOTIFICATION__THE_GIVEN_USERNAME_IS_TOO_SHORT);
 		}
 
-		val authors = databaseManagerService.findModelObjects(Author.class,
-				Queries.AUTHOR__BY_USERNAME, newUsername);
-		if (authors.iterator().hasNext()) {
+		val backendUsers = databaseManagerService.findModelObjects(
+				BackendUser.class, Queries.BACKEND_USER__BY_USERNAME,
+				newUsername);
+		if (backendUsers.iterator().hasNext()) {
 			throw new NotificationMessageException(
 					AdminMessageStrings.NOTIFICATION__THE_GIVEN_USERNAME_IS_ALREADY_IN_USE);
 		}
@@ -484,28 +515,28 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.deleteModelObject(interventionToDelete);
 	}
 
-	// Author Intervention Access
+	// BackendUser Intervention Access
 	@Synchronized
-	public AuthorInterventionAccess authorInterventionAccessCreate(
-			final ObjectId authorId, final ObjectId interventionId) {
+	public BackendUserInterventionAccess backendUserInterventionAccessCreate(
+			final ObjectId backendUserId, final ObjectId interventionId) {
 
-		val authorInterventionAccess = new AuthorInterventionAccess(authorId,
-				interventionId);
+		val backendUserInterventionAccess = new BackendUserInterventionAccess(
+				backendUserId, interventionId);
 
-		databaseManagerService.saveModelObject(authorInterventionAccess);
+		databaseManagerService.saveModelObject(backendUserInterventionAccess);
 
-		return authorInterventionAccess;
+		return backendUserInterventionAccess;
 	}
 
 	@Synchronized
-	public void authorInterventionAccessDelete(final ObjectId authorId,
-			final ObjectId interventionId) {
-		val authorInterventionAccess = databaseManagerService
-				.findOneModelObject(AuthorInterventionAccess.class,
-						Queries.AUTHOR_INTERVENTION_ACCESS__BY_AUTHOR_AND_INTERVENTION,
-						authorId, interventionId);
+	public void backendUserInterventionAccessDelete(
+			final ObjectId backendUserId, final ObjectId interventionId) {
+		val backendUserInterventionAccess = databaseManagerService
+				.findOneModelObject(BackendUserInterventionAccess.class,
+						Queries.BACKEND_USER_INTERVENTION_ACCESS__BY_BACKEND_USER_AND_INTERVENTION,
+						backendUserId, interventionId);
 
-		databaseManagerService.deleteModelObject(authorInterventionAccess);
+		databaseManagerService.deleteModelObject(backendUserInterventionAccess);
 	}
 
 	// Intervention Variable With Value
@@ -2846,14 +2877,14 @@ public class InterventionAdministrationManagerService {
 	 * Getter methods
 	 */
 	@Synchronized
-	public Author getAuthor(final ObjectId authorId) {
-		return databaseManagerService.getModelObjectById(Author.class,
-				authorId);
+	public BackendUser getBackendUser(final ObjectId backendUserId) {
+		return databaseManagerService.getModelObjectById(BackendUser.class,
+				backendUserId);
 	}
 
 	@Synchronized
-	public Iterable<Author> getAllAuthors() {
-		return databaseManagerService.findModelObjects(Author.class,
+	public Iterable<BackendUser> getAllBackendUsers() {
+		return databaseManagerService.findModelObjects(BackendUser.class,
 				Queries.ALL);
 	}
 
@@ -2864,24 +2895,25 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public Iterable<Intervention> getAllInterventionsForAuthor(
-			final ObjectId authorId) {
-		val authorInterventionAccessForAuthor = databaseManagerService
-				.findModelObjects(AuthorInterventionAccess.class,
-						Queries.AUTHOR_INTERVENTION_ACCESS__BY_AUTHOR,
-						authorId);
+	public Iterable<Intervention> getAllInterventionsForBackendUser(
+			final ObjectId backendUserId) {
+		val backendUserInterventionAccessForBackendUser = databaseManagerService
+				.findModelObjects(BackendUserInterventionAccess.class,
+						Queries.BACKEND_USER_INTERVENTION_ACCESS__BY_BACKEND_USER,
+						backendUserId);
 
 		final List<Intervention> interventions = new ArrayList<Intervention>();
 
-		for (val authorInterventionAccess : authorInterventionAccessForAuthor) {
+		for (val backendUserInterventionAccess : backendUserInterventionAccessForBackendUser) {
 			val intervention = databaseManagerService.getModelObjectById(
 					Intervention.class,
-					authorInterventionAccess.getIntervention());
+					backendUserInterventionAccess.getIntervention());
 
 			if (intervention != null) {
 				interventions.add(intervention);
 			} else {
-				databaseManagerService.collectGarbage(authorInterventionAccess);
+				databaseManagerService
+						.collectGarbage(backendUserInterventionAccess);
 			}
 		}
 
@@ -2889,27 +2921,28 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public Iterable<Author> getAllAuthorsOfIntervention(
+	public Iterable<BackendUser> getAllBackendUsersOfIntervention(
 			final ObjectId interventionId) {
-		val authorInterventionAccessForIntervention = databaseManagerService
-				.findModelObjects(AuthorInterventionAccess.class,
-						Queries.AUTHOR_INTERVENTION_ACCESS__BY_INTERVENTION,
+		val backendUserInterventionAccessesForIntervention = databaseManagerService
+				.findModelObjects(BackendUserInterventionAccess.class,
+						Queries.BACKEND_USER_INTERVENTION_ACCESS__BY_INTERVENTION,
 						interventionId);
 
-		final List<Author> authors = new ArrayList<Author>();
+		final List<BackendUser> backendUsers = new ArrayList<BackendUser>();
 
-		for (val authorInterventionAccess : authorInterventionAccessForIntervention) {
-			val author = databaseManagerService.getModelObjectById(Author.class,
-					authorInterventionAccess.getAuthor());
+		for (val backendUserInterventionAccess : backendUserInterventionAccessesForIntervention) {
+			val backendUser = databaseManagerService.getModelObjectById(
+					BackendUser.class,
+					backendUserInterventionAccess.getBackendUser());
 
-			if (author != null) {
-				authors.add(author);
+			if (backendUser != null) {
+				backendUsers.add(backendUser);
 			} else {
-				databaseManagerService.collectGarbage(authorInterventionAccess);
+				databaseManagerService.collectGarbage(backendUser);
 			}
 		}
 
-		return authors;
+		return backendUsers;
 	}
 
 	@Synchronized

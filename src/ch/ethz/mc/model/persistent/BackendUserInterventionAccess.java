@@ -1,5 +1,8 @@
-package ch.ethz.mc.model.persistent.outdated;
+package ch.ethz.mc.model.persistent;
 
+import org.bson.types.ObjectId;
+
+import ch.ethz.mc.model.ModelObject;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -20,52 +23,38 @@ package ch.ethz.mc.model.persistent.outdated;
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-import org.bson.types.ObjectId;
-
-import ch.ethz.mc.model.persistent.Participant;
-import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 
 /**
- * CAUTION: Will only be used for conversion from data model 28 to 29
- *
- * @author Andreas Filler
+ * {@link ModelObject} to represent an {@link BackendUserInterventionAccess}
+ * 
+ * The {@link BackendUserInterventionAccess} describes, which
+ * {@link BackendUser} is allowed to access a specific {@link Intervention}.
+ * 
+ * author Andreas Filler
  */
 @NoArgsConstructor
-public class ParticipantVariableWithValueV28 extends AbstractVariableWithValue {
-	private static final long serialVersionUID = 4556566163793166655L;
+@AllArgsConstructor
+public class BackendUserInterventionAccess extends ModelObject {
+	private static final long	serialVersionUID	= -2686891854353434099L;
 
 	/**
-	 * Default constructor
-	 */
-	public ParticipantVariableWithValueV28(final ObjectId participant,
-			final long timestamp, final String name, final String value) {
-		super(name, value);
-
-		this.participant = participant;
-		this.timestamp = timestamp;
-		describesMediaUpload = false;
-	}
-
-	/**
-	 * {@link Participant} to which this variable and its value belong to
+	 * {@link BackendUser} who is allowed to access {@link Intervention}
 	 */
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId	participant;
+	private ObjectId			backendUser;
 
 	/**
-	 * The moment in time when the variable was created
+	 * {@link Intervention} that can be accessed by the {@link BackendUser}
 	 */
 	@Getter
 	@Setter
-	private long		timestamp;
-
-	@Getter
-	@Setter
-	private boolean		describesMediaUpload;
+	@NonNull
+	private ObjectId			intervention;
 }

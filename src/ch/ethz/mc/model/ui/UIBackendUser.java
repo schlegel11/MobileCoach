@@ -24,14 +24,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import ch.ethz.mc.conf.AdminMessageStrings;
-import ch.ethz.mc.model.persistent.Author;
+import ch.ethz.mc.model.persistent.BackendUser;
 
 import com.vaadin.data.fieldgroup.PropertyId;
 
 @AllArgsConstructor
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class UIAuthor extends UIModelObject {
+public class UIBackendUser extends UIModelObject {
 	// NOTE: The String values have to fit the name of the variables
 	public static final String	USERNAME	= "username";
 	public static final String	TYPE		= "type";
@@ -57,6 +57,6 @@ public class UIAuthor extends UIModelObject {
 
 	@Override
 	public String toString() {
-		return getRelatedModelObject(Author.class).getUsername();
+		return getRelatedModelObject(BackendUser.class).getUsername();
 	}
 }

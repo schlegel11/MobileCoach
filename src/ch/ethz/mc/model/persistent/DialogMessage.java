@@ -268,7 +268,7 @@ public class DialogMessage extends ModelObject {
 
 	/**
 	 * Marker showing if the {@link DialogMessage} has been sent manually by an
-	 * {@link Author}
+	 * {@link BackendUser}
 	 */
 	@Getter
 	@Setter

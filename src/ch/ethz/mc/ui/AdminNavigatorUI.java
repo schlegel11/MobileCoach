@@ -187,24 +187,25 @@ public class AdminNavigatorUI extends UI
 	}
 
 	/**
-	 * Login currentAuthorId if provided login information is correct
+	 * Login backend user if provided login information is correct
 	 *
-	 * @param currentAuthorUsername
+	 * @param username
 	 * @param password
 	 */
 	public void login(final String username, final String password) {
-		val author = MC.getInstance()
+		val backendUser = MC.getInstance()
 				.getInterventionAdministrationManagerService()
-				.authorAuthenticateAndReturn(username, password);
+				.backendUserAuthenticateForEditingBackendAndReturn(username,
+						password);
 
-		if (author == null) {
+		if (backendUser == null) {
 			showErrorNotification(
 					AdminMessageStrings.NOTIFICATION__WRONG_LOGIN);
 		} else {
 			final UISession uiSession = getUISession();
-			uiSession.setAdmin(author.isAdmin());
-			uiSession.setCurrentAuthorId(author.getId());
-			uiSession.setCurrentAuthorUsername(author.getUsername());
+			uiSession.setAdmin(backendUser.isAdmin());
+			uiSession.setCurrentBackendUserId(backendUser.getId());
+			uiSession.setCurrentBackendUserUsername(backendUser.getUsername());
 			uiSession.setLoggedIn(true);
 
 			getUI().getNavigator()

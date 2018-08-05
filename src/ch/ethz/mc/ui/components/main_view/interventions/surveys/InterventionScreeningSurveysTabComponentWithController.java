@@ -589,7 +589,7 @@ public class InterventionScreeningSurveysTabComponentWithController
 			log.debug("Show intermediate survey");
 
 			val participantId = getAdminUI().getUISession()
-					.getCurrentAuthorParticipantId();
+					.getCurrentBackendUserParticipantId();
 
 			if (participantId == null) {
 				getAdminUI().showWarningNotification(

@@ -244,11 +244,12 @@ public class Intervention extends ModelObject {
 				getId());
 		ModelObject.delete(interventionVariablesWithValuesToDelete);
 
-		// Delete author intervention access
-		val authorInterventionAccessToDelete = ModelObject.find(
-				AuthorInterventionAccess.class,
-				Queries.AUTHOR_INTERVENTION_ACCESS__BY_INTERVENTION, getId());
-		ModelObject.delete(authorInterventionAccessToDelete);
+		// Delete backend user intervention access
+		val backendUserInterventionAccessToDelete = ModelObject.find(
+				BackendUserInterventionAccess.class,
+				Queries.BACKEND_USER_INTERVENTION_ACCESS__BY_INTERVENTION,
+				getId());
+		ModelObject.delete(backendUserInterventionAccessToDelete);
 
 		// Delete monitoring rules
 		val monitoringRulesToDelete = ModelObject.find(MonitoringRule.class,

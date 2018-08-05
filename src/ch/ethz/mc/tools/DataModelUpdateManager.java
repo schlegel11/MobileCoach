@@ -31,11 +31,16 @@ import com.mongodb.DBObject;
 
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.model.Queries;
+import ch.ethz.mc.model.persistent.BackendUser;
+import ch.ethz.mc.model.persistent.BackendUserInterventionAccess;
 import ch.ethz.mc.model.persistent.consistency.DataModelConfiguration;
+import ch.ethz.mc.model.persistent.outdated.AuthorInterventionAccessV39;
+import ch.ethz.mc.model.persistent.outdated.AuthorV39;
 import ch.ethz.mc.model.persistent.outdated.InterventionV12;
 import ch.ethz.mc.model.persistent.outdated.MonitoringRuleV12;
 import ch.ethz.mc.model.persistent.outdated.ParticipantVariableWithValueV28;
 import ch.ethz.mc.model.persistent.outdated.ParticipantVariableWithValueV29;
+import ch.ethz.mc.model.persistent.types.BackendUserTypes;
 import ch.ethz.mc.model.persistent.types.MonitoringRuleTypes;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import lombok.val;
@@ -131,6 +136,9 @@ public class DataModelUpdateManager {
 					break;
 				case 38:
 					updateToVersion38();
+					break;
+				case 40:
+					updateToVersion40();
 					break;
 			}
 
@@ -662,5 +670,48 @@ public class DataModelUpdateManager {
 		participantCollection.update(Queries.EVERYTHING).multi().with(
 				Queries.UPDATE_VERSION_38__PARTICIPANT__CHANGE_2,
 				currentTimestamp);
+	}
+
+	/**
+	 * Changes for version 40:
+	 */
+	private static void updateToVersion40() {
+		val authorCollection = jongo.getCollection("Author");
+		val authorInterventionAccessCollection = jongo
+				.getCollection("AuthorInterventionAccess");
+
+		val backendUserCollection = jongo.getCollection("BackendUser");
+		val backendUserInterventionAccessCollection = jongo
+				.getCollection("BackendUserInterventionAccess");
+
+		for (val author : authorCollection.find(Queries.ALL)
+				.as(AuthorV39.class)) {
+
+			val backendUser = new BackendUser(
+					author.isAdmin() ? BackendUserTypes.ADMIN
+							: BackendUserTypes.AUTHOR,
+					author.getUsername(), author.getPasswordHash());
+			backendUserCollection.save(backendUser);
+
+			for (val authorInterventionAccess : authorInterventionAccessCollection
+					.find(Queries.UPDATE_VERSION_40__AUTHOR_INTERVENTION_ACCESS__CHANGE_1,
+							author.getId())
+					.as(AuthorInterventionAccessV39.class)) {
+
+				val backendUserInterventionAccess = new BackendUserInterventionAccess(
+						backendUser.getId(),
+						authorInterventionAccess.getIntervention());
+				backendUserInterventionAccessCollection
+						.save(backendUserInterventionAccess);
+			}
+		}
+
+		authorCollection.dropIndexes();
+		authorInterventionAccessCollection.dropIndexes();
+
+		authorCollection.drop();
+		authorInterventionAccessCollection.drop();
+
+		log.info("Done.");
 	}
 }
