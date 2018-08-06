@@ -29,14 +29,13 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import lombok.extern.log4j.Log4j2;
-
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.rest.OK;
 import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mc.tools.StringValidator;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Service to collect credits using REST

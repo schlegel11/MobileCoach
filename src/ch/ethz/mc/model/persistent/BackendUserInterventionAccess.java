@@ -2,7 +2,12 @@ package ch.ethz.mc.model.persistent;
 
 import org.bson.types.ObjectId;
 
+import ch.ethz.mc.MC;
+import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.ModelObject;
+import ch.ethz.mc.model.ui.UIBackendUserInterventionAccess;
+import ch.ethz.mc.model.ui.UIModelObject;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -28,6 +33,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.val;
 
 /**
  * {@link ModelObject} to represent an {@link BackendUserInterventionAccess}
@@ -57,4 +63,65 @@ public class BackendUserInterventionAccess extends ModelObject {
 	@Setter
 	@NonNull
 	private ObjectId			intervention;
+
+	/**
+	 * The group pattern the {@link BackendUser} has access to
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private String				groupPattern;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ch.ethz.mc.model.ModelObject#toUIModelObject()
+	 */
+	@Override
+	public UIModelObject toUIModelObject() {
+
+		val backendUser = MC.getInstance()
+				.getInterventionAdministrationManagerService()
+				.getBackendUser(backendUser);
+
+		String uiType = null;
+		UIBackendUserInterventionAccess backendUserInterventionAccess = null;
+
+		if (backendUser != null) {
+			switch (backendUser.getType()) {
+				case ADMIN:
+					uiType = Messages.getAdminString(
+							AdminMessageStrings.UI_MODEL__ADMIN);
+					break;
+				case AUTHOR:
+					uiType = Messages.getAdminString(
+							AdminMessageStrings.UI_MODEL__AUTHOR);
+					break;
+				case TEAM_MANAGER:
+					uiType = Messages.getAdminString(
+							AdminMessageStrings.UI_MODEL__TEAM_MANAGER);
+					break;
+				case NO_RIGHTS:
+					uiType = Messages.getAdminString(
+							AdminMessageStrings.UI_MODEL__NO_RIGHTS);
+					break;
+
+			}
+
+			backendUserInterventionAccess = new UIBackendUserInterventionAccess(
+					backendUser.getUsername(), uiType, getGroupPattern());
+		} else {
+			backendUserInterventionAccess = new UIBackendUserInterventionAccess(
+					Messages.getAdminString(
+							AdminMessageStrings.UI_MODEL__NOT_SET),
+					Messages.getAdminString(
+							AdminMessageStrings.UI_MODEL__NOT_SET),
+					getGroupPattern());
+		}
+
+		backendUserInterventionAccess.setRelatedModelObject(this);
+
+		return backendUserInterventionAccess;
+	}
+
 }

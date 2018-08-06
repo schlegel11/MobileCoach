@@ -700,7 +700,7 @@ public class DataModelUpdateManager {
 
 				val backendUserInterventionAccess = new BackendUserInterventionAccess(
 						backendUser.getId(),
-						authorInterventionAccess.getIntervention());
+						authorInterventionAccess.getIntervention(), "");
 				backendUserInterventionAccessCollection
 						.save(backendUserInterventionAccess);
 			}

@@ -932,7 +932,7 @@ public class DeepstreamCommunicationService extends Thread
 		Record record = null;
 		synchronized (client) {
 			try {
-				restManagerService.destroyToken(
+				restManagerService.destroyParticipantToken(
 						ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
 								+ participantOrSupervisorId);
 
@@ -1319,7 +1319,7 @@ public class DeepstreamCommunicationService extends Thread
 	 * @return
 	 */
 	private String createRESTToken(final String participantId) {
-		return restManagerService.createToken(
+		return restManagerService.createParticipantToken(
 				ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
 						+ participantId);
 	}

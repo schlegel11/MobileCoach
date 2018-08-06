@@ -33,6 +33,8 @@ import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.memory.ExternalRegistration;
+import ch.ethz.mc.model.persistent.BackendUser;
+import ch.ethz.mc.model.persistent.BackendUserInterventionAccess;
 import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.DialogStatus;
 import ch.ethz.mc.model.persistent.Intervention;
@@ -53,6 +55,7 @@ import ch.ethz.mc.services.internal.FileStorageManagerService;
 import ch.ethz.mc.services.internal.VariablesManagerService;
 import ch.ethz.mc.services.internal.VariablesManagerService.ExternallyReadProtectedVariableException;
 import ch.ethz.mc.services.internal.VariablesManagerService.ExternallyWriteProtectedVariableException;
+import ch.ethz.mc.tools.BCrypt;
 import lombok.Getter;
 import lombok.Synchronized;
 import lombok.val;
@@ -279,7 +282,52 @@ public class RESTManagerService extends Thread {
 				filterVariable, filterValue);
 
 		try {
-			val collecionOfExtendedVariables = getVariableValueForDashboardOfParticipantsOfGroupOrIntervention(
+			val collecionOfExtendedVariables = getVariableValueForDashboardOrExternalOfParticipantsOfGroupOrIntervention(
+					interventionId, variable, group, filterVariable,
+					filterValue, isService);
+
+			log.debug(
+					"Returing variables with values {} of participants from {}",
+					collecionOfExtendedVariables,
+					group == null ? "intervention " + interventionId
+							: "group " + group);
+
+			return collecionOfExtendedVariables;
+		} catch (final Exception e) {
+			log.debug("Could not read variable {} of participants from {}: {}",
+					variable, group == null ? "intervention " + interventionId
+							: "group " + group,
+					e.getMessage());
+			throw e;
+		}
+	}
+
+	/**
+	 * Reads variable for external for all participants of the given
+	 * group/intervention
+	 *
+	 * @param interventionId
+	 * @param variable
+	 * @param group
+	 * @param filterVariable
+	 * @param filterValue
+	 * @param isService
+	 * @return
+	 * @throws ExternallyReadProtectedVariableException
+	 */
+	public CollectionOfExtendedVariables readVariableArrayForExternalOfGroupOrIntervention(
+			final ObjectId interventionId, final String variable,
+			final String group, final String filterVariable,
+			final String filterValue, final boolean isService)
+			throws ExternallyReadProtectedVariableException {
+		log.debug(
+				"Try to read variable array {} of participants from {} filtered by {}={}",
+				variable, group == null ? "intervention " + interventionId
+						: "group " + group,
+				filterVariable, filterValue);
+
+		try {
+			val collecionOfExtendedVariables = getVariableValueForDashboardOrExternalOfParticipantsOfGroupOrIntervention(
 					interventionId, variable, group, filterVariable,
 					filterValue, isService);
 
@@ -450,6 +498,59 @@ public class RESTManagerService extends Thread {
 	}
 
 	/**
+	 * Calculate average of variable for external for all participants of the
+	 * given group/intervention
+	 *
+	 * @param interventionId
+	 * @param variable
+	 * @param group
+	 * @param isService
+	 * @return
+	 * @throws ExternallyReadProtectedVariableException
+	 */
+	public VariableAverage calculateAverageOfVariableArrayForExternalOfGroupOrIntervention(
+			final ObjectId interventionId, final String variable,
+			final String group, final boolean isService)
+			throws ExternallyReadProtectedVariableException {
+		log.debug(
+				"Try to calculate average of variable array {} of participants from {}",
+				variable, group == null ? "intervention " + interventionId
+						: "group " + group);
+
+		try {
+			val variableAverage = new VariableAverage();
+			variableAverage.setVariable(variable);
+
+			val resultVariables = readVariableArrayForDashboardOfGroupOrIntervention(
+					interventionId, variable, group, null, null, isService);
+
+			try {
+				int i = 0;
+				double average = 0d;
+				for (val resultVariable : resultVariables.getVariables()) {
+					i++;
+					average += Double.parseDouble(resultVariable.getValue());
+				}
+				variableAverage.setAverage(average / i);
+				variableAverage.setSize(i);
+			} catch (final Exception e) {
+				throw variablesManagerService.new ExternallyReadProtectedVariableException(
+						"Variable value can not be interpreted as calculateable value: "
+								+ e.getMessage());
+			}
+
+			return variableAverage;
+		} catch (final Exception e) {
+			log.debug(
+					"Could not calculate average of variable {} of participants from {}: {}",
+					variable, group == null ? "intervention " + interventionId
+							: "group " + group,
+					e.getMessage());
+			throw e;
+		}
+	}
+
+	/**
 	 * Writes variable for given participant
 	 *
 	 * @param participantId
@@ -548,7 +649,7 @@ public class RESTManagerService extends Thread {
 	 * @param externalParticipantId
 	 * @return
 	 */
-	public String createToken(final String externalParticipantId) {
+	public String createParticipantToken(final String externalParticipantId) {
 		synchronized (externalParticipantsTokenHashMap) {
 			if (externalParticipantsTokenHashMap
 					.containsKey(externalParticipantId)) {
@@ -570,7 +671,7 @@ public class RESTManagerService extends Thread {
 	 * 
 	 * @param externalParticipantId
 	 */
-	public void destroyToken(final String externalParticipantId) {
+	public void destroyParticipantToken(final String externalParticipantId) {
 		externalParticipantsTokenHashMap.remove(externalParticipantId);
 	}
 
@@ -622,20 +723,88 @@ public class RESTManagerService extends Thread {
 		return dialogOption.getParticipant();
 	}
 
+	/**
+	 * Checks the access rights of the given {@link BackendUser} for the given
+	 * group and intervention and returns {@link BackendUserInterventionAccess},
+	 * otherwise null
+	 * 
+	 * @param username
+	 * @param password
+	 * @param group
+	 * @param interventionPattern
+	 * @return
+	 */
+	public BackendUserInterventionAccess checkExternalBackendUserInterventionAccess(
+			final String username, final String password, final String group,
+			final String interventionPattern) {
+
+		// Prevent unauthorized access with empty values
+		if (StringUtils.isBlank(username) || StringUtils.isBlank(password)
+				|| StringUtils.isBlank(group)
+				|| StringUtils.isBlank(interventionPattern)) {
+			return null;
+		}
+
+		// Find backend user and check password
+		val backendUser = databaseManagerService.findOneModelObject(
+				BackendUser.class, Queries.BACKEND_USER__BY_USERNAME, username);
+
+		if (backendUser == null) {
+			log.debug("Username '{}' not found.", username);
+			return null;
+		}
+
+		if (!backendUser.hasDashboardBackendAccess()) {
+			log.debug("Username '{}' has no access to the dashboard backend.");
+			return null;
+		}
+
+		if (!BCrypt.checkpw(password, backendUser.getPasswordHash())) {
+			log.debug("Wrong password provided");
+			return null;
+		}
+
+		// Find backend user intervention access
+		val backendUserInterventionenAccesses = databaseManagerService
+				.findModelObjects(BackendUserInterventionAccess.class,
+						Queries.BACKEND_USER_INTERVENTION_ACCESS__BY_BACKEND_USER,
+						backendUser.getId());
+
+		BackendUserInterventionAccess approvedBackendUserInterventionAccess = null;
+
+		for (val backendUserInterventionAccess : backendUserInterventionenAccesses) {
+			val intervention = databaseManagerService.getModelObjectById(
+					Intervention.class,
+					backendUserInterventionAccess.getIntervention());
+
+			if (intervention == null || !intervention.isActive()) {
+				continue;
+			}
+
+			if (intervention.getName().matches(interventionPattern) && group
+					.matches(backendUserInterventionAccess.getGroupPattern())) {
+				approvedBackendUserInterventionAccess = backendUserInterventionAccess;
+				break;
+			}
+		}
+
+		return approvedBackendUserInterventionAccess;
+	}
+
 	/*
 	 * Deepstream functions
 	 */
 	/**
 	 * Validates deepstream access for participant/supervisor/server
 	 * 
-	 * @param user
+	 * @param username
 	 * @param interventionPassword
 	 * @param role
 	 * @param secret
 	 * @return
 	 */
 	public boolean checkDeepstreamAccess(final int clientVersion,
-			final String user, final String secret, final String role,
+			final String username, final String secret, final String role,
 			final String interventionPassword) {
 
 		// Prevent access for too old or new clients
@@ -645,7 +814,7 @@ public class RESTManagerService extends Thread {
 		}
 
 		// Prevent unauthorized access with empty values
-		if (StringUtils.isBlank(user) || StringUtils.isBlank(secret)
+		if (StringUtils.isBlank(username) || StringUtils.isBlank(secret)
 				|| StringUtils.isBlank(role)
 				|| StringUtils.isBlank(interventionPassword)) {
 			return false;
@@ -668,11 +837,11 @@ public class RESTManagerService extends Thread {
 					DialogOption.class, Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
 					DialogOptionTypes.EXTERNAL_ID,
 					ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
-							+ user);
+							+ username);
 			if (dialogOption == null) {
 				log.debug(
 						"Participant with deepstream id {} not authorized for deepstream access: Dialog option not found",
-						user);
+						username);
 				return false;
 			}
 
@@ -681,7 +850,7 @@ public class RESTManagerService extends Thread {
 			if (participant == null) {
 				log.debug(
 						"Participant with deepstream id {} not authorized for deepstream access: Participant not found",
-						user);
+						username);
 				return false;
 			}
 
@@ -690,28 +859,28 @@ public class RESTManagerService extends Thread {
 			if (intervention == null || !intervention.isActive()) {
 				log.debug(
 						"Participant with deepstream id {} not authorized for deepstream access: Intervention not active",
-						user);
+						username);
 				return false;
 			}
 			if (!intervention.getDeepstreamPassword()
 					.equals(interventionPassword)) {
 				log.debug(
 						"Participant with deepstream id {} not authorized for deepstream access: Password does not match deepstream intervention password",
-						user);
+						username);
 				return false;
 			}
 
 			if (deepstreamCommunicationService != null
-					&& deepstreamCommunicationService.checkSecret(user, secret,
-							role.equals(deepstreamObserverRole))) {
+					&& deepstreamCommunicationService.checkSecret(username,
+							secret, role.equals(deepstreamObserverRole))) {
 				log.debug(
 						"Participant with deepstream id {} authorized for deepstream access",
-						user);
+						username);
 				return true;
 			} else {
 				log.debug(
 						"Participant with deepstream id {} not authorized for deepstream access: Wrong secret",
-						user);
+						username);
 				return false;
 			}
 		} else if (role.equals(deepstreamSuperviserRole)) {
@@ -720,11 +889,11 @@ public class RESTManagerService extends Thread {
 					DialogOption.class, Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
 					DialogOptionTypes.SUPERVISOR_EXTERNAL_ID,
 					ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
-							+ user);
+							+ username);
 			if (dialogOption == null) {
 				log.debug(
 						"Supervisor with deepstream id {} not authorized for deepstream access: Dialog option not found",
-						user);
+						username);
 				return false;
 			}
 
@@ -733,7 +902,7 @@ public class RESTManagerService extends Thread {
 			if (participant == null) {
 				log.debug(
 						"Supervisor with deepstream id {} not authorized for deepstream access: Participant not found",
-						user);
+						username);
 				return false;
 			}
 
@@ -742,28 +911,28 @@ public class RESTManagerService extends Thread {
 			if (intervention == null || !intervention.isActive()) {
 				log.debug(
 						"Supervisor with deepstream id {} not authorized for deepstream access: Intervention not active",
-						user);
+						username);
 				return false;
 			}
 			if (!intervention.getDeepstreamPassword()
 					.equals(interventionPassword)) {
 				log.debug(
 						"Supervisor with deepstream id {} not authorized for deepstream access: Password does not match deepstream intervention password",
-						user);
+						username);
 				return false;
 			}
 
 			if (deepstreamCommunicationService != null
-					&& deepstreamCommunicationService.checkSecret(user,
+					&& deepstreamCommunicationService.checkSecret(username,
 							secret)) {
 				log.debug(
 						"Supervisor with deepstream id {} authorized for deepstream access",
-						user);
+						username);
 				return true;
 			} else {
 				log.debug(
 						"Supervisor with deepstream id {} not authorized for deepstream access: Wrong secret",
-						user);
+						username);
 				return false;
 			}
 		} else {
@@ -983,7 +1152,7 @@ public class RESTManagerService extends Thread {
 	 * @return
 	 */
 	@Synchronized
-	private CollectionOfExtendedVariables getVariableValueForDashboardOfParticipantsOfGroupOrIntervention(
+	private CollectionOfExtendedVariables getVariableValueForDashboardOrExternalOfParticipantsOfGroupOrIntervention(
 			final ObjectId interventionId, final String variable,
 			final String group, final String filterVariable,
 			final String filterValue, final boolean isService)

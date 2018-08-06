@@ -128,6 +128,7 @@ public class BackendUser extends ModelObject {
 			case TEAM_MANAGER:
 				uiType = Messages.getAdminString(
 						AdminMessageStrings.UI_MODEL__TEAM_MANAGER);
+				break;
 			case NO_RIGHTS:
 				uiType = Messages.getAdminString(
 						AdminMessageStrings.UI_MODEL__NO_RIGHTS);

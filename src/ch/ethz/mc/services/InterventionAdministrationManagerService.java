@@ -239,31 +239,6 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public BackendUser backendUserAuthenticateForDashboardBackendAndReturn(
-			final String username, final String password) {
-		val backendUser = databaseManagerService.findOneModelObject(
-				BackendUser.class, Queries.BACKEND_USER__BY_USERNAME, username);
-
-		if (backendUser == null) {
-			log.debug("Username '{}' not found.", username);
-			return null;
-		}
-
-		if (!backendUser.hasDashboardBackendAccess()) {
-			log.debug("Username '{}' has no access to the dashboard backend.");
-			return null;
-		}
-
-		if (BCrypt.checkpw(password, backendUser.getPasswordHash())) {
-			log.debug("Backend user with fitting password found");
-			return backendUser;
-		} else {
-			log.debug("Wrong password provided");
-			return null;
-		}
-	}
-
-	@Synchronized
 	public void backendUserSetType(final BackendUser backendUser,
 			final BackendUserTypes type, final ObjectId currentBackendUser)
 			throws NotificationMessageException {
@@ -521,7 +496,7 @@ public class InterventionAdministrationManagerService {
 			final ObjectId backendUserId, final ObjectId interventionId) {
 
 		val backendUserInterventionAccess = new BackendUserInterventionAccess(
-				backendUserId, interventionId);
+				backendUserId, interventionId, "");
 
 		databaseManagerService.saveModelObject(backendUserInterventionAccess);
 
@@ -529,12 +504,18 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
+	public void backendUserInterventionAccessSetGroupPattern(
+			final BackendUserInterventionAccess backendUserInterventionAccess,
+			final String groupPattern) {
+
+		backendUserInterventionAccess.setGroupPattern(groupPattern);
+
+		databaseManagerService.saveModelObject(backendUserInterventionAccess);
+	}
+
+	@Synchronized
 	public void backendUserInterventionAccessDelete(
-			final ObjectId backendUserId, final ObjectId interventionId) {
-		val backendUserInterventionAccess = databaseManagerService
-				.findOneModelObject(BackendUserInterventionAccess.class,
-						Queries.BACKEND_USER_INTERVENTION_ACCESS__BY_BACKEND_USER_AND_INTERVENTION,
-						backendUserId, interventionId);
+			final BackendUserInterventionAccess backendUserInterventionAccess) {
 
 		databaseManagerService.deleteModelObject(backendUserInterventionAccess);
 	}
@@ -2921,28 +2902,14 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public Iterable<BackendUser> getAllBackendUsersOfIntervention(
+	public Iterable<BackendUserInterventionAccess> getAllBackendUserInterventionAcceessesOfIntervention(
 			final ObjectId interventionId) {
 		val backendUserInterventionAccessesForIntervention = databaseManagerService
 				.findModelObjects(BackendUserInterventionAccess.class,
 						Queries.BACKEND_USER_INTERVENTION_ACCESS__BY_INTERVENTION,
 						interventionId);
 
-		final List<BackendUser> backendUsers = new ArrayList<BackendUser>();
-
-		for (val backendUserInterventionAccess : backendUserInterventionAccessesForIntervention) {
-			val backendUser = databaseManagerService.getModelObjectById(
-					BackendUser.class,
-					backendUserInterventionAccess.getBackendUser());
-
-			if (backendUser != null) {
-				backendUsers.add(backendUser);
-			} else {
-				databaseManagerService.collectGarbage(backendUser);
-			}
-		}
-
-		return backendUsers;
+		return backendUserInterventionAccessesForIntervention;
 	}
 
 	@Synchronized
