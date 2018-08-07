@@ -35,6 +35,8 @@ import ch.ethz.mc.model.Indices;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.BackendUser;
+import ch.ethz.mc.model.persistent.BackendUserInterventionAccess;
+import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.MicroDialogRule;
 import ch.ethz.mc.model.persistent.MonitoringReplyRule;
 import ch.ethz.mc.model.persistent.MonitoringRule;
@@ -216,6 +218,8 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 	public void ensureDatabaseConsistency() {
 		log.info("Ensuring database consistency...");
 
+		log.info("Checking rules...");
+
 		// Check recursive data model structures for inconsistencies or obsolete
 		// objects
 
@@ -270,6 +274,30 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 		}
 
 		log.info("{} rules checked.", rulesChecked);
+
+		log.info("Checking backend user intervention access...");
+
+		int linksChecked = 0;
+
+		val allBackendUserInterventionAccesses = findModelObjects(
+				BackendUserInterventionAccess.class, Queries.ALL);
+
+		for (val backendUserInterventionAccess : allBackendUserInterventionAccesses) {
+			linksChecked++;
+
+			val backendUser = getModelObjectById(BackendUser.class,
+					backendUserInterventionAccess.getBackendUser());
+			val intervention = getModelObjectById(Intervention.class,
+					backendUserInterventionAccess.getIntervention());
+
+			if (backendUser == null || intervention == null) {
+				log.warn("Deleting backend user intervention access id {}",
+						backendUserInterventionAccess.getId());
+				deleteModelObject(backendUserInterventionAccess);
+			}
+		}
+
+		log.info("{} links checked.", linksChecked);
 
 		log.info("Database consistency ensured.");
 	}
