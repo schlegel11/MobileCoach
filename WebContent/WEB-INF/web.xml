@@ -4,7 +4,6 @@
 	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
 	version="3.1">
 
-
 	<display-name>MC</display-name>
 	<description>MobileCoach</description>
 
@@ -12,23 +11,6 @@
 		<session-timeout>30</session-timeout>
 	</session-config>
 
-	<filter>
-		<filter-name>CorsFilter</filter-name>
-		<filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
-		<init-param>
-			<param-name>cors.allowed.origins</param-name>
-			<param-value>*</param-value>
-		</init-param>
-		<init-param>
-			<param-name>cors.allowed.methods</param-name>
-			<param-value>GET,POST,HEAD,OPTIONS,PUT,DELETE</param-value>
-		</init-param>
-	</filter>
-	<filter-mapping>
-		<filter-name>CorsFilter</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping>
-	
 	<listener>
 		<listener-class>ch.ethz.mc.FirstInitializations</listener-class>
 	</listener>
@@ -62,7 +44,7 @@
 		</user-data-constraint>
 	</security-constraint>
 ##END## -->
- 
+
 	<context-param>
 		<param-name>resteasy.servlet.mapping.prefix</param-name>
 		<param-value>/api</param-value>
@@ -70,12 +52,12 @@
 
 	<context-param>
 		<param-name>resteasy.scan</param-name>
-		<param-value>true</param-value>
+		<param-value>false</param-value>
 	</context-param>
 
 	<context-param>
 		<param-name>resteasy.providers</param-name>
-		<param-value>ch.ethz.mc.rest.JacksonConfiguration</param-value>
+		<param-value>ch.ethz.mc.rest.JacksonConfiguration,ch.ethz.mc.rest.CorsFeature</param-value>
 	</context-param>
 
 	<servlet>
