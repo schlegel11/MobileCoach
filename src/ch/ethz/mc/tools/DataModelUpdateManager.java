@@ -676,6 +676,10 @@ public class DataModelUpdateManager {
 	 * Changes for version 40:
 	 */
 	private static void updateToVersion40() {
+		val dialogMessageCollection = jongo.getCollection("DialogMessage");
+		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+				.with(Queries.UPDATE_VERSION_40__DIALOG_MESSAGE__CHANGE_1);
+
 		val authorCollection = jongo.getCollection("Author");
 		val authorInterventionAccessCollection = jongo
 				.getCollection("AuthorInterventionAccess");

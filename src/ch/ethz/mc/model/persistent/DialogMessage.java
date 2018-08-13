@@ -141,6 +141,13 @@ public class DialogMessage extends ModelObject {
 	private String						mediaObjectLink;
 
 	/**
+	 * Optional name of media object contained in message
+	 */
+	@Getter
+	@Setter
+	private String						mediaObjectName;
+
+	/**
 	 * Optional type of media object linked in message
 	 */
 	@Getter

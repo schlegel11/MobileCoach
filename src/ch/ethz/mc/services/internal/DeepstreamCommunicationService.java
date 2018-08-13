@@ -340,6 +340,10 @@ public class DeepstreamCommunicationService extends Thread
 							DeepstreamConstants.CONTAINS_MEDIA,
 							dialogMessage.getMediaObjectLink());
 				}
+				if (!StringUtils.isBlank(dialogMessage.getMediaObjectName())) {
+					messageObject.addProperty(DeepstreamConstants.MEDIA_NAME,
+							dialogMessage.getMediaObjectName());
+				}
 				if (dialogMessage.getMediaObjectType() != null) {
 					messageObject.addProperty(DeepstreamConstants.MEDIA_TYPE,
 							dialogMessage.getMediaObjectType().toJSONField());

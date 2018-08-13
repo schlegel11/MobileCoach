@@ -328,7 +328,7 @@ public class InterventionExecutionManagerService {
 		val dialogMessage = new DialogMessage(participant.getId(), 0,
 				DialogMessageStatusTypes.PREPARED_FOR_SENDING, type, null,
 				message, message, answerType, answerOptions, null, null, null,
-				null, timestampToSendMessage, -1, supervisorMessage,
+				null, null, timestampToSendMessage, -1, supervisorMessage,
 				answerExpected, isSticky, -1, -1, null, null, false,
 				relatedMonitoringRule == null ? null
 						: relatedMonitoringRule.getId(),
@@ -417,6 +417,7 @@ public class InterventionExecutionManagerService {
 
 				dialogMessage.setMediaObjectLink(
 						mediaObjectParticipantShortURLString);
+				dialogMessage.setMediaObjectName(linkedMediaObject.getName());
 				dialogMessage.setMediaObjectType(linkedMediaObject.getType());
 
 				if (message.contains(
@@ -691,7 +692,7 @@ public class InterventionExecutionManagerService {
 				isTypeIntention ? DialogMessageStatusTypes.RECEIVED_AS_INTENTION
 						: DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY,
 				type, receivedMessage.getClientId(), "", "", null, null, null,
-				null, null, null, -1, -1, false, false, false, -1,
+				null, null, null, null, -1, -1, false, false, false, -1,
 				receivedMessage.getReceivedTimestamp(), answerCleaned,
 				answerRaw, isTypeIntention ? false : true, null, null, null,
 				null, false, false);
