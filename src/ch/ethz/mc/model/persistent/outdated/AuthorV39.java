@@ -1,8 +1,5 @@
-package ch.ethz.mc.model.persistent;
+package ch.ethz.mc.model.persistent.outdated;
 
-import org.bson.types.ObjectId;
-
-import ch.ethz.mc.model.ModelObject;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -23,6 +20,7 @@ import ch.ethz.mc.model.ModelObject;
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+import ch.ethz.mc.model.ModelObject;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,31 +28,35 @@ import lombok.NonNull;
 import lombok.Setter;
 
 /**
- * {@link ModelObject} to represent an {@link AuthorInterventionAccess}
- * 
- * The {@link AuthorInterventionAccess} describes, which {@link Author} is
- * allowed to administrate a specific {@link Intervention}.
- * 
+ * CAUTION: Will only be used for conversion from data model 39 to 40
+ *
  * @author Andreas Filler
  */
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuthorInterventionAccess extends ModelObject {
-	private static final long	serialVersionUID	= -2686891854353434099L;
+public class AuthorV39 extends ModelObject {
+	private static final long	serialVersionUID	= 9068910637074662586L;
 
 	/**
-	 * {@link Author} who is allowed to administrate {@link Intervention}
+	 * Admin rights of {@link AuthorV39}
+	 */
+	@Getter
+	@Setter
+	private boolean				admin;
+
+	/**
+	 * Username of {@link AuthorV39} required to authenticate
 	 */
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId			author;
+	private String				username;
 
 	/**
-	 * {@link Intervention} that can be administrated by the {@link Author}
+	 * Hash of password of {@link AuthorV39} required to authenticate
 	 */
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId			intervention;
+	private String				passwordHash;
 }

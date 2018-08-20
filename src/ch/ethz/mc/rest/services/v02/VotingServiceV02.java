@@ -29,9 +29,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
@@ -41,6 +38,8 @@ import ch.ethz.mc.model.rest.OK;
 import ch.ethz.mc.model.rest.Variable;
 import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mc.tools.StringValidator;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Service to read voting values and to vote/unvote using REST

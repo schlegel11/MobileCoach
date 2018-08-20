@@ -184,7 +184,7 @@ public class DeepstreamRESTServlet extends HttpServlet {
 
 				val responseData = new JsonObject();
 				responseData.addProperty(DeepstreamConstants.DS_FIELD_USERNAME,
-						user);
+						user + " " + role);
 				responseData.add(DeepstreamConstants.DS_FIELD_CLIENT_DATA,
 						responseClientData);
 				responseData.add(DeepstreamConstants.DS_FIELD_SERVER_DATA,
@@ -220,7 +220,7 @@ public class DeepstreamRESTServlet extends HttpServlet {
 
 				val responseData = new JsonObject();
 				responseData.addProperty(DeepstreamConstants.DS_FIELD_USERNAME,
-						user);
+						user + " " + role);
 				responseData.add(DeepstreamConstants.DS_FIELD_SERVER_DATA,
 						responseServerData);
 

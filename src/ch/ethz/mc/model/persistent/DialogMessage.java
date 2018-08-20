@@ -141,6 +141,13 @@ public class DialogMessage extends ModelObject {
 	private String						mediaObjectLink;
 
 	/**
+	 * Optional name of media object contained in message
+	 */
+	@Getter
+	@Setter
+	private String						mediaObjectName;
+
+	/**
 	 * Optional type of media object linked in message
 	 */
 	@Getter
@@ -268,7 +275,7 @@ public class DialogMessage extends ModelObject {
 
 	/**
 	 * Marker showing if the {@link DialogMessage} has been sent manually by an
-	 * {@link Author}
+	 * {@link BackendUser}
 	 */
 	@Getter
 	@Setter

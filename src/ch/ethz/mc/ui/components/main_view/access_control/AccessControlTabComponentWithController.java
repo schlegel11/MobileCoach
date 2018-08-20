@@ -1,5 +1,21 @@
 package ch.ethz.mc.ui.components.main_view.access_control;
 
+import org.bson.types.ObjectId;
+
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.BeanContainer;
+import com.vaadin.data.util.BeanItem;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+
+import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.conf.Messages;
+import ch.ethz.mc.model.persistent.BackendUser;
+import ch.ethz.mc.model.persistent.types.BackendUserTypes;
+import ch.ethz.mc.model.ui.UIBackendUser;
+import ch.ethz.mc.ui.components.basics.PasswordEditComponent;
+import ch.ethz.mc.ui.components.basics.ShortStringEditComponent;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -23,22 +39,6 @@ package ch.ethz.mc.ui.components.main_view.access_control;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
-import org.bson.types.ObjectId;
-
-import ch.ethz.mc.conf.AdminMessageStrings;
-import ch.ethz.mc.conf.Messages;
-import ch.ethz.mc.model.persistent.Author;
-import ch.ethz.mc.model.ui.UIAuthor;
-import ch.ethz.mc.ui.components.basics.PasswordEditComponent;
-import ch.ethz.mc.ui.components.basics.ShortStringEditComponent;
-
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.BeanContainer;
-import com.vaadin.data.util.BeanItem;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-
 /**
  * Extends the access control tab component with a controller
  * 
@@ -49,10 +49,10 @@ import com.vaadin.ui.Button.ClickEvent;
 public class AccessControlTabComponentWithController
 		extends AccessControlTabComponent {
 
-	private UIAuthor								selectedUIAuthor			= null;
-	private BeanItem<UIAuthor>						selectedUIAuthorBeanItem	= null;
+	private UIBackendUser									selectedUIBackendUser			= null;
+	private BeanItem<UIBackendUser>							selectedUIBackendUserBeanItem	= null;
 
-	private final BeanContainer<ObjectId, UIAuthor>	beanContainer;
+	private final BeanContainer<ObjectId, UIBackendUser>	beanContainer;
 
 	public AccessControlTabComponentWithController() {
 		super();
@@ -62,13 +62,14 @@ public class AccessControlTabComponentWithController
 		val accountsTable = accessControlEditComponent.getAccountsTable();
 
 		// table content
-		beanContainer = createBeanContainerForModelObjects(UIAuthor.class,
-				getInterventionAdministrationManagerService().getAllAuthors());
+		beanContainer = createBeanContainerForModelObjects(UIBackendUser.class,
+				getInterventionAdministrationManagerService()
+						.getAllBackendUsers());
 
 		accountsTable.setContainerDataSource(beanContainer);
-		accountsTable.setSortContainerPropertyId(UIAuthor.getSortColumn());
-		accountsTable.setVisibleColumns(UIAuthor.getVisibleColumns());
-		accountsTable.setColumnHeaders(UIAuthor.getColumnHeaders());
+		accountsTable.setSortContainerPropertyId(UIBackendUser.getSortColumn());
+		accountsTable.setVisibleColumns(UIBackendUser.getVisibleColumns());
+		accountsTable.setColumnHeaders(UIBackendUser.getColumnHeaders());
 
 		// handle selection change
 		accountsTable.addValueChangeListener(new ValueChangeListener() {
@@ -78,13 +79,13 @@ public class AccessControlTabComponentWithController
 				val objectId = accountsTable.getValue();
 				if (objectId == null) {
 					accessControlEditComponent.setNothingSelected();
-					selectedUIAuthor = null;
-					selectedUIAuthorBeanItem = null;
+					selectedUIBackendUser = null;
+					selectedUIBackendUserBeanItem = null;
 				} else {
-					selectedUIAuthor = getUIModelObjectFromTableByObjectId(
-							accountsTable, UIAuthor.class, objectId);
-					selectedUIAuthorBeanItem = getBeanItemFromTableByObjectId(
-							accountsTable, UIAuthor.class, objectId);
+					selectedUIBackendUser = getUIModelObjectFromTableByObjectId(
+							accountsTable, UIBackendUser.class, objectId);
+					selectedUIBackendUserBeanItem = getBeanItemFromTableByObjectId(
+							accountsTable, UIBackendUser.class, objectId);
 					accessControlEditComponent.setSomethingSelected();
 				}
 			}
@@ -93,6 +94,8 @@ public class AccessControlTabComponentWithController
 		// handle buttons
 		val buttonClickListener = new ButtonClickListener();
 		accessControlEditComponent.getNewButton()
+				.addClickListener(buttonClickListener);
+		accessControlEditComponent.getMakeTeamManagerButton()
 				.addClickListener(buttonClickListener);
 		accessControlEditComponent.getMakeAuthorButton()
 				.addClickListener(buttonClickListener);
@@ -117,6 +120,9 @@ public class AccessControlTabComponentWithController
 					.getMakeAdminButton()) {
 				makeAccountAdmin();
 			} else if (event.getButton() == accessControlEditComponent
+					.getMakeTeamManagerButton()) {
+				makeAccountTeamManager();
+			} else if (event.getButton() == accessControlEditComponent
 					.getMakeAuthorButton()) {
 				makeAccountAuthor();
 			} else if (event.getButton() == accessControlEditComponent
@@ -137,25 +143,27 @@ public class AccessControlTabComponentWithController
 				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
-						Author newAuthor;
+						BackendUser newAuthor;
 						try {
 							val newUsername = getStringValue();
 
 							// Validate username
 							getInterventionAdministrationManagerService()
-									.authorCheckValidAndUnique(newUsername);
+									.backendUserCheckValidAndUnique(
+											newUsername);
 
 							// Create new author
 							newAuthor = getInterventionAdministrationManagerService()
-									.authorCreate(newUsername);
+									.backendUserCreate(newUsername);
 						} catch (final Exception e) {
 							handleException(e);
 							return;
 						}
 
 						// Adapt UI
-						beanContainer.addItem(newAuthor.getId(), UIAuthor.class
-								.cast(newAuthor.toUIModelObject()));
+						beanContainer.addItem(newAuthor.getId(),
+								UIBackendUser.class
+										.cast(newAuthor.toUIModelObject()));
 						getAccessControlEditComponent().getAccountsTable()
 								.select(newAuthor.getId());
 						getAdminUI().showInformationNotification(
@@ -166,21 +174,44 @@ public class AccessControlTabComponentWithController
 				}, null);
 	}
 
-	public void makeAccountAuthor() {
-		log.debug("Set account author");
+	public void makeAccountTeamManager() {
+		log.debug("Set account team manager");
 		try {
-			val selectedAuthor = selectedUIAuthor
-					.getRelatedModelObject(Author.class);
-			getInterventionAdministrationManagerService().authorSetAuthor(
-					selectedAuthor, getUISession().getCurrentAuthorId());
+			val selectedBackendUser = selectedUIBackendUser
+					.getRelatedModelObject(BackendUser.class);
+			getInterventionAdministrationManagerService().backendUserSetType(
+					selectedBackendUser, BackendUserTypes.TEAM_MANAGER,
+					getUISession().getCurrentBackendUserId());
 		} catch (final Exception e) {
 			handleException(e);
 			return;
 		}
 
 		// Adapt UI
-		getStringItemProperty(selectedUIAuthorBeanItem, UIAuthor.TYPE).setValue(
-				Messages.getAdminString(AdminMessageStrings.UI_MODEL__AUTHOR));
+		getStringItemProperty(selectedUIBackendUserBeanItem, UIBackendUser.TYPE)
+				.setValue(Messages.getAdminString(
+						AdminMessageStrings.UI_MODEL__TEAM_MANAGER));
+		getAdminUI().showInformationNotification(
+				AdminMessageStrings.NOTIFICATION__ACCOUNT_CHANGED_TO_TEAM_MANAGER);
+	}
+
+	public void makeAccountAuthor() {
+		log.debug("Set account author");
+		try {
+			val selectedBackendUser = selectedUIBackendUser
+					.getRelatedModelObject(BackendUser.class);
+			getInterventionAdministrationManagerService().backendUserSetType(
+					selectedBackendUser, BackendUserTypes.AUTHOR,
+					getUISession().getCurrentBackendUserId());
+		} catch (final Exception e) {
+			handleException(e);
+			return;
+		}
+
+		// Adapt UI
+		getStringItemProperty(selectedUIBackendUserBeanItem, UIBackendUser.TYPE)
+				.setValue(Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__AUTHOR));
 		getAdminUI().showInformationNotification(
 				AdminMessageStrings.NOTIFICATION__ACCOUNT_CHANGED_TO_AUTHOR);
 	}
@@ -188,21 +219,20 @@ public class AccessControlTabComponentWithController
 	public void makeAccountAdmin() {
 		log.debug("Set account admin");
 		try {
-			val selectedAuthor = selectedUIAuthor
-					.getRelatedModelObject(Author.class);
-
-			// Set admin
-			getInterventionAdministrationManagerService()
-					.authorSetAdmin(selectedAuthor);
+			val selectedBackendUser = selectedUIBackendUser
+					.getRelatedModelObject(BackendUser.class);
+			getInterventionAdministrationManagerService().backendUserSetType(
+					selectedBackendUser, BackendUserTypes.ADMIN,
+					getUISession().getCurrentBackendUserId());
 		} catch (final Exception e) {
 			handleException(e);
 			return;
 		}
 
 		// Adapt UI
-		getStringItemProperty(selectedUIAuthorBeanItem, UIAuthor.TYPE)
-				.setValue(Messages.getAdminString(
-						AdminMessageStrings.UI_MODEL__ADMINISTRATOR));
+		getStringItemProperty(selectedUIBackendUserBeanItem, UIBackendUser.TYPE)
+				.setValue(Messages
+						.getAdminString(AdminMessageStrings.UI_MODEL__ADMIN));
 		getAdminUI().showInformationNotification(
 				AdminMessageStrings.NOTIFICATION__ACCOUNT_CHANGED_TO_ADMIN);
 	}
@@ -216,12 +246,12 @@ public class AccessControlTabComponentWithController
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						try {
-							val selectedAuthor = selectedUIAuthor
-									.getRelatedModelObject(Author.class);
+							val selectedBackendUser = selectedUIBackendUser
+									.getRelatedModelObject(BackendUser.class);
 
 							// Change password
 							getInterventionAdministrationManagerService()
-									.authorSetPassword(selectedAuthor,
+									.backendUserSetPassword(selectedBackendUser,
 											getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
@@ -242,13 +272,14 @@ public class AccessControlTabComponentWithController
 			@Override
 			public void buttonClick(final ClickEvent event) {
 				try {
-					val selectedAuthor = selectedUIAuthor
-							.getRelatedModelObject(Author.class);
+					val selectedBackendUser = selectedUIBackendUser
+							.getRelatedModelObject(BackendUser.class);
 
 					// Delete account
-					getInterventionAdministrationManagerService().authorDelete(
-							getUISession().getCurrentAuthorId(),
-							selectedAuthor);
+					getInterventionAdministrationManagerService()
+							.backendUserDelete(
+									getUISession().getCurrentBackendUserId(),
+									selectedBackendUser);
 				} catch (final Exception e) {
 					closeWindow();
 					handleException(e);
@@ -257,8 +288,9 @@ public class AccessControlTabComponentWithController
 
 				// Adapt UI
 				getAccessControlEditComponent().getAccountsTable()
-						.removeItem(selectedUIAuthor
-								.getRelatedModelObject(Author.class).getId());
+						.removeItem(selectedUIBackendUser
+								.getRelatedModelObject(BackendUser.class)
+								.getId());
 				getAdminUI().showInformationNotification(
 						AdminMessageStrings.NOTIFICATION__ACCOUNT_DELETED);
 

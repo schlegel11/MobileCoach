@@ -94,7 +94,10 @@ public class DeepstreamCommunicationService extends Thread
 
 	private RESTManagerService						restManagerService;
 
-	private final Set<String>						loggedInUsers;
+	private final Set<String>						loggedInParticipants;
+	private final Set<String>						loggedInSupervisors;
+	private final Set<String>						loggedInObservers;
+
 	private final Hashtable<String, Integer>		allUsersVisibleMessagesSentSinceLastLogout;
 
 	private final int								substringLength;
@@ -114,15 +117,20 @@ public class DeepstreamCommunicationService extends Thread
 
 	private final String							participantRole;
 	private final String							supervisorRole;
+	private final String							observerRole;
 
 	private DeepstreamCommunicationService(final String deepstreamHost,
 			final String deepstreamServerRole,
 			final String deepstreamServerPassword,
 			final String deepstreamParticipantRole,
-			final String deepstreamSupervisorRole) {
+			final String deepstreamSupervisorRole,
+			final String deepstreamObserverRole) {
 		systemLoad = SystemLoad.getInstance();
 
-		loggedInUsers = new HashSet<String>();
+		loggedInParticipants = new HashSet<String>();
+		loggedInSupervisors = new HashSet<String>();
+		loggedInObservers = new HashSet<String>();
+
 		allUsersVisibleMessagesSentSinceLastLogout = new Hashtable<String, Integer>();
 
 		// Care for connection state file
@@ -142,6 +150,7 @@ public class DeepstreamCommunicationService extends Thread
 
 		participantRole = deepstreamParticipantRole;
 		supervisorRole = deepstreamSupervisorRole;
+		observerRole = deepstreamObserverRole;
 
 		loginData = new JsonObject();
 		loginData.addProperty(DeepstreamConstants.REST_FIELD_CLIENT_VERSION,
@@ -168,12 +177,14 @@ public class DeepstreamCommunicationService extends Thread
 			final String deepstreamHost, final String deepstreamServerRole,
 			final String deepstreamServerPassword,
 			final String deepstreamParticipantRole,
-			final String deepstreamSupervisorRole) {
+			final String deepstreamSupervisorRole,
+			final String deepstreamObserverRole) {
 		log.info("Preparing service...");
 		if (instance == null) {
 			instance = new DeepstreamCommunicationService(deepstreamHost,
 					deepstreamServerRole, deepstreamServerPassword,
-					deepstreamParticipantRole, deepstreamSupervisorRole);
+					deepstreamParticipantRole, deepstreamSupervisorRole,
+					deepstreamObserverRole);
 
 			instance.setName(
 					DeepstreamCommunicationService.class.getSimpleName());
@@ -213,9 +224,21 @@ public class DeepstreamCommunicationService extends Thread
 			// Update load info every 10 seconds
 			if (nextLoadInfo < System.currentTimeMillis()) {
 				nextLoadInfo = System.currentTimeMillis() + 10000;
-				systemLoad.setLoggedInUsers(
-						ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM,
-						loggedInUsers.size());
+				systemLoad
+						.setLoggedInUsers(
+								ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+										+ participantRole,
+								loggedInParticipants.size());
+				systemLoad
+						.setLoggedInUsers(
+								ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+										+ supervisorRole,
+								loggedInSupervisors.size());
+				systemLoad
+						.setLoggedInUsers(
+								ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+										+ observerRole,
+								loggedInObservers.size());
 			}
 		}
 
@@ -317,6 +340,10 @@ public class DeepstreamCommunicationService extends Thread
 							DeepstreamConstants.CONTAINS_MEDIA,
 							dialogMessage.getMediaObjectLink());
 				}
+				if (!StringUtils.isBlank(dialogMessage.getMediaObjectName())) {
+					messageObject.addProperty(DeepstreamConstants.MEDIA_NAME,
+							dialogMessage.getMediaObjectName());
+				}
 				if (dialogMessage.getMediaObjectType() != null) {
 					messageObject.addProperty(DeepstreamConstants.MEDIA_TYPE,
 							dialogMessage.getMediaObjectType().toJSONField());
@@ -383,8 +410,10 @@ public class DeepstreamCommunicationService extends Thread
 				// If it's not a visible message ignore it
 				if (!isCommand) {
 					synchronized (allUsersVisibleMessagesSentSinceLastLogout) {
-						if (loggedInUsers
-								.contains(participantOrSupervisorIdentifier)) {
+						if (loggedInParticipants
+								.contains(participantOrSupervisorIdentifier)
+								|| loggedInSupervisors.contains(
+										participantOrSupervisorIdentifier)) {
 							// If user is logged in remember as one (for late
 							// logout
 							// users)
@@ -706,6 +735,21 @@ public class DeepstreamCommunicationService extends Thread
 	 */
 	public boolean checkSecret(final String participantOrSupervisorIdentifier,
 			final String secret) {
+		return checkSecret(participantOrSupervisorIdentifier, secret, false);
+	}
+
+	/**
+	 * Check secret of user using deepstream
+	 * 
+	 * @param participantOrSupervisorIdentifier
+	 * @param secret
+	 * @param observerCheck
+	 *            The observer check only compares the first 64 characters of
+	 *            the secret
+	 * @return
+	 */
+	public boolean checkSecret(final String participantOrSupervisorIdentifier,
+			final String secret, final boolean observerCheck) {
 		log.debug("Checking secret for {}", participantOrSupervisorIdentifier);
 
 		Record record = null;
@@ -726,7 +770,8 @@ public class DeepstreamCommunicationService extends Thread
 				return false;
 			}
 
-			if (secretFromRecord.equals(secret)) {
+			if (observerCheck ? secretFromRecord.substring(0, 64).equals(secret)
+					: secretFromRecord.equals(secret)) {
 				log.debug("Secret check for {} returns {}",
 						participantOrSupervisorIdentifier, true);
 				return true;
@@ -873,7 +918,7 @@ public class DeepstreamCommunicationService extends Thread
 	 * @return
 	 */
 	public boolean checkIfParticipantIsConnected(final String participantId) {
-		if (loggedInUsers.contains(participantId)) {
+		if (loggedInParticipants.contains(participantId)) {
 			return true;
 		} else {
 			return false;
@@ -891,7 +936,7 @@ public class DeepstreamCommunicationService extends Thread
 		Record record = null;
 		synchronized (client) {
 			try {
-				restManagerService.destroyToken(
+				restManagerService.destroyParticipantToken(
 						ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
 								+ participantOrSupervisorId);
 
@@ -989,25 +1034,57 @@ public class DeepstreamCommunicationService extends Thread
 			}
 
 			log.debug("Caching presence information...");
-			synchronized (loggedInUsers) {
-				loggedInUsers.clear();
+			synchronized (loggedInParticipants) {
+				synchronized (loggedInSupervisors) {
+					synchronized (loggedInObservers) {
+						loggedInParticipants.clear();
+						loggedInSupervisors.clear();
+						loggedInObservers.clear();
 
-				for (val user : client.presence.getAll()) {
-					loggedInUsers.add(user);
-					allUsersVisibleMessagesSentSinceLastLogout.put(user, 0);
-					interventionExecutionManagerService
-							.participantRememberLoginBasedOnDialogOptionTypeAndData(
-									DialogOptionTypes.EXTERNAL_ID,
-									ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
-											+ user);
+						for (val userAndRole : client.presence.getAll()) {
+							val userAndRoleArray = userAndRole.split(" ");
+							val user = userAndRoleArray[0];
+							val role = userAndRoleArray[1];
+
+							if (role.equals(participantRole)) {
+								loggedInParticipants.add(user);
+
+								allUsersVisibleMessagesSentSinceLastLogout
+										.put(user, 0);
+								interventionExecutionManagerService
+										.participantRememberLoginBasedOnDialogOptionTypeAndData(
+												DialogOptionTypes.EXTERNAL_ID,
+												ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+														+ user);
+							} else if (role.equals(supervisorRole)) {
+								loggedInSupervisors.add(user);
+
+								allUsersVisibleMessagesSentSinceLastLogout
+										.put(user, 0);
+							} else if (role.equals(observerRole)) {
+								loggedInObservers.add(user);
+							}
+						}
+
+						client.presence.subscribe(this);
+					}
 				}
-
-				client.presence.subscribe(this);
 			}
 
+			systemLoad
+					.setLoggedInUsers(
+							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+									+ participantRole,
+							loggedInParticipants.size());
+			systemLoad
+					.setLoggedInUsers(
+							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+									+ supervisorRole,
+							loggedInSupervisors.size());
 			systemLoad.setLoggedInUsers(
-					ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM,
-					loggedInUsers.size());
+					ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+							+ observerRole,
+					loggedInObservers.size());
 
 			startupComplete = true;
 			reconnecting = false;
@@ -1246,7 +1323,7 @@ public class DeepstreamCommunicationService extends Thread
 	 * @return
 	 */
 	private String createRESTToken(final String participantId) {
-		return restManagerService.createToken(
+		return restManagerService.createParticipantToken(
 				ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
 						+ participantId);
 	}
@@ -1440,13 +1517,24 @@ public class DeepstreamCommunicationService extends Thread
 	 * @see io.deepstream.PresenceEventListener#onClientLogin(java.lang.String)
 	 */
 	@Override
-	public void onClientLogin(final String user) {
-		loggedInUsers.add(user);
-		interventionExecutionManagerService
-				.participantRememberLoginBasedOnDialogOptionTypeAndData(
-						DialogOptionTypes.EXTERNAL_ID,
-						ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
-								+ user);
+	public void onClientLogin(final String userAndRole) {
+		val userAndRoleArray = userAndRole.split(" ");
+		val user = userAndRoleArray[0];
+		val role = userAndRoleArray[1];
+
+		if (role.equals(participantRole)) {
+			loggedInParticipants.add(user);
+
+			interventionExecutionManagerService
+					.participantRememberLoginBasedOnDialogOptionTypeAndData(
+							DialogOptionTypes.EXTERNAL_ID,
+							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+									+ user);
+		} else if (role.equals(supervisorRole)) {
+			loggedInSupervisors.add(user);
+		} else if (role.equals(observerRole)) {
+			loggedInObservers.add(user);
+		}
 	}
 
 	/*
@@ -1455,14 +1543,27 @@ public class DeepstreamCommunicationService extends Thread
 	 * @see io.deepstream.PresenceEventListener#onClientLogout(java.lang.String)
 	 */
 	@Override
-	public void onClientLogout(final String user) {
-		loggedInUsers.remove(user);
-		allUsersVisibleMessagesSentSinceLastLogout.put(user, 0);
-		interventionExecutionManagerService
-				.participantRememberLogoutBasedOnDialogOptionTypeAndData(
-						DialogOptionTypes.EXTERNAL_ID,
-						ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
-								+ user);
+	public void onClientLogout(final String userAndRole) {
+		val userAndRoleArray = userAndRole.split(" ");
+		val user = userAndRoleArray[0];
+		val role = userAndRoleArray[1];
+
+		if (role.equals(participantRole)) {
+			loggedInParticipants.remove(user);
+
+			allUsersVisibleMessagesSentSinceLastLogout.put(user, 0);
+			interventionExecutionManagerService
+					.participantRememberLoginBasedOnDialogOptionTypeAndData(
+							DialogOptionTypes.EXTERNAL_ID,
+							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+									+ user);
+		} else if (role.equals(supervisorRole)) {
+			loggedInSupervisors.remove(user);
+
+			allUsersVisibleMessagesSentSinceLastLogout.put(user, 0);
+		} else if (role.equals(observerRole)) {
+			loggedInObservers.remove(user);
+		}
 	}
 
 	@Override

@@ -328,7 +328,7 @@ public class InterventionExecutionManagerService {
 		val dialogMessage = new DialogMessage(participant.getId(), 0,
 				DialogMessageStatusTypes.PREPARED_FOR_SENDING, type, null,
 				message, message, answerType, answerOptions, null, null, null,
-				null, timestampToSendMessage, -1, supervisorMessage,
+				null, null, timestampToSendMessage, -1, supervisorMessage,
 				answerExpected, isSticky, -1, -1, null, null, false,
 				relatedMonitoringRule == null ? null
 						: relatedMonitoringRule.getId(),
@@ -417,6 +417,7 @@ public class InterventionExecutionManagerService {
 
 				dialogMessage.setMediaObjectLink(
 						mediaObjectParticipantShortURLString);
+				dialogMessage.setMediaObjectName(linkedMediaObject.getName());
 				dialogMessage.setMediaObjectType(linkedMediaObject.getType());
 
 				if (message.contains(
@@ -691,7 +692,7 @@ public class InterventionExecutionManagerService {
 				isTypeIntention ? DialogMessageStatusTypes.RECEIVED_AS_INTENTION
 						: DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY,
 				type, receivedMessage.getClientId(), "", "", null, null, null,
-				null, null, null, -1, -1, false, false, false, -1,
+				null, null, null, null, -1, -1, false, false, false, -1,
 				receivedMessage.getReceivedTimestamp(), answerCleaned,
 				answerRaw, isTypeIntention ? false : true, null, null, null,
 				null, false, false);
@@ -2960,7 +2961,7 @@ public class InterventionExecutionManagerService {
 							externalIdDialogOptionData, false, false);
 				} catch (final Exception e) {
 					log.error(
-							"Should never occur: Error at writing participant dialog option external ID: {}",
+							"Should never occur: Error at writing participant supervisor dialog option external ID: {}",
 							e.getMessage());
 					return false;
 				}
@@ -3313,13 +3314,5 @@ public class InterventionExecutionManagerService {
 		}
 
 		return relevantParticipants;
-	}
-
-	/**
-	 * Clear cache
-	 */
-	@Synchronized
-	public void clearCache() {
-		databaseManagerService.clearCache();
 	}
 }

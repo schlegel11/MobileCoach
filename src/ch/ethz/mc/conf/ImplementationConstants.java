@@ -109,6 +109,9 @@ public class ImplementationConstants {
 
 	public static final String	REST_SESSION_BASED_API_VERSION										= "v01";
 	public static final String	TOKEN_BASED_API_VERSION												= "v02";
+
+	public static final String	REST_API_ADDITIONAL_ALLOWED_HEADERS									= "token,password,interventionPattern,group,user";
+
 	public static final String	REST_API_CREDITS_CHECK_VARIABLE_POSTFIX								= "Check";
 	public static final String	REST_API_CREDITS_REMINDER_VARIABLE_POSTFIX							= "Reminder";
 

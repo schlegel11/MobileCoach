@@ -34,11 +34,14 @@ import ch.ethz.mc.model.AbstractModelObjectAccessService;
 import ch.ethz.mc.model.Indices;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
-import ch.ethz.mc.model.persistent.Author;
+import ch.ethz.mc.model.persistent.BackendUser;
+import ch.ethz.mc.model.persistent.BackendUserInterventionAccess;
+import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.MicroDialogRule;
 import ch.ethz.mc.model.persistent.MonitoringReplyRule;
 import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.consistency.DataModelConfiguration;
+import ch.ethz.mc.model.persistent.types.BackendUserTypes;
 import ch.ethz.mc.tools.BCrypt;
 import ch.ethz.mc.tools.DataModelUpdateManager;
 import lombok.val;
@@ -120,22 +123,20 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 		}
 
 		// Checking for admin account
-		val authors = findModelObjects(Author.class,
-				Queries.AUTHOR__ADMIN_TRUE);
-		if (!authors.iterator().hasNext()) {
+		val backendUsers = findModelObjects(BackendUser.class,
+				Queries.BACKEND_USER__BY_TYPE, BackendUserTypes.ADMIN);
+		if (!backendUsers.iterator().hasNext()) {
 			// Create new admin account if none exists
 			log.warn(
 					"No admin account has been found! One will be created as '{}' with password '{}'",
 					Constants.getDefaultAdminUsername(),
 					Constants.getDefaultAdminPassword());
-			val author = new Author(true, Constants.getDefaultAdminUsername(),
+			val backendUser = new BackendUser(BackendUserTypes.ADMIN,
+					Constants.getDefaultAdminUsername(),
 					BCrypt.hashpw(Constants.getDefaultAdminPassword(),
 							BCrypt.gensalt()));
-			saveModelObject(author);
+			saveModelObject(backendUser);
 		}
-
-		// Clear cache to ensure stable state after DB update
-		clearCache();
 
 		log.info("Started.");
 	}
@@ -214,6 +215,8 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 	public void ensureDatabaseConsistency() {
 		log.info("Ensuring database consistency...");
 
+		log.info("Checking rules...");
+
 		// Check recursive data model structures for inconsistencies or obsolete
 		// objects
 
@@ -268,6 +271,30 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 		}
 
 		log.info("{} rules checked.", rulesChecked);
+
+		log.info("Checking backend user intervention access...");
+
+		int linksChecked = 0;
+
+		val allBackendUserInterventionAccesses = findModelObjects(
+				BackendUserInterventionAccess.class, Queries.ALL);
+
+		for (val backendUserInterventionAccess : allBackendUserInterventionAccesses) {
+			linksChecked++;
+
+			val backendUser = getModelObjectById(BackendUser.class,
+					backendUserInterventionAccess.getBackendUser());
+			val intervention = getModelObjectById(Intervention.class,
+					backendUserInterventionAccess.getIntervention());
+
+			if (backendUser == null || intervention == null) {
+				log.warn("Deleting backend user intervention access id {}",
+						backendUserInterventionAccess.getId());
+				deleteModelObject(backendUserInterventionAccess);
+			}
+		}
+
+		log.info("{} links checked.", linksChecked);
 
 		log.info("Database consistency ensured.");
 	}

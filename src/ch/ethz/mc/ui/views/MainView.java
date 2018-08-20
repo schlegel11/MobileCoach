@@ -1,5 +1,22 @@
 package ch.ethz.mc.ui.views;
 
+import com.vaadin.event.LayoutEvents.LayoutClickEvent;
+import com.vaadin.event.LayoutEvents.LayoutClickListener;
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.Component;
+
+import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.conf.ThemeImageStrings;
+import ch.ethz.mc.ui.AdminNavigatorUI;
+import ch.ethz.mc.ui.components.basics.MenuButtonComponent;
+import ch.ethz.mc.ui.components.main_view.access_control.AccessControlTabComponentWithController;
+import ch.ethz.mc.ui.components.main_view.account.AccountTabComponentWithController;
+import ch.ethz.mc.ui.components.main_view.interventions.AllInterventionsTabComponentWithController;
+import ch.ethz.mc.ui.components.main_view.welcome.WelcomeTabComponentWithController;
+import ch.ethz.mc.ui.components.views.MainViewComponent;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -22,23 +39,6 @@ package ch.ethz.mc.ui.views;
  */
 import lombok.Synchronized;
 import lombok.extern.log4j.Log4j2;
-import ch.ethz.mc.conf.AdminMessageStrings;
-import ch.ethz.mc.conf.ThemeImageStrings;
-import ch.ethz.mc.ui.AdminNavigatorUI;
-import ch.ethz.mc.ui.components.basics.MenuButtonComponent;
-import ch.ethz.mc.ui.components.main_view.access_control.AccessControlTabComponentWithController;
-import ch.ethz.mc.ui.components.main_view.account.AccountTabComponentWithController;
-import ch.ethz.mc.ui.components.main_view.interventions.AllInterventionsTabComponentWithController;
-import ch.ethz.mc.ui.components.main_view.welcome.WelcomeTabComponentWithController;
-import ch.ethz.mc.ui.components.views.MainViewComponent;
-
-import com.vaadin.event.LayoutEvents.LayoutClickEvent;
-import com.vaadin.event.LayoutEvents.LayoutClickListener;
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Component;
 
 /**
  * Provides main view and navigation in main view
@@ -191,7 +191,7 @@ public class MainView extends AbstractView
 
 		addTab(mainViewComponent.getContentAccordion(),
 				new AccountTabComponentWithController(
-						getUISession().getCurrentAuthorId()),
+						getUISession().getCurrentBackendUserId()),
 				AdminMessageStrings.MAIN_VIEW__ACCOUNT_TAB,
 				ThemeImageStrings.ACCOUNT_ICON);
 	}

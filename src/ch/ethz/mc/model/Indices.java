@@ -22,7 +22,7 @@ package ch.ethz.mc.model;
  */
 import java.util.Hashtable;
 
-import ch.ethz.mc.model.persistent.Author;
+import ch.ethz.mc.model.persistent.BackendUser;
 import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.DialogStatus;
@@ -53,7 +53,7 @@ import lombok.val;
  * @author Andreas Filler
  */
 public class Indices {
-	private static final String[]	authorIndices											= new String[] {
+	private static final String[]	backendUserIndices										= new String[] {
 			"{'username':1}" };
 
 	private static final String[]	dialogMessageIndices									= new String[] {
@@ -124,7 +124,7 @@ public class Indices {
 	public static Hashtable<Class<? extends ModelObject>, String[]> getIndices() {
 		val indices = new Hashtable<Class<? extends ModelObject>, String[]>();
 
-		indices.put(Author.class, authorIndices);
+		indices.put(BackendUser.class, backendUserIndices);
 
 		indices.put(DialogMessage.class, dialogMessageIndices);
 		indices.put(DialogOption.class, dialogOptionIndices);

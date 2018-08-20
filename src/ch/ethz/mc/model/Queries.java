@@ -40,12 +40,12 @@ public class Queries {
 	public static final String	SCREENING_SURVEY__BY_INTERVENTION_AND_INTERMEDIATE_SURVEY_TRUE																																					= "{'intervention':#,'intermediateSurvey':true}";
 	public static final String	SCREENING_SURVEY__BY_INTERVENTION_AND_GLOBAL_UNIQUE_ID																																							= "{'intervention':#,'globalUniqueId':#}";
 
-	public static final String	AUTHOR__BY_USERNAME																																																= "{'username':#}";
-	public static final String	AUTHOR__ADMIN_TRUE																																																= "{'admin':true}";
+	public static final String	BACKEND_USER__BY_USERNAME																																														= "{'username':#}";
+	public static final String	BACKEND_USER__BY_TYPE																																															= "{'type':#}";
 
-	public static final String	AUTHOR_INTERVENTION_ACCESS__BY_AUTHOR																																											= "{'author':#}";
-	public static final String	AUTHOR_INTERVENTION_ACCESS__BY_INTERVENTION																																										= "{'intervention':#}";
-	public static final String	AUTHOR_INTERVENTION_ACCESS__BY_AUTHOR_AND_INTERVENTION																																							= "{'author':#,'intervention':#}";
+	public static final String	BACKEND_USER_INTERVENTION_ACCESS__BY_BACKEND_USER																																								= "{'backendUser':#}";
+	public static final String	BACKEND_USER_INTERVENTION_ACCESS__BY_INTERVENTION																																								= "{'intervention':#}";
+	public static final String	BACKEND_USER_INTERVENTION_ACCESS__BY_BACKEND_USER_AND_INTERVENTION																																				= "{'backendUser':#,'intervention':#}";
 
 	public static final String	INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION																																								= "{'intervention':#}";
 	public static final String	INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME																																						= "{'intervention':#,'name':#}";
@@ -268,4 +268,6 @@ public class Queries {
 	public static final String	UPDATE_VERSION_37__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'mediaObjectType':null}}";
 	public static final String	UPDATE_VERSION_38__PARTICIPANT__CHANGE_1																																										= "{$set:{'lastLoginTimestamp':#}}";
 	public static final String	UPDATE_VERSION_38__PARTICIPANT__CHANGE_2																																										= "{$set:{'lastLogoutTimestamp':#}}";
+	public static final String	UPDATE_VERSION_40__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'mediaObjectName':null}}";
+	public static final String	UPDATE_VERSION_40__AUTHOR_INTERVENTION_ACCESS__CHANGE_1																																							= "{'author':#}";
 }
