@@ -1,5 +1,6 @@
 package ch.ethz.mc.model.memory;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 
 import lombok.Getter;
@@ -40,14 +41,16 @@ public class SystemLoad {
 	}
 
 	@Synchronized
-	public int getLoggedInUsers() {
-		int count = 0;
+	public ArrayList<String> getLoggedInUsers() {
+		val countInfos = new ArrayList<String>();
+		val iterator = loggedInUsers.keySet().iterator();
 
-		for (val key : loggedInUsers.keySet()) {
-			count += loggedInUsers.get(key);
+		while (iterator.hasNext()) {
+			val key = iterator.next();
+			countInfos.add(key + ": " + loggedInUsers.get(key));
 		}
 
-		return count;
+		return countInfos;
 	}
 
 	@Synchronized
@@ -87,9 +90,10 @@ public class SystemLoad {
 		synchronized (log) {
 			log.info(
 					"--------------------------------------------------------------------------------");
-			log.info(
-					"Logged in users:                                              {}",
-					getLoggedInUsers());
+			log.info("Logged in users:");
+			for (val countInfo : getLoggedInUsers()) {
+				log.info(" * {}", countInfo);
+			}
 			log.info(
 					"Messaging performed for participants:                         {}",
 					getMessagingPerformedForParticipants());

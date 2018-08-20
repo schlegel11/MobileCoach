@@ -75,7 +75,7 @@ public class Constants {
 	 * 
 	 * CAUTION: Can NOT be defined in configuration file
 	 */
-	public static final int		DATA_MODEL_VERSION					= 39;
+	public static final int		DATA_MODEL_VERSION					= 40;
 	/**
 	 * Data model configuration collection
 	 * 
@@ -257,6 +257,8 @@ public class Constants {
 	private static String		deepstreamParticipantRole				= "participant";
 	@Getter
 	private static String		deepstreamSupervisorRole				= "supervisor";
+	@Getter
+	private static String		deepstreamObserverRole					= "observer";
 	@Getter
 	private static int			deepstreamMinClientVersion				= 1;
 	@Getter

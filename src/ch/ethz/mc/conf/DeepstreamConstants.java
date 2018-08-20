@@ -92,6 +92,7 @@ public class DeepstreamConstants {
 	public static final String	MESSAGE_TIMESTAMP					= "message-timestamp";
 	public static final String	SERVER_MESSAGE						= "server-message";
 	public static final String	CONTAINS_MEDIA						= "contains-media";
+	public static final String	MEDIA_NAME							= "media-name";
 	public static final String	MEDIA_TYPE							= "media-type";
 	public static final String	ANSWER_FORMAT						= "answer-format";
 

@@ -21,6 +21,8 @@ package ch.ethz.mc.rest.services.v02;
  * the License.
  */
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Hashtable;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -39,11 +41,15 @@ import lombok.extern.log4j.Log4j2;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.model.persistent.BackendUserInterventionAccess;
+import ch.ethz.mc.model.rest.ClusterValue;
 import ch.ethz.mc.model.rest.CollectionOfExtendedListVariables;
 import ch.ethz.mc.model.rest.CollectionOfExtendedVariables;
 import ch.ethz.mc.model.rest.OK;
 import ch.ethz.mc.model.rest.VariableAverageWithParticipant;
+import ch.ethz.mc.model.rest.VariableCluster;
 import ch.ethz.mc.model.rest.Variable;
+import ch.ethz.mc.model.rest.VariableAverage;
 import ch.ethz.mc.model.rest.CollectionOfVariables;
 import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mc.tools.StringValidator;
@@ -298,6 +304,183 @@ public class VariableAccessServiceV02 extends AbstractServiceV02 {
 	}
 
 	@GET
+	@Path("/externallyReadGroupArray/{group}/{variable}")
+	@Produces("application/json")
+	public CollectionOfExtendedVariables variableReadExternalGroupArray(
+			@HeaderParam("user") final String user,
+			@HeaderParam("password") final String password,
+			@HeaderParam("interventionPattern") final String interventionPattern,
+			@PathParam("group") final String group,
+			@PathParam("variable") final String variable) {
+		log.debug(
+				"Externally read variable array {} of participants from group {}",
+				variable, group);
+		BackendUserInterventionAccess backendUserInterventionAccess;
+		try {
+			backendUserInterventionAccess = checkExternalBackendUserInterventionAccess(
+					user, password, group, interventionPattern);
+		} catch (final Exception e) {
+			throw e;
+		}
+
+		try {
+			if (!StringValidator
+					.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
+							+ variable.trim())) {
+				throw new Exception("The variable name is not valid");
+			}
+
+			val collectionOfExtendedVariables = restManagerService
+					.readVariableArrayForExternalOfGroupOrIntervention(
+							backendUserInterventionAccess.getIntervention(),
+							variable.trim(), group, null, null, false);
+
+			return collectionOfExtendedVariables;
+		} catch (final Exception e) {
+			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
+					.entity("Could not retrieve variable: " + e.getMessage())
+					.build());
+		}
+	}
+
+	@GET
+	@Path("/externallyReadGroupCluster/{group}/{variable}")
+	@Produces("application/json")
+	public VariableCluster variableReadExternalGroupCluster(
+			@HeaderParam("user") final String user,
+			@HeaderParam("password") final String password,
+			@HeaderParam("interventionPattern") final String interventionPattern,
+			@PathParam("group") final String group,
+			@PathParam("variable") final String variable) {
+		log.debug(
+				"Externally read variable cluster of variable {} of group {} of intervention",
+				variable, group);
+		BackendUserInterventionAccess backendUserInterventionAccess;
+		try {
+			backendUserInterventionAccess = checkExternalBackendUserInterventionAccess(
+					user, password, group, interventionPattern);
+		} catch (final Exception e) {
+			throw e;
+		}
+
+		try {
+			if (!StringValidator
+					.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
+							+ variable.trim())) {
+				throw new Exception("The variable name is not valid");
+			}
+
+			val collectionOfExtendedVariables = restManagerService
+					.readVariableArrayForExternalOfGroupOrIntervention(
+							backendUserInterventionAccess.getIntervention(),
+							variable, group, null, null, false);
+
+			val clusterHashtable = new Hashtable<String, Integer>();
+
+			for (val resultVariable : collectionOfExtendedVariables
+					.getVariables()) {
+				val value = resultVariable.getValue();
+				if (clusterHashtable.containsKey(value)) {
+					clusterHashtable.put(value,
+							clusterHashtable.get(value) + 1);
+				} else {
+					clusterHashtable.put(value, 1);
+				}
+			}
+
+			val variableCluster = new VariableCluster();
+			variableCluster.setVariable(variable);
+			val clusterValues = variableCluster.getClusteredValues();
+
+			for (val key : clusterHashtable.keySet()) {
+				val clusterValue = new ClusterValue(key,
+						clusterHashtable.get(key));
+				clusterValues.add(clusterValue);
+			}
+
+			Collections.sort(clusterValues,
+					(a, b) -> a.getValue().compareToIgnoreCase(b.getValue()));
+
+			return variableCluster;
+		} catch (final Exception e) {
+			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
+					.entity("Could not read cluster of variable: "
+							+ e.getMessage())
+					.build());
+		}
+	}
+
+	@GET
+	@Path("/externallyReadFilteredGroupCluster/{group}/{variable}/{filterVariable}/{filterValue}")
+	@Produces("application/json")
+	public VariableCluster variableReadExternalFilteredGroupCluster(
+			@HeaderParam("user") final String user,
+			@HeaderParam("password") final String password,
+			@HeaderParam("interventionPattern") final String interventionPattern,
+			@PathParam("group") final String group,
+			@PathParam("variable") final String variable,
+			@PathParam("filterVariable") final String filterVariable,
+			@PathParam("filterValue") final String filterValue) {
+		log.debug(
+				"Externally read variable cluster of variable {} of group {} of intervention filtered by {}={}",
+				variable, group, filterVariable, filterValue);
+		BackendUserInterventionAccess backendUserInterventionAccess;
+		try {
+			backendUserInterventionAccess = checkExternalBackendUserInterventionAccess(
+					user, password, group, interventionPattern);
+		} catch (final Exception e) {
+			throw e;
+		}
+
+		try {
+			if (!StringValidator
+					.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
+							+ variable.trim())) {
+				throw new Exception("The variable name is not valid");
+			}
+
+			val collectionOfExtendedVariables = restManagerService
+					.readVariableArrayForExternalOfGroupOrIntervention(
+							backendUserInterventionAccess.getIntervention(),
+							variable, group, filterVariable, filterValue,
+							false);
+
+			val clusterHashtable = new Hashtable<String, Integer>();
+
+			for (val resultVariable : collectionOfExtendedVariables
+					.getVariables()) {
+				val value = resultVariable.getValue();
+				if (clusterHashtable.containsKey(value)) {
+					clusterHashtable.put(value,
+							clusterHashtable.get(value) + 1);
+				} else {
+					clusterHashtable.put(value, 1);
+				}
+			}
+
+			val variableCluster = new VariableCluster();
+			variableCluster.setVariable(variable);
+			val clusterValues = variableCluster.getClusteredValues();
+
+			for (val key : clusterHashtable.keySet()) {
+				val clusterValue = new ClusterValue(key,
+						clusterHashtable.get(key));
+				clusterValues.add(clusterValue);
+			}
+
+			Collections.sort(clusterValues,
+					(a, b) -> a.getValue().compareToIgnoreCase(b.getValue()));
+
+			return variableCluster;
+		} catch (final Exception e) {
+			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
+					.entity("Could not read cluster of variable: "
+							+ e.getMessage())
+					.build());
+		}
+	}
+
+	@GET
 	@Path("/calculateGroupAverage/{variable}")
 	@Produces("application/json")
 	public VariableAverageWithParticipant variableCalculateGroupAverage(
@@ -325,6 +508,47 @@ public class VariableAccessServiceV02 extends AbstractServiceV02 {
 			val variableAverage = restManagerService
 					.calculateAverageOfVariableArrayOfGroupOrIntervention(
 							participantId, variable.trim(), true, false);
+
+			return variableAverage;
+		} catch (final Exception e) {
+			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
+					.entity("Could not calculate average of variable: "
+							+ e.getMessage())
+					.build());
+		}
+	}
+
+	@GET
+	@Path("/externallyCalculateGroupAverage/{group}/{variable}")
+	@Produces("application/json")
+	public VariableAverage variableCalculateExternalGroupAverage(
+			@HeaderParam("user") final String user,
+			@HeaderParam("password") final String password,
+			@HeaderParam("interventionPattern") final String interventionPattern,
+			@PathParam("group") final String group,
+			@PathParam("variable") final String variable) {
+		log.debug(
+				"Externally calculate variable average of variable {} of group {} of intervention",
+				variable, group);
+		BackendUserInterventionAccess backendUserInterventionAccess;
+		try {
+			backendUserInterventionAccess = checkExternalBackendUserInterventionAccess(
+					user, password, group, interventionPattern);
+		} catch (final Exception e) {
+			throw e;
+		}
+
+		try {
+			if (!StringValidator
+					.isValidVariableName(ImplementationConstants.VARIABLE_PREFIX
+							+ variable.trim())) {
+				throw new Exception("The variable name is not valid");
+			}
+
+			val variableAverage = restManagerService
+					.calculateAverageOfVariableArrayForExternalOfGroupOrIntervention(
+							backendUserInterventionAccess.getIntervention(),
+							variable.trim(), group, false);
 
 			return variableAverage;
 		} catch (final Exception e) {

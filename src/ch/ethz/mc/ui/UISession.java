@@ -41,30 +41,30 @@ import com.vaadin.server.WrappedSession;
  */
 @Log4j2
 public class UISession implements Serializable {
-	private static final long	serialVersionUID		= 1L;
+	private static final long	serialVersionUID			= 1L;
 
-	private boolean				isLoggedIn				= false;
-
-	@Getter
-	@Setter
-	private boolean				isAdmin					= false;
+	private boolean				isLoggedIn					= false;
 
 	@Getter
 	@Setter
-	private ObjectId			currentAuthorId			= null;
+	private boolean				isAdmin						= false;
 
 	@Getter
 	@Setter
-	private String				currentAuthorUsername	= null;
+	private ObjectId			currentBackendUserId		= null;
 
 	@Getter
 	@Setter
-	private String				baseURL					= null;
+	private String				currentBackendUserUsername	= null;
 
 	@Getter
-	private String				sessionId				= null;
+	@Setter
+	private String				baseURL						= null;
 
-	private WrappedSession		session					= null;
+	@Getter
+	private String				sessionId					= null;
+
+	private WrappedSession		session						= null;
 
 	public UISession(final WrappedSession session) {
 		sessionId = session.getId();
@@ -75,14 +75,14 @@ public class UISession implements Serializable {
 				false);
 	}
 
-	public ObjectId getCurrentAuthorParticipantId() {
+	public ObjectId getCurrentBackendUserParticipantId() {
 		if (session.getAttribute(
 				ImplementationConstants.PARTICIPANT_SESSION_ATTRIBUTE) != null) {
 			try {
-				val authorParticipant = (ObjectId) session.getAttribute(
+				val participant = (ObjectId) session.getAttribute(
 						ImplementationConstants.PARTICIPANT_SESSION_ATTRIBUTE);
 
-				return authorParticipant;
+				return participant;
 			} catch (final Exception e) {
 				log.warn(
 						"Error when getting author participant id from session: {}",
@@ -106,7 +106,7 @@ public class UISession implements Serializable {
 					true);
 			session.setAttribute(
 					ImplementationConstants.PARTICIPANT_SESSION_ATTRIBUTE_DESCRIPTION,
-					currentAuthorUsername);
+					currentBackendUserUsername);
 		} else {
 			session.setAttribute(
 					ImplementationConstants.PARTICIPANT_SESSION_ATTRIBUTE_EXPECTED,

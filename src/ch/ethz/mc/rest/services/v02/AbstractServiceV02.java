@@ -29,6 +29,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.conf.Constants;
+import ch.ethz.mc.model.persistent.BackendUser;
+import ch.ethz.mc.model.persistent.BackendUserInterventionAccess;
 import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mc.services.types.GeneralSessionAttributeTypes;
 import ch.ethz.mc.services.types.GeneralSessionAttributeValidatorTypes;
@@ -49,41 +51,6 @@ public abstract class AbstractServiceV02 {
 
 	public AbstractServiceV02(final RESTManagerService restManagerService) {
 		this.restManagerService = restManagerService;
-	}
-
-	/**
-	 * Checks if the given token is valid for a specific external participant
-	 * and returns appropriate participant id afterwards
-	 *
-	 * @param externalParticipant
-	 * @param token
-	 * @return
-	 */
-	protected ObjectId checkExternalParticipantAccessAndReturnParticipantId(
-			final String externalParticipantId, final String token) {
-		log.debug("Checking if token {} fits to external participant {}", token,
-				externalParticipantId);
-		if (StringUtils.isBlank(externalParticipantId)
-				|| StringUtils.isBlank(token)) {
-			log.debug(
-					"REST access denied: Given external participant id or token is null");
-			throw new WebApplicationException(Response.notAcceptable(null)
-					.entity("External participant id or access token missing")
-					.build());
-		}
-
-		val participantId = restManagerService
-				.checkExternalParticipantAccessAndReturnParticipantId(
-						externalParticipantId, token);
-		if (participantId == null) {
-			log.debug(
-					"REST access denied: External participant or token not matching or unknown");
-			throw new WebApplicationException(
-					Response.status(Status.UNAUTHORIZED)
-							.entity("Wrong access token").build());
-		} else {
-			return participantId;
-		}
 	}
 
 	/**
@@ -147,6 +114,68 @@ public abstract class AbstractServiceV02 {
 					.entity("The current session is not bound to an intervention")
 					.build());
 		}
+	}
+
+	/**
+	 * Checks if the given token is valid for a specific external participant
+	 * and returns appropriate participant id afterwards
+	 *
+	 * @param externalParticipant
+	 * @param token
+	 * @return
+	 */
+	protected ObjectId checkExternalParticipantAccessAndReturnParticipantId(
+			final String externalParticipantId, final String token) {
+		log.debug("Checking if token {} fits to external participant {}", token,
+				externalParticipantId);
+		if (StringUtils.isBlank(externalParticipantId)
+				|| StringUtils.isBlank(token)) {
+			log.debug(
+					"REST access denied: Given external participant id or token is null");
+			throw new WebApplicationException(Response.notAcceptable(null)
+					.entity("External participant id or access token missing")
+					.build());
+		}
+
+		val participantId = restManagerService
+				.checkExternalParticipantAccessAndReturnParticipantId(
+						externalParticipantId, token);
+		if (participantId == null) {
+			log.debug(
+					"REST access denied: External participant or token not matching or unknown");
+			throw new WebApplicationException(
+					Response.status(Status.UNAUTHORIZED)
+							.entity("Wrong access token").build());
+		} else {
+			return participantId;
+		}
+	}
+
+	/**
+	 * Checks the access rights of the given {@link BackendUser} for the given
+	 * group and intervention and returns {@link BackendUserInterventionAccess},
+	 * otherwise null
+	 * 
+	 * @param username
+	 * @param password
+	 * @param group
+	 * @param interventionPattern
+	 * @return
+	 */
+	protected BackendUserInterventionAccess checkExternalBackendUserInterventionAccess(
+			final String username, final String password, final String group,
+			final String interventionPattern) {
+		val backendUserInterventionAccess = restManagerService
+				.checkExternalBackendUserInterventionAccess(username, password,
+						group, interventionPattern);
+
+		if (backendUserInterventionAccess == null) {
+			throw new WebApplicationException(
+					Response.status(Status.UNAUTHORIZED)
+							.entity("Unauthorized access").build());
+		}
+
+		return backendUserInterventionAccess;
 	}
 
 	/**

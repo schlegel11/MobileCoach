@@ -87,14 +87,14 @@ public class AllInterventionsTabComponentWithController
 		allInterventionsTable.setImmediate(true);
 
 		// table content
-		val allRelevantIntervention = getUISession().isAdmin()
+		val allRelevantInterventions = getUISession().isAdmin()
 				? getInterventionAdministrationManagerService()
 						.getAllInterventions()
 				: getInterventionAdministrationManagerService()
-						.getAllInterventionsForAuthor(
-								getUISession().getCurrentAuthorId());
+						.getAllInterventionsForBackendUser(
+								getUISession().getCurrentBackendUserId());
 		interventionsBeanContainer = createBeanContainerForModelObjects(
-				UIIntervention.class, allRelevantIntervention);
+				UIIntervention.class, allRelevantInterventions);
 
 		allInterventionsTable
 				.setContainerDataSource(interventionsBeanContainer);

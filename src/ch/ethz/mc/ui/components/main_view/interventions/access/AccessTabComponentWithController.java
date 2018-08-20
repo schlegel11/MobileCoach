@@ -30,11 +30,16 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Table;
 
+import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
-import ch.ethz.mc.model.persistent.Author;
+import ch.ethz.mc.model.persistent.BackendUser;
+import ch.ethz.mc.model.persistent.BackendUserInterventionAccess;
 import ch.ethz.mc.model.persistent.Intervention;
-import ch.ethz.mc.model.ui.UIAuthor;
+import ch.ethz.mc.model.ui.UIBackendUser;
+import ch.ethz.mc.model.ui.UIBackendUserInterventionAccess;
+import ch.ethz.mc.ui.components.basics.ShortStringEditComponent;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
@@ -47,13 +52,15 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class AccessTabComponentWithController extends AccessTabComponent {
 
-	private final Intervention						intervention;
+	private final Intervention												intervention;
 
-	private UIAuthor								selectedUIAuthorInTable		= null;
-	private UIAuthor								selectedUIAuthorInComboBox	= null;
+	private UIBackendUserInterventionAccess									selectedUIBackendUserInterventionAccessInTable	= null;
+	private UIBackendUser													selectedUIBackendUserInComboBox					= null;
 
-	private final BeanContainer<ObjectId, UIAuthor>	tableBeanContainer;
-	private final BeanContainer<UIAuthor, UIAuthor>	comboBoxBeanContainer;
+	private Table															backendUserInterventionAccessTable				= null;
+
+	private final BeanContainer<ObjectId, UIBackendUserInterventionAccess>	tableBeanContainer;
+	private final BeanContainer<UIBackendUser, UIBackendUser>				comboBoxBeanContainer;
 
 	public AccessTabComponentWithController(final Intervention intervention) {
 		super();
@@ -62,73 +69,90 @@ public class AccessTabComponentWithController extends AccessTabComponent {
 
 		// table options
 		val accessControlEditComponent = getAccessEditComponent();
-		val accountsTable = accessControlEditComponent.getAccountsTable();
+		backendUserInterventionAccessTable = accessControlEditComponent
+				.getAccountsTable();
 
 		// table content
-		val allAuthors = getInterventionAdministrationManagerService()
-				.getAllAuthors();
-		val authorsOfIntervention = getInterventionAdministrationManagerService()
-				.getAllAuthorsOfIntervention(intervention.getId());
+		val allBackendUsers = getInterventionAdministrationManagerService()
+				.getAllBackendUsers();
+		val backendUsersInterventionAccessesOfIntervention = getInterventionAdministrationManagerService()
+				.getAllBackendUserInterventionAcceessesOfIntervention(
+						intervention.getId());
 
-		tableBeanContainer = createBeanContainerForModelObjects(UIAuthor.class,
-				authorsOfIntervention);
+		tableBeanContainer = createBeanContainerForModelObjects(
+				UIBackendUserInterventionAccess.class,
+				backendUsersInterventionAccessesOfIntervention);
 
-		accountsTable.setContainerDataSource(tableBeanContainer);
-		accountsTable.setSortContainerPropertyId(UIAuthor.getSortColumn());
-		accountsTable.setVisibleColumns(UIAuthor.getVisibleColumns());
-		accountsTable.setColumnHeaders(UIAuthor.getColumnHeaders());
+		backendUserInterventionAccessTable
+				.setContainerDataSource(tableBeanContainer);
+		backendUserInterventionAccessTable.setSortContainerPropertyId(
+				UIBackendUserInterventionAccess.getSortColumn());
+		backendUserInterventionAccessTable.setVisibleColumns(
+				UIBackendUserInterventionAccess.getVisibleColumns());
+		backendUserInterventionAccessTable.setColumnHeaders(
+				UIBackendUserInterventionAccess.getColumnHeaders());
 
 		// handle table selection change
-		accountsTable.addValueChangeListener(new ValueChangeListener() {
-
-			@Override
-			public void valueChange(final ValueChangeEvent event) {
-				val objectId = accountsTable.getValue();
-				if (objectId == null) {
-					accessControlEditComponent.setNothingSelectedInTable();
-					selectedUIAuthorInTable = null;
-				} else {
-					selectedUIAuthorInTable = getUIModelObjectFromTableByObjectId(
-							accountsTable, UIAuthor.class, objectId);
-					accessControlEditComponent.setSomethingSelectedInTable();
-				}
-			}
-		});
-
-		// combo box content
-		val accountsSelectComboList = accessControlEditComponent
-				.getAccountsSelectComboBox();
-		final List<Author> authorsNotOfIntervention = new ArrayList<Author>();
-		allAuthorsLoop: for (val author : allAuthors) {
-			for (val authorOfIntervention : authorsOfIntervention) {
-				if (author.getId().equals(authorOfIntervention.getId())) {
-					continue allAuthorsLoop;
-				}
-			}
-			authorsNotOfIntervention.add(author);
-		}
-		comboBoxBeanContainer = createSimpleBeanContainerForModelObjects(
-				UIAuthor.class, authorsNotOfIntervention);
-		comboBoxBeanContainer.sort(new String[] { UIAuthor.getSortColumn() },
-				new boolean[] { true });
-
-		accountsSelectComboList.setContainerDataSource(comboBoxBeanContainer);
-
-		// handle combo box selection change
-		accountsSelectComboList
+		backendUserInterventionAccessTable
 				.addValueChangeListener(new ValueChangeListener() {
 
 					@Override
 					public void valueChange(final ValueChangeEvent event) {
-						val uiModelObjectWrapper = accountsSelectComboList
+						val objectId = backendUserInterventionAccessTable
+								.getValue();
+						if (objectId == null) {
+							accessControlEditComponent
+									.setNothingSelectedInTable();
+							selectedUIBackendUserInterventionAccessInTable = null;
+						} else {
+							selectedUIBackendUserInterventionAccessInTable = getUIModelObjectFromTableByObjectId(
+									backendUserInterventionAccessTable,
+									UIBackendUserInterventionAccess.class,
+									objectId);
+							accessControlEditComponent
+									.setSomethingSelectedInTable();
+						}
+					}
+				});
+
+		// combo box content
+		val backendUserSelectsComboBox = accessControlEditComponent
+				.getAccountsSelectComboBox();
+		final List<BackendUser> backendUsersNotOfIntervention = new ArrayList<BackendUser>();
+		allBackendUsersLoop: for (val backendUser : allBackendUsers) {
+			for (val backendUsersInterventionAccess : backendUsersInterventionAccessesOfIntervention) {
+				if (backendUser.getId().equals(
+						backendUsersInterventionAccess.getBackendUser())) {
+					continue allBackendUsersLoop;
+				}
+			}
+			backendUsersNotOfIntervention.add(backendUser);
+		}
+		comboBoxBeanContainer = createSimpleBeanContainerForModelObjects(
+				UIBackendUser.class, backendUsersNotOfIntervention);
+		comboBoxBeanContainer.sort(
+				new String[] { UIBackendUser.getSortColumn() },
+				new boolean[] { true });
+
+		backendUserSelectsComboBox
+				.setContainerDataSource(comboBoxBeanContainer);
+
+		// handle combo box selection change
+		backendUserSelectsComboBox
+				.addValueChangeListener(new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						val uiModelObjectWrapper = backendUserSelectsComboBox
 								.getValue();
 						if (uiModelObjectWrapper == null) {
 							accessControlEditComponent
 									.setNothingSelectedInComboBox();
-							selectedUIAuthorInComboBox = null;
+							selectedUIBackendUserInComboBox = null;
 						} else {
-							selectedUIAuthorInComboBox = UIAuthor.class
-									.cast(accountsSelectComboList.getValue());
+							selectedUIBackendUserInComboBox = UIBackendUser.class
+									.cast(backendUserSelectsComboBox
+											.getValue());
 							accessControlEditComponent
 									.setSomethingSelectedInComboBox();
 						}
@@ -138,6 +162,8 @@ public class AccessTabComponentWithController extends AccessTabComponent {
 		// handle buttons
 		val buttonClickListener = new ButtonClickListener();
 		accessControlEditComponent.getAddButton()
+				.addClickListener(buttonClickListener);
+		accessControlEditComponent.getEditGroupPatternButton()
 				.addClickListener(buttonClickListener);
 		accessControlEditComponent.getRemoveButton()
 				.addClickListener(buttonClickListener);
@@ -153,6 +179,9 @@ public class AccessTabComponentWithController extends AccessTabComponent {
 					.getAddButton()) {
 				addAccountToIntervention();
 			} else if (event.getButton() == accessControlEditComponent
+					.getEditGroupPatternButton()) {
+				editGroupPattern();
+			} else if (event.getButton() == accessControlEditComponent
 					.getRemoveButton()) {
 				removeAccountFromIntervention();
 			}
@@ -160,12 +189,15 @@ public class AccessTabComponentWithController extends AccessTabComponent {
 	}
 
 	public void addAccountToIntervention() {
-		log.debug("Add account");
+		log.debug("Add backend user intervention access");
+		final BackendUserInterventionAccess backendUserInterventionAccess;
 		try {
-			// Add author to intervention
-			getInterventionAdministrationManagerService()
-					.authorInterventionAccessCreate(selectedUIAuthorInComboBox
-							.getRelatedModelObject(Author.class).getId(),
+			// Add backend user to intervention
+			backendUserInterventionAccess = getInterventionAdministrationManagerService()
+					.backendUserInterventionAccessCreate(
+							selectedUIBackendUserInComboBox
+									.getRelatedModelObject(BackendUser.class)
+									.getId(),
 							intervention.getId());
 		} catch (final Exception e) {
 			handleException(e);
@@ -173,44 +205,90 @@ public class AccessTabComponentWithController extends AccessTabComponent {
 		}
 
 		// Adapt UI
-		tableBeanContainer
-				.addItem(
-						selectedUIAuthorInComboBox
-								.getRelatedModelObject(Author.class).getId(),
-						selectedUIAuthorInComboBox);
-		getAccessEditComponent().getAccountsTable()
-				.select(selectedUIAuthorInComboBox
-						.getRelatedModelObject(Author.class).getId());
+		tableBeanContainer.addItem(backendUserInterventionAccess.getId(),
+				(UIBackendUserInterventionAccess) backendUserInterventionAccess
+						.toUIModelObject());
+		backendUserInterventionAccessTable
+				.select(selectedUIBackendUserInComboBox
+						.getRelatedModelObject(BackendUser.class).getId());
+		backendUserInterventionAccessTable.sort();
+
 		getAccessEditComponent().getAccountsSelectComboBox()
-				.removeItem(selectedUIAuthorInComboBox);
+				.removeItem(selectedUIBackendUserInComboBox);
 
 		getAdminUI().showInformationNotification(
 				AdminMessageStrings.NOTIFICATION__ACCOUNT_ADDED_TO_INTERVENTION);
 	}
 
-	public void removeAccountFromIntervention() {
-		log.debug("Remove account");
-		try {
-			val selectedAuthor = selectedUIAuthorInTable
-					.getRelatedModelObject(Author.class);
+	public void editGroupPattern() {
+		log.debug("Edit group pattern");
+		val selectedUIBackendUserInterventionAccess = selectedUIBackendUserInterventionAccessInTable
+				.getRelatedModelObject(BackendUserInterventionAccess.class);
 
-			// Remove author from intervention
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_GROUP_PATTERN,
+				selectedUIBackendUserInterventionAccess.getGroupPattern(), null,
+				new ShortStringEditComponent(),
+				new ExtendableButtonClickListener() {
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						// Change value
+						MC.getInstance()
+								.getInterventionAdministrationManagerService()
+								.backendUserInterventionAccessSetGroupPattern(
+										selectedUIBackendUserInterventionAccess,
+										getStringValue());
+
+						getAdminUI().showInformationNotification(
+								AdminMessageStrings.NOTIFICATION__GROUP_PATTERN_CHANGED);
+						closeWindow();
+
+						// Adapt UI
+						tableBeanContainer.removeItem(
+								selectedUIBackendUserInterventionAccess
+										.getId());
+						tableBeanContainer.addItem(
+								selectedUIBackendUserInterventionAccess.getId(),
+								(UIBackendUserInterventionAccess) selectedUIBackendUserInterventionAccess
+										.toUIModelObject());
+
+						backendUserInterventionAccessTable.sort();
+					}
+				}, null);
+	}
+
+	public void removeAccountFromIntervention() {
+		log.debug("Remove backend user intervention access");
+		val selectedBackendUserInterventionAccess = selectedUIBackendUserInterventionAccessInTable
+				.getRelatedModelObject(BackendUserInterventionAccess.class);
+
+		try {
+			// Remove backend user from intervention
 			getInterventionAdministrationManagerService()
-					.authorInterventionAccessDelete(selectedAuthor.getId(),
-							intervention.getId());
+					.backendUserInterventionAccessDelete(
+							selectedBackendUserInterventionAccess);
 		} catch (final Exception e) {
 			handleException(e);
 			return;
 		}
 
 		// Adapt UI
-		comboBoxBeanContainer.addItem(selectedUIAuthorInTable,
-				selectedUIAuthorInTable);
-		comboBoxBeanContainer.sort(new String[] { UIAuthor.getSortColumn() },
+		val uiBackendUser = (UIBackendUser) getInterventionAdministrationManagerService()
+				.getBackendUser(
+						selectedBackendUserInterventionAccess.getBackendUser())
+				.toUIModelObject();
+
+		comboBoxBeanContainer.addItem(uiBackendUser, uiBackendUser);
+		comboBoxBeanContainer.sort(
+				new String[] { UIBackendUser.getSortColumn() },
 				new boolean[] { true });
-		getAccessEditComponent().getAccountsTable()
-				.removeItem(selectedUIAuthorInTable
-						.getRelatedModelObject(Author.class).getId());
+
+		backendUserInterventionAccessTable
+				.removeItem(
+						selectedUIBackendUserInterventionAccessInTable
+								.getRelatedModelObject(
+										BackendUserInterventionAccess.class)
+								.getId());
 
 		getAdminUI().showInformationNotification(
 				AdminMessageStrings.NOTIFICATION__ACCOUNT_REMOVED_FROM_INTERVENTION);

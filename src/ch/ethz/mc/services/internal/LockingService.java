@@ -23,6 +23,9 @@ package ch.ethz.mc.services.internal;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
+import org.bson.types.ObjectId;
+
+import ch.ethz.mc.ui.UISession;
 import lombok.Synchronized;
 import lombok.val;
 /*
@@ -46,10 +49,6 @@ import lombok.val;
  * the License.
  */
 import lombok.extern.log4j.Log4j2;
-
-import org.bson.types.ObjectId;
-
-import ch.ethz.mc.ui.UISession;
 
 /**
  * @author Andreas Filler
@@ -99,14 +98,14 @@ public class LockingService {
 					&& objectId.equals(objectIdToCompare)) {
 				log.debug(
 						"Can't lock intervention {} because it's already locked by {}",
-						objectId, uiSession.getCurrentAuthorId());
+						objectId, uiSession.getCurrentBackendUserId());
 				return false;
 			}
 		}
 
 		lockedInterventionsByUISession.put(uiSession, objectId);
 		log.debug("Locked {} for UI session of {} (currently {} locks)",
-				objectId, uiSession.getCurrentAuthorId(),
+				objectId, uiSession.getCurrentBackendUserId(),
 				lockedInterventionsByUISession.size());
 		return true;
 	}

@@ -27,7 +27,7 @@ import org.bson.types.ObjectId;
 
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
-import ch.ethz.mc.model.persistent.Author;
+import ch.ethz.mc.model.persistent.BackendUser;
 import ch.ethz.mc.ui.components.basics.PasswordEditComponent;
 
 import com.vaadin.ui.Button;
@@ -42,13 +42,13 @@ import com.vaadin.ui.Button.ClickEvent;
 @Log4j2
 public class AccountTabComponentWithController extends AccountTabComponent {
 
-	private final Author currentAccountAuthor;
+	private final BackendUser currentAccountAuthor;
 
 	public AccountTabComponentWithController(final ObjectId accountObjectId) {
 		super();
 
 		currentAccountAuthor = getInterventionAdministrationManagerService()
-				.getAuthor(accountObjectId);
+				.getBackendUser(accountObjectId);
 
 		// Localize
 		getAccountEditComponent().adjust(currentAccountAuthor.getUsername(),
@@ -86,7 +86,8 @@ public class AccountTabComponentWithController extends AccountTabComponent {
 						try {
 							// Change password
 							getInterventionAdministrationManagerService()
-									.authorSetPassword(currentAccountAuthor,
+									.backendUserSetPassword(
+											currentAccountAuthor,
 											getStringValue());
 						} catch (final Exception e) {
 							handleException(e);

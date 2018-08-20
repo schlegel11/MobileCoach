@@ -191,7 +191,8 @@ public class CommunicationManagerService {
 							Constants.getDeepstreamServerRole(),
 							Constants.getDeepstreamServerPassword(),
 							Constants.getDeepstreamParticipantRole(),
-							Constants.getDeepstreamSupervisorRole());
+							Constants.getDeepstreamSupervisorRole(),
+							Constants.getDeepstreamObserverRole());
 		} else {
 			deepstreamCommunicationService = null;
 		}
