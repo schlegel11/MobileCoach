@@ -138,9 +138,6 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 			saveModelObject(backendUser);
 		}
 
-		// Clear cache to ensure stable state after DB update
-		clearCache();
-
 		log.info("Started.");
 	}
 

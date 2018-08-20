@@ -48,7 +48,6 @@ public class MonitoringSchedulingWorker extends Thread {
 
 	private final boolean								statisticsEnabled;
 	private String										lastStatisticsCreation				= "";
-	private String										lastCacheClearing					= "";
 	private long										lastScreeningSurveyFinishingCheck	= 0;
 
 	private static File									statisticsFile						= null;
@@ -97,16 +96,6 @@ public class MonitoringSchedulingWorker extends Thread {
 					"Executing new run of monitoring scheduling worker...started");
 
 			try {
-				// Check cache clearing
-				val dailyUniqueIndexForCache = StringHelpers
-						.createDailyUniqueIndex();
-				if (!lastCacheClearing.equals(dailyUniqueIndexForCache)) {
-					log.debug("Clear cache");
-					lastCacheClearing = dailyUniqueIndexForCache;
-
-					interventionExecutionManagerService.clearCache();
-				}
-
 				// Check statistics creation
 				if (statisticsEnabled) {
 					try {

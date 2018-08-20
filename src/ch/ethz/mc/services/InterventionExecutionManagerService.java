@@ -3315,12 +3315,4 @@ public class InterventionExecutionManagerService {
 
 		return relevantParticipants;
 	}
-
-	/**
-	 * Clear cache
-	 */
-	@Synchronized
-	public void clearCache() {
-		databaseManagerService.clearCache();
-	}
 }
