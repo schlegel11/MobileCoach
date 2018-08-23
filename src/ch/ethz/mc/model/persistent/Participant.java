@@ -316,6 +316,11 @@ public class Participant extends ModelObject {
 				getId());
 		ModelObject.delete(participantVariablesWithValuesToDelete);
 
+		// Delete dashboard messages
+		val dashboardMessagesToDelete = ModelObject.find(DashboardMessage.class,
+				Queries.DASHBOARD_MESSAGE__BY_PARTICIPANT, getId());
+		ModelObject.delete(dashboardMessagesToDelete);
+
 		// Delete dialog messages
 		val dialogMessagesToDelete = ModelObject.find(DialogMessage.class,
 				Queries.DIALOG_MESSAGE__BY_PARTICIPANT, getId());

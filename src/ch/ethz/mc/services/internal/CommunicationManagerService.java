@@ -188,11 +188,7 @@ public class CommunicationManagerService {
 		if (deepstreamActive) {
 			deepstreamCommunicationService = DeepstreamCommunicationService
 					.prepare(Constants.getDeepstreamHost(),
-							Constants.getDeepstreamServerRole(),
-							Constants.getDeepstreamServerPassword(),
-							Constants.getDeepstreamParticipantRole(),
-							Constants.getDeepstreamSupervisorRole(),
-							Constants.getDeepstreamObserverRole());
+							Constants.getDeepstreamServerPassword());
 		} else {
 			deepstreamCommunicationService = null;
 		}

@@ -52,6 +52,7 @@ import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.memory.DialogMessageWithSenderIdentification;
 import ch.ethz.mc.model.memory.ReceivedMessage;
+import ch.ethz.mc.model.persistent.DashboardMessage;
 import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.DialogStatus;
@@ -777,6 +778,40 @@ public class InterventionExecutionManagerService {
 		databaseManagerService.saveModelObject(dialogMessage);
 
 		return dialogMessage;
+	}
+
+	// Dashboard message
+	@Synchronized
+	public DashboardMessage dashboardMessageCreateUsingDialogOptionTypeAndData(
+			final DialogOptionTypes dialogOptionType, final String data,
+			final String clientMessageId, final String role,
+			final String message, final long timestamp) {
+		val dialogOption = databaseManagerService.findOneModelObject(
+				DialogOption.class, Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
+				dialogOptionType, data);
+
+		if (dialogOption == null) {
+			return null;
+		}
+
+		val participantId = dialogOption.getParticipant();
+
+		val dashboardMessage = new DashboardMessage(participantId,
+				clientMessageId, role, 0, message, timestamp);
+
+		val highestOrderMessage = databaseManagerService
+				.findOneSortedModelObject(DashboardMessage.class,
+						Queries.DASHBOARD_MESSAGE__BY_PARTICIPANT,
+						Queries.DASHBOARD_MESSAGE__SORT_BY_ORDER_DESC,
+						participantId);
+
+		if (highestOrderMessage != null) {
+			dashboardMessage.setOrder(highestOrderMessage.getOrder() + 1);
+		}
+
+		databaseManagerService.saveModelObject(dashboardMessage);
+
+		return dashboardMessage;
 	}
 
 	// Dialog status

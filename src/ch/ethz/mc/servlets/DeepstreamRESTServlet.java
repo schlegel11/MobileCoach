@@ -234,7 +234,7 @@ public class DeepstreamRESTServlet extends HttpServlet {
 			}
 		} catch (final Exception e) {
 			log.warn(
-					"Could not register or authorize server/participant/supervisor for deepstream access: ",
+					"Could not register or authorize for deepstream access: ",
 					e.getMessage());
 
 			response.sendError(HttpServletResponse.SC_FORBIDDEN);

@@ -11,7 +11,13 @@ record:
   "messages/$userId":
     create: "user.data.role === 'server'"
     write: "user.data.role === 'server'"
-    read: "user.data.role === 'server' || ((user.data.role === 'participant' || user.data.role === 'supervisor') && user.data.user === $userId)"
+    read: "user.data.role === 'server' || ((user.data.role === 'participant' || user.data.role === 'supervisor' || user.data.role === 'observer') && user.data.user === $userId)"
+    delete: "user.data.role === 'server'"
+    listen: "user.data.role === 'server'"
+  "dashboard/$userId":
+    create: "user.data.role === 'server'"
+    write: "user.data.role === 'server'"
+    read: "user.data.role === 'server' || ((user.data.role === 'participant' || user.data.role === 'team-manager') && user.data.user === $userId)"
     delete: "user.data.role === 'server'"
     listen: "user.data.role === 'server'"
 event:
@@ -21,15 +27,22 @@ event:
     listen: false
   "message-update/$userId":
     publish: "user.data.role === 'server'"
-    subscribe: "(user.data.role === 'participant' || user.data.role === 'supervisor') && user.data.user === $userId"
-    listen: "(user.data.role === 'participant' || user.data.role === 'supervisor') && user.data.user === $userId"
+    subscribe: "(user.data.role === 'participant' || user.data.role === 'supervisor' || user.data.role === 'observer') && user.data.user === $userId"
+    listen: "(user.data.role === 'participant' || user.data.role === 'supervisor' || user.data.role === 'observer') && user.data.user === $userId"
+  "dashboard-update/$userId":
+    publish: "user.data.role === 'server'"
+    subscribe: "(user.data.role === 'participant' || user.data.role === 'team-manager') && user.data.user === $userId"
+    listen: "(user.data.role === 'participant' || user.data.role === 'team-manager') && user.data.user === $userId"
 rpc:
   "*":
     provide: false
     request: false
   "message-diff":
     provide: "user.data.role === 'server'"
-    request: "(user.data.role === 'participant' || user.data.role === 'supervisor') && user.data.user === data.user"
+    request: "(user.data.role === 'participant' || user.data.role === 'supervisor' || user.data.role === 'observer') && user.data.user === data.user"
+  "dashboard-diff":
+    provide: "user.data.role === 'server'"
+    request: "(user.data.role === 'participant' || user.data.role === 'team-manager') && user.data.user === data.user"
   "user-message":
     provide: "user.data.role === 'server'"
     request: "user.data.role === 'participant' && user.data.user === data.user"
