@@ -46,6 +46,9 @@ rpc:
   "user-message":
     provide: "user.data.role === 'server'"
     request: "user.data.role === 'participant' && user.data.user === data.user"
+  "dashboard-message":
+    provide: "user.data.role === 'server'"
+    request: "(user.data.role === 'participant' || user.data.role === 'team-manager') && user.data.user === data.user"
   "user-intention":
     provide: "user.data.role === 'server'"
     request: "user.data.role === 'participant' && user.data.user === data.user"
