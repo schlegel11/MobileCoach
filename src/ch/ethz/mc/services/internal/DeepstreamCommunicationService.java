@@ -361,7 +361,15 @@ public class DeepstreamCommunicationService extends Thread
 				if (isCommand) {
 					messageObject.addProperty(
 							DeepstreamConstants.SERVER_MESSAGE,
-							dialogMessage.getMessageWithForcedLinks());
+							dialogMessage.getMessage()
+									.replaceAll(
+											"[ ]?" + ImplementationConstants.PLACEHOLDER_LINKED_MEDIA_OBJECT
+													+ "[ ]?",
+											"")
+									.replaceAll(
+											"[ ]?" + ImplementationConstants.PLACEHOLDER_LINKED_SURVEY
+													+ "[ ]?",
+											""));
 				} else {
 					messageObject.addProperty(
 							DeepstreamConstants.SERVER_MESSAGE,
