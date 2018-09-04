@@ -679,15 +679,23 @@ public class VariablesManagerService {
 				DialogOption.class,
 				Queries.DIALOG_OPTION__BY_PARTICIPANT_AND_TYPE, participantId,
 				dialogOptionType);
+		
+		if ("".equals(dialogOptionData)){
+		         
+			databaseManagerService.deleteModelObject(dialogOption);
+		           
+		} else {
 
-		if (dialogOption == null) {
-			dialogOption = new DialogOption(participantId, dialogOptionType,
-					dialogOptionData);
+			if (dialogOption == null) {
+				dialogOption = new DialogOption(participantId, dialogOptionType,
+						dialogOptionData);
+			}
+	
+			dialogOption.setData(dialogOptionData);
+	
+			databaseManagerService.saveModelObject(dialogOption);
+			
 		}
-
-		dialogOption.setData(dialogOptionData);
-
-		databaseManagerService.saveModelObject(dialogOption);
 	}
 
 	/*
