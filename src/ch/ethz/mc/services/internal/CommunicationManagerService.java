@@ -836,46 +836,51 @@ public class CommunicationManagerService {
 			// Send notification if no former notification within the last x
 			// minutes
 			if (!lastNotificationWithinSilenceDuration) {
-				val runnable = new Runnable() {
+				val participant = interventionExecutionManagerService
+						.getParticipantById(participantId);
 
-					@Override
-					public void run() {
-						log.debug(
-								"Sending notification for new message to team manager");
-						val participant = interventionExecutionManagerService
-								.getParticipantById(participantId);
-						val variablesWithValues = variablesManagerService
-								.getAllVariablesWithValuesOfParticipantAndSystem(
-										participant);
+				if (participant.getResponsibleTeamManagerEmail() != null) {
+					val runnable = new Runnable() {
 
-						val message = VariableStringReplacer
-								.findVariablesAndReplaceWithTextValues(
-										participant.getLanguage(),
-										emailTemplateForTeamManager,
-										variablesWithValues.values(), "");
+						@Override
+						public void run() {
+							log.debug(
+									"Sending notification for new message to team manager");
+							val variablesWithValues = variablesManagerService
+									.getAllVariablesWithValuesOfParticipantAndSystem(
+											participant);
 
-						try {
-							val emailMessage = new MimeMessage(
-									outgoingMailSession);
+							val message = VariableStringReplacer
+									.findVariablesAndReplaceWithTextValues(
+											participant.getLanguage(),
+											emailTemplateForTeamManager,
+											variablesWithValues.values(), "");
 
-							emailMessage
-									.setFrom(new InternetAddress(emailFrom));
-							emailMessage.addRecipient(Message.RecipientType.TO,
-									new InternetAddress(participant
-											.getResponsibleTeamManagerEmail()));
-							emailMessage.setSubject(emailSubjectForTeamManager);
-							emailMessage.setText(message, "UTF-8");
+							try {
+								val emailMessage = new MimeMessage(
+										outgoingMailSession);
 
-							Transport.send(emailMessage);
-						} catch (final Exception e) {
-							log.warn(
-									"Error when trying to send notifiation email to team manager: {}",
-									e);
+								emailMessage.setFrom(
+										new InternetAddress(emailFrom));
+								emailMessage.addRecipient(
+										Message.RecipientType.TO,
+										new InternetAddress(participant
+												.getResponsibleTeamManagerEmail()));
+								emailMessage
+										.setSubject(emailSubjectForTeamManager);
+								emailMessage.setText(message, "UTF-8");
+
+								Transport.send(emailMessage);
+							} catch (final Exception e) {
+								log.warn(
+										"Error when trying to send notifiation email to team manager: {}",
+										e);
+							}
 						}
-					}
-				};
+					};
 
-				new Thread(runnable).start();
+					new Thread(runnable).start();
+				}
 			}
 		}
 
