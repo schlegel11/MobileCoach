@@ -82,6 +82,7 @@ public class DeepstreamCommunicationService extends Thread
 		ConnectionStateListener {
 	@Getter
 	private static DeepstreamCommunicationService	instance			= null;
+	private final CommunicationManagerService		communicationManagerService;
 
 	private final SystemLoad						systemLoad;
 
@@ -122,7 +123,10 @@ public class DeepstreamCommunicationService extends Thread
 	private final String							observerRole;
 
 	private DeepstreamCommunicationService(final String deepstreamHost,
-			final String deepstreamServerPassword) {
+			final String deepstreamServerPassword,
+			final CommunicationManagerService communicationManagerService) {
+		this.communicationManagerService = communicationManagerService;
+
 		systemLoad = SystemLoad.getInstance();
 
 		loggedInParticipants = new HashSet<String>();
@@ -174,12 +178,12 @@ public class DeepstreamCommunicationService extends Thread
 	}
 
 	public static DeepstreamCommunicationService prepare(
-			final String deepstreamHost,
-			final String deepstreamServerPassword) {
+			final String deepstreamHost, final String deepstreamServerPassword,
+			final CommunicationManagerService communicationManagerService) {
 		log.info("Preparing service...");
 		if (instance == null) {
 			instance = new DeepstreamCommunicationService(deepstreamHost,
-					deepstreamServerPassword);
+					deepstreamServerPassword, communicationManagerService);
 
 			instance.setName(
 					DeepstreamCommunicationService.class.getSimpleName());
@@ -1545,6 +1549,7 @@ public class DeepstreamCommunicationService extends Thread
 		messageObject.addProperty(DeepstreamConstants.SERVER_TIMESTAMP,
 				timestamp);
 
+		boolean sendingResult = false;
 		synchronized (client) {
 			try {
 				record = client.record
@@ -1559,7 +1564,7 @@ public class DeepstreamCommunicationService extends Thread
 				client.event.emit(DeepstreamConstants.PATH_DASHBOARD_UPDATE
 						+ participantIdentifier, messageObject);
 
-				return true;
+				sendingResult = true;
 			} catch (final Exception e) {
 				try {
 
@@ -1583,7 +1588,52 @@ public class DeepstreamCommunicationService extends Thread
 			}
 		}
 
-		return false;
+		// Send notifications when sending was successful
+		if (sendingResult) {
+			if (role.equals(participantRole)) {
+				// Message by participant (send email notification to
+				// team-manager)
+
+				communicationManagerService.sendDashboardChatNotification(false,
+						dashboardMessage.getParticipant(),
+						dashboardMessage.getMessage(), 0, null);
+			} else if (role.equals(teamManagerRole)) {
+				// Message by team manager (send push notification to
+				// participant)
+
+				int messagesSentSinceLastLogout = 0;
+				synchronized (allUsersVisibleMessagesSentSinceLastLogout) {
+					if (loggedInParticipants.contains(participantIdentifier)) {
+						// If user is logged in remember as one (for late
+						// logout
+						// users)
+						messagesSentSinceLastLogout = 1;
+					} else if (allUsersVisibleMessagesSentSinceLastLogout
+							.containsKey(participantIdentifier)) {
+						// User is not logged in and well known
+						messagesSentSinceLastLogout = allUsersVisibleMessagesSentSinceLastLogout
+								.get(participantIdentifier) + 1;
+					} else {
+						// User is not logged in and not known
+						messagesSentSinceLastLogout = 1;
+					}
+					allUsersVisibleMessagesSentSinceLastLogout.put(
+							participantIdentifier, messagesSentSinceLastLogout);
+				}
+
+				if (messagesSentSinceLastLogout > 0) {
+					communicationManagerService.sendDashboardChatNotification(
+							true, dashboardMessage.getParticipant(),
+							dashboardMessage.getMessage(),
+							messagesSentSinceLastLogout,
+							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+									+ participantIdentifier);
+				}
+			}
+
+		}
+
+		return sendingResult;
 	}
 
 	/**

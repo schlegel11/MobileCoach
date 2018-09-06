@@ -170,6 +170,9 @@ public class ImplementationConstants {
 	public static final String	DEEPSTREAM_TEAM_MANAGER_ROLE										= "team-manager";
 	public static final String	DEEPSTREAM_OBSERVER_ROLE											= "observer";
 
+	public static final String	TEAM_MANAGER_PUSH_NOTIFICATION_PREFIX								= "👤: ";
+	public static final int		TEAM_MANAGER_EMAIL_NOTIFICATION_SILENCE_DURATION_IN_MINUTES			= 5;
+
 	public static final String	REPORT_TABLE														= "<table class=\"automatic\">|</table>";
 	public static final String	REPORT_TABLE_ROW													= "<tr #>|</tr>";
 	public static final String	REPORT_TABLE_HEADER_FIELD											= "<th #>|</th>";

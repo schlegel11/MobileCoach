@@ -274,4 +274,5 @@ public class Queries {
 	public static final String	UPDATE_VERSION_38__PARTICIPANT__CHANGE_2																																										= "{$set:{'lastLogoutTimestamp':#}}";
 	public static final String	UPDATE_VERSION_40__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'mediaObjectName':null}}";
 	public static final String	UPDATE_VERSION_40__AUTHOR_INTERVENTION_ACCESS__CHANGE_1																																							= "{'author':#}";
+	public static final String	UPDATE_VERSION_41__PARTICIPANT__CHANGE_1																																										= "{$set:{'responsibleTeamManagerEmail':null}}";
 }

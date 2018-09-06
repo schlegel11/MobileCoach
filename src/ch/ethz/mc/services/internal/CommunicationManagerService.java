@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import javax.mail.Authenticator;
@@ -73,48 +74,60 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public class CommunicationManagerService {
-	private static CommunicationManagerService	instance		= null;
+	private static CommunicationManagerService		instance		= null;
 
-	private final boolean						simulatorActive;
+	private final boolean							simulatorActive;
 
-	private long								lastSMSCheck	= 0;
-	private long								lastEmailCheck	= 0;
+	private long									lastSMSCheck	= 0;
+	private long									lastEmailCheck	= 0;
 
-	private final boolean						emailActive;
-	private final boolean						smsActive;
-	private final boolean						deepstreamActive;
-	private final boolean						pushNotificationsActive;
+	private final boolean							emailActive;
+	private final boolean							smsActive;
+	private final boolean							deepstreamActive;
+	private final boolean							pushNotificationsActive;
 
 	@Getter
-	private DeepstreamCommunicationService		deepstreamCommunicationService;
-	private PushNotificationService				pushNotificationService;
+	private DeepstreamCommunicationService			deepstreamCommunicationService;
+	private PushNotificationService					pushNotificationService;
 
-	private InterventionExecutionManagerService	interventionExecutionManagerService;
-	private final Session						incomingMailSession;
-	private final Session						outgoingMailSession;
+	private InterventionExecutionManagerService		interventionExecutionManagerService;
+	private VariablesManagerService					variablesManagerService;
 
-	private final String						mailboxProtocol;
-	private final String						mailboxFolder;
+	private final Session							incomingMailSession;
+	private final Session							outgoingMailSession;
 
-	private final String						emailFrom;
-	private final String						emailSubjectForParticipant;
-	private final String						emailSubjectForSupervisor;
+	private final String							mailboxProtocol;
+	private final String							mailboxFolder;
 
-	private final String						smsEmailFrom;
-	private final String						smsMailSubjectStartsWith;
-	private final String						smsEmailTo;
-	private final String						smsUserKey;
-	private final String						smsUserPassword;
+	private final String							emailFrom;
+	private final String							emailSubjectForParticipant;
+	private final String							emailSubjectForSupervisor;
+	private final String							emailSubjectForTeamManager;
+	private final String							emailTemplateForTeamManager;
 
-	private final DocumentBuilderFactory		documentBuilderFactory;
-	private final SimpleDateFormat				receiverDateFormat;
+	private final String							smsEmailFrom;
+	private final String							smsMailSubjectStartsWith;
+	private final String							smsEmailTo;
+	private final String							smsUserKey;
+	private final String							smsUserPassword;
 
-	private final List<MailingThread>			runningMailingThreads;
+	private final DocumentBuilderFactory			documentBuilderFactory;
+	private final SimpleDateFormat					receiverDateFormat;
 
-	private CommunicationManagerService() throws Exception {
+	private final List<MailingThread>				runningMailingThreads;
+
+	private final ConcurrentHashMap<String, Long>	lastTeamManagerNotificationsCache;
+
+	private CommunicationManagerService(
+			final VariablesManagerService variablesManagerService)
+			throws Exception {
 		log.info("Preparing service...");
 
+		this.variablesManagerService = variablesManagerService;
+
 		runningMailingThreads = new ArrayList<MailingThread>();
+
+		lastTeamManagerNotificationsCache = new ConcurrentHashMap<String, Long>();
 
 		simulatorActive = Constants.isSimulatedDateAndTime();
 
@@ -145,6 +158,9 @@ public class CommunicationManagerService {
 		emailFrom = Constants.getEmailFrom();
 		emailSubjectForParticipant = Constants.getEmailSubjectForParticipant();
 		emailSubjectForSupervisor = Constants.getEmailSubjectForSupervisor();
+		emailSubjectForTeamManager = Constants.getEmailSubjectForTeamManager();
+		emailTemplateForTeamManager = Constants
+				.getEmailTemplateForTeamManager();
 
 		// SMS configuration
 		smsMailSubjectStartsWith = Constants.getSmsMailSubjectStartsWith();
@@ -188,7 +204,7 @@ public class CommunicationManagerService {
 		if (deepstreamActive) {
 			deepstreamCommunicationService = DeepstreamCommunicationService
 					.prepare(Constants.getDeepstreamHost(),
-							Constants.getDeepstreamServerPassword());
+							Constants.getDeepstreamServerPassword(), this);
 		} else {
 			deepstreamCommunicationService = null;
 		}
@@ -212,9 +228,11 @@ public class CommunicationManagerService {
 		log.info("Prepared.");
 	}
 
-	public static CommunicationManagerService prepare() throws Exception {
+	public static CommunicationManagerService prepare(
+			final VariablesManagerService variablesManagerService)
+			throws Exception {
 		if (instance == null) {
-			instance = new CommunicationManagerService();
+			instance = new CommunicationManagerService(variablesManagerService);
 		}
 		return instance;
 	}
@@ -225,6 +243,7 @@ public class CommunicationManagerService {
 		log.info("Starting service...");
 
 		this.interventionExecutionManagerService = interventionExecutionManagerService;
+		variablesManagerService = variablesManagerService;
 
 		if (deepstreamActive) {
 			deepstreamCommunicationService
@@ -761,5 +780,88 @@ public class CommunicationManagerService {
 
 	public int getMessagingThreadCount() {
 		return runningMailingThreads.size();
+	}
+
+	public void sendDashboardChatNotification(final boolean sendToParticipant,
+			final ObjectId participantId, final String message,
+			final int visibleMessagesSentSinceLogout,
+			final String dialogOptionData) {
+		if (sendToParticipant) {
+			// Massage by team manager (send push notification to participant)
+
+			if (pushNotificationsActive && visibleMessagesSentSinceLogout > 0) {
+				val dialogOption = interventionExecutionManagerService
+						.getDialogOptionByTypeAndDataOfActiveInterventions(
+								DialogOptionTypes.EXTERNAL_ID,
+								dialogOptionData);
+
+				if (dialogOption != null) {
+					try {
+						pushNotificationService.asyncSendPushNotification(
+								dialogOption,
+								ImplementationConstants.TEAM_MANAGER_PUSH_NOTIFICATION_PREFIX
+										+ message,
+								visibleMessagesSentSinceLogout);
+					} catch (final Exception e) {
+						log.warn(
+								"Could not send team manager caused push notification: {}",
+								e.getMessage());
+					}
+				}
+			}
+		} else {
+			// Message by participant (send email notification to team-manager)
+
+			boolean lastNotificationWithinSilenceDuration = false;
+			val participantIdString = participantId.toHexString();
+			if (lastTeamManagerNotificationsCache
+					.containsKey(participantIdString)) {
+				final long lastNotificationTimeStamp = lastTeamManagerNotificationsCache
+						.get(participantIdString);
+
+				if (lastNotificationTimeStamp
+						+ ImplementationConstants.TEAM_MANAGER_EMAIL_NOTIFICATION_SILENCE_DURATION_IN_MINUTES
+								* ImplementationConstants.MINUTES_TO_TIME_IN_MILLIS_MULTIPLICATOR > InternalDateTime
+										.currentTimeMillis()) {
+					lastNotificationWithinSilenceDuration = true;
+				} else {
+					lastTeamManagerNotificationsCache.put(participantIdString,
+							InternalDateTime.currentTimeMillis());
+				}
+			} else {
+				lastTeamManagerNotificationsCache.put(participantIdString,
+						InternalDateTime.currentTimeMillis());
+			}
+
+			// Send notification if no former notification within the last x
+			// minutes
+			if (!lastNotificationWithinSilenceDuration) {
+				val runnable = new Runnable() {
+
+					@Override
+					public void run() {
+						log.debug(
+								"Sending notification for new message to team manager");
+						val participant  = interventionExecutionManagerService.getParticipantById(participantId);
+						variablesManagerService.getAllVariablesWithValuesOfParticipantAndSystem(participant)
+
+						// Nachricht mit Platzhaltern füllen!
+						
+						val emailMessage = new MimeMessage(outgoingMailSession);
+
+						emailMessage.setFrom(new InternetAddress(emailFrom));
+						emailMessage.addRecipient(Message.RecipientType.TO,
+								new InternetAddress(dialogOption.getData()));
+						emailMessage.setSubject(emailSubjectForTeamManager);
+						emailMessage.setText(message, "UTF-8");
+
+						Transport.send(emailMessage);
+					}
+				};
+
+				new Thread(runnable).start();
+			}
+		}
+
 	}
 }

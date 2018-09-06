@@ -2913,7 +2913,7 @@ public class InterventionExecutionManagerService {
 					appropriateIntervention.getId(), creationTimestamp,
 					creationTimestamp, creationTimestamp, "",
 					Constants.getInterventionLocales()[0], null, null, null,
-					null, null, true, "", "");
+					null, null, null, true, "", "");
 
 			databaseManagerService.saveModelObject(participant);
 
@@ -3076,6 +3076,71 @@ public class InterventionExecutionManagerService {
 				return doubleValue;
 			}
 		}
+	}
+
+	/**
+	 * Finds appropriate dialog option for given type and data
+	 * 
+	 * @param dialogOptionType
+	 * @param dialogOptionData
+	 * @return
+	 */
+	@Synchronized
+	public DialogOption getDialogOptionByTypeAndDataOfActiveInterventions(
+			final DialogOptionTypes dialogOptionType,
+			final String dialogOptionData) {
+		val dialogOptions = databaseManagerService.findModelObjects(
+				DialogOption.class, Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
+				dialogOptionType, dialogOptionData);
+
+		long highestCreatedTimestamp = 0;
+		DialogOption appropriateDialogOption = null;
+
+		for (val dialogOption : dialogOptions) {
+			if (dialogOption == null) {
+				continue;
+			}
+
+			val participant = databaseManagerService.getModelObjectById(
+					Participant.class, dialogOption.getParticipant());
+
+			if (participant != null) {
+				val intervention = databaseManagerService.getModelObjectById(
+						Intervention.class, participant.getIntervention());
+
+				if (intervention != null) {
+					if (intervention.isActive()) {
+						if (participant
+								.getCreatedTimestamp() > highestCreatedTimestamp) {
+							highestCreatedTimestamp = participant
+									.getCreatedTimestamp();
+							appropriateDialogOption = dialogOption;
+							continue;
+						}
+					} else {
+						continue;
+					}
+				} else {
+					continue;
+				}
+			} else {
+				continue;
+			}
+		}
+
+		return appropriateDialogOption;
+	}
+
+	/**
+	 * Get participant by {@link ObjectId}
+	 * 
+	 * @param participantId
+	 * @return
+	 */
+	@Synchronized
+	public Object getParticipantById(final ObjectId participantId) {
+		return databaseManagerService.getModelObjectById(Participant.class,
+				participantId);
 	}
 
 	/*
@@ -3257,52 +3322,6 @@ public class InterventionExecutionManagerService {
 		}
 
 		return dialogMessage;
-	}
-
-	@Synchronized
-	private DialogOption getDialogOptionByTypeAndDataOfActiveInterventions(
-			final DialogOptionTypes dialogOptionType,
-			final String dialogOptionData) {
-		val dialogOptions = databaseManagerService.findModelObjects(
-				DialogOption.class, Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
-				dialogOptionType, dialogOptionData);
-
-		long highestCreatedTimestamp = 0;
-		DialogOption appropriateDialogOption = null;
-
-		for (val dialogOption : dialogOptions) {
-			if (dialogOption == null) {
-				continue;
-			}
-
-			val participant = databaseManagerService.getModelObjectById(
-					Participant.class, dialogOption.getParticipant());
-
-			if (participant != null) {
-				val intervention = databaseManagerService.getModelObjectById(
-						Intervention.class, participant.getIntervention());
-
-				if (intervention != null) {
-					if (intervention.isActive()) {
-						if (participant
-								.getCreatedTimestamp() > highestCreatedTimestamp) {
-							highestCreatedTimestamp = participant
-									.getCreatedTimestamp();
-							appropriateDialogOption = dialogOption;
-							continue;
-						}
-					} else {
-						continue;
-					}
-				} else {
-					continue;
-				}
-			} else {
-				continue;
-			}
-		}
-
-		return appropriateDialogOption;
 	}
 
 	@Synchronized

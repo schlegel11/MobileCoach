@@ -145,7 +145,7 @@ public class SurveyExecutionManagerService {
 		final val participant = new Participant(
 				screeningSurvey.getIntervention(), creationTimestamp,
 				creationTimestamp, creationTimestamp, "",
-				Constants.getInterventionLocales()[0], null,
+				Constants.getInterventionLocales()[0], null, null,
 				screeningSurvey.getId(), screeningSurvey.getGlobalUniqueId(),
 				null, null, true, "", "");
 

@@ -62,6 +62,7 @@ public class SystemVariables {
 		participantName,
 		participantLanguage,
 		participantGroup,
+		participantResponsibleTeamManagerEmailData,
 		participantDialogOptionSMSData,
 		participantDialogOptionEmailData,
 		participantDialogOptionExternalID,

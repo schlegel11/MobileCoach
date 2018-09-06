@@ -110,6 +110,13 @@ public class Participant extends ModelObject {
 	private String				group;
 
 	/**
+	 * The email address of the responsible team manager
+	 */
+	@Getter
+	@Setter
+	private String				responsibleTeamManagerEmail;
+
+	/**
 	 * The {@link ScreeningSurvey} the {@link Participant} participates in
 	 */
 	@Getter

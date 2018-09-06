@@ -75,7 +75,7 @@ public class Constants {
 	 * 
 	 * CAUTION: Can NOT be defined in configuration file
 	 */
-	public static final int		DATA_MODEL_VERSION					= 40;
+	public static final int		DATA_MODEL_VERSION					= 41;
 	/**
 	 * Data model configuration collection
 	 * 
@@ -223,9 +223,13 @@ public class Constants {
 	@Getter
 	private static String		emailFrom								= "a@b.eu";
 	@Getter
-	private static String		emailSubjectForParticipant				= "MobileCoach Message";
+	private static String		emailSubjectForParticipant				= "PMCP Message";
 	@Getter
-	private static String		emailSubjectForSupervisor				= "MobileCoach Supervisor Notification";
+	private static String		emailSubjectForSupervisor				= "PMCP Supervisor Notification";
+	@Getter
+	private static String		emailSubjectForTeamManager				= "PMCP Supervisor Notification";
+	@Getter
+	private static String		emailTemplateForTeamManager				= "Hi Team Manager of $participantName!\n\nYou have new message from your participant, which can be read on the dashboard.";
 
 	/**
 	 * SMS configuration
