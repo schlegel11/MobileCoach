@@ -3138,7 +3138,7 @@ public class InterventionExecutionManagerService {
 	 * @return
 	 */
 	@Synchronized
-	public Object getParticipantById(final ObjectId participantId) {
+	public Participant getParticipantById(final ObjectId participantId) {
 		return databaseManagerService.getModelObjectById(Participant.class,
 				participantId);
 	}

@@ -687,8 +687,10 @@ public class VariablesManagerService {
 					participantSetGroup(participantId, variableValue);
 					break;
 				case participantResponsibleTeamManagerEmailData:
-					log.debug("Setting variable 'participantResponsibleTeamManagerEmailData'");
-					participantSetResponsibleTeamManagerEmail(participantId, variableValue);
+					log.debug(
+							"Setting variable 'participantResponsibleTeamManagerEmailData'");
+					participantSetResponsibleTeamManagerEmail(participantId,
+							variableValue);
 					break;
 			}
 		} else {
@@ -814,19 +816,19 @@ public class VariablesManagerService {
 
 		databaseManagerService.saveModelObject(participant);
 	}
-	
+
 	@Synchronized
-	private void participantSetResponsibleTeamManagerEmail(final ObjectId participantId,
-			final String emailAddress) {
+	private void participantSetResponsibleTeamManagerEmail(
+			final ObjectId participantId, final String emailAddress) {
 		val participant = databaseManagerService
 				.getModelObjectById(Participant.class, participantId);
-		
+
 		if (emailAddress == null || emailAddress.equals("")) {
 			participant.setResponsibleTeamManagerEmail(null);
 		} else {
 			participant.setResponsibleTeamManagerEmail(emailAddress);
 		}
-		
+
 		databaseManagerService.saveModelObject(participant);
 	}
 

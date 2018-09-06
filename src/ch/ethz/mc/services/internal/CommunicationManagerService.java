@@ -62,6 +62,7 @@ import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
 import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mc.tools.StringHelpers;
+import ch.ethz.mc.tools.VariableStringReplacer;
 import lombok.Getter;
 import lombok.Synchronized;
 import lombok.val;
@@ -91,7 +92,7 @@ public class CommunicationManagerService {
 	private PushNotificationService					pushNotificationService;
 
 	private InterventionExecutionManagerService		interventionExecutionManagerService;
-	private VariablesManagerService					variablesManagerService;
+	private final VariablesManagerService			variablesManagerService;
 
 	private final Session							incomingMailSession;
 	private final Session							outgoingMailSession;
@@ -243,7 +244,6 @@ public class CommunicationManagerService {
 		log.info("Starting service...");
 
 		this.interventionExecutionManagerService = interventionExecutionManagerService;
-		variablesManagerService = variablesManagerService;
 
 		if (deepstreamActive) {
 			deepstreamCommunicationService
@@ -786,10 +786,10 @@ public class CommunicationManagerService {
 			final ObjectId participantId, final String message,
 			final int visibleMessagesSentSinceLogout,
 			final String dialogOptionData) {
-		if (sendToParticipant) {
+		if (sendToParticipant && pushNotificationsActive) {
 			// Massage by team manager (send push notification to participant)
 
-			if (pushNotificationsActive && visibleMessagesSentSinceLogout > 0) {
+			if (visibleMessagesSentSinceLogout > 0) {
 				val dialogOption = interventionExecutionManagerService
 						.getDialogOptionByTypeAndDataOfActiveInterventions(
 								DialogOptionTypes.EXTERNAL_ID,
@@ -809,7 +809,7 @@ public class CommunicationManagerService {
 					}
 				}
 			}
-		} else {
+		} else if (!sendToParticipant && emailActive) {
 			// Message by participant (send email notification to team-manager)
 
 			boolean lastNotificationWithinSilenceDuration = false;
@@ -842,20 +842,36 @@ public class CommunicationManagerService {
 					public void run() {
 						log.debug(
 								"Sending notification for new message to team manager");
-						val participant  = interventionExecutionManagerService.getParticipantById(participantId);
-						variablesManagerService.getAllVariablesWithValuesOfParticipantAndSystem(participant)
+						val participant = interventionExecutionManagerService
+								.getParticipantById(participantId);
+						val variablesWithValues = variablesManagerService
+								.getAllVariablesWithValuesOfParticipantAndSystem(
+										participant);
 
-						// Nachricht mit Platzhaltern füllen!
-						
-						val emailMessage = new MimeMessage(outgoingMailSession);
+						val message = VariableStringReplacer
+								.findVariablesAndReplaceWithTextValues(
+										participant.getLanguage(),
+										emailTemplateForTeamManager,
+										variablesWithValues.values(), "");
 
-						emailMessage.setFrom(new InternetAddress(emailFrom));
-						emailMessage.addRecipient(Message.RecipientType.TO,
-								new InternetAddress(dialogOption.getData()));
-						emailMessage.setSubject(emailSubjectForTeamManager);
-						emailMessage.setText(message, "UTF-8");
+						try {
+							val emailMessage = new MimeMessage(
+									outgoingMailSession);
 
-						Transport.send(emailMessage);
+							emailMessage
+									.setFrom(new InternetAddress(emailFrom));
+							emailMessage.addRecipient(Message.RecipientType.TO,
+									new InternetAddress(participant
+											.getResponsibleTeamManagerEmail()));
+							emailMessage.setSubject(emailSubjectForTeamManager);
+							emailMessage.setText(message, "UTF-8");
+
+							Transport.send(emailMessage);
+						} catch (final Exception e) {
+							log.warn(
+									"Error when trying to send notifiation email to team manager: {}",
+									e);
+						}
 					}
 				};
 
