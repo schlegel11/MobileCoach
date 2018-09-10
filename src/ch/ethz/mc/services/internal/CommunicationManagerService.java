@@ -46,6 +46,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -523,7 +524,10 @@ public class CommunicationManagerService {
 				break;
 			case EXTERNAL_ID:
 			case SUPERVISOR_EXTERNAL_ID:
-				if (deepstreamActive) {
+				if (deepstreamActive
+						&& !StringUtils.isBlank(receivedMessage.getSender())
+						&& receivedMessage.getSender().startsWith(
+								ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM)) {
 					deepstreamCommunicationService.asyncAcknowledgeMessage(
 							dialogMessage, receivedMessage);
 				}

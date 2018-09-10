@@ -85,24 +85,6 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 
 			// Creating Jongo object
 			jongo = new Jongo(mongoClient.getDB(Constants.getDatabaseName()));
-
-			// Ensure indices
-			log.debug("Creating/ensuring indices: ");
-			val indicesHashtable = Indices.getIndices();
-			val indicesHashtableKeys = indicesHashtable.keys();
-			while (indicesHashtableKeys.hasMoreElements()) {
-				val clazz = indicesHashtableKeys.nextElement();
-				final String[] indices = indicesHashtable.get(clazz);
-				val collection = jongo.getCollection(clazz.getSimpleName());
-
-				collection.dropIndexes();
-
-				for (final String index : indices) {
-					log.debug("Creating/ensuring index {} on collection {}",
-							index, clazz.getSimpleName());
-					collection.ensureIndex(index);
-				}
-			}
 		} catch (final Exception e) {
 			log.error("Error at creating MongoDB connection: {}",
 					e.getMessage());
@@ -113,6 +95,29 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 		// Give Jongo object to model object
 		configure(jongo);
 
+		// Ensure indices (1 of 2)
+		try {
+			log.debug("Creating/ensuring indices: ");
+			val indicesHashtable = Indices.getIndices();
+			val indicesHashtableKeys = indicesHashtable.keys();
+			while (indicesHashtableKeys.hasMoreElements()) {
+				val clazz = indicesHashtableKeys.nextElement();
+				final String[] indices = indicesHashtable.get(clazz);
+				val collection = jongo.getCollection(clazz.getSimpleName());
+
+				for (final String index : indices) {
+					log.debug("Creating/ensuring index {} on collection {}",
+							index, clazz.getSimpleName());
+					collection.ensureIndex(index);
+				}
+			}
+		} catch (final Exception e) {
+			log.error("Error at creating/ensuring database indices: {}",
+					e.getMessage());
+			throw new Exception("Error at creating/ensuring database indices: "
+					+ e.getMessage());
+		}
+
 		// Doing database updates
 		try {
 			updateDataToVersionIfNecessary(expectedVersion);
@@ -120,6 +125,29 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 			log.error("Error at updating database: {}", e.getMessage());
 			throw new Exception(
 					"Error at updating database: " + e.getMessage());
+		}
+
+		// Ensure indices (2 of 2)
+		try {
+			log.debug("Creating/ensuring indices: ");
+			val indicesHashtable = Indices.getIndices();
+			val indicesHashtableKeys = indicesHashtable.keys();
+			while (indicesHashtableKeys.hasMoreElements()) {
+				val clazz = indicesHashtableKeys.nextElement();
+				final String[] indices = indicesHashtable.get(clazz);
+				val collection = jongo.getCollection(clazz.getSimpleName());
+
+				for (final String index : indices) {
+					log.debug("Creating/ensuring index {} on collection {}",
+							index, clazz.getSimpleName());
+					collection.ensureIndex(index);
+				}
+			}
+		} catch (final Exception e) {
+			log.error("Error at creating/ensuring database indices: {}",
+					e.getMessage());
+			throw new Exception("Error at creating/ensuring database indices: "
+					+ e.getMessage());
 		}
 
 		// Checking for admin account
@@ -188,6 +216,18 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 		// perform update
 		DataModelUpdateManager.updateDataFromVersionToVersion(currentVersion,
 				versionToBeReached, jongo);
+
+		// clear indices when current and expected database versions are
+		// different
+		if (currentVersion != versionToBeReached) {
+			for (val collectionName : jongo.getDatabase()
+					.getCollectionNames()) {
+				log.info(
+						"Index of collection '{}' will be dropped because of database version change");
+				val collection = jongo.getCollection(collectionName);
+				collection.dropIndexes();
+			}
+		}
 
 		log.info("Database is now on data model version {}",
 				versionToBeReached);
