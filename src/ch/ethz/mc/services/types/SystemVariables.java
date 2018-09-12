@@ -34,7 +34,7 @@ public class SystemVariables {
 	};
 
 	public enum READ_ONLY_PARTICIPANT_VARIABLES {
-		participantParticipationInWeeks, participantParticipationInDays, participantFeedbackURL, participantOneTimeToken, participantAppToken,
+		participantParticipationInWeeks, participantParticipationInDays, participantFeedbackURL, participantAppToken,
 		participantId, participantShortId;
 
 		public String toVariableName() {
@@ -43,7 +43,7 @@ public class SystemVariables {
 	};
 
 	public enum READ_WRITE_PARTICIPANT_VARIABLES {
-		participantName, participantLanguage, participantGroup, participantDialogOptionSMSData, participantDialogOptionEmailData, participantSupervisorDialogOptionSMSData, participantSupervisorDialogOptionEmailData;
+		participantName, participantLanguage, participantGroup, participantDialogOptionSMSData, participantDialogOptionEmailData, participantSupervisorDialogOptionSMSData, participantSupervisorDialogOptionEmailData, participantOneTimeToken;
 
 		public String toVariableName() {
 			return ImplementationConstants.VARIABLE_PREFIX + toString();

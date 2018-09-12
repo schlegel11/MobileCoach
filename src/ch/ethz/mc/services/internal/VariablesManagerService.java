@@ -365,6 +365,9 @@ public class VariablesManagerService {
 					return participant.getGroup();
 				}
 				break;
+			case participantOneTimeToken:
+				String oneTimeToken = new TokenPersistenceService(databaseManagerService).getOrCreateRecentOneTimeToken(participant.getId());
+				return oneTimeToken;
 		}
 		return null;
 	}
@@ -449,9 +452,6 @@ public class VariablesManagerService {
 					}
 				}
 				return participantFeedbackURL;
-			case participantOneTimeToken:
-				String oneTimeToken = new TokenPersistenceService(databaseManagerService).getOrCreateRecentOneTimeToken(participant.getId());
-				return oneTimeToken;
 			case participantAppToken:
 				String appToken = new TokenPersistenceService(databaseManagerService).getOrCreateAppToken(participant.getId());
 				return appToken;
@@ -550,6 +550,9 @@ public class VariablesManagerService {
 				case participantGroup:
 					log.debug("Setting variable 'participantGroup'");
 					participantSetGroup(participantId, variableValue);
+					break;
+				case participantOneTimeToken:
+					new TokenPersistenceService(databaseManagerService).createNewOneTimeTokenForParticipant(participantId);
 					break;
 			}
 		} else {

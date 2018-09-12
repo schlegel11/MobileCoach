@@ -75,6 +75,18 @@ public class TokenPersistenceService {
 		dbService.saveModelObject(oneTimeToken);
 		return oneTimeToken;
 	}
+	
+	public OneTimeToken createNewOneTimeTokenForParticipant(ObjectId participantId) {
+		// delete old token
+		OneTimeToken oneTimeToken = dbService.findOneModelObject(OneTimeToken.class, "{participantId:#}", participantId);
+		if (oneTimeToken != null) {
+			dbService.deleteModelObject(oneTimeToken);
+		}
+		
+		// create new token	
+		return createOneTimeTokenForParticipant(participantId);
+	}
+	
 
 	public ObjectId consumeOneTimeToken(String token) {
 		OneTimeToken oneTimeToken = dbService.findOneModelObject(OneTimeToken.class, "{token:#}", token.toUpperCase());
