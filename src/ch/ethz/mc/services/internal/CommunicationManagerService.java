@@ -156,6 +156,18 @@ public class CommunicationManagerService {
 
 		// General properties
 		val properties = new Properties();
+		properties.setProperty("mail.pop3.timeout",
+				ImplementationConstants.MAIL_SERVER_TIMEOUT);
+		properties.setProperty("mail.pop3.connectiontimeout",
+				ImplementationConstants.MAIL_SERVER_CONNECTION_TIMEOUT);
+		properties.setProperty("mail.smtp.timeout",
+				ImplementationConstants.MAIL_SERVER_TIMEOUT);
+		properties.setProperty("mail.smtp.connectiontimeout",
+				ImplementationConstants.MAIL_SERVER_CONNECTION_TIMEOUT);
+		properties.setProperty("mail.smtps.timeout",
+				ImplementationConstants.MAIL_SERVER_TIMEOUT);
+		properties.setProperty("mail.smtps.connectiontimeout",
+				ImplementationConstants.MAIL_SERVER_CONNECTION_TIMEOUT);
 		properties.setProperty("mail.pop3.host", mailhostIncoming);
 		properties.setProperty("mail.smtp.host", mailhostOutgoing);
 		if (useAuthentication) {
