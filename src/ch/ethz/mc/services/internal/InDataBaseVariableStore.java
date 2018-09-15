@@ -50,7 +50,8 @@ public class InDataBaseVariableStore implements VariableStore {
 
 		Hashtable<String, AbstractVariableWithValue> table = variableManagerService.getAllVariablesWithValuesOfParticipantAndSystem(participant);
 
-		if(!table.containsKey(variableName)) throw new VariableException("Variable has not been initialized: " + variableName);
+		// The following line caused problems when setting $participantDialogOptionEmailData. TODO: check if it is needed for something
+		//if(!table.containsKey(variableName)) throw new VariableException("Variable has not been initialized: " + variableName);
 
 		try{
 			variableManagerService.writeVariableValueOfParticipant(participantId,
