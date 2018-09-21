@@ -194,6 +194,10 @@ public class Queries {
 	public static final String	PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME																																						= "{'participant':#,'name':#}";
 	public static final String	PARTICIPANT_VARIABLE_WITH_VALUE__BY_DESCRIBES_MEDIA_UPLOAD																																						= "{'describesMediaUpload':#}";
 
+	public static final String	DASHBOARD_MESSAGE__BY_PARTICIPANT																																												= "{'participant':#}";
+	public static final String	DASHBOARD_MESSAGE__SORT_BY_ORDER_ASC																																											= "{'order':1}";
+	public static final String	DASHBOARD_MESSAGE__SORT_BY_ORDER_DESC																																											= "{'order':-1}";
+
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT																																													= "{'participant':#}";
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_MESSAGE_TYPE																																									= "{'participant':#,'supervisorMessage':#}";
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_ORDER																																										= "{'participant':#,'order':#}";

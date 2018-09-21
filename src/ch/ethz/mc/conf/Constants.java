@@ -252,14 +252,6 @@ public class Constants {
 	@Getter
 	private static String		deepstreamHost							= "wss://localhost:6020";
 	@Getter
-	private static String		deepstreamServerRole					= "server";
-	@Getter
-	private static String		deepstreamParticipantRole				= "participant";
-	@Getter
-	private static String		deepstreamSupervisorRole				= "supervisor";
-	@Getter
-	private static String		deepstreamObserverRole					= "observer";
-	@Getter
 	private static int			deepstreamMinClientVersion				= 1;
 	@Getter
 	private static int			deepstreamMaxClientVersion				= 1;

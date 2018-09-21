@@ -87,6 +87,7 @@ public class RESTManagerService extends Thread {
 	private final String							deepstreamServerRole;
 	private final String							deepstreamParticipantRole;
 	private final String							deepstreamSuperviserRole;
+	private final String							deepstreamTeamManagerRole;
 	private final String							deepstreamObserverRole;
 	private final int								deepstreamMinClientVersion;
 	private final int								deepstreamMaxClientVersion;
@@ -112,10 +113,11 @@ public class RESTManagerService extends Thread {
 		deepstreamCommunicationService = communicationManagerService
 				.getDeepstreamCommunicationService();
 
-		deepstreamServerRole = Constants.getDeepstreamServerRole();
-		deepstreamParticipantRole = Constants.getDeepstreamParticipantRole();
-		deepstreamSuperviserRole = Constants.getDeepstreamSupervisorRole();
-		deepstreamObserverRole = Constants.getDeepstreamObserverRole();
+		deepstreamServerRole = ImplementationConstants.DEEPSTREAM_SERVER_ROLE;
+		deepstreamParticipantRole = ImplementationConstants.DEEPSTREAM_PARTICIPANT_ROLE;
+		deepstreamSuperviserRole = ImplementationConstants.DEEPSTREAM_SUPERVISOR_ROLE;
+		deepstreamTeamManagerRole = ImplementationConstants.DEEPSTREAM_TEAM_MANAGER_ROLE;
+		deepstreamObserverRole = ImplementationConstants.DEEPSTREAM_OBSERVER_ROLE;
 		deepstreamMinClientVersion = Constants.getDeepstreamMinClientVersion();
 		deepstreamMaxClientVersion = Constants.getDeepstreamMaxClientVersion();
 
@@ -831,6 +833,7 @@ public class RESTManagerService extends Thread {
 				return false;
 			}
 		} else if (role.equals(deepstreamParticipantRole)
+				|| role.equals(deepstreamTeamManagerRole)
 				|| role.equals(deepstreamObserverRole)) {
 			// Check participant or observer access
 			val dialogOption = databaseManagerService.findOneModelObject(
@@ -872,7 +875,8 @@ public class RESTManagerService extends Thread {
 
 			if (deepstreamCommunicationService != null
 					&& deepstreamCommunicationService.checkSecret(username,
-							secret, role.equals(deepstreamObserverRole))) {
+							secret, role.equals(deepstreamObserverRole) || role
+									.equals(deepstreamTeamManagerRole))) {
 				log.debug(
 						"Participant with deepstream id {} authorized for deepstream access",
 						username);

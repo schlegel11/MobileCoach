@@ -78,6 +78,9 @@ public class ImplementationConstants {
 	public static final int		UI_SESSION_TIMEOUT_IN_SECONDS														= 900;
 	public static final String	UI_SESSION_ATTRIBUTE_DETECTOR														= "mc.vaadin.is_vaadin_session";
 
+	public static final String	MAIL_SERVER_TIMEOUT																	= "5000";
+	public static final String	MAIL_SERVER_CONNECTION_TIMEOUT														= "30000";
+
 	public static enum ACCEPTED_MEDIA_UPLOAD_TYPES {
 		IMAGE, VIDEO, AUDIO
 	};
@@ -163,6 +166,12 @@ public class ImplementationConstants {
 
 	public static final String	DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM								= "ds:";
 	public static final String	DEFAULT_PARTICIPANT_NICKNAME_FOR_SURVEY_GENERATION_FOR_DEEPSTREAM	= "Participant";
+
+	public static final String	DEEPSTREAM_SERVER_ROLE												= "server";
+	public static final String	DEEPSTREAM_PARTICIPANT_ROLE											= "participant";
+	public static final String	DEEPSTREAM_SUPERVISOR_ROLE											= "supervisor";
+	public static final String	DEEPSTREAM_TEAM_MANAGER_ROLE										= "team-manager";
+	public static final String	DEEPSTREAM_OBSERVER_ROLE											= "observer";
 
 	public static final String	REPORT_TABLE														= "<table class=\"automatic\">|</table>";
 	public static final String	REPORT_TABLE_ROW													= "<tr #>|</tr>";
