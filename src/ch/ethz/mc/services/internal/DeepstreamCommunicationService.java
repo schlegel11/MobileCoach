@@ -1776,7 +1776,7 @@ public class DeepstreamCommunicationService extends Thread
 
 			allUsersVisibleMessagesSentSinceLastLogout.put(user, 0);
 			interventionExecutionManagerService
-					.participantRememberLoginBasedOnDialogOptionTypeAndData(
+					.participantRememberLogoutBasedOnDialogOptionTypeAndData(
 							DialogOptionTypes.EXTERNAL_ID,
 							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
 									+ user);

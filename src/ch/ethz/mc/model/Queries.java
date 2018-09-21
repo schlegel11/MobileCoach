@@ -180,6 +180,7 @@ public class Queries {
 	public static final String	PARTICIPANT__BY_INTERVENTION																																													= "{'intervention':#}";
 	public static final String	PARTICIPANT__BY_INTERVENTION_AND_GROUP_AND_MONITORING_ACTIVE_TRUE																																				= "{'intervention':#,'group':#,'monitoringActive':true}";
 	public static final String	PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE																																							= "{'intervention':#,'monitoringActive':true}";
+	public static final String	PARTICIPANT__WHERE_LAST_LOGIN_TIME_IS_BIGGER_THAN_LAST_LOGOUT_TIME																																				= "{$where:'this.lastLoginTimestamp > this.lastLogoutTimestamp'}";
 
 	public static final String	DIALOG_OPTION__BY_PARTICIPANT																																													= "{'participant':#}";
 	public static final String	DIALOG_OPTION__FOR_PARTICIPANT_BY_PARTICIPANT																																									= "{'participant':#,$or:[{'type':'SMS'},{'type':'EMAIL'},{'type':'EXTERNAL_ID'}]}";
