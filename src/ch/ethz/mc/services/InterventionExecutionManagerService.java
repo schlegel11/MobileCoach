@@ -923,7 +923,7 @@ public class InterventionExecutionManagerService {
 		long messagingPerformedForParticipants = 0;
 
 		log.debug(
-				"Create a list of all relevant participants to perfom messaging");
+				"Create a list of all relevant participants to perform messaging");
 		val participants = getAllParticipantsRelevantForAnsweredInTimeChecksAndMonitoringScheduling();
 
 		// Scheduling of new messages (periodic) will only be
@@ -1088,7 +1088,7 @@ public class InterventionExecutionManagerService {
 			dialogMessages = getDialogMessagesOfParticipantAnsweredByParticipant(
 					participant.getId());
 		} else {
-			dialogMessages = getDialogMessagesOfParticipantUnansweredByParticipant(
+			dialogMessages = getDialogMessagesOfParticipantWaitingToBeAnsweredOrUnansweredByParticipant(
 					participant.getId());
 		}
 
@@ -3201,11 +3201,11 @@ public class InterventionExecutionManagerService {
 	}
 
 	@Synchronized
-	private Iterable<DialogMessage> getDialogMessagesOfParticipantUnansweredByParticipant(
+	private Iterable<DialogMessage> getDialogMessagesOfParticipantWaitingToBeAnsweredOrUnansweredByParticipant(
 			final ObjectId participantId) {
 		val dialogMessages = databaseManagerService.findSortedModelObjects(
 				DialogMessage.class,
-				Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_UNANSWERED_AFTER_TIMESTAMP_LOWER,
+				Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS,
 				Queries.DIALOG_MESSAGE__SORT_BY_ORDER_ASC, participantId,
 				DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
 				InternalDateTime.currentTimeMillis());
