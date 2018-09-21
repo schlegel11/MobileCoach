@@ -85,7 +85,7 @@ If you are using Tomcat8.5 or newer, with the support for virtual servers, then 
 
 Also the following should be added to avoid encoding problems on several operating systems and/or RAM problems:
 
-	-server -Dfile.encoding=UTF8 -Djava.awt.headless=true -Xms2g -Xmx2g
+	-server -Dfile.encoding=UTF8 -Dorg.apache.catalina.connector.URI_ENCODING=UTF-8 -Djava.awt.headless=true -Xms2g -Xmx2g
 
 You should also add the following parameters to avoid problems with the Log4J logging system:
 

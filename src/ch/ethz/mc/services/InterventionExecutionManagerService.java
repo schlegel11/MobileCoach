@@ -2644,8 +2644,10 @@ public class InterventionExecutionManagerService {
 					Participant.class, dialogOption.getParticipant());
 
 			if (participant != null) {
-				participant.setLastLoginTimestamp(
-						InternalDateTime.currentTimeMillis());
+				val timestamp = InternalDateTime.currentTimeMillis();
+
+				participant.setLastLogoutTimestamp(timestamp);
+				participant.setLastLoginTimestamp(timestamp);
 
 				databaseManagerService.saveModelObject(participant);
 			}

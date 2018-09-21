@@ -54,9 +54,11 @@ import org.xml.sax.InputSource;
 
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.memory.ReceivedMessage;
 import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogOption;
+import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogMessageTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
@@ -243,11 +245,15 @@ public class CommunicationManagerService {
 	}
 
 	public static CommunicationManagerService prepare(
-			final VariablesManagerService variablesManagerService)
+			final VariablesManagerService variablesManagerService,
+			final DatabaseManagerService databaseManagerService)
 			throws Exception {
 		if (instance == null) {
 			instance = new CommunicationManagerService(variablesManagerService);
 		}
+
+		instance.ensureSensefulParticipantTimings(databaseManagerService);
+
 		return instance;
 	}
 
@@ -302,6 +308,25 @@ public class CommunicationManagerService {
 		}
 
 		log.info("Stopped.");
+	}
+
+	@Synchronized
+	private void ensureSensefulParticipantTimings(
+			final DatabaseManagerService databaseManagerService) {
+		log.info("Ensuring senseful participant login/logout timinigs...");
+
+		val participants = databaseManagerService.findModelObjects(
+				Participant.class,
+				Queries.PARTICIPANT__WHERE_LAST_LOGIN_TIME_IS_BIGGER_THAN_LAST_LOGOUT_TIME);
+
+		for (val participant : participants) {
+			participant.setLastLogoutTimestamp(
+					participant.getLastLoginTimestamp());
+
+			databaseManagerService.saveModelObject(participant);
+		}
+
+		log.info("Done");
 	}
 
 	/**
