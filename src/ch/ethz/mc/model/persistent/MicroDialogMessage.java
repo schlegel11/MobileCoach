@@ -91,6 +91,14 @@ public class MicroDialogMessage extends ModelObject
 	private boolean				commandMessage;
 
 	/**
+	 * <strong>OPTIONAL:</strong> And identifier for the given
+	 * {@link MicroDialogMessage}
+	 */
+	@Getter
+	@Setter
+	private String				nonUniqueIdentifier;
+
+	/**
 	 * <strong>OPTIONAL:</strong> The {@link MediaObject} used/presented in this
 	 * {@link MicroDialogMessage}
 	 */

@@ -1231,8 +1231,8 @@ public class InterventionAdministrationManagerService {
 	public MicroDialogMessage microDialogMessageCreate(
 			final ObjectId microDialogId) {
 		val microDialogMessage = new MicroDialogMessage(microDialogId, 0,
-				new LString(), false, null, null, false, false, false, null,
-				null, AnswerTypes.FREE_TEXT,
+				new LString(), false, null, null, null, false, false, false,
+				null, null, AnswerTypes.FREE_TEXT,
 				ImplementationConstants.DEFAULT_MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED,
 				new LString(),
 				GlobalUniqueIdGenerator.createSimpleGlobalUniqueId());
