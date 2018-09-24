@@ -214,7 +214,6 @@ public class Queries {
 	public static final String	DIALOG_MESSAGE__SORT_BY_ORDER_DESC																																												= "{'order':-1}";
 
 	// Special
-	public static final String	EVERYTHING																																																		= "{}";
 	public static final String	UPDATE_VERSION_5__GENERAL_UPDATE_FOR_COMMENT																																									= "{$set:{'comment':''}}";
 	public static final String	UPDATE_VERSION_6__INTERVENTION__CHANGE_1																																										= "{$set:{'automaticallyFinishScreeningSurveys':false}}";
 	public static final String	UPDATE_VERSION_6__SCREENING_SURVEY_SLIDE__CHANGE_1																																								= "{$set:{'linkedIntermediateSurvey':null}}";
@@ -275,4 +274,5 @@ public class Queries {
 	public static final String	UPDATE_VERSION_40__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'mediaObjectName':null}}";
 	public static final String	UPDATE_VERSION_40__AUTHOR_INTERVENTION_ACCESS__CHANGE_1																																							= "{'author':#}";
 	public static final String	UPDATE_VERSION_41__MICRO_DIALOG_MESSAGE__CHANGE_1																																								= "{$set:{'nonUniqueKey':null}}";
+	public static final String	UPDATE_VERSION_41__PARTICIPANT__CHANGE_1																																										= "{$set:{'responsibleTeamManagerEmail':null}}";
 }

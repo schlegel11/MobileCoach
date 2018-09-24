@@ -471,6 +471,11 @@ public class VariablesManagerService {
 					return participant.getGroup();
 				}
 				break;
+			case participantResponsibleTeamManagerEmailData:
+				if (participant.getResponsibleTeamManagerEmail() != null) {
+					return participant.getResponsibleTeamManagerEmail();
+				}
+				break;
 		}
 		return null;
 	}
@@ -795,6 +800,12 @@ public class VariablesManagerService {
 					log.debug("Setting variable 'participantGroup'");
 					participantSetGroup(participantId, variableValue);
 					break;
+				case participantResponsibleTeamManagerEmailData:
+					log.debug(
+							"Setting variable 'participantResponsibleTeamManagerEmailData'");
+					participantSetResponsibleTeamManagerEmail(participantId,
+							variableValue);
+					break;
 			}
 		} else {
 			ParticipantVariableWithValue participantVariableWithValue = databaseManagerService
@@ -917,6 +928,21 @@ public class VariablesManagerService {
 			participant.setGroup(null);
 		} else {
 			participant.setGroup(group);
+		}
+
+		databaseManagerService.saveModelObject(participant);
+	}
+
+	@Synchronized
+	private void participantSetResponsibleTeamManagerEmail(
+			final ObjectId participantId, final String emailAddress) {
+		val participant = databaseManagerService
+				.getModelObjectById(Participant.class, participantId);
+
+		if (emailAddress == null || emailAddress.equals("")) {
+			participant.setResponsibleTeamManagerEmail(null);
+		} else {
+			participant.setResponsibleTeamManagerEmail(emailAddress);
 		}
 
 		databaseManagerService.saveModelObject(participant);
