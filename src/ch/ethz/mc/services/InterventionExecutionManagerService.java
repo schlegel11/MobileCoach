@@ -923,7 +923,7 @@ public class InterventionExecutionManagerService {
 		long messagingPerformedForParticipants = 0;
 
 		log.debug(
-				"Create a list of all relevant participants to perfom messaging");
+				"Create a list of all relevant participants to perform messaging");
 		val participants = getAllParticipantsRelevantForAnsweredInTimeChecksAndMonitoringScheduling();
 
 		// Scheduling of new messages (periodic) will only be
@@ -1082,13 +1082,18 @@ public class InterventionExecutionManagerService {
 		log.debug("Handling {} messages for participant {}",
 				userAnswered ? "answered" : "unanswered", participant.getId());
 
+		int participantInfiniteBlockingMessagesCount = 0;
+		final HashSet<String> participantInfiniteBlockingMessagesIdentifiers = new HashSet<String>();
+		double participantInfiniteBlockingMessagesWaitingMinutesMin = 0d;
+		double participantInfiniteBlockingMessagesWaitingMinutesMax = 0d;
+
 		// Get relevant messages of participant
 		Iterable<DialogMessage> dialogMessages;
 		if (userAnswered) {
 			dialogMessages = getDialogMessagesOfParticipantAnsweredByParticipant(
 					participant.getId());
 		} else {
-			dialogMessages = getDialogMessagesOfParticipantUnansweredByParticipant(
+			dialogMessages = getDialogMessagesOfParticipantWaitingToBeAnsweredOrUnansweredByParticipant(
 					participant.getId());
 		}
 
@@ -1101,6 +1106,52 @@ public class InterventionExecutionManagerService {
 				relatedMicroDialogMessage = databaseManagerService
 						.getModelObjectById(MicroDialogMessage.class,
 								dialogMessage.getRelatedMicroDialogMessage());
+			}
+
+			// Check for possible "unanswered" cases
+			if (!userAnswered) {
+
+				if (dialogMessage
+						.getIsUnansweredAfterTimestamp() < InternalDateTime
+								.currentTimeMillis()) {
+					// Classic unanswered case --> proceed regularly
+				} else if (relatedMicroDialogMessage != null
+						&& relatedMicroDialogMessage
+								.isMessageBlocksMicroDialogUntilAnswered()
+						&& relatedMicroDialogMessage
+								.getMinutesUntilMessageIsHandledAsUnanswered() == Integer.MAX_VALUE
+						&& dialogMessage.getSentTimestamp()
+								+ ImplementationConstants.MICRO_DIALOG_MESSAGE_UNHANDLED_MESSAGE_MINIMUM_THRESHOLD_IN_MILLIS < InternalDateTime
+										.currentTimeMillis()) {
+					// Related micro dialog message is blocking and has infinite
+					// timeout and message has been sent more than given time in
+					// millis ago
+
+					participantInfiniteBlockingMessagesCount++;
+
+					if (!StringUtils.isBlank(
+							relatedMicroDialogMessage.getNonUniqueKey())) {
+						participantInfiniteBlockingMessagesIdentifiers.add(
+								relatedMicroDialogMessage.getNonUniqueKey());
+					}
+					final double minutesWaitingForAnswer = (InternalDateTime
+							.currentTimeMillis()
+							- dialogMessage.getSentTimestamp())
+							/ ImplementationConstants.MILLIS_TO_MINUTES_DIVIDER;
+
+					if (participantInfiniteBlockingMessagesWaitingMinutesMin == 0d
+							|| minutesWaitingForAnswer < participantInfiniteBlockingMessagesWaitingMinutesMin) {
+						participantInfiniteBlockingMessagesWaitingMinutesMin = minutesWaitingForAnswer;
+					}
+					if (minutesWaitingForAnswer > participantInfiniteBlockingMessagesWaitingMinutesMax) {
+						participantInfiniteBlockingMessagesWaitingMinutesMax = minutesWaitingForAnswer;
+					}
+
+					continue;
+				} else {
+					// Other cases are not relevant so proceed with next message
+					continue;
+				}
 			}
 
 			// Handle storing of message reply (the text sent) by
@@ -1339,6 +1390,15 @@ public class InterventionExecutionManagerService {
 			}
 		}
 
+		if (!userAnswered) {
+			variablesManagerService
+					.cacheNewInfiniteBlockingMessagesInformationForParticipant(
+							participant.getId(),
+							participantInfiniteBlockingMessagesCount,
+							participantInfiniteBlockingMessagesIdentifiers,
+							participantInfiniteBlockingMessagesWaitingMinutesMin,
+							participantInfiniteBlockingMessagesWaitingMinutesMax);
+		}
 	}
 
 	@Synchronized
@@ -3203,14 +3263,13 @@ public class InterventionExecutionManagerService {
 	}
 
 	@Synchronized
-	private Iterable<DialogMessage> getDialogMessagesOfParticipantUnansweredByParticipant(
+	private Iterable<DialogMessage> getDialogMessagesOfParticipantWaitingToBeAnsweredOrUnansweredByParticipant(
 			final ObjectId participantId) {
 		val dialogMessages = databaseManagerService.findSortedModelObjects(
 				DialogMessage.class,
-				Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_UNANSWERED_AFTER_TIMESTAMP_LOWER,
+				Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS,
 				Queries.DIALOG_MESSAGE__SORT_BY_ORDER_ASC, participantId,
-				DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
-				InternalDateTime.currentTimeMillis());
+				DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER);
 
 		return dialogMessages;
 	}

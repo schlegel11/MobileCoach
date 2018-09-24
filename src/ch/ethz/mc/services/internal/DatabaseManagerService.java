@@ -223,7 +223,8 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 			for (val collectionName : jongo.getDatabase()
 					.getCollectionNames()) {
 				log.info(
-						"Index of collection '{}' will be dropped because of database version change");
+						"Index of collection '{}' will be dropped because of database version change",
+						collectionName);
 				val collection = jongo.getCollection(collectionName);
 				collection.dropIndexes();
 			}

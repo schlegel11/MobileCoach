@@ -52,6 +52,9 @@ public class ImplementationConstants {
 	public static final long	DAYS_TO_TIME_IN_MILLIS_MULTIPLICATOR												= 24
 			* 60 * 60 * 1000;
 
+	public static final double	MILLIS_TO_MINUTES_DIVIDER															= 1000
+			* 60;
+
 	public static final long	MASTER_RULE_EVALUTION_WORKER_MILLISECONDS_SLEEP_BETWEEN_CHECK_CYCLES				= 500;
 
 	public static final long	PERIODIC_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITHOUT_SIMULATOR	= 300;
@@ -80,6 +83,9 @@ public class ImplementationConstants {
 
 	public static final String	MAIL_SERVER_TIMEOUT																	= "5000";
 	public static final String	MAIL_SERVER_CONNECTION_TIMEOUT														= "30000";
+
+	public static final long	MICRO_DIALOG_MESSAGE_UNHANDLED_MESSAGE_MINIMUM_THRESHOLD_IN_MILLIS					= 30
+			* MINUTES_TO_TIME_IN_MILLIS_MULTIPLICATOR;
 
 	public static enum ACCEPTED_MEDIA_UPLOAD_TYPES {
 		IMAGE, VIDEO, AUDIO

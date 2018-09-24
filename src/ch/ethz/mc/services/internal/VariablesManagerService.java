@@ -35,6 +35,7 @@ import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.MC;
@@ -96,6 +97,8 @@ public class VariablesManagerService {
 	private final HashSet<String>												externallyReadableParticipantVariableNames;
 
 	private final ConcurrentHashMap<String, Hashtable<String, MemoryVariable>>	participantsVariablesCache;
+	private final ConcurrentHashMap<String, Hashtable<String, String>>			participantInfiniteBlockingMessagesCache;
+
 	private final int															maxVariableHistory;
 
 	private static SimpleDateFormat												minuteOfHourFormatter	= new SimpleDateFormat(
@@ -168,6 +171,7 @@ public class VariablesManagerService {
 
 		// Init cache
 		participantsVariablesCache = new ConcurrentHashMap<String, Hashtable<String, MemoryVariable>>();
+		participantInfiniteBlockingMessagesCache = new ConcurrentHashMap<String, Hashtable<String, String>>();
 		maxVariableHistory = Constants.getMaxVariableHistory();
 
 		log.info("Started.");
@@ -521,6 +525,8 @@ public class VariablesManagerService {
 	private String getReadOnlyParticipantVariableValue(
 			final Participant participant, final DialogStatus dialogStatus,
 			final READ_ONLY_PARTICIPANT_VARIABLES variable) {
+		String participantHexId = null;
+
 		switch (variable) {
 			case participantParticipationInDays:
 				int participationInDays = 0;
@@ -569,6 +575,62 @@ public class VariablesManagerService {
 			case participantLastLogoutTime:
 				return StringHelpers.formatInternalTime(
 						participant.getLastLogoutTimestamp());
+			case participantInfiniteBlockingMessagesCount:
+				participantHexId = participant.getId().toHexString();
+
+				synchronized (participantInfiniteBlockingMessagesCache) {
+					if (participantInfiniteBlockingMessagesCache
+							.containsKey(participantHexId)) {
+						return participantInfiniteBlockingMessagesCache
+								.get(participantHexId).getOrDefault(
+										"participantInfiniteBlockingMessagesCount",
+										"0");
+					}
+				}
+
+				return "0";
+			case participantInfiniteBlockingMessagesIdentifiers:
+				participantHexId = participant.getId().toHexString();
+
+				synchronized (participantInfiniteBlockingMessagesCache) {
+					if (participantInfiniteBlockingMessagesCache
+							.containsKey(participantHexId)) {
+						return participantInfiniteBlockingMessagesCache
+								.get(participantHexId).getOrDefault(
+										"participantInfiniteBlockingMessagesIdentifiers",
+										"");
+					}
+				}
+
+				return "";
+			case participantInfiniteBlockingMessagesWaitingMinutesMin:
+				participantHexId = participant.getId().toHexString();
+
+				synchronized (participantInfiniteBlockingMessagesCache) {
+					if (participantInfiniteBlockingMessagesCache
+							.containsKey(participantHexId)) {
+						return participantInfiniteBlockingMessagesCache
+								.get(participantHexId).getOrDefault(
+										"participantInfiniteBlockingMessagesWaitingMinutesMin",
+										"0.0");
+					}
+				}
+
+				return "0.0";
+			case participantInfiniteBlockingMessagesWaitingMinutesMax:
+				participantHexId = participant.getId().toHexString();
+
+				synchronized (participantInfiniteBlockingMessagesCache) {
+					if (participantInfiniteBlockingMessagesCache
+							.containsKey(participantHexId)) {
+						return participantInfiniteBlockingMessagesCache
+								.get(participantHexId).getOrDefault(
+										"participantInfiniteBlockingMessagesWaitingMinutesMax",
+										"0.0");
+					}
+				}
+
+				return "0.0";
 
 		}
 		return null;
@@ -590,6 +652,58 @@ public class VariablesManagerService {
 		newVariableWithValue.setValue(value);
 
 		hashtable.put(variable, newVariableWithValue);
+	}
+
+	/**
+	 * Cache new infinite blocking message information
+	 * 
+	 * @param participantId
+	 * @param participantInfiniteBlockingMessagesCount
+	 * @param participantInfiniteBlockingMessagesIdentifiers
+	 * @param participantInfiniteBlockingMessagesWaitingMinutesMin
+	 * @param participantInfiniteBlockingMessagesWaitingMinutesMax
+	 */
+	public void cacheNewInfiniteBlockingMessagesInformationForParticipant(
+			ObjectId participantId,
+			int participantInfiniteBlockingMessagesCount,
+			HashSet<String> participantInfiniteBlockingMessagesIdentifiers,
+			double participantInfiniteBlockingMessagesWaitingMinutesMin,
+			double participantInfiniteBlockingMessagesWaitingMinutesMax) {
+
+		val participantHexId = participantId.toHexString();
+
+		synchronized (participantInfiniteBlockingMessagesCache) {
+			Hashtable<String, String> infiniteBlockingMessagesCache;
+			if (participantInfiniteBlockingMessagesCache
+					.containsKey(participantHexId)) {
+				// Use cache
+				infiniteBlockingMessagesCache = participantInfiniteBlockingMessagesCache
+						.get(participantHexId);
+			} else {
+				// Create cache
+				infiniteBlockingMessagesCache = new Hashtable<String, String>();
+
+				participantInfiniteBlockingMessagesCache.put(participantHexId,
+						infiniteBlockingMessagesCache);
+			}
+
+			infiniteBlockingMessagesCache.put(
+					"participantInfiniteBlockingMessagesCount",
+					String.valueOf(participantInfiniteBlockingMessagesCount));
+			infiniteBlockingMessagesCache.put(
+					"participantInfiniteBlockingMessagesIdentifiers",
+					StringUtils.join(
+							participantInfiniteBlockingMessagesIdentifiers,
+							","));
+			infiniteBlockingMessagesCache.put(
+					"participantInfiniteBlockingMessagesWaitingMinutesMin",
+					String.valueOf(
+							participantInfiniteBlockingMessagesWaitingMinutesMin));
+			infiniteBlockingMessagesCache.put(
+					"participantInfiniteBlockingMessagesWaitingMinutesMax",
+					String.valueOf(
+							participantInfiniteBlockingMessagesWaitingMinutesMax));
+		}
 	}
 
 	@Synchronized
@@ -750,6 +864,8 @@ public class VariablesManagerService {
 			final ObjectId participantId) {
 		synchronized (participantsVariablesCache) {
 			participantsVariablesCache.remove(participantId.toHexString());
+			participantInfiniteBlockingMessagesCache
+					.remove(participantId.toHexString());
 		}
 	}
 
