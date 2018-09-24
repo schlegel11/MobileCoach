@@ -40,10 +40,12 @@ import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.MicroDialogRule;
 import ch.ethz.mc.model.persistent.MonitoringReplyRule;
 import ch.ethz.mc.model.persistent.MonitoringRule;
+import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.consistency.DataModelConfiguration;
 import ch.ethz.mc.model.persistent.types.BackendUserTypes;
 import ch.ethz.mc.tools.BCrypt;
 import ch.ethz.mc.tools.DataModelUpdateManager;
+import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
@@ -341,6 +343,28 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 		log.info("{} links checked.", linksChecked);
 
 		log.info("Database consistency ensured.");
+	}
+
+	/**
+	 * Corrects potentially wrong participant timings
+	 * 
+	 * @param databaseManagerService
+	 */
+	@Synchronized
+	public void ensureSensefulParticipantTimings() {
+		log.info("Ensuring senseful participant login/logout timinigs...");
+
+		val participants = findModelObjects(Participant.class,
+				Queries.PARTICIPANT__WHERE_LAST_LOGIN_TIME_IS_BIGGER_THAN_LAST_LOGOUT_TIME);
+
+		for (val participant : participants) {
+			participant.setLastLogoutTimestamp(
+					participant.getLastLoginTimestamp());
+
+			saveModelObject(participant);
+		}
+
+		log.info("Done.");
 	}
 
 	/**

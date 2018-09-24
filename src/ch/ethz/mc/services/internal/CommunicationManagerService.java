@@ -245,14 +245,11 @@ public class CommunicationManagerService {
 	}
 
 	public static CommunicationManagerService prepare(
-			final VariablesManagerService variablesManagerService,
-			final DatabaseManagerService databaseManagerService)
+			final VariablesManagerService variablesManagerService)
 			throws Exception {
 		if (instance == null) {
 			instance = new CommunicationManagerService(variablesManagerService);
 		}
-
-		instance.ensureSensefulParticipantTimings(databaseManagerService);
 
 		return instance;
 	}
