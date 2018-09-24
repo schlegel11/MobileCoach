@@ -35,6 +35,7 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.MC;
@@ -1361,6 +1362,26 @@ public class InterventionAdministrationManagerService {
 			}
 
 			microDialogMessage.setStoreValueToVariableWithName(variableName);
+
+			databaseManagerService.saveModelObject(microDialogMessage);
+		}
+	}
+
+	@Synchronized
+	public void microDialogMessageSetNonUniqueKey(
+			final MicroDialogMessage microDialogMessage,
+			final String nonUniqueKey) throws NotificationMessageException {
+		if (StringUtils.isBlank(nonUniqueKey)) {
+			microDialogMessage.setNonUniqueKey(null);
+
+			databaseManagerService.saveModelObject(microDialogMessage);
+		} else {
+			if (!StringValidator.isValidNonUniqueKey(nonUniqueKey)) {
+				throw new NotificationMessageException(
+						AdminMessageStrings.NOTIFICATION__THE_GIVEN_NON_UNIQUE_KEY_IS_NOT_VALID);
+			}
+
+			microDialogMessage.setNonUniqueKey(nonUniqueKey);
 
 			databaseManagerService.saveModelObject(microDialogMessage);
 		}

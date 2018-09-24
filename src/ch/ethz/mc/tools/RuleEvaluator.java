@@ -462,6 +462,30 @@ public class RuleEvaluator {
 					}
 
 					break;
+				case TEXT_VALUE_MATCHES_KEY:
+					for (val splitValue : ruleEvaluationResult
+							.getTextRuleComparisonTermValue().split(",")) {
+						if (ruleEvaluationResult.getTextRuleValue()
+								.equals(splitValue)) {
+							ruleEvaluationResult
+									.setRuleMatchesEquationSign(true);
+							break;
+						}
+					}
+					break;
+				case TEXT_VALUE_NOT_MATCHES_KEY:
+					ruleEvaluationResult.setRuleMatchesEquationSign(true);
+
+					for (val splitValue : ruleEvaluationResult
+							.getTextRuleComparisonTermValue().split(",")) {
+						if (ruleEvaluationResult.getTextRuleValue()
+								.equals(splitValue)) {
+							ruleEvaluationResult
+									.setRuleMatchesEquationSign(false);
+							break;
+						}
+					}
+					break;
 				case DATE_DIFFERENCE_VALUE_EQUALS:
 					calendarDiff1 = StringHelpers
 							.createInternalDateCalendarRepresentation(

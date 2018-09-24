@@ -1129,11 +1129,10 @@ public class InterventionExecutionManagerService {
 
 					participantInfiniteBlockingMessagesCount++;
 
-					if (!StringUtils.isBlank(relatedMicroDialogMessage
-							.getNonUniqueIdentifier())) {
-						participantInfiniteBlockingMessagesIdentifiers
-								.add(relatedMicroDialogMessage
-										.getNonUniqueIdentifier());
+					if (!StringUtils.isBlank(
+							relatedMicroDialogMessage.getNonUniqueKey())) {
+						participantInfiniteBlockingMessagesIdentifiers.add(
+								relatedMicroDialogMessage.getNonUniqueKey());
 					}
 					final double minutesWaitingForAnswer = (InternalDateTime
 							.currentTimeMillis()
