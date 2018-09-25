@@ -1,5 +1,8 @@
 package ch.ethz.mc.services.internal;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -21,6 +24,8 @@ package ch.ethz.mc.services.internal;
  * the License.
  */
 import java.io.StringReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -52,6 +57,9 @@ import org.bson.types.ObjectId;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.Queries;
@@ -66,6 +74,7 @@ import ch.ethz.mc.services.InterventionExecutionManagerService;
 import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.tools.VariableStringReplacer;
+import lombok.Cleanup;
 import lombok.Getter;
 import lombok.Synchronized;
 import lombok.val;
@@ -79,6 +88,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class CommunicationManagerService {
 	private static CommunicationManagerService		instance		= null;
+
+	private static final String						ASPSMS_API_URL	= "https://json.aspsms.com/SendSimpleTextSMS";
 
 	private final boolean							simulatorActive;
 
@@ -109,16 +120,14 @@ public class CommunicationManagerService {
 	private final String							emailSubjectForTeamManager;
 	private final String							emailTemplateForTeamManager;
 
-	private final String							smsEmailFrom;
 	private final String							smsMailSubjectStartsWith;
-	private final String							smsEmailTo;
 	private final String							smsUserKey;
 	private final String							smsUserPassword;
 
 	private final DocumentBuilderFactory			documentBuilderFactory;
 	private final SimpleDateFormat					receiverDateFormat;
 
-	private final List<MailingThread>				runningMailingThreads;
+	private final List<AsyncSendingThread>			runningAsyncSendingThreads;
 
 	private final ConcurrentHashMap<String, Long>	lastTeamManagerNotificationsCache;
 
@@ -129,7 +138,7 @@ public class CommunicationManagerService {
 
 		this.variablesManagerService = variablesManagerService;
 
-		runningMailingThreads = new ArrayList<MailingThread>();
+		runningAsyncSendingThreads = new ArrayList<AsyncSendingThread>();
 
 		lastTeamManagerNotificationsCache = new ConcurrentHashMap<String, Long>();
 
@@ -168,8 +177,6 @@ public class CommunicationManagerService {
 
 		// SMS configuration
 		smsMailSubjectStartsWith = Constants.getSmsMailSubjectStartsWith();
-		smsEmailFrom = Constants.getSmsEmailFrom();
-		smsEmailTo = Constants.getSmsEmailTo();
 		smsUserKey = Constants.getSmsUserKey();
 		smsUserPassword = Constants.getSmsUserPassword();
 
@@ -295,11 +302,11 @@ public class CommunicationManagerService {
 		}
 
 		log.debug("Stopping mailing threads...");
-		synchronized (runningMailingThreads) {
-			for (val runningMailingThread : runningMailingThreads) {
-				synchronized (runningMailingThread) {
-					runningMailingThread.interrupt();
-					runningMailingThread.join();
+		synchronized (runningAsyncSendingThreads) {
+			for (val runningAsyncSendingThread : runningAsyncSendingThreads) {
+				synchronized (runningAsyncSendingThread) {
+					runningAsyncSendingThread.interrupt();
+					runningAsyncSendingThread.join();
 				}
 			}
 		}
@@ -341,13 +348,13 @@ public class CommunicationManagerService {
 			case SMS:
 			case SUPERVISOR_SMS:
 				if (smsActive) {
-					val mailingThread = new MailingThread(dialogOption,
+					val mailingThread = new AsyncSendingThread(dialogOption,
 							dialogMessage.getId(), messageSender,
 							dialogMessage.getMessageWithForcedLinks(),
 							dialogMessage.isMessageExpectsAnswer());
 
-					synchronized (runningMailingThreads) {
-						runningMailingThreads.add(mailingThread);
+					synchronized (runningAsyncSendingThreads) {
+						runningAsyncSendingThreads.add(mailingThread);
 					}
 
 					mailingThread.start();
@@ -356,13 +363,13 @@ public class CommunicationManagerService {
 			case EMAIL:
 			case SUPERVISOR_EMAIL:
 				if (emailActive) {
-					val mailingThread = new MailingThread(dialogOption,
+					val mailingThread = new AsyncSendingThread(dialogOption,
 							dialogMessage.getId(), messageSender,
 							dialogMessage.getMessageWithForcedLinks(),
 							dialogMessage.isMessageExpectsAnswer());
 
-					synchronized (runningMailingThreads) {
-						runningMailingThreads.add(mailingThread);
+					synchronized (runningAsyncSendingThreads) {
+						runningAsyncSendingThreads.add(mailingThread);
 					}
 
 					mailingThread.start();
@@ -642,21 +649,21 @@ public class CommunicationManagerService {
 	}
 
 	/**
-	 * Enables threaded sending of mailing messages, with retries
+	 * Enables threaded sending of messages, with retries
 	 *
 	 * @author Andreas Filler
 	 */
-	private class MailingThread extends Thread {
+	private class AsyncSendingThread extends Thread {
 		private final DialogOption	dialogOption;
 		private final ObjectId		dialogMessageId;
 		private final String		messageSender;
 		private final String		message;
 		private final boolean		messageExpectsAnswer;
 
-		public MailingThread(final DialogOption dialogOption,
+		public AsyncSendingThread(final DialogOption dialogOption,
 				final ObjectId dialogMessageId, final String smsPhoneNumberFrom,
 				final String message, final boolean messageExpectsAnswer) {
-			setName("Mailing Thread " + dialogOption.getData());
+			setName("Async Sending Thread " + dialogOption.getData());
 			this.dialogOption = dialogOption;
 			this.dialogMessageId = dialogMessageId;
 			messageSender = smsPhoneNumberFrom;
@@ -753,13 +760,13 @@ public class CommunicationManagerService {
 		}
 
 		private void removeFromList() {
-			synchronized (runningMailingThreads) {
-				runningMailingThreads.remove(this);
+			synchronized (runningAsyncSendingThreads) {
+				runningAsyncSendingThreads.remove(this);
 			}
 		}
 
 		/**
-		 * Sends mailing messages
+		 * Async send messages
 		 *
 		 * @param dialogOption
 		 * @param messageSender
@@ -769,25 +776,82 @@ public class CommunicationManagerService {
 		 */
 		private void sendMessage(final DialogOption dialogOption,
 				final String messageSender, final String message)
-				throws AddressException, MessagingException {
+				throws Exception {
 			log.debug("Sending message with text {} to {}", message,
 					dialogOption.getData());
 
 			switch (dialogOption.getType()) {
 				case SMS:
 				case SUPERVISOR_SMS:
-					val SMSMailMessage = new MimeMessage(outgoingMailSession);
+					HttpURLConnection conn = null;
+					try {
+						final URL url = new URL(ASPSMS_API_URL);
+						conn = (HttpURLConnection) url.openConnection();
 
-					SMSMailMessage.setFrom(new InternetAddress(smsEmailFrom));
-					SMSMailMessage.addRecipient(Message.RecipientType.TO,
-							new InternetAddress(smsEmailTo));
-					SMSMailMessage.setSubject("UserKey=" + smsUserKey
-							+ ",Password=" + smsUserPassword + ",Recipient="
-							+ dialogOption.getData() + ",Originator="
-							+ messageSender + ",Notify=none");
-					SMSMailMessage.setText(message, "ISO-8859-1");
+						conn.setUseCaches(false);
+						conn.setDoInput(true);
+						conn.setDoOutput(true);
 
-					Transport.send(SMSMailMessage);
+						conn.setRequestMethod("POST");
+						conn.setRequestProperty("Content-Type",
+								"application/json");
+
+						final JsonObject jsonObject = new JsonObject();
+
+						jsonObject.addProperty("UserName", smsUserKey);
+						jsonObject.addProperty("Password", smsUserPassword);
+						jsonObject.addProperty("Originator", messageSender);
+						val recipients = new JsonArray();
+						recipients.add(dialogOption.getData());
+						jsonObject.add("Recipients", recipients);
+						jsonObject.addProperty("MessageText", message);
+						jsonObject.addProperty("ForceGSM7bit", false);
+
+						@Cleanup
+						final OutputStreamWriter wr = new OutputStreamWriter(
+								conn.getOutputStream());
+						wr.write(jsonObject.toString());
+						wr.flush();
+						int status = 0;
+
+						if (null != conn) {
+							status = conn.getResponseCode();
+						}
+
+						if (status == 200) {
+							@Cleanup
+							val reader = new BufferedReader(
+									new InputStreamReader(
+											conn.getInputStream()));
+							val response = reader.readLine();
+
+							if (response.equals("")) {
+								log.debug(
+										"Message accepted by ASPSMS gateway.");
+							} else {
+								log.warn("Message rejected by ASPSMS gateway: ",
+										response);
+							}
+						} else {
+							log.warn("Message rejected by ASPSMS gateway: ",
+									status);
+
+							throw new Exception(
+									"Message rejected: Status code " + status);
+						}
+						conn.disconnect();
+					} catch (final Exception e) {
+						log.debug(
+								"Message rejected by ASPSMS gateway or connection failed: ",
+								e.getMessage());
+
+						throw e;
+					} finally {
+						if (conn != null) {
+							conn.disconnect();
+						}
+					}
+
 					break;
 				case EMAIL:
 				case SUPERVISOR_EMAIL:
@@ -816,8 +880,8 @@ public class CommunicationManagerService {
 		}
 	}
 
-	public int getMessagingThreadCount() {
-		return runningMailingThreads.size();
+	public int getAsyncSendingThreadCount() {
+		return runningAsyncSendingThreads.size();
 	}
 
 	public void sendDashboardChatNotification(final boolean sendToParticipant,

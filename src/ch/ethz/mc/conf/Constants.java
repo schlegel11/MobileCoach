@@ -237,10 +237,6 @@ public class Constants {
 	@Getter
 	private static boolean		smsActive								= true;
 	@Getter
-	private static String		smsEmailFrom							= "a@b.eu";
-	@Getter
-	private static String		smsEmailTo								= "c@d.eu";
-	@Getter
 	private static String		smsMailSubjectStartsWith				= "SMS received on";
 	@Getter
 	private static String		smsUserKey								= "abc";

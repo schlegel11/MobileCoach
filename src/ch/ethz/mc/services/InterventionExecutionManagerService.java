@@ -2055,9 +2055,9 @@ public class InterventionExecutionManagerService {
 										continue;
 									}
 									if (communicationManagerService
-											.getMessagingThreadCount() > ImplementationConstants.EMAIL_SENDING_MAXIMUM_THREAD_COUNT) {
+											.getAsyncSendingThreadCount() > ImplementationConstants.ASYNC_SENDING_MAXIMUM_THREAD_COUNT) {
 										log.debug(
-												"Too many email based messages currently prepared for sending...delay until the next run");
+												"Too many async sending threads currently prepared for sending...delay until the next run");
 										continue;
 									}
 									break;

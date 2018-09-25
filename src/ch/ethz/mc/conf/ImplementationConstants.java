@@ -71,7 +71,7 @@ public class ImplementationConstants {
 	public static final long	EMAIL_SENDING_RETRIES																= 2;
 	public static final long	EMAIL_SENDING_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS								= 2
 			* 60;
-	public static final int		EMAIL_SENDING_MAXIMUM_THREAD_COUNT													= 25;
+	public static final int		ASYNC_SENDING_MAXIMUM_THREAD_COUNT													= 25;
 
 	public static final long	SIMULATOR_TIME_UPDATE_INTERVAL_IN_SECONDS											= 5;
 
