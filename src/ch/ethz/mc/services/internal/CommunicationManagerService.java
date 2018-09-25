@@ -823,9 +823,15 @@ public class CommunicationManagerService {
 							val reader = new BufferedReader(
 									new InputStreamReader(
 											conn.getInputStream()));
-							val response = reader.readLine();
 
-							if (response.equals("")) {
+							final StringBuffer response = new StringBuffer();
+							String line;
+							while ((line = reader.readLine()) != null) {
+								response.append(line);
+							}
+
+							if (response.toString()
+									.contains("\"StatusCode\":\"1\"")) {
 								log.debug(
 										"Message accepted by ASPSMS gateway.");
 							} else {
