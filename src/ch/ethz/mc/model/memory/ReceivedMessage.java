@@ -72,4 +72,12 @@ public class ReceivedMessage {
 	@Getter
 	@Setter
 	private long				receivedTimestamp;
+
+	@Getter
+	@Setter
+	private String				mediaURL;
+
+	@Getter
+	@Setter
+	private String				mediaType;
 }

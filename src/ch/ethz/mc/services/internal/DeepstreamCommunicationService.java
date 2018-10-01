@@ -622,6 +622,15 @@ public class DeepstreamCommunicationService extends Thread
 							receivedMessage.getReceivedTimestamp());
 					messageConfirmationObject.addProperty(
 							DeepstreamConstants.LAST_MODIFIED, timestamp);
+					if (receivedMessage.getMediaURL() != null
+							&& receivedMessage.getMediaType() != null) {
+						messageConfirmationObject.addProperty(
+								DeepstreamConstants.CONTAINS_MEDIA,
+								receivedMessage.getMediaURL());
+						messageConfirmationObject.addProperty(
+								DeepstreamConstants.MEDIA_TYPE,
+								receivedMessage.getMediaType());
+					}
 				}
 
 				if (messageConfirmationObject != null) {
@@ -1242,6 +1251,17 @@ public class DeepstreamCommunicationService extends Thread
 											DeepstreamConstants.USER_TIMESTAMP)
 											.getAsLong(),
 									jsonData.has(
+											DeepstreamConstants.CONTAINS_MEDIA)
+													? jsonData
+															.get(DeepstreamConstants.CONTAINS_MEDIA)
+															.getAsString()
+													: null,
+									jsonData.has(DeepstreamConstants.MEDIA_TYPE)
+											? jsonData
+													.get(DeepstreamConstants.MEDIA_TYPE)
+													.getAsString()
+											: null,
+									jsonData.has(
 											DeepstreamConstants.RELATED_MESSAGE_ID)
 													? jsonData
 															.get(DeepstreamConstants.RELATED_MESSAGE_ID)
@@ -1324,7 +1344,7 @@ public class DeepstreamCommunicationService extends Thread
 									jsonData.get(
 											DeepstreamConstants.USER_TIMESTAMP)
 											.getAsLong(),
-									-1,
+									null, null, -1,
 									jsonData.has(DeepstreamConstants.CLIENT_ID)
 											? jsonData
 													.get(DeepstreamConstants.CLIENT_ID)
@@ -1465,6 +1485,8 @@ public class DeepstreamCommunicationService extends Thread
 	 * @param content
 	 * @param text
 	 * @param timestamp
+	 * @param containsMedia
+	 * @param mediaType
 	 * @param relatedMessageIdBasedOnOrder
 	 * @param clientId
 	 * @param typeIntention
@@ -1472,9 +1494,9 @@ public class DeepstreamCommunicationService extends Thread
 	 */
 	private boolean receiveUserMessage(final String participantId,
 			final String message, final String intention, final String content,
-			final String text, final long timestamp,
-			final int relatedMessageIdBasedOnOrder, final String clientId,
-			final boolean typeIntention) {
+			final String text, final long timestamp, final String containsMedia,
+			final String mediaType, final int relatedMessageIdBasedOnOrder,
+			final String clientId, final boolean typeIntention) {
 		log.debug("Received {} message for participant {}",
 				typeIntention ? "intention" : "regular", participantId);
 
@@ -1494,6 +1516,8 @@ public class DeepstreamCommunicationService extends Thread
 		receivedMessage.setContent(content);
 		receivedMessage.setText(text);
 		receivedMessage.setReceivedTimestamp(timestamp);
+		receivedMessage.setMediaURL(containsMedia);
+		receivedMessage.setMediaType(mediaType);
 		receivedMessage
 				.setRelatedMessageIdBasedOnOrder(relatedMessageIdBasedOnOrder);
 
