@@ -275,4 +275,6 @@ public class Queries {
 	public static final String	UPDATE_VERSION_40__AUTHOR_INTERVENTION_ACCESS__CHANGE_1																																							= "{'author':#}";
 	public static final String	UPDATE_VERSION_41__MICRO_DIALOG_MESSAGE__CHANGE_1																																								= "{$set:{'nonUniqueKey':null}}";
 	public static final String	UPDATE_VERSION_41__PARTICIPANT__CHANGE_1																																										= "{$set:{'responsibleTeamManagerEmail':null}}";
+	public static final String	UPDATE_VERSION_42__MONITORING_MESSAGE__CHANGE_1																																									= "{$set:{'pushOnly':false}}";
+	public static final String	UPDATE_VERSION_42__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'pushOnly':false}}";
 }

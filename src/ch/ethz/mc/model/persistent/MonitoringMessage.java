@@ -90,6 +90,14 @@ public class MonitoringMessage extends ModelObject {
 	private int					order;
 
 	/**
+	 * <strong>OPTIONAL:</strong> The message will be pushed, but will not
+	 * appear in the chat
+	 */
+	@Getter
+	@Setter
+	private boolean				pushOnly			= false;
+
+	/**
 	 * <strong>OPTIONAL:</strong> The {@link MediaObject} used/presented in this
 	 * {@link MonitoringMessage}
 	 */

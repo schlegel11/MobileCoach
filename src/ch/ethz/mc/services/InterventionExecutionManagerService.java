@@ -327,6 +327,8 @@ public class InterventionExecutionManagerService {
 			final int minutesUntilHandledAsNotAnswered) {
 		log.debug("Create message and prepare for sending");
 		val dialogMessage = new DialogMessage(participant.getId(), 0,
+				relatedMonitoringMessage == null ? false
+						: relatedMonitoringMessage.isPushOnly(),
 				DialogMessageStatusTypes.PREPARED_FOR_SENDING, type, null,
 				message, message, answerType, answerOptions, null, null, null,
 				null, null, timestampToSendMessage, -1, supervisorMessage,
@@ -689,7 +691,7 @@ public class InterventionExecutionManagerService {
 			answerRaw = receivedMessage.getMessage();
 		}
 
-		val dialogMessage = new DialogMessage(participantId, 0,
+		val dialogMessage = new DialogMessage(participantId, 0, false,
 				isTypeIntention ? DialogMessageStatusTypes.RECEIVED_AS_INTENTION
 						: DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY,
 				type, receivedMessage.getClientId(), "", "", null, null, null,

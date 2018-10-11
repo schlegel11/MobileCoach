@@ -794,7 +794,7 @@ public class InterventionAdministrationManagerService {
 	public MonitoringMessage monitoringMessageCreate(
 			final ObjectId monitoringMessageGroupId) {
 		val monitoringMessage = new MonitoringMessage(monitoringMessageGroupId,
-				new LString(), false, 0, null, null, null,
+				new LString(), false, 0, false, null, null, null,
 				AnswerTypes.FREE_TEXT, new LString(),
 				GlobalUniqueIdGenerator.createSimpleGlobalUniqueId());
 
@@ -864,6 +864,15 @@ public class InterventionAdministrationManagerService {
 			final MonitoringMessage monitoringMessage,
 			final boolean isCommandMessage) {
 		monitoringMessage.setCommandMessage(isCommandMessage);
+
+		databaseManagerService.saveModelObject(monitoringMessage);
+	}
+
+	@Synchronized
+	public void monitoringMessageSetIsPushOnlyMessage(
+			final MonitoringMessage monitoringMessage,
+			final boolean isPushOnlyMessage) {
+		monitoringMessage.setPushOnly(isPushOnlyMessage);
 
 		databaseManagerService.saveModelObject(monitoringMessage);
 	}
