@@ -874,9 +874,11 @@ public class VariablesManagerService {
 	public void participantInvalidateVariableCache(
 			final ObjectId participantId) {
 		synchronized (participantsVariablesCache) {
-			participantsVariablesCache.remove(participantId.toHexString());
-			participantInfiniteBlockingMessagesCache
-					.remove(participantId.toHexString());
+			synchronized (participantInfiniteBlockingMessagesCache) {
+				participantsVariablesCache.remove(participantId.toHexString());
+				participantInfiniteBlockingMessagesCache
+						.remove(participantId.toHexString());
+			}
 		}
 	}
 
