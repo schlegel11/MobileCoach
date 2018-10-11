@@ -378,33 +378,59 @@ public class CommunicationManagerService {
 			case EXTERNAL_ID:
 			case SUPERVISOR_EXTERNAL_ID:
 				int visibleMessagesSentSinceLogout = 0;
-				if (dialogOption.getData().startsWith(
-						ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM)
-						&& deepstreamActive) {
-					try {
-						visibleMessagesSentSinceLogout = deepstreamCommunicationService
-								.asyncSendMessage(dialogOption,
-										dialogMessage.getId());
-					} catch (final Exception e) {
-						log.warn("Could not send message using deepstream: {}",
-								e.getMessage());
+
+				if (!dialogMessage.isPushOnly()) {
+					// Send only visible messages
+					if (dialogOption.getData().startsWith(
+							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM)
+							&& deepstreamActive) {
+						try {
+							visibleMessagesSentSinceLogout = deepstreamCommunicationService
+									.asyncSendMessage(dialogOption,
+											dialogMessage.getId());
+						} catch (final Exception e) {
+							log.warn(
+									"Could not send message using deepstream: {}",
+									e.getMessage());
+						}
+					} else {
+						log.warn(
+								"No appropriate handler could be found for external id dialog option with data {}",
+								dialogOption.getData());
 					}
 				} else {
-					log.warn(
-							"No appropriate handler could be found for external id dialog option with data {}",
-							dialogOption.getData());
+					// Mark push only push messages as sent
+					if (dialogMessage.isMessageExpectsAnswer()) {
+						interventionExecutionManagerService
+								.dialogMessageStatusChangesForSending(
+										dialogMessage.getId(),
+										DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
+										InternalDateTime.currentTimeMillis());
+					} else {
+						interventionExecutionManagerService
+								.dialogMessageStatusChangesForSending(
+										dialogMessage.getId(),
+										DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
+										InternalDateTime.currentTimeMillis());
+					}
+
 				}
+
 				// Only send push notifications if
 				// (1) it is switched on in general
-				// (2) if the message was really sent to out
-				// (3) it is a visible message
+				// (2) if the message was really sent to out / will in general
+				// not be sent, because it's push only
+				// (3) it is a visible message / a forced push message
 				if (pushNotificationsActive
-						&& visibleMessagesSentSinceLogout > 0 && dialogMessage
+						&& (visibleMessagesSentSinceLogout > 0
+								|| dialogMessage.isPushOnly())
+						&& dialogMessage
 								.getType() != DialogMessageTypes.COMMAND) {
 					try {
 						pushNotificationService.asyncSendPushNotification(
 								dialogOption, dialogMessage.getMessage(),
-								visibleMessagesSentSinceLogout);
+								visibleMessagesSentSinceLogout,
+								dialogMessage.isPushOnly());
 					} catch (final Exception e) {
 						log.warn("Could not send push notification: {}",
 								e.getMessage());
@@ -895,7 +921,7 @@ public class CommunicationManagerService {
 			final int visibleMessagesSentSinceLogout,
 			final String dialogOptionData) {
 		if (sendToParticipant && pushNotificationsActive) {
-			// Massage by team manager (send push notification to participant)
+			// Message by team manager (send push notification to participant)
 
 			if (visibleMessagesSentSinceLogout > 0) {
 				val dialogOption = interventionExecutionManagerService
@@ -909,7 +935,7 @@ public class CommunicationManagerService {
 								dialogOption,
 								ImplementationConstants.TEAM_MANAGER_PUSH_NOTIFICATION_PREFIX
 										+ message,
-								visibleMessagesSentSinceLogout);
+								visibleMessagesSentSinceLogout, false);
 					} catch (final Exception e) {
 						log.warn(
 								"Could not send team manager caused push notification: {}",
