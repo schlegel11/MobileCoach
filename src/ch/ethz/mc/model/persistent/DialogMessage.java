@@ -71,6 +71,14 @@ public class DialogMessage extends ModelObject {
 	private int							order;
 
 	/**
+	 * <strong>OPTIONAL:</strong> The message will be pushed, but will not
+	 * appear in the chat
+	 */
+	@Getter
+	@Setter
+	private boolean						pushOnly			= false;
+
+	/**
 	 * The status of the {@link DialogMessage}; all statuses follow each other
 	 * except for the last two: a {@link DialogMessage} can only have one of
 	 * them

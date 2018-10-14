@@ -140,6 +140,12 @@ public class DataModelUpdateManager {
 				case 40:
 					updateToVersion40();
 					break;
+				case 41:
+					updateToVersion41();
+					break;
+				case 42:
+					updateToVersion42();
+					break;
 			}
 
 			log.info("Update to version {} done", updateToVersionInThisStep);
@@ -147,8 +153,7 @@ public class DataModelUpdateManager {
 			// set new version
 			val configurationCollection = jongo
 					.getCollection(Constants.DATA_MODEL_CONFIGURATION);
-			val configuration = configurationCollection
-					.findOne(Queries.EVERYTHING)
+			val configuration = configurationCollection.findOne(Queries.ALL)
 					.as(DataModelConfiguration.class);
 			configuration.setVersion(updateToVersionInThisStep);
 			configurationCollection.save(configuration);
@@ -178,7 +183,7 @@ public class DataModelUpdateManager {
 		for (val collectionName : collectionsToChange) {
 			log.debug("Adjusting comment of collection {}", collectionName);
 			val collection = jongo.getCollection(collectionName);
-			collection.update(Queries.EVERYTHING).multi()
+			collection.update(Queries.ALL).multi()
 					.with(Queries.UPDATE_VERSION_5__GENERAL_UPDATE_FOR_COMMENT);
 		}
 	}
@@ -188,12 +193,12 @@ public class DataModelUpdateManager {
 	 */
 	private static void updateToVersion6() {
 		val interventionCollection = jongo.getCollection("Intervention");
-		interventionCollection.update(Queries.EVERYTHING).multi()
+		interventionCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_6__INTERVENTION__CHANGE_1);
 
 		val screeningSurveySlideCollection = jongo
 				.getCollection("ScreeningSurveySlide");
-		screeningSurveySlideCollection.update(Queries.EVERYTHING).multi().with(
+		screeningSurveySlideCollection.update(Queries.ALL).multi().with(
 				Queries.UPDATE_VERSION_6__SCREENING_SURVEY_SLIDE__CHANGE_1);
 	}
 
@@ -202,16 +207,16 @@ public class DataModelUpdateManager {
 	 */
 	private static void updateToVersion7() {
 		val monitoringRuleCollection = jongo.getCollection("MonitoringRule");
-		monitoringRuleCollection.update(Queries.EVERYTHING).multi()
+		monitoringRuleCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_7__MONITORING_RULE__CHANGE_1);
 
 		val monitoringReplyRuleCollection = jongo
 				.getCollection("MonitoringReplyRule");
-		monitoringReplyRuleCollection.update(Queries.EVERYTHING).multi().with(
+		monitoringReplyRuleCollection.update(Queries.ALL).multi().with(
 				Queries.UPDATE_VERSION_7__MONITORING_REPLY_RULE__CHANGE_1);
 
 		val dialogMessageCollection = jongo.getCollection("DialogMessage");
-		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+		dialogMessageCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_7__DIALOG_MESSAGE__CHANGE_1);
 	}
 
@@ -220,9 +225,9 @@ public class DataModelUpdateManager {
 	 */
 	private static void updateToVersion9() {
 		val interventionCollection = jongo.getCollection("Intervention");
-		interventionCollection.update(Queries.EVERYTHING).multi()
+		interventionCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_9__INTERVENTION__CHANGE_1);
-		interventionCollection.update(Queries.EVERYTHING).multi()
+		interventionCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_9__INTERVENTION__CHANGE_2);
 	}
 
@@ -231,9 +236,9 @@ public class DataModelUpdateManager {
 	 */
 	private static void updateToVersion10() {
 		val interventionCollection = jongo.getCollection("Intervention");
-		interventionCollection.update(Queries.EVERYTHING).multi()
+		interventionCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_10__INTERVENTION__CHANGE_1);
-		interventionCollection.update(Queries.EVERYTHING).multi()
+		interventionCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_10__INTERVENTION__CHANGE_2);
 	}
 
@@ -242,7 +247,7 @@ public class DataModelUpdateManager {
 	 */
 	private static void updateToVersion11() {
 		val interventionCollection = jongo.getCollection("Intervention");
-		interventionCollection.update(Queries.EVERYTHING).multi()
+		interventionCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_11__INTERVENTION__CHANGE_1);
 	}
 
@@ -251,11 +256,11 @@ public class DataModelUpdateManager {
 	 */
 	private static void updateToVersion12() {
 		val monitoringRuleCollection = jongo.getCollection("MonitoringRule");
-		monitoringRuleCollection.update(Queries.EVERYTHING).multi()
+		monitoringRuleCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_12__MONITORING_RULE__CHANGE_1);
 
 		val interventionCollection = jongo.getCollection("Intervention");
-		val interventions = interventionCollection.find(Queries.EVERYTHING)
+		val interventions = interventionCollection.find(Queries.ALL)
 				.as(InterventionV12.class);
 
 		for (val intervention : interventions) {
@@ -304,7 +309,7 @@ public class DataModelUpdateManager {
 	 */
 	private static void updateToVersion13() {
 		val monitoringRulesCollection = jongo.getCollection("MonitoringRule");
-		monitoringRulesCollection.update(Queries.EVERYTHING).multi()
+		monitoringRulesCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_13__MONITORING_RULE__CHANGE_1);
 	}
 
@@ -313,11 +318,11 @@ public class DataModelUpdateManager {
 	 */
 	private static void updateToVersion14() {
 		val dialogMessageCollection = jongo.getCollection("DialogMessage");
-		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+		dialogMessageCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_14__DIALOG_MESSAGE__CHANGE_1);
 		val monitoringMessageCollection = jongo
 				.getCollection("MonitoringMessage");
-		monitoringMessageCollection.update(Queries.EVERYTHING).multi()
+		monitoringMessageCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_14__MONITORING_MESSAGE__CHANGE_1);
 	}
 
@@ -338,11 +343,11 @@ public class DataModelUpdateManager {
 							Queries.UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_1_FIELD));
 		}
 
-		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+		dialogMessageCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_2);
-		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+		dialogMessageCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_3);
-		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+		dialogMessageCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_15__DIALOG_MESSAGE__CHANGE_4);
 	}
 
@@ -352,15 +357,15 @@ public class DataModelUpdateManager {
 	private static void updateToVersion16() {
 		val monitoringMessageCollection = jongo
 				.getCollection("MonitoringMessage");
-		monitoringMessageCollection.update(Queries.EVERYTHING).multi()
+		monitoringMessageCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_16__MONITORING_MESSAGE__CHANGE_1);
-		monitoringMessageCollection.update(Queries.EVERYTHING).multi()
+		monitoringMessageCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_16__MONITORING_MESSAGE__CHANGE_2);
 
 		val dialogMessageCollection = jongo.getCollection("DialogMessage");
-		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+		dialogMessageCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_16__DIALOG_MESSAGE__CHANGE_1);
-		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+		dialogMessageCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_16__DIALOG_MESSAGE__CHANGE_2);
 
 		val mongoDriverMonitoringRuleCollection = jongo.getDatabase()
@@ -413,9 +418,9 @@ public class DataModelUpdateManager {
 		val mongoDriverMonitoringRuleCollection = jongo.getDatabase()
 				.getCollection("MonitoringRule");
 		val monitoringRuleCollection = jongo.getCollection("MonitoringRule");
-		monitoringRuleCollection.update(Queries.EVERYTHING).multi().with(
+		monitoringRuleCollection.update(Queries.ALL).multi().with(
 				Queries.UPDATE_VERSION_20__ABSTRACT_MONITORING_RULE__CHANGE_1);
-		monitoringRuleCollection.update(Queries.EVERYTHING).multi().with(
+		monitoringRuleCollection.update(Queries.ALL).multi().with(
 				Queries.UPDATE_VERSION_20__ABSTRACT_MONITORING_RULE__CHANGE_2);
 
 		for (final DBObject document : mongoDriverMonitoringRuleCollection
@@ -439,15 +444,15 @@ public class DataModelUpdateManager {
 
 		val monitoringReplyRuleCollection = jongo
 				.getCollection("MonitoringReplyRule");
-		monitoringReplyRuleCollection.update(Queries.EVERYTHING).multi().with(
+		monitoringReplyRuleCollection.update(Queries.ALL).multi().with(
 				Queries.UPDATE_VERSION_20__ABSTRACT_MONITORING_RULE__CHANGE_1);
-		monitoringReplyRuleCollection.update(Queries.EVERYTHING).multi().with(
+		monitoringReplyRuleCollection.update(Queries.ALL).multi().with(
 				Queries.UPDATE_VERSION_20__ABSTRACT_MONITORING_RULE__CHANGE_2);
 
 		val dialogMessageCollection = jongo.getCollection("DialogMessage");
-		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+		dialogMessageCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_20__DIALOG_MESSAGE__CHANGE_1);
-		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+		dialogMessageCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_20__DIALOG_MESSAGE__CHANGE_2);
 	}
 
@@ -456,7 +461,7 @@ public class DataModelUpdateManager {
 	 */
 	private static void updateToVersion24() {
 		val dialogOptionCollection = jongo.getCollection("DialogOption");
-		dialogOptionCollection.update(Queries.EVERYTHING).multi()
+		dialogOptionCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_24__DIALOG_OPTION__CHANGE_1);
 	}
 
@@ -527,7 +532,7 @@ public class DataModelUpdateManager {
 	 */
 	private static void updateToVersion30() {
 		val dialogMessageCollection = jongo.getCollection("DialogMessage");
-		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+		dialogMessageCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_30__DIALOG_MESSAGE__CHANGE_1);
 	}
 
@@ -536,11 +541,11 @@ public class DataModelUpdateManager {
 	 */
 	private static void updateToVersion31() {
 		val dialogMessageCollection = jongo.getCollection("DialogMessage");
-		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+		dialogMessageCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_31__DIALOG_MESSAGE__CHANGE_1);
 		val microDialogMessageCollection = jongo
 				.getCollection("MicroDialogMessage");
-		microDialogMessageCollection.update(Queries.EVERYTHING).multi().with(
+		microDialogMessageCollection.update(Queries.ALL).multi().with(
 				Queries.UPDATE_VERSION_31__MICRO_DIALOG_MESSAGE__CHANGE_1);
 	}
 
@@ -549,7 +554,7 @@ public class DataModelUpdateManager {
 	 */
 	private static void updateToVersion32() {
 		val monitoringRuleCollection = jongo.getCollection("MonitoringRule");
-		monitoringRuleCollection.update(Queries.EVERYTHING).multi()
+		monitoringRuleCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_32__MONITORING_RULE__CHANGE_1);
 	}
 
@@ -643,7 +648,7 @@ public class DataModelUpdateManager {
 	private static void updateToVersion36() {
 		val screeningSurveySlideCollection = jongo
 				.getCollection("ScreeningSurveySlide");
-		screeningSurveySlideCollection.update(Queries.EVERYTHING).multi().with(
+		screeningSurveySlideCollection.update(Queries.ALL).multi().with(
 				Queries.UPDATE_VERSION_36__SCREENING_SURVEY_SLIDE__CHANGE_1);
 	}
 
@@ -652,7 +657,7 @@ public class DataModelUpdateManager {
 	 */
 	private static void updateToVersion37() {
 		val dialogMessageCollection = jongo.getCollection("DialogMessage");
-		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+		dialogMessageCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_37__DIALOG_MESSAGE__CHANGE_1);
 	}
 
@@ -664,10 +669,10 @@ public class DataModelUpdateManager {
 
 		val currentTimestamp = InternalDateTime.currentTimeMillis();
 
-		participantCollection.update(Queries.EVERYTHING).multi().with(
+		participantCollection.update(Queries.ALL).multi().with(
 				Queries.UPDATE_VERSION_38__PARTICIPANT__CHANGE_1,
 				currentTimestamp);
-		participantCollection.update(Queries.EVERYTHING).multi().with(
+		participantCollection.update(Queries.ALL).multi().with(
 				Queries.UPDATE_VERSION_38__PARTICIPANT__CHANGE_2,
 				currentTimestamp);
 	}
@@ -677,7 +682,7 @@ public class DataModelUpdateManager {
 	 */
 	private static void updateToVersion40() {
 		val dialogMessageCollection = jongo.getCollection("DialogMessage");
-		dialogMessageCollection.update(Queries.EVERYTHING).multi()
+		dialogMessageCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_40__DIALOG_MESSAGE__CHANGE_1);
 
 		val authorCollection = jongo.getCollection("Author");
@@ -717,5 +722,37 @@ public class DataModelUpdateManager {
 		authorInterventionAccessCollection.drop();
 
 		log.info("Done.");
+	}
+
+	/**
+	 * Changes for version 41:
+	 */
+	private static void updateToVersion41() {
+		val microDialogMessageCollection = jongo
+				.getCollection("MicroDialogMessage");
+
+		microDialogMessageCollection.update(Queries.ALL).multi().with(
+				Queries.UPDATE_VERSION_41__MICRO_DIALOG_MESSAGE__CHANGE_1);
+
+		val participantCollection = jongo.getCollection("Participant");
+
+		participantCollection.update(Queries.ALL).multi()
+				.with(Queries.UPDATE_VERSION_41__PARTICIPANT__CHANGE_1);
+	}
+
+	/**
+	 * Changes for version 42:
+	 */
+	private static void updateToVersion42() {
+		val monitoringMessageCollection = jongo
+				.getCollection("MonitoringMessage");
+
+		monitoringMessageCollection.update(Queries.ALL).multi()
+				.with(Queries.UPDATE_VERSION_42__MONITORING_MESSAGE__CHANGE_1);
+
+		val dialogMessageCollection = jongo.getCollection("DialogMessage");
+
+		dialogMessageCollection.update(Queries.ALL).multi()
+				.with(Queries.UPDATE_VERSION_42__DIALOG_MESSAGE__CHANGE_1);
 	}
 }

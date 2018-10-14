@@ -43,7 +43,7 @@ public class CorsFeature implements Feature {
 		corsFilter.getAllowedOrigins().add("*");
 		corsFilter.setAllowedMethods("GET, POST, HEAD, OPTIONS, PUT, DELETE");
 		corsFilter.setAllowedHeaders(
-				"Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers,Authorization,Accept-Encoding,Accept-Language,Access-Control-Request-Method,Cache-Control,Connection,Host,Referer,User-Agent"
+				"Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers,Authorization,Accept-Encoding,Accept-Language,Access-Control-Request-Method,Cache-Control,Connection,Host,Referer,User-Agent,"
 						+ ImplementationConstants.REST_API_ADDITIONAL_ALLOWED_HEADERS);
 		context.register(corsFilter);
 		return true;

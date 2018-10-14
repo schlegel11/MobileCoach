@@ -82,6 +82,7 @@ public class DeepstreamCommunicationService extends Thread
 		ConnectionStateListener {
 	@Getter
 	private static DeepstreamCommunicationService	instance			= null;
+	private final CommunicationManagerService		communicationManagerService;
 
 	private final SystemLoad						systemLoad;
 
@@ -122,7 +123,10 @@ public class DeepstreamCommunicationService extends Thread
 	private final String							observerRole;
 
 	private DeepstreamCommunicationService(final String deepstreamHost,
-			final String deepstreamServerPassword) {
+			final String deepstreamServerPassword,
+			final CommunicationManagerService communicationManagerService) {
+		this.communicationManagerService = communicationManagerService;
+
 		systemLoad = SystemLoad.getInstance();
 
 		loggedInParticipants = new HashSet<String>();
@@ -174,12 +178,12 @@ public class DeepstreamCommunicationService extends Thread
 	}
 
 	public static DeepstreamCommunicationService prepare(
-			final String deepstreamHost,
-			final String deepstreamServerPassword) {
+			final String deepstreamHost, final String deepstreamServerPassword,
+			final CommunicationManagerService communicationManagerService) {
 		log.info("Preparing service...");
 		if (instance == null) {
 			instance = new DeepstreamCommunicationService(deepstreamHost,
-					deepstreamServerPassword);
+					deepstreamServerPassword, communicationManagerService);
 
 			instance.setName(
 					DeepstreamCommunicationService.class.getSimpleName());
@@ -618,6 +622,15 @@ public class DeepstreamCommunicationService extends Thread
 							receivedMessage.getReceivedTimestamp());
 					messageConfirmationObject.addProperty(
 							DeepstreamConstants.LAST_MODIFIED, timestamp);
+					if (receivedMessage.getMediaURL() != null
+							&& receivedMessage.getMediaType() != null) {
+						messageConfirmationObject.addProperty(
+								DeepstreamConstants.CONTAINS_MEDIA,
+								receivedMessage.getMediaURL());
+						messageConfirmationObject.addProperty(
+								DeepstreamConstants.MEDIA_TYPE,
+								receivedMessage.getMediaType());
+					}
 				}
 
 				if (messageConfirmationObject != null) {
@@ -1238,6 +1251,17 @@ public class DeepstreamCommunicationService extends Thread
 											DeepstreamConstants.USER_TIMESTAMP)
 											.getAsLong(),
 									jsonData.has(
+											DeepstreamConstants.CONTAINS_MEDIA)
+													? jsonData
+															.get(DeepstreamConstants.CONTAINS_MEDIA)
+															.getAsString()
+													: null,
+									jsonData.has(DeepstreamConstants.MEDIA_TYPE)
+											? jsonData
+													.get(DeepstreamConstants.MEDIA_TYPE)
+													.getAsString()
+											: null,
+									jsonData.has(
 											DeepstreamConstants.RELATED_MESSAGE_ID)
 													? jsonData
 															.get(DeepstreamConstants.RELATED_MESSAGE_ID)
@@ -1320,7 +1344,7 @@ public class DeepstreamCommunicationService extends Thread
 									jsonData.get(
 											DeepstreamConstants.USER_TIMESTAMP)
 											.getAsLong(),
-									-1,
+									null, null, -1,
 									jsonData.has(DeepstreamConstants.CLIENT_ID)
 											? jsonData
 													.get(DeepstreamConstants.CLIENT_ID)
@@ -1461,6 +1485,8 @@ public class DeepstreamCommunicationService extends Thread
 	 * @param content
 	 * @param text
 	 * @param timestamp
+	 * @param containsMedia
+	 * @param mediaType
 	 * @param relatedMessageIdBasedOnOrder
 	 * @param clientId
 	 * @param typeIntention
@@ -1468,9 +1494,9 @@ public class DeepstreamCommunicationService extends Thread
 	 */
 	private boolean receiveUserMessage(final String participantId,
 			final String message, final String intention, final String content,
-			final String text, final long timestamp,
-			final int relatedMessageIdBasedOnOrder, final String clientId,
-			final boolean typeIntention) {
+			final String text, final long timestamp, final String containsMedia,
+			final String mediaType, final int relatedMessageIdBasedOnOrder,
+			final String clientId, final boolean typeIntention) {
 		log.debug("Received {} message for participant {}",
 				typeIntention ? "intention" : "regular", participantId);
 
@@ -1490,6 +1516,8 @@ public class DeepstreamCommunicationService extends Thread
 		receivedMessage.setContent(content);
 		receivedMessage.setText(text);
 		receivedMessage.setReceivedTimestamp(timestamp);
+		receivedMessage.setMediaURL(containsMedia);
+		receivedMessage.setMediaType(mediaType);
 		receivedMessage
 				.setRelatedMessageIdBasedOnOrder(relatedMessageIdBasedOnOrder);
 
@@ -1545,6 +1573,7 @@ public class DeepstreamCommunicationService extends Thread
 		messageObject.addProperty(DeepstreamConstants.SERVER_TIMESTAMP,
 				timestamp);
 
+		boolean sendingResult = false;
 		synchronized (client) {
 			try {
 				record = client.record
@@ -1559,7 +1588,7 @@ public class DeepstreamCommunicationService extends Thread
 				client.event.emit(DeepstreamConstants.PATH_DASHBOARD_UPDATE
 						+ participantIdentifier, messageObject);
 
-				return true;
+				sendingResult = true;
 			} catch (final Exception e) {
 				try {
 
@@ -1583,7 +1612,52 @@ public class DeepstreamCommunicationService extends Thread
 			}
 		}
 
-		return false;
+		// Send notifications when sending was successful
+		if (sendingResult) {
+			if (role.equals(participantRole)) {
+				// Message by participant (send email notification to
+				// team-manager)
+
+				communicationManagerService.sendDashboardChatNotification(false,
+						dashboardMessage.getParticipant(),
+						dashboardMessage.getMessage(), 0, null);
+			} else if (role.equals(teamManagerRole)) {
+				// Message by team manager (send push notification to
+				// participant)
+
+				int messagesSentSinceLastLogout = 0;
+				synchronized (allUsersVisibleMessagesSentSinceLastLogout) {
+					if (loggedInParticipants.contains(participantIdentifier)) {
+						// If user is logged in remember as one (for late
+						// logout
+						// users)
+						messagesSentSinceLastLogout = 1;
+					} else if (allUsersVisibleMessagesSentSinceLastLogout
+							.containsKey(participantIdentifier)) {
+						// User is not logged in and well known
+						messagesSentSinceLastLogout = allUsersVisibleMessagesSentSinceLastLogout
+								.get(participantIdentifier) + 1;
+					} else {
+						// User is not logged in and not known
+						messagesSentSinceLastLogout = 1;
+					}
+					allUsersVisibleMessagesSentSinceLastLogout.put(
+							participantIdentifier, messagesSentSinceLastLogout);
+				}
+
+				if (messagesSentSinceLastLogout > 0) {
+					communicationManagerService.sendDashboardChatNotification(
+							true, dashboardMessage.getParticipant(),
+							dashboardMessage.getMessage(),
+							messagesSentSinceLastLogout,
+							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+									+ participantIdentifier);
+				}
+			}
+
+		}
+
+		return sendingResult;
 	}
 
 	/**
@@ -1776,7 +1850,7 @@ public class DeepstreamCommunicationService extends Thread
 
 			allUsersVisibleMessagesSentSinceLastLogout.put(user, 0);
 			interventionExecutionManagerService
-					.participantRememberLoginBasedOnDialogOptionTypeAndData(
+					.participantRememberLogoutBasedOnDialogOptionTypeAndData(
 							DialogOptionTypes.EXTERNAL_ID,
 							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
 									+ user);

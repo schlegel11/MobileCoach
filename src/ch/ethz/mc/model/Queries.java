@@ -180,6 +180,7 @@ public class Queries {
 	public static final String	PARTICIPANT__BY_INTERVENTION																																													= "{'intervention':#}";
 	public static final String	PARTICIPANT__BY_INTERVENTION_AND_GROUP_AND_MONITORING_ACTIVE_TRUE																																				= "{'intervention':#,'group':#,'monitoringActive':true}";
 	public static final String	PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE																																							= "{'intervention':#,'monitoringActive':true}";
+	public static final String	PARTICIPANT__WHERE_LAST_LOGIN_TIME_IS_BIGGER_THAN_LAST_LOGOUT_TIME																																				= "{$where:'this.lastLoginTimestamp > this.lastLogoutTimestamp'}";
 
 	public static final String	DIALOG_OPTION__BY_PARTICIPANT																																													= "{'participant':#}";
 	public static final String	DIALOG_OPTION__FOR_PARTICIPANT_BY_PARTICIPANT																																									= "{'participant':#,$or:[{'type':'SMS'},{'type':'EMAIL'},{'type':'EXTERNAL_ID'}]}";
@@ -205,7 +206,6 @@ public class Queries {
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS																																										= "{'participant':#,'status':#}";
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_NOT_AUTOMATICALLY_PROCESSABLE_AND_UNANSWERED_AFTER_TIMESTAMP_HIGHER																								= "{'participant':#,'status':#,'answerNotAutomaticallyProcessable':#,'isUnansweredAfterTimestamp':{$gt:#}}";
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_OR_STATUS_AND_NOT_AUTOMATICALLY_PROCESSABLE																															= "{'participant':#,$or:[{'status':#},{'status':#}],'answerNotAutomaticallyProcessable':#}";
-	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_UNANSWERED_AFTER_TIMESTAMP_LOWER																																	= "{'participant':#,'status':#,'isUnansweredAfterTimestamp':{$lt:#}}";
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_SHOULD_BE_SENT_TIMESTAMP_LOWER																																	= "{'participant':#,'status':#,'shouldBeSentTimestamp':{$lt:#}}";
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_RELATED_MONITORING_MESSAGE																																					= "{'participant':#,'relatedMonitoringMessage':#}";
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_CLIENT_ID																																									= "{'participant':#,'clientId':#}";
@@ -214,7 +214,6 @@ public class Queries {
 	public static final String	DIALOG_MESSAGE__SORT_BY_ORDER_DESC																																												= "{'order':-1}";
 
 	// Special
-	public static final String	EVERYTHING																																																		= "{}";
 	public static final String	UPDATE_VERSION_5__GENERAL_UPDATE_FOR_COMMENT																																									= "{$set:{'comment':''}}";
 	public static final String	UPDATE_VERSION_6__INTERVENTION__CHANGE_1																																										= "{$set:{'automaticallyFinishScreeningSurveys':false}}";
 	public static final String	UPDATE_VERSION_6__SCREENING_SURVEY_SLIDE__CHANGE_1																																								= "{$set:{'linkedIntermediateSurvey':null}}";
@@ -274,4 +273,8 @@ public class Queries {
 	public static final String	UPDATE_VERSION_38__PARTICIPANT__CHANGE_2																																										= "{$set:{'lastLogoutTimestamp':#}}";
 	public static final String	UPDATE_VERSION_40__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'mediaObjectName':null}}";
 	public static final String	UPDATE_VERSION_40__AUTHOR_INTERVENTION_ACCESS__CHANGE_1																																							= "{'author':#}";
+	public static final String	UPDATE_VERSION_41__MICRO_DIALOG_MESSAGE__CHANGE_1																																								= "{$set:{'nonUniqueKey':null}}";
+	public static final String	UPDATE_VERSION_41__PARTICIPANT__CHANGE_1																																										= "{$set:{'responsibleTeamManagerEmail':null}}";
+	public static final String	UPDATE_VERSION_42__MONITORING_MESSAGE__CHANGE_1																																									= "{$set:{'pushOnly':false}}";
+	public static final String	UPDATE_VERSION_42__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'pushOnly':false}}";
 }

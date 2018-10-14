@@ -143,6 +143,8 @@ public class MicroDialogMessageEditComponentWithController
 				.addClickListener(buttonClickListener);
 		getStoreVariableTextFieldComponent().getButton()
 				.addClickListener(buttonClickListener);
+		getMessageKeyTextFieldComponent().getButton()
+				.addClickListener(buttonClickListener);
 		getAnswerOptionsTextFieldComponent().getButton()
 				.addClickListener(buttonClickListener);
 		getNoReplyTextFieldComponent().getButton()
@@ -305,6 +307,8 @@ public class MicroDialogMessageEditComponentWithController
 				microDialogMessage.getTextWithPlaceholders().toString());
 		getStoreVariableTextFieldComponent()
 				.setValue(microDialogMessage.getStoreValueToVariableWithName());
+		getMessageKeyTextFieldComponent()
+				.setValue(microDialogMessage.getNonUniqueKey());
 		getAnswerOptionsTextFieldComponent().setValue(microDialogMessage
 				.getAnswerOptionsWithPlaceholders().toString());
 		getNoReplyTextFieldComponent()
@@ -387,6 +391,9 @@ public class MicroDialogMessageEditComponentWithController
 			} else if (event.getButton() == getStoreVariableTextFieldComponent()
 					.getButton()) {
 				editStoreResultToVariable();
+			} else if (event.getButton() == getMessageKeyTextFieldComponent()
+					.getButton()) {
+				editMessageKey();
 			} else if (event.getButton() == getAnswerOptionsTextFieldComponent()
 					.getButton()) {
 				editAnswerOptionsWithPlaceholder();
@@ -461,6 +468,37 @@ public class MicroDialogMessageEditComponentWithController
 							// Change store result to variable
 							getInterventionAdministrationManagerService()
 									.microDialogMessageSetStoreResultToVariable(
+											microDialogMessage,
+											getStringValue());
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						adjust();
+
+						closeWindow();
+					}
+				}, null);
+	}
+
+	public void editMessageKey() {
+		log.debug("Edit message key");
+		val allPossibleMessageVariables = getInterventionAdministrationManagerService()
+				.getAllWritableMessageVariablesOfIntervention(interventionId);
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_MESSAGE_KEY,
+				microDialogMessage.getNonUniqueKey(),
+				allPossibleMessageVariables,
+				new ShortPlaceholderStringEditComponent(),
+				new ExtendableButtonClickListener() {
+
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Change store result to variable
+							getInterventionAdministrationManagerService()
+									.microDialogMessageSetNonUniqueKey(
 											microDialogMessage,
 											getStringValue());
 						} catch (final Exception e) {

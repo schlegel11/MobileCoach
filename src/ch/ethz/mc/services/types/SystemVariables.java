@@ -51,7 +51,11 @@ public class SystemVariables {
 		participantLastLoginDate,
 		participantLastLoginTime,
 		participantLastLogoutDate,
-		participantLastLogoutTime;
+		participantLastLogoutTime,
+		participantInfiniteBlockingMessagesCount,
+		participantInfiniteBlockingMessagesIdentifiers,
+		participantInfiniteBlockingMessagesWaitingMinutesMin,
+		participantInfiniteBlockingMessagesWaitingMinutesMax;
 
 		public String toVariableName() {
 			return ImplementationConstants.VARIABLE_PREFIX + toString();
@@ -62,6 +66,7 @@ public class SystemVariables {
 		participantName,
 		participantLanguage,
 		participantGroup,
+		participantResponsibleTeamManagerEmailData,
 		participantDialogOptionSMSData,
 		participantDialogOptionEmailData,
 		participantDialogOptionExternalID,

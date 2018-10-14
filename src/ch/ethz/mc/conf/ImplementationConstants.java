@@ -52,6 +52,9 @@ public class ImplementationConstants {
 	public static final long	DAYS_TO_TIME_IN_MILLIS_MULTIPLICATOR												= 24
 			* 60 * 60 * 1000;
 
+	public static final double	MILLIS_TO_MINUTES_DIVIDER															= 1000
+			* 60;
+
 	public static final long	MASTER_RULE_EVALUTION_WORKER_MILLISECONDS_SLEEP_BETWEEN_CHECK_CYCLES				= 500;
 
 	public static final long	PERIODIC_RULE_EVALUTION_WORKER_SECONDS_SLEEP_BETWEEN_CHECK_CYCLES_WITHOUT_SIMULATOR	= 300;
@@ -68,7 +71,7 @@ public class ImplementationConstants {
 	public static final long	EMAIL_SENDING_RETRIES																= 2;
 	public static final long	EMAIL_SENDING_RETRIES_SLEEP_BETWEEN_RETRIES_IN_SECONDS								= 2
 			* 60;
-	public static final int		EMAIL_SENDING_MAXIMUM_THREAD_COUNT													= 25;
+	public static final int		ASYNC_SENDING_MAXIMUM_THREAD_COUNT													= 25;
 
 	public static final long	SIMULATOR_TIME_UPDATE_INTERVAL_IN_SECONDS											= 5;
 
@@ -80,6 +83,9 @@ public class ImplementationConstants {
 
 	public static final String	MAIL_SERVER_TIMEOUT																	= "5000";
 	public static final String	MAIL_SERVER_CONNECTION_TIMEOUT														= "30000";
+
+	public static final long	MICRO_DIALOG_MESSAGE_UNHANDLED_MESSAGE_MINIMUM_THRESHOLD_IN_MILLIS					= 30
+			* MINUTES_TO_TIME_IN_MILLIS_MULTIPLICATOR;
 
 	public static enum ACCEPTED_MEDIA_UPLOAD_TYPES {
 		IMAGE, VIDEO, AUDIO
@@ -172,6 +178,9 @@ public class ImplementationConstants {
 	public static final String	DEEPSTREAM_SUPERVISOR_ROLE											= "supervisor";
 	public static final String	DEEPSTREAM_TEAM_MANAGER_ROLE										= "team-manager";
 	public static final String	DEEPSTREAM_OBSERVER_ROLE											= "observer";
+
+	public static final String	TEAM_MANAGER_PUSH_NOTIFICATION_PREFIX								= "👤: ";
+	public static final int		TEAM_MANAGER_EMAIL_NOTIFICATION_SILENCE_DURATION_IN_MINUTES			= 5;
 
 	public static final String	REPORT_TABLE														= "<table class=\"automatic\">|</table>";
 	public static final String	REPORT_TABLE_ROW													= "<tr #>|</tr>";
