@@ -51,6 +51,8 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 /**
+ * Backend UI locking service
+ * 
  * @author Andreas Filler
  */
 @Log4j2
