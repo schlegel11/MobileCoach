@@ -30,12 +30,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.persistent.MediaObject;
+import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.services.InterventionAdministrationManagerService;
+import ch.ethz.mc.services.InterventionExecutionManagerService;
+import ch.ethz.mc.services.internal.DeepstreamCommunicationService;
 import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
 import ch.ethz.mc.services.internal.ImageCachingService;
 import lombok.val;
@@ -64,8 +68,11 @@ import net.balusc.webapp.FileServletWrapper;
 @Log4j2
 public class MediaObjectFileStreamingServlet extends HttpServlet {
 	private InterventionAdministrationManagerService	interventionAdministrationManagerService;
+	private InterventionExecutionManagerService			interventionExecutionManagerService;
 
 	private ImageCachingService							imageCachingService;
+
+	private DeepstreamCommunicationService				deepstreamCommunicationService;
 
 	private FileServletWrapper							fileServletWrapper;
 
@@ -76,8 +83,14 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 
 		interventionAdministrationManagerService = MC.getInstance()
 				.getInterventionAdministrationManagerService();
+		interventionExecutionManagerService = MC.getInstance()
+				.getInterventionExecutionManagerService();
 
 		imageCachingService = MC.getInstance().getImageCachingService();
+
+		deepstreamCommunicationService = MC.getInstance()
+				.getCommunicationManagerService()
+				.getDeepstreamCommunicationService();
 
 		fileServletWrapper = new FileServletWrapper();
 		fileServletWrapper.init(getServletContext());
@@ -128,6 +141,45 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 		if (requestedElement
 				.startsWith(ImplementationConstants.FILE_STORAGE_PREFIX)) {
 			log.debug("Uploaded media object request");
+
+			// Check access rights
+			val communicationServiceType = request.getParameter("c");
+			val user = request.getParameter("u");
+			val secret = request.getParameter("t");
+			val role = request.getParameter("r");
+
+			if (StringUtils.isBlank(communicationServiceType)
+					|| StringUtils.isBlank(user) || StringUtils.isBlank(secret)
+					|| StringUtils.isBlank(role)) {
+				log.debug("Not all required parameters provided");
+				return null;
+			}
+
+			switch (communicationServiceType + ":") {
+				case ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM:
+					if (deepstreamCommunicationService == null) {
+						log.debug("Deepstream requested, but not active");
+						return null;
+					}
+
+					val accessGranted = deepstreamCommunicationService
+							.checkSecret(user, secret, 32);
+
+					if (accessGranted) {
+						val dialogOption = interventionExecutionManagerService
+								.getDialogOptionByTypeAndDataOfActiveInterventions(
+										DialogOptionTypes.EXTERNAL_ID,
+										ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+												+ user);
+					} else {
+						return null;
+					}
+					break;
+				default:
+					log.debug("Invalid communication service type provided");
+					return null;
+
+			}
 
 			// Retrieve media file
 			file = interventionAdministrationManagerService.getFileByReference(
