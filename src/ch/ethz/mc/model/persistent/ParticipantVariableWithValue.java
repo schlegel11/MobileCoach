@@ -196,6 +196,22 @@ public class ParticipantVariableWithValue extends AbstractVariableWithValue {
 						"File belonging to file reference {} could not be deleted: {}",
 						getValue(), e.getMessage());
 			}
+
+			for (val formerValue : formerVariableValues) {
+				if (formerValue.isDescribesMediaUpload()) {
+					log.debug("Deleting file with reference {}",
+							formerValue.getValue());
+					try {
+						getFileStorageManagerService().deleteFile(
+								formerValue.getValue(),
+								FILE_STORES.MEDIA_UPLOAD);
+					} catch (final Exception e) {
+						log.warn(
+								"File belonging to file reference {} could not be deleted: {}",
+								formerValue.getValue(), e.getMessage());
+					}
+				}
+			}
 		}
 
 		super.performOnDelete();

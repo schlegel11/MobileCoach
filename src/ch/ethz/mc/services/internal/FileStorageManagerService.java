@@ -136,11 +136,12 @@ public class FileStorageManagerService {
 		log.info("Checking variables and media upload folder for consistency:");
 		val mediaUploadVariables = databaseManagerService.findModelObjects(
 				ParticipantVariableWithValue.class,
-				Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_DESCRIBES_MEDIA_UPLOAD,
-				true);
+				Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_DESCRIBES_MEDIA_UPLOAD_OR_FORMER_VALUE_DESCRIBES_MEDIA_UPLOAD,
+				true, true);
 
 		for (val mediaUploadVariable : mediaUploadVariables) {
-			if (mediaUploadVariable.getValue() != null) {
+			if (mediaUploadVariable.isDescribesMediaUpload()
+					&& mediaUploadVariable.getValue() != null) {
 				final String fileReference = mediaUploadVariable.getValue();
 				requiredFileReferences.add(fileReference.split("-")[0]);
 				if (getFileByReference(fileReference,
@@ -149,6 +150,22 @@ public class FileStorageManagerService {
 							"Media upload variable {} contains missing file reference {}",
 							mediaUploadVariable.getId(),
 							mediaUploadVariable.getValue());
+				}
+			}
+
+			for (val formerValue : mediaUploadVariable
+					.getFormerVariableValues()) {
+				if (formerValue.isDescribesMediaUpload()
+						&& formerValue.getValue() != null) {
+					final String fileReference = formerValue.getValue();
+					requiredFileReferences.add(fileReference.split("-")[0]);
+					if (getFileByReference(fileReference,
+							FILE_STORES.MEDIA_UPLOAD) == null) {
+						log.warn(
+								"Media upload variable {} contains missing file reference {}",
+								mediaUploadVariable.getId(),
+								formerValue.getValue());
+					}
 				}
 			}
 		}

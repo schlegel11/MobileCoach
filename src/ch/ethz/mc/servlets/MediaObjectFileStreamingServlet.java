@@ -36,7 +36,6 @@ import org.bson.types.ObjectId;
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.persistent.MediaObject;
-import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.services.InterventionAdministrationManagerService;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
 import ch.ethz.mc.services.internal.DeepstreamCommunicationService;
@@ -166,11 +165,13 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 							.checkSecret(user, secret, 32);
 
 					if (accessGranted) {
-						val dialogOption = interventionExecutionManagerService
-								.getDialogOptionByTypeAndDataOfActiveInterventions(
-										DialogOptionTypes.EXTERNAL_ID,
-										ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
-												+ user);
+						val fitsToUser = interventionExecutionManagerService
+								.checkIfFileUploadFitsToExternalParticipant(
+										user, requestedElement);
+
+						if (!fitsToUser) {
+							return null;
+						}
 					} else {
 						return null;
 					}

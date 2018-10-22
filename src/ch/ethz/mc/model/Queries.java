@@ -193,7 +193,8 @@ public class Queries {
 
 	public static final String	PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT																																									= "{'participant':#}";
 	public static final String	PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_NAME																																						= "{'participant':#,'name':#}";
-	public static final String	PARTICIPANT_VARIABLE_WITH_VALUE__BY_DESCRIBES_MEDIA_UPLOAD																																						= "{'describesMediaUpload':#}";
+	public static final String	PARTICIPANT_VARIABLE_WITH_VALUE__BY_DESCRIBES_MEDIA_UPLOAD_OR_FORMER_VALUE_DESCRIBES_MEDIA_UPLOAD																												= "{$or:[{'describesMediaUpload':#},{'formerVariableValues':{$elemMatch:{'describesMediaUpload':#}}}]}";
+	public static final String	PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_DESCRIBES_MEDIA_UPLOAD_OR_FORMER_VALUE_DESCRIBES_MEDIA_UPLOAD																								= "{'participant':#, $or:[{'describesMediaUpload':#},{'formerVariableValues':{$elemMatch:{'describesMediaUpload':#}}}]}";
 
 	public static final String	DASHBOARD_MESSAGE__BY_PARTICIPANT																																												= "{'participant':#}";
 	public static final String	DASHBOARD_MESSAGE__SORT_BY_ORDER_ASC																																											= "{'order':1}";
