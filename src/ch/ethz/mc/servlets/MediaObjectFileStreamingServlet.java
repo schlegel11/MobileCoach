@@ -34,6 +34,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.MC;
+import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.persistent.MediaObject;
 import ch.ethz.mc.services.InterventionAdministrationManagerService;
@@ -141,45 +142,49 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 				.startsWith(ImplementationConstants.FILE_STORAGE_PREFIX)) {
 			log.debug("Uploaded media object request");
 
-			// Check access rights
-			val communicationServiceType = request.getParameter("c");
-			val user = request.getParameter("u");
-			val secret = request.getParameter("t");
-			val role = request.getParameter("r");
+			if (Constants.isMediaUploadSecurityCheck()) {
+				// Check access rights
+				val communicationServiceType = request.getParameter("c");
+				val user = request.getParameter("u");
+				val secret = request.getParameter("t");
+				val role = request.getParameter("r");
 
-			if (StringUtils.isBlank(communicationServiceType)
-					|| StringUtils.isBlank(user) || StringUtils.isBlank(secret)
-					|| StringUtils.isBlank(role)) {
-				log.debug("Not all required parameters provided");
-				return null;
-			}
+				if (StringUtils.isBlank(communicationServiceType)
+						|| StringUtils.isBlank(user)
+						|| StringUtils.isBlank(secret)
+						|| StringUtils.isBlank(role)) {
+					log.debug("Not all required parameters provided");
+					return null;
+				}
 
-			switch (communicationServiceType + ":") {
-				case ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM:
-					if (deepstreamCommunicationService == null) {
-						log.debug("Deepstream requested, but not active");
-						return null;
-					}
-
-					val accessGranted = deepstreamCommunicationService
-							.checkSecret(user, secret, 32);
-
-					if (accessGranted) {
-						val fitsToUser = interventionExecutionManagerService
-								.checkIfFileUploadFitsToExternalParticipant(
-										user, requestedElement);
-
-						if (!fitsToUser) {
+				switch (communicationServiceType + ":") {
+					case ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM:
+						if (deepstreamCommunicationService == null) {
+							log.debug("Deepstream requested, but not active");
 							return null;
 						}
-					} else {
-						return null;
-					}
-					break;
-				default:
-					log.debug("Invalid communication service type provided");
-					return null;
 
+						val accessGranted = deepstreamCommunicationService
+								.checkSecret(user, secret, 32);
+
+						if (accessGranted) {
+							val fitsToUser = interventionExecutionManagerService
+									.checkIfFileUploadFitsToExternalParticipant(
+											user, requestedElement);
+
+							if (!fitsToUser) {
+								return null;
+							}
+						} else {
+							return null;
+						}
+						break;
+					default:
+						log.debug(
+								"Invalid communication service type provided");
+						return null;
+
+				}
 			}
 
 			// Retrieve media file

@@ -154,6 +154,9 @@ public class Constants {
 	@Getter
 	private static int			maxVariableHistory						= 1000;
 
+	@Getter
+	private static boolean		mediaUploadSecurityCheck				= true;
+
 	/**
 	 * Survey listing configuration
 	 */
