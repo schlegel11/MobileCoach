@@ -172,6 +172,10 @@ public class MediaObjectFileStreamingServlet extends HttpServlet {
 									.checkIfFileUploadFitsToExternalParticipant(
 											user, requestedElement);
 
+							log.debug(
+									"File request fits to user check result: {}",
+									fitsToUser);
+
 							if (!fitsToUser) {
 								return null;
 							}
