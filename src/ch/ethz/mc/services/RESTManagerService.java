@@ -874,9 +874,11 @@ public class RESTManagerService extends Thread {
 			}
 
 			if (deepstreamCommunicationService != null
-					&& deepstreamCommunicationService.checkSecret(username,
-							secret, role.equals(deepstreamObserverRole) || role
-									.equals(deepstreamTeamManagerRole))) {
+					&& deepstreamCommunicationService
+							.checkSecret(username, secret,
+									role.equals(deepstreamObserverRole) || role
+											.equals(deepstreamTeamManagerRole)
+													? 64 : -1)) {
 				log.debug(
 						"Participant with deepstream id {} authorized for deepstream access",
 						username);

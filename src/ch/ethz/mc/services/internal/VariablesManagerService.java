@@ -847,12 +847,8 @@ public class VariablesManagerService {
 				participantVariableWithValue.setTimestamp(creationTimestamp);
 				participantVariableWithValue
 						.setValue(variableValue == null ? "" : variableValue);
-
-				if (describesMediaUpload) {
-					participantVariableWithValue.setDescribesMediaUpload(true);
-				} else {
-					participantVariableWithValue.setDescribesMediaUpload(false);
-				}
+				participantVariableWithValue
+						.setDescribesMediaUpload(describesMediaUpload);
 
 				databaseManagerService
 						.saveModelObject(participantVariableWithValue);

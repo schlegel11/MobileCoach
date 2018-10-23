@@ -69,6 +69,7 @@ import ch.ethz.mc.model.persistent.MonitoringMessageRule;
 import ch.ethz.mc.model.persistent.MonitoringReplyRule;
 import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.Participant;
+import ch.ethz.mc.model.persistent.ParticipantVariableWithValue;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 import ch.ethz.mc.model.persistent.types.AnswerTypes;
@@ -3207,6 +3208,56 @@ public class InterventionExecutionManagerService {
 				participantId);
 	}
 
+	/**
+	 * Clear cache
+	 */
+	@Synchronized
+	public void clearCache() {
+		databaseManagerService.clearCache();
+	}
+
+	/**
+	 * Check if the given upload file reference belongs to the given user
+	 * 
+	 * @param user
+	 * @param fileReference
+	 * @return
+	 */
+	@Synchronized
+	public boolean checkIfFileUploadFitsToExternalParticipant(final String user,
+			final String fileReference) {
+		val dialogOption = getDialogOptionByTypeAndDataOfActiveInterventions(
+				DialogOptionTypes.EXTERNAL_ID,
+				ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+						+ user);
+
+		if (dialogOption == null) {
+			return false;
+		}
+
+		val variablesWithValues = databaseManagerService.findModelObjects(
+				ParticipantVariableWithValue.class,
+				Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_DESCRIBES_MEDIA_UPLOAD_OR_FORMER_VALUE_DESCRIBES_MEDIA_UPLOAD,
+				dialogOption.getParticipant(), true, true);
+
+		for (val variableWithValue : variablesWithValues) {
+			if (variableWithValue.isDescribesMediaUpload()
+					&& variableWithValue.getValue().equals(fileReference)) {
+				return true;
+			}
+
+			for (val formerValue : variableWithValue
+					.getFormerVariableValues()) {
+				if (formerValue.isDescribesMediaUpload()
+						&& formerValue.getValue().equals(fileReference)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
 	/*
 	 * PRIVATE Getter methods
 	 */
@@ -3431,13 +3482,5 @@ public class InterventionExecutionManagerService {
 		}
 
 		return relevantParticipants;
-	}
-
-	/**
-	 * Clear cache
-	 */
-	@Synchronized
-	public void clearCache() {
-		databaseManagerService.clearCache();
 	}
 }
