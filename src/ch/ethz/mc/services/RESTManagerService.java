@@ -39,15 +39,18 @@ import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.DialogStatus;
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.Participant;
+import ch.ethz.mc.model.persistent.ParticipantVariableWithValue;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValuePrivacyTypes;
 import ch.ethz.mc.model.rest.CollectionOfExtendedListVariables;
 import ch.ethz.mc.model.rest.CollectionOfExtendedVariables;
+import ch.ethz.mc.model.rest.CollectionOfVariablesWithTimestamp;
 import ch.ethz.mc.model.rest.ExtendedListVariable;
 import ch.ethz.mc.model.rest.ExtendedVariable;
 import ch.ethz.mc.model.rest.Variable;
 import ch.ethz.mc.model.rest.VariableAverage;
 import ch.ethz.mc.model.rest.VariableAverageWithParticipant;
+import ch.ethz.mc.model.rest.VariableWithTimestamp;
 import ch.ethz.mc.services.internal.CommunicationManagerService;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.DeepstreamCommunicationService;
@@ -838,6 +841,60 @@ public class RESTManagerService extends Thread {
 		}
 
 		return approvedBackendUserInterventionAccess;
+	}
+
+	/**
+	 * Returns all media uploads of the given participant or null if the
+	 * {@link Participant} does not fit to the given intervention or group
+	 * 
+	 * @param intervention
+	 * @param group
+	 * @param participant
+	 * @return
+	 */
+	public CollectionOfVariablesWithTimestamp readUploadsOfParticipantIfPartOfInterventionAndGroup(
+			final ObjectId interventionId, final String group,
+			final ObjectId participantId) {
+
+		val participant = databaseManagerService
+				.getModelObjectById(Participant.class, participantId);
+
+		if (participant == null
+				|| !participant.getIntervention().equals(interventionId)
+				|| !participant.getGroup().equals(group)) {
+			return null;
+		}
+
+		val collectionOfVariablesWithTimestamp = new CollectionOfVariablesWithTimestamp();
+		val variables = collectionOfVariablesWithTimestamp.getVariables();
+
+		val variablesWithValues = databaseManagerService.findModelObjects(
+				ParticipantVariableWithValue.class,
+				Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_DESCRIBES_MEDIA_UPLOAD_OR_FORMER_VALUE_DESCRIBES_MEDIA_UPLOAD,
+				participantId, true, true);
+
+		for (val variableWithValue : variablesWithValues) {
+			if (variableWithValue.isDescribesMediaUpload()) {
+				variables.add(new VariableWithTimestamp(
+						variableWithValue.getName().substring(1),
+						variableWithValue.getValue(),
+						variableWithValue.getTimestamp()));
+			}
+
+			for (val formerValue : variableWithValue
+					.getFormerVariableValues()) {
+				if (formerValue.isDescribesMediaUpload()) {
+					variables.add(new VariableWithTimestamp(
+							variableWithValue.getName().substring(1),
+							formerValue.getValue(),
+							formerValue.getTimestamp()));
+				}
+			}
+		}
+
+		collectionOfVariablesWithTimestamp.setSize(variables.size());
+
+		return collectionOfVariablesWithTimestamp;
 	}
 
 	/*

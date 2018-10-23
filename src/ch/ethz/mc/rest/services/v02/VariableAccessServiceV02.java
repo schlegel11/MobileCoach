@@ -342,7 +342,7 @@ public class VariableAccessServiceV02 extends AbstractServiceV02 {
 					.build());
 		}
 	}
-	
+
 	@GET
 	@Path("/externallyReadGroupArrayMany/{group}/{variables}")
 	@Produces("application/json")
@@ -376,7 +376,8 @@ public class VariableAccessServiceV02 extends AbstractServiceV02 {
 			}
 
 			val collectionOfExtendedListVariables = restManagerService
-					.readVariableListArrayForExternalOfGroupOrIntervention(backendUserInterventionAccess.getIntervention(),
+					.readVariableListArrayForExternalOfGroupOrIntervention(
+							backendUserInterventionAccess.getIntervention(),
 							cleanedVariableList, group, null, null, false);
 
 			return collectionOfExtendedListVariables;
@@ -386,7 +387,6 @@ public class VariableAccessServiceV02 extends AbstractServiceV02 {
 					.build());
 		}
 	}
-
 
 	@GET
 	@Path("/externallyReadGroupCluster/{group}/{variable}")
