@@ -2121,13 +2121,14 @@ public class InterventionExecutionManagerService {
 		MicroDialog microDialog = null;
 
 		boolean variablesRequireRefresh = true;
+		boolean participantRequiresRefresh = true;
 		Hashtable<String, AbstractVariableWithValue> variablesWithValues = null;
 
 		if (microDialogMessageId != null) {
 			val microDialogMessage = databaseManagerService.getModelObjectById(
 					MicroDialogMessage.class, microDialogMessageId);
 			if (microDialogMessage != null) {
-				// Only proceed with micro dialog if former message was a
+				// Only proceed with micro dialog if former message was no
 				// blocking message
 				if (!microDialogMessage
 						.isMessageBlocksMicroDialogUntilAnswered()) {
@@ -2165,10 +2166,11 @@ public class InterventionExecutionManagerService {
 				handleMessage = false;
 			}
 
-			// Retrieve participant (only once)
-			if (participant == null) {
+			// Retrieve participant (only after potential change)
+			if (participantRequiresRefresh || participant == null) {
 				participant = databaseManagerService
 						.getModelObjectById(Participant.class, participantId);
+				participantRequiresRefresh = false;
 			}
 
 			if (handleMessage) {
@@ -2343,6 +2345,7 @@ public class InterventionExecutionManagerService {
 
 				// Variables need to be refreshed after performing rules
 				variablesRequireRefresh = true;
+				participantRequiresRefresh = true;
 			}
 		} while (!stopMicroDialogHandling);
 	}
