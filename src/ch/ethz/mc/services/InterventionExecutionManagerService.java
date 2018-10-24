@@ -69,6 +69,7 @@ import ch.ethz.mc.model.persistent.MonitoringMessageRule;
 import ch.ethz.mc.model.persistent.MonitoringReplyRule;
 import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.Participant;
+import ch.ethz.mc.model.persistent.ParticipantVariableWithValue;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 import ch.ethz.mc.model.persistent.types.AnswerTypes;
@@ -2120,13 +2121,14 @@ public class InterventionExecutionManagerService {
 		MicroDialog microDialog = null;
 
 		boolean variablesRequireRefresh = true;
+		boolean participantRequiresRefresh = true;
 		Hashtable<String, AbstractVariableWithValue> variablesWithValues = null;
 
 		if (microDialogMessageId != null) {
 			val microDialogMessage = databaseManagerService.getModelObjectById(
 					MicroDialogMessage.class, microDialogMessageId);
 			if (microDialogMessage != null) {
-				// Only proceed with micro dialog if former message was a
+				// Only proceed with micro dialog if former message was no
 				// blocking message
 				if (!microDialogMessage
 						.isMessageBlocksMicroDialogUntilAnswered()) {
@@ -2164,10 +2166,11 @@ public class InterventionExecutionManagerService {
 				handleMessage = false;
 			}
 
-			// Retrieve participant (only once)
-			if (participant == null) {
+			// Retrieve participant (only after potential change)
+			if (participantRequiresRefresh || participant == null) {
 				participant = databaseManagerService
 						.getModelObjectById(Participant.class, participantId);
+				participantRequiresRefresh = false;
 			}
 
 			if (handleMessage) {
@@ -2342,6 +2345,7 @@ public class InterventionExecutionManagerService {
 
 				// Variables need to be refreshed after performing rules
 				variablesRequireRefresh = true;
+				participantRequiresRefresh = true;
 			}
 		} while (!stopMicroDialogHandling);
 	}
@@ -3205,6 +3209,56 @@ public class InterventionExecutionManagerService {
 	public Participant getParticipantById(final ObjectId participantId) {
 		return databaseManagerService.getModelObjectById(Participant.class,
 				participantId);
+	}
+
+	/**
+	 * Clear cache
+	 */
+	@Synchronized
+	public void clearCache() {
+		databaseManagerService.clearCache();
+	}
+
+	/**
+	 * Check if the given upload file reference belongs to the given user
+	 * 
+	 * @param user
+	 * @param fileReference
+	 * @return
+	 */
+	@Synchronized
+	public boolean checkIfFileUploadFitsToExternalParticipant(final String user,
+			final String fileReference) {
+		val dialogOption = getDialogOptionByTypeAndDataOfActiveInterventions(
+				DialogOptionTypes.EXTERNAL_ID,
+				ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+						+ user);
+
+		if (dialogOption == null) {
+			return false;
+		}
+
+		val variablesWithValues = databaseManagerService.findModelObjects(
+				ParticipantVariableWithValue.class,
+				Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_DESCRIBES_MEDIA_UPLOAD_OR_FORMER_VALUE_DESCRIBES_MEDIA_UPLOAD,
+				dialogOption.getParticipant(), true, true);
+
+		for (val variableWithValue : variablesWithValues) {
+			if (variableWithValue.isDescribesMediaUpload()
+					&& variableWithValue.getValue().equals(fileReference)) {
+				return true;
+			}
+
+			for (val formerValue : variableWithValue
+					.getFormerVariableValues()) {
+				if (formerValue.isDescribesMediaUpload()
+						&& formerValue.getValue().equals(fileReference)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/*

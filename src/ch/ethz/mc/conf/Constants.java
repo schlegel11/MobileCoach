@@ -75,7 +75,7 @@ public class Constants {
 	 * 
 	 * CAUTION: Can NOT be defined in configuration file
 	 */
-	public static final int		DATA_MODEL_VERSION					= 42;
+	public static final int		DATA_MODEL_VERSION					= 43;
 	/**
 	 * Data model configuration collection
 	 * 
@@ -153,6 +153,9 @@ public class Constants {
 	// -1 can be used to set it to infinite, 0 disables the history completely
 	@Getter
 	private static int			maxVariableHistory						= 1000;
+
+	@Getter
+	private static boolean		mediaUploadSecurityCheck				= true;
 
 	/**
 	 * Survey listing configuration

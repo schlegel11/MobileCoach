@@ -471,6 +471,10 @@ public class VariablesManagerService {
 					return participant.getGroup();
 				}
 				break;
+			case participantOrganization:
+				return participant.getOrganization();
+			case participantOrganizationUnit:
+				return participant.getOrganizationUnit();
 			case participantResponsibleTeamManagerEmailData:
 				if (participant.getResponsibleTeamManagerEmail() != null) {
 					return participant.getResponsibleTeamManagerEmail();
@@ -533,6 +537,8 @@ public class VariablesManagerService {
 		String participantHexId = null;
 
 		switch (variable) {
+			case participantIdentifier:
+				return participant.getId().toHexString();
 			case participantParticipationInDays:
 				int participationInDays = 0;
 				if (dialogStatus != null) {
@@ -800,6 +806,15 @@ public class VariablesManagerService {
 					log.debug("Setting variable 'participantGroup'");
 					participantSetGroup(participantId, variableValue);
 					break;
+				case participantOrganization:
+					log.debug("Setting variable 'participantOrganization'");
+					participantSetOrganization(participantId, variableValue);
+					break;
+				case participantOrganizationUnit:
+					log.debug("Setting variable 'participantOrganizationUnit'");
+					participantSetOrganizationUnit(participantId,
+							variableValue);
+					break;
 				case participantResponsibleTeamManagerEmailData:
 					log.debug(
 							"Setting variable 'participantResponsibleTeamManagerEmailData'");
@@ -847,12 +862,8 @@ public class VariablesManagerService {
 				participantVariableWithValue.setTimestamp(creationTimestamp);
 				participantVariableWithValue
 						.setValue(variableValue == null ? "" : variableValue);
-
-				if (describesMediaUpload) {
-					participantVariableWithValue.setDescribesMediaUpload(true);
-				} else {
-					participantVariableWithValue.setDescribesMediaUpload(false);
-				}
+				participantVariableWithValue
+						.setDescribesMediaUpload(describesMediaUpload);
 
 				databaseManagerService
 						.saveModelObject(participantVariableWithValue);
@@ -931,6 +942,28 @@ public class VariablesManagerService {
 		} else {
 			participant.setGroup(group);
 		}
+
+		databaseManagerService.saveModelObject(participant);
+	}
+
+	@Synchronized
+	private void participantSetOrganization(final ObjectId participantId,
+			final String organization) {
+		val participant = databaseManagerService
+				.getModelObjectById(Participant.class, participantId);
+
+		participant.setOrganization(organization);
+
+		databaseManagerService.saveModelObject(participant);
+	}
+
+	@Synchronized
+	private void participantSetOrganizationUnit(final ObjectId participantId,
+			final String organizationUnit) {
+		val participant = databaseManagerService
+				.getModelObjectById(Participant.class, participantId);
+
+		participant.setOrganizationUnit(organizationUnit);
 
 		databaseManagerService.saveModelObject(participant);
 	}

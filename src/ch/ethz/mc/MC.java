@@ -62,6 +62,7 @@ public class MC implements ServletContextListener {
 
 	VariablesManagerService						variablesManagerService;
 
+	@Getter
 	CommunicationManagerService					communicationManagerService;
 	ModelObjectExchangeService					modelObjectExchangeService;
 

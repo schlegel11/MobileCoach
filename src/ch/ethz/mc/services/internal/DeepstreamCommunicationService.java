@@ -756,7 +756,7 @@ public class DeepstreamCommunicationService extends Thread
 	 */
 	public boolean checkSecret(final String participantOrSupervisorIdentifier,
 			final String secret) {
-		return checkSecret(participantOrSupervisorIdentifier, secret, false);
+		return checkSecret(participantOrSupervisorIdentifier, secret, -1);
 	}
 
 	/**
@@ -764,15 +764,15 @@ public class DeepstreamCommunicationService extends Thread
 	 * 
 	 * @param participantOrSupervisorIdentifier
 	 * @param secret
-	 * @param observerOrTeamManagerAccess
-	 *            The observer check only compares the first 64 characters of
-	 *            the secret
+	 * @param charactersToCheck
+	 *            The observer check only compares the first x characters of the
+	 *            secret, or all in case of -1
 	 * @return
 	 */
 	public boolean checkSecret(final String participantOrSupervisorIdentifier,
-			final String secret, final boolean observerOrTeamManagerAccess) {
-		log.debug("Checking secret for {} (observer/team-manager access: {})",
-				participantOrSupervisorIdentifier, observerOrTeamManagerAccess);
+			final String secret, final int charactersToCheck) {
+		log.debug("Checking secret for {} (characters to check: {})",
+				participantOrSupervisorIdentifier, charactersToCheck);
 
 		Record record = null;
 		try {
@@ -792,9 +792,9 @@ public class DeepstreamCommunicationService extends Thread
 				return false;
 			}
 
-			if (observerOrTeamManagerAccess
-					? secretFromRecord.substring(0, 64).equals(secret)
-					: secretFromRecord.equals(secret)) {
+			if (charactersToCheck == -1 ? secretFromRecord.equals(secret)
+					: secretFromRecord.substring(0, charactersToCheck)
+							.equals(secret)) {
 				log.debug("Secret check for {} returns {}",
 						participantOrSupervisorIdentifier, true);
 				return true;

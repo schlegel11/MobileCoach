@@ -40,15 +40,14 @@ import javax.imageio.ImageWriter;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.FileImageOutputStream;
 
-import lombok.extern.log4j.Log4j2;
-import net.coobird.thumbnailator.Thumbnails;
-
 import org.apache.commons.lang3.RandomStringUtils;
-
-import ch.ethz.mc.conf.ImplementationConstants;
 
 import com.mortennobel.imagescaling.AdvancedResizeOp;
 import com.mortennobel.imagescaling.MultiStepRescaleOp;
+
+import ch.ethz.mc.conf.ImplementationConstants;
+import lombok.extern.log4j.Log4j2;
+import net.coobird.thumbnailator.Thumbnails;
 
 /**
  * Image service to store, cache, manipulate and return (modified) images
@@ -314,7 +313,7 @@ public class ImageCachingService {
 	}
 
 	/**
-	 * Writes immage to JPEG file
+	 * Writes image to JPEG file
 	 *
 	 * @param image
 	 * @param outputFile

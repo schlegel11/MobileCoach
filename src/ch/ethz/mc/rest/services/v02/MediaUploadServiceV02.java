@@ -24,6 +24,7 @@ import java.io.File;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -39,6 +40,8 @@ import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.conf.ImplementationConstants.ACCEPTED_MEDIA_UPLOAD_TYPES;
+import ch.ethz.mc.model.persistent.BackendUserInterventionAccess;
+import ch.ethz.mc.model.rest.CollectionOfVariablesWithTimestamp;
 import ch.ethz.mc.model.rest.UploadOK;
 import ch.ethz.mc.services.RESTManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
@@ -181,5 +184,43 @@ public class MediaUploadServiceV02 extends AbstractFileUploadServiceV02 {
 
 		return Response.ok(new UploadOK(fileReference.replace("/", "-")))
 				.build();
+	}
+
+	@GET
+	@Path("/externallyReadUploadsOfParticipant/{group}/{participant}")
+	@Produces("application/json")
+	public CollectionOfVariablesWithTimestamp externallyReadUploadsOfParticipant(
+			@HeaderParam("user") final String user,
+			@HeaderParam("password") final String password,
+			@HeaderParam("interventionPattern") final String interventionPattern,
+			@PathParam("group") final String group,
+			@PathParam("participant") final String participant) {
+		log.debug("Externally read uploads of participant {} from group {}",
+				participant, group);
+		BackendUserInterventionAccess backendUserInterventionAccess;
+		try {
+			backendUserInterventionAccess = checkExternalBackendUserInterventionAccess(
+					user, password, group, interventionPattern);
+		} catch (final Exception e) {
+			throw e;
+		}
+
+		try {
+			if (!ObjectId.isValid(participant.trim())) {
+				throw new Exception("The participant id is not valid");
+			}
+
+			val collectionOfVariablesWithTimestamp = restManagerService
+					.readUploadsOfParticipantIfPartOfInterventionAndGroup(
+							backendUserInterventionAccess.getIntervention(),
+							group, new ObjectId(participant.trim()));
+
+			return collectionOfVariablesWithTimestamp;
+		} catch (final Exception e) {
+			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
+					.entity("Could not retrieve uploads of participant: "
+							+ e.getMessage())
+					.build());
+		}
 	}
 }

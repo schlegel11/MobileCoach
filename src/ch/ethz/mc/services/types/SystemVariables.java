@@ -45,6 +45,7 @@ public class SystemVariables {
 	};
 
 	public enum READ_ONLY_PARTICIPANT_VARIABLES {
+		participantIdentifier,
 		participantParticipationInWeeks,
 		participantParticipationInDays,
 		participantFeedbackURL,
@@ -66,6 +67,8 @@ public class SystemVariables {
 		participantName,
 		participantLanguage,
 		participantGroup,
+		participantOrganization,
+		participantOrganizationUnit,
 		participantResponsibleTeamManagerEmailData,
 		participantDialogOptionSMSData,
 		participantDialogOptionEmailData,
