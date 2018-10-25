@@ -1,5 +1,8 @@
 package ch.ethz.mc.services.internal;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -21,12 +24,15 @@ package ch.ethz.mc.services.internal;
  * the License.
  */
 import java.io.StringReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import javax.mail.Authenticator;
@@ -46,21 +52,29 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.memory.ReceivedMessage;
 import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogOption;
+import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogMessageTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
 import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mc.tools.StringHelpers;
+import ch.ethz.mc.tools.VariableStringReplacer;
+import lombok.Cleanup;
 import lombok.Getter;
 import lombok.Synchronized;
 import lombok.val;
@@ -73,48 +87,60 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public class CommunicationManagerService {
-	private static CommunicationManagerService	instance		= null;
+	private static CommunicationManagerService		instance		= null;
 
-	private final boolean						simulatorActive;
+	private static final String						ASPSMS_API_URL	= "https://json.aspsms.com/SendSimpleTextSMS";
 
-	private long								lastSMSCheck	= 0;
-	private long								lastEmailCheck	= 0;
+	private final boolean							simulatorActive;
 
-	private final boolean						emailActive;
-	private final boolean						smsActive;
-	private final boolean						deepstreamActive;
-	private final boolean						pushNotificationsActive;
+	private long									lastSMSCheck	= 0;
+	private long									lastEmailCheck	= 0;
+
+	private final boolean							emailActive;
+	private final boolean							smsActive;
+	private final boolean							deepstreamActive;
+	private final boolean							pushNotificationsActive;
 
 	@Getter
-	private DeepstreamCommunicationService		deepstreamCommunicationService;
-	private PushNotificationService				pushNotificationService;
+	private DeepstreamCommunicationService			deepstreamCommunicationService;
+	private PushNotificationService					pushNotificationService;
 
-	private InterventionExecutionManagerService	interventionExecutionManagerService;
-	private final Session						incomingMailSession;
-	private final Session						outgoingMailSession;
+	private InterventionExecutionManagerService		interventionExecutionManagerService;
+	private final VariablesManagerService			variablesManagerService;
 
-	private final String						mailboxProtocol;
-	private final String						mailboxFolder;
+	private final Session							incomingMailSession;
+	private final Session							outgoingMailSession;
 
-	private final String						emailFrom;
-	private final String						emailSubjectForParticipant;
-	private final String						emailSubjectForSupervisor;
+	private final String							mailboxProtocol;
+	private final String							mailboxFolder;
 
-	private final String						smsEmailFrom;
-	private final String						smsMailSubjectStartsWith;
-	private final String						smsEmailTo;
-	private final String						smsUserKey;
-	private final String						smsUserPassword;
+	private final String							emailFrom;
+	private final String							emailSubjectForParticipant;
+	private final String							emailSubjectForSupervisor;
+	private final String							emailSubjectForTeamManager;
+	private final String							emailTemplateForTeamManager;
 
-	private final DocumentBuilderFactory		documentBuilderFactory;
-	private final SimpleDateFormat				receiverDateFormat;
+	private final String							smsMailSubjectStartsWith;
+	private final String							smsUserKey;
+	private final String							smsUserPassword;
 
-	private final List<MailingThread>			runningMailingThreads;
+	private final DocumentBuilderFactory			documentBuilderFactory;
+	private final SimpleDateFormat					receiverDateFormat;
 
-	private CommunicationManagerService() throws Exception {
+	private final List<AsyncSendingThread>			runningAsyncSendingThreads;
+
+	private final ConcurrentHashMap<String, Long>	lastTeamManagerNotificationsCache;
+
+	private CommunicationManagerService(
+			final VariablesManagerService variablesManagerService)
+			throws Exception {
 		log.info("Preparing service...");
 
-		runningMailingThreads = new ArrayList<MailingThread>();
+		this.variablesManagerService = variablesManagerService;
+
+		runningAsyncSendingThreads = new ArrayList<AsyncSendingThread>();
+
+		lastTeamManagerNotificationsCache = new ConcurrentHashMap<String, Long>();
 
 		simulatorActive = Constants.isSimulatedDateAndTime();
 
@@ -145,16 +171,29 @@ public class CommunicationManagerService {
 		emailFrom = Constants.getEmailFrom();
 		emailSubjectForParticipant = Constants.getEmailSubjectForParticipant();
 		emailSubjectForSupervisor = Constants.getEmailSubjectForSupervisor();
+		emailSubjectForTeamManager = Constants.getEmailSubjectForTeamManager();
+		emailTemplateForTeamManager = Constants
+				.getEmailTemplateForTeamManager();
 
 		// SMS configuration
 		smsMailSubjectStartsWith = Constants.getSmsMailSubjectStartsWith();
-		smsEmailFrom = Constants.getSmsEmailFrom();
-		smsEmailTo = Constants.getSmsEmailTo();
 		smsUserKey = Constants.getSmsUserKey();
 		smsUserPassword = Constants.getSmsUserPassword();
 
 		// General properties
 		val properties = new Properties();
+		properties.setProperty("mail.pop3.timeout",
+				ImplementationConstants.MAIL_SERVER_TIMEOUT);
+		properties.setProperty("mail.pop3.connectiontimeout",
+				ImplementationConstants.MAIL_SERVER_CONNECTION_TIMEOUT);
+		properties.setProperty("mail.smtp.timeout",
+				ImplementationConstants.MAIL_SERVER_TIMEOUT);
+		properties.setProperty("mail.smtp.connectiontimeout",
+				ImplementationConstants.MAIL_SERVER_CONNECTION_TIMEOUT);
+		properties.setProperty("mail.smtps.timeout",
+				ImplementationConstants.MAIL_SERVER_TIMEOUT);
+		properties.setProperty("mail.smtps.connectiontimeout",
+				ImplementationConstants.MAIL_SERVER_CONNECTION_TIMEOUT);
 		properties.setProperty("mail.pop3.host", mailhostIncoming);
 		properties.setProperty("mail.smtp.host", mailhostOutgoing);
 		if (useAuthentication) {
@@ -188,11 +227,7 @@ public class CommunicationManagerService {
 		if (deepstreamActive) {
 			deepstreamCommunicationService = DeepstreamCommunicationService
 					.prepare(Constants.getDeepstreamHost(),
-							Constants.getDeepstreamServerRole(),
-							Constants.getDeepstreamServerPassword(),
-							Constants.getDeepstreamParticipantRole(),
-							Constants.getDeepstreamSupervisorRole(),
-							Constants.getDeepstreamObserverRole());
+							Constants.getDeepstreamServerPassword(), this);
 		} else {
 			deepstreamCommunicationService = null;
 		}
@@ -216,10 +251,13 @@ public class CommunicationManagerService {
 		log.info("Prepared.");
 	}
 
-	public static CommunicationManagerService prepare() throws Exception {
+	public static CommunicationManagerService prepare(
+			final VariablesManagerService variablesManagerService)
+			throws Exception {
 		if (instance == null) {
-			instance = new CommunicationManagerService();
+			instance = new CommunicationManagerService(variablesManagerService);
 		}
+
 		return instance;
 	}
 
@@ -264,16 +302,35 @@ public class CommunicationManagerService {
 		}
 
 		log.debug("Stopping mailing threads...");
-		synchronized (runningMailingThreads) {
-			for (val runningMailingThread : runningMailingThreads) {
-				synchronized (runningMailingThread) {
-					runningMailingThread.interrupt();
-					runningMailingThread.join();
+		synchronized (runningAsyncSendingThreads) {
+			for (val runningAsyncSendingThread : runningAsyncSendingThreads) {
+				synchronized (runningAsyncSendingThread) {
+					runningAsyncSendingThread.interrupt();
+					runningAsyncSendingThread.join();
 				}
 			}
 		}
 
 		log.info("Stopped.");
+	}
+
+	@Synchronized
+	private void ensureSensefulParticipantTimings(
+			final DatabaseManagerService databaseManagerService) {
+		log.info("Ensuring senseful participant login/logout timinigs...");
+
+		val participants = databaseManagerService.findModelObjects(
+				Participant.class,
+				Queries.PARTICIPANT__WHERE_LAST_LOGIN_TIME_IS_BIGGER_THAN_LAST_LOGOUT_TIME);
+
+		for (val participant : participants) {
+			participant.setLastLogoutTimestamp(
+					participant.getLastLoginTimestamp());
+
+			databaseManagerService.saveModelObject(participant);
+		}
+
+		log.info("Done");
 	}
 
 	/**
@@ -291,13 +348,13 @@ public class CommunicationManagerService {
 			case SMS:
 			case SUPERVISOR_SMS:
 				if (smsActive) {
-					val mailingThread = new MailingThread(dialogOption,
+					val mailingThread = new AsyncSendingThread(dialogOption,
 							dialogMessage.getId(), messageSender,
 							dialogMessage.getMessageWithForcedLinks(),
 							dialogMessage.isMessageExpectsAnswer());
 
-					synchronized (runningMailingThreads) {
-						runningMailingThreads.add(mailingThread);
+					synchronized (runningAsyncSendingThreads) {
+						runningAsyncSendingThreads.add(mailingThread);
 					}
 
 					mailingThread.start();
@@ -306,13 +363,13 @@ public class CommunicationManagerService {
 			case EMAIL:
 			case SUPERVISOR_EMAIL:
 				if (emailActive) {
-					val mailingThread = new MailingThread(dialogOption,
+					val mailingThread = new AsyncSendingThread(dialogOption,
 							dialogMessage.getId(), messageSender,
 							dialogMessage.getMessageWithForcedLinks(),
 							dialogMessage.isMessageExpectsAnswer());
 
-					synchronized (runningMailingThreads) {
-						runningMailingThreads.add(mailingThread);
+					synchronized (runningAsyncSendingThreads) {
+						runningAsyncSendingThreads.add(mailingThread);
 					}
 
 					mailingThread.start();
@@ -321,33 +378,59 @@ public class CommunicationManagerService {
 			case EXTERNAL_ID:
 			case SUPERVISOR_EXTERNAL_ID:
 				int visibleMessagesSentSinceLogout = 0;
-				if (dialogOption.getData().startsWith(
-						ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM)
-						&& deepstreamActive) {
-					try {
-						visibleMessagesSentSinceLogout = deepstreamCommunicationService
-								.asyncSendMessage(dialogOption,
-										dialogMessage.getId());
-					} catch (final Exception e) {
-						log.warn("Could not send message using deepstream: {}",
-								e.getMessage());
+
+				if (!dialogMessage.isPushOnly()) {
+					// Send only visible messages
+					if (dialogOption.getData().startsWith(
+							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM)
+							&& deepstreamActive) {
+						try {
+							visibleMessagesSentSinceLogout = deepstreamCommunicationService
+									.asyncSendMessage(dialogOption,
+											dialogMessage.getId());
+						} catch (final Exception e) {
+							log.warn(
+									"Could not send message using deepstream: {}",
+									e.getMessage());
+						}
+					} else {
+						log.warn(
+								"No appropriate handler could be found for external id dialog option with data {}",
+								dialogOption.getData());
 					}
 				} else {
-					log.warn(
-							"No appropriate handler could be found for external id dialog option with data {}",
-							dialogOption.getData());
+					// Mark push only push messages as sent
+					if (dialogMessage.isMessageExpectsAnswer()) {
+						interventionExecutionManagerService
+								.dialogMessageStatusChangesForSending(
+										dialogMessage.getId(),
+										DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
+										InternalDateTime.currentTimeMillis());
+					} else {
+						interventionExecutionManagerService
+								.dialogMessageStatusChangesForSending(
+										dialogMessage.getId(),
+										DialogMessageStatusTypes.SENT_BUT_NOT_WAITING_FOR_ANSWER,
+										InternalDateTime.currentTimeMillis());
+					}
+
 				}
+
 				// Only send push notifications if
 				// (1) it is switched on in general
-				// (2) if the message was really sent to out
-				// (3) it is a visible message
+				// (2) if the message was really sent to out / will in general
+				// not be sent, because it's push only
+				// (3) it is a visible message / a forced push message
 				if (pushNotificationsActive
-						&& visibleMessagesSentSinceLogout > 0 && dialogMessage
+						&& (visibleMessagesSentSinceLogout > 0
+								|| dialogMessage.isPushOnly())
+						&& dialogMessage
 								.getType() != DialogMessageTypes.COMMAND) {
 					try {
 						pushNotificationService.asyncSendPushNotification(
 								dialogOption, dialogMessage.getMessage(),
-								visibleMessagesSentSinceLogout);
+								visibleMessagesSentSinceLogout,
+								dialogMessage.isPushOnly());
 					} catch (final Exception e) {
 						log.warn("Could not send push notification: {}",
 								e.getMessage());
@@ -527,7 +610,10 @@ public class CommunicationManagerService {
 				break;
 			case EXTERNAL_ID:
 			case SUPERVISOR_EXTERNAL_ID:
-				if (deepstreamActive) {
+				if (deepstreamActive
+						&& !StringUtils.isBlank(receivedMessage.getSender())
+						&& receivedMessage.getSender().startsWith(
+								ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM)) {
 					deepstreamCommunicationService.asyncAcknowledgeMessage(
 							dialogMessage, receivedMessage);
 				}
@@ -589,21 +675,21 @@ public class CommunicationManagerService {
 	}
 
 	/**
-	 * Enables threaded sending of mailing messages, with retries
+	 * Enables threaded sending of messages, with retries
 	 *
 	 * @author Andreas Filler
 	 */
-	private class MailingThread extends Thread {
+	private class AsyncSendingThread extends Thread {
 		private final DialogOption	dialogOption;
 		private final ObjectId		dialogMessageId;
 		private final String		messageSender;
 		private final String		message;
 		private final boolean		messageExpectsAnswer;
 
-		public MailingThread(final DialogOption dialogOption,
+		public AsyncSendingThread(final DialogOption dialogOption,
 				final ObjectId dialogMessageId, final String smsPhoneNumberFrom,
 				final String message, final boolean messageExpectsAnswer) {
-			setName("Mailing Thread " + dialogOption.getData());
+			setName("Async Sending Thread " + dialogOption.getData());
 			this.dialogOption = dialogOption;
 			this.dialogMessageId = dialogMessageId;
 			messageSender = smsPhoneNumberFrom;
@@ -700,13 +786,13 @@ public class CommunicationManagerService {
 		}
 
 		private void removeFromList() {
-			synchronized (runningMailingThreads) {
-				runningMailingThreads.remove(this);
+			synchronized (runningAsyncSendingThreads) {
+				runningAsyncSendingThreads.remove(this);
 			}
 		}
 
 		/**
-		 * Sends mailing messages
+		 * Async send messages
 		 *
 		 * @param dialogOption
 		 * @param messageSender
@@ -716,25 +802,88 @@ public class CommunicationManagerService {
 		 */
 		private void sendMessage(final DialogOption dialogOption,
 				final String messageSender, final String message)
-				throws AddressException, MessagingException {
+				throws Exception {
 			log.debug("Sending message with text {} to {}", message,
 					dialogOption.getData());
 
 			switch (dialogOption.getType()) {
 				case SMS:
 				case SUPERVISOR_SMS:
-					val SMSMailMessage = new MimeMessage(outgoingMailSession);
+					HttpURLConnection conn = null;
+					try {
+						final URL url = new URL(ASPSMS_API_URL);
+						conn = (HttpURLConnection) url.openConnection();
 
-					SMSMailMessage.setFrom(new InternetAddress(smsEmailFrom));
-					SMSMailMessage.addRecipient(Message.RecipientType.TO,
-							new InternetAddress(smsEmailTo));
-					SMSMailMessage.setSubject("UserKey=" + smsUserKey
-							+ ",Password=" + smsUserPassword + ",Recipient="
-							+ dialogOption.getData() + ",Originator="
-							+ messageSender + ",Notify=none");
-					SMSMailMessage.setText(message, "ISO-8859-1");
+						conn.setUseCaches(false);
+						conn.setDoInput(true);
+						conn.setDoOutput(true);
 
-					Transport.send(SMSMailMessage);
+						conn.setRequestMethod("POST");
+						conn.setRequestProperty("Content-Type",
+								"application/json");
+
+						final JsonObject jsonObject = new JsonObject();
+
+						jsonObject.addProperty("UserName", smsUserKey);
+						jsonObject.addProperty("Password", smsUserPassword);
+						jsonObject.addProperty("Originator", messageSender);
+						val recipients = new JsonArray();
+						recipients.add(dialogOption.getData());
+						jsonObject.add("Recipients", recipients);
+						jsonObject.addProperty("MessageText", message);
+						jsonObject.addProperty("ForceGSM7bit", false);
+
+						@Cleanup
+						final OutputStreamWriter wr = new OutputStreamWriter(
+								conn.getOutputStream());
+						wr.write(jsonObject.toString());
+						wr.flush();
+						int status = 0;
+
+						if (null != conn) {
+							status = conn.getResponseCode();
+						}
+
+						if (status == 200) {
+							@Cleanup
+							val reader = new BufferedReader(
+									new InputStreamReader(
+											conn.getInputStream()));
+
+							final StringBuffer response = new StringBuffer();
+							String line;
+							while ((line = reader.readLine()) != null) {
+								response.append(line);
+							}
+
+							if (response.toString()
+									.contains("\"StatusCode\":\"1\"")) {
+								log.debug(
+										"Message accepted by ASPSMS gateway.");
+							} else {
+								log.warn("Message rejected by ASPSMS gateway: ",
+										response);
+							}
+						} else {
+							log.warn("Message rejected by ASPSMS gateway: ",
+									status);
+
+							throw new Exception(
+									"Message rejected: Status code " + status);
+						}
+						conn.disconnect();
+					} catch (final Exception e) {
+						log.debug(
+								"Message rejected by ASPSMS gateway or connection failed: ",
+								e.getMessage());
+
+						throw e;
+					} finally {
+						if (conn != null) {
+							conn.disconnect();
+						}
+					}
+
 					break;
 				case EMAIL:
 				case SUPERVISOR_EMAIL:
@@ -763,7 +912,111 @@ public class CommunicationManagerService {
 		}
 	}
 
-	public int getMessagingThreadCount() {
-		return runningMailingThreads.size();
+	public int getAsyncSendingThreadCount() {
+		return runningAsyncSendingThreads.size();
+	}
+
+	public void sendDashboardChatNotification(final boolean sendToParticipant,
+			final ObjectId participantId, final String message,
+			final int visibleMessagesSentSinceLogout,
+			final String dialogOptionData) {
+		if (sendToParticipant && pushNotificationsActive) {
+			// Message by team manager (send push notification to participant)
+
+			if (visibleMessagesSentSinceLogout > 0) {
+				val dialogOption = interventionExecutionManagerService
+						.getDialogOptionByTypeAndDataOfActiveInterventions(
+								DialogOptionTypes.EXTERNAL_ID,
+								dialogOptionData);
+
+				if (dialogOption != null) {
+					try {
+						pushNotificationService.asyncSendPushNotification(
+								dialogOption,
+								ImplementationConstants.TEAM_MANAGER_PUSH_NOTIFICATION_PREFIX
+										+ message,
+								visibleMessagesSentSinceLogout, false);
+					} catch (final Exception e) {
+						log.warn(
+								"Could not send team manager caused push notification: {}",
+								e.getMessage());
+					}
+				}
+			}
+		} else if (!sendToParticipant && emailActive) {
+			// Message by participant (send email notification to team-manager)
+
+			boolean lastNotificationWithinSilenceDuration = false;
+			val participantIdString = participantId.toHexString();
+			if (lastTeamManagerNotificationsCache
+					.containsKey(participantIdString)) {
+				final long lastNotificationTimeStamp = lastTeamManagerNotificationsCache
+						.get(participantIdString);
+
+				if (lastNotificationTimeStamp
+						+ ImplementationConstants.TEAM_MANAGER_EMAIL_NOTIFICATION_SILENCE_DURATION_IN_MINUTES
+								* ImplementationConstants.MINUTES_TO_TIME_IN_MILLIS_MULTIPLICATOR > InternalDateTime
+										.currentTimeMillis()) {
+					lastNotificationWithinSilenceDuration = true;
+				} else {
+					lastTeamManagerNotificationsCache.put(participantIdString,
+							InternalDateTime.currentTimeMillis());
+				}
+			} else {
+				lastTeamManagerNotificationsCache.put(participantIdString,
+						InternalDateTime.currentTimeMillis());
+			}
+
+			// Send notification if no former notification within the last x
+			// minutes
+			if (!lastNotificationWithinSilenceDuration) {
+				val participant = interventionExecutionManagerService
+						.getParticipantById(participantId);
+
+				if (participant.getResponsibleTeamManagerEmail() != null) {
+					val runnable = new Runnable() {
+
+						@Override
+						public void run() {
+							log.debug(
+									"Sending notification for new message to team manager");
+							val variablesWithValues = variablesManagerService
+									.getAllVariablesWithValuesOfParticipantAndSystem(
+											participant);
+
+							val message = VariableStringReplacer
+									.findVariablesAndReplaceWithTextValues(
+											participant.getLanguage(),
+											emailTemplateForTeamManager,
+											variablesWithValues.values(), "");
+
+							try {
+								val emailMessage = new MimeMessage(
+										outgoingMailSession);
+
+								emailMessage.setFrom(
+										new InternetAddress(emailFrom));
+								emailMessage.addRecipient(
+										Message.RecipientType.TO,
+										new InternetAddress(participant
+												.getResponsibleTeamManagerEmail()));
+								emailMessage
+										.setSubject(emailSubjectForTeamManager);
+								emailMessage.setText(message, "UTF-8");
+
+								Transport.send(emailMessage);
+							} catch (final Exception e) {
+								log.warn(
+										"Error when trying to send notifiation email to team manager: {}",
+										e);
+							}
+						}
+					};
+
+					new Thread(runnable).start();
+				}
+			}
+		}
+
 	}
 }

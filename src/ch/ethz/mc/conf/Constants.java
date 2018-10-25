@@ -75,7 +75,7 @@ public class Constants {
 	 * 
 	 * CAUTION: Can NOT be defined in configuration file
 	 */
-	public static final int		DATA_MODEL_VERSION					= 40;
+	public static final int		DATA_MODEL_VERSION					= 43;
 	/**
 	 * Data model configuration collection
 	 * 
@@ -154,6 +154,9 @@ public class Constants {
 	@Getter
 	private static int			maxVariableHistory						= 1000;
 
+	@Getter
+	private static boolean		mediaUploadSecurityCheck				= true;
+
 	/**
 	 * Survey listing configuration
 	 */
@@ -226,16 +229,16 @@ public class Constants {
 	private static String		emailSubjectForParticipant				= "MobileCoach Message";
 	@Getter
 	private static String		emailSubjectForSupervisor				= "MobileCoach Supervisor Notification";
+	@Getter
+	private static String		emailSubjectForTeamManager				= "MobileCoach Team Manager Notification";
+	@Getter
+	private static String		emailTemplateForTeamManager				= "Hi Team Manager of $participantName!\n\nYou have one or more new messages from your participant, which can be read on the MobileCoach dashboard.";
 
 	/**
 	 * SMS configuration
 	 */
 	@Getter
 	private static boolean		smsActive								= true;
-	@Getter
-	private static String		smsEmailFrom							= "a@b.eu";
-	@Getter
-	private static String		smsEmailTo								= "c@d.eu";
 	@Getter
 	private static String		smsMailSubjectStartsWith				= "SMS received on";
 	@Getter
@@ -251,14 +254,6 @@ public class Constants {
 	private static boolean		deepstreamActive						= false;
 	@Getter
 	private static String		deepstreamHost							= "wss://localhost:6020";
-	@Getter
-	private static String		deepstreamServerRole					= "server";
-	@Getter
-	private static String		deepstreamParticipantRole				= "participant";
-	@Getter
-	private static String		deepstreamSupervisorRole				= "supervisor";
-	@Getter
-	private static String		deepstreamObserverRole					= "observer";
 	@Getter
 	private static int			deepstreamMinClientVersion				= 1;
 	@Getter

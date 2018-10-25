@@ -53,12 +53,16 @@ public class DeepstreamConstants {
 	public static final String	RPC_REST_TOKEN						= "rest-token";
 	public static final String	RPC_PUSH_TOKEN						= "push-token";
 	public static final String	RPC_USER_MESSAGE					= "user-message";
+	public static final String	RPC_DASHBOARD_MESSAGE				= "dashboard-message";
 	public static final String	RPC_USER_INTENTION					= "user-intention";
 	public static final String	RPC_USER_VARIABLE					= "user-variable";
 	public static final String	RPC_MESSAGE_DIFF					= "message-diff";
+	public static final String	RPC_DASHBOARD_DIFF					= "dashboard-diff";
 
 	public static final String	PATH_MESSAGES						= "messages/";
+	public static final String	PATH_DASHBOARD						= "dashboard/";
 	public static final String	PATH_MESSAGE_UPDATE					= "message-update/";
+	public static final String	PATH_DASHBOARD_UPDATE				= "dashboard-update/";
 	public static final String	PATH_LIST							= "list/";
 
 	public static final String	NICKNAME							= "nickname";

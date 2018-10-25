@@ -22,9 +22,9 @@ package ch.ethz.mc.tools;
  */
 import java.util.concurrent.TimeUnit;
 
-import lombok.extern.log4j.Log4j2;
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.ImplementationConstants;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Helper class to simulate timestamps in the future
@@ -37,8 +37,11 @@ public class InternalDateTime {
 
 	private static FastForwardModeThread	fastForwardModeThread	= null;
 
+	private static int						minutesOffsetCount		= 0;
+
 	private static int						hourOffsetCount			= 0;
 
+	private final static long				minutesOffset			= ImplementationConstants.MINUTES_TO_TIME_IN_MILLIS_MULTIPLICATOR;
 	private final static long				hourOffset				= ImplementationConstants.HOURS_TO_TIME_IN_MILLIS_MULTIPLICATOR;
 
 	/**
@@ -47,7 +50,17 @@ public class InternalDateTime {
 	 * @return
 	 */
 	public static long currentTimeMillis() {
-		return System.currentTimeMillis() + hourOffset * hourOffsetCount;
+		return System.currentTimeMillis() + minutesOffset * minutesOffsetCount
+				+ hourOffset * hourOffsetCount;
+	}
+
+	/**
+	 * Simulates a step one hour into the future
+	 */
+	public static void nextTenMinutes() {
+		synchronized (MC.getInstance()) {
+			minutesOffsetCount += 10;
+		}
 	}
 
 	/**

@@ -40,10 +40,12 @@ import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.MicroDialogRule;
 import ch.ethz.mc.model.persistent.MonitoringReplyRule;
 import ch.ethz.mc.model.persistent.MonitoringRule;
+import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.consistency.DataModelConfiguration;
 import ch.ethz.mc.model.persistent.types.BackendUserTypes;
 import ch.ethz.mc.tools.BCrypt;
 import ch.ethz.mc.tools.DataModelUpdateManager;
+import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
@@ -85,24 +87,6 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 
 			// Creating Jongo object
 			jongo = new Jongo(mongoClient.getDB(Constants.getDatabaseName()));
-
-			// Ensure indices
-			log.debug("Creating/ensuring indices: ");
-			val indicesHashtable = Indices.getIndices();
-			val indicesHashtableKeys = indicesHashtable.keys();
-			while (indicesHashtableKeys.hasMoreElements()) {
-				val clazz = indicesHashtableKeys.nextElement();
-				final String[] indices = indicesHashtable.get(clazz);
-				val collection = jongo.getCollection(clazz.getSimpleName());
-
-				collection.dropIndexes();
-
-				for (final String index : indices) {
-					log.debug("Creating/ensuring index {} on collection {}",
-							index, clazz.getSimpleName());
-					collection.ensureIndex(index);
-				}
-			}
 		} catch (final Exception e) {
 			log.error("Error at creating MongoDB connection: {}",
 					e.getMessage());
@@ -113,6 +97,29 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 		// Give Jongo object to model object
 		configure(jongo);
 
+		// Ensure indices (1 of 2)
+		try {
+			log.debug("Creating/ensuring indices: ");
+			val indicesHashtable = Indices.getIndices();
+			val indicesHashtableKeys = indicesHashtable.keys();
+			while (indicesHashtableKeys.hasMoreElements()) {
+				val clazz = indicesHashtableKeys.nextElement();
+				final String[] indices = indicesHashtable.get(clazz);
+				val collection = jongo.getCollection(clazz.getSimpleName());
+
+				for (final String index : indices) {
+					log.debug("Creating/ensuring index {} on collection {}",
+							index, clazz.getSimpleName());
+					collection.ensureIndex(index);
+				}
+			}
+		} catch (final Exception e) {
+			log.error("Error at creating/ensuring database indices: {}",
+					e.getMessage());
+			throw new Exception("Error at creating/ensuring database indices: "
+					+ e.getMessage());
+		}
+
 		// Doing database updates
 		try {
 			updateDataToVersionIfNecessary(expectedVersion);
@@ -120,6 +127,29 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 			log.error("Error at updating database: {}", e.getMessage());
 			throw new Exception(
 					"Error at updating database: " + e.getMessage());
+		}
+
+		// Ensure indices (2 of 2)
+		try {
+			log.debug("Creating/ensuring indices: ");
+			val indicesHashtable = Indices.getIndices();
+			val indicesHashtableKeys = indicesHashtable.keys();
+			while (indicesHashtableKeys.hasMoreElements()) {
+				val clazz = indicesHashtableKeys.nextElement();
+				final String[] indices = indicesHashtable.get(clazz);
+				val collection = jongo.getCollection(clazz.getSimpleName());
+
+				for (final String index : indices) {
+					log.debug("Creating/ensuring index {} on collection {}",
+							index, clazz.getSimpleName());
+					collection.ensureIndex(index);
+				}
+			}
+		} catch (final Exception e) {
+			log.error("Error at creating/ensuring database indices: {}",
+					e.getMessage());
+			throw new Exception("Error at creating/ensuring database indices: "
+					+ e.getMessage());
 		}
 
 		// Checking for admin account
@@ -185,6 +215,21 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 		// perform update
 		DataModelUpdateManager.updateDataFromVersionToVersion(currentVersion,
 				versionToBeReached, jongo);
+
+		// clear indices when current and expected database versions are
+		// different
+		if (currentVersion != versionToBeReached) {
+			for (val collectionName : jongo.getDatabase()
+					.getCollectionNames()) {
+				if (!collectionName.startsWith("system.")) {
+					log.info(
+							"Index of collection '{}' will be dropped because of database version change",
+							collectionName);
+					val collection = jongo.getCollection(collectionName);
+					collection.dropIndexes();
+				}
+			}
+		}
 
 		log.info("Database is now on data model version {}",
 				versionToBeReached);
@@ -297,6 +342,28 @@ public class DatabaseManagerService extends AbstractModelObjectAccessService {
 		log.info("{} links checked.", linksChecked);
 
 		log.info("Database consistency ensured.");
+	}
+
+	/**
+	 * Corrects potentially wrong participant timings
+	 * 
+	 * @param databaseManagerService
+	 */
+	@Synchronized
+	public void ensureSensefulParticipantTimings() {
+		log.info("Ensuring senseful participant login/logout timinigs...");
+
+		val participants = findModelObjects(Participant.class,
+				Queries.PARTICIPANT__WHERE_LAST_LOGIN_TIME_IS_BIGGER_THAN_LAST_LOGOUT_TIME);
+
+		for (val participant : participants) {
+			participant.setLastLogoutTimestamp(
+					participant.getLastLoginTimestamp());
+
+			saveModelObject(participant);
+		}
+
+		log.info("Done.");
 	}
 
 	/**

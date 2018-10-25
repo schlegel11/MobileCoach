@@ -52,6 +52,7 @@ import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.memory.DialogMessageWithSenderIdentification;
 import ch.ethz.mc.model.memory.ReceivedMessage;
+import ch.ethz.mc.model.persistent.DashboardMessage;
 import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.DialogStatus;
@@ -68,6 +69,7 @@ import ch.ethz.mc.model.persistent.MonitoringMessageRule;
 import ch.ethz.mc.model.persistent.MonitoringReplyRule;
 import ch.ethz.mc.model.persistent.MonitoringRule;
 import ch.ethz.mc.model.persistent.Participant;
+import ch.ethz.mc.model.persistent.ParticipantVariableWithValue;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 import ch.ethz.mc.model.persistent.types.AnswerTypes;
@@ -326,6 +328,8 @@ public class InterventionExecutionManagerService {
 			final int minutesUntilHandledAsNotAnswered) {
 		log.debug("Create message and prepare for sending");
 		val dialogMessage = new DialogMessage(participant.getId(), 0,
+				relatedMonitoringMessage == null ? false
+						: relatedMonitoringMessage.isPushOnly(),
 				DialogMessageStatusTypes.PREPARED_FOR_SENDING, type, null,
 				message, message, answerType, answerOptions, null, null, null,
 				null, null, timestampToSendMessage, -1, supervisorMessage,
@@ -688,7 +692,7 @@ public class InterventionExecutionManagerService {
 			answerRaw = receivedMessage.getMessage();
 		}
 
-		val dialogMessage = new DialogMessage(participantId, 0,
+		val dialogMessage = new DialogMessage(participantId, 0, false,
 				isTypeIntention ? DialogMessageStatusTypes.RECEIVED_AS_INTENTION
 						: DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY,
 				type, receivedMessage.getClientId(), "", "", null, null, null,
@@ -777,6 +781,40 @@ public class InterventionExecutionManagerService {
 		databaseManagerService.saveModelObject(dialogMessage);
 
 		return dialogMessage;
+	}
+
+	// Dashboard message
+	@Synchronized
+	public DashboardMessage dashboardMessageCreateUsingDialogOptionTypeAndData(
+			final DialogOptionTypes dialogOptionType, final String data,
+			final String clientMessageId, final String role,
+			final String message, final long timestamp) {
+		val dialogOption = databaseManagerService.findOneModelObject(
+				DialogOption.class, Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
+				dialogOptionType, data);
+
+		if (dialogOption == null) {
+			return null;
+		}
+
+		val participantId = dialogOption.getParticipant();
+
+		val dashboardMessage = new DashboardMessage(participantId,
+				clientMessageId, role, 0, message, timestamp);
+
+		val highestOrderMessage = databaseManagerService
+				.findOneSortedModelObject(DashboardMessage.class,
+						Queries.DASHBOARD_MESSAGE__BY_PARTICIPANT,
+						Queries.DASHBOARD_MESSAGE__SORT_BY_ORDER_DESC,
+						participantId);
+
+		if (highestOrderMessage != null) {
+			dashboardMessage.setOrder(highestOrderMessage.getOrder() + 1);
+		}
+
+		databaseManagerService.saveModelObject(dashboardMessage);
+
+		return dashboardMessage;
 	}
 
 	// Dialog status
@@ -888,7 +926,7 @@ public class InterventionExecutionManagerService {
 		long messagingPerformedForParticipants = 0;
 
 		log.debug(
-				"Create a list of all relevant participants to perfom messaging");
+				"Create a list of all relevant participants to perform messaging");
 		val participants = getAllParticipantsRelevantForAnsweredInTimeChecksAndMonitoringScheduling();
 
 		// Scheduling of new messages (periodic) will only be
@@ -1047,13 +1085,18 @@ public class InterventionExecutionManagerService {
 		log.debug("Handling {} messages for participant {}",
 				userAnswered ? "answered" : "unanswered", participant.getId());
 
+		int participantInfiniteBlockingMessagesCount = 0;
+		final HashSet<String> participantInfiniteBlockingMessagesIdentifiers = new HashSet<String>();
+		double participantInfiniteBlockingMessagesWaitingMinutesMin = 0d;
+		double participantInfiniteBlockingMessagesWaitingMinutesMax = 0d;
+
 		// Get relevant messages of participant
 		Iterable<DialogMessage> dialogMessages;
 		if (userAnswered) {
 			dialogMessages = getDialogMessagesOfParticipantAnsweredByParticipant(
 					participant.getId());
 		} else {
-			dialogMessages = getDialogMessagesOfParticipantUnansweredByParticipant(
+			dialogMessages = getDialogMessagesOfParticipantWaitingToBeAnsweredOrUnansweredByParticipant(
 					participant.getId());
 		}
 
@@ -1066,6 +1109,52 @@ public class InterventionExecutionManagerService {
 				relatedMicroDialogMessage = databaseManagerService
 						.getModelObjectById(MicroDialogMessage.class,
 								dialogMessage.getRelatedMicroDialogMessage());
+			}
+
+			// Check for possible "unanswered" cases
+			if (!userAnswered) {
+
+				if (dialogMessage
+						.getIsUnansweredAfterTimestamp() < InternalDateTime
+								.currentTimeMillis()) {
+					// Classic unanswered case --> proceed regularly
+				} else if (relatedMicroDialogMessage != null
+						&& relatedMicroDialogMessage
+								.isMessageBlocksMicroDialogUntilAnswered()
+						&& relatedMicroDialogMessage
+								.getMinutesUntilMessageIsHandledAsUnanswered() == Integer.MAX_VALUE
+						&& dialogMessage.getSentTimestamp()
+								+ ImplementationConstants.MICRO_DIALOG_MESSAGE_UNHANDLED_MESSAGE_MINIMUM_THRESHOLD_IN_MILLIS < InternalDateTime
+										.currentTimeMillis()) {
+					// Related micro dialog message is blocking and has infinite
+					// timeout and message has been sent more than given time in
+					// millis ago
+
+					participantInfiniteBlockingMessagesCount++;
+
+					if (!StringUtils.isBlank(
+							relatedMicroDialogMessage.getNonUniqueKey())) {
+						participantInfiniteBlockingMessagesIdentifiers.add(
+								relatedMicroDialogMessage.getNonUniqueKey());
+					}
+					final double minutesWaitingForAnswer = (InternalDateTime
+							.currentTimeMillis()
+							- dialogMessage.getSentTimestamp())
+							/ ImplementationConstants.MILLIS_TO_MINUTES_DIVIDER;
+
+					if (participantInfiniteBlockingMessagesWaitingMinutesMin == 0d
+							|| minutesWaitingForAnswer < participantInfiniteBlockingMessagesWaitingMinutesMin) {
+						participantInfiniteBlockingMessagesWaitingMinutesMin = minutesWaitingForAnswer;
+					}
+					if (minutesWaitingForAnswer > participantInfiniteBlockingMessagesWaitingMinutesMax) {
+						participantInfiniteBlockingMessagesWaitingMinutesMax = minutesWaitingForAnswer;
+					}
+
+					continue;
+				} else {
+					// Other cases are not relevant so proceed with next message
+					continue;
+				}
 			}
 
 			// Handle storing of message reply (the text sent) by
@@ -1304,6 +1393,15 @@ public class InterventionExecutionManagerService {
 			}
 		}
 
+		if (!userAnswered) {
+			variablesManagerService
+					.cacheNewInfiniteBlockingMessagesInformationForParticipant(
+							participant.getId(),
+							participantInfiniteBlockingMessagesCount,
+							participantInfiniteBlockingMessagesIdentifiers,
+							participantInfiniteBlockingMessagesWaitingMinutesMin,
+							participantInfiniteBlockingMessagesWaitingMinutesMax);
+		}
 	}
 
 	@Synchronized
@@ -1960,9 +2058,9 @@ public class InterventionExecutionManagerService {
 										continue;
 									}
 									if (communicationManagerService
-											.getMessagingThreadCount() > ImplementationConstants.EMAIL_SENDING_MAXIMUM_THREAD_COUNT) {
+											.getAsyncSendingThreadCount() > ImplementationConstants.ASYNC_SENDING_MAXIMUM_THREAD_COUNT) {
 										log.debug(
-												"Too many email based messages currently prepared for sending...delay until the next run");
+												"Too many async sending threads currently prepared for sending...delay until the next run");
 										continue;
 									}
 									break;
@@ -2023,13 +2121,14 @@ public class InterventionExecutionManagerService {
 		MicroDialog microDialog = null;
 
 		boolean variablesRequireRefresh = true;
+		boolean participantRequiresRefresh = true;
 		Hashtable<String, AbstractVariableWithValue> variablesWithValues = null;
 
 		if (microDialogMessageId != null) {
 			val microDialogMessage = databaseManagerService.getModelObjectById(
 					MicroDialogMessage.class, microDialogMessageId);
 			if (microDialogMessage != null) {
-				// Only proceed with micro dialog if former message was a
+				// Only proceed with micro dialog if former message was no
 				// blocking message
 				if (!microDialogMessage
 						.isMessageBlocksMicroDialogUntilAnswered()) {
@@ -2067,10 +2166,11 @@ public class InterventionExecutionManagerService {
 				handleMessage = false;
 			}
 
-			// Retrieve participant (only once)
-			if (participant == null) {
+			// Retrieve participant (only after potential change)
+			if (participantRequiresRefresh || participant == null) {
 				participant = databaseManagerService
 						.getModelObjectById(Participant.class, participantId);
+				participantRequiresRefresh = false;
 			}
 
 			if (handleMessage) {
@@ -2245,6 +2345,7 @@ public class InterventionExecutionManagerService {
 
 				// Variables need to be refreshed after performing rules
 				variablesRequireRefresh = true;
+				participantRequiresRefresh = true;
 			}
 		} while (!stopMicroDialogHandling);
 	}
@@ -2609,8 +2710,10 @@ public class InterventionExecutionManagerService {
 					Participant.class, dialogOption.getParticipant());
 
 			if (participant != null) {
-				participant.setLastLoginTimestamp(
-						InternalDateTime.currentTimeMillis());
+				val timestamp = InternalDateTime.currentTimeMillis();
+
+				participant.setLastLogoutTimestamp(timestamp);
+				participant.setLastLoginTimestamp(timestamp);
 
 				databaseManagerService.saveModelObject(participant);
 			}
@@ -2878,7 +2981,7 @@ public class InterventionExecutionManagerService {
 					appropriateIntervention.getId(), creationTimestamp,
 					creationTimestamp, creationTimestamp, "",
 					Constants.getInterventionLocales()[0], null, null, null,
-					null, null, true, "", "");
+					null, null, null, true, "", "");
 
 			databaseManagerService.saveModelObject(participant);
 
@@ -3043,6 +3146,113 @@ public class InterventionExecutionManagerService {
 		}
 	}
 
+	/**
+	 * Finds appropriate dialog option for given type and data
+	 * 
+	 * @param dialogOptionType
+	 * @param dialogOptionData
+	 * @return
+	 */
+	@Synchronized
+	public DialogOption getDialogOptionByTypeAndDataOfActiveInterventions(
+			final DialogOptionTypes dialogOptionType,
+			final String dialogOptionData) {
+		val dialogOptions = databaseManagerService.findModelObjects(
+				DialogOption.class, Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
+				dialogOptionType, dialogOptionData);
+
+		long highestCreatedTimestamp = 0;
+		DialogOption appropriateDialogOption = null;
+
+		for (val dialogOption : dialogOptions) {
+			if (dialogOption == null) {
+				continue;
+			}
+
+			val participant = databaseManagerService.getModelObjectById(
+					Participant.class, dialogOption.getParticipant());
+
+			if (participant != null) {
+				val intervention = databaseManagerService.getModelObjectById(
+						Intervention.class, participant.getIntervention());
+
+				if (intervention != null) {
+					if (intervention.isActive()) {
+						if (participant
+								.getCreatedTimestamp() > highestCreatedTimestamp) {
+							highestCreatedTimestamp = participant
+									.getCreatedTimestamp();
+							appropriateDialogOption = dialogOption;
+							continue;
+						}
+					} else {
+						continue;
+					}
+				} else {
+					continue;
+				}
+			} else {
+				continue;
+			}
+		}
+
+		return appropriateDialogOption;
+	}
+
+	/**
+	 * Get participant by {@link ObjectId}
+	 * 
+	 * @param participantId
+	 * @return
+	 */
+	@Synchronized
+	public Participant getParticipantById(final ObjectId participantId) {
+		return databaseManagerService.getModelObjectById(Participant.class,
+				participantId);
+	}
+
+	/**
+	 * Check if the given upload file reference belongs to the given user
+	 * 
+	 * @param user
+	 * @param fileReference
+	 * @return
+	 */
+	@Synchronized
+	public boolean checkIfFileUploadFitsToExternalParticipant(final String user,
+			final String fileReference) {
+		val dialogOption = getDialogOptionByTypeAndDataOfActiveInterventions(
+				DialogOptionTypes.EXTERNAL_ID,
+				ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+						+ user);
+
+		if (dialogOption == null) {
+			return false;
+		}
+
+		val variablesWithValues = databaseManagerService.findModelObjects(
+				ParticipantVariableWithValue.class,
+				Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT_AND_DESCRIBES_MEDIA_UPLOAD_OR_FORMER_VALUE_DESCRIBES_MEDIA_UPLOAD,
+				dialogOption.getParticipant(), true, true);
+
+		for (val variableWithValue : variablesWithValues) {
+			if (variableWithValue.isDescribesMediaUpload()
+					&& variableWithValue.getValue().equals(fileReference)) {
+				return true;
+			}
+
+			for (val formerValue : variableWithValue
+					.getFormerVariableValues()) {
+				if (formerValue.isDescribesMediaUpload()
+						&& formerValue.getValue().equals(fileReference)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
 	/*
 	 * PRIVATE Getter methods
 	 */
@@ -3166,14 +3376,13 @@ public class InterventionExecutionManagerService {
 	}
 
 	@Synchronized
-	private Iterable<DialogMessage> getDialogMessagesOfParticipantUnansweredByParticipant(
+	private Iterable<DialogMessage> getDialogMessagesOfParticipantWaitingToBeAnsweredOrUnansweredByParticipant(
 			final ObjectId participantId) {
 		val dialogMessages = databaseManagerService.findSortedModelObjects(
 				DialogMessage.class,
-				Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_UNANSWERED_AFTER_TIMESTAMP_LOWER,
+				Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS,
 				Queries.DIALOG_MESSAGE__SORT_BY_ORDER_ASC, participantId,
-				DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER,
-				InternalDateTime.currentTimeMillis());
+				DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER);
 
 		return dialogMessages;
 	}
@@ -3222,52 +3431,6 @@ public class InterventionExecutionManagerService {
 		}
 
 		return dialogMessage;
-	}
-
-	@Synchronized
-	private DialogOption getDialogOptionByTypeAndDataOfActiveInterventions(
-			final DialogOptionTypes dialogOptionType,
-			final String dialogOptionData) {
-		val dialogOptions = databaseManagerService.findModelObjects(
-				DialogOption.class, Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
-				dialogOptionType, dialogOptionData);
-
-		long highestCreatedTimestamp = 0;
-		DialogOption appropriateDialogOption = null;
-
-		for (val dialogOption : dialogOptions) {
-			if (dialogOption == null) {
-				continue;
-			}
-
-			val participant = databaseManagerService.getModelObjectById(
-					Participant.class, dialogOption.getParticipant());
-
-			if (participant != null) {
-				val intervention = databaseManagerService.getModelObjectById(
-						Intervention.class, participant.getIntervention());
-
-				if (intervention != null) {
-					if (intervention.isActive()) {
-						if (participant
-								.getCreatedTimestamp() > highestCreatedTimestamp) {
-							highestCreatedTimestamp = participant
-									.getCreatedTimestamp();
-							appropriateDialogOption = dialogOption;
-							continue;
-						}
-					} else {
-						continue;
-					}
-				} else {
-					continue;
-				}
-			} else {
-				continue;
-			}
-		}
-
-		return appropriateDialogOption;
 	}
 
 	@Synchronized

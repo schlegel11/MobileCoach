@@ -344,6 +344,51 @@ public class VariableAccessServiceV02 extends AbstractServiceV02 {
 	}
 
 	@GET
+	@Path("/externallyReadGroupArrayMany/{group}/{variables}")
+	@Produces("application/json")
+	public CollectionOfExtendedListVariables variableReadExternalGroupArrayMany(
+			@HeaderParam("user") final String user,
+			@HeaderParam("password") final String password,
+			@HeaderParam("interventionPattern") final String interventionPattern,
+			@PathParam("group") final String group,
+			@PathParam("variables") final String variables) {
+		log.debug(
+				"Externally read variables array {} of participants from group {}",
+				variables, group);
+		BackendUserInterventionAccess backendUserInterventionAccess;
+		try {
+			backendUserInterventionAccess = checkExternalBackendUserInterventionAccess(
+					user, password, group, interventionPattern);
+		} catch (final Exception e) {
+			throw e;
+		}
+
+		try {
+			val cleanedVariableList = new ArrayList<String>();
+
+			for (val variable : variables.split(",")) {
+				if (!StringValidator.isValidVariableName(
+						ImplementationConstants.VARIABLE_PREFIX
+								+ variable.trim())) {
+					throw new Exception("The variable name is not valid");
+				}
+				cleanedVariableList.add(variable.trim());
+			}
+
+			val collectionOfExtendedListVariables = restManagerService
+					.readVariableListArrayForExternalOfGroupOrIntervention(
+							backendUserInterventionAccess.getIntervention(),
+							cleanedVariableList, group, null, null, false);
+
+			return collectionOfExtendedListVariables;
+		} catch (final Exception e) {
+			throw new WebApplicationException(Response.status(Status.FORBIDDEN)
+					.entity("Could not retrieve variable: " + e.getMessage())
+					.build());
+		}
+	}
+
+	@GET
 	@Path("/externallyReadGroupCluster/{group}/{variable}")
 	@Produces("application/json")
 	public VariableCluster variableReadExternalGroupCluster(

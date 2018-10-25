@@ -45,13 +45,18 @@ public class SystemVariables {
 	};
 
 	public enum READ_ONLY_PARTICIPANT_VARIABLES {
+		participantIdentifier,
 		participantParticipationInWeeks,
 		participantParticipationInDays,
 		participantFeedbackURL,
 		participantLastLoginDate,
 		participantLastLoginTime,
 		participantLastLogoutDate,
-		participantLastLogoutTime;
+		participantLastLogoutTime,
+		participantInfiniteBlockingMessagesCount,
+		participantInfiniteBlockingMessagesIdentifiers,
+		participantInfiniteBlockingMessagesWaitingMinutesMin,
+		participantInfiniteBlockingMessagesWaitingMinutesMax;
 
 		public String toVariableName() {
 			return ImplementationConstants.VARIABLE_PREFIX + toString();
@@ -62,6 +67,9 @@ public class SystemVariables {
 		participantName,
 		participantLanguage,
 		participantGroup,
+		participantOrganization,
+		participantOrganizationUnit,
+		participantResponsibleTeamManagerEmailData,
 		participantDialogOptionSMSData,
 		participantDialogOptionEmailData,
 		participantDialogOptionExternalID,

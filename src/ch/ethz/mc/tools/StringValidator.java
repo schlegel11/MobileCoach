@@ -23,11 +23,11 @@ package ch.ethz.mc.tools;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.persistent.subelements.LString;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Validates strings for several purposes
@@ -87,6 +87,23 @@ public class StringValidator {
 
 		log.debug("Yes");
 		return true;
+	}
+
+	/**
+	 * Check if a {@link String} is a valid non unique key
+	 *
+	 * @param key
+	 *            The key to test
+	 * @return
+	 */
+	public static boolean isValidNonUniqueKey(final String key) {
+		log.debug("Testing if '{}' is a valid non unique key", key);
+
+		if (key.contains(",")) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	/**

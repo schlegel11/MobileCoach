@@ -62,6 +62,7 @@ public class MC implements ServletContextListener {
 
 	VariablesManagerService						variablesManagerService;
 
+	@Getter
 	CommunicationManagerService					communicationManagerService;
 	ModelObjectExchangeService					modelObjectExchangeService;
 
@@ -108,6 +109,7 @@ public class MC implements ServletContextListener {
 					.start(databaseManagerService);
 
 			databaseManagerService.ensureDatabaseConsistency();
+			databaseManagerService.ensureSensefulParticipantTimings();
 
 			imageCachingService = ImageCachingService
 					.start(fileStorageManagerService.getMediaCacheFolder());
@@ -121,7 +123,8 @@ public class MC implements ServletContextListener {
 
 			// Internal services which internally require started controller
 			// services
-			communicationManagerService = CommunicationManagerService.prepare();
+			communicationManagerService = CommunicationManagerService
+					.prepare(variablesManagerService);
 
 			// Controller services
 			surveyAdministrationManagerService = SurveyAdministrationManagerService

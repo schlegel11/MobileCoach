@@ -37,6 +37,7 @@ public enum AnswerTypes {
 	LIKERT_SLIDER,
 	SELECT_ONE,
 	SELECT_MANY,
+	SELECT_MANY_MODAL,
 	SELECT_ONE_IMAGES,
 	SELECT_MANY_IMAGES,
 	DATE,
@@ -83,6 +84,7 @@ public enum AnswerTypes {
 			case LIKERT_SLIDER:
 			case SELECT_ONE:
 			case SELECT_MANY:
+			case SELECT_MANY_MODAL:
 			case SELECT_ONE_IMAGES:
 			case SELECT_MANY_IMAGES:
 			case DATE:
@@ -111,6 +113,7 @@ public enum AnswerTypes {
 			case LIKERT_SLIDER:
 			case SELECT_ONE:
 			case SELECT_MANY:
+			case SELECT_MANY_MODAL:
 			case SELECT_ONE_IMAGES:
 			case SELECT_MANY_IMAGES:
 			case DATE:

@@ -23,6 +23,7 @@ package ch.ethz.mc.model;
 import java.util.Hashtable;
 
 import ch.ethz.mc.model.persistent.BackendUser;
+import ch.ethz.mc.model.persistent.DashboardMessage;
 import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.DialogStatus;
@@ -59,13 +60,15 @@ public class Indices {
 	private static final String[]	dialogMessageIndices									= new String[] {
 			"{'participant':1,'status':1}", "{'participant':1,'order':1}",
 			"{'participant':1,'status':1,'shouldBeSentTimestamp':1}",
-			"{'participant':1,'status':1,'isUnansweredAfterTimestamp':1}",
 			"{'participant':1,'clientId':1}" };
 	private static final String[]	dialogOptionIndices										= new String[] {
 			"{'participant':1,'type':1}", "{'type':1,'data':1}" };
 	private static final String[]	dialogStatusIndices										= new String[] {
 			"{'participant':1}",
 			"{'participant':1,'lastVisitedScreeningSurveySlideTimestamp':1}" };
+
+	private static final String[]	dashboardMessageIndices									= new String[] {
+			"{'participant':1,'order':1}" };
 
 	private static final String[]	participantIndices										= new String[] {
 			"{'intervention':1}", "{'intervention':1,'monitoringActive':1}",
@@ -129,6 +132,8 @@ public class Indices {
 		indices.put(DialogMessage.class, dialogMessageIndices);
 		indices.put(DialogOption.class, dialogOptionIndices);
 		indices.put(DialogStatus.class, dialogStatusIndices);
+
+		indices.put(DashboardMessage.class, dashboardMessageIndices);
 
 		indices.put(Participant.class, participantIndices);
 

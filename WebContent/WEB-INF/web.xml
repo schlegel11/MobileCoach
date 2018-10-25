@@ -60,6 +60,11 @@
 		<param-value>ch.ethz.mc.rest.JacksonConfiguration,ch.ethz.mc.rest.CorsFeature</param-value>
 	</context-param>
 
+	<context-param>
+		<param-name>PARAMETER_ENCODING</param-name>
+		<param-value>UTF-8</param-value>
+	</context-param>
+
 	<servlet>
 		<servlet-name>RESTeasy</servlet-name>
 		<servlet-class>org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher</servlet-class>

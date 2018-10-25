@@ -24,17 +24,17 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import lombok.Synchronized;
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.tools.InternalDateTime;
-
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
+import lombok.Synchronized;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Extends the simulator component with a controller
@@ -82,6 +82,7 @@ public class SimulatorComponentWithController extends SimulatorComponent {
 		getActivateFastForwadModeButton().addClickListener(buttonClickListener);
 		getDeactivateFastForwardModeButton()
 				.addClickListener(buttonClickListener);
+		getNextTenMinuesButton().addClickListener(buttonClickListener);
 		getNextHourButton().addClickListener(buttonClickListener);
 		getNextDayButton().addClickListener(buttonClickListener);
 
@@ -117,7 +118,9 @@ public class SimulatorComponentWithController extends SimulatorComponent {
 
 		@Override
 		public void buttonClick(final ClickEvent event) {
-			if (event.getButton() == getNextHourButton()) {
+			if (event.getButton() == getNextTenMinuesButton()) {
+				jumpToNextTenMinutes();
+			} else if (event.getButton() == getNextHourButton()) {
 				jumpToNextHour();
 			} else if (event.getButton() == getNextDayButton()) {
 				jumpToNextDay();
@@ -128,6 +131,13 @@ public class SimulatorComponentWithController extends SimulatorComponent {
 				setFastForwardMode(false);
 			}
 		}
+	}
+
+	public void jumpToNextTenMinutes() {
+		log.debug("Set time to ten minutes in the future...");
+		InternalDateTime.nextTenMinutes();
+
+		updateTime();
 	}
 
 	public void jumpToNextHour() {

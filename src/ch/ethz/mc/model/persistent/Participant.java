@@ -110,6 +110,13 @@ public class Participant extends ModelObject {
 	private String				group;
 
 	/**
+	 * The email address of the responsible team manager
+	 */
+	@Getter
+	@Setter
+	private String				responsibleTeamManagerEmail;
+
+	/**
 	 * The {@link ScreeningSurvey} the {@link Participant} participates in
 	 */
 	@Getter
@@ -315,6 +322,11 @@ public class Participant extends ModelObject {
 				Queries.PARTICIPANT_VARIABLE_WITH_VALUE__BY_PARTICIPANT,
 				getId());
 		ModelObject.delete(participantVariablesWithValuesToDelete);
+
+		// Delete dashboard messages
+		val dashboardMessagesToDelete = ModelObject.find(DashboardMessage.class,
+				Queries.DASHBOARD_MESSAGE__BY_PARTICIPANT, getId());
+		ModelObject.delete(dashboardMessagesToDelete);
 
 		// Delete dialog messages
 		val dialogMessagesToDelete = ModelObject.find(DialogMessage.class,

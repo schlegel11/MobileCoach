@@ -1,7 +1,5 @@
-package ch.ethz.mc.model.memory;
+package ch.ethz.mc.model.rest;
 
-import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
-import ch.ethz.mc.services.internal.CommunicationManagerService;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -22,62 +20,21 @@ import ch.ethz.mc.services.internal.CommunicationManagerService;
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 /**
- * Contains a message as received by the {@link CommunicationManagerService}
+ * Wrapper for variables with values and timestamp for REST
  *
  * @author Andreas Filler
  */
-@ToString
-public class ReceivedMessage {
+public class CollectionOfVariablesWithTimestamp {
+	@Getter
+	private final List<VariableWithTimestamp>	variables	= new ArrayList<VariableWithTimestamp>();
 	@Getter
 	@Setter
-	private DialogOptionTypes	type;
-
-	@Getter
-	@Setter
-	private String				sender;
-
-	@Getter
-	@Setter
-	private String				message;
-
-	@Getter
-	@Setter
-	private boolean				typeIntention;
-
-	@Getter
-	@Setter
-	private String				clientId;
-
-	@Getter
-	@Setter
-	private int					relatedMessageIdBasedOnOrder;
-
-	@Getter
-	@Setter
-	private String				intention;
-
-	@Getter
-	@Setter
-	private String				content;
-
-	@Getter
-	@Setter
-	private String				text;
-
-	@Getter
-	@Setter
-	private long				receivedTimestamp;
-
-	@Getter
-	@Setter
-	private String				mediaURL;
-
-	@Getter
-	@Setter
-	private String				mediaType;
+	private int									size;
 }

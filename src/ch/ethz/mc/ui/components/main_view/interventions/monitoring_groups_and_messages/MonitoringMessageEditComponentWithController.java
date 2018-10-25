@@ -1,5 +1,24 @@
 package ch.ethz.mc.ui.components.main_view.interventions.monitoring_groups_and_messages;
 
+import org.bson.types.ObjectId;
+
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.BeanContainer;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Table;
+
+import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.model.persistent.MonitoringMessage;
+import ch.ethz.mc.model.persistent.MonitoringMessageRule;
+import ch.ethz.mc.model.persistent.ScreeningSurvey;
+import ch.ethz.mc.model.persistent.types.AnswerTypes;
+import ch.ethz.mc.model.ui.UIMonitoringMessageRule;
+import ch.ethz.mc.model.ui.UIScreeningSurvey;
+import ch.ethz.mc.ui.components.basics.LocalizedPlaceholderStringEditComponent;
+import ch.ethz.mc.ui.components.basics.MediaObjectIntegrationComponentWithController.MediaObjectCreationOrDeleteionListener;
+import ch.ethz.mc.ui.components.basics.ShortPlaceholderStringEditComponent;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -22,26 +41,6 @@ package ch.ethz.mc.ui.components.main_view.interventions.monitoring_groups_and_m
  */
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
-
-import org.bson.types.ObjectId;
-
-import ch.ethz.mc.conf.AdminMessageStrings;
-import ch.ethz.mc.model.persistent.MonitoringMessage;
-import ch.ethz.mc.model.persistent.MonitoringMessageRule;
-import ch.ethz.mc.model.persistent.ScreeningSurvey;
-import ch.ethz.mc.model.persistent.types.AnswerTypes;
-import ch.ethz.mc.model.ui.UIMonitoringMessageRule;
-import ch.ethz.mc.model.ui.UIScreeningSurvey;
-import ch.ethz.mc.ui.components.basics.LocalizedPlaceholderStringEditComponent;
-import ch.ethz.mc.ui.components.basics.ShortPlaceholderStringEditComponent;
-import ch.ethz.mc.ui.components.basics.MediaObjectIntegrationComponentWithController.MediaObjectCreationOrDeleteionListener;
-
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.BeanContainer;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Table;
 
 /**
  * Extends the monitoring message edit component with a controller
@@ -198,10 +197,10 @@ public class MonitoringMessageEditComponentWithController
 		});
 
 		// Handle check box
-		val isCommandMessagCheckBox = getIsCommandCheckbox();
-		isCommandMessagCheckBox.setValue(monitoringMessage.isCommandMessage());
+		val isCommandMessageCheckBox = getIsCommandCheckbox();
+		isCommandMessageCheckBox.setValue(monitoringMessage.isCommandMessage());
 
-		isCommandMessagCheckBox
+		isCommandMessageCheckBox
 				.addValueChangeListener(new ValueChangeListener() {
 
 					@Override
@@ -212,6 +211,20 @@ public class MonitoringMessageEditComponentWithController
 												.getProperty().getValue());
 					}
 				});
+
+		val isPushOnlyCheckBox = getIsPushOnlyCheckbox();
+		isPushOnlyCheckBox.setValue(monitoringMessage.isPushOnly());
+
+		isPushOnlyCheckBox.addValueChangeListener(new ValueChangeListener() {
+
+			@Override
+			public void valueChange(final ValueChangeEvent event) {
+				getInterventionAdministrationManagerService()
+						.monitoringMessageSetIsPushOnlyMessage(
+								monitoringMessage,
+								(boolean) event.getProperty().getValue());
+			}
+		});
 	}
 
 	private void adjust() {
