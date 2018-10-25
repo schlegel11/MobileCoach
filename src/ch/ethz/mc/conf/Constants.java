@@ -226,13 +226,13 @@ public class Constants {
 	@Getter
 	private static String		emailFrom								= "a@b.eu";
 	@Getter
-	private static String		emailSubjectForParticipant				= "PMCP Message";
+	private static String		emailSubjectForParticipant				= "MobileCoach Message";
 	@Getter
-	private static String		emailSubjectForSupervisor				= "PMCP Supervisor Notification";
+	private static String		emailSubjectForSupervisor				= "MobileCoach Supervisor Notification";
 	@Getter
-	private static String		emailSubjectForTeamManager				= "PMCP Team Manager Notification";
+	private static String		emailSubjectForTeamManager				= "MobileCoach Team Manager Notification";
 	@Getter
-	private static String		emailTemplateForTeamManager				= "Hi Team Manager of $participantName!\n\nYou have one or more new messages from your participant, which can be read on the dashboard.";
+	private static String		emailTemplateForTeamManager				= "Hi Team Manager of $participantName!\n\nYou have one or more new messages from your participant, which can be read on the MobileCoach dashboard.";
 
 	/**
 	 * SMS configuration

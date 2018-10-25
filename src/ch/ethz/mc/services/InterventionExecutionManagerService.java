@@ -3212,14 +3212,6 @@ public class InterventionExecutionManagerService {
 	}
 
 	/**
-	 * Clear cache
-	 */
-	@Synchronized
-	public void clearCache() {
-		databaseManagerService.clearCache();
-	}
-
-	/**
 	 * Check if the given upload file reference belongs to the given user
 	 * 
 	 * @param user
