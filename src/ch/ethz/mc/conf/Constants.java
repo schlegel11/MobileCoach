@@ -38,6 +38,7 @@ import lombok.Getter;
 import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
+import ch.ethz.mc.model.persistent.types.SMSServiceType;
 import ch.ethz.mc.tools.StringHelpers;
 
 /**
@@ -112,69 +113,69 @@ public class Constants {
 	 * Admin configuration
 	 */
 	@Getter
-	private static String		defaultAdminUsername					= "admin";
+	private static String			defaultAdminUsername					= "admin";
 	@Getter
-	private static String		defaultAdminPassword					= "admin";
+	private static String			defaultAdminPassword					= "admin";
 
 	/**
 	 * CAUTION: Do NEVER activate this on public servers! It's only for
 	 * development.
 	 */
 	@Getter
-	private static boolean		automaticallyLoginAsDefaultAdmin		= false;
+	private static boolean			automaticallyLoginAsDefaultAdmin		= false;
 
 	@Getter
-	private static Locale		adminLocale								= new Locale(
+	private static Locale			adminLocale								= new Locale(
 			"en", "GB");
 
 	@Getter
-	private static Locale[]		interventionLocales						= new Locale[] {
+	private static Locale[]			interventionLocales						= new Locale[] {
 			new Locale("de", "CH"), new Locale("fr", "CH") };
 
 	@Getter
-	private static String		loggingFolder							= "/mc_data/logs";
+	private static String			loggingFolder							= "/mc_data/logs";
 	@Getter
-	private static String		storageFolder							= "/mc_data/FileStorage";
+	private static String			storageFolder							= "/mc_data/FileStorage";
 	@Getter
-	private static String		mediaUploadFolder						= "/mc_data/MediaUpload";
+	private static String			mediaUploadFolder						= "/mc_data/MediaUpload";
 	@Getter
-	private static String		mediaCacheFolder						= "/mc_data/MediaCache";
+	private static String			mediaCacheFolder						= "/mc_data/MediaCache";
 	@Getter
-	private static String		templatesFolder							= "/mc_data/templates";
+	private static String			templatesFolder							= "/mc_data/templates";
 
 	@Getter
-	private static String		loggingConsoleLevel						= "DEBUG";
+	private static String			loggingConsoleLevel						= "DEBUG";
 	@Getter
-	private static String		loggingRollingFileLevel					= "DEBUG";
+	private static String			loggingRollingFileLevel					= "DEBUG";
 
 	@Getter
-	private static String		fileExtension							= ".mc";
+	private static String			fileExtension							= ".mc";
 
 	// -1 can be used to set it to infinite, 0 disables the history completely
 	@Getter
-	private static int			maxVariableHistory						= 1000;
+	private static int				maxVariableHistory						= 1000;
 
 	@Getter
-	private static boolean		mediaUploadSecurityCheck				= true;
+	private static boolean			mediaUploadSecurityCheck				= true;
 
 	/**
 	 * Survey listing configuration
 	 */
 	@Getter
-	private static String		surveyListingTitle						= "Active surveys:";
+	private static String			surveyListingTitle						= "Active surveys:";
 	@Getter
-	private static String		surveyListingNoneActive					= "No survey active.";
+	private static String			surveyListingNoneActive					= "No survey active.";
 	@Getter
-	private static String		surveyListingNotActive					= "Survey listing inactive.";
+	private static String			surveyListingNotActive					= "Survey listing inactive.";
 
 	/**
 	 * Statistics configuration
 	 */
 	@Getter
-	private static boolean		statisticsFileEnabled					= false;
+	private static boolean			statisticsFileEnabled					= false;
 
 	@Getter
-	private static String		statisticsFile							= "/mc_data/statistics.properties";
+	private static String			statisticsFile							= "/mc_data/statistics.properties";
 
 	/**
 	 * Simulation configuration
@@ -186,106 +187,108 @@ public class Constants {
 	 * interventions should never be transfered back to another system.
 	 */
 	@Getter
-	private static boolean		simulatedDateAndTime					= false;
+	private static boolean			simulatedDateAndTime					= false;
 
 	/**
 	 * Database configuration
 	 */
 	@Getter
-	private static String		databaseHost							= "127.0.0.1";
+	private static String			databaseHost							= "127.0.0.1";
 	@Getter
-	private static int			databasePort							= 27017;
+	private static int				databasePort							= 27017;
 	@Getter
-	private static String		databaseUser							= "mc";
+	private static String			databaseUser							= "mc";
 	@Getter
-	private static String		databasePassword						= "mc";
+	private static String			databasePassword						= "mc";
 	@Getter
-	private static String		databaseName							= "mc";
+	private static String			databaseName							= "mc";
 
 	/**
 	 * General Mailing configuration
 	 */
 	@Getter
-	private static String		mailhostIncoming						= "localhost";
+	private static String			mailhostIncoming						= "localhost";
 	@Getter
-	private static String		mailboxProtocol							= "pop3";
+	private static String			mailboxProtocol							= "pop3";
 	@Getter
-	private static String		mailboxFolder							= "INBOX";
+	private static String			mailboxFolder							= "INBOX";
 	@Getter
-	private static String		mailhostOutgoing						= "localhost";
+	private static String			mailhostOutgoing						= "localhost";
 	@Getter
-	private static String		mailUser								= "---";
+	private static String			mailUser								= "---";
 	@Getter
-	private static String		mailPassword							= "---";
+	private static String			mailPassword							= "---";
 
 	/**
 	 * Email configuration
 	 */
 	@Getter
-	private static boolean		emailActive								= true;
+	private static boolean			emailActive								= true;
 	@Getter
-	private static String		emailFrom								= "a@b.eu";
+	private static String			emailFrom								= "a@b.eu";
 	@Getter
-	private static String		emailSubjectForParticipant				= "PMCP Message";
+	private static String			emailSubjectForParticipant				= "PMCP Message";
 	@Getter
-	private static String		emailSubjectForSupervisor				= "PMCP Supervisor Notification";
+	private static String			emailSubjectForSupervisor				= "PMCP Supervisor Notification";
 	@Getter
-	private static String		emailSubjectForTeamManager				= "PMCP Team Manager Notification";
+	private static String			emailSubjectForTeamManager				= "PMCP Team Manager Notification";
 	@Getter
-	private static String		emailTemplateForTeamManager				= "Hi Team Manager of $participantName!\n\nYou have one or more new messages from your participant, which can be read on the dashboard.";
+	private static String			emailTemplateForTeamManager				= "Hi Team Manager of $participantName!\n\nYou have one or more new messages from your participant, which can be read on the dashboard.";
 
 	/**
 	 * SMS configuration
 	 */
 	@Getter
-	private static boolean		smsActive								= true;
+	private static boolean			smsActive								= true;
 	@Getter
-	private static String		smsMailSubjectStartsWith				= "SMS received on";
+	private static SMSServiceType	smsServiceType							= SMSServiceType.ASPSMS;
 	@Getter
-	private static String		smsUserKey								= "abc";
+	private static String			smsMailSubjectStartsWith				= "SMS received on";
 	@Getter
-	private static String		smsUserPassword							= "xyz";
-	private static String		smsPhoneNumberAcceptedCountryCodes		= "41,43,49";
+	private static String			smsUserKey								= "abc";
+	@Getter
+	private static String			smsUserPassword							= "xyz";
+	private static String			smsPhoneNumberAcceptedCountryCodes		= "41,43,49";
 
 	/**
 	 * Deepstream configuration
 	 */
 	@Getter
-	private static boolean		deepstreamActive						= false;
+	private static boolean			deepstreamActive						= false;
 	@Getter
-	private static String		deepstreamHost							= "wss://localhost:6020";
+	private static String			deepstreamHost							= "wss://localhost:6020";
 	@Getter
-	private static int			deepstreamMinClientVersion				= 1;
+	private static int				deepstreamMinClientVersion				= 1;
 	@Getter
-	private static int			deepstreamMaxClientVersion				= 1;
+	private static int				deepstreamMaxClientVersion				= 1;
 
 	@Getter
-	private static final String	deepstreamServerPassword				= RandomStringUtils
+	private static final String		deepstreamServerPassword				= RandomStringUtils
 			.randomAlphanumeric(64);
 
 	/**
 	 * Push notifications configuration
 	 */
 	@Getter
-	private static boolean		pushNotificationsActive					= false;
+	private static boolean			pushNotificationsActive					= false;
 	@Getter
-	private static boolean		pushNotificationsIOSActive				= false;
+	private static boolean			pushNotificationsIOSActive				= false;
 	@Getter
-	private static boolean		pushNotificationsIOSEncrypted			= false;
+	private static boolean			pushNotificationsIOSEncrypted			= false;
 	@Getter
-	private static boolean		pushNotificationsAndroidActive			= false;
+	private static boolean			pushNotificationsAndroidActive			= false;
 	@Getter
-	private static boolean		pushNotificationsAndroidEncrypted		= false;
+	private static boolean			pushNotificationsAndroidEncrypted		= false;
 	@Getter
-	private static boolean		pushNotificationsProductionMode			= false;
+	private static boolean			pushNotificationsProductionMode			= false;
 	@Getter
-	private static String		pushNotificationsIOSAppIdentifier		= "com.mycompany.myapp";
+	private static String			pushNotificationsIOSAppIdentifier		= "com.mycompany.myapp";
 	@Getter
-	private static String		pushNotificationsIOSCertificateFile		= "/mc_data/certs/push-http2.p12";
+	private static String			pushNotificationsIOSCertificateFile		= "/mc_data/certs/push-http2.p12";
 	@Getter
-	private static String		pushNotificationsIOSCertificatePassword	= "abc123topsecret";
+	private static String			pushNotificationsIOSCertificatePassword	= "abc123topsecret";
 	@Getter
-	private static String		pushNotificationsAndroidAuthKey			= "1234380438403840384068";
+	private static String			pushNotificationsAndroidAuthKey			= "1234380438403840384068";
 
 	/**
 	 * Get all accepted country codes for SMS phone numbers
@@ -461,6 +464,9 @@ public class Constants {
 								}
 								field.set(null,
 										localeList.toArray(new Locale[] {}));
+							} else if (fieldType == SMSServiceType.class) {
+								field.set(null, SMSServiceType.valueOf(
+										properties.getProperty(fieldName)));
 							} else {
 								log.error(
 										"Field '{}' seems to be of an unsupported type {}!",

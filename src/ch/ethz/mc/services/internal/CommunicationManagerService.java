@@ -59,6 +59,8 @@ import org.xml.sax.InputSource;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.twilio.Twilio;
+import com.twilio.type.PhoneNumber;
 
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
@@ -70,6 +72,8 @@ import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogMessageTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
+import ch.ethz.mc.model.persistent.types.SMSServiceType;
+import ch.ethz.mc.rest.services.v02.TWILIOMessageRetrievalServiceV02;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
 import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mc.tools.StringHelpers;
@@ -87,14 +91,14 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public class CommunicationManagerService {
-	private static CommunicationManagerService		instance		= null;
+	private static CommunicationManagerService		instance						= null;
 
-	private static final String						ASPSMS_API_URL	= "https://json.aspsms.com/SendSimpleTextSMS";
+	private static final String						ASPSMS_API_URL					= "https://json.aspsms.com/SendSimpleTextSMS";
 
 	private final boolean							simulatorActive;
 
-	private long									lastSMSCheck	= 0;
-	private long									lastEmailCheck	= 0;
+	private long									lastSMSCheck					= 0;
+	private long									lastEmailCheck					= 0;
 
 	private final boolean							emailActive;
 	private final boolean							smsActive;
@@ -120,9 +124,12 @@ public class CommunicationManagerService {
 	private final String							emailSubjectForTeamManager;
 	private final String							emailTemplateForTeamManager;
 
+	private final SMSServiceType					smsServiceType;
 	private final String							smsMailSubjectStartsWith;
 	private final String							smsUserKey;
 	private final String							smsUserPassword;
+
+	private TWILIOMessageRetrievalServiceV02		twilioMessageRetrievalService	= null;
 
 	private final DocumentBuilderFactory			documentBuilderFactory;
 	private final SimpleDateFormat					receiverDateFormat;
@@ -176,9 +183,14 @@ public class CommunicationManagerService {
 				.getEmailTemplateForTeamManager();
 
 		// SMS configuration
+		smsServiceType = Constants.getSmsServiceType();
 		smsMailSubjectStartsWith = Constants.getSmsMailSubjectStartsWith();
 		smsUserKey = Constants.getSmsUserKey();
 		smsUserPassword = Constants.getSmsUserPassword();
+
+		if (smsActive && smsServiceType == SMSServiceType.TWILIO) {
+			Twilio.init(smsUserKey, smsUserPassword);
+		}
 
 		// General properties
 		val properties = new Properties();
@@ -441,7 +453,7 @@ public class CommunicationManagerService {
 	}
 
 	/**
-	 * Receives mail messages
+	 * Receives messages
 	 *
 	 * @return
 	 */
@@ -461,8 +473,6 @@ public class CommunicationManagerService {
 		}
 
 		// Add SMS messages (every x minutes only)
-		Store store = null;
-		Folder folder = null;
 		if (smsActive
 				& System.currentTimeMillis() > lastSMSCheck + (simulatorActive
 						? ImplementationConstants.SMS_AND_EMAIL_RETRIEVAL_INTERVAL_IN_SECONDS_WITH_SIMULATOR
@@ -470,101 +480,13 @@ public class CommunicationManagerService {
 						* 1000) {
 			lastSMSCheck = System.currentTimeMillis();
 
-			try {
-				log.debug("Retrieving SMS messages...");
-				store = incomingMailSession.getStore(mailboxProtocol);
-				store.connect();
-				folder = store.getFolder(mailboxFolder);
-				folder.open(Folder.READ_WRITE);
-
-				for (val message : folder.getMessages()) {
-					// Only handle messages who match the subject pattern
-					if (message.getSubject()
-							.startsWith(smsMailSubjectStartsWith)) {
-						try {
-
-							log.debug("Mail received with subject '{}'",
-									message.getSubject());
-							val receivedMessage = new ReceivedMessage();
-							receivedMessage.setType(DialogOptionTypes.SMS);
-							receivedMessage.setTypeIntention(false);
-							receivedMessage.setRelatedMessageIdBasedOnOrder(-1);
-
-							// Parse message content
-							val documentBuilder = documentBuilderFactory
-									.newDocumentBuilder();
-							val inputSource = new InputSource(new StringReader(
-									String.class.cast(message.getContent())));
-							val document = documentBuilder.parse(inputSource);
-
-							final XPath xPath = XPathFactory.newInstance()
-									.newXPath();
-
-							val sender = ((NodeList) xPath.evaluate(
-									"/aspsms/Originator/PhoneNumber",
-									document.getDocumentElement(),
-									XPathConstants.NODESET)).item(0)
-											.getTextContent();
-
-							receivedMessage.setSender(
-									StringHelpers.cleanPhoneNumber(sender));
-
-							val receivedTimestampString = ((NodeList) xPath
-									.evaluate("/aspsms/DateReceived",
-											document.getDocumentElement(),
-											XPathConstants.NODESET)).item(0)
-													.getTextContent();
-
-							val receivedTimestamp = receiverDateFormat
-									.parse(receivedTimestampString).getTime();
-
-							// Abjust for simulated date and time
-							if (simulatorActive) {
-								receivedMessage.setReceivedTimestamp(
-										InternalDateTime.currentTimeMillis());
-							} else {
-								receivedMessage.setReceivedTimestamp(
-										receivedTimestamp);
-							}
-
-							val messageStringEncoded = ((NodeList) xPath
-									.evaluate("/aspsms/MessageData",
-											document.getDocumentElement(),
-											XPathConstants.NODESET)).item(0)
-													.getTextContent();
-							val messageString = URLDecoder
-									.decode(messageStringEncoded, "ISO-8859-1");
-
-							receivedMessage.setMessage(messageString);
-
-							log.debug("Mail parsed as {}",
-									receivedMessage.toString());
-
-							receivedMessages.add(receivedMessage);
-						} catch (final Exception e) {
-							log.error(
-									"Could not parse message, so remove it unparsed. Reason: {}",
-									e.getMessage());
-						}
-					}
-
-					// Delete also messages not matching the subject pattern
-					message.setFlag(Flags.Flag.DELETED, true);
-				}
-			} catch (final Exception e) {
-				log.error("Could not retrieve SMS messages: {}",
-						e.getMessage());
-			} finally {
-				try {
-					folder.close(true);
-				} catch (final Exception e) {
-					// Do nothing
-				}
-				try {
-					store.close();
-				} catch (final Exception e) {
-					// Do nothing
-				}
+			switch (smsServiceType) {
+				case ASPSMS:
+					receiveSMSMessagesFromASPSMS(receivedMessages);
+					break;
+				case TWILIO:
+					receiveSMSMessagesFromTWILIO(receivedMessages);
+					break;
 			}
 		}
 
@@ -585,6 +507,137 @@ public class CommunicationManagerService {
 		 */
 
 		return receivedMessages;
+	}
+
+	/**
+	 * Receive messages from ASPSMS
+	 * 
+	 * @param receivedMessages
+	 */
+	private void receiveSMSMessagesFromASPSMS(
+			final ArrayList<ReceivedMessage> receivedMessages) {
+		Store store = null;
+		Folder folder = null;
+		try {
+			log.debug("Retrieving SMS messages from ASPSMS...");
+			store = incomingMailSession.getStore(mailboxProtocol);
+			store.connect();
+			folder = store.getFolder(mailboxFolder);
+			folder.open(Folder.READ_WRITE);
+
+			for (val message : folder.getMessages()) {
+				// Only handle messages who match the subject pattern
+				if (message.getSubject().startsWith(smsMailSubjectStartsWith)) {
+					try {
+
+						log.debug("Mail received with subject '{}'",
+								message.getSubject());
+						val receivedMessage = new ReceivedMessage();
+						receivedMessage.setType(DialogOptionTypes.SMS);
+						receivedMessage.setTypeIntention(false);
+						receivedMessage.setRelatedMessageIdBasedOnOrder(-1);
+
+						// Parse message content
+						val documentBuilder = documentBuilderFactory
+								.newDocumentBuilder();
+						val inputSource = new InputSource(new StringReader(
+								String.class.cast(message.getContent())));
+						val document = documentBuilder.parse(inputSource);
+
+						final XPath xPath = XPathFactory.newInstance()
+								.newXPath();
+
+						val sender = ((NodeList) xPath.evaluate(
+								"/aspsms/Originator/PhoneNumber",
+								document.getDocumentElement(),
+								XPathConstants.NODESET)).item(0)
+										.getTextContent();
+
+						receivedMessage.setSender(
+								StringHelpers.cleanPhoneNumber(sender));
+
+						val receivedTimestampString = ((NodeList) xPath
+								.evaluate("/aspsms/DateReceived",
+										document.getDocumentElement(),
+										XPathConstants.NODESET)).item(0)
+												.getTextContent();
+
+						// Adjust for simulated date and time
+						if (simulatorActive) {
+							receivedMessage.setReceivedTimestamp(
+									InternalDateTime.currentTimeMillis());
+						} else {
+							val receivedTimestamp = receiverDateFormat
+									.parse(receivedTimestampString).getTime();
+							receivedMessage
+									.setReceivedTimestamp(receivedTimestamp);
+						}
+
+						val messageStringEncoded = ((NodeList) xPath.evaluate(
+								"/aspsms/MessageData",
+								document.getDocumentElement(),
+								XPathConstants.NODESET)).item(0)
+										.getTextContent();
+						val messageString = URLDecoder
+								.decode(messageStringEncoded, "ISO-8859-1");
+
+						receivedMessage.setMessage(messageString);
+
+						log.debug("Mail parsed as {}",
+								receivedMessage.toString());
+
+						receivedMessages.add(receivedMessage);
+					} catch (final Exception e) {
+						log.error(
+								"Could not parse message, so remove it unparsed. Reason: {}",
+								e.getMessage());
+					}
+				}
+
+				// Delete also messages not matching the subject pattern
+				message.setFlag(Flags.Flag.DELETED, true);
+			}
+		} catch (final Exception e) {
+			log.error("Could not retrieve SMS messages from ASPSMS: {}",
+					e.getMessage());
+		} finally {
+			try {
+				folder.close(true);
+			} catch (final Exception e) {
+				// Do nothing
+			}
+			try {
+				store.close();
+			} catch (final Exception e) {
+				// Do nothing
+			}
+		}
+	}
+
+	/**
+	 * Receive message from TWILIO
+	 * 
+	 * @param receivedMessages
+	 */
+	private void receiveSMSMessagesFromTWILIO(
+			final ArrayList<ReceivedMessage> receivedMessages) {
+		try {
+			log.debug("Retrieving SMS messages from TWILIO...");
+
+			if (twilioMessageRetrievalService == null) {
+				twilioMessageRetrievalService = TWILIOMessageRetrievalServiceV02
+						.getInstance();
+			}
+
+			if (twilioMessageRetrievalService != null) {
+				receivedMessages.addAll(
+						twilioMessageRetrievalService.getReceivedMessages());
+			}
+
+		} catch (final Exception e) {
+			log.error("Could not retrieve SMS messages from TWILIO: {}",
+					e.getMessage());
+		}
 	}
 
 	/**
@@ -809,79 +862,15 @@ public class CommunicationManagerService {
 			switch (dialogOption.getType()) {
 				case SMS:
 				case SUPERVISOR_SMS:
-					HttpURLConnection conn = null;
-					try {
-						final URL url = new URL(ASPSMS_API_URL);
-						conn = (HttpURLConnection) url.openConnection();
-
-						conn.setUseCaches(false);
-						conn.setDoInput(true);
-						conn.setDoOutput(true);
-
-						conn.setRequestMethod("POST");
-						conn.setRequestProperty("Content-Type",
-								"application/json");
-
-						final JsonObject jsonObject = new JsonObject();
-
-						jsonObject.addProperty("UserName", smsUserKey);
-						jsonObject.addProperty("Password", smsUserPassword);
-						jsonObject.addProperty("Originator", messageSender);
-						val recipients = new JsonArray();
-						recipients.add(dialogOption.getData());
-						jsonObject.add("Recipients", recipients);
-						jsonObject.addProperty("MessageText", message);
-						jsonObject.addProperty("ForceGSM7bit", false);
-
-						@Cleanup
-						final OutputStreamWriter wr = new OutputStreamWriter(
-								conn.getOutputStream());
-						wr.write(jsonObject.toString());
-						wr.flush();
-						int status = 0;
-
-						if (null != conn) {
-							status = conn.getResponseCode();
-						}
-
-						if (status == 200) {
-							@Cleanup
-							val reader = new BufferedReader(
-									new InputStreamReader(
-											conn.getInputStream()));
-
-							final StringBuffer response = new StringBuffer();
-							String line;
-							while ((line = reader.readLine()) != null) {
-								response.append(line);
-							}
-
-							if (response.toString()
-									.contains("\"StatusCode\":\"1\"")) {
-								log.debug(
-										"Message accepted by ASPSMS gateway.");
-							} else {
-								log.warn("Message rejected by ASPSMS gateway: ",
-										response);
-							}
-						} else {
-							log.warn("Message rejected by ASPSMS gateway: ",
-									status);
-
-							throw new Exception(
-									"Message rejected: Status code " + status);
-						}
-						conn.disconnect();
-					} catch (final Exception e) {
-						log.debug(
-								"Message rejected by ASPSMS gateway or connection failed: ",
-								e.getMessage());
-
-						throw e;
-					} finally {
-						if (conn != null) {
-							conn.disconnect();
-						}
+					switch (smsServiceType) {
+						case ASPSMS:
+							sendMessageUsingASPSMS(dialogOption, messageSender,
+									message);
+							break;
+						case TWILIO:
+							sendMessageUsingTWILIO(dialogOption, messageSender,
+									message);
+							break;
 					}
 
 					break;
@@ -909,6 +898,113 @@ public class CommunicationManagerService {
 			}
 
 			log.debug("Message sent to {}", dialogOption.getData());
+		}
+
+		/**
+		 * Sends message using ASPSMS
+		 * 
+		 * @param dialogOption
+		 * @param messageSender
+		 * @param message
+		 * @throws Exception
+		 */
+		private void sendMessageUsingASPSMS(final DialogOption dialogOption,
+				final String messageSender, final String message)
+				throws Exception {
+			HttpURLConnection conn = null;
+			try {
+				final URL url = new URL(ASPSMS_API_URL);
+				conn = (HttpURLConnection) url.openConnection();
+
+				conn.setUseCaches(false);
+				conn.setDoInput(true);
+				conn.setDoOutput(true);
+
+				conn.setRequestMethod("POST");
+				conn.setRequestProperty("Content-Type", "application/json");
+
+				final JsonObject jsonObject = new JsonObject();
+
+				jsonObject.addProperty("UserName", smsUserKey);
+				jsonObject.addProperty("Password", smsUserPassword);
+				jsonObject.addProperty("Originator", messageSender);
+				val recipients = new JsonArray();
+				recipients.add(dialogOption.getData());
+				jsonObject.add("Recipients", recipients);
+				jsonObject.addProperty("MessageText", message);
+				jsonObject.addProperty("ForceGSM7bit", false);
+
+				@Cleanup
+				final OutputStreamWriter wr = new OutputStreamWriter(
+						conn.getOutputStream());
+				wr.write(jsonObject.toString());
+				wr.flush();
+				int status = 0;
+
+				if (null != conn) {
+					status = conn.getResponseCode();
+				}
+
+				if (status == 200) {
+					@Cleanup
+					val reader = new BufferedReader(
+							new InputStreamReader(conn.getInputStream()));
+
+					final StringBuffer response = new StringBuffer();
+					String line;
+					while ((line = reader.readLine()) != null) {
+						response.append(line);
+					}
+
+					if (response.toString().contains("\"StatusCode\":\"1\"")) {
+						log.debug("Message accepted by ASPSMS gateway.");
+					} else {
+						log.warn("Message rejected by ASPSMS gateway: ",
+								response);
+					}
+				} else {
+					log.warn("Message rejected by ASPSMS gateway: ", status);
+
+					throw new Exception(
+							"Message rejected: Status code " + status);
+				}
+				conn.disconnect();
+			} catch (final Exception e) {
+				log.debug(
+						"Message rejected by ASPSMS gateway or connection failed: ",
+						e.getMessage());
+
+				throw e;
+			} finally {
+				if (conn != null) {
+					conn.disconnect();
+				}
+			}
+		}
+
+		/**
+		 * Sends message using TWILIO
+		 * 
+		 * @param dialogOption
+		 * @param messageSender
+		 * @param message
+		 * @throws Exception
+		 */
+		private void sendMessageUsingTWILIO(final DialogOption dialogOption,
+				final String messageSender, final String message)
+				throws Exception {
+			try {
+				val smsMessage = com.twilio.rest.api.v2010.account.Message
+						.creator(new PhoneNumber(dialogOption.getData()),
+								new PhoneNumber(messageSender), message)
+						.create();
+
+				log.debug("Message sent using TWILIO: {}", smsMessage.getSid());
+			} catch (final Exception e) {
+				log.debug("Message rejected by TWILIO: ", e.getMessage());
+
+				throw e;
+			}
 		}
 	}
 
