@@ -1,11 +1,14 @@
 package ch.ethz.mc.rest.services.v02;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.twilio.twiml.MessagingResponse;
 
@@ -27,13 +30,17 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class TWILIOMessageRetrievalServiceV02 extends AbstractServiceV02 {
 	@Getter
-	private static TWILIOMessageRetrievalServiceV02 instance = null;
+	private static TWILIOMessageRetrievalServiceV02	instance	= null;
+
+	private final List<ReceivedMessage>				receivedMessages;
 
 	public TWILIOMessageRetrievalServiceV02(
 			final RESTManagerService restManagerService) {
 		super(restManagerService);
 
 		instance = this;
+
+		receivedMessages = new ArrayList<ReceivedMessage>();
 	}
 
 	@GET
@@ -41,6 +48,10 @@ public class TWILIOMessageRetrievalServiceV02 extends AbstractServiceV02 {
 	@Produces("application/xml")
 	public String receiveMessage(@QueryParam("From") final String sender,
 			@QueryParam("Body") final String message) {
+
+		if (StringUtils.isBlank(sender) || StringUtils.isBlank(message)) {
+			return null;
+		}
 
 		try {
 			log.debug("Received message from TWILIO for {}", sender);
@@ -52,6 +63,10 @@ public class TWILIOMessageRetrievalServiceV02 extends AbstractServiceV02 {
 			receivedMessage
 					.setReceivedTimestamp(InternalDateTime.currentTimeMillis());
 			receivedMessage.setMessage(message);
+
+			synchronized (receivedMessages) {
+				receivedMessages.add(receivedMessage);
+			}
 		} catch (final Exception e) {
 			throw e;
 		}
@@ -60,8 +75,16 @@ public class TWILIOMessageRetrievalServiceV02 extends AbstractServiceV02 {
 		return twiml.toXml();
 	}
 
-	public List<ReceivedMessage> getReceivedMessages() {
-		// TODO Auto-generated method stub
-		return null;
+	/**
+	 * Get all messages received by TWILIO since the last check
+	 * 
+	 * @param receivedMessages
+	 */
+	public void getReceivedMessages(
+			final List<ReceivedMessage> receivedMessages) {
+		synchronized (this.receivedMessages) {
+			receivedMessages.addAll(this.receivedMessages);
+			this.receivedMessages.clear();
+		}
 	}
 }

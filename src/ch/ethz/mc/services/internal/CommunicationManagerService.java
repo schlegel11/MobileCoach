@@ -493,9 +493,8 @@ public class CommunicationManagerService {
 		// Add deepstream messages
 		if (deepstreamActive) {
 			try {
-				val receivedDeepstreamMessages = deepstreamCommunicationService
-						.getReceivedMessages();
-				receivedMessages.addAll(receivedDeepstreamMessages);
+				deepstreamCommunicationService
+						.getReceivedMessages(receivedMessages);
 			} catch (final Exception e) {
 				log.warn("Could not receive message using deepstream: {}",
 						e.getMessage());
@@ -630,8 +629,8 @@ public class CommunicationManagerService {
 			}
 
 			if (twilioMessageRetrievalService != null) {
-				receivedMessages.addAll(
-						twilioMessageRetrievalService.getReceivedMessages());
+				twilioMessageRetrievalService
+						.getReceivedMessages(receivedMessages);
 			}
 
 		} catch (final Exception e) {
@@ -995,8 +994,14 @@ public class CommunicationManagerService {
 				throws Exception {
 			try {
 				val smsMessage = com.twilio.rest.api.v2010.account.Message
-						.creator(new PhoneNumber(dialogOption.getData()),
-								new PhoneNumber(messageSender), message)
+						.creator(
+								new PhoneNumber(StringHelpers
+										.cleanPhoneNumberPlusFormat(
+												dialogOption.getData())),
+								new PhoneNumber(StringHelpers
+										.cleanPhoneNumberPlusFormat(
+												messageSender)),
+								message)
 						.create();
 
 				log.debug("Message sent using TWILIO: {}", smsMessage.getSid());
