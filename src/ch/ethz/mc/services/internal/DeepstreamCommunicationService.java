@@ -734,17 +734,14 @@ public class DeepstreamCommunicationService extends Thread
 	/**
 	 * Get all messages received by deepstream since the last check
 	 * 
-	 * @return
+	 * @param receivedMessage
 	 */
-	public List<ReceivedMessage> getReceivedMessages() {
-		val newReceivedMessages = new ArrayList<ReceivedMessage>();
-
+	public void getReceivedMessages(
+			final List<ReceivedMessage> receivedMessage) {
 		synchronized (receivedMessages) {
-			newReceivedMessages.addAll(receivedMessages);
+			receivedMessage.addAll(receivedMessages);
 			receivedMessages.clear();
 		}
-
-		return newReceivedMessages;
 	}
 
 	/**
