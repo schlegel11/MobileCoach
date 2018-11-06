@@ -65,6 +65,7 @@ import io.deepstream.Event;
 import io.deepstream.LoginResult;
 import io.deepstream.PresenceEventListener;
 import io.deepstream.Record;
+import io.deepstream.SnapshotResult;
 import io.deepstream.Topic;
 import lombok.Getter;
 import lombok.Synchronized;
@@ -1695,8 +1696,11 @@ public class DeepstreamCommunicationService extends Thread
 
 		long newestTimestamp = 0;
 
-		val snapshot = client.record.snapshot(
-				DeepstreamConstants.PATH_MESSAGES + participantOrSupervisorId);
+		SnapshotResult snapshot;
+		synchronized (client) {
+			snapshot = client.record.snapshot(DeepstreamConstants.PATH_MESSAGES
+					+ participantOrSupervisorId);
+		}
 
 		val jsonObject = new JsonObject();
 		val jsonObjects = new JsonObject();
@@ -1738,8 +1742,11 @@ public class DeepstreamCommunicationService extends Thread
 
 		long newestTimestamp = 0;
 
-		val snapshot = client.record
-				.snapshot(DeepstreamConstants.PATH_DASHBOARD + participantId);
+		SnapshotResult snapshot;
+		synchronized (client) {
+			snapshot = client.record.snapshot(
+					DeepstreamConstants.PATH_DASHBOARD + participantId);
+		}
 
 		val jsonObject = new JsonObject();
 		val jsonObjects = new JsonObject();
