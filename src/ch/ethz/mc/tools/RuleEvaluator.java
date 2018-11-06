@@ -463,26 +463,30 @@ public class RuleEvaluator {
 
 					break;
 				case TEXT_VALUE_MATCHES_KEY:
-					for (val splitValue : ruleEvaluationResult
-							.getTextRuleComparisonTermValue().split(",")) {
-						if (ruleEvaluationResult.getTextRuleValue()
-								.equals(splitValue)) {
-							ruleEvaluationResult
-									.setRuleMatchesEquationSign(true);
-							break;
+					for (val splitValue1 : ruleEvaluationResult
+							.getTextRuleValue().split(",")) {
+						for (val splitValue2 : ruleEvaluationResult
+								.getTextRuleComparisonTermValue().split(",")) {
+							if (splitValue1.equals(splitValue2)) {
+								ruleEvaluationResult
+										.setRuleMatchesEquationSign(true);
+								break;
+							}
 						}
 					}
 					break;
 				case TEXT_VALUE_NOT_MATCHES_KEY:
 					ruleEvaluationResult.setRuleMatchesEquationSign(true);
 
-					for (val splitValue : ruleEvaluationResult
-							.getTextRuleComparisonTermValue().split(",")) {
-						if (ruleEvaluationResult.getTextRuleValue()
-								.equals(splitValue)) {
-							ruleEvaluationResult
-									.setRuleMatchesEquationSign(false);
-							break;
+					for (val splitValue1 : ruleEvaluationResult
+							.getTextRuleValue().split(",")) {
+						for (val splitValue2 : ruleEvaluationResult
+								.getTextRuleComparisonTermValue().split(",")) {
+							if (splitValue1.equals(splitValue2)) {
+								ruleEvaluationResult
+										.setRuleMatchesEquationSign(false);
+								break;
+							}
 						}
 					}
 					break;
