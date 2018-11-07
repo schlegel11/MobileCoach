@@ -960,6 +960,9 @@ public class CommunicationManagerService {
 					} else {
 						log.warn("Message rejected by ASPSMS gateway: ",
 								response);
+
+						throw new Exception(
+								"Message rejected: Status code " + status);
 					}
 				} else {
 					log.warn("Message rejected by ASPSMS gateway: ", status);
