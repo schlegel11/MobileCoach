@@ -293,6 +293,7 @@ public class StringHelpers {
 				.getSmsPhoneNumberAcceptedCountryCodes()) {
 			if (numberWithoutZeros.startsWith(countryCode)) {
 				needsCorrection = false;
+				break;
 			}
 		}
 
@@ -302,6 +303,38 @@ public class StringHelpers {
 		}
 
 		return "00" + numberWithoutZeros;
+	}
+
+	/**
+	 * Creates a clean phone number of the given {@link String} to result in the
+	 * format "+CCNNNNNNN..." (CC: country code, NN...: number)
+	 *
+	 * @param phoneNumber
+	 * @return
+	 */
+	public static String cleanPhoneNumberPlusFormat(final String phoneNumber) {
+		String numberWithoutZeros = phoneNumber.trim()
+				.replaceAll(
+						ImplementationConstants.REGULAR_EXPRESSION_TO_CLEAN_PHONE_NUMBERS,
+						"")
+				.replaceAll("^0+", "");
+
+		boolean needsCorrection = true;
+
+		for (val countryCode : Constants
+				.getSmsPhoneNumberAcceptedCountryCodes()) {
+			if (numberWithoutZeros.startsWith(countryCode)) {
+				needsCorrection = false;
+				break;
+			}
+		}
+
+		if (needsCorrection) {
+			numberWithoutZeros = Constants.getSmsPhoneNumberCountryCorrection()
+					+ numberWithoutZeros;
+		}
+
+		return "+" + numberWithoutZeros;
 	}
 
 	/**
