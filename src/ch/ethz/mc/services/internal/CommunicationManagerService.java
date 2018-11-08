@@ -778,7 +778,7 @@ public class CommunicationManagerService {
 				return;
 			} catch (final Exception e) {
 				log.warn(
-						"Could not send mail to {}, retrying later another {} times: ",
+						"Could not send message/mail to {}, retrying later another {} times: ",
 						dialogOption.getData(),
 						ImplementationConstants.EMAIL_SENDING_RETRIES,
 						e.getMessage());
