@@ -278,4 +278,5 @@ public class Queries {
 	public static final String	UPDATE_VERSION_41__PARTICIPANT__CHANGE_1																																										= "{$set:{'responsibleTeamManagerEmail':null}}";
 	public static final String	UPDATE_VERSION_42__MONITORING_MESSAGE__CHANGE_1																																									= "{$set:{'pushOnly':false}}";
 	public static final String	UPDATE_VERSION_42__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'pushOnly':false}}";
+	public static final String	UPDATE_VERSION_44__MICRO_DIALOG__CHANGE_1																																										= "{$set:{'comment':''}}";
 }
