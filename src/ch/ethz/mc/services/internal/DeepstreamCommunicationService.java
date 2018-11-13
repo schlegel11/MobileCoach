@@ -353,15 +353,12 @@ public class DeepstreamCommunicationService extends Thread
 					messageObject.addProperty(DeepstreamConstants.MEDIA_TYPE,
 							dialogMessage.getMediaObjectType().toJSONField());
 				}
-				if (isCommand) {
-					if (!StringUtils.isBlank(
-							dialogMessage.getTextBasedMediaObjectContent())) {
-						messageObject.addProperty(DeepstreamConstants.CONTENT,
-								dialogMessage.getTextBasedMediaObjectContent());
-					} else {
-						messageObject.addProperty(DeepstreamConstants.CONTENT,
-								"");
-					}
+				if (!StringUtils.isBlank(
+						dialogMessage.getTextBasedMediaObjectContent())) {
+					messageObject.addProperty(DeepstreamConstants.CONTENT,
+							dialogMessage.getTextBasedMediaObjectContent());
+				} else {
+					messageObject.addProperty(DeepstreamConstants.CONTENT, "");
 				}
 				if (isCommand) {
 					messageObject.addProperty(

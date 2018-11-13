@@ -1111,7 +1111,8 @@ public class InterventionAdministrationManagerService {
 	@Synchronized
 	public MicroDialog microDialogCreate(final String microDialogName,
 			final ObjectId interventionId) {
-		val microDialog = new MicroDialog(interventionId, microDialogName, 0);
+		val microDialog = new MicroDialog(interventionId, microDialogName, "",
+				0);
 
 		if (microDialog.getName().equals("")) {
 			microDialog.setName(ImplementationConstants.DEFAULT_OBJECT_NAME);
@@ -1166,6 +1167,18 @@ public class InterventionAdministrationManagerService {
 			microDialog.setName(ImplementationConstants.DEFAULT_OBJECT_NAME);
 		} else {
 			microDialog.setName(newName);
+		}
+
+		databaseManagerService.saveModelObject(microDialog);
+	}
+
+	@Synchronized
+	public void microDialogChangeComment(final MicroDialog microDialog,
+			final String comment) throws NotificationMessageException {
+		if (comment == null) {
+			microDialog.setComment("");
+		} else {
+			microDialog.setComment(comment);
 		}
 
 		databaseManagerService.saveModelObject(microDialog);
