@@ -967,7 +967,8 @@ public class RuleEvaluator {
 		// Replace variables with their according values
 		val result = VariableStringReplacer
 				.findVariablesAndReplaceWithTextValues(locale, rule,
-						variablesWithValues, "", withJavaScriptEscapedQuotes);
+						variablesWithValues, "",
+						VariableStringReplacer.ENCODING.JAVASCRIPT);
 
 		log.debug("Result of rule {} is {}", rule, result);
 

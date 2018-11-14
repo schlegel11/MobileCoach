@@ -27,6 +27,8 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
@@ -40,6 +42,10 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public class VariableStringReplacer {
+	public static enum ENCODING {
+		NONE, JAVASCRIPT, HTML
+	}
+
 	/**
 	 * Finds variables within the given {@link String} and replaces them with
 	 * the appropriate calculatable variable values
@@ -160,7 +166,7 @@ public class VariableStringReplacer {
 			final String notFoundReplacer) {
 		return findVariablesAndReplaceWithTextValues(locale,
 				stringWithVariables, variablesWithValues, notFoundReplacer,
-				false);
+				ENCODING.NONE);
 	}
 
 	/**
@@ -177,15 +183,15 @@ public class VariableStringReplacer {
 	 *            The replacement {@link String} if a variable value could not
 	 *            be found, or null if the variable should not be replaced if no
 	 *            variable with the appropriate name could be found
-	 * @param withJavaScriptEscapedQuotes
-	 *            If set all quotes with be escaped for JavaScript
+	 * @param encoding
+	 *            If set all variable values will be specifically encoded
 	 * @return The String filled with variable values
 	 */
 	public static String findVariablesAndReplaceWithTextValues(
 			final Locale locale, String stringWithVariables,
 			final Collection<AbstractVariableWithValue> variablesWithValues,
-			final String notFoundReplacer,
-			final boolean withJavaScriptEscapedQuotes) {
+			final String notFoundReplacer, final ENCODING encoding) {
+
 		// Prevent null pointer exceptions
 		if (stringWithVariables == null || stringWithVariables.equals("")) {
 			log.debug("It's an empty string");
@@ -271,11 +277,19 @@ public class VariableStringReplacer {
 					}
 
 					// Care for JavaScript characters
-					if (withJavaScriptEscapedQuotes) {
-						value = value.replace("\"", "\\x22");
-						value = value.replace("'", "\\x27");
-						value = value.replace("\r", "\\r");
-						value = value.replace("\n", "\\n");
+					switch (encoding) {
+						case HTML:
+							value = StringEscapeUtils.escapeHtml4(value)
+									.replaceAll("(\r\n|\r|\n)", "<br/>");
+							break;
+						case JAVASCRIPT:
+							value = value.replace("\"", "\\x22");
+							value = value.replace("'", "\\x27");
+							value = value.replace("\r", "\\r");
+							value = value.replace("\n", "\\n");
+							break;
+						case NONE:
+							break;
 					}
 
 					// Check if variable has modifiers
