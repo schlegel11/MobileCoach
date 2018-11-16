@@ -86,6 +86,7 @@ public class ImplementationConstants {
 
 	public static final long	MICRO_DIALOG_MESSAGE_UNHANDLED_MESSAGE_MINIMUM_THRESHOLD_IN_MILLIS					= 30
 			* MINUTES_TO_TIME_IN_MILLIS_MULTIPLICATOR;
+	public static final int		MICRO_DIALOG_LOOP_DETECTION_THRESHOLD												= 500;
 
 	public static enum ACCEPTED_MEDIA_UPLOAD_TYPES {
 		IMAGE, VIDEO, AUDIO
