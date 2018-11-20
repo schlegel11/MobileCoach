@@ -705,7 +705,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public MonitoringMessageGroup monitoringMessageGroupMove(
+	public boolean monitoringMessageGroupMove(
 			final MonitoringMessageGroup monitoringMessageGroup,
 			final boolean moveLeft) {
 		// Find monitoring message to swap with
@@ -719,7 +719,7 @@ public class InterventionAdministrationManagerService {
 						monitoringMessageGroup.getOrder());
 
 		if (monitoringMessageGroupToSwapWith == null) {
-			return null;
+			return false;
 		}
 
 		// Swap order
@@ -732,7 +732,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService
 				.saveModelObject(monitoringMessageGroupToSwapWith);
 
-		return monitoringMessageGroupToSwapWith;
+		return true;
 	}
 
 	@Synchronized
@@ -1134,7 +1134,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public MicroDialog microDialogMove(final MicroDialog microDialog,
+	public boolean microDialogMove(final MicroDialog microDialog,
 			final boolean moveLeft) {
 		// Find micro dialog to swap with
 		val microDialogToSwapWith = databaseManagerService
@@ -1146,7 +1146,7 @@ public class InterventionAdministrationManagerService {
 						microDialog.getIntervention(), microDialog.getOrder());
 
 		if (microDialogToSwapWith == null) {
-			return null;
+			return false;
 		}
 
 		// Swap order
@@ -1157,7 +1157,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(microDialog);
 		databaseManagerService.saveModelObject(microDialogToSwapWith);
 
-		return microDialogToSwapWith;
+		return true;
 	}
 
 	@Synchronized

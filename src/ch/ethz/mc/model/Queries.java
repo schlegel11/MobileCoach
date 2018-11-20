@@ -279,4 +279,6 @@ public class Queries {
 	public static final String	UPDATE_VERSION_42__MONITORING_MESSAGE__CHANGE_1																																									= "{$set:{'pushOnly':false}}";
 	public static final String	UPDATE_VERSION_42__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'pushOnly':false}}";
 	public static final String	UPDATE_VERSION_44__MICRO_DIALOG__CHANGE_1																																										= "{$set:{'comment':''}}";
+	public static final String	UPDATE_VERSION_45__MONITORING_MESSAGE_GROUP__CHANGE_1																																							= "{$set:{'order':#}}";
+	public static final String	UPDATE_VERSION_45__MICRO_DIALOG__CHANGE_1																																										= "{$set:{'order':#}}";
 }

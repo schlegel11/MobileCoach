@@ -2155,7 +2155,7 @@ public class InterventionExecutionManagerService {
 		int iteration = 0;
 		itemsLoop: do {
 			iteration++;
-			System.err.println(iteration);
+
 			val microDialogMessage = databaseManagerService
 					.findOneSortedModelObject(MicroDialogMessage.class,
 							Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG_AND_ORDER_HIGHER,

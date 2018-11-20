@@ -20,6 +20,8 @@ import ch.ethz.mc.model.persistent.MicroDialogMessage;
 import ch.ethz.mc.model.persistent.concepts.MicroDialogElementInterface;
 import ch.ethz.mc.model.ui.UIMicroDialogElementInterface;
 import ch.ethz.mc.ui.components.basics.ShortStringEditComponent;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
@@ -33,7 +35,9 @@ import lombok.extern.log4j.Log4j2;
 public class MicroDialogEditComponentWithController
 		extends MicroDialogEditComponent {
 
-	private final MicroDialog												microDialog;
+	@Getter
+	@Setter
+	private MicroDialog														microDialog;
 
 	private final Intervention												intervention;
 
