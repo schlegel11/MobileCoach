@@ -590,7 +590,7 @@ public class DeepstreamCommunicationService extends Thread
 							receivedMessage.getText());
 				}
 				messageObject.addProperty(DeepstreamConstants.USER_TIMESTAMP,
-						receivedMessage.getReceivedTimestamp());
+						receivedMessage.getClientTimestamp());
 				messageObject.addProperty(DeepstreamConstants.LAST_MODIFIED,
 						timestamp);
 
@@ -617,7 +617,7 @@ public class DeepstreamCommunicationService extends Thread
 					}
 					messageConfirmationObject.addProperty(
 							DeepstreamConstants.USER_TIMESTAMP,
-							receivedMessage.getReceivedTimestamp());
+							receivedMessage.getClientTimestamp());
 					messageConfirmationObject.addProperty(
 							DeepstreamConstants.LAST_MODIFIED, timestamp);
 					if (receivedMessage.getMediaURL() != null
@@ -1479,7 +1479,7 @@ public class DeepstreamCommunicationService extends Thread
 	 * @param intention
 	 * @param content
 	 * @param text
-	 * @param timestamp
+	 * @param clientTimestamp
 	 * @param containsMedia
 	 * @param mediaType
 	 * @param relatedMessageIdBasedOnOrder
@@ -1489,9 +1489,10 @@ public class DeepstreamCommunicationService extends Thread
 	 */
 	private boolean receiveUserMessage(final String participantId,
 			final String message, final String intention, final String content,
-			final String text, final long timestamp, final String containsMedia,
-			final String mediaType, final int relatedMessageIdBasedOnOrder,
-			final String clientId, final boolean typeIntention) {
+			final String text, final long clientTimestamp,
+			final String containsMedia, final String mediaType,
+			final int relatedMessageIdBasedOnOrder, final String clientId,
+			final boolean typeIntention) {
 		log.debug("Received {} message for participant {}",
 				typeIntention ? "intention" : "regular", participantId);
 
@@ -1510,7 +1511,9 @@ public class DeepstreamCommunicationService extends Thread
 		receivedMessage.setIntention(intention);
 		receivedMessage.setContent(content);
 		receivedMessage.setText(text);
-		receivedMessage.setReceivedTimestamp(timestamp);
+		receivedMessage.setClientTimestamp(clientTimestamp);
+		receivedMessage
+				.setReceivedTimestamp(InternalDateTime.currentTimeMillis());
 		receivedMessage.setMediaURL(containsMedia);
 		receivedMessage.setMediaType(mediaType);
 		receivedMessage
