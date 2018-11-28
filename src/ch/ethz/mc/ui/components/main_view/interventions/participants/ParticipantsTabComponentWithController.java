@@ -194,6 +194,7 @@ public class ParticipantsTabComponentWithController
 
 		log.debug("Update participants");
 		refreshBeanContainer(beanContainer, UIParticipant.class,
+				Participant.class,
 				getInterventionAdministrationManagerService()
 						.getAllParticipantsOfIntervention(
 								intervention.getId()));

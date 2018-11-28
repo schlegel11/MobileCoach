@@ -1,5 +1,6 @@
 package ch.ethz.mc.ui.components;
 
+import java.util.ArrayList;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -22,11 +23,23 @@ package ch.ethz.mc.ui.components;
  */
 import java.util.List;
 
-import lombok.Setter;
-import lombok.val;
-import lombok.extern.log4j.Log4j2;
-
 import org.bson.types.ObjectId;
+
+import com.vaadin.data.Property;
+import com.vaadin.data.util.AbstractBeanContainer.BeanIdResolver;
+import com.vaadin.data.util.BeanContainer;
+import com.vaadin.data.util.BeanItem;
+import com.vaadin.server.ThemeResource;
+import com.vaadin.ui.AbstractComponent;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.CustomComponent;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.TabSheet.Tab;
+import com.vaadin.ui.Table;
+import com.vaadin.ui.UI;
+import com.vaadin.ui.Window;
 
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
@@ -44,21 +57,9 @@ import ch.ethz.mc.ui.NotificationMessageException;
 import ch.ethz.mc.ui.UISession;
 import ch.ethz.mc.ui.components.basics.ConfirmationComponent;
 import ch.ethz.mc.ui.components.helpers.CaseInsensitiveItemSorter;
-
-import com.vaadin.data.Property;
-import com.vaadin.data.util.BeanContainer;
-import com.vaadin.data.util.BeanItem;
-import com.vaadin.server.ThemeResource;
-import com.vaadin.ui.AbstractComponent;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.TabSheet.Tab;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
+import lombok.Setter;
+import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Provides methods for all {@link CustomComponent}s
@@ -457,14 +458,28 @@ public abstract class AbstractCustomComponent extends CustomComponent {
 	protected <UIObjectSubclass extends UIObject> void refreshBeanContainer(
 			final BeanContainer<ObjectId, UIObjectSubclass> beanContainer,
 			final Class<UIObjectSubclass> uiModelObjectSubclass,
+			final Class<? extends ModelObject> modelObjectClass,
 			final Iterable<? extends ModelObject> iterableModelObjects) {
 
 		beanContainer.removeAllItems();
 
+		beanContainer.setBeanIdResolver(
+				new BeanIdResolver<ObjectId, UIObjectSubclass>() {
+					@Override
+					public ObjectId getIdForBean(final UIObjectSubclass bean) {
+						val uiModelObject = (UIModelObject) bean;
+						return uiModelObject
+								.getRelatedModelObject(modelObjectClass)
+								.getId();
+					}
+				});
+
+		final List<UIObjectSubclass> list = new ArrayList<UIObjectSubclass>();
 		for (final ModelObject modelObject : iterableModelObjects) {
-			beanContainer.addItem(modelObject.getId(),
-					uiModelObjectSubclass.cast(modelObject.toUIModelObject()));
+			list.add(uiModelObjectSubclass.cast(modelObject.toUIModelObject()));
 		}
+
+		beanContainer.addAll(list);
 	}
 
 	/**

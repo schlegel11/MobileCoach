@@ -27,6 +27,7 @@ import java.util.List;
 import org.bson.types.ObjectId;
 import org.jongo.Jongo;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
 import ch.ethz.mc.conf.Constants;
@@ -145,6 +146,12 @@ public class DataModelUpdateManager {
 					break;
 				case 42:
 					updateToVersion42();
+					break;
+				case 44:
+					updateToVersion44();
+					break;
+				case 45:
+					updateToVersion45();
 					break;
 			}
 
@@ -754,5 +761,67 @@ public class DataModelUpdateManager {
 
 		dialogMessageCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_42__DIALOG_MESSAGE__CHANGE_1);
+	}
+
+	/**
+	 * Changes for version 44:
+	 */
+	private static void updateToVersion44() {
+		val microDialogCollection = jongo.getCollection("MicroDialog");
+
+		microDialogCollection.update(Queries.ALL).multi()
+				.with(Queries.UPDATE_VERSION_44__MICRO_DIALOG__CHANGE_1);
+	}
+
+	/**
+	 * Changes for version 45:
+	 */
+	private static void updateToVersion45() {
+
+		val mongoDriverInterventionCollection = jongo.getDatabase()
+				.getCollection("Intervention");
+
+		val mongoDriverMonitoringMessageGroupCollection = jongo.getDatabase()
+				.getCollection("MonitoringMessageGroup");
+		val monitoringMessageGroupCollection = jongo
+				.getCollection("MonitoringMessageGroup");
+		val mongoDriverMicroDialogCollection = jongo.getDatabase()
+				.getCollection("MicroDialog");
+		val microDialogCollection = jongo.getCollection("MicroDialog");
+
+		final List<ObjectId> objectsToChange = new ArrayList<>();
+		for (final DBObject document : mongoDriverInterventionCollection.find()
+				.snapshot()) {
+			val interventionObjectId = (ObjectId) document.get("_id");
+
+			int i = 0;
+			objectsToChange.clear();
+			for (final DBObject subDocument : mongoDriverMonitoringMessageGroupCollection
+					.find(new BasicDBObject("intervention",
+							interventionObjectId))
+					.sort(new BasicDBObject("order", 1))) {
+				objectsToChange.add((ObjectId) subDocument.get("_id"));
+			}
+			for (val objectId : objectsToChange) {
+				monitoringMessageGroupCollection.update(objectId).with(
+						Queries.UPDATE_VERSION_45__MONITORING_MESSAGE_GROUP__CHANGE_1,
+						i);
+				i++;
+			}
+
+			i = 0;
+			objectsToChange.clear();
+			for (final DBObject subDocument : mongoDriverMicroDialogCollection
+					.find(new BasicDBObject("intervention",
+							interventionObjectId))
+					.sort(new BasicDBObject("order", 1))) {
+				objectsToChange.add((ObjectId) subDocument.get("_id"));
+			}
+			for (val objectId : objectsToChange) {
+				microDialogCollection.update(objectId).with(
+						Queries.UPDATE_VERSION_45__MICRO_DIALOG__CHANGE_1, i);
+				i++;
+			}
+		}
 	}
 }

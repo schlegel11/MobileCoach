@@ -1,6 +1,4 @@
 package ch.ethz.mc.ui.components.main_view.interventions.micro_dialogs;
-
-import java.io.File;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -21,16 +19,13 @@ import java.io.File;
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-import java.util.Hashtable;
 
-import org.bson.types.ObjectId;
+import java.io.File;
 
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
 import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
-import com.vaadin.ui.TabSheet.Tab;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.model.persistent.Intervention;
@@ -49,19 +44,13 @@ import lombok.extern.log4j.Log4j2;
 public class MicroDialogsTabComponentWithController
 		extends MicroDialogsTabComponent {
 
-	private final Intervention				intervention;
-
-	private MicroDialog						selectedMicroDialog	= null;
-
-	private final Hashtable<Tab, ObjectId>	tabsWithObjectIdsOfMicroDialog;
+	private final Intervention intervention;
 
 	public MicroDialogsTabComponentWithController(
 			final Intervention intervention) {
 		super();
 
 		this.intervention = intervention;
-
-		tabsWithObjectIdsOfMicroDialog = new Hashtable<TabSheet.Tab, ObjectId>();
 
 		// Retrieve monitoring message groups to set current and fill tabs
 		final Iterable<MicroDialog> microDialogsIterable = getInterventionAdministrationManagerService()
@@ -70,11 +59,8 @@ public class MicroDialogsTabComponentWithController
 		for (val microDialog : microDialogsIterable) {
 			val newTab = addTabComponent(microDialog, intervention);
 
-			tabsWithObjectIdsOfMicroDialog.put(newTab, microDialog.getId());
-
 			if (getMicroDialogsTabSheet().getComponentCount() == 1) {
 				// First tab added
-				selectedMicroDialog = microDialog;
 				getMicroDialogsTabSheet().setSelectedTab(newTab);
 			}
 		}
@@ -95,20 +81,8 @@ public class MicroDialogsTabComponentWithController
 						val selectedTab = event.getTabSheet().getSelectedTab();
 						if (selectedTab == null) {
 							setNothingSelected();
-							selectedMicroDialog = null;
 						} else {
-							val selectedTabObject = event.getTabSheet()
-									.getTab(selectedTab);
-							val microDialogObjectId = tabsWithObjectIdsOfMicroDialog
-									.get(selectedTabObject);
-
-							// New tabs cannot be found in list, so the selected
-							// tab will be set programmatically after creation
-							if (microDialogObjectId != null) {
-								selectedMicroDialog = getInterventionAdministrationManagerService()
-										.getMicroDialog(microDialogObjectId);
-							}
-
+							refreshRelatedMicroDialog();
 							setSomethingSelected();
 						}
 					}
@@ -143,6 +117,23 @@ public class MicroDialogsTabComponentWithController
 		}
 	}
 
+	private MicroDialog getRelatedMicroDialog() {
+		val tabSheet = getMicroDialogsTabSheet();
+		val component = (MicroDialogEditComponentWithController) tabSheet
+				.getSelectedTab();
+
+		return component.getMicroDialog();
+	}
+
+	private void refreshRelatedMicroDialog() {
+		val tabSheet = getMicroDialogsTabSheet();
+		val component = (MicroDialogEditComponentWithController) tabSheet
+				.getSelectedTab();
+
+		component.setMicroDialog(getInterventionAdministrationManagerService()
+				.getMicroDialog(component.getMicroDialog().getId()));
+	}
+
 	public void createDialog() {
 		log.debug("Create dialog");
 		showModalStringValueEditWindow(
@@ -166,11 +157,6 @@ public class MicroDialogsTabComponentWithController
 						val newTab = addTabComponent(newMicroDialog,
 								intervention);
 
-						tabsWithObjectIdsOfMicroDialog.put(newTab,
-								newMicroDialog.getId());
-
-						selectedMicroDialog = newMicroDialog;
-
 						getMicroDialogsTabSheet().setSelectedTab(newTab);
 						getAdminUI().showInformationNotification(
 								AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_CREATED);
@@ -183,10 +169,12 @@ public class MicroDialogsTabComponentWithController
 	public void moveDialog(final boolean moveLeft) {
 		log.debug("Move dialog {}", moveLeft ? "left" : "right");
 
-		val swappedMicroDialog = getInterventionAdministrationManagerService()
-				.microDialogMove(selectedMicroDialog, moveLeft);
+		val microDialog = getRelatedMicroDialog();
 
-		if (swappedMicroDialog == null) {
+		val swappedMicroDialog = getInterventionAdministrationManagerService()
+				.microDialogMove(microDialog, moveLeft);
+
+		if (!swappedMicroDialog) {
 			log.debug("Micro dialog is already at beginning/end of list");
 			return;
 		}
@@ -202,23 +190,25 @@ public class MicroDialogsTabComponentWithController
 					currentPosition + 1);
 		}
 
+		refreshRelatedMicroDialog();
 		setSomethingSelected();
 	}
 
 	public void renameDialog() {
 		log.debug("Rename dialog");
 
+		val microDialog = getRelatedMicroDialog();
+
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_NAME_FOR_MICRO_DIALOG,
-				selectedMicroDialog.getName(), null,
-				new ShortStringEditComponent(),
+				microDialog.getName(), null, new ShortStringEditComponent(),
 				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						try {
 							// Change name
 							getInterventionAdministrationManagerService()
-									.microDialogSetName(selectedMicroDialog,
+									.microDialogSetName(microDialog,
 											getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
@@ -228,7 +218,8 @@ public class MicroDialogsTabComponentWithController
 						// Adapt UI
 						val tab = getMicroDialogsTabSheet();
 						tab.getTab(tab.getSelectedTab())
-								.setCaption(selectedMicroDialog.getName());
+								.setCaption(microDialog.getName());
+						refreshRelatedMicroDialog();
 
 						getAdminUI().showInformationNotification(
 								AdminMessageStrings.NOTIFICATION__MICRO_DIALOG_RENAMED);
@@ -240,10 +231,12 @@ public class MicroDialogsTabComponentWithController
 	public void duplicateDialog() {
 		log.debug("Duplicate dialog");
 
+		val microDialog = getRelatedMicroDialog();
+
 		File temporaryBackupFile = null;
 		try {
 			temporaryBackupFile = getInterventionAdministrationManagerService()
-					.microDialogExport(selectedMicroDialog);
+					.microDialogExport(microDialog);
 
 			final MicroDialog importedMicroDialog = getInterventionAdministrationManagerService()
 					.microDialogImport(temporaryBackupFile, true);
@@ -254,11 +247,6 @@ public class MicroDialogsTabComponentWithController
 
 			// Adapt UI
 			val newTab = addTabComponent(importedMicroDialog, intervention);
-
-			tabsWithObjectIdsOfMicroDialog.put(newTab,
-					importedMicroDialog.getId());
-
-			selectedMicroDialog = importedMicroDialog;
 
 			getMicroDialogsTabSheet().setSelectedTab(newTab);
 			getAdminUI().showInformationNotification(
@@ -278,6 +266,8 @@ public class MicroDialogsTabComponentWithController
 	public void deleteDialog() {
 		log.debug("Delete dialog");
 
+		val microDialog = getRelatedMicroDialog();
+
 		showConfirmationWindow(new ExtendableButtonClickListener() {
 
 			@Override
@@ -285,7 +275,7 @@ public class MicroDialogsTabComponentWithController
 				try {
 					// Delete dialog
 					getInterventionAdministrationManagerService()
-							.microDialogDelete(selectedMicroDialog);
+							.microDialogDelete(microDialog);
 				} catch (final Exception e) {
 					closeWindow();
 					handleException(e);
@@ -295,22 +285,13 @@ public class MicroDialogsTabComponentWithController
 				// Adapt UI
 				val tabSheet = getMicroDialogsTabSheet();
 
-				tabsWithObjectIdsOfMicroDialog
-						.remove(tabSheet.getTab(tabSheet.getSelectedTab()));
-
 				tabSheet.removeTab(tabSheet.getTab(tabSheet.getSelectedTab()));
 
 				val selectedTab = tabSheet.getSelectedTab();
 				if (selectedTab == null) {
 					setNothingSelected();
-					selectedMicroDialog = null;
 				} else {
-					val selectedTabObject = tabSheet.getTab(selectedTab);
-					val microDialogObjectId = tabsWithObjectIdsOfMicroDialog
-							.get(selectedTabObject);
-					selectedMicroDialog = getInterventionAdministrationManagerService()
-							.getMicroDialog(microDialogObjectId);
-
+					refreshRelatedMicroDialog();
 					setSomethingSelected();
 				}
 

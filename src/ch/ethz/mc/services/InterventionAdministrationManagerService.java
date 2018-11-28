@@ -705,7 +705,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public MonitoringMessageGroup monitoringMessageGroupMove(
+	public boolean monitoringMessageGroupMove(
 			final MonitoringMessageGroup monitoringMessageGroup,
 			final boolean moveLeft) {
 		// Find monitoring message to swap with
@@ -719,7 +719,7 @@ public class InterventionAdministrationManagerService {
 						monitoringMessageGroup.getOrder());
 
 		if (monitoringMessageGroupToSwapWith == null) {
-			return null;
+			return false;
 		}
 
 		// Swap order
@@ -732,7 +732,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService
 				.saveModelObject(monitoringMessageGroupToSwapWith);
 
-		return monitoringMessageGroupToSwapWith;
+		return true;
 	}
 
 	@Synchronized
@@ -1111,7 +1111,8 @@ public class InterventionAdministrationManagerService {
 	@Synchronized
 	public MicroDialog microDialogCreate(final String microDialogName,
 			final ObjectId interventionId) {
-		val microDialog = new MicroDialog(interventionId, microDialogName, 0);
+		val microDialog = new MicroDialog(interventionId, microDialogName, "",
+				0);
 
 		if (microDialog.getName().equals("")) {
 			microDialog.setName(ImplementationConstants.DEFAULT_OBJECT_NAME);
@@ -1133,7 +1134,7 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public MicroDialog microDialogMove(final MicroDialog microDialog,
+	public boolean microDialogMove(final MicroDialog microDialog,
 			final boolean moveLeft) {
 		// Find micro dialog to swap with
 		val microDialogToSwapWith = databaseManagerService
@@ -1145,7 +1146,7 @@ public class InterventionAdministrationManagerService {
 						microDialog.getIntervention(), microDialog.getOrder());
 
 		if (microDialogToSwapWith == null) {
-			return null;
+			return false;
 		}
 
 		// Swap order
@@ -1156,7 +1157,7 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.saveModelObject(microDialog);
 		databaseManagerService.saveModelObject(microDialogToSwapWith);
 
-		return microDialogToSwapWith;
+		return true;
 	}
 
 	@Synchronized
@@ -1166,6 +1167,18 @@ public class InterventionAdministrationManagerService {
 			microDialog.setName(ImplementationConstants.DEFAULT_OBJECT_NAME);
 		} else {
 			microDialog.setName(newName);
+		}
+
+		databaseManagerService.saveModelObject(microDialog);
+	}
+
+	@Synchronized
+	public void microDialogChangeComment(final MicroDialog microDialog,
+			final String comment) throws NotificationMessageException {
+		if (comment == null) {
+			microDialog.setComment("");
+		} else {
+			microDialog.setComment(comment);
 		}
 
 		databaseManagerService.saveModelObject(microDialog);

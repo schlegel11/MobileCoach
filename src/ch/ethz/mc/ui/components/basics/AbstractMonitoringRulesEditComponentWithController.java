@@ -995,11 +995,13 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 						&& container.hasChildren(parentTargetItemId)) {
 					// move first in the container
 					container.moveAfterSibling(sourceItemId, null);
+
+					// Adjust monitoring rule
+					component.moveItem(TreeSortDropHandler.MOVE.AS_CHILD,
+							(ObjectId) sourceItemId,
+							(ObjectId) parentTargetItemId,
+							(ObjectId) sameLevelTargetItemId);
 				}
-				// Adjust monitoring rule
-				component.moveItem(TreeSortDropHandler.MOVE.AS_CHILD,
-						(ObjectId) sourceItemId, (ObjectId) parentTargetItemId,
-						(ObjectId) sameLevelTargetItemId);
 			} else if (location == VerticalDropLocation.TOP) {
 				final Object parentItemId = container
 						.getParent(sameLevelTargetItemId);
@@ -1009,22 +1011,24 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 							sameLevelTargetItemId);
 					container.moveAfterSibling(sameLevelTargetItemId,
 							sourceItemId);
+
+					// Adjust monitoring rule
+					component.moveItem(TreeSortDropHandler.MOVE.ABOVE,
+							(ObjectId) sourceItemId, (ObjectId) parentItemId,
+							(ObjectId) sameLevelTargetItemId);
 				}
-				// Adjust monitoring rule
-				component.moveItem(TreeSortDropHandler.MOVE.ABOVE,
-						(ObjectId) sourceItemId, (ObjectId) parentItemId,
-						(ObjectId) sameLevelTargetItemId);
 			} else if (location == VerticalDropLocation.BOTTOM) {
 				final Object parentItemId = container
 						.getParent(sameLevelTargetItemId);
 				if (container.setParent(sourceItemId, parentItemId)) {
 					container.moveAfterSibling(sourceItemId,
 							sameLevelTargetItemId);
+
+					// Adjust monitoring rule
+					component.moveItem(TreeSortDropHandler.MOVE.BELOW,
+							(ObjectId) sourceItemId, (ObjectId) parentItemId,
+							(ObjectId) sameLevelTargetItemId);
 				}
-				// Adjust monitoring rule
-				component.moveItem(TreeSortDropHandler.MOVE.BELOW,
-						(ObjectId) sourceItemId, (ObjectId) parentItemId,
-						(ObjectId) sameLevelTargetItemId);
 			}
 		}
 	}

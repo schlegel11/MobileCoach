@@ -68,6 +68,14 @@ public class MicroDialog extends ModelObject {
 	private String				name;
 
 	/**
+	 * A comment for the author, not visible to any participant
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private String				comment;
+
+	/**
 	 * The position of the {@link MicroDialog} compared to all other
 	 * {@link MicroDialog}s
 	 */

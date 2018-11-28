@@ -91,6 +91,7 @@ import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mc.tools.RuleEvaluator;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.tools.VariableStringReplacer;
+import ch.ethz.mc.tools.VariableStringReplacer.ENCODING;
 import ch.ethz.mc.ui.NotificationMessageException;
 import lombok.Cleanup;
 import lombok.Synchronized;
@@ -441,8 +442,20 @@ public class InterventionExecutionManagerService {
 										FILE_STORES.STORAGE);
 						try {
 							val fileContent = FileUtils.readFileToString(file);
+
+							val variablesWithValues = variablesManagerService
+									.getAllVariablesWithValuesOfParticipantAndSystem(
+											participant);
+
+							val filledFileContent = VariableStringReplacer
+									.findVariablesAndReplaceWithTextValues(
+											participant.getLanguage(),
+											fileContent,
+											variablesWithValues.values(), "",
+											ENCODING.HTML);
+
 							dialogMessage.setTextBasedMediaObjectContent(
-									fileContent);
+									filledFileContent);
 						} catch (final IOException e) {
 							log.error(
 									"File could not be read for creating dialog message with file content: {}",
@@ -2139,7 +2152,10 @@ public class InterventionExecutionManagerService {
 			}
 		}
 
+		int iteration = 0;
 		itemsLoop: do {
+			iteration++;
+
 			val microDialogMessage = databaseManagerService
 					.findOneSortedModelObject(MicroDialogMessage.class,
 							Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG_AND_ORDER_HIGHER,
@@ -2347,7 +2363,29 @@ public class InterventionExecutionManagerService {
 				variablesRequireRefresh = true;
 				participantRequiresRefresh = true;
 			}
-		} while (!stopMicroDialogHandling);
+		} while (!stopMicroDialogHandling
+				&& iteration < ImplementationConstants.MICRO_DIALOG_LOOP_DETECTION_THRESHOLD);
+
+		if (iteration >= ImplementationConstants.MICRO_DIALOG_LOOP_DETECTION_THRESHOLD) {
+			// Loop detected
+			// Set participant to data not available for monitoring
+			dialogStatusSetDataForMonitoringNotAvailable(participant.getId());
+			log.error(
+					"Detected endless loop while trying to handle micro dialog for participant {}",
+					participant.getId());
+		}
+	}
+
+	@Synchronized
+	private void dialogStatusSetDataForMonitoringNotAvailable(
+			final ObjectId participantId) {
+		final val dialogStatus = databaseManagerService.findOneModelObject(
+				DialogStatus.class, Queries.DIALOG_STATUS__BY_PARTICIPANT,
+				participantId);
+
+		dialogStatus.setDataForMonitoringParticipationAvailable(false);
+
+		databaseManagerService.saveModelObject(dialogStatus);
 	}
 
 	/*

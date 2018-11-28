@@ -35,6 +35,8 @@ import ch.ethz.mc.model.persistent.MonitoringMessage;
 import ch.ethz.mc.model.persistent.MonitoringMessageGroup;
 import ch.ethz.mc.model.ui.UIMonitoringMessage;
 import ch.ethz.mc.ui.components.basics.ShortStringEditComponent;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
@@ -52,7 +54,9 @@ import lombok.extern.log4j.Log4j2;
 public class MonitoringMessageGroupEditComponentWithController
 		extends MonitoringMessageGroupEditComponent {
 
-	private final MonitoringMessageGroup						monitoringMessageGroup;
+	@Getter
+	@Setter
+	private MonitoringMessageGroup								monitoringMessageGroup;
 
 	private final ObjectId										interventionId;
 
@@ -61,11 +65,11 @@ public class MonitoringMessageGroupEditComponentWithController
 	private final BeanContainer<ObjectId, UIMonitoringMessage>	beanContainer;
 
 	protected MonitoringMessageGroupEditComponentWithController(
-			final MonitoringMessageGroup monitoringMessageGroup,
+			final MonitoringMessageGroup monitoringMessageGroupToSet,
 			final ObjectId interventionId) {
 		super();
 
-		this.monitoringMessageGroup = monitoringMessageGroup;
+		monitoringMessageGroup = monitoringMessageGroupToSet;
 		this.interventionId = interventionId;
 
 		// table options
