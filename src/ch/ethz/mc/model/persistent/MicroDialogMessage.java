@@ -132,6 +132,15 @@ public class MicroDialogMessage extends ModelObject
 	private boolean				messageIsSticky;
 
 	/**
+	 * Defines if the {@link MicroDialogMessage} deactivates all open questions
+	 * of former messages
+	 *
+	 */
+	@Getter
+	@Setter
+	private boolean				messageDeactivatesAllOpenQuestions;
+
+	/**
 	 * Defines if the {@link MicroDialogMessage}s in the group expect to be
 	 * answeres by the {@link Participant}
 	 *
@@ -232,7 +241,8 @@ public class MicroDialogMessage extends ModelObject
 		final val microDialogMessage = new UIMicroDialogElementInterface(
 				getOrder(),
 				Messages.getAdminString(AdminMessageStrings.UI_MODEL__MESSAGE),
-				true, textWithPlaceholders.toShortenedString(80),
+				true, messageDeactivatesAllOpenQuestions,
+				textWithPlaceholders.toShortenedString(80),
 				commandMessage
 						? Messages.getAdminString(
 								AdminMessageStrings.UI_MODEL__YES)

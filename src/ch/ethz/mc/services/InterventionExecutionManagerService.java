@@ -325,7 +325,7 @@ public class InterventionExecutionManagerService {
 			final MicroDialog relatedMicroDialogForActivation,
 			final MicroDialogMessage relatedMicroDialogMessage,
 			final boolean supervisorMessage, final boolean answerExpected,
-			final boolean isSticky,
+			final boolean isSticky, final boolean deactivatesAllOpenQuestions,
 			final int minutesUntilHandledAsNotAnswered) {
 		log.debug("Create message and prepare for sending");
 		val dialogMessage = new DialogMessage(participant.getId(), 0,
@@ -334,7 +334,8 @@ public class InterventionExecutionManagerService {
 				DialogMessageStatusTypes.PREPARED_FOR_SENDING, type, null,
 				message, message, answerType, answerOptions, null, null, null,
 				null, null, timestampToSendMessage, -1, supervisorMessage,
-				answerExpected, isSticky, -1, -1, null, null, false,
+				answerExpected, isSticky, deactivatesAllOpenQuestions, -1, -1,
+				null, null, false,
 				relatedMonitoringRule == null ? null
 						: relatedMonitoringRule.getId(),
 				relatedMonitoringMessage == null ? null
@@ -709,7 +710,7 @@ public class InterventionExecutionManagerService {
 				isTypeIntention ? DialogMessageStatusTypes.RECEIVED_AS_INTENTION
 						: DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY,
 				type, receivedMessage.getClientId(), "", "", null, null, null,
-				null, null, null, null, -1, -1, false, false, false, -1,
+				null, null, null, null, -1, -1, false, false, false, false, -1,
 				receivedMessage.getReceivedTimestamp(), answerCleaned,
 				answerRaw, isTypeIntention ? false : true, null, null, null,
 				null, false, false);
@@ -1379,7 +1380,7 @@ public class InterventionExecutionManagerService {
 										? monitoringReplyRule
 												.isSendMessageToSupervisor()
 										: false,
-								false, false, 0);
+								false, false, false, 0);
 					}
 				}
 
@@ -1395,7 +1396,7 @@ public class InterventionExecutionManagerService {
 							AnswerTypes.CUSTOM, null, false,
 							InternalDateTime.currentTimeMillis(), null, null,
 							microDialogActivation.getMiroDialogToActivate(),
-							null, false, false, false, 0);
+							null, false, false, false, false, 0);
 				}
 			} else if (relatedMicroDialogMessage != null) {
 				log.debug("Caring for further micro dialog handling");
@@ -1560,7 +1561,8 @@ public class InterventionExecutionManagerService {
 										? monitoringRule
 												.isSendMessageToSupervisor()
 										: false,
-								monitoringMessageExpectsAnswer, false, 0);
+								monitoringMessageExpectsAnswer, false, false,
+								0);
 					}
 				}
 
@@ -1601,7 +1603,7 @@ public class InterventionExecutionManagerService {
 							AnswerTypes.CUSTOM, null, false,
 							timeToSendMessageInMillis, null, null,
 							microDialogActivation.getMiroDialogToActivate(),
-							null, false, false, false, 0);
+							null, false, false, false, false, 0);
 				}
 
 				if (!periodicCheck) {
@@ -1842,7 +1844,7 @@ public class InterventionExecutionManagerService {
 							monitoringRule != null
 									? monitoringRule.isSendMessageToSupervisor()
 									: false,
-							monitoringMessageExpectsAnswer, false, 0);
+							monitoringMessageExpectsAnswer, false, false, 0);
 				}
 			}
 
@@ -1881,7 +1883,7 @@ public class InterventionExecutionManagerService {
 						AnswerTypes.CUSTOM, null, false,
 						timeToSendMessageInMillis, null, null,
 						microDialogActivation.getMiroDialogToActivate(), null,
-						false, false, false, 0);
+						false, false, false, false, 0);
 			}
 
 			return dialogMessageCreated;
@@ -2029,6 +2031,8 @@ public class InterventionExecutionManagerService {
 					}
 
 					try {
+						// Check appropriate recipient (supervisor or
+						// participant)
 						DialogOption dialogOption = null;
 						boolean sendToSupervisor;
 						if (dialogMessageWithSenderIdentificationToSend
@@ -2044,6 +2048,19 @@ public class InterventionExecutionManagerService {
 						}
 
 						if (dialogOption != null) {
+							// Deactivate former messages if requested
+							if (dialogMessageToSend
+									.isMessageDeactivatesAllOpenQuestions()) {
+								log.debug(
+										"Message requests to deactivate all open questions...");
+								// TODO HIER NOCH NACHRICHTEN DEAKTIVIEREN DIE
+								// BEREITS VERSENDET SIND UND AUF ANTWORT WARTEN
+								// --> was bedeutet das für die Nachrichten
+								// bzgl. default-Werten? (nicht setzen)
+								log.debug("Deactivation done");
+							}
+
+							// Send based on dialog option type
 							switch (dialogOption.getType()) {
 								case SMS:
 								case EMAIL:
@@ -2290,7 +2307,10 @@ public class InterventionExecutionManagerService {
 						answerOptionsToSend, false, lastMessageSent, null, null,
 						microDialog, microDialogMessage, false,
 						microDialogMessage.isMessageExpectsAnswer(),
-						microDialogMessage.isMessageIsSticky(), 0);
+						microDialogMessage.isMessageIsSticky(),
+						microDialogMessage
+								.isMessageDeactivatesAllOpenQuestions(),
+						0);
 
 				// Proceed with micro dialog handling?
 				if (microDialogMessage
@@ -2356,7 +2376,7 @@ public class InterventionExecutionManagerService {
 							DialogMessageTypes.MICRO_DIALOG_ACTIVATION,
 							nextMicroDialog.getName(), AnswerTypes.CUSTOM, null,
 							false, lastMessageSent, null, null, nextMicroDialog,
-							null, false, false, false, 0);
+							null, false, false, false, false, 0);
 				}
 
 				// Variables need to be refreshed after performing rules
@@ -2594,7 +2614,7 @@ public class InterventionExecutionManagerService {
 		dialogMessageCreateManuallyOrByRulesIncludingMediaObject(participant,
 				DialogMessageTypes.PLAIN, messageTextToSend, null, null, true,
 				InternalDateTime.currentTimeMillis(), null, null, null, null,
-				advisorMessage, false, false, 0);
+				advisorMessage, false, false, false, 0);
 	}
 
 	/**
@@ -2664,7 +2684,7 @@ public class InterventionExecutionManagerService {
 				messageTextToSend, answerTypeToSend, answerOptionsToSend, true,
 				InternalDateTime.currentTimeMillis(), null,
 				determinedMonitoringMessageToSend, null, null, advisorMessage,
-				monitoringMessageGroup.isMessagesExpectAnswer(), false,
+				monitoringMessageGroup.isMessagesExpectAnswer(), false, false,
 				minutesUntilHandledAsNotAnswered);
 	}
 

@@ -402,6 +402,8 @@ public class DeepstreamCommunicationService extends Thread
 						timestamp);
 				messageObject.addProperty(DeepstreamConstants.STICKY,
 						dialogMessage.isMessageIsSticky());
+				messageObject.addProperty(DeepstreamConstants.DEACTIVATION,
+						dialogMessage.isMessageDeactivatesAllOpenQuestions());
 
 				record = client.record
 						.getRecord(DeepstreamConstants.PATH_MESSAGES

@@ -918,6 +918,9 @@ public class CommunicationManagerService {
 				conn.setUseCaches(false);
 				conn.setDoInput(true);
 				conn.setDoOutput(true);
+				conn.setConnectTimeout(
+						ImplementationConstants.SMS_SERVER_TIMEOUT);
+				conn.setReadTimeout(ImplementationConstants.SMS_SERVER_TIMEOUT);
 
 				conn.setRequestMethod("POST");
 				conn.setRequestProperty("Content-Type", "application/json");

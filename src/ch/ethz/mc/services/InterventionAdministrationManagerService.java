@@ -1255,7 +1255,7 @@ public class InterventionAdministrationManagerService {
 			final ObjectId microDialogId) {
 		val microDialogMessage = new MicroDialogMessage(microDialogId, 0,
 				new LString(), false, null, null, null, false, false, false,
-				null, null, AnswerTypes.FREE_TEXT,
+				false, null, null, AnswerTypes.FREE_TEXT,
 				ImplementationConstants.DEFAULT_MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED,
 				new LString(),
 				GlobalUniqueIdGenerator.createSimpleGlobalUniqueId());
@@ -1318,6 +1318,16 @@ public class InterventionAdministrationManagerService {
 			final MicroDialogMessage microDialogMessage,
 			final boolean isStickyMessage) {
 		microDialogMessage.setMessageIsSticky(isStickyMessage);
+
+		databaseManagerService.saveModelObject(microDialogMessage);
+	}
+
+	@Synchronized
+	public void microDialogMessageSetDeactivatesAllOpenQuestions(
+			final MicroDialogMessage microDialogMessage,
+			final boolean deactivatesAllOpenQuestions) {
+		microDialogMessage.setMessageDeactivatesAllOpenQuestions(
+				deactivatesAllOpenQuestions);
 
 		databaseManagerService.saveModelObject(microDialogMessage);
 	}

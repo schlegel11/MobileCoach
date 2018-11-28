@@ -107,7 +107,7 @@ public class MicroDialogDecisionPoint extends ModelObject
 				getOrder(),
 				Messages.getAdminString(
 						AdminMessageStrings.UI_MODEL__DECISION_POINT),
-				false,
+				false, false,
 				StringUtils.isBlank(comment)
 						? ImplementationConstants.DEFAULT_OBJECT_NAME : comment,
 				"", "", "", "", "", decisionPointRules);

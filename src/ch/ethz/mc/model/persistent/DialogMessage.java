@@ -206,6 +206,14 @@ public class DialogMessage extends ModelObject {
 	private boolean						messageIsSticky;
 
 	/**
+	 * Defines if this message deactivates all open questions of former messages
+	 *
+	 */
+	@Getter
+	@Setter
+	private boolean						messageDeactivatesAllOpenQuestions;
+
+	/**
 	 * Timestamp when the {@link DialogMessage} is handled as unanswered
 	 */
 	@Getter

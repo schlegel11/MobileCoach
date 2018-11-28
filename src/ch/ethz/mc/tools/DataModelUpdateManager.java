@@ -153,6 +153,9 @@ public class DataModelUpdateManager {
 				case 45:
 					updateToVersion45();
 					break;
+				case 46:
+					updateToVersion46();
+					break;
 			}
 
 			log.info("Update to version {} done", updateToVersionInThisStep);
@@ -823,5 +826,21 @@ public class DataModelUpdateManager {
 				i++;
 			}
 		}
+	}
+
+	/**
+	 * Changes for version 46:
+	 */
+	private static void updateToVersion46() {
+		val microDialogMessageCollection = jongo
+				.getCollection("MicroDialogMessage");
+
+		microDialogMessageCollection.update(Queries.ALL).multi().with(
+				Queries.UPDATE_VERSION_46__MICRO_DIALOG_MESSAGE__CHANGE_1);
+
+		val dialogMessageCollection = jongo.getCollection("DialogMessage");
+
+		dialogMessageCollection.update(Queries.ALL).multi()
+				.with(Queries.UPDATE_VERSION_46__DIALOG_MESSAGE__CHANGE_1);
 	}
 }
