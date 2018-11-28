@@ -323,6 +323,7 @@ public class InterventionResultsComponentWithController
 		if (refreshAlsoParticipants) {
 			log.debug("Update participants");
 			refreshBeanContainer(beanContainer, UIParticipant.class,
+					Participant.class,
 					getInterventionAdministrationManagerService()
 							.getAllParticipantsOfIntervention(
 									intervention.getId()));
