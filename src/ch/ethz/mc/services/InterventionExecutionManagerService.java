@@ -1110,7 +1110,7 @@ public class InterventionExecutionManagerService {
 			dialogMessages = getDialogMessagesOfParticipantAnsweredByParticipant(
 					participant.getId());
 		} else {
-			dialogMessages = getDialogMessagesOfParticipantWaitingToBeAnsweredOrUnansweredByParticipant(
+			dialogMessages = getDialogMessagesOfParticipantWaitingToBeAnsweredByParticipant(
 					participant.getId());
 		}
 
@@ -2053,10 +2053,26 @@ public class InterventionExecutionManagerService {
 									.isMessageDeactivatesAllOpenQuestions()) {
 								log.debug(
 										"Message requests to deactivate all open questions...");
-								// TODO HIER NOCH NACHRICHTEN DEAKTIVIEREN DIE
-								// BEREITS VERSENDET SIND UND AUF ANTWORT WARTEN
-								// --> was bedeutet das für die Nachrichten
-								// bzgl. default-Werten? (nicht setzen)
+
+								val dialogMessagesToDeactivate = getDialogMessagesOfParticipantWaitingToBeAnsweredByParticipant(
+										participantId);
+								for (val dialogMessageToDeactivate : dialogMessagesToDeactivate) {
+									dialogMessageStatusChangesAfterSending(
+											dialogMessageToDeactivate.getId(),
+											DialogMessageStatusTypes.SENT_AND_WAITED_FOR_ANSWER_BUT_DEACTIVATED,
+											InternalDateTime
+													.currentTimeMillis(),
+											null, null, null);
+
+									// Stop deactivation when current message is
+									// reached
+									if (dialogMessageToDeactivate
+											.getOrder() > dialogMessageToSend
+													.getOrder()) {
+										break;
+									}
+								}
+
 								log.debug("Deactivation done");
 							}
 
@@ -2853,6 +2869,7 @@ public class InterventionExecutionManagerService {
 			// Message counts
 			int totalSentMessages = 0;
 			int totalReceivedMessages = 0;
+			int totalDeactivatedMessages = 0;
 			int answeredQuestions = 0;
 			int unansweredQuestions = 0;
 			int mediaObjectsViewed = 0;
@@ -2896,6 +2913,10 @@ public class InterventionExecutionManagerService {
 						case SENT_BUT_NOT_WAITING_FOR_ANSWER:
 							totalSentMessages++;
 							break;
+						case SENT_AND_WAITED_FOR_ANSWER_BUT_DEACTIVATED:
+							totalSentMessages++;
+							totalDeactivatedMessages++;
+							break;
 					}
 
 					if (dialogMessage.isMediaContentViewed()) {
@@ -2917,6 +2938,10 @@ public class InterventionExecutionManagerService {
 					"intervention." + intervention.getId().toString()
 							+ ".totalReceivedMessages",
 					String.valueOf(totalReceivedMessages));
+			statistics.setProperty(
+					"intervention." + intervention.getId().toString()
+							+ ".totalDeactivatedMessages",
+					String.valueOf(totalDeactivatedMessages));
 			statistics.setProperty(
 					"intervention." + intervention.getId().toString()
 							+ ".answeredQuestions",
@@ -3442,7 +3467,7 @@ public class InterventionExecutionManagerService {
 	}
 
 	@Synchronized
-	private Iterable<DialogMessage> getDialogMessagesOfParticipantWaitingToBeAnsweredOrUnansweredByParticipant(
+	private Iterable<DialogMessage> getDialogMessagesOfParticipantWaitingToBeAnsweredByParticipant(
 			final ObjectId participantId) {
 		val dialogMessages = databaseManagerService.findSortedModelObjects(
 				DialogMessage.class,

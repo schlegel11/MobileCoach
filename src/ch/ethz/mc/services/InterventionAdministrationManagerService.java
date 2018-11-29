@@ -3468,6 +3468,7 @@ public class InterventionAdministrationManagerService {
 		// Message counts
 		int totalSentMessages = 0;
 		int totalReceivedMessages = 0;
+		int totalDeactivatedMessages = 0;
 		int answeredQuestions = 0;
 		int unansweredQuestions = 0;
 		int mediaObjectsContained = 0;
@@ -3511,6 +3512,10 @@ public class InterventionAdministrationManagerService {
 				case SENT_BUT_NOT_WAITING_FOR_ANSWER:
 					totalSentMessages++;
 					break;
+				case SENT_AND_WAITED_FOR_ANSWER_BUT_DEACTIVATED:
+					totalSentMessages++;
+					totalDeactivatedMessages++;
+					break;
 			}
 
 			val relatedMonitoringMessageId = dialogMessage
@@ -3544,6 +3549,10 @@ public class InterventionAdministrationManagerService {
 				Messages.getAdminString(
 						AdminMessageStrings.STATISTICS__TOTAL_MESSAGES_RECEIVED),
 				String.valueOf(totalReceivedMessages));
+		values.put(
+				Messages.getAdminString(
+						AdminMessageStrings.STATISTICS__TOTAL_MESSAGES_DEACTIVATED),
+				String.valueOf(totalDeactivatedMessages));
 		values.put(
 				Messages.getAdminString(
 						AdminMessageStrings.STATISTICS__ANSWERED_QUESTIONS),
