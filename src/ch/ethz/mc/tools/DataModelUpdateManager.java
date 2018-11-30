@@ -844,6 +844,8 @@ public class DataModelUpdateManager {
 
 		dialogMessageCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_46__DIALOG_MESSAGE__CHANGE_1);
+		dialogMessageCollection.update(Queries.ALL).multi()
+				.with(Queries.UPDATE_VERSION_46__DIALOG_MESSAGE__CHANGE_2);
 
 	}
 }

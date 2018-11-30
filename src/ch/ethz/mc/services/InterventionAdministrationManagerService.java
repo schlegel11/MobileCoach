@@ -77,9 +77,9 @@ import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValueAccessTypes;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValuePrivacyTypes;
 import ch.ethz.mc.model.persistent.types.MediaObjectTypes;
-import ch.ethz.mc.model.persistent.types.TextFormatTypes;
 import ch.ethz.mc.model.persistent.types.MonitoringRuleTypes;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
+import ch.ethz.mc.model.persistent.types.TextFormatTypes;
 import ch.ethz.mc.modules.AbstractModule;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService;
@@ -1374,10 +1374,10 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
-	public void microDialogMessageSetTextFormat(
+	public void microDialogMessageSetTextFormatType(
 			final MicroDialogMessage microDialogMessage,
-			final TextFormatTypes textFormat) {
-		microDialogMessage.setTextFormat(textFormat);
+			final TextFormatTypes textFormatType) {
+		microDialogMessage.setTextFormat(textFormatType);
 
 		databaseManagerService.saveModelObject(microDialogMessage);
 	}

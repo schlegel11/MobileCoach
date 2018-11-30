@@ -183,7 +183,7 @@ public class MicroDialogMessageEditComponentWithController
 				log.debug("Adjust text format type to {}",
 						selectedTextFormatType);
 				getInterventionAdministrationManagerService()
-						.microDialogMessageSetTextFormat(microDialogMessage,
+						.microDialogMessageSetTextFormatType(microDialogMessage,
 								selectedTextFormatType);
 			}
 		});

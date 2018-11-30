@@ -1,6 +1,7 @@
 package ch.ethz.mc.model.persistent.types;
 
 import ch.ethz.mc.model.persistent.MicroDialogMessage;
+import ch.ethz.mc.tools.VariableStringReplacer.ENCODING;
 
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
@@ -33,5 +34,20 @@ public enum TextFormatTypes {
 	@Override
 	public String toString() {
 		return name().toLowerCase().replace("_", " ");
+	}
+
+	/**
+	 * Returns the appropriate encoding
+	 * 
+	 * @return
+	 */
+	public ENCODING toEncoding() {
+		switch (this) {
+			case HTML:
+				return ENCODING.HTML;
+			case PLAIN:
+			default:
+				return ENCODING.NONE;
+		}
 	}
 }

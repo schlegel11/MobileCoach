@@ -377,6 +377,8 @@ public class DeepstreamCommunicationService extends Thread
 							DeepstreamConstants.SERVER_MESSAGE,
 							dialogMessage.getMessage());
 				}
+				messageObject.addProperty(DeepstreamConstants.FORMAT,
+						dialogMessage.getTextFormat().toString());
 				val answerType = dialogMessage.getAnswerType();
 				if (answerType != null) {
 					val answerTypeMessageObject = new JsonObject();

@@ -33,6 +33,7 @@ import ch.ethz.mc.model.persistent.types.AnswerTypes;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogMessageTypes;
 import ch.ethz.mc.model.persistent.types.MediaObjectTypes;
+import ch.ethz.mc.model.persistent.types.TextFormatTypes;
 import ch.ethz.mc.model.ui.UIDialogMessageProblemViewWithParticipant;
 import ch.ethz.mc.model.ui.UIDialogMessageWithParticipant;
 import ch.ethz.mc.model.ui.results.UIDialogMessageWithParticipantForResults;
@@ -119,6 +120,14 @@ public class DialogMessage extends ModelObject {
 	@Setter
 	@NonNull
 	private String						messageWithForcedLinks;
+
+	/**
+	 * The format of the message text
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private TextFormatTypes				textFormat;
 
 	/**
 	 * The {@link AnswerTypes} of the message

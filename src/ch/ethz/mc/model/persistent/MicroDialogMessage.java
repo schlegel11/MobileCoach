@@ -84,6 +84,9 @@ public class MicroDialogMessage extends ModelObject
 	@NonNull
 	private LString				textWithPlaceholders;
 
+	/**
+	 * The format of the message text
+	 */
 	@Getter
 	@Setter
 	@NonNull

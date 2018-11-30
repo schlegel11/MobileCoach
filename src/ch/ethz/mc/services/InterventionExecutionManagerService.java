@@ -77,6 +77,7 @@ import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogMessageTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.model.persistent.types.PushNotificationTypes;
+import ch.ethz.mc.model.persistent.types.TextFormatTypes;
 import ch.ethz.mc.services.internal.CommunicationManagerService;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
@@ -317,9 +318,9 @@ public class InterventionExecutionManagerService {
 	@Synchronized
 	private void dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
 			final Participant participant, final DialogMessageTypes type,
-			final String message, final AnswerTypes answerType,
-			final String answerOptions, final boolean manuallySent,
-			final long timestampToSendMessage,
+			final String message, final TextFormatTypes textFormatType,
+			final AnswerTypes answerType, final String answerOptions,
+			final boolean manuallySent, final long timestampToSendMessage,
 			final MonitoringRule relatedMonitoringRule,
 			final MonitoringMessage relatedMonitoringMessage,
 			final MicroDialog relatedMicroDialogForActivation,
@@ -332,10 +333,10 @@ public class InterventionExecutionManagerService {
 				relatedMonitoringMessage == null ? false
 						: relatedMonitoringMessage.isPushOnly(),
 				DialogMessageStatusTypes.PREPARED_FOR_SENDING, type, null,
-				message, message, answerType, answerOptions, null, null, null,
-				null, null, timestampToSendMessage, -1, supervisorMessage,
-				answerExpected, isSticky, deactivatesAllOpenQuestions, -1, -1,
-				null, null, false,
+				message, message, textFormatType, answerType, answerOptions,
+				null, null, null, null, null, timestampToSendMessage, -1,
+				supervisorMessage, answerExpected, isSticky,
+				deactivatesAllOpenQuestions, -1, -1, null, null, false,
 				relatedMonitoringRule == null ? null
 						: relatedMonitoringRule.getId(),
 				relatedMonitoringMessage == null ? null
@@ -709,8 +710,9 @@ public class InterventionExecutionManagerService {
 		val dialogMessage = new DialogMessage(participantId, 0, false,
 				isTypeIntention ? DialogMessageStatusTypes.RECEIVED_AS_INTENTION
 						: DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY,
-				type, receivedMessage.getClientId(), "", "", null, null, null,
-				null, null, null, null, -1, -1, false, false, false, false, -1,
+				type, receivedMessage.getClientId(), "", "",
+				TextFormatTypes.PLAIN, null, null, null, null, null, null, null,
+				-1, -1, false, false, false, false, -1,
 				receivedMessage.getReceivedTimestamp(), answerCleaned,
 				answerRaw, isTypeIntention ? false : true, null, null, null,
 				null, false, false);
@@ -1372,8 +1374,8 @@ public class InterventionExecutionManagerService {
 						// Prepare message for sending
 						dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
 								participant, dialogMessageType,
-								messageTextToSend, answerTypeToSend,
-								answerOptionsToSend, false,
+								messageTextToSend, TextFormatTypes.PLAIN,
+								answerTypeToSend, answerOptionsToSend, false,
 								InternalDateTime.currentTimeMillis(), null,
 								monitoringMessage, null, null,
 								monitoringReplyRule != null
@@ -1393,8 +1395,9 @@ public class InterventionExecutionManagerService {
 							DialogMessageTypes.MICRO_DIALOG_ACTIVATION,
 							microDialogActivation.getMiroDialogToActivate()
 									.getName(),
-							AnswerTypes.CUSTOM, null, false,
-							InternalDateTime.currentTimeMillis(), null, null,
+							TextFormatTypes.PLAIN, AnswerTypes.CUSTOM, null,
+							false, InternalDateTime.currentTimeMillis(), null,
+							null,
 							microDialogActivation.getMiroDialogToActivate(),
 							null, false, false, false, false, 0);
 				}
@@ -1553,8 +1556,8 @@ public class InterventionExecutionManagerService {
 						// Prepare message for sending
 						dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
 								participant, dialogMessageType,
-								messageTextToSend, answerTypeToSend,
-								answerOptionsToSend, false,
+								messageTextToSend, TextFormatTypes.PLAIN,
+								answerTypeToSend, answerOptionsToSend, false,
 								timeToSendMessageInMillis, monitoringRule,
 								monitoringMessage, null, null,
 								monitoringRule != null
@@ -1600,8 +1603,8 @@ public class InterventionExecutionManagerService {
 							DialogMessageTypes.MICRO_DIALOG_ACTIVATION,
 							microDialogActivation.getMiroDialogToActivate()
 									.getName(),
-							AnswerTypes.CUSTOM, null, false,
-							timeToSendMessageInMillis, null, null,
+							TextFormatTypes.PLAIN, AnswerTypes.CUSTOM, null,
+							false, timeToSendMessageInMillis, null, null,
 							microDialogActivation.getMiroDialogToActivate(),
 							null, false, false, false, false, 0);
 				}
@@ -1838,7 +1841,8 @@ public class InterventionExecutionManagerService {
 					// Prepare message for sending
 					dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
 							participant, dialogMessageType, messageTextToSend,
-							answerTypeToSend, answerOptionsToSend, false,
+							TextFormatTypes.PLAIN, answerTypeToSend,
+							answerOptionsToSend, false,
 							timeToSendMessageInMillis, monitoringRule,
 							monitoringMessage, null, null,
 							monitoringRule != null
@@ -1880,7 +1884,7 @@ public class InterventionExecutionManagerService {
 						participant, DialogMessageTypes.MICRO_DIALOG_ACTIVATION,
 						microDialogActivation.getMiroDialogToActivate()
 								.getName(),
-						AnswerTypes.CUSTOM, null, false,
+						TextFormatTypes.PLAIN, AnswerTypes.CUSTOM, null, false,
 						timeToSendMessageInMillis, null, null,
 						microDialogActivation.getMiroDialogToActivate(), null,
 						false, false, false, false, 0);
@@ -2272,7 +2276,8 @@ public class InterventionExecutionManagerService {
 										.get(participant),
 								variablesWithValuesForMessageGeneration
 										.values(),
-								"");
+								"", microDialogMessage.getTextFormat()
+										.toEncoding());
 
 				AnswerTypes answerTypeToSend = null;
 				String answerOptionsToSend = null;
@@ -2319,9 +2324,10 @@ public class InterventionExecutionManagerService {
 						microDialogMessage.isCommandMessage()
 								? DialogMessageTypes.COMMAND
 								: DialogMessageTypes.PLAIN,
-						messageTextToSend, answerTypeToSend,
-						answerOptionsToSend, false, lastMessageSent, null, null,
-						microDialog, microDialogMessage, false,
+						messageTextToSend, microDialogMessage.getTextFormat(),
+						answerTypeToSend, answerOptionsToSend, false,
+						lastMessageSent, null, null, microDialog,
+						microDialogMessage, false,
 						microDialogMessage.isMessageExpectsAnswer(),
 						microDialogMessage.isMessageIsSticky(),
 						microDialogMessage
@@ -2390,9 +2396,10 @@ public class InterventionExecutionManagerService {
 					dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
 							participant,
 							DialogMessageTypes.MICRO_DIALOG_ACTIVATION,
-							nextMicroDialog.getName(), AnswerTypes.CUSTOM, null,
-							false, lastMessageSent, null, null, nextMicroDialog,
-							null, false, false, false, false, 0);
+							nextMicroDialog.getName(), TextFormatTypes.PLAIN,
+							AnswerTypes.CUSTOM, null, false, lastMessageSent,
+							null, null, nextMicroDialog, null, false, false,
+							false, false, 0);
 				}
 
 				// Variables need to be refreshed after performing rules
@@ -2628,7 +2635,8 @@ public class InterventionExecutionManagerService {
 
 		// Create dialog message
 		dialogMessageCreateManuallyOrByRulesIncludingMediaObject(participant,
-				DialogMessageTypes.PLAIN, messageTextToSend, null, null, true,
+				DialogMessageTypes.PLAIN, messageTextToSend,
+				TextFormatTypes.PLAIN, null, null, true,
 				InternalDateTime.currentTimeMillis(), null, null, null, null,
 				advisorMessage, false, false, false, 0);
 	}
@@ -2697,11 +2705,11 @@ public class InterventionExecutionManagerService {
 		dialogMessageCreateManuallyOrByRulesIncludingMediaObject(participant,
 				determinedMonitoringMessageToSend.isCommandMessage()
 						? DialogMessageTypes.COMMAND : DialogMessageTypes.PLAIN,
-				messageTextToSend, answerTypeToSend, answerOptionsToSend, true,
-				InternalDateTime.currentTimeMillis(), null,
-				determinedMonitoringMessageToSend, null, null, advisorMessage,
-				monitoringMessageGroup.isMessagesExpectAnswer(), false, false,
-				minutesUntilHandledAsNotAnswered);
+				messageTextToSend, TextFormatTypes.PLAIN, answerTypeToSend,
+				answerOptionsToSend, true, InternalDateTime.currentTimeMillis(),
+				null, determinedMonitoringMessageToSend, null, null,
+				advisorMessage, monitoringMessageGroup.isMessagesExpectAnswer(),
+				false, false, minutesUntilHandledAsNotAnswered);
 	}
 
 	/**
