@@ -52,6 +52,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.w3c.dom.NodeList;
@@ -73,6 +74,7 @@ import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogMessageTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.model.persistent.types.SMSServiceType;
+import ch.ethz.mc.model.persistent.types.TextFormatTypes;
 import ch.ethz.mc.rest.services.v02.TWILIOMessageRetrievalServiceV02;
 import ch.ethz.mc.services.InterventionExecutionManagerService;
 import ch.ethz.mc.tools.InternalDateTime;
@@ -440,7 +442,9 @@ public class CommunicationManagerService {
 								.getType() != DialogMessageTypes.COMMAND) {
 					try {
 						pushNotificationService.asyncSendPushNotification(
-								dialogOption, dialogMessage.getMessage(),
+								dialogOption,
+								cleanupForPush(dialogMessage.getTextFormat(),
+										dialogMessage.getMessage()),
 								visibleMessagesSentSinceLogout,
 								dialogMessage.isPushOnly());
 					} catch (final Exception e) {
@@ -449,6 +453,28 @@ public class CommunicationManagerService {
 					}
 				}
 				break;
+		}
+	}
+
+	/**
+	 * Cleans the given message to be sent out as push notification
+	 * 
+	 * @param textFormat
+	 * @param message
+	 * @return
+	 */
+	private String cleanupForPush(final TextFormatTypes textFormat,
+			final String message) {
+		switch (textFormat) {
+			case HTML:
+				// TODO: Check for completeness
+				return StringEscapeUtils
+						.unescapeHtml4(message.replaceAll("(\r\n|\r|\n)", " ")
+								.replaceAll("\\<br.*\\>", " ")
+								.replaceAll("\\<.*\\>", ""));
+			case PLAIN:
+			default:
+				return message;
 		}
 	}
 
