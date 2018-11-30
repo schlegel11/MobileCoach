@@ -34,6 +34,7 @@ import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.concepts.MicroDialogElementInterface;
 import ch.ethz.mc.model.persistent.subelements.LString;
 import ch.ethz.mc.model.persistent.types.AnswerTypes;
+import ch.ethz.mc.model.persistent.types.TextFormatTypes;
 import ch.ethz.mc.model.ui.UIMicroDialogElementInterface;
 import ch.ethz.mc.model.ui.UIModelObject;
 import ch.ethz.mc.tools.StringHelpers;
@@ -82,6 +83,11 @@ public class MicroDialogMessage extends ModelObject
 	@Setter
 	@NonNull
 	private LString				textWithPlaceholders;
+
+	@Getter
+	@Setter
+	@NonNull
+	private TextFormatTypes		textFormat;
 
 	/**
 	 * The message itself is a command for the client

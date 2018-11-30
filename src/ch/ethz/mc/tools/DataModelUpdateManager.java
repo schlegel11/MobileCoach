@@ -837,10 +837,13 @@ public class DataModelUpdateManager {
 
 		microDialogMessageCollection.update(Queries.ALL).multi().with(
 				Queries.UPDATE_VERSION_46__MICRO_DIALOG_MESSAGE__CHANGE_1);
+		microDialogMessageCollection.update(Queries.ALL).multi().with(
+				Queries.UPDATE_VERSION_46__MICRO_DIALOG_MESSAGE__CHANGE_2);
 
 		val dialogMessageCollection = jongo.getCollection("DialogMessage");
 
 		dialogMessageCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_46__DIALOG_MESSAGE__CHANGE_1);
+
 	}
 }
