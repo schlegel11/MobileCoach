@@ -409,6 +409,8 @@ public class PushNotificationService {
 			conn.setUseCaches(false);
 			conn.setDoInput(true);
 			conn.setDoOutput(true);
+			conn.setConnectTimeout(ImplementationConstants.PUSH_SERVER_TIMEOUT);
+			conn.setReadTimeout(ImplementationConstants.PUSH_SERVER_TIMEOUT);
 
 			conn.setRequestMethod("POST");
 			conn.setRequestProperty("Authorization", "key=" + androidAuthKey);

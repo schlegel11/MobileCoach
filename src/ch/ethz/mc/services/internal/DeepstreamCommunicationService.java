@@ -377,6 +377,8 @@ public class DeepstreamCommunicationService extends Thread
 							DeepstreamConstants.SERVER_MESSAGE,
 							dialogMessage.getMessage());
 				}
+				messageObject.addProperty(DeepstreamConstants.FORMAT,
+						dialogMessage.getTextFormat().toString());
 				val answerType = dialogMessage.getAnswerType();
 				if (answerType != null) {
 					val answerTypeMessageObject = new JsonObject();
@@ -402,6 +404,8 @@ public class DeepstreamCommunicationService extends Thread
 						timestamp);
 				messageObject.addProperty(DeepstreamConstants.STICKY,
 						dialogMessage.isMessageIsSticky());
+				messageObject.addProperty(DeepstreamConstants.DEACTIVATION,
+						dialogMessage.isMessageDeactivatesAllOpenQuestions());
 
 				record = client.record
 						.getRecord(DeepstreamConstants.PATH_MESSAGES

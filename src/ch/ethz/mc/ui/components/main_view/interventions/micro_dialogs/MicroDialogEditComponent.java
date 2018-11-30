@@ -116,7 +116,12 @@ public class MicroDialogEditComponent extends AbstractCustomComponent {
 										itemId);
 
 								if (uiMicroDialogElement.isMessage()) {
-									return "message";
+									if (uiMicroDialogElement
+											.isMessageDeactivatesAllOpenQuestions()) {
+										return "deactivation";
+									} else {
+										return "message";
+									}
 								} else {
 									return "decision-point";
 								}

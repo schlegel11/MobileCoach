@@ -1,5 +1,8 @@
 package ch.ethz.mc.model.persistent.types;
 
+import ch.ethz.mc.model.persistent.MicroDialogMessage;
+import ch.ethz.mc.tools.VariableStringReplacer.ENCODING;
+
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -21,25 +24,30 @@ package ch.ethz.mc.model.persistent.types;
  * the License.
  */
 /**
- * Supported dialog message status types
+ * Supported {@link TextFormatTypes} for {@link MicroDialogMessage}
  *
  * @author Andreas Filler
  */
-public enum DialogMessageStatusTypes {
-	IN_CREATION,
-	PREPARED_FOR_SENDING,
-	SENDING,
-	SENT_AND_WAITING_FOR_ANSWER,
-	SENT_BUT_NOT_WAITING_FOR_ANSWER,
-	SENT_AND_ANSWERED_BY_PARTICIPANT,
-	SENT_AND_ANSWERED_AND_PROCESSED,
-	SENT_AND_NOT_ANSWERED_AND_PROCESSED,
-	SENT_AND_WAITED_FOR_ANSWER_BUT_DEACTIVATED,
-	RECEIVED_UNEXPECTEDLY,
-	RECEIVED_AS_INTENTION;
+public enum TextFormatTypes {
+	PLAIN, HTML;
 
 	@Override
 	public String toString() {
 		return name().toLowerCase().replace("_", " ");
+	}
+
+	/**
+	 * Returns the appropriate encoding
+	 * 
+	 * @return
+	 */
+	public ENCODING toEncoding() {
+		switch (this) {
+			case HTML:
+				return ENCODING.HTML;
+			case PLAIN:
+			default:
+				return ENCODING.NONE;
+		}
 	}
 }

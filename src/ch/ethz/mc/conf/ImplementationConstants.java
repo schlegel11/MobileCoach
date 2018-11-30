@@ -81,6 +81,10 @@ public class ImplementationConstants {
 	public static final int		UI_SESSION_TIMEOUT_IN_SECONDS														= 900;
 	public static final String	UI_SESSION_ATTRIBUTE_DETECTOR														= "mc.vaadin.is_vaadin_session";
 
+	public static final int		PUSH_SERVER_TIMEOUT																	= 10000;
+
+	public static final int		SMS_SERVER_TIMEOUT																	= 10000;
+
 	public static final String	MAIL_SERVER_TIMEOUT																	= "5000";
 	public static final String	MAIL_SERVER_CONNECTION_TIMEOUT														= "30000";
 
