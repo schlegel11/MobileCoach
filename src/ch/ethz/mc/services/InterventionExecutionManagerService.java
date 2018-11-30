@@ -3495,8 +3495,8 @@ public class InterventionExecutionManagerService {
 			final ObjectId participantId, final long timestampOfReceivedMessage,
 			final int relatedMessageIdBasedOnOrder) {
 
-		DialogMessage dialogMessage = null;
 		if (relatedMessageIdBasedOnOrder >= 0) {
+			// Care for messages with related IDs
 			val dialogMessageWithFittingOrder = databaseManagerService
 					.findOneModelObject(DialogMessage.class,
 							Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_ORDER,
@@ -3508,20 +3508,23 @@ public class InterventionExecutionManagerService {
 							.isAnswerNotAutomaticallyProcessable()
 					&& dialogMessageWithFittingOrder
 							.getIsUnansweredAfterTimestamp() > timestampOfReceivedMessage) {
-				dialogMessage = dialogMessageWithFittingOrder;
+				return dialogMessageWithFittingOrder;
 			}
-		}
-
-		if (dialogMessage == null) {
-			dialogMessage = databaseManagerService.findOneSortedModelObject(
+		} else {
+			// Care for messages without related IDs (e.g. SMS/email)
+			val dialogMessage = databaseManagerService.findOneSortedModelObject(
 					DialogMessage.class,
 					Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_NOT_AUTOMATICALLY_PROCESSABLE_AND_UNANSWERED_AFTER_TIMESTAMP_HIGHER,
 					Queries.DIALOG_MESSAGE__SORT_BY_ORDER_ASC, participantId,
 					DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER, false,
 					timestampOfReceivedMessage);
+
+			return dialogMessage;
 		}
 
-		return dialogMessage;
+		// Return null if no appropriate dialog message could be found for one
+		// of the cases
+		return null;
 	}
 
 	@Synchronized
