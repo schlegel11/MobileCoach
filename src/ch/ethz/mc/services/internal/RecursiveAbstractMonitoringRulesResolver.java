@@ -380,7 +380,8 @@ public class RecursiveAbstractMonitoringRulesResolver {
 										determinedMonitoringMessageToSend
 												.getAnswerOptionsWithPlaceholders(),
 										participant.getLanguage(),
-										variablesWithValues.values());
+										variablesWithValues.values(),
+										answerTypeToSend.isRawKeyValueBased());
 					} else {
 						answerOptionsToSend = VariableStringReplacer
 								.findVariablesAndReplaceWithTextValues(

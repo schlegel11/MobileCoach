@@ -2291,7 +2291,8 @@ public class InterventionExecutionManagerService {
 												.getAnswerOptionsWithPlaceholders(),
 										participant.getLanguage(),
 										variablesWithValuesForMessageGeneration
-												.values());
+												.values(),
+										answerTypeToSend.isRawKeyValueBased());
 					} else {
 						answerOptionsToSend = VariableStringReplacer
 								.findVariablesAndReplaceWithTextValues(
@@ -2689,7 +2690,8 @@ public class InterventionExecutionManagerService {
 								determinedMonitoringMessageToSend
 										.getAnswerOptionsWithPlaceholders(),
 								participant.getLanguage(),
-								variablesWithValues.values());
+								variablesWithValues.values(),
+								answerTypeToSend.isRawKeyValueBased());
 			} else {
 				answerOptionsToSend = VariableStringReplacer
 						.findVariablesAndReplaceWithTextValues(

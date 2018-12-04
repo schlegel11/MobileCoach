@@ -36,8 +36,10 @@ public enum AnswerTypes {
 	LIKERT_SILENT,
 	LIKERT_SLIDER,
 	SELECT_ONE,
+	SELECT_ONE_RAW,
 	SELECT_ONE_LIST,
 	SELECT_MANY,
+	SELECT_MANY_RAW,
 	SELECT_MANY_MODAL,
 	SELECT_ONE_IMAGES,
 	SELECT_MANY_IMAGES,
@@ -64,6 +66,8 @@ public enum AnswerTypes {
 			case FREE_NUMBERS_RAW:
 			case FREE_TEXT_MULTILINE_RAW:
 			case FREE_TEXT_RAW:
+			case SELECT_ONE_RAW:
+			case SELECT_MANY_RAW:
 				return name().replace("_RAW", "");
 			default:
 				return name();
@@ -84,8 +88,10 @@ public enum AnswerTypes {
 			case LIKERT_SILENT:
 			case LIKERT_SLIDER:
 			case SELECT_ONE:
+			case SELECT_ONE_RAW:
 			case SELECT_ONE_LIST:
 			case SELECT_MANY:
+			case SELECT_MANY_RAW:
 			case SELECT_MANY_MODAL:
 			case SELECT_ONE_IMAGES:
 			case SELECT_MANY_IMAGES:
@@ -114,8 +120,10 @@ public enum AnswerTypes {
 			case LIKERT_SILENT:
 			case LIKERT_SLIDER:
 			case SELECT_ONE:
+			case SELECT_ONE_RAW:
 			case SELECT_ONE_LIST:
 			case SELECT_MANY:
+			case SELECT_MANY_RAW:
 			case SELECT_MANY_MODAL:
 			case SELECT_ONE_IMAGES:
 			case SELECT_MANY_IMAGES:
@@ -126,6 +134,22 @@ public enum AnswerTypes {
 			case VIDEO:
 			case AUDIO:
 			case CUSTOM:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	/**
+	 * Raw key-values-based answer types can contain "unsafe" variable values to
+	 * enable concatenation of answer options
+	 * 
+	 * @return
+	 */
+	public boolean isRawKeyValueBased() {
+		switch (this) {
+			case SELECT_ONE_RAW:
+			case SELECT_MANY_RAW:
 				return true;
 			default:
 				return false;
