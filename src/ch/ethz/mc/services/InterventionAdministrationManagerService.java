@@ -1256,7 +1256,8 @@ public class InterventionAdministrationManagerService {
 			final ObjectId microDialogId) {
 		val microDialogMessage = new MicroDialogMessage(microDialogId, 0,
 				new LString(), TextFormatTypes.PLAIN, false, null, null, null,
-				false, false, false, false, null, null, AnswerTypes.FREE_TEXT,
+				null, false, false, false, false, null, null,
+				AnswerTypes.FREE_TEXT,
 				ImplementationConstants.DEFAULT_MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED,
 				new LString(),
 				GlobalUniqueIdGenerator.createSimpleGlobalUniqueId());
@@ -1424,6 +1425,22 @@ public class InterventionAdministrationManagerService {
 			}
 
 			microDialogMessage.setNonUniqueKey(nonUniqueKey);
+
+			databaseManagerService.saveModelObject(microDialogMessage);
+		}
+	}
+
+	@Synchronized
+	public void microDialogMessageSetRandomizationGroup(
+			final MicroDialogMessage microDialogMessage,
+			final String randomizationGroup)
+			throws NotificationMessageException {
+		if (StringUtils.isBlank(randomizationGroup)) {
+			microDialogMessage.setRandomizationGroup(null);
+
+			databaseManagerService.saveModelObject(microDialogMessage);
+		} else {
+			microDialogMessage.setRandomizationGroup(randomizationGroup);
 
 			databaseManagerService.saveModelObject(microDialogMessage);
 		}

@@ -1,5 +1,7 @@
 package ch.ethz.mc.ui;
 
+import java.io.File;
+
 import com.vaadin.annotations.Theme;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.ViewChangeListener;
@@ -21,6 +23,7 @@ import ch.ethz.mc.services.internal.LockingService;
 import ch.ethz.mc.ui.views.ErrorView;
 import ch.ethz.mc.ui.views.LoginView;
 import ch.ethz.mc.ui.views.MainView;
+import lombok.Getter;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -56,9 +59,14 @@ import lombok.extern.log4j.Log4j2;
 public class AdminNavigatorUI extends UI
 		implements ViewChangeListener, DetachListener {
 
-	private UISession uiSession;
+	private UISession	uiSession;
+
+	@Getter
+	private File		clipboard;
 
 	public AdminNavigatorUI() {
+		clipboard = null;
+
 		val session = VaadinSession.getCurrent().getSession();
 		log.debug("Creating new UI Session object based on session {}",
 				session.getId());
@@ -166,6 +174,8 @@ public class AdminNavigatorUI extends UI
 				session.getId());
 		uiSession = new UISession(session);
 		uiSession.setBaseURL(baseURL);
+
+		cleanupClipboard();
 	}
 
 	public void showInformationNotification(final AdminMessageStrings message,
@@ -273,6 +283,25 @@ public class AdminNavigatorUI extends UI
 	public void detach(final DetachEvent event) {
 		log.debug("View detached");
 
+		cleanupClipboard();
+
 		getLockingService().releaseLockOfUISession(getUISession());
+	}
+
+	public void setClipboard(final File newClipboard) {
+		cleanupClipboard();
+
+		clipboard = newClipboard;
+	}
+
+	private void cleanupClipboard() {
+		if (clipboard != null) {
+			try {
+				clipboard.delete();
+			} catch (final Exception e) {
+				clipboard.deleteOnExit();
+			}
+			clipboard = null;
+		}
 	}
 }

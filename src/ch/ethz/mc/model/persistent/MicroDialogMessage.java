@@ -107,6 +107,14 @@ public class MicroDialogMessage extends ModelObject
 	private String				nonUniqueKey;
 
 	/**
+	 * <strong>OPTIONAL:</strong> The randomization group of the
+	 * {@link MicroDialogMessage}
+	 */
+	@Getter
+	@Setter
+	private String				randomizationGroup;
+
+	/**
 	 * <strong>OPTIONAL:</strong> The {@link MediaObject} used/presented in this
 	 * {@link MicroDialogMessage}
 	 */
@@ -257,6 +265,7 @@ public class MicroDialogMessage extends ModelObject
 								AdminMessageStrings.UI_MODEL__YES)
 						: Messages.getAdminString(
 								AdminMessageStrings.UI_MODEL__NO),
+				randomizationGroup != null ? randomizationGroup : "",
 				linkedMediaObject != null
 						? Messages.getAdminString(
 								AdminMessageStrings.UI_MODEL__YES)

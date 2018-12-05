@@ -1,6 +1,7 @@
 package ch.ethz.mc.ui.components.main_view.interventions.micro_dialogs;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.bson.types.ObjectId;
 
@@ -100,6 +101,8 @@ public class MicroDialogEditComponentWithController
 				.addClickListener(buttonClickListener);
 		getNewMessageButton().addClickListener(buttonClickListener);
 		getNewDecisionPointButton().addClickListener(buttonClickListener);
+		getCopyButton().addClickListener(buttonClickListener);
+		getPasteButton().addClickListener(buttonClickListener);
 		getEditButton().addClickListener(buttonClickListener);
 		getDuplicateButton().addClickListener(buttonClickListener);
 		getMoveUpButton().addClickListener(buttonClickListener);
@@ -108,6 +111,7 @@ public class MicroDialogEditComponentWithController
 
 		// Adjust UI
 		adjust();
+		adjustCopyPasteButtons();
 	}
 
 	private void adjust() {
@@ -116,6 +120,16 @@ public class MicroDialogEditComponentWithController
 
 		if (tab != null) {
 			tab.setDescription(microDialog.getComment());
+		}
+	}
+
+	protected void adjustCopyPasteButtons() {
+		// Adjust copy/paste buttons
+		if (getAdminUI().getClipboard() != null
+				&& getAdminUI().getClipboard().exists()) {
+			getPasteButton().setEnabled(true);
+		} else {
+			getPasteButton().setEnabled(false);
 		}
 	}
 
@@ -133,6 +147,10 @@ public class MicroDialogEditComponentWithController
 				createMessage();
 			} else if (event.getButton() == getNewDecisionPointButton()) {
 				createDecisionPoint();
+			} else if (event.getButton() == getCopyButton()) {
+				copyElement();
+			} else if (event.getButton() == getPasteButton()) {
+				pasteElement();
 			} else if (event.getButton() == getEditButton()) {
 				editElement();
 			} else if (event.getButton() == getDuplicateButton()) {
@@ -227,6 +245,26 @@ public class MicroDialogEditComponentWithController
 						closeWindow();
 					}
 				});
+	}
+
+	public void copyElement() {
+		log.debug("Copy element");
+
+		// TODO EXPORT
+		try {
+			getAdminUI().setClipboard(File.createTempFile("ttestetet", "tmp"));
+		} catch (final IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		adjustCopyPasteButtons();
+	}
+
+	public void pasteElement() {
+		log.debug("Paste element");
+
+		// TODO IMPORT
 	}
 
 	public void editElement() {
