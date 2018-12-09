@@ -132,6 +132,7 @@ public class MicroDialogsTabComponentWithController
 
 		component.setMicroDialog(getInterventionAdministrationManagerService()
 				.getMicroDialog(component.getMicroDialog().getId()));
+		component.adjustCopyPasteButtons();
 	}
 
 	public void createDialog() {

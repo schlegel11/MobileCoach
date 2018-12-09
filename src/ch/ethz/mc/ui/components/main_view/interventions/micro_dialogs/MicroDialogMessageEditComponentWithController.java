@@ -146,6 +146,8 @@ public class MicroDialogMessageEditComponentWithController
 				.addClickListener(buttonClickListener);
 		getMessageKeyTextFieldComponent().getButton()
 				.addClickListener(buttonClickListener);
+		getRandomizationGroupTextFieldComponent().getButton()
+				.addClickListener(buttonClickListener);
 		getAnswerOptionsTextFieldComponent().getButton()
 				.addClickListener(buttonClickListener);
 		getNoReplyTextFieldComponent().getButton()
@@ -359,14 +361,14 @@ public class MicroDialogMessageEditComponentWithController
 				.setValue(microDialogMessage.getStoreValueToVariableWithName());
 		getMessageKeyTextFieldComponent()
 				.setValue(microDialogMessage.getNonUniqueKey());
+		getRandomizationGroupTextFieldComponent()
+				.setValue(microDialogMessage.getRandomizationGroup());
+		getRandomizationGroupTextFieldComponent()
+				.setValue(microDialogMessage.getRandomizationGroup());
 		getAnswerOptionsTextFieldComponent().setValue(microDialogMessage
 				.getAnswerOptionsWithPlaceholders().toString());
 		getNoReplyTextFieldComponent()
 				.setValue(microDialogMessage.getNoReplyValue());
-
-		// TODO Aktivierungen und Deaktivierungen stimmen ncoh nicht, auch nicht
-		// mit Check-Status
-		// Außerdem noch Icon
 
 		if (microDialogMessage.isCommandMessage()) {
 			getMessageExpectsAnswerCheckBox().setEnabled(false);
@@ -455,6 +457,10 @@ public class MicroDialogMessageEditComponentWithController
 			} else if (event.getButton() == getMessageKeyTextFieldComponent()
 					.getButton()) {
 				editMessageKey();
+			} else if (event
+					.getButton() == getRandomizationGroupTextFieldComponent()
+							.getButton()) {
+				editRandomizationGroup();
 			} else if (event.getButton() == getAnswerOptionsTextFieldComponent()
 					.getButton()) {
 				editAnswerOptionsWithPlaceholder();
@@ -545,19 +551,17 @@ public class MicroDialogMessageEditComponentWithController
 
 	public void editMessageKey() {
 		log.debug("Edit message key");
-		val allPossibleMessageVariables = getInterventionAdministrationManagerService()
-				.getAllWritableMessageVariablesOfIntervention(interventionId);
+
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_MESSAGE_KEY,
-				microDialogMessage.getNonUniqueKey(),
-				allPossibleMessageVariables,
-				new ShortPlaceholderStringEditComponent(),
+				microDialogMessage.getNonUniqueKey(), null,
+				new ShortStringEditComponent(),
 				new ExtendableButtonClickListener() {
 
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						try {
-							// Change store result to variable
+							// Change message key
 							getInterventionAdministrationManagerService()
 									.microDialogMessageSetNonUniqueKey(
 											microDialogMessage,
@@ -574,8 +578,38 @@ public class MicroDialogMessageEditComponentWithController
 				}, null);
 	}
 
+	public void editRandomizationGroup() {
+		log.debug("Edit randomization group");
+
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_RANDOMIZATION_GROUP,
+				microDialogMessage.getRandomizationGroup(), null,
+				new ShortStringEditComponent(),
+				new ExtendableButtonClickListener() {
+
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Change randomization group
+							getInterventionAdministrationManagerService()
+									.microDialogMessageSetRandomizationGroup(
+											microDialogMessage,
+											getStringValue());
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						adjust();
+
+						closeWindow();
+					}
+				}, null);
+	}
+
 	public void editAnswerOptionsWithPlaceholder() {
 		log.debug("Edit answer options with placeholder");
+
 		val allPossibleMessageVariables = getInterventionAdministrationManagerService()
 				.getAllPossibleMessageVariablesOfIntervention(interventionId);
 		showModalLStringValueEditWindow(

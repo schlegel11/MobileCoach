@@ -1256,7 +1256,8 @@ public class InterventionAdministrationManagerService {
 			final ObjectId microDialogId) {
 		val microDialogMessage = new MicroDialogMessage(microDialogId, 0,
 				new LString(), TextFormatTypes.PLAIN, false, null, null, null,
-				false, false, false, false, null, null, AnswerTypes.FREE_TEXT,
+				null, false, false, false, false, null, null,
+				AnswerTypes.FREE_TEXT,
 				ImplementationConstants.DEFAULT_MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED,
 				new LString(),
 				GlobalUniqueIdGenerator.createSimpleGlobalUniqueId());
@@ -1430,6 +1431,22 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
+	public void microDialogMessageSetRandomizationGroup(
+			final MicroDialogMessage microDialogMessage,
+			final String randomizationGroup)
+			throws NotificationMessageException {
+		if (StringUtils.isBlank(randomizationGroup)) {
+			microDialogMessage.setRandomizationGroup(null);
+
+			databaseManagerService.saveModelObject(microDialogMessage);
+		} else {
+			microDialogMessage.setRandomizationGroup(randomizationGroup);
+
+			databaseManagerService.saveModelObject(microDialogMessage);
+		}
+	}
+
+	@Synchronized
 	public void microDialogMessageSetNoReplyValue(
 			final MicroDialogMessage microDialogMessage,
 			final String newValue) {
@@ -1509,7 +1526,8 @@ public class InterventionAdministrationManagerService {
 
 	@Synchronized
 	public MicroDialogMessage microDialogMessageImport(final File file,
-			final boolean duplicate) throws FileNotFoundException, IOException {
+			final boolean duplicate, final MicroDialog newBelongingMicroDialog)
+			throws FileNotFoundException, IOException {
 		val importedModelObjects = modelObjectExchangeService
 				.importModelObjects(file,
 						ModelObjectExchangeFormatTypes.MICRO_DIALOG_MESSAGE);
@@ -1522,6 +1540,14 @@ public class InterventionAdministrationManagerService {
 					// Recreate I18n identifier
 					microDialogMessage.setI18nIdentifier(GlobalUniqueIdGenerator
 							.createSimpleGlobalUniqueId());
+				}
+
+				if (!microDialogMessage.getMicroDialog()
+						.equals(newBelongingMicroDialog.getId())) {
+					// Micro dialog message has been copy & pasted to other
+					// micro dialog
+					microDialogMessage
+							.setMicroDialog(newBelongingMicroDialog.getId());
 				}
 
 				// Adjust order
@@ -1708,14 +1734,28 @@ public class InterventionAdministrationManagerService {
 
 	@Synchronized
 	public MicroDialogDecisionPoint microDialogDecisionPointImport(
-			final File file) throws FileNotFoundException, IOException {
+			final File file, final MicroDialog newBelongingMicroDialog)
+			throws FileNotFoundException, IOException {
 		val importedModelObjects = modelObjectExchangeService
 				.importModelObjects(file,
 						ModelObjectExchangeFormatTypes.MICRO_DIALOG_DECISION_POINT);
 
+		boolean copyCase = false;
+		MicroDialogDecisionPoint newMicroDialogDecisionPoint = null;
+
 		for (val modelObject : importedModelObjects) {
 			if (modelObject instanceof MicroDialogDecisionPoint) {
 				val microDialogDecisionPoint = (MicroDialogDecisionPoint) modelObject;
+
+				if (!microDialogDecisionPoint.getMicroDialog()
+						.equals(newBelongingMicroDialog.getId())) {
+					// Micro dialog decision point has been copy & pasted to
+					// other micro dialog
+					microDialogDecisionPoint
+							.setMicroDialog(newBelongingMicroDialog.getId());
+
+					copyCase = true;
+				}
 
 				// Adjust order
 				int newOrder = 0;
@@ -1743,11 +1783,21 @@ public class InterventionAdministrationManagerService {
 				databaseManagerService
 						.saveModelObject(microDialogDecisionPoint);
 
-				return microDialogDecisionPoint;
+				newMicroDialogDecisionPoint = microDialogDecisionPoint;
+			}
+
+			if (modelObject instanceof MicroDialogRule && copyCase) {
+				val microDialogRule = (MicroDialogRule) modelObject;
+
+				microDialogRule.setNextMicroDialogWhenTrue(null);
+				microDialogRule.setNextMicroDialogMessageWhenTrue(null);
+				microDialogRule.setNextMicroDialogMessageWhenFalse(null);
+
+				databaseManagerService.saveModelObject(microDialogRule);
 			}
 		}
 
-		return null;
+		return newMicroDialogDecisionPoint;
 	}
 
 	@Synchronized

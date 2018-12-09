@@ -467,7 +467,6 @@ public class CommunicationManagerService {
 			final String message) {
 		switch (textFormat) {
 			case HTML:
-				// TODO: Check for completeness
 				return StringEscapeUtils
 						.unescapeHtml4(message.replaceAll("(\r\n|\r|\n)", " ")
 								.replaceAll("\\<br.*\\>", " ")
