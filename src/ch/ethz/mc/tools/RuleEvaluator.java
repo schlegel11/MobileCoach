@@ -57,6 +57,7 @@ import ch.ethz.mc.model.persistent.concepts.AbstractRule;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import ch.ethz.mc.services.internal.VariablesManagerService;
+import ch.ethz.mc.tools.VariableStringReplacer.ENCODING;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -166,7 +167,7 @@ public class RuleEvaluator {
 				try {
 					ruleResult = evaluateTextRuleTerm(locale,
 							rule.getRuleWithPlaceholders(), variablesWithValues,
-							false);
+							ENCODING.NONE);
 					ruleEvaluationResult.setTextRuleValue(ruleResult);
 				} catch (final Exception e) {
 					throw new Exception(
@@ -193,7 +194,7 @@ public class RuleEvaluator {
 				try {
 					ruleResult = evaluateTextRuleTerm(locale,
 							rule.getRuleWithPlaceholders(), variablesWithValues,
-							true);
+							ENCODING.JAVASCRIPT);
 					ruleEvaluationResult.setTextRuleValue(ruleResult);
 				} catch (final Exception e) {
 					throw new Exception(
@@ -208,7 +209,7 @@ public class RuleEvaluator {
 				try {
 					ruleResult = evaluateTextRuleTerm(locale,
 							rule.getRuleWithPlaceholders(), variablesWithValues,
-							false);
+							ENCODING.NONE);
 					ruleEvaluationResult.setTextRuleValue(ruleResult);
 				} catch (final Exception e) {
 					throw new Exception(
@@ -220,7 +221,7 @@ public class RuleEvaluator {
 				try {
 					ruleComparisonTermResult = evaluateTextRuleTerm(locale,
 							rule.getRuleComparisonTermWithPlaceholders(),
-							variablesWithValues, false);
+							variablesWithValues, ENCODING.NONE);
 					ruleEvaluationResult.setTextRuleComparisonTermValue(
 							ruleComparisonTermResult);
 				} catch (final Exception e) {
@@ -946,14 +947,14 @@ public class RuleEvaluator {
 	 * @param variablesWithValues
 	 *            List of {@link AbstractVariableWithValue}s to replace in rule
 	 *            before evaluation
-	 * @param withJavaScriptEscapedQuotes
-	 *            If set all quotes with be escaped for JavaScript
+	 * @param encoding
+	 *            If set all variable values will be specifically encoded
 	 * @return Value of the rule evaluation
 	 */
 	private static String evaluateTextRuleTerm(final Locale locale,
 			final String ruleWithPlaceholders,
 			final Collection<AbstractVariableWithValue> variablesWithValues,
-			final boolean withJavaScriptEscapedQuotes) throws Exception {
+			final ENCODING encoding) throws Exception {
 		final String rule = ruleWithPlaceholders;
 
 		// Prevent null pointer exceptions
@@ -967,8 +968,7 @@ public class RuleEvaluator {
 		// Replace variables with their according values
 		val result = VariableStringReplacer
 				.findVariablesAndReplaceWithTextValues(locale, rule,
-						variablesWithValues, "",
-						VariableStringReplacer.ENCODING.JAVASCRIPT);
+						variablesWithValues, "", encoding);
 
 		log.debug("Result of rule {} is {}", rule, result);
 
