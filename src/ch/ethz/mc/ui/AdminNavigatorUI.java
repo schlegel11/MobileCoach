@@ -20,6 +20,7 @@ import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.services.internal.LockingService;
+import ch.ethz.mc.services.types.ModelObjectExchangeFormatTypes;
 import ch.ethz.mc.ui.views.ErrorView;
 import ch.ethz.mc.ui.views.LoginView;
 import ch.ethz.mc.ui.views.MainView;
@@ -59,13 +60,17 @@ import lombok.extern.log4j.Log4j2;
 public class AdminNavigatorUI extends UI
 		implements ViewChangeListener, DetachListener {
 
-	private UISession	uiSession;
+	private UISession						uiSession;
 
 	@Getter
-	private File		clipboard;
+	private File							clipboard;
+
+	@Getter
+	private ModelObjectExchangeFormatTypes	clipboardExchangeFormatType;
 
 	public AdminNavigatorUI() {
 		clipboard = null;
+		clipboardExchangeFormatType = null;
 
 		val session = VaadinSession.getCurrent().getSession();
 		log.debug("Creating new UI Session object based on session {}",
@@ -288,10 +293,12 @@ public class AdminNavigatorUI extends UI
 		getLockingService().releaseLockOfUISession(getUISession());
 	}
 
-	public void setClipboard(final File newClipboard) {
+	public void setClipboard(final File newClipboard,
+			final ModelObjectExchangeFormatTypes newClipboardExchangeFormatType) {
 		cleanupClipboard();
 
 		clipboard = newClipboard;
+		clipboardExchangeFormatType = newClipboardExchangeFormatType;
 	}
 
 	private void cleanupClipboard() {
@@ -303,5 +310,6 @@ public class AdminNavigatorUI extends UI
 			}
 			clipboard = null;
 		}
+		clipboardExchangeFormatType = null;
 	}
 }

@@ -370,10 +370,6 @@ public class MicroDialogMessageEditComponentWithController
 		getNoReplyTextFieldComponent()
 				.setValue(microDialogMessage.getNoReplyValue());
 
-		// TODO Aktivierungen und Deaktivierungen stimmen ncoh nicht, auch nicht
-		// mit Check-Status
-		// Außerdem noch Icon
-
 		if (microDialogMessage.isCommandMessage()) {
 			getMessageExpectsAnswerCheckBox().setEnabled(false);
 		} else {

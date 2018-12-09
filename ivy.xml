@@ -23,6 +23,7 @@
 	<!ENTITY jsonpath.version "2.4.0">
 	<!ENTITY pushy.version "0.11.3">
 	<!ENTITY twilio.version "7.24.2">
+	<!ENTITY joda-time.version "2.10.1">
 ]>
 <ivy-module version="2.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -138,5 +139,8 @@
 		
 		<!-- TWILIO -->
 		<dependency org="com.twilio.sdk" name="twilio" rev="&twilio.version;" />
+		
+		<!-- Joda-Time -->
+		<dependency org="joda-time" name="joda-time" rev="&joda-time.version;" />
 	</dependencies>
 </ivy-module>

@@ -20,6 +20,7 @@ import ch.ethz.mc.model.persistent.MicroDialogDecisionPoint;
 import ch.ethz.mc.model.persistent.MicroDialogMessage;
 import ch.ethz.mc.model.persistent.concepts.MicroDialogElementInterface;
 import ch.ethz.mc.model.ui.UIMicroDialogElementInterface;
+import ch.ethz.mc.services.types.ModelObjectExchangeFormatTypes;
 import ch.ethz.mc.ui.components.basics.ShortStringEditComponent;
 import lombok.Getter;
 import lombok.Setter;
@@ -125,8 +126,10 @@ public class MicroDialogEditComponentWithController
 
 	protected void adjustCopyPasteButtons() {
 		// Adjust copy/paste buttons
-		if (getAdminUI().getClipboard() != null
-				&& getAdminUI().getClipboard().exists()) {
+		val clipboardExchangeFormatType = getAdminUI()
+				.getClipboardExchangeFormatType();
+		if (clipboardExchangeFormatType == ModelObjectExchangeFormatTypes.MICRO_DIALOG_MESSAGE
+				|| clipboardExchangeFormatType == ModelObjectExchangeFormatTypes.MICRO_DIALOG_DECISION_POINT) {
 			getPasteButton().setEnabled(true);
 		} else {
 			getPasteButton().setEnabled(false);
@@ -250,12 +253,27 @@ public class MicroDialogEditComponentWithController
 	public void copyElement() {
 		log.debug("Copy element");
 
-		// TODO EXPORT
-		try {
-			getAdminUI().setClipboard(File.createTempFile("ttestetet", "tmp"));
-		} catch (final IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		File clipboardFile = null;
+
+		if (selectedUIMicroDialogElement.isMessage()) {
+			val selectedMicroDialogMessage = selectedUIMicroDialogElement
+					.getRelatedModelObject(MicroDialogMessage.class);
+
+			clipboardFile = getInterventionAdministrationManagerService()
+					.microDialogMessageExport(selectedMicroDialogMessage);
+
+			getAdminUI().setClipboard(clipboardFile,
+					ModelObjectExchangeFormatTypes.MICRO_DIALOG_MESSAGE);
+		} else {
+			val selectedMicroDialogDecisionPoint = selectedUIMicroDialogElement
+					.getRelatedModelObject(MicroDialogDecisionPoint.class);
+
+			clipboardFile = getInterventionAdministrationManagerService()
+					.microDialogDecisionPointExport(
+							selectedMicroDialogDecisionPoint);
+
+			getAdminUI().setClipboard(clipboardFile,
+					ModelObjectExchangeFormatTypes.MICRO_DIALOG_DECISION_POINT);
 		}
 
 		adjustCopyPasteButtons();
@@ -264,7 +282,49 @@ public class MicroDialogEditComponentWithController
 	public void pasteElement() {
 		log.debug("Paste element");
 
-		// TODO IMPORT
+		switch (getAdminUI().getClipboardExchangeFormatType()) {
+			case MICRO_DIALOG_MESSAGE:
+				try {
+					val newMicroDialogMessage = getInterventionAdministrationManagerService()
+							.microDialogMessageImport(
+									getAdminUI().getClipboard(), true,
+									microDialog);
+
+					// Adapt UI
+					beanContainer.addItem(newMicroDialogMessage.getId(),
+							UIMicroDialogElementInterface.class.cast(
+									newMicroDialogMessage.toUIModelObject()));
+
+					getMicroDialogElementsTable()
+							.select(newMicroDialogMessage.getId());
+				} catch (final IOException e) {
+					// Should never happen for copy & paste
+				}
+
+				break;
+			case MICRO_DIALOG_DECISION_POINT:
+				try {
+					val newMicroDialogDecisionPoint = getInterventionAdministrationManagerService()
+							.microDialogDecisionPointImport(
+									getAdminUI().getClipboard(), microDialog);
+
+					// Adapt UI
+					beanContainer.addItem(newMicroDialogDecisionPoint.getId(),
+							UIMicroDialogElementInterface.class
+									.cast(newMicroDialogDecisionPoint
+											.toUIModelObject()));
+
+					getMicroDialogElementsTable()
+							.select(newMicroDialogDecisionPoint.getId());
+				} catch (final IOException e) {
+					// Should never happen for copy & paste
+				}
+
+				break;
+			default:
+				// Do nothing
+				break;
+		}
 	}
 
 	public void editElement() {
@@ -333,7 +393,8 @@ public class MicroDialogEditComponentWithController
 										MicroDialogMessage.class));
 
 				importedMicroDialogElement = getInterventionAdministrationManagerService()
-						.microDialogMessageImport(temporaryBackupFile, true);
+						.microDialogMessageImport(temporaryBackupFile, true,
+								null);
 			} else {
 				temporaryBackupFile = getInterventionAdministrationManagerService()
 						.microDialogDecisionPointExport(
@@ -342,7 +403,8 @@ public class MicroDialogEditComponentWithController
 												MicroDialogDecisionPoint.class));
 
 				importedMicroDialogElement = getInterventionAdministrationManagerService()
-						.microDialogDecisionPointImport(temporaryBackupFile);
+						.microDialogDecisionPointImport(temporaryBackupFile,
+								null);
 			}
 
 			if (importedMicroDialogElement == null) {

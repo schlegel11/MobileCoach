@@ -1526,7 +1526,8 @@ public class InterventionAdministrationManagerService {
 
 	@Synchronized
 	public MicroDialogMessage microDialogMessageImport(final File file,
-			final boolean duplicate) throws FileNotFoundException, IOException {
+			final boolean duplicate, final MicroDialog newBelongingMicroDialog)
+			throws FileNotFoundException, IOException {
 		val importedModelObjects = modelObjectExchangeService
 				.importModelObjects(file,
 						ModelObjectExchangeFormatTypes.MICRO_DIALOG_MESSAGE);
@@ -1539,6 +1540,14 @@ public class InterventionAdministrationManagerService {
 					// Recreate I18n identifier
 					microDialogMessage.setI18nIdentifier(GlobalUniqueIdGenerator
 							.createSimpleGlobalUniqueId());
+				}
+
+				if (!microDialogMessage.getMicroDialog()
+						.equals(newBelongingMicroDialog.getId())) {
+					// Micro dialog message has been copy & pasted to other
+					// micro dialog
+					microDialogMessage
+							.setMicroDialog(newBelongingMicroDialog.getId());
 				}
 
 				// Adjust order
@@ -1725,14 +1734,28 @@ public class InterventionAdministrationManagerService {
 
 	@Synchronized
 	public MicroDialogDecisionPoint microDialogDecisionPointImport(
-			final File file) throws FileNotFoundException, IOException {
+			final File file, final MicroDialog newBelongingMicroDialog)
+			throws FileNotFoundException, IOException {
 		val importedModelObjects = modelObjectExchangeService
 				.importModelObjects(file,
 						ModelObjectExchangeFormatTypes.MICRO_DIALOG_DECISION_POINT);
 
+		boolean copyCase = false;
+		MicroDialogDecisionPoint newMicroDialogDecisionPoint = null;
+
 		for (val modelObject : importedModelObjects) {
 			if (modelObject instanceof MicroDialogDecisionPoint) {
 				val microDialogDecisionPoint = (MicroDialogDecisionPoint) modelObject;
+
+				if (!microDialogDecisionPoint.getMicroDialog()
+						.equals(newBelongingMicroDialog.getId())) {
+					// Micro dialog decision point has been copy & pasted to
+					// other micro dialog
+					microDialogDecisionPoint
+							.setMicroDialog(newBelongingMicroDialog.getId());
+
+					copyCase = true;
+				}
 
 				// Adjust order
 				int newOrder = 0;
@@ -1760,11 +1783,21 @@ public class InterventionAdministrationManagerService {
 				databaseManagerService
 						.saveModelObject(microDialogDecisionPoint);
 
-				return microDialogDecisionPoint;
+				newMicroDialogDecisionPoint = microDialogDecisionPoint;
+			}
+
+			if (modelObject instanceof MicroDialogRule && copyCase) {
+				val microDialogRule = (MicroDialogRule) modelObject;
+
+				microDialogRule.setNextMicroDialogWhenTrue(null);
+				microDialogRule.setNextMicroDialogMessageWhenTrue(null);
+				microDialogRule.setNextMicroDialogMessageWhenFalse(null);
+
+				databaseManagerService.saveModelObject(microDialogRule);
 			}
 		}
 
-		return null;
+		return newMicroDialogDecisionPoint;
 	}
 
 	@Synchronized
