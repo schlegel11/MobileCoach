@@ -1542,8 +1542,9 @@ public class InterventionAdministrationManagerService {
 							.createSimpleGlobalUniqueId());
 				}
 
-				if (!microDialogMessage.getMicroDialog()
-						.equals(newBelongingMicroDialog.getId())) {
+				if (newBelongingMicroDialog != null
+						&& !microDialogMessage.getMicroDialog()
+								.equals(newBelongingMicroDialog.getId())) {
 					// Micro dialog message has been copy & pasted to other
 					// micro dialog
 					microDialogMessage
@@ -1747,8 +1748,9 @@ public class InterventionAdministrationManagerService {
 			if (modelObject instanceof MicroDialogDecisionPoint) {
 				val microDialogDecisionPoint = (MicroDialogDecisionPoint) modelObject;
 
-				if (!microDialogDecisionPoint.getMicroDialog()
-						.equals(newBelongingMicroDialog.getId())) {
+				if (newBelongingMicroDialog != null
+						&& !microDialogDecisionPoint.getMicroDialog()
+								.equals(newBelongingMicroDialog.getId())) {
 					// Micro dialog decision point has been copy & pasted to
 					// other micro dialog
 					microDialogDecisionPoint
