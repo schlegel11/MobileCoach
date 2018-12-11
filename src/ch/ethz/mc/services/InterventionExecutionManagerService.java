@@ -92,6 +92,7 @@ import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mc.tools.RuleEvaluator;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.tools.VariableStringReplacer;
+import ch.ethz.mc.tools.VariableStringReplacer.ENCODING;
 import ch.ethz.mc.ui.NotificationMessageException;
 import lombok.Cleanup;
 import lombok.Synchronized;
@@ -444,8 +445,19 @@ public class InterventionExecutionManagerService {
 						try {
 							val fileContent = FileUtils.readFileToString(file);
 
+							val variablesWithValues = variablesManagerService
+									.getAllVariablesWithValuesOfParticipantAndSystem(
+											participant);
+
+							val filledFileContent = VariableStringReplacer
+									.findVariablesAndReplaceWithTextValues(
+											participant.getLanguage(),
+											fileContent,
+											variablesWithValues.values(), "",
+											ENCODING.HTML);
+
 							dialogMessage.setTextBasedMediaObjectContent(
-									fileContent);
+									filledFileContent);
 						} catch (final IOException e) {
 							log.error(
 									"File could not be read for creating dialog message with file content: {}",
