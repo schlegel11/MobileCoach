@@ -91,10 +91,12 @@ public class DeepstreamConstants {
 	public static final String	CLIENT_ID							= "client-id";
 	public static final String	LAST_MODIFIED						= "last-modified";
 	public static final String	STICKY								= "sticky";
+	public static final String	DEACTIVATION						= "deactivation";
 	public static final String	CONTAINS_SURVEY						= "contains-survey";
 	public static final String	EXPECTS_ANSWER						= "expects-answer";
 	public static final String	MESSAGE_TIMESTAMP					= "message-timestamp";
 	public static final String	SERVER_MESSAGE						= "server-message";
+	public static final String	FORMAT								= "format";
 	public static final String	CONTAINS_MEDIA						= "contains-media";
 	public static final String	MEDIA_NAME							= "media-name";
 	public static final String	MEDIA_TYPE							= "media-type";
