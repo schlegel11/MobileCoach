@@ -65,6 +65,7 @@ import io.deepstream.Event;
 import io.deepstream.LoginResult;
 import io.deepstream.PresenceEventListener;
 import io.deepstream.Record;
+import io.deepstream.SnapshotResult;
 import io.deepstream.Topic;
 import lombok.Getter;
 import lombok.Synchronized;
@@ -352,15 +353,12 @@ public class DeepstreamCommunicationService extends Thread
 					messageObject.addProperty(DeepstreamConstants.MEDIA_TYPE,
 							dialogMessage.getMediaObjectType().toJSONField());
 				}
-				if (isCommand) {
-					if (!StringUtils.isBlank(
-							dialogMessage.getTextBasedMediaObjectContent())) {
-						messageObject.addProperty(DeepstreamConstants.CONTENT,
-								dialogMessage.getTextBasedMediaObjectContent());
-					} else {
-						messageObject.addProperty(DeepstreamConstants.CONTENT,
-								"");
-					}
+				if (!StringUtils.isBlank(
+						dialogMessage.getTextBasedMediaObjectContent())) {
+					messageObject.addProperty(DeepstreamConstants.CONTENT,
+							dialogMessage.getTextBasedMediaObjectContent());
+				} else {
+					messageObject.addProperty(DeepstreamConstants.CONTENT, "");
 				}
 				if (isCommand) {
 					messageObject.addProperty(
@@ -379,6 +377,8 @@ public class DeepstreamCommunicationService extends Thread
 							DeepstreamConstants.SERVER_MESSAGE,
 							dialogMessage.getMessage());
 				}
+				messageObject.addProperty(DeepstreamConstants.FORMAT,
+						dialogMessage.getTextFormat().toString());
 				val answerType = dialogMessage.getAnswerType();
 				if (answerType != null) {
 					val answerTypeMessageObject = new JsonObject();
@@ -404,6 +404,8 @@ public class DeepstreamCommunicationService extends Thread
 						timestamp);
 				messageObject.addProperty(DeepstreamConstants.STICKY,
 						dialogMessage.isMessageIsSticky());
+				messageObject.addProperty(DeepstreamConstants.DEACTIVATION,
+						dialogMessage.isMessageDeactivatesAllOpenQuestions());
 
 				record = client.record
 						.getRecord(DeepstreamConstants.PATH_MESSAGES
@@ -592,7 +594,7 @@ public class DeepstreamCommunicationService extends Thread
 							receivedMessage.getText());
 				}
 				messageObject.addProperty(DeepstreamConstants.USER_TIMESTAMP,
-						receivedMessage.getReceivedTimestamp());
+						receivedMessage.getClientTimestamp());
 				messageObject.addProperty(DeepstreamConstants.LAST_MODIFIED,
 						timestamp);
 
@@ -619,7 +621,7 @@ public class DeepstreamCommunicationService extends Thread
 					}
 					messageConfirmationObject.addProperty(
 							DeepstreamConstants.USER_TIMESTAMP,
-							receivedMessage.getReceivedTimestamp());
+							receivedMessage.getClientTimestamp());
 					messageConfirmationObject.addProperty(
 							DeepstreamConstants.LAST_MODIFIED, timestamp);
 					if (receivedMessage.getMediaURL() != null
@@ -734,17 +736,14 @@ public class DeepstreamCommunicationService extends Thread
 	/**
 	 * Get all messages received by deepstream since the last check
 	 * 
-	 * @return
+	 * @param receivedMessage
 	 */
-	public List<ReceivedMessage> getReceivedMessages() {
-		val newReceivedMessages = new ArrayList<ReceivedMessage>();
-
+	public void getReceivedMessages(
+			final List<ReceivedMessage> receivedMessage) {
 		synchronized (receivedMessages) {
-			newReceivedMessages.addAll(receivedMessages);
+			receivedMessage.addAll(receivedMessages);
 			receivedMessages.clear();
 		}
-
-		return newReceivedMessages;
 	}
 
 	/**
@@ -1484,7 +1483,7 @@ public class DeepstreamCommunicationService extends Thread
 	 * @param intention
 	 * @param content
 	 * @param text
-	 * @param timestamp
+	 * @param clientTimestamp
 	 * @param containsMedia
 	 * @param mediaType
 	 * @param relatedMessageIdBasedOnOrder
@@ -1494,9 +1493,10 @@ public class DeepstreamCommunicationService extends Thread
 	 */
 	private boolean receiveUserMessage(final String participantId,
 			final String message, final String intention, final String content,
-			final String text, final long timestamp, final String containsMedia,
-			final String mediaType, final int relatedMessageIdBasedOnOrder,
-			final String clientId, final boolean typeIntention) {
+			final String text, final long clientTimestamp,
+			final String containsMedia, final String mediaType,
+			final int relatedMessageIdBasedOnOrder, final String clientId,
+			final boolean typeIntention) {
 		log.debug("Received {} message for participant {}",
 				typeIntention ? "intention" : "regular", participantId);
 
@@ -1515,7 +1515,9 @@ public class DeepstreamCommunicationService extends Thread
 		receivedMessage.setIntention(intention);
 		receivedMessage.setContent(content);
 		receivedMessage.setText(text);
-		receivedMessage.setReceivedTimestamp(timestamp);
+		receivedMessage.setClientTimestamp(clientTimestamp);
+		receivedMessage
+				.setReceivedTimestamp(InternalDateTime.currentTimeMillis());
 		receivedMessage.setMediaURL(containsMedia);
 		receivedMessage.setMediaType(mediaType);
 		receivedMessage
@@ -1698,8 +1700,11 @@ public class DeepstreamCommunicationService extends Thread
 
 		long newestTimestamp = 0;
 
-		val snapshot = client.record.snapshot(
-				DeepstreamConstants.PATH_MESSAGES + participantOrSupervisorId);
+		SnapshotResult snapshot;
+		synchronized (client) {
+			snapshot = client.record.snapshot(DeepstreamConstants.PATH_MESSAGES
+					+ participantOrSupervisorId);
+		}
 
 		val jsonObject = new JsonObject();
 		val jsonObjects = new JsonObject();
@@ -1741,8 +1746,11 @@ public class DeepstreamCommunicationService extends Thread
 
 		long newestTimestamp = 0;
 
-		val snapshot = client.record
-				.snapshot(DeepstreamConstants.PATH_DASHBOARD + participantId);
+		SnapshotResult snapshot;
+		synchronized (client) {
+			snapshot = client.record.snapshot(
+					DeepstreamConstants.PATH_DASHBOARD + participantId);
+		}
 
 		val jsonObject = new JsonObject();
 		val jsonObjects = new JsonObject();

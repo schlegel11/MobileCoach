@@ -9,6 +9,7 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.TabSheet.Tab;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.model.ModelObject;
@@ -18,6 +19,9 @@ import ch.ethz.mc.model.persistent.MicroDialogDecisionPoint;
 import ch.ethz.mc.model.persistent.MicroDialogMessage;
 import ch.ethz.mc.model.persistent.concepts.MicroDialogElementInterface;
 import ch.ethz.mc.model.ui.UIMicroDialogElementInterface;
+import ch.ethz.mc.ui.components.basics.ShortStringEditComponent;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
@@ -31,9 +35,13 @@ import lombok.extern.log4j.Log4j2;
 public class MicroDialogEditComponentWithController
 		extends MicroDialogEditComponent {
 
-	private final MicroDialog												microDialog;
+	@Getter
+	@Setter
+	private MicroDialog														microDialog;
 
 	private final Intervention												intervention;
+
+	private Tab																tab								= null;
 
 	private UIMicroDialogElementInterface									selectedUIMicroDialogElement	= null;
 
@@ -88,6 +96,8 @@ public class MicroDialogEditComponentWithController
 
 		// handle buttons
 		val buttonClickListener = new ButtonClickListener();
+		getCommentTextFieldComponent().getButton()
+				.addClickListener(buttonClickListener);
 		getNewMessageButton().addClickListener(buttonClickListener);
 		getNewDecisionPointButton().addClickListener(buttonClickListener);
 		getEditButton().addClickListener(buttonClickListener);
@@ -95,12 +105,31 @@ public class MicroDialogEditComponentWithController
 		getMoveUpButton().addClickListener(buttonClickListener);
 		getMoveDownButton().addClickListener(buttonClickListener);
 		getDeleteButton().addClickListener(buttonClickListener);
+
+		// Adjust UI
+		adjust();
+	}
+
+	private void adjust() {
+		// Adjust variable text fields
+		getCommentTextFieldComponent().setValue(microDialog.getComment());
+
+		if (tab != null) {
+			tab.setDescription(microDialog.getComment());
+		}
+	}
+
+	public void setTab(final Tab tab) {
+		this.tab = tab;
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
 		@Override
 		public void buttonClick(final ClickEvent event) {
-			if (event.getButton() == getNewMessageButton()) {
+			if (event.getButton() == getCommentTextFieldComponent()
+					.getButton()) {
+				changeComment();
+			} else if (event.getButton() == getNewMessageButton()) {
 				createMessage();
 			} else if (event.getButton() == getNewDecisionPointButton()) {
 				createDecisionPoint();
@@ -117,6 +146,32 @@ public class MicroDialogEditComponentWithController
 			}
 			event.getButton().setEnabled(true);
 		}
+	}
+
+	public void changeComment() {
+		log.debug("Edit comment");
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_COMMENT,
+				microDialog.getComment(), null, new ShortStringEditComponent(),
+				new ExtendableButtonClickListener() {
+
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Change comment
+							getInterventionAdministrationManagerService()
+									.microDialogChangeComment(microDialog,
+											getStringValue());
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						adjust();
+
+						closeWindow();
+					}
+				}, null);
 	}
 
 	public void createMessage() {
@@ -374,5 +429,4 @@ public class MicroDialogEditComponentWithController
 			}
 		}, null);
 	}
-
 }

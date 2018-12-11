@@ -36,6 +36,7 @@ public enum AnswerTypes {
 	LIKERT_SILENT,
 	LIKERT_SLIDER,
 	SELECT_ONE,
+	SELECT_ONE_LIST,
 	SELECT_MANY,
 	SELECT_MANY_MODAL,
 	SELECT_ONE_IMAGES,
@@ -83,6 +84,7 @@ public enum AnswerTypes {
 			case LIKERT_SILENT:
 			case LIKERT_SLIDER:
 			case SELECT_ONE:
+			case SELECT_ONE_LIST:
 			case SELECT_MANY:
 			case SELECT_MANY_MODAL:
 			case SELECT_ONE_IMAGES:
@@ -112,6 +114,7 @@ public enum AnswerTypes {
 			case LIKERT_SILENT:
 			case LIKERT_SLIDER:
 			case SELECT_ONE:
+			case SELECT_ONE_LIST:
 			case SELECT_MANY:
 			case SELECT_MANY_MODAL:
 			case SELECT_ONE_IMAGES:

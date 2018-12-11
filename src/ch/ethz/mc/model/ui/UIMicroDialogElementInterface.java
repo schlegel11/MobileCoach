@@ -57,6 +57,10 @@ public class UIMicroDialogElementInterface extends UIModelObject {
 	@Setter
 	private boolean				isMessage									= false;
 
+	@Getter
+	@Setter
+	private boolean				messageDeactivatesAllOpenQuestions			= false;
+
 	@PropertyId(MESSAGE_TEXT_WITH_PLACEHOLDERS_OR_COMMENT)
 	private String				messageTextWithPlaceholdersOrComment;
 

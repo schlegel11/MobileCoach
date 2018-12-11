@@ -15,6 +15,7 @@ import ch.ethz.mc.model.persistent.MicroDialogMessage;
 import ch.ethz.mc.model.persistent.MicroDialogMessageRule;
 import ch.ethz.mc.model.persistent.ScreeningSurvey;
 import ch.ethz.mc.model.persistent.types.AnswerTypes;
+import ch.ethz.mc.model.persistent.types.TextFormatTypes;
 import ch.ethz.mc.model.ui.UIMicroDialogMessageRule;
 import ch.ethz.mc.model.ui.UIScreeningSurvey;
 import ch.ethz.mc.ui.components.basics.LocalizedPlaceholderStringEditComponent;
@@ -164,6 +165,29 @@ public class MicroDialogMessageEditComponentWithController
 		adjust();
 
 		// Handle combo boxes
+		val textFormatComboBox = getTextFormatComboBox();
+
+		for (val textFormatType : TextFormatTypes.values()) {
+			textFormatComboBox.addItem(textFormatType);
+			if (microDialogMessage.getTextFormat() == textFormatType) {
+				textFormatComboBox.select(textFormatType);
+			}
+		}
+		textFormatComboBox.addValueChangeListener(new ValueChangeListener() {
+
+			@Override
+			public void valueChange(final ValueChangeEvent event) {
+				val selectedTextFormatType = (TextFormatTypes) event
+						.getProperty().getValue();
+
+				log.debug("Adjust text format type to {}",
+						selectedTextFormatType);
+				getInterventionAdministrationManagerService()
+						.microDialogMessageSetTextFormatType(microDialogMessage,
+								selectedTextFormatType);
+			}
+		});
+
 		val intermediateSurveys = getSurveyAdministrationManagerService()
 				.getAllIntermediateSurveysOfIntervention(interventionId);
 
@@ -241,6 +265,10 @@ public class MicroDialogMessageEditComponentWithController
 										.isMessageExpectsAnswer()) {
 							getMessageExpectsAnswerCheckBox().setValue(false);
 						}
+						if (microDialogMessage.isCommandMessage()) {
+							getDeactivatesAllOpenQuestionsCheckBox()
+									.setValue(false);
+						}
 
 						adjust();
 					}
@@ -260,6 +288,22 @@ public class MicroDialogMessageEditComponentWithController
 			}
 		});
 
+		val deactivatesAllOpenQuestionsCheckBox = getDeactivatesAllOpenQuestionsCheckBox();
+		deactivatesAllOpenQuestionsCheckBox.setValue(
+				microDialogMessage.isMessageDeactivatesAllOpenQuestions());
+
+		deactivatesAllOpenQuestionsCheckBox
+				.addValueChangeListener(new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						getInterventionAdministrationManagerService()
+								.microDialogMessageSetDeactivatesAllOpenQuestions(
+										microDialogMessage, (boolean) event
+												.getProperty().getValue());
+					}
+				});
+
 		val messageExpectsAnswerCheckBox = getMessageExpectsAnswerCheckBox();
 		messageExpectsAnswerCheckBox
 				.setValue(microDialogMessage.isMessageExpectsAnswer());
@@ -277,7 +321,13 @@ public class MicroDialogMessageEditComponentWithController
 						if (!microDialogMessage.isMessageExpectsAnswer()
 								&& microDialogMessage
 										.isMessageBlocksMicroDialogUntilAnswered()) {
+							getDeactivatesAllOpenQuestionsCheckBox()
+									.setValue(false);
 							getMessageBlocksMicroDialogUntilAnsweredCheckBox()
+									.setValue(false);
+						}
+						if (microDialogMessage.isMessageExpectsAnswer()) {
+							getDeactivatesAllOpenQuestionsCheckBox()
 									.setValue(false);
 						}
 
@@ -314,21 +364,32 @@ public class MicroDialogMessageEditComponentWithController
 		getNoReplyTextFieldComponent()
 				.setValue(microDialogMessage.getNoReplyValue());
 
+		// TODO Aktivierungen und Deaktivierungen stimmen ncoh nicht, auch nicht
+		// mit Check-Status
+		// Außerdem noch Icon
+
 		if (microDialogMessage.isCommandMessage()) {
 			getMessageExpectsAnswerCheckBox().setEnabled(false);
 		} else {
 			getMessageExpectsAnswerCheckBox().setEnabled(true);
 		}
 
-		if (!microDialogMessage.isMessageExpectsAnswer()) {
+		if (microDialogMessage.isMessageExpectsAnswer()) {
+			getMessageBlocksMicroDialogUntilAnsweredCheckBox().setEnabled(true);
+			getAnswerGridLayout().setEnabled(true);
+			getMinutesUntilHandledAsNotAnsweredSlider().setEnabled(true);
+		} else {
 			getMessageBlocksMicroDialogUntilAnsweredCheckBox()
 					.setEnabled(false);
 			getAnswerGridLayout().setEnabled(false);
 			getMinutesUntilHandledAsNotAnsweredSlider().setEnabled(false);
+		}
+
+		if (microDialogMessage.isCommandMessage()
+				|| microDialogMessage.isMessageExpectsAnswer()) {
+			getDeactivatesAllOpenQuestionsCheckBox().setEnabled(false);
 		} else {
-			getMessageBlocksMicroDialogUntilAnsweredCheckBox().setEnabled(true);
-			getAnswerGridLayout().setEnabled(true);
-			getMinutesUntilHandledAsNotAnsweredSlider().setEnabled(true);
+			getDeactivatesAllOpenQuestionsCheckBox().setEnabled(true);
 		}
 
 		// Adjust sliders

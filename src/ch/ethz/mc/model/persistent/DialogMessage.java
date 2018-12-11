@@ -33,6 +33,7 @@ import ch.ethz.mc.model.persistent.types.AnswerTypes;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogMessageTypes;
 import ch.ethz.mc.model.persistent.types.MediaObjectTypes;
+import ch.ethz.mc.model.persistent.types.TextFormatTypes;
 import ch.ethz.mc.model.ui.UIDialogMessageProblemViewWithParticipant;
 import ch.ethz.mc.model.ui.UIDialogMessageWithParticipant;
 import ch.ethz.mc.model.ui.results.UIDialogMessageWithParticipantForResults;
@@ -121,6 +122,14 @@ public class DialogMessage extends ModelObject {
 	private String						messageWithForcedLinks;
 
 	/**
+	 * The format of the message text
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private TextFormatTypes				textFormat;
+
+	/**
 	 * The {@link AnswerTypes} of the message
 	 */
 	@Getter
@@ -204,6 +213,14 @@ public class DialogMessage extends ModelObject {
 	@Getter
 	@Setter
 	private boolean						messageIsSticky;
+
+	/**
+	 * Defines if this message deactivates all open questions of former messages
+	 *
+	 */
+	@Getter
+	@Setter
+	private boolean						messageDeactivatesAllOpenQuestions;
 
 	/**
 	 * Timestamp when the {@link DialogMessage} is handled as unanswered

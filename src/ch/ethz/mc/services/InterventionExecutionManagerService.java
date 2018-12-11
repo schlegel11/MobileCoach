@@ -77,6 +77,7 @@ import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogMessageTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.model.persistent.types.PushNotificationTypes;
+import ch.ethz.mc.model.persistent.types.TextFormatTypes;
 import ch.ethz.mc.services.internal.CommunicationManagerService;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
@@ -316,24 +317,25 @@ public class InterventionExecutionManagerService {
 	@Synchronized
 	private void dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
 			final Participant participant, final DialogMessageTypes type,
-			final String message, final AnswerTypes answerType,
-			final String answerOptions, final boolean manuallySent,
-			final long timestampToSendMessage,
+			final String message, final TextFormatTypes textFormatType,
+			final AnswerTypes answerType, final String answerOptions,
+			final boolean manuallySent, final long timestampToSendMessage,
 			final MonitoringRule relatedMonitoringRule,
 			final MonitoringMessage relatedMonitoringMessage,
 			final MicroDialog relatedMicroDialogForActivation,
 			final MicroDialogMessage relatedMicroDialogMessage,
 			final boolean supervisorMessage, final boolean answerExpected,
-			final boolean isSticky,
+			final boolean isSticky, final boolean deactivatesAllOpenQuestions,
 			final int minutesUntilHandledAsNotAnswered) {
 		log.debug("Create message and prepare for sending");
 		val dialogMessage = new DialogMessage(participant.getId(), 0,
 				relatedMonitoringMessage == null ? false
 						: relatedMonitoringMessage.isPushOnly(),
 				DialogMessageStatusTypes.PREPARED_FOR_SENDING, type, null,
-				message, message, answerType, answerOptions, null, null, null,
-				null, null, timestampToSendMessage, -1, supervisorMessage,
-				answerExpected, isSticky, -1, -1, null, null, false,
+				message, message, textFormatType, answerType, answerOptions,
+				null, null, null, null, null, timestampToSendMessage, -1,
+				supervisorMessage, answerExpected, isSticky,
+				deactivatesAllOpenQuestions, -1, -1, null, null, false,
 				relatedMonitoringRule == null ? null
 						: relatedMonitoringRule.getId(),
 				relatedMonitoringMessage == null ? null
@@ -441,6 +443,7 @@ public class InterventionExecutionManagerService {
 										FILE_STORES.STORAGE);
 						try {
 							val fileContent = FileUtils.readFileToString(file);
+
 							dialogMessage.setTextBasedMediaObjectContent(
 									fileContent);
 						} catch (final IOException e) {
@@ -695,8 +698,9 @@ public class InterventionExecutionManagerService {
 		val dialogMessage = new DialogMessage(participantId, 0, false,
 				isTypeIntention ? DialogMessageStatusTypes.RECEIVED_AS_INTENTION
 						: DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY,
-				type, receivedMessage.getClientId(), "", "", null, null, null,
-				null, null, null, null, -1, -1, false, false, false, -1,
+				type, receivedMessage.getClientId(), "", "",
+				TextFormatTypes.PLAIN, null, null, null, null, null, null, null,
+				-1, -1, false, false, false, false, -1,
 				receivedMessage.getReceivedTimestamp(), answerCleaned,
 				answerRaw, isTypeIntention ? false : true, null, null, null,
 				null, false, false);
@@ -1096,7 +1100,7 @@ public class InterventionExecutionManagerService {
 			dialogMessages = getDialogMessagesOfParticipantAnsweredByParticipant(
 					participant.getId());
 		} else {
-			dialogMessages = getDialogMessagesOfParticipantWaitingToBeAnsweredOrUnansweredByParticipant(
+			dialogMessages = getDialogMessagesOfParticipantWaitingToBeAnsweredByParticipant(
 					participant.getId());
 		}
 
@@ -1358,15 +1362,15 @@ public class InterventionExecutionManagerService {
 						// Prepare message for sending
 						dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
 								participant, dialogMessageType,
-								messageTextToSend, answerTypeToSend,
-								answerOptionsToSend, false,
+								messageTextToSend, TextFormatTypes.PLAIN,
+								answerTypeToSend, answerOptionsToSend, false,
 								InternalDateTime.currentTimeMillis(), null,
 								monitoringMessage, null, null,
 								monitoringReplyRule != null
 										? monitoringReplyRule
 												.isSendMessageToSupervisor()
 										: false,
-								false, false, 0);
+								false, false, false, 0);
 					}
 				}
 
@@ -1379,10 +1383,11 @@ public class InterventionExecutionManagerService {
 							DialogMessageTypes.MICRO_DIALOG_ACTIVATION,
 							microDialogActivation.getMiroDialogToActivate()
 									.getName(),
-							AnswerTypes.CUSTOM, null, false,
-							InternalDateTime.currentTimeMillis(), null, null,
+							TextFormatTypes.PLAIN, AnswerTypes.CUSTOM, null,
+							false, InternalDateTime.currentTimeMillis(), null,
+							null,
 							microDialogActivation.getMiroDialogToActivate(),
-							null, false, false, false, 0);
+							null, false, false, false, false, 0);
 				}
 			} else if (relatedMicroDialogMessage != null) {
 				log.debug("Caring for further micro dialog handling");
@@ -1539,15 +1544,16 @@ public class InterventionExecutionManagerService {
 						// Prepare message for sending
 						dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
 								participant, dialogMessageType,
-								messageTextToSend, answerTypeToSend,
-								answerOptionsToSend, false,
+								messageTextToSend, TextFormatTypes.PLAIN,
+								answerTypeToSend, answerOptionsToSend, false,
 								timeToSendMessageInMillis, monitoringRule,
 								monitoringMessage, null, null,
 								monitoringRule != null
 										? monitoringRule
 												.isSendMessageToSupervisor()
 										: false,
-								monitoringMessageExpectsAnswer, false, 0);
+								monitoringMessageExpectsAnswer, false, false,
+								0);
 					}
 				}
 
@@ -1585,10 +1591,10 @@ public class InterventionExecutionManagerService {
 							DialogMessageTypes.MICRO_DIALOG_ACTIVATION,
 							microDialogActivation.getMiroDialogToActivate()
 									.getName(),
-							AnswerTypes.CUSTOM, null, false,
-							timeToSendMessageInMillis, null, null,
+							TextFormatTypes.PLAIN, AnswerTypes.CUSTOM, null,
+							false, timeToSendMessageInMillis, null, null,
 							microDialogActivation.getMiroDialogToActivate(),
-							null, false, false, false, 0);
+							null, false, false, false, false, 0);
 				}
 
 				if (!periodicCheck) {
@@ -1823,13 +1829,14 @@ public class InterventionExecutionManagerService {
 					// Prepare message for sending
 					dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
 							participant, dialogMessageType, messageTextToSend,
-							answerTypeToSend, answerOptionsToSend, false,
+							TextFormatTypes.PLAIN, answerTypeToSend,
+							answerOptionsToSend, false,
 							timeToSendMessageInMillis, monitoringRule,
 							monitoringMessage, null, null,
 							monitoringRule != null
 									? monitoringRule.isSendMessageToSupervisor()
 									: false,
-							monitoringMessageExpectsAnswer, false, 0);
+							monitoringMessageExpectsAnswer, false, false, 0);
 				}
 			}
 
@@ -1865,10 +1872,10 @@ public class InterventionExecutionManagerService {
 						participant, DialogMessageTypes.MICRO_DIALOG_ACTIVATION,
 						microDialogActivation.getMiroDialogToActivate()
 								.getName(),
-						AnswerTypes.CUSTOM, null, false,
+						TextFormatTypes.PLAIN, AnswerTypes.CUSTOM, null, false,
 						timeToSendMessageInMillis, null, null,
 						microDialogActivation.getMiroDialogToActivate(), null,
-						false, false, false, 0);
+						false, false, false, false, 0);
 			}
 
 			return dialogMessageCreated;
@@ -2016,6 +2023,8 @@ public class InterventionExecutionManagerService {
 					}
 
 					try {
+						// Check appropriate recipient (supervisor or
+						// participant)
 						DialogOption dialogOption = null;
 						boolean sendToSupervisor;
 						if (dialogMessageWithSenderIdentificationToSend
@@ -2031,6 +2040,35 @@ public class InterventionExecutionManagerService {
 						}
 
 						if (dialogOption != null) {
+							// Deactivate former messages if requested
+							if (dialogMessageToSend
+									.isMessageDeactivatesAllOpenQuestions()) {
+								log.debug(
+										"Message requests to deactivate all open questions...");
+
+								val dialogMessagesToDeactivate = getDialogMessagesOfParticipantWaitingToBeAnsweredByParticipant(
+										participantId);
+								for (val dialogMessageToDeactivate : dialogMessagesToDeactivate) {
+									dialogMessageStatusChangesAfterSending(
+											dialogMessageToDeactivate.getId(),
+											DialogMessageStatusTypes.SENT_AND_WAITED_FOR_ANSWER_BUT_DEACTIVATED,
+											InternalDateTime
+													.currentTimeMillis(),
+											null, null, null);
+
+									// Stop deactivation when current message is
+									// reached
+									if (dialogMessageToDeactivate
+											.getOrder() > dialogMessageToSend
+													.getOrder()) {
+										break;
+									}
+								}
+
+								log.debug("Deactivation done");
+							}
+
+							// Send based on dialog option type
 							switch (dialogOption.getType()) {
 								case SMS:
 								case EMAIL:
@@ -2139,7 +2177,10 @@ public class InterventionExecutionManagerService {
 			}
 		}
 
+		int iteration = 0;
 		itemsLoop: do {
+			iteration++;
+
 			val microDialogMessage = databaseManagerService
 					.findOneSortedModelObject(MicroDialogMessage.class,
 							Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG_AND_ORDER_HIGHER,
@@ -2223,7 +2264,8 @@ public class InterventionExecutionManagerService {
 										.get(participant),
 								variablesWithValuesForMessageGeneration
 										.values(),
-								"");
+								"", microDialogMessage.getTextFormat()
+										.toEncoding());
 
 				AnswerTypes answerTypeToSend = null;
 				String answerOptionsToSend = null;
@@ -2270,11 +2312,15 @@ public class InterventionExecutionManagerService {
 						microDialogMessage.isCommandMessage()
 								? DialogMessageTypes.COMMAND
 								: DialogMessageTypes.PLAIN,
-						messageTextToSend, answerTypeToSend,
-						answerOptionsToSend, false, lastMessageSent, null, null,
-						microDialog, microDialogMessage, false,
+						messageTextToSend, microDialogMessage.getTextFormat(),
+						answerTypeToSend, answerOptionsToSend, false,
+						lastMessageSent, null, null, microDialog,
+						microDialogMessage, false,
 						microDialogMessage.isMessageExpectsAnswer(),
-						microDialogMessage.isMessageIsSticky(), 0);
+						microDialogMessage.isMessageIsSticky(),
+						microDialogMessage
+								.isMessageDeactivatesAllOpenQuestions(),
+						0);
 
 				// Proceed with micro dialog handling?
 				if (microDialogMessage
@@ -2338,16 +2384,39 @@ public class InterventionExecutionManagerService {
 					dialogMessageCreateManuallyOrByRulesIncludingMediaObject(
 							participant,
 							DialogMessageTypes.MICRO_DIALOG_ACTIVATION,
-							nextMicroDialog.getName(), AnswerTypes.CUSTOM, null,
-							false, lastMessageSent, null, null, nextMicroDialog,
-							null, false, false, false, 0);
+							nextMicroDialog.getName(), TextFormatTypes.PLAIN,
+							AnswerTypes.CUSTOM, null, false, lastMessageSent,
+							null, null, nextMicroDialog, null, false, false,
+							false, false, 0);
 				}
 
 				// Variables need to be refreshed after performing rules
 				variablesRequireRefresh = true;
 				participantRequiresRefresh = true;
 			}
-		} while (!stopMicroDialogHandling);
+		} while (!stopMicroDialogHandling
+				&& iteration < ImplementationConstants.MICRO_DIALOG_LOOP_DETECTION_THRESHOLD);
+
+		if (iteration >= ImplementationConstants.MICRO_DIALOG_LOOP_DETECTION_THRESHOLD) {
+			// Loop detected
+			// Set participant to data not available for monitoring
+			dialogStatusSetDataForMonitoringNotAvailable(participant.getId());
+			log.error(
+					"Detected endless loop while trying to handle micro dialog for participant {}",
+					participant.getId());
+		}
+	}
+
+	@Synchronized
+	private void dialogStatusSetDataForMonitoringNotAvailable(
+			final ObjectId participantId) {
+		final val dialogStatus = databaseManagerService.findOneModelObject(
+				DialogStatus.class, Queries.DIALOG_STATUS__BY_PARTICIPANT,
+				participantId);
+
+		dialogStatus.setDataForMonitoringParticipationAvailable(false);
+
+		databaseManagerService.saveModelObject(dialogStatus);
 	}
 
 	/*
@@ -2554,9 +2623,10 @@ public class InterventionExecutionManagerService {
 
 		// Create dialog message
 		dialogMessageCreateManuallyOrByRulesIncludingMediaObject(participant,
-				DialogMessageTypes.PLAIN, messageTextToSend, null, null, true,
+				DialogMessageTypes.PLAIN, messageTextToSend,
+				TextFormatTypes.PLAIN, null, null, true,
 				InternalDateTime.currentTimeMillis(), null, null, null, null,
-				advisorMessage, false, false, 0);
+				advisorMessage, false, false, false, 0);
 	}
 
 	/**
@@ -2623,11 +2693,11 @@ public class InterventionExecutionManagerService {
 		dialogMessageCreateManuallyOrByRulesIncludingMediaObject(participant,
 				determinedMonitoringMessageToSend.isCommandMessage()
 						? DialogMessageTypes.COMMAND : DialogMessageTypes.PLAIN,
-				messageTextToSend, answerTypeToSend, answerOptionsToSend, true,
-				InternalDateTime.currentTimeMillis(), null,
-				determinedMonitoringMessageToSend, null, null, advisorMessage,
-				monitoringMessageGroup.isMessagesExpectAnswer(), false,
-				minutesUntilHandledAsNotAnswered);
+				messageTextToSend, TextFormatTypes.PLAIN, answerTypeToSend,
+				answerOptionsToSend, true, InternalDateTime.currentTimeMillis(),
+				null, determinedMonitoringMessageToSend, null, null,
+				advisorMessage, monitoringMessageGroup.isMessagesExpectAnswer(),
+				false, false, minutesUntilHandledAsNotAnswered);
 	}
 
 	/**
@@ -2795,6 +2865,7 @@ public class InterventionExecutionManagerService {
 			// Message counts
 			int totalSentMessages = 0;
 			int totalReceivedMessages = 0;
+			int totalDeactivatedMessages = 0;
 			int answeredQuestions = 0;
 			int unansweredQuestions = 0;
 			int mediaObjectsViewed = 0;
@@ -2838,6 +2909,10 @@ public class InterventionExecutionManagerService {
 						case SENT_BUT_NOT_WAITING_FOR_ANSWER:
 							totalSentMessages++;
 							break;
+						case SENT_AND_WAITED_FOR_ANSWER_BUT_DEACTIVATED:
+							totalSentMessages++;
+							totalDeactivatedMessages++;
+							break;
 					}
 
 					if (dialogMessage.isMediaContentViewed()) {
@@ -2859,6 +2934,10 @@ public class InterventionExecutionManagerService {
 					"intervention." + intervention.getId().toString()
 							+ ".totalReceivedMessages",
 					String.valueOf(totalReceivedMessages));
+			statistics.setProperty(
+					"intervention." + intervention.getId().toString()
+							+ ".totalDeactivatedMessages",
+					String.valueOf(totalDeactivatedMessages));
 			statistics.setProperty(
 					"intervention." + intervention.getId().toString()
 							+ ".answeredQuestions",
@@ -3376,7 +3455,7 @@ public class InterventionExecutionManagerService {
 	}
 
 	@Synchronized
-	private Iterable<DialogMessage> getDialogMessagesOfParticipantWaitingToBeAnsweredOrUnansweredByParticipant(
+	private Iterable<DialogMessage> getDialogMessagesOfParticipantWaitingToBeAnsweredByParticipant(
 			final ObjectId participantId) {
 		val dialogMessages = databaseManagerService.findSortedModelObjects(
 				DialogMessage.class,
@@ -3404,8 +3483,8 @@ public class InterventionExecutionManagerService {
 			final ObjectId participantId, final long timestampOfReceivedMessage,
 			final int relatedMessageIdBasedOnOrder) {
 
-		DialogMessage dialogMessage = null;
 		if (relatedMessageIdBasedOnOrder >= 0) {
+			// Care for messages with related IDs
 			val dialogMessageWithFittingOrder = databaseManagerService
 					.findOneModelObject(DialogMessage.class,
 							Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_ORDER,
@@ -3417,20 +3496,23 @@ public class InterventionExecutionManagerService {
 							.isAnswerNotAutomaticallyProcessable()
 					&& dialogMessageWithFittingOrder
 							.getIsUnansweredAfterTimestamp() > timestampOfReceivedMessage) {
-				dialogMessage = dialogMessageWithFittingOrder;
+				return dialogMessageWithFittingOrder;
 			}
-		}
-
-		if (dialogMessage == null) {
-			dialogMessage = databaseManagerService.findOneSortedModelObject(
+		} else {
+			// Care for messages without related IDs (e.g. SMS/email)
+			val dialogMessage = databaseManagerService.findOneSortedModelObject(
 					DialogMessage.class,
 					Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_NOT_AUTOMATICALLY_PROCESSABLE_AND_UNANSWERED_AFTER_TIMESTAMP_HIGHER,
 					Queries.DIALOG_MESSAGE__SORT_BY_ORDER_ASC, participantId,
 					DialogMessageStatusTypes.SENT_AND_WAITING_FOR_ANSWER, false,
 					timestampOfReceivedMessage);
+
+			return dialogMessage;
 		}
 
-		return dialogMessage;
+		// Return null if no appropriate dialog message could be found for one
+		// of the cases
+		return null;
 	}
 
 	@Synchronized

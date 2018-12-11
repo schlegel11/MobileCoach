@@ -278,4 +278,11 @@ public class Queries {
 	public static final String	UPDATE_VERSION_41__PARTICIPANT__CHANGE_1																																										= "{$set:{'responsibleTeamManagerEmail':null}}";
 	public static final String	UPDATE_VERSION_42__MONITORING_MESSAGE__CHANGE_1																																									= "{$set:{'pushOnly':false}}";
 	public static final String	UPDATE_VERSION_42__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'pushOnly':false}}";
+	public static final String	UPDATE_VERSION_44__MICRO_DIALOG__CHANGE_1																																										= "{$set:{'comment':''}}";
+	public static final String	UPDATE_VERSION_45__MONITORING_MESSAGE_GROUP__CHANGE_1																																							= "{$set:{'order':#}}";
+	public static final String	UPDATE_VERSION_45__MICRO_DIALOG__CHANGE_1																																										= "{$set:{'order':#}}";
+	public static final String	UPDATE_VERSION_46__MICRO_DIALOG_MESSAGE__CHANGE_1																																								= "{$set:{'textFormat':'PLAIN'}}";
+	public static final String	UPDATE_VERSION_46__MICRO_DIALOG_MESSAGE__CHANGE_2																																								= "{$set:{'messageDeactivatesAllOpenQuestions':false}}";
+	public static final String	UPDATE_VERSION_46__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'textFormat':'PLAIN'}}";
+	public static final String	UPDATE_VERSION_46__DIALOG_MESSAGE__CHANGE_2																																										= "{$set:{'messageDeactivatesAllOpenQuestions':false}}";
 }

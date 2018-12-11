@@ -81,11 +81,16 @@ public class ImplementationConstants {
 	public static final int		UI_SESSION_TIMEOUT_IN_SECONDS														= 900;
 	public static final String	UI_SESSION_ATTRIBUTE_DETECTOR														= "mc.vaadin.is_vaadin_session";
 
+	public static final int		PUSH_SERVER_TIMEOUT																	= 10000;
+
+	public static final int		SMS_SERVER_TIMEOUT																	= 10000;
+
 	public static final String	MAIL_SERVER_TIMEOUT																	= "5000";
 	public static final String	MAIL_SERVER_CONNECTION_TIMEOUT														= "30000";
 
 	public static final long	MICRO_DIALOG_MESSAGE_UNHANDLED_MESSAGE_MINIMUM_THRESHOLD_IN_MILLIS					= 30
 			* MINUTES_TO_TIME_IN_MILLIS_MULTIPLICATOR;
+	public static final int		MICRO_DIALOG_LOOP_DETECTION_THRESHOLD												= 500;
 
 	public static enum ACCEPTED_MEDIA_UPLOAD_TYPES {
 		IMAGE, VIDEO, AUDIO

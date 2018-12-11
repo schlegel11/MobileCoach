@@ -342,7 +342,7 @@ public class PushNotificationService {
 							log.debug(
 									"Push notification accepted by APNs gateway.");
 						} else {
-							log.debug(
+							log.warn(
 									"Notification rejected by the APNs gateway: ",
 									pushNotificationResponse
 											.getRejectionReason());
@@ -351,7 +351,7 @@ public class PushNotificationService {
 									.equals(BAD_DEVICE_TOKEN)
 									|| pushNotificationResponse
 											.getTokenInvalidationTimestamp() != null) {
-								log.debug(
+								log.warn(
 										"Token is invalid (since {}) and will be removed for the appropriate participant",
 										pushNotificationResponse
 												.getTokenInvalidationTimestamp());
@@ -409,6 +409,8 @@ public class PushNotificationService {
 			conn.setUseCaches(false);
 			conn.setDoInput(true);
 			conn.setDoOutput(true);
+			conn.setConnectTimeout(ImplementationConstants.PUSH_SERVER_TIMEOUT);
+			conn.setReadTimeout(ImplementationConstants.PUSH_SERVER_TIMEOUT);
 
 			conn.setRequestMethod("POST");
 			conn.setRequestProperty("Authorization", "key=" + androidAuthKey);
@@ -461,21 +463,30 @@ public class PushNotificationService {
 						new InputStreamReader(conn.getInputStream()));
 				val response = reader.readLine();
 
-				log.debug("Push notification accepted by FCM gateway: {}.",
-						response);
+				if (response.contains("\"success\":0")) {
+					log.warn("Push notification rejected by FCM gateway: {}.",
+							response);
 
-				if (response.equals("error:NotRegistered")) {
-					interventionExecutionManagerService
-							.dialogOptionRemovePushNotificationToken(
-									dialogOption.getId(),
-									PushNotificationTypes.ANDROID, token);
+					if (response.contains("\"error\":\"NotRegistered\"")) {
+						log.debug("Removing push token for participant");
+						interventionExecutionManagerService
+								.dialogOptionRemovePushNotificationToken(
+										dialogOption.getId(),
+										PushNotificationTypes.ANDROID, token);
+					}
+				} else {
+					log.debug("Push notification accepted by FCM gateway: {}.",
+							response);
 				}
+
 			} else {
-				log.debug("Notification rejected by the FCM gateway: ", status);
+				log.warn(
+						"Notification rejected by the FCM gateway: Status is {}",
+						status);
 			}
 			conn.disconnect();
 		} catch (final Exception e) {
-			log.debug("Notification rejected by the FCM gateway: ",
+			log.warn("Notification rejected by the FCM gateway: ",
 					e.getMessage());
 		} finally {
 			if (conn != null) {

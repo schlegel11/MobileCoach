@@ -34,6 +34,7 @@ import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.persistent.concepts.MicroDialogElementInterface;
 import ch.ethz.mc.model.persistent.subelements.LString;
 import ch.ethz.mc.model.persistent.types.AnswerTypes;
+import ch.ethz.mc.model.persistent.types.TextFormatTypes;
 import ch.ethz.mc.model.ui.UIMicroDialogElementInterface;
 import ch.ethz.mc.model.ui.UIModelObject;
 import ch.ethz.mc.tools.StringHelpers;
@@ -84,6 +85,14 @@ public class MicroDialogMessage extends ModelObject
 	private LString				textWithPlaceholders;
 
 	/**
+	 * The format of the message text
+	 */
+	@Getter
+	@Setter
+	@NonNull
+	private TextFormatTypes		textFormat;
+
+	/**
 	 * The message itself is a command for the client
 	 */
 	@Getter
@@ -130,6 +139,15 @@ public class MicroDialogMessage extends ModelObject
 	@Getter
 	@Setter
 	private boolean				messageIsSticky;
+
+	/**
+	 * Defines if the {@link MicroDialogMessage} deactivates all open questions
+	 * of former messages
+	 *
+	 */
+	@Getter
+	@Setter
+	private boolean				messageDeactivatesAllOpenQuestions;
 
 	/**
 	 * Defines if the {@link MicroDialogMessage}s in the group expect to be
@@ -232,7 +250,8 @@ public class MicroDialogMessage extends ModelObject
 		final val microDialogMessage = new UIMicroDialogElementInterface(
 				getOrder(),
 				Messages.getAdminString(AdminMessageStrings.UI_MODEL__MESSAGE),
-				true, textWithPlaceholders.toShortenedString(80),
+				true, messageDeactivatesAllOpenQuestions,
+				textWithPlaceholders.toShortenedString(80),
 				commandMessage
 						? Messages.getAdminString(
 								AdminMessageStrings.UI_MODEL__YES)
