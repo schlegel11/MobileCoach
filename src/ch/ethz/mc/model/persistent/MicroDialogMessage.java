@@ -140,6 +140,15 @@ public class MicroDialogMessage extends ModelObject
 	private boolean				messageExpectsAnswer;
 
 	/**
+	 * Defines if the answer can be cancelled, e.g. by showing an X beside the
+	 * answer to enable the user to skip it
+	 *
+	 */
+	@Getter
+	@Setter
+	private boolean				answerCanBeCancelled;
+
+	/**
 	 * Defines if the {@link MicroDialogMessage} should be sticky within the
 	 * client
 	 *

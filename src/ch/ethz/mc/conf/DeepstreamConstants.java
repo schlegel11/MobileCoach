@@ -94,6 +94,7 @@ public class DeepstreamConstants {
 	public static final String	DEACTIVATION						= "deactivation";
 	public static final String	CONTAINS_SURVEY						= "contains-survey";
 	public static final String	EXPECTS_ANSWER						= "expects-answer";
+	public static final String	CAN_BE_CANCELLED					= "can-be-cancelled";
 	public static final String	MESSAGE_TIMESTAMP					= "message-timestamp";
 	public static final String	SERVER_MESSAGE						= "server-message";
 	public static final String	FORMAT								= "format";

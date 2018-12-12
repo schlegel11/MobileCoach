@@ -400,6 +400,8 @@ public class DeepstreamCommunicationService extends Thread
 						timestamp);
 				messageObject.addProperty(DeepstreamConstants.EXPECTS_ANSWER,
 						dialogMessage.isMessageExpectsAnswer());
+				messageObject.addProperty(DeepstreamConstants.CAN_BE_CANCELLED,
+						dialogMessage.isAnswerCanBeCancelled());
 				messageObject.addProperty(DeepstreamConstants.LAST_MODIFIED,
 						timestamp);
 				messageObject.addProperty(DeepstreamConstants.STICKY,

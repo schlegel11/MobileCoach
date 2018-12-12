@@ -1256,7 +1256,7 @@ public class InterventionAdministrationManagerService {
 			final ObjectId microDialogId) {
 		val microDialogMessage = new MicroDialogMessage(microDialogId, 0,
 				new LString(), TextFormatTypes.PLAIN, false, null, null, null,
-				null, false, false, false, false, null, null,
+				null, false, false, false, false, false, null, null,
 				AnswerTypes.FREE_TEXT,
 				ImplementationConstants.DEFAULT_MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED,
 				new LString(),
@@ -1339,6 +1339,15 @@ public class InterventionAdministrationManagerService {
 			final MicroDialogMessage microDialogMessage,
 			final boolean messageExpectsAnswer) {
 		microDialogMessage.setMessageExpectsAnswer(messageExpectsAnswer);
+
+		databaseManagerService.saveModelObject(microDialogMessage);
+	}
+
+	@Synchronized
+	public void microDialogMessageSetAnswerCanBeCancelledCheckBox(
+			final MicroDialogMessage microDialogMessage,
+			final boolean answerCanBeCancelled) {
+		microDialogMessage.setAnswerCanBeCancelled(answerCanBeCancelled);
 
 		databaseManagerService.saveModelObject(microDialogMessage);
 	}

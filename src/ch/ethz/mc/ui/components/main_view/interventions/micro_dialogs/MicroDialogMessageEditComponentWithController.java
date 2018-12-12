@@ -337,6 +337,22 @@ public class MicroDialogMessageEditComponentWithController
 					}
 				});
 
+		val answerCanBeCancelledCheckBox = getAnswerCanBeCancelledCheckBox();
+		answerCanBeCancelledCheckBox
+				.setValue(microDialogMessage.isAnswerCanBeCancelled());
+
+		answerCanBeCancelledCheckBox
+				.addValueChangeListener(new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						getInterventionAdministrationManagerService()
+								.microDialogMessageSetAnswerCanBeCancelledCheckBox(
+										microDialogMessage, (boolean) event
+												.getProperty().getValue());
+					}
+				});
+
 		val messageBlocksMicroDialogUntilAnsweredCheckBox = getMessageBlocksMicroDialogUntilAnsweredCheckBox();
 		messageBlocksMicroDialogUntilAnsweredCheckBox.setValue(
 				microDialogMessage.isMessageBlocksMicroDialogUntilAnswered());
@@ -372,17 +388,21 @@ public class MicroDialogMessageEditComponentWithController
 
 		if (microDialogMessage.isCommandMessage()) {
 			getMessageExpectsAnswerCheckBox().setEnabled(false);
+			getAnswerCanBeCancelledCheckBox().setEnabled(false);
 		} else {
 			getMessageExpectsAnswerCheckBox().setEnabled(true);
+			getAnswerCanBeCancelledCheckBox().setEnabled(true);
 		}
 
 		if (microDialogMessage.isMessageExpectsAnswer()) {
 			getMessageBlocksMicroDialogUntilAnsweredCheckBox().setEnabled(true);
+			getAnswerCanBeCancelledCheckBox().setEnabled(true);
 			getAnswerGridLayout().setEnabled(true);
 			getMinutesUntilHandledAsNotAnsweredSlider().setEnabled(true);
 		} else {
 			getMessageBlocksMicroDialogUntilAnsweredCheckBox()
 					.setEnabled(false);
+			getAnswerCanBeCancelledCheckBox().setEnabled(false);
 			getAnswerGridLayout().setEnabled(false);
 			getMinutesUntilHandledAsNotAnsweredSlider().setEnabled(false);
 		}

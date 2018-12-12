@@ -326,7 +326,8 @@ public class InterventionExecutionManagerService {
 			final MicroDialog relatedMicroDialogForActivation,
 			final MicroDialogMessage relatedMicroDialogMessage,
 			final boolean supervisorMessage, final boolean answerExpected,
-			final boolean isSticky, final boolean deactivatesAllOpenQuestions,
+			final boolean answerCanBeCancelled, final boolean isSticky,
+			final boolean deactivatesAllOpenQuestions,
 			final int minutesUntilHandledAsNotAnswered) {
 		log.debug("Create message and prepare for sending");
 		val dialogMessage = new DialogMessage(participant.getId(), 0,
@@ -335,8 +336,9 @@ public class InterventionExecutionManagerService {
 				DialogMessageStatusTypes.PREPARED_FOR_SENDING, type, null,
 				message, message, textFormatType, answerType, answerOptions,
 				null, null, null, null, null, timestampToSendMessage, -1,
-				supervisorMessage, answerExpected, isSticky,
-				deactivatesAllOpenQuestions, -1, -1, null, null, false,
+				supervisorMessage, answerExpected, answerCanBeCancelled,
+				isSticky, deactivatesAllOpenQuestions, -1, -1, null, null,
+				false,
 				relatedMonitoringRule == null ? null
 						: relatedMonitoringRule.getId(),
 				relatedMonitoringMessage == null ? null
@@ -712,7 +714,7 @@ public class InterventionExecutionManagerService {
 						: DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY,
 				type, receivedMessage.getClientId(), "", "",
 				TextFormatTypes.PLAIN, null, null, null, null, null, null, null,
-				-1, -1, false, false, false, false, -1,
+				-1, -1, false, false, false, false, false, -1,
 				receivedMessage.getReceivedTimestamp(), answerCleaned,
 				answerRaw, isTypeIntention ? false : true, null, null, null,
 				null, false, false);
@@ -1382,7 +1384,7 @@ public class InterventionExecutionManagerService {
 										? monitoringReplyRule
 												.isSendMessageToSupervisor()
 										: false,
-								false, false, false, 0);
+								false, false, false, false, 0);
 					}
 				}
 
@@ -1399,7 +1401,7 @@ public class InterventionExecutionManagerService {
 							false, InternalDateTime.currentTimeMillis(), null,
 							null,
 							microDialogActivation.getMiroDialogToActivate(),
-							null, false, false, false, false, 0);
+							null, false, false, false, false, false, 0);
 				}
 			} else if (relatedMicroDialogMessage != null) {
 				log.debug("Caring for further micro dialog handling");
@@ -1565,7 +1567,7 @@ public class InterventionExecutionManagerService {
 												.isSendMessageToSupervisor()
 										: false,
 								monitoringMessageExpectsAnswer, false, false,
-								0);
+								false, 0);
 					}
 				}
 
@@ -1606,7 +1608,7 @@ public class InterventionExecutionManagerService {
 							TextFormatTypes.PLAIN, AnswerTypes.CUSTOM, null,
 							false, timeToSendMessageInMillis, null, null,
 							microDialogActivation.getMiroDialogToActivate(),
-							null, false, false, false, false, 0);
+							null, false, false, false, false, false, 0);
 				}
 
 				if (!periodicCheck) {
@@ -1848,7 +1850,8 @@ public class InterventionExecutionManagerService {
 							monitoringRule != null
 									? monitoringRule.isSendMessageToSupervisor()
 									: false,
-							monitoringMessageExpectsAnswer, false, false, 0);
+							monitoringMessageExpectsAnswer, false, false, false,
+							0);
 				}
 			}
 
@@ -1887,7 +1890,7 @@ public class InterventionExecutionManagerService {
 						TextFormatTypes.PLAIN, AnswerTypes.CUSTOM, null, false,
 						timeToSendMessageInMillis, null, null,
 						microDialogActivation.getMiroDialogToActivate(), null,
-						false, false, false, false, 0);
+						false, false, false, false, false, 0);
 			}
 
 			return dialogMessageCreated;
@@ -2330,6 +2333,7 @@ public class InterventionExecutionManagerService {
 						lastMessageSent, null, null, microDialog,
 						microDialogMessage, false,
 						microDialogMessage.isMessageExpectsAnswer(),
+						microDialogMessage.isAnswerCanBeCancelled(),
 						microDialogMessage.isMessageIsSticky(),
 						microDialogMessage
 								.isMessageDeactivatesAllOpenQuestions(),
@@ -2400,7 +2404,7 @@ public class InterventionExecutionManagerService {
 							nextMicroDialog.getName(), TextFormatTypes.PLAIN,
 							AnswerTypes.CUSTOM, null, false, lastMessageSent,
 							null, null, nextMicroDialog, null, false, false,
-							false, false, 0);
+							false, false, false, 0);
 				}
 
 				// Variables need to be refreshed after performing rules
@@ -2639,7 +2643,7 @@ public class InterventionExecutionManagerService {
 				DialogMessageTypes.PLAIN, messageTextToSend,
 				TextFormatTypes.PLAIN, null, null, true,
 				InternalDateTime.currentTimeMillis(), null, null, null, null,
-				advisorMessage, false, false, false, 0);
+				advisorMessage, false, false, false, false, 0);
 	}
 
 	/**
@@ -2711,7 +2715,7 @@ public class InterventionExecutionManagerService {
 				answerOptionsToSend, true, InternalDateTime.currentTimeMillis(),
 				null, determinedMonitoringMessageToSend, null, null,
 				advisorMessage, monitoringMessageGroup.isMessagesExpectAnswer(),
-				false, false, minutesUntilHandledAsNotAnswered);
+				false, false, false, minutesUntilHandledAsNotAnswered);
 	}
 
 	/**
