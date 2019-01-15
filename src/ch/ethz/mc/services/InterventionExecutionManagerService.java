@@ -3375,7 +3375,6 @@ public class InterventionExecutionManagerService {
 	 *
 	 * @return
 	 */
-	@Synchronized
 	private List<ObjectId> getParticipantIdsWithMessagesWaitingToBeSent() {
 		val participantsWithMessagesWaitingToBeSend = new ArrayList<ObjectId>();
 
