@@ -3565,7 +3565,6 @@ public class InterventionExecutionManagerService {
 	 *
 	 * @return
 	 */
-	@Synchronized
 	private List<Participant> getAllParticipantsRelevantForAnsweredInTimeChecksAndMonitoringScheduling() {
 		val relevantParticipants = new ArrayList<Participant>();
 
