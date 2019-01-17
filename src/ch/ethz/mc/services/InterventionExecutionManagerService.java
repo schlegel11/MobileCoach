@@ -1009,7 +1009,6 @@ public class InterventionExecutionManagerService {
 	 * @param periodicScheduling
 	 * @return
 	 */
-	@Synchronized
 	private boolean performMessagingForParticipant(
 			final ObjectId participantIdToCheck,
 			final boolean periodicScheduling) {
