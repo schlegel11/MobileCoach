@@ -30,6 +30,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
@@ -2848,10 +2849,12 @@ public class InterventionExecutionManagerService {
 	/**
 	 * Create a statistics file
 	 * 
+	 * Important: For performance reasons this method is NOT synchronized
+	 * anymore.
+	 * 
 	 * @param statisticsFile
 	 * @throws IOException
 	 */
-	@Synchronized
 	public void createStatistics(final File statisticsFile) throws IOException {
 		final Properties statistics = new Properties() {
 			private static final long serialVersionUID = -478652106406702866L;
@@ -2869,73 +2872,130 @@ public class InterventionExecutionManagerService {
 				Intervention.class, Queries.INTERVENTION__ACTIVE_TRUE);
 
 		int activeInterventionsCount = 0;
+		int validParticipants;
+		int invalidParticipants;
 		// Create statistics of all active interventions
 		for (val intervention : activeInterventions) {
 			activeInterventionsCount++;
+			validParticipants = 0;
+			invalidParticipants = 0;
 
 			// Check all relevant participants
 			val participants = databaseManagerService.findModelObjects(
-					Participant.class,
-					Queries.PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE,
+					Participant.class, Queries.PARTICIPANT__BY_INTERVENTION,
 					intervention.getId());
 
 			// Message counts
 			int totalSentMessages = 0;
+			int totalSentCommands = 0;
 			int totalReceivedMessages = 0;
+			int totalReceivedIntentions = 0;
 			int totalDeactivatedMessages = 0;
 			int answeredQuestions = 0;
 			int unansweredQuestions = 0;
 			int mediaObjectsViewed = 0;
+			int totalActivatedMicroDialogs = 0;
+			long secondsUsageTotal = 0l;
+			long secondsUsageAverage = 0l;
+			final HashMap<String, Integer> microDialogsWithRate = new HashMap<String, Integer>();
 
-			for (val participant : participants) {
-				val dialogMessages = databaseManagerService.findModelObjects(
-						DialogMessage.class,
-						Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_MESSAGE_TYPE,
-						participant.getId(), false);
-				for (val dialogMessage : dialogMessages) {
-					switch (dialogMessage.getStatus()) {
-						case IN_CREATION:
-							break;
-						case PREPARED_FOR_SENDING:
-							break;
-						case RECEIVED_UNEXPECTEDLY:
-							totalReceivedMessages++;
-							break;
-						case RECEIVED_AS_INTENTION:
-							totalReceivedMessages++;
-							break;
-						case SENDING:
-							break;
-						case SENT_AND_ANSWERED_AND_PROCESSED:
-							totalSentMessages++;
-							totalReceivedMessages++;
-							answeredQuestions++;
-							break;
-						case SENT_AND_ANSWERED_BY_PARTICIPANT:
-							totalSentMessages++;
-							totalReceivedMessages++;
-							answeredQuestions++;
-							break;
-						case SENT_AND_NOT_ANSWERED_AND_PROCESSED:
-							totalSentMessages++;
-							unansweredQuestions++;
-							break;
-						case SENT_AND_WAITING_FOR_ANSWER:
-							totalSentMessages++;
-							break;
-						case SENT_BUT_NOT_WAITING_FOR_ANSWER:
-							totalSentMessages++;
-							break;
-						case SENT_AND_WAITED_FOR_ANSWER_BUT_DEACTIVATED:
-							totalSentMessages++;
-							totalDeactivatedMessages++;
-							break;
+			for (val participantToCheck : participants) {
+				synchronized ($lock) {
+					val participant = databaseManagerService.getModelObjectById(
+							Participant.class, participantToCheck.getId());
+					if (participant == null) {
+						continue;
+					} else if (!participant.isMonitoringActive()) {
+						invalidParticipants++;
+						continue;
+					} else {
+						validParticipants++;
+						secondsUsageTotal += (participant
+								.getLastLogoutTimestamp()
+								- participant.getCreatedTimestamp()) / 1000;
 					}
 
-					if (dialogMessage.isMediaContentViewed()) {
-						mediaObjectsViewed++;
+					val dialogMessages = databaseManagerService
+							.findModelObjects(DialogMessage.class,
+									Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_MESSAGE_TYPE,
+									participant.getId(), false);
+					for (val dialogMessage : dialogMessages) {
+						switch (dialogMessage.getStatus()) {
+							case IN_CREATION:
+								break;
+							case PREPARED_FOR_SENDING:
+								break;
+							case RECEIVED_UNEXPECTEDLY:
+								totalReceivedMessages++;
+								break;
+							case RECEIVED_AS_INTENTION:
+								totalReceivedIntentions++;
+								break;
+							case SENDING:
+								break;
+							case SENT_AND_ANSWERED_AND_PROCESSED:
+								totalSentMessages += dialogMessage.getMessage()
+										.split(ImplementationConstants.PLACEHOLDER_NEW_MESSAGE_APP_IDENTIFIER).length;
+								totalReceivedMessages++;
+								answeredQuestions++;
+								break;
+							case SENT_AND_ANSWERED_BY_PARTICIPANT:
+								totalSentMessages += dialogMessage.getMessage()
+										.split(ImplementationConstants.PLACEHOLDER_NEW_MESSAGE_APP_IDENTIFIER).length;
+								totalReceivedMessages++;
+								answeredQuestions++;
+								break;
+							case SENT_AND_NOT_ANSWERED_AND_PROCESSED:
+								totalSentMessages += dialogMessage.getMessage()
+										.split(ImplementationConstants.PLACEHOLDER_NEW_MESSAGE_APP_IDENTIFIER).length;
+								unansweredQuestions++;
+								break;
+							case SENT_AND_WAITING_FOR_ANSWER:
+								totalSentMessages += dialogMessage.getMessage()
+										.split(ImplementationConstants.PLACEHOLDER_NEW_MESSAGE_APP_IDENTIFIER).length;
+								break;
+							case SENT_BUT_NOT_WAITING_FOR_ANSWER:
+								switch (dialogMessage.getType()) {
+									case COMMAND:
+										totalSentCommands++;
+										break;
+									case PLAIN:
+										totalSentMessages += dialogMessage
+												.getMessage()
+												.split(ImplementationConstants.PLACEHOLDER_NEW_MESSAGE_APP_IDENTIFIER).length;
+										break;
+									case MICRO_DIALOG_ACTIVATION:
+										totalActivatedMicroDialogs++;
+										val microDialogId = dialogMessage
+												.getRelatedMicroDialogForActivation()
+												.toHexString();
+										microDialogsWithRate.put(microDialogId,
+												microDialogsWithRate
+														.getOrDefault(
+																microDialogId,
+																0)
+														+ 1);
+									default:
+										break;
+								}
+								break;
+							case SENT_AND_WAITED_FOR_ANSWER_BUT_DEACTIVATED:
+								totalSentMessages += dialogMessage.getMessage()
+										.split(ImplementationConstants.PLACEHOLDER_NEW_MESSAGE_APP_IDENTIFIER).length;
+								unansweredQuestions++;
+								totalDeactivatedMessages++;
+								break;
+						}
+
+						if (dialogMessage.isMediaContentViewed()) {
+							mediaObjectsViewed++;
+						}
 					}
 				}
+			}
+
+			if (validParticipants > 0) {
+				secondsUsageAverage = secondsUsageTotal / validParticipants;
 			}
 
 			// Write values
@@ -2945,12 +3005,28 @@ public class InterventionExecutionManagerService {
 
 			statistics.setProperty(
 					"intervention." + intervention.getId().toString()
+							+ ".validParticipants",
+					String.valueOf(validParticipants));
+			statistics.setProperty(
+					"intervention." + intervention.getId().toString()
+							+ ".invalidParticipants",
+					String.valueOf(invalidParticipants));
+			statistics.setProperty(
+					"intervention." + intervention.getId().toString()
 							+ ".totalSentMessages",
 					String.valueOf(totalSentMessages));
 			statistics.setProperty(
 					"intervention." + intervention.getId().toString()
+							+ ".totalSentCommands",
+					String.valueOf(totalSentCommands));
+			statistics.setProperty(
+					"intervention." + intervention.getId().toString()
 							+ ".totalReceivedMessages",
 					String.valueOf(totalReceivedMessages));
+			statistics.setProperty(
+					"intervention." + intervention.getId().toString()
+							+ ".totalReceivedIntentions",
+					String.valueOf(totalReceivedIntentions));
 			statistics.setProperty(
 					"intervention." + intervention.getId().toString()
 							+ ".totalDeactivatedMessages",
@@ -2967,6 +3043,46 @@ public class InterventionExecutionManagerService {
 					"intervention." + intervention.getId().toString()
 							+ ".mediaObjectsViewed",
 					String.valueOf(mediaObjectsViewed));
+			statistics.setProperty(
+					"intervention." + intervention.getId().toString()
+							+ ".totalActivatedMicroDialogs",
+					String.valueOf(totalActivatedMicroDialogs));
+			statistics.setProperty(
+					"intervention." + intervention.getId().toString()
+							+ ".secondsUsageTotal",
+					String.valueOf(secondsUsageTotal));
+			statistics.setProperty(
+					"intervention." + intervention.getId().toString()
+							+ ".secondsUsageAverage",
+					String.valueOf(secondsUsageAverage));
+
+			for (val microDialogWithRate : microDialogsWithRate.entrySet()) {
+				val microDialog = databaseManagerService.getModelObjectById(
+						MicroDialog.class,
+						new ObjectId(microDialogWithRate.getKey()));
+
+				if (microDialog != null) {
+					statistics.setProperty("intervention."
+							+ intervention.getId().toString() + "."
+							+ microDialogWithRate.getKey() + ".Name",
+							microDialog.getName());
+					statistics.setProperty(
+							"intervention." + intervention.getId().toString()
+									+ "." + microDialogWithRate.getKey()
+									+ ".Value",
+							String.valueOf(microDialogWithRate.getValue()));
+				} else {
+					statistics.setProperty("intervention."
+							+ intervention.getId().toString() + "."
+							+ microDialogWithRate.getKey() + ".Name",
+							"ALREADY DELETED");
+					statistics.setProperty(
+							"intervention." + intervention.getId().toString()
+									+ "." + microDialogWithRate.getKey()
+									+ ".Value",
+							String.valueOf(microDialogWithRate.getValue()));
+				}
+			}
 		}
 
 		statistics.setProperty("activeInterventions",
@@ -2986,6 +3102,7 @@ public class InterventionExecutionManagerService {
 						+ " Statistics File");
 		stringWriter.flush();
 		log.debug(stringWriter.toString());
+		System.err.println(stringWriter.toString());
 	}
 
 	/**
