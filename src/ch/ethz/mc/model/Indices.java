@@ -77,7 +77,7 @@ public class Indices {
 	private static final String[]	participantVariableWithValuesIndices					= new String[] {
 			"{'participant':1}", "{'participant':1,'name':1}" };
 	private static final String[]	interventionVariableWithValuesIndices					= new String[] {
-			"{'intervention':1}" };
+			"{'intervention':1}", "{'intervention':1,'name':1}" };
 
 	private static final String[]	monitoringRuleIndices									= new String[] {
 			"{'intervention':1,'isSubRuleOfMonitoringRule':1}",
