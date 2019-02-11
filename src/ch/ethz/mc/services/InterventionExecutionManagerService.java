@@ -44,6 +44,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
+import org.graphstream.graph.implementations.SingleGraph;
 
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
@@ -2880,6 +2881,9 @@ public class InterventionExecutionManagerService {
 			validParticipants = 0;
 			invalidParticipants = 0;
 
+			// Prepare graph
+			val graph = new SingleGraph(intervention.getName(), false, true);
+
 			// Check all relevant participants
 			val participants = databaseManagerService.findModelObjects(
 					Participant.class, Queries.PARTICIPANT__BY_INTERVENTION,
@@ -2916,9 +2920,13 @@ public class InterventionExecutionManagerService {
 					}
 
 					val dialogMessages = databaseManagerService
-							.findModelObjects(DialogMessage.class,
+							.findSortedModelObjects(DialogMessage.class,
 									Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_MESSAGE_TYPE,
+									Queries.DIALOG_MESSAGE__SORT_BY_ORDER_ASC,
 									participant.getId(), false);
+
+					String formerMicroDialogId = null;
+
 					for (val dialogMessage : dialogMessages) {
 						switch (dialogMessage.getStatus()) {
 							case IN_CREATION:
@@ -2975,6 +2983,25 @@ public class InterventionExecutionManagerService {
 																microDialogId,
 																0)
 														+ 1);
+
+										if (formerMicroDialogId != null) {
+											val edge = graph.addEdge(
+													formerMicroDialogId + "-"
+															+ microDialogId,
+													formerMicroDialogId,
+													microDialogId, true);
+											if (edge.getAttribute(
+													"label") == null) {
+												edge.setAttribute("label", 1);
+											} else {
+												edge.setAttribute("label",
+														(int) edge.getAttribute(
+																"label") + 1);
+											}
+										} else {
+											graph.addNode(microDialogId);
+										}
+										formerMicroDialogId = microDialogId;
 									default:
 										break;
 								}
@@ -3062,6 +3089,9 @@ public class InterventionExecutionManagerService {
 						new ObjectId(microDialogWithRate.getKey()));
 
 				if (microDialog != null) {
+					graph.getNode(microDialogWithRate.getKey())
+							.addAttribute("label", microDialog.getName() + " ("
+									+ microDialogWithRate.getValue() + ")");
 					statistics.setProperty("intervention."
 							+ intervention.getId().toString() + "."
 							+ microDialogWithRate.getKey() + ".Name",
@@ -3072,6 +3102,9 @@ public class InterventionExecutionManagerService {
 									+ ".Value",
 							String.valueOf(microDialogWithRate.getValue()));
 				} else {
+					graph.getNode(microDialogWithRate.getKey())
+							.addAttribute("label", "-DELETED-" + " ("
+									+ microDialogWithRate.getValue() + ")");
 					statistics.setProperty("intervention."
 							+ intervention.getId().toString() + "."
 							+ microDialogWithRate.getKey() + ".Name",
@@ -3083,6 +3116,18 @@ public class InterventionExecutionManagerService {
 							String.valueOf(microDialogWithRate.getValue()));
 				}
 			}
+
+			// Create graph
+			val graphFile = new File(statisticsFile.getParentFile(),
+					"statistics_" + intervention.getName().replaceAll(
+							ImplementationConstants.REGULAR_EXPRESSION_TO_CLEAN_FILE_NAMES,
+							"_") + ".dgs");
+
+			if (graphFile.exists()) {
+				graphFile.delete();
+			}
+
+			graph.write(graphFile.getAbsolutePath());
 		}
 
 		statistics.setProperty("activeInterventions",
@@ -3102,7 +3147,6 @@ public class InterventionExecutionManagerService {
 						+ " Statistics File");
 		stringWriter.flush();
 		log.debug(stringWriter.toString());
-		System.err.println(stringWriter.toString());
 	}
 
 	/**

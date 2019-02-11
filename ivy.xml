@@ -24,6 +24,7 @@
 	<!ENTITY pushy.version "0.11.3">
 	<!ENTITY twilio.version "7.24.2">
 	<!ENTITY joda-time.version "2.10.1">
+	<!ENTITY graphstream.version "1.3">
 ]>
 <ivy-module version="2.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -142,5 +143,8 @@
 		
 		<!-- Joda-Time -->
 		<dependency org="joda-time" name="joda-time" rev="&joda-time.version;" />
+		
+		<!-- Graphstream -->
+		<dependency org="org.graphstream" name="gs-core" rev="&graphstream.version;" />
 	</dependencies>
 </ivy-module>
