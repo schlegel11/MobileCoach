@@ -90,6 +90,7 @@ import ch.ethz.mc.services.threads.IncomingMessageWorker;
 import ch.ethz.mc.services.threads.MonitoringSchedulingWorker;
 import ch.ethz.mc.services.threads.OutgoingMessageWorker;
 import ch.ethz.mc.services.types.SystemVariables;
+import ch.ethz.mc.tools.HTMLStatisticsExport;
 import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mc.tools.RuleEvaluator;
 import ch.ethz.mc.tools.StringHelpers;
@@ -2867,8 +2868,6 @@ public class InterventionExecutionManagerService {
 			}
 		};
 
-		statistics.setProperty("created",
-				StringHelpers.createDailyUniqueIndex());
 		val activeInterventions = databaseManagerService.findModelObjects(
 				Intervention.class, Queries.INTERVENTION__ACTIVE_TRUE);
 
@@ -2902,6 +2901,9 @@ public class InterventionExecutionManagerService {
 			long secondsUsageTotal = 0l;
 			long secondsUsageAverage = 0l;
 			final HashMap<String, Integer> microDialogsWithRate = new HashMap<String, Integer>();
+			final HashMap<String, Integer[]> microDialogMessagesWithRates = new HashMap<String, Integer[]>();
+			final HashMap<String, Integer> languages = new HashMap<String, Integer>();
+			final HashMap<String, Integer> platforms = new HashMap<String, Integer>();
 
 			for (val participantToCheck : participants) {
 				synchronized ($lock) {
@@ -2914,11 +2916,21 @@ public class InterventionExecutionManagerService {
 						continue;
 					} else {
 						validParticipants++;
-						secondsUsageTotal += (participant
-								.getLastLogoutTimestamp()
-								- participant.getCreatedTimestamp()) / 1000;
 					}
 
+					// Analyze basic values
+					secondsUsageTotal += (participant.getLastLogoutTimestamp()
+							- participant.getCreatedTimestamp()) / 1000;
+					languages
+							.put(participant.getLanguage().getDisplayLanguage(),
+									languages
+											.getOrDefault(
+													participant.getLanguage()
+															.getDisplayLanguage(),
+													0)
+											+ 1);
+
+					// Analyze messages
 					val dialogMessages = databaseManagerService
 							.findSortedModelObjects(DialogMessage.class,
 									Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_MESSAGE_TYPE,
@@ -2938,6 +2950,14 @@ public class InterventionExecutionManagerService {
 								break;
 							case RECEIVED_AS_INTENTION:
 								totalReceivedIntentions++;
+								if (dialogMessage.getAnswerReceived()
+										.startsWith("platform\n")) {
+									val platform = dialogMessage
+											.getAnswerReceived().split("\n")[1];
+									platforms.put(platform,
+											platforms.getOrDefault(platform, 0)
+													+ 1);
+								}
 								break;
 							case SENDING:
 								break;
@@ -3014,6 +3034,36 @@ public class InterventionExecutionManagerService {
 								break;
 						}
 
+						if (dialogMessage.isMessageExpectsAnswer()
+								&& dialogMessage
+										.getRelatedMicroDialogMessage() != null) {
+							val microDialogMessageId = dialogMessage
+									.getRelatedMicroDialogMessage()
+									.toHexString();
+
+							val values = microDialogMessagesWithRates
+									.getOrDefault(microDialogMessageId,
+											new Integer[] { 0, 0, 0 });
+
+							switch (dialogMessage.getStatus()) {
+								case SENT_AND_ANSWERED_BY_PARTICIPANT:
+								case SENT_AND_ANSWERED_AND_PROCESSED:
+									values[0]++;
+									break;
+								case SENT_AND_NOT_ANSWERED_AND_PROCESSED:
+									values[1]++;
+									break;
+								case SENT_AND_WAITED_FOR_ANSWER_BUT_DEACTIVATED:
+									values[2]++;
+									break;
+								default:
+									break;
+							}
+
+							microDialogMessagesWithRates
+									.put(microDialogMessageId, values);
+						}
+
 						if (dialogMessage.isMediaContentViewed()) {
 							mediaObjectsViewed++;
 						}
@@ -3026,6 +3076,8 @@ public class InterventionExecutionManagerService {
 			}
 
 			// Write values
+			statistics.setProperty("created",
+					StringHelpers.createDailyUniqueIndex());
 			statistics.setProperty(
 					"intervention." + intervention.getId().toString() + ".name",
 					intervention.getName());
@@ -3093,12 +3145,12 @@ public class InterventionExecutionManagerService {
 							.addAttribute("label", microDialog.getName() + " ("
 									+ microDialogWithRate.getValue() + ")");
 					statistics.setProperty("intervention."
-							+ intervention.getId().toString() + "."
+							+ intervention.getId().toString() + ".md."
 							+ microDialogWithRate.getKey() + ".Name",
 							microDialog.getName());
 					statistics.setProperty(
 							"intervention." + intervention.getId().toString()
-									+ "." + microDialogWithRate.getKey()
+									+ ".md." + microDialogWithRate.getKey()
 									+ ".Value",
 							String.valueOf(microDialogWithRate.getValue()));
 				} else {
@@ -3106,28 +3158,119 @@ public class InterventionExecutionManagerService {
 							.addAttribute("label", "-DELETED-" + " ("
 									+ microDialogWithRate.getValue() + ")");
 					statistics.setProperty("intervention."
-							+ intervention.getId().toString() + "."
+							+ intervention.getId().toString() + ".md."
 							+ microDialogWithRate.getKey() + ".Name",
 							"ALREADY DELETED");
 					statistics.setProperty(
-							"intervention." + intervention.getId().toString()
-									+ "." + microDialogWithRate.getKey()
+							"interventio." + intervention.getId().toString()
+									+ ".md." + microDialogWithRate.getKey()
 									+ ".Value",
 							String.valueOf(microDialogWithRate.getValue()));
 				}
 			}
 
-			// Create graph
-			val graphFile = new File(statisticsFile.getParentFile(),
-					"statistics_" + intervention.getName().replaceAll(
-							ImplementationConstants.REGULAR_EXPRESSION_TO_CLEAN_FILE_NAMES,
-							"_") + ".dgs");
+			for (val microDialogMessageWithRates : microDialogMessagesWithRates
+					.entrySet()) {
+				val microDialogMessage = databaseManagerService
+						.getModelObjectById(MicroDialogMessage.class,
+								new ObjectId(
+										microDialogMessageWithRates.getKey()));
 
-			if (graphFile.exists()) {
-				graphFile.delete();
+				if (microDialogMessage != null) {
+					statistics.setProperty(
+							"intervention." + intervention.getId().toString()
+									+ ".md."
+									+ microDialogMessage.getMicroDialog()
+											.toHexString()
+									+ ".m."
+									+ microDialogMessage.getId().toHexString()
+									+ ".Order",
+							String.valueOf(microDialogMessage.getOrder()));
+					statistics.setProperty(
+							"intervention." + intervention.getId().toString()
+									+ ".md."
+									+ microDialogMessage.getMicroDialog()
+											.toHexString()
+									+ ".m."
+									+ microDialogMessage.getId().toHexString()
+									+ ".Question",
+							microDialogMessage.getTextWithPlaceholders().get(
+									Constants.getInterventionLocales()[0]));
+					statistics.setProperty(
+							"intervention." + intervention.getId().toString()
+									+ ".md."
+									+ microDialogMessage.getMicroDialog()
+											.toHexString()
+									+ ".m."
+									+ microDialogMessage.getId().toHexString()
+									+ ".Type",
+							microDialogMessage.getAnswerType().toString());
+					statistics.setProperty(
+							"intervention." + intervention.getId().toString()
+									+ ".md."
+									+ microDialogMessage.getMicroDialog()
+											.toHexString()
+									+ ".m."
+									+ microDialogMessage.getId().toHexString()
+									+ ".AnswerOptions",
+							microDialogMessage
+									.getAnswerOptionsWithPlaceholders()
+									.get(Constants
+											.getInterventionLocales()[0]));
+					statistics.setProperty(
+							"intervention." + intervention.getId().toString()
+									+ ".md."
+									+ microDialogMessage.getMicroDialog()
+											.toHexString()
+									+ ".m."
+									+ microDialogMessage.getId().toHexString()
+									+ ".Answered",
+							String.valueOf(
+									microDialogMessageWithRates.getValue()[0]));
+					statistics.setProperty(
+							"intervention." + intervention.getId().toString()
+									+ ".md."
+									+ microDialogMessage.getMicroDialog()
+											.toHexString()
+									+ ".m."
+									+ microDialogMessage.getId().toHexString()
+									+ ".Unanswered",
+							String.valueOf(
+									microDialogMessageWithRates.getValue()[1]));
+					statistics.setProperty(
+							"intervention." + intervention.getId().toString()
+									+ ".md."
+									+ microDialogMessage.getMicroDialog()
+											.toHexString()
+									+ ".m."
+									+ microDialogMessage.getId().toHexString()
+									+ ".Deactivated",
+							String.valueOf(
+									microDialogMessageWithRates.getValue()[2]));
+				}
 			}
 
-			graph.write(graphFile.getAbsolutePath());
+			for (val language : languages.entrySet()) {
+				statistics.setProperty(
+						"intervention." + intervention.getId().toString()
+								+ ".language." + language.getKey(),
+						String.valueOf(language.getValue()));
+			}
+			for (val platform : platforms.entrySet()) {
+				statistics.setProperty(
+						"intervention." + intervention.getId().toString()
+								+ ".platform." + platform.getKey(),
+						String.valueOf(platform.getValue()));
+			}
+
+			// Create graph
+			createInterventionStatisticsGraph(statisticsFile.getParentFile(),
+					intervention, graph);
+
+			// Create HTML file
+			new HTMLStatisticsExport(statisticsFile.getParentFile(),
+					intervention, statistics)
+							.createInterventionStatisticsHTMLFile();
 		}
 
 		statistics.setProperty("activeInterventions",
@@ -3521,6 +3664,30 @@ public class InterventionExecutionManagerService {
 	/*
 	 * PRIVATE Getter methods
 	 */
+	/**
+	 * Creates a statistics graph file in DGS format of the given intervention
+	 * 
+	 * @param statisticsFolder
+	 * @param intervention
+	 * @param graph
+	 * @throws IOException
+	 */
+	private void createInterventionStatisticsGraph(final File statisticsFolder,
+			final Intervention intervention, final SingleGraph graph)
+			throws IOException {
+		// Create graph
+		val graphFile = new File(statisticsFolder,
+				"statistics_" + intervention.getName().replaceAll(
+						ImplementationConstants.REGULAR_EXPRESSION_TO_CLEAN_FILE_NAMES,
+						"_") + ".dgs");
+
+		if (graphFile.exists()) {
+			graphFile.delete();
+		}
+
+		graph.write(graphFile.getAbsolutePath());
+	}
+
 	/**
 	 * Returns a list of {@link ObjectId}s of {@link Participant}s that have
 	 * messages that should be sent; Parameters therefore are:
