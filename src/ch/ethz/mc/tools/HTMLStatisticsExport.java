@@ -378,6 +378,7 @@ public class HTMLStatisticsExport {
 			for (val value : values) {
 				writer.write("<" + tag + ">"
 						+ StringEscapeUtils.escapeHtml4(String.valueOf(value))
+								.replaceAll("\n", "<br/>")
 						+ "</" + tag + ">\n");
 			}
 		} catch (final IOException e) {
