@@ -3162,7 +3162,7 @@ public class InterventionExecutionManagerService {
 							+ microDialogWithRate.getKey() + ".Name",
 							"ALREADY DELETED");
 					statistics.setProperty(
-							"interventio." + intervention.getId().toString()
+							"intervention." + intervention.getId().toString()
 									+ ".md." + microDialogWithRate.getKey()
 									+ ".Value",
 							String.valueOf(microDialogWithRate.getValue()));
