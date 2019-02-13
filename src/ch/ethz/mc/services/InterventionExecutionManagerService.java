@@ -2918,6 +2918,8 @@ public class InterventionExecutionManagerService {
 						validParticipants++;
 					}
 
+					String lastOpenOrUnansweredMicroDialogMessageId = null;
+
 					// Analyze basic values
 					secondsUsageTotal += (participant.getLastLogoutTimestamp()
 							- participant.getCreatedTimestamp()) / 1000;
@@ -3043,17 +3045,22 @@ public class InterventionExecutionManagerService {
 
 							val values = microDialogMessagesWithRates
 									.getOrDefault(microDialogMessageId,
-											new Integer[] { 0, 0, 0 });
+											new Integer[] { 0, 0, 0, 0 });
 
 							switch (dialogMessage.getStatus()) {
+								case SENT_AND_WAITING_FOR_ANSWER:
+									lastOpenOrUnansweredMicroDialogMessageId = microDialogMessageId;
+									break;
 								case SENT_AND_ANSWERED_BY_PARTICIPANT:
 								case SENT_AND_ANSWERED_AND_PROCESSED:
 									values[0]++;
 									break;
 								case SENT_AND_NOT_ANSWERED_AND_PROCESSED:
+									lastOpenOrUnansweredMicroDialogMessageId = microDialogMessageId;
 									values[1]++;
 									break;
 								case SENT_AND_WAITED_FOR_ANSWER_BUT_DEACTIVATED:
+									lastOpenOrUnansweredMicroDialogMessageId = microDialogMessageId;
 									values[2]++;
 									break;
 								default:
@@ -3067,6 +3074,18 @@ public class InterventionExecutionManagerService {
 						if (dialogMessage.isMediaContentViewed()) {
 							mediaObjectsViewed++;
 						}
+					}
+
+					if (lastOpenOrUnansweredMicroDialogMessageId != null) {
+						val values = microDialogMessagesWithRates.getOrDefault(
+								lastOpenOrUnansweredMicroDialogMessageId,
+								new Integer[] { 0, 0, 0, 0 });
+
+						values[3]++;
+
+						microDialogMessagesWithRates.put(
+								lastOpenOrUnansweredMicroDialogMessageId,
+								values);
 					}
 				}
 			}
@@ -3247,6 +3266,16 @@ public class InterventionExecutionManagerService {
 									+ ".Deactivated",
 							String.valueOf(
 									microDialogMessageWithRates.getValue()[2]));
+					statistics.setProperty(
+							"intervention." + intervention.getId().toString()
+									+ ".md."
+									+ microDialogMessage.getMicroDialog()
+											.toHexString()
+									+ ".m."
+									+ microDialogMessage.getId().toHexString()
+									+ ".EndPoint",
+							String.valueOf(
+									microDialogMessageWithRates.getValue()[3]));
 				}
 			}
 
