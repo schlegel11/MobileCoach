@@ -340,7 +340,7 @@ public class HTMLStatisticsExport {
 		write("<div class=\"row\">");
 		// Start of row 4
 
-		write("h2", "Potention end-points (open/unanswered last questions)");
+		write("h2", "Potential end-points (open/unanswered last questions)");
 
 		write("<table>");
 		write("<tr>");
