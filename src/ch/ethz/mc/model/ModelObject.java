@@ -43,7 +43,6 @@ import ch.ethz.mc.services.internal.FileStorageManagerService;
 import ch.ethz.mc.tools.CustomObjectMapper;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
@@ -331,7 +330,6 @@ public abstract class ModelObject extends AbstractSerializableTable
 	 *         {@link Iterable} or <code>null</code> if not found
 	 */
 	@JsonIgnore
-	@Synchronized
 	protected static final <ModelObjectSubclass extends ModelObject> ModelObjectSubclass findOne(
 			final Class<ModelObjectSubclass> clazz, final String query,
 			final Object... parameters) {
@@ -376,7 +374,6 @@ public abstract class ModelObject extends AbstractSerializableTable
 	 *         {@link Iterable} or <code>null</code> if not found
 	 */
 	@JsonIgnore
-	@Synchronized
 	protected static final <ModelObjectSubclass extends ModelObject> ModelObjectSubclass findOneSorted(
 			final Class<ModelObjectSubclass> clazz, final String query,
 			final String sort, final Object... parameters) {
@@ -428,7 +425,6 @@ public abstract class ModelObject extends AbstractSerializableTable
 	 *         {@link Iterable} (which contains no items if none has been found)
 	 */
 	@JsonIgnore
-	@Synchronized
 	protected static final <ModelObjectSubclass extends ModelObject> Iterable<ModelObjectSubclass> find(
 			final Class<ModelObjectSubclass> clazz, final String query,
 			final Object... parameters) {
@@ -469,7 +465,6 @@ public abstract class ModelObject extends AbstractSerializableTable
 	 *         {@link Iterable} (which contains no items if none has been found)
 	 */
 	@JsonIgnore
-	@Synchronized
 	protected static final Iterable<ObjectId> findIds(
 			final Class<? extends ModelObject> clazz, final String query,
 			final Object... parameters) {
@@ -515,7 +510,6 @@ public abstract class ModelObject extends AbstractSerializableTable
 	 *         {@link Iterable} (which contains no items if none has been found)
 	 */
 	@JsonIgnore
-	@Synchronized
 	protected static final <ModelObjectSubclass extends ModelObject> Iterable<ModelObjectSubclass> findSorted(
 			final Class<ModelObjectSubclass> clazz, final String query,
 			final String sort, final Object... parameters) {
