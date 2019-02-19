@@ -94,7 +94,7 @@ public class HTMLStatisticsExport {
 		write("<meta charset=\"utf-8\"/>");
 		write("<link href='https://fonts.googleapis.com/css?family=Raleway:400,300,600' rel='stylesheet' type='text/css'/>");
 		write("<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css\" integrity=\"sha256-2YQRJMXD7pIAPHiXr0s+vlRWA7GYJEK0ARns7k2sbHY=\" crossorigin=\"anonymous\"/>");
-		write("<style type=\"text/css\">\ndiv.container { max-width: 2000px; }\ndiv.row { padding-top: 2em; }\ntable { width: 100%; }\ntable.simple th:first-child { width: 70%; }\nh2 { color: darkgray; }\nh3 { color: gray; }\n</style>");
+		write("<style type=\"text/css\">\ndiv.container { max-width: 2000px; }\ndiv.row { padding-top: 2em; }\ntable { width: 100%; }\ntable.simple th:first-child { width: 70%; }\ntable.no-padding th, table.no-padding td { padding: 0; text-align: center; }\nh2 { color: darkgray; }\nh3 { color: gray; }\n</style>");
 
 		write("title", intervention.getName() + " - Pathmate Statistics");
 
@@ -376,6 +376,71 @@ public class HTMLStatisticsExport {
 		write("</div>");
 
 		write("<div class=\"row\">");
+		// Start of row 5
+
+		write("h2", "Participant creation distribution");
+
+		write("<table class=\"no-padding\">");
+		write("<tr>");
+		write("th", "", "00:", "01:", "02:", "03:", "04:", "05:", "06:", "07:",
+				"08:", "09:", "10:", "11:", "12:", "13:", "14:", "15:", "16:",
+				"17:", "18:", "19:", "20:", "21:", "22:", "23:");
+		write("</tr>");
+
+		val weekdays = new String[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat",
+				"Sun" };
+
+		final long[][] participantCreationDistribution = stringToDeep(
+				get("participantCreationDistribution"));
+
+		long min = Long.MAX_VALUE;
+		long max = Long.MIN_VALUE;
+		for (final long[] element : participantCreationDistribution) {
+			for (final long element2 : element) {
+				if (element2 < min) {
+					min = element2;
+				}
+				if (element2 > max) {
+					max = element2;
+				}
+			}
+		}
+
+		for (int i = 0; i < participantCreationDistribution.length; i++) {
+			write("<tr>");
+			write("td", weekdays[i], participantCreationDistribution[i][0],
+					participantCreationDistribution[i][1],
+					participantCreationDistribution[i][2],
+					participantCreationDistribution[i][3],
+					participantCreationDistribution[i][4],
+					participantCreationDistribution[i][5],
+					participantCreationDistribution[i][6],
+					participantCreationDistribution[i][7],
+					participantCreationDistribution[i][8],
+					participantCreationDistribution[i][9],
+					participantCreationDistribution[i][10],
+					participantCreationDistribution[i][11],
+					participantCreationDistribution[i][12],
+					participantCreationDistribution[i][13],
+					participantCreationDistribution[i][14],
+					participantCreationDistribution[i][15],
+					participantCreationDistribution[i][16],
+					participantCreationDistribution[i][17],
+					participantCreationDistribution[i][18],
+					participantCreationDistribution[i][19],
+					participantCreationDistribution[i][20],
+					participantCreationDistribution[i][21],
+					participantCreationDistribution[i][22],
+					participantCreationDistribution[i][23]);
+			write("</tr>");
+		}
+
+		write("</table>");
+
+		// End of row 5
+		write("</div>");
+
+		write("<div class=\"row\">");
 		// Start of last row
 
 		write("<p>Created: " + statistics.getProperty("created") + "<br/>");
@@ -435,5 +500,48 @@ public class HTMLStatisticsExport {
 			log.error("Error when writing statistics to HTML file: {}",
 					e.getMessage());
 		}
+	}
+
+	/**
+	 * Converts string representation of multi-dimensional long array back to
+	 * long array
+	 * 
+	 * @param stringToConvertBack
+	 * @return
+	 */
+	private static long[][] stringToDeep(String stringToConvertBack) {
+		int row = 0;
+		int col = 0;
+		for (int i = 0; i < stringToConvertBack.length(); i++) {
+			if (stringToConvertBack.charAt(i) == '[') {
+				row++;
+			}
+		}
+		row--;
+		for (int i = 0;; i++) {
+			if (stringToConvertBack.charAt(i) == ',') {
+				col++;
+			}
+			if (stringToConvertBack.charAt(i) == ']') {
+				break;
+			}
+		}
+		col++;
+
+		final long[][] out = new long[row][col];
+
+		stringToConvertBack = stringToConvertBack.replaceAll("\\[", "")
+				.replaceAll("\\]", "");
+
+		final String[] s1 = stringToConvertBack.split(", ");
+
+		int j = -1;
+		for (int i = 0; i < s1.length; i++) {
+			if (i % col == 0) {
+				j++;
+			}
+			out[j][i % col] = Long.parseLong(s1[i]);
+		}
+		return out;
 	}
 }

@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -2904,6 +2905,7 @@ public class InterventionExecutionManagerService {
 			final HashMap<String, Integer[]> microDialogMessagesWithRates = new HashMap<String, Integer[]>();
 			final HashMap<String, Integer> languages = new HashMap<String, Integer>();
 			final HashMap<String, Integer> platforms = new HashMap<String, Integer>();
+			final long[][] participantCreationDistribution = new long[7][24];
 
 			for (val participantToCheck : participants) {
 				synchronized ($lock) {
@@ -2931,6 +2933,15 @@ public class InterventionExecutionManagerService {
 															.getDisplayLanguage(),
 													0)
 											+ 1);
+					val calendar = Calendar.getInstance();
+					calendar.setTimeInMillis(
+							participantToCheck.getCreatedTimestamp());
+					participantCreationDistribution[calendar
+							.get(Calendar.DAY_OF_WEEK) == 1
+									? 6
+									: calendar.get(Calendar.DAY_OF_WEEK)
+											- 2][calendar.get(
+													Calendar.HOUR_OF_DAY)]++;
 
 					// Analyze messages
 					val dialogMessages = databaseManagerService
@@ -3153,6 +3164,10 @@ public class InterventionExecutionManagerService {
 					"intervention." + intervention.getId().toString()
 							+ ".secondsUsageAverage",
 					String.valueOf(secondsUsageAverage));
+			statistics.setProperty(
+					"intervention." + intervention.getId().toString()
+							+ ".participantCreationDistribution",
+					Arrays.deepToString(participantCreationDistribution));
 
 			for (val microDialogWithRate : microDialogsWithRate.entrySet()) {
 				val microDialog = databaseManagerService.getModelObjectById(
