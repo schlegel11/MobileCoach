@@ -1392,6 +1392,48 @@ public class DeepstreamCommunicationService extends Thread
 							rpcResponse.send(new JsonPrimitive(false));
 						}
 					});
+			// Can only be called by a "participant" (role)
+			client.rpc.provide(DeepstreamConstants.RPC_USER_VARIABLES,
+					(rpcName, data, rpcResponse) -> {
+						final JsonObject jsonData = (JsonObject) gson
+								.toJsonTree(data);
+
+						try {
+							val entrySet = jsonData
+									.getAsJsonObject(
+											DeepstreamConstants.VARIABLES)
+									.entrySet();
+
+							final String[] variables = new String[entrySet
+									.size()];
+							final String[] values = new String[entrySet.size()];
+
+							val entrySetIterator = entrySet.iterator();
+							int i = 0;
+							while (entrySetIterator.hasNext()) {
+								val entry = entrySetIterator.next();
+								variables[i] = entry.getKey();
+								values[i] = entry.getValue().getAsString();
+								i++;
+							}
+
+							final boolean variablesStored = writeVariableValues(
+									jsonData.get(DeepstreamConstants.USER)
+											.getAsString(),
+									variables, values);
+
+							if (variablesStored) {
+								rpcResponse.send(new JsonPrimitive(true));
+							} else {
+								rpcResponse.send(new JsonPrimitive(false));
+							}
+						} catch (final Exception e) {
+							log.warn(
+									"Error when writing variable values for participant: {}",
+									e.getMessage());
+							rpcResponse.send(new JsonPrimitive(false));
+						}
+					});
 			// Can be called by a "participant" or "supervisor" (role)
 			client.rpc.provide(DeepstreamConstants.RPC_MESSAGE_DIFF,
 					(rpcName, data, rpcResponse) -> {
@@ -1683,6 +1725,37 @@ public class DeepstreamCommunicationService extends Thread
 						variable, value);
 
 		if (variableStored) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * @param participantId
+	 * @param variables
+	 * @param values
+	 * @return
+	 */
+	private boolean writeVariableValues(final String participantId,
+			final String[] variables, final String[] values) {
+		log.debug("Received new values for variables {} for participant {}",
+				variables, participantId);
+
+		boolean variablesStored = true;
+
+		for (int i = 0; i < variables.length; i++) {
+			if (!interventionExecutionManagerService
+					.participantAdjustVariableValueExternallyBasedOnDialogOptionTypeAndData(
+							DialogOptionTypes.EXTERNAL_ID,
+							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+									+ participantId,
+							variables[i], values[i])) {
+				variablesStored = false;
+			}
+		}
+
+		if (variablesStored) {
 			return true;
 		} else {
 			return false;
