@@ -2877,6 +2877,9 @@ public class InterventionExecutionManagerService {
 		int invalidParticipants;
 		// Create statistics of all active interventions
 		for (val intervention : activeInterventions) {
+			// Calender instance to be used several times
+			val calendar = Calendar.getInstance();
+
 			activeInterventionsCount++;
 			validParticipants = 0;
 			invalidParticipants = 0;
@@ -2906,6 +2909,7 @@ public class InterventionExecutionManagerService {
 			final HashMap<String, Integer> languages = new HashMap<String, Integer>();
 			final HashMap<String, Integer> platforms = new HashMap<String, Integer>();
 			final long[][] participantCreationDistribution = new long[7][24];
+			final long[][] participantActivityDistribution = new long[7][24];
 
 			for (val participantToCheck : participants) {
 				synchronized ($lock) {
@@ -2933,7 +2937,7 @@ public class InterventionExecutionManagerService {
 															.getDisplayLanguage(),
 													0)
 											+ 1);
-					val calendar = Calendar.getInstance();
+
 					calendar.setTimeInMillis(
 							participantToCheck.getCreatedTimestamp());
 					participantCreationDistribution[calendar
@@ -3044,6 +3048,31 @@ public class InterventionExecutionManagerService {
 										.split(ImplementationConstants.PLACEHOLDER_NEW_MESSAGE_APP_IDENTIFIER).length;
 								unansweredQuestions++;
 								totalDeactivatedMessages++;
+								break;
+						}
+
+						switch (dialogMessage.getStatus()) {
+							case IN_CREATION:
+							case PREPARED_FOR_SENDING:
+							case RECEIVED_AS_INTENTION:
+							case SENDING:
+							case SENT_AND_NOT_ANSWERED_AND_PROCESSED:
+							case SENT_BUT_NOT_WAITING_FOR_ANSWER:
+							case SENT_AND_WAITED_FOR_ANSWER_BUT_DEACTIVATED:
+							case SENT_AND_WAITING_FOR_ANSWER:
+								break;
+							case RECEIVED_UNEXPECTEDLY:
+							case SENT_AND_ANSWERED_AND_PROCESSED:
+							case SENT_AND_ANSWERED_BY_PARTICIPANT:
+								calendar.setTimeInMillis(dialogMessage
+										.getAnswerReceivedTimestamp());
+								participantActivityDistribution[calendar
+										.get(Calendar.DAY_OF_WEEK) == 1
+												? 6
+												: calendar
+														.get(Calendar.DAY_OF_WEEK)
+														- 2][calendar.get(
+																Calendar.HOUR_OF_DAY)]++;
 								break;
 						}
 
@@ -3168,6 +3197,10 @@ public class InterventionExecutionManagerService {
 					"intervention." + intervention.getId().toString()
 							+ ".participantCreationDistribution",
 					Arrays.deepToString(participantCreationDistribution));
+			statistics.setProperty(
+					"intervention." + intervention.getId().toString()
+							+ ".participantActivityDistribution",
+					Arrays.deepToString(participantActivityDistribution));
 
 			for (val microDialogWithRate : microDialogsWithRate.entrySet()) {
 				val microDialog = databaseManagerService.getModelObjectById(

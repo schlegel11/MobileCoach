@@ -11,6 +11,7 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.persistent.Intervention;
@@ -378,7 +379,7 @@ public class HTMLStatisticsExport {
 		write("<div class=\"row\">");
 		// Start of row 5
 
-		write("h2", "Participant creation distribution");
+		write("h2", "Participant creation distribution (absolute values)");
 
 		write("<table class=\"no-padding\">");
 		write("<tr>");
@@ -395,49 +396,93 @@ public class HTMLStatisticsExport {
 
 		long min = Long.MAX_VALUE;
 		long max = Long.MIN_VALUE;
-		for (final long[] element : participantCreationDistribution) {
-			for (final long element2 : element) {
-				if (element2 < min) {
-					min = element2;
+		for (final long[] dayElements : participantCreationDistribution) {
+			for (final long element : dayElements) {
+				if (element < min) {
+					min = element;
 				}
-				if (element2 > max) {
-					max = element2;
+				if (element > max) {
+					max = element;
 				}
 			}
 		}
 
+		int digits = String.valueOf(max).length();
+
 		for (int i = 0; i < participantCreationDistribution.length; i++) {
 			write("<tr>");
-			write("td", weekdays[i], participantCreationDistribution[i][0],
-					participantCreationDistribution[i][1],
-					participantCreationDistribution[i][2],
-					participantCreationDistribution[i][3],
-					participantCreationDistribution[i][4],
-					participantCreationDistribution[i][5],
-					participantCreationDistribution[i][6],
-					participantCreationDistribution[i][7],
-					participantCreationDistribution[i][8],
-					participantCreationDistribution[i][9],
-					participantCreationDistribution[i][10],
-					participantCreationDistribution[i][11],
-					participantCreationDistribution[i][12],
-					participantCreationDistribution[i][13],
-					participantCreationDistribution[i][14],
-					participantCreationDistribution[i][15],
-					participantCreationDistribution[i][16],
-					participantCreationDistribution[i][17],
-					participantCreationDistribution[i][18],
-					participantCreationDistribution[i][19],
-					participantCreationDistribution[i][20],
-					participantCreationDistribution[i][21],
-					participantCreationDistribution[i][22],
-					participantCreationDistribution[i][23]);
+			write("td", weekdays[i]);
+
+			for (int j = 0; j < participantCreationDistribution[i].length; j++) {
+				writeWithStyle("td",
+						"background-color: rgba(255, 0, 0, "
+								+ 1.0f / (max - min)
+										* +participantCreationDistribution[i][j]
+								+ "); font-size: 0.75em;",
+						StringUtils.leftPad(
+								String.valueOf(
+										participantCreationDistribution[i][j]),
+								digits, "0"));
+			}
 			write("</tr>");
 		}
 
 		write("</table>");
 
 		// End of row 5
+		write("</div>");
+
+		write("<div class=\"row\">");
+		// Start of row 6
+
+		write("h2", "Participant activity distribution (in %)");
+
+		write("<table class=\"no-padding\">");
+		write("<tr>");
+		write("th", "", "00:", "01:", "02:", "03:", "04:", "05:", "06:", "07:",
+				"08:", "09:", "10:", "11:", "12:", "13:", "14:", "15:", "16:",
+				"17:", "18:", "19:", "20:", "21:", "22:", "23:");
+		write("</tr>");
+
+		final long[][] participantActivityDistribution = stringToDeep(
+				get("participantActivityDistribution"));
+
+		min = Long.MAX_VALUE;
+		max = Long.MIN_VALUE;
+		long sum = 0;
+		for (final long[] dayElements : participantActivityDistribution) {
+			for (final long element : dayElements) {
+				sum += element;
+				if (element < min) {
+					min = element;
+				}
+				if (element > max) {
+					max = element;
+				}
+			}
+		}
+
+		digits = String.valueOf(max).length();
+
+		for (int i = 0; i < participantActivityDistribution.length; i++) {
+			write("<tr>");
+			write("td", weekdays[i]);
+
+			for (int j = 0; j < participantActivityDistribution[i].length; j++) {
+				writeWithStyle("td",
+						"background-color: rgba(255, 0, 0, "
+								+ 1.0f / (max - min)
+										* +participantActivityDistribution[i][j]
+								+ "); font-size: 0.75em;",
+						Math.round(1000f / sum
+								* participantActivityDistribution[i][j]) / 10f);
+			}
+			write("</tr>");
+		}
+
+		write("</table>");
+
+		// End of row 6
 		write("</div>");
 
 		write("<div class=\"row\">");
@@ -492,6 +537,28 @@ public class HTMLStatisticsExport {
 		try {
 			for (val value : values) {
 				writer.write("<" + tag + ">"
+						+ StringEscapeUtils.escapeHtml4(String.valueOf(value))
+								.replaceAll("\n", "<br/>")
+						+ "</" + tag + ">\n");
+			}
+		} catch (final IOException e) {
+			log.error("Error when writing statistics to HTML file: {}",
+					e.getMessage());
+		}
+	}
+
+	/**
+	 * Writes tag(s) with style and value(s)
+	 * 
+	 * @param tag
+	 * @param style
+	 * @param values
+	 */
+	private void writeWithStyle(final String tag, final String style,
+			final Object... values) {
+		try {
+			for (val value : values) {
+				writer.write("<" + tag + " style=\"" + style + "\">"
 						+ StringEscapeUtils.escapeHtml4(String.valueOf(value))
 								.replaceAll("\n", "<br/>")
 						+ "</" + tag + ">\n");
