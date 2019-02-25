@@ -91,7 +91,6 @@ import ch.ethz.mc.services.threads.IncomingMessageWorker;
 import ch.ethz.mc.services.threads.MonitoringSchedulingWorker;
 import ch.ethz.mc.services.threads.OutgoingMessageWorker;
 import ch.ethz.mc.services.types.SystemVariables;
-import ch.ethz.mc.tools.HTMLStatisticsExport;
 import ch.ethz.mc.tools.InternalDateTime;
 import ch.ethz.mc.tools.RuleEvaluator;
 import ch.ethz.mc.tools.StringHelpers;
@@ -3327,15 +3326,6 @@ public class InterventionExecutionManagerService {
 								+ ".platform." + platform.getKey(),
 						String.valueOf(platform.getValue()));
 			}
-
-			// Create graph
-			createInterventionStatisticsGraph(statisticsFile.getParentFile(),
-					intervention, graph);
-
-			// Create HTML file
-			new HTMLStatisticsExport(statisticsFile.getParentFile(),
-					intervention, statistics)
-							.createInterventionStatisticsHTMLFile();
 		}
 
 		statistics.setProperty("activeInterventions",
@@ -3721,30 +3711,6 @@ public class InterventionExecutionManagerService {
 	/*
 	 * PRIVATE Getter methods
 	 */
-	/**
-	 * Creates a statistics graph file in DGS format of the given intervention
-	 * 
-	 * @param statisticsFolder
-	 * @param intervention
-	 * @param graph
-	 * @throws IOException
-	 */
-	private void createInterventionStatisticsGraph(final File statisticsFolder,
-			final Intervention intervention, final SingleGraph graph)
-			throws IOException {
-		// Create graph
-		val graphFile = new File(statisticsFolder,
-				"statistics_" + intervention.getName().replaceAll(
-						ImplementationConstants.REGULAR_EXPRESSION_TO_CLEAN_FILE_NAMES,
-						"_") + ".dgs");
-
-		if (graphFile.exists()) {
-			graphFile.delete();
-		}
-
-		graph.write(graphFile.getAbsolutePath());
-	}
-
 	/**
 	 * Returns a list of {@link ObjectId}s of {@link Participant}s that have
 	 * messages that should be sent; Parameters therefore are:
