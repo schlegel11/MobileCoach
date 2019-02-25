@@ -369,9 +369,8 @@ public class DeepstreamCommunicationService extends Thread
 													+ "[ ]?",
 											"")
 									.replaceAll(
-											"[ ]?" + ImplementationConstants.PLACEHOLDER_LINKED_SURVEY
-													+ "[ ]?",
-											""));
+											ImplementationConstants.PLACEHOLDER_LINKED_SURVEY,
+											dialogMessage.getSurveyLink()));
 				} else {
 					messageObject.addProperty(
 							DeepstreamConstants.SERVER_MESSAGE,
