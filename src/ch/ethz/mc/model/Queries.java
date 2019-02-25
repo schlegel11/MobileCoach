@@ -285,4 +285,7 @@ public class Queries {
 	public static final String	UPDATE_VERSION_46__MICRO_DIALOG_MESSAGE__CHANGE_2																																								= "{$set:{'messageDeactivatesAllOpenQuestions':false}}";
 	public static final String	UPDATE_VERSION_46__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'textFormat':'PLAIN'}}";
 	public static final String	UPDATE_VERSION_46__DIALOG_MESSAGE__CHANGE_2																																										= "{$set:{'messageDeactivatesAllOpenQuestions':false}}";
+	public static final String	UPDATE_VERSION_47__MICRO_DIALOG_MESSAGE__CHANGE_1																																								= "{$set:{'randomizationGroup':null}}";
+	public static final String	UPDATE_VERSION_48__MICRO_DIALOG_MESSAGE__CHANGE_1																																								= "{$set:{'answerCanBeCancelled':true}}";
+	public static final String	UPDATE_VERSION_48__DIALOG_MESSAGE__CHANGE_1																																										= "{$set:{'answerCanBeCancelled':true}}";
 }

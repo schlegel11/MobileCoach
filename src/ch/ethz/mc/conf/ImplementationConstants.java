@@ -108,7 +108,7 @@ public class ImplementationConstants {
 	public static final Object	IMAGE_JPEG_RENDERING												= RenderingHints.VALUE_RENDER_DEFAULT;
 	// public static final Object IMAGE_JPEG_RENDERING =
 	// RenderingHints.VALUE_RENDER_QUALITY;
-	public static final float	IMAGE_JPEG_COMPRESSION												= 0.7f;
+	public static final float	IMAGE_JPEG_COMPRESSION												= 0.85f;
 	public static final int		IMAGE_MAX_WIDTH														= 1000;
 	public static final int		IMAGE_MAX_HEIGHT													= 1000;
 

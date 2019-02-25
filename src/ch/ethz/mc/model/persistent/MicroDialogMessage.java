@@ -107,6 +107,14 @@ public class MicroDialogMessage extends ModelObject
 	private String				nonUniqueKey;
 
 	/**
+	 * <strong>OPTIONAL:</strong> The randomization group of the
+	 * {@link MicroDialogMessage}
+	 */
+	@Getter
+	@Setter
+	private String				randomizationGroup;
+
+	/**
 	 * <strong>OPTIONAL:</strong> The {@link MediaObject} used/presented in this
 	 * {@link MicroDialogMessage}
 	 */
@@ -130,6 +138,15 @@ public class MicroDialogMessage extends ModelObject
 	@Getter
 	@Setter
 	private boolean				messageExpectsAnswer;
+
+	/**
+	 * Defines if the answer can be cancelled, e.g. by showing an X beside the
+	 * answer to enable the user to skip it
+	 *
+	 */
+	@Getter
+	@Setter
+	private boolean				answerCanBeCancelled;
 
 	/**
 	 * Defines if the {@link MicroDialogMessage} should be sticky within the
@@ -257,6 +274,7 @@ public class MicroDialogMessage extends ModelObject
 								AdminMessageStrings.UI_MODEL__YES)
 						: Messages.getAdminString(
 								AdminMessageStrings.UI_MODEL__NO),
+				randomizationGroup != null ? randomizationGroup : "",
 				linkedMediaObject != null
 						? Messages.getAdminString(
 								AdminMessageStrings.UI_MODEL__YES)

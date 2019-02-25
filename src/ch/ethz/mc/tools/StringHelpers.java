@@ -409,12 +409,22 @@ public class StringHelpers {
 	 * @return
 	 */
 	public static String parseColonSeparatedMultiLineStringToJSON(
-			final LString text, final Locale language,
-			final Collection<AbstractVariableWithValue> variablesWithValues) {
+			final LString textToParse, final Locale language,
+			final Collection<AbstractVariableWithValue> variablesWithValues,
+			boolean allowRawReplacement) {
+
+		String text;
+		if (allowRawReplacement) {
+			text = VariableStringReplacer.findVariablesAndReplaceWithTextValues(
+					language, textToParse.get(language), variablesWithValues,
+					"");
+		} else {
+			text = textToParse.get(language);
+		}
 
 		val jsonOuterArray = new JsonArray();
 
-		for (val line : text.get(language).split("\n", -1)) {
+		for (val line : text.split("\n", -1)) {
 			if (!StringUtils.isBlank(line)) {
 				val jsonArray = new JsonArray();
 
@@ -423,7 +433,7 @@ public class StringHelpers {
 					String name = line.substring(0, indexOfColon);
 					String value = line.substring(indexOfColon + 1);
 
-					if (name.contains(
+					if (!allowRawReplacement && name.contains(
 							ImplementationConstants.VARIABLE_PREFIX)) {
 						name = VariableStringReplacer
 								.findVariablesAndReplaceWithTextValues(language,
@@ -431,7 +441,7 @@ public class StringHelpers {
 					}
 					jsonArray.add(name);
 
-					if (value.contains(
+					if (!allowRawReplacement && value.contains(
 							ImplementationConstants.VARIABLE_PREFIX)) {
 						value = VariableStringReplacer
 								.findVariablesAndReplaceWithTextValues(language,
@@ -439,7 +449,7 @@ public class StringHelpers {
 					}
 					jsonArray.add(value);
 				} else {
-					if (line.contains(
+					if (!allowRawReplacement && line.contains(
 							ImplementationConstants.VARIABLE_PREFIX)) {
 						jsonArray.add(VariableStringReplacer
 								.findVariablesAndReplaceWithTextValues(language,

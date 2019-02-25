@@ -22,16 +22,15 @@ package ch.ethz.mc.ui;
  */
 import java.io.Serializable;
 
+import org.bson.types.ObjectId;
+
+import com.vaadin.server.WrappedSession;
+
+import ch.ethz.mc.conf.ImplementationConstants;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
-
-import org.bson.types.ObjectId;
-
-import ch.ethz.mc.conf.ImplementationConstants;
-
-import com.vaadin.server.WrappedSession;
 
 /**
  * Contains information about the user currently using the

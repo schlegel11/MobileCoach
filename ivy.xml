@@ -12,7 +12,7 @@
 	<!ENTITY jongo.version "1.3.0">
 	<!ENTITY mongodb-driver.version "3.4.2">
 	<!ENTITY jena.version "2.11.0">
-	<!ENTITY javaluator.version "2.0.0">
+	<!ENTITY javaluator.version "3.0.2">
 	<!ENTITY lombok.version "1.16.8">
 	<!ENTITY mustache.java.version "0.8.14">
 	<!ENTITY java.mail.version "1.4.7">
@@ -23,6 +23,8 @@
 	<!ENTITY jsonpath.version "2.4.0">
 	<!ENTITY pushy.version "0.11.3">
 	<!ENTITY twilio.version "7.24.2">
+	<!ENTITY joda-time.version "2.10.1">
+	<!ENTITY graphstream.version "1.3">
 ]>
 <ivy-module version="2.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -138,5 +140,11 @@
 		
 		<!-- TWILIO -->
 		<dependency org="com.twilio.sdk" name="twilio" rev="&twilio.version;" />
+		
+		<!-- Joda-Time -->
+		<dependency org="joda-time" name="joda-time" rev="&joda-time.version;" />
+		
+		<!-- Graphstream -->
+		<dependency org="org.graphstream" name="gs-core" rev="&graphstream.version;" />
 	</dependencies>
 </ivy-module>

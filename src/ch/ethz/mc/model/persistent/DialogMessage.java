@@ -208,6 +208,15 @@ public class DialogMessage extends ModelObject {
 	private boolean						messageExpectsAnswer;
 
 	/**
+	 * Defines if the answer can be cancelled, e.g. by showing an X beside the
+	 * answer to enable the user to skip it
+	 *
+	 */
+	@Getter
+	@Setter
+	private boolean						answerCanBeCancelled;
+
+	/**
 	 * Defines if this message should be sticky within a chat client
 	 */
 	@Getter

@@ -110,7 +110,7 @@ public class MicroDialogDecisionPoint extends ModelObject
 				false, false,
 				StringUtils.isBlank(comment)
 						? ImplementationConstants.DEFAULT_OBJECT_NAME : comment,
-				"", "", "", "", "", decisionPointRules);
+				"", "", "", "", "", "", decisionPointRules);
 
 		microDialogMessage.setRelatedModelObject(this);
 

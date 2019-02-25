@@ -56,6 +56,7 @@ public class DeepstreamConstants {
 	public static final String	RPC_DASHBOARD_MESSAGE				= "dashboard-message";
 	public static final String	RPC_USER_INTENTION					= "user-intention";
 	public static final String	RPC_USER_VARIABLE					= "user-variable";
+	public static final String	RPC_USER_VARIABLES					= "user-variables";
 	public static final String	RPC_MESSAGE_DIFF					= "message-diff";
 	public static final String	RPC_DASHBOARD_DIFF					= "dashboard-diff";
 
@@ -80,6 +81,7 @@ public class DeepstreamConstants {
 	public static final String	PLATFORM							= "platform";
 	public static final String	TOKEN								= "token";
 	public static final String	VARIABLE							= "variable";
+	public static final String	VARIABLES							= "variables";
 	public static final String	VALUE								= "value";
 	public static final String	SERVER_TIMESTAMP					= "server-timestamp";
 	public static final String	RELATED_MESSAGE_ID					= "related-message-id";
@@ -94,6 +96,7 @@ public class DeepstreamConstants {
 	public static final String	DEACTIVATION						= "deactivation";
 	public static final String	CONTAINS_SURVEY						= "contains-survey";
 	public static final String	EXPECTS_ANSWER						= "expects-answer";
+	public static final String	CAN_BE_CANCELLED					= "can-be-cancelled";
 	public static final String	MESSAGE_TIMESTAMP					= "message-timestamp";
 	public static final String	SERVER_MESSAGE						= "server-message";
 	public static final String	FORMAT								= "format";
