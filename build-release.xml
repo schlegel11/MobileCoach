@@ -14,7 +14,7 @@ STEPS:
 
 -->
 
-<project name="MobileCoach Release" basedir="." default="release">
+<project name="Pathmate Cloud Platform Release" basedir="." default="release">
 	<description>
 		MobileCoach release version creation
 	</description>

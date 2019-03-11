@@ -1,5 +1,6 @@
 package ch.ethz.mc.model.memory;
 
+/* ##LICENSE## */
 import ch.ethz.mc.model.persistent.subelements.LString;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,5 +1,6 @@
 package ch.ethz.mc.rest.services.v02;
 
+/* ##LICENSE## */
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
