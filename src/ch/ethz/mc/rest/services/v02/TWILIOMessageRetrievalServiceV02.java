@@ -1,5 +1,6 @@
 package ch.ethz.mc.rest.services.v02;
 
+/* ##LICENSE## */
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,25 +1,6 @@
 package ch.ethz.mc.services;
 
-/*
- * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
- * initiative of the Institute of Technology Management at University of St.
- * Gallen and the Department of Management, Technology and Economics at ETH
- * Zurich
- * 
- * For details see README.md file in the root folder of this project.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+/* ##LICENSE## */
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -34,10 +15,14 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.IteratorUtils;
@@ -96,7 +81,9 @@ import ch.ethz.mc.tools.RuleEvaluator;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.tools.VariableStringReplacer;
 import ch.ethz.mc.ui.NotificationMessageException;
+import lombok.AllArgsConstructor;
 import lombok.Cleanup;
+import lombok.Data;
 import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -134,6 +121,13 @@ public class InterventionExecutionManagerService {
 	private final MonitoringSchedulingWorker			monitoringSchedulingWorker;
 
 	private final HashSet<String>						priorityParticipantsIds;
+
+	@Data
+	@AllArgsConstructor
+	private class MicroDialogMessageRandomizationResult {
+		MicroDialogMessage	microDialogMessage;
+		int					highestOrder;
+	}
 
 	private InterventionExecutionManagerService(
 			final DatabaseManagerService databaseManagerService,
@@ -2186,7 +2180,7 @@ public class InterventionExecutionManagerService {
 		itemsLoop: do {
 			iteration++;
 
-			val microDialogMessage = databaseManagerService
+			MicroDialogMessage microDialogMessage = databaseManagerService
 					.findOneSortedModelObject(MicroDialogMessage.class,
 							Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG_AND_ORDER_HIGHER,
 							Queries.MICRO_DIALOG_MESSAGE__SORT_BY_ORDER_ASC,
@@ -2220,19 +2214,11 @@ public class InterventionExecutionManagerService {
 			}
 
 			if (handleMessage) {
-				// Handle message
-				currentOrder = microDialogMessage.getOrder();
-				log.debug("Checking micro dialog message {}",
-						microDialogMessage.getId());
-
-				// Check rules of message for execution
-				val rules = databaseManagerService.findSortedModelObjects(
-						MicroDialogMessageRule.class,
-						Queries.MICRO_DIALOG_MESSAGE_RULE__BY_MICRO_DIALOG_MESSAGE,
-						Queries.MICRO_DIALOG_MESSAGE_RULE__SORT_BY_ORDER_ASC,
-						microDialogMessage.getId());
-
-				for (val rule : rules) {
+				// Evaluate next fitting message in case of randomization,
+				// otherwise directly check message
+				if (!StringUtils
+						.isBlank(microDialogMessage.getRandomizationGroup())) {
+					// (Re-)retrieve variables if necessary
 					if (variablesRequireRefresh
 							|| variablesWithValues == null) {
 						variablesWithValues = variablesManagerService
@@ -2241,20 +2227,58 @@ public class InterventionExecutionManagerService {
 						variablesRequireRefresh = false;
 					}
 
-					val ruleResult = RuleEvaluator.evaluateRule(
-							participant.getId(), participant.getLanguage(),
-							rule, variablesWithValues.values());
+					// Determine appropriate message
+					val microDialogMessageRandomizationResult = determineNextFittingMicroDialogMessageInRandomizationGroup(
+							microDialogId, microDialogMessage, participant,
+							variablesWithValues);
 
-					if (!ruleResult.isEvaluatedSuccessful()) {
-						log.error("Error when validating rule: "
-								+ ruleResult.getErrorMessage());
-						continue;
-					}
+					microDialogMessage = microDialogMessageRandomizationResult
+							.getMicroDialogMessage();
+					currentOrder = microDialogMessageRandomizationResult
+							.getHighestOrder();
 
-					// Check if true rule matches
-					if (!ruleResult.isRuleMatchesEquationSign()) {
-						log.debug("Rule does not match, so skip this message");
+					// Continue loop if no message fits at all
+					if (microDialogMessage == null) {
 						continue itemsLoop;
+					}
+				} else {
+					// Handle message
+					currentOrder = microDialogMessage.getOrder();
+					log.debug("Checking micro dialog message {}",
+							microDialogMessage.getId());
+
+					// Check rules of message for execution
+					val rules = databaseManagerService.findSortedModelObjects(
+							MicroDialogMessageRule.class,
+							Queries.MICRO_DIALOG_MESSAGE_RULE__BY_MICRO_DIALOG_MESSAGE,
+							Queries.MICRO_DIALOG_MESSAGE_RULE__SORT_BY_ORDER_ASC,
+							microDialogMessage.getId());
+
+					for (val rule : rules) {
+						if (variablesRequireRefresh
+								|| variablesWithValues == null) {
+							variablesWithValues = variablesManagerService
+									.getAllVariablesWithValuesOfParticipantAndSystem(
+											participant);
+							variablesRequireRefresh = false;
+						}
+
+						val ruleResult = RuleEvaluator.evaluateRule(
+								participant.getId(), participant.getLanguage(),
+								rule, variablesWithValues.values());
+
+						if (!ruleResult.isEvaluatedSuccessful()) {
+							log.error("Error when validating rule: "
+									+ ruleResult.getErrorMessage());
+							continue;
+						}
+
+						// Check if true rule matches
+						if (!ruleResult.isRuleMatchesEquationSign()) {
+							log.debug(
+									"Rule does not match, so skip this message");
+							continue itemsLoop;
+						}
 					}
 				}
 
@@ -2414,6 +2438,11 @@ public class InterventionExecutionManagerService {
 		}
 	}
 
+	/**
+	 * Switch off monitoring for given participant
+	 * 
+	 * @param participantId
+	 */
 	@Synchronized
 	private void dialogStatusSetDataForMonitoringNotAvailable(
 			final ObjectId participantId) {
@@ -2424,6 +2453,138 @@ public class InterventionExecutionManagerService {
 		dialogStatus.setDataForMonitoringParticipationAvailable(false);
 
 		databaseManagerService.saveModelObject(dialogStatus);
+	}
+
+	/**
+	 * Tries to evaluate the next fitting {@link MicroDialogMessage} fitting to
+	 * the participant's history and the belonging randomization group
+	 * 
+	 * @param relatedMicroDialogId
+	 * @param relatedMicroDialogMessage
+	 * @param participant
+	 * @param variablesWithValues
+	 * @return
+	 */
+	private MicroDialogMessageRandomizationResult determineNextFittingMicroDialogMessageInRandomizationGroup(
+			final ObjectId relatedMicroDialogId,
+			final MicroDialogMessage relatedMicroDialogMessage,
+			final Participant participant,
+			final Hashtable<String, AbstractVariableWithValue> variablesWithValues) {
+
+		// Prepare results object
+		val microDialogMessageRandomizationResult = new MicroDialogMessageRandomizationResult(
+				null, relatedMicroDialogMessage.getOrder());
+
+		// Collect former micro dialog messages and their usage amounts
+		val microDialogMessages = databaseManagerService.findSortedModelObjects(
+				MicroDialogMessage.class,
+				Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG_AND_RANDOMIZATION_GROUP,
+				Queries.MICRO_DIALOG_MESSAGE__SORT_BY_ORDER_ASC,
+				relatedMicroDialogId,
+				relatedMicroDialogMessage.getRandomizationGroup());
+
+		val microDialogMessageIds = new LinkedHashMap<String, Integer>();
+		val microDialogMessagesMap = new HashMap<String, MicroDialogMessage>();
+		microDialogMessages.forEach(microDialogMessage -> {
+			microDialogMessageIds.put(microDialogMessage.getId().toHexString(),
+					0);
+			microDialogMessagesMap.put(microDialogMessage.getId().toHexString(),
+					microDialogMessage);
+
+			if (microDialogMessageRandomizationResult
+					.getHighestOrder() < microDialogMessage.getOrder()) {
+				microDialogMessageRandomizationResult
+						.setHighestOrder(microDialogMessage.getOrder());
+			}
+		});
+
+		val dialogMessages = databaseManagerService.findModelObjects(
+				DialogMessage.class,
+				Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_RELATED_MICRO_DIALOG,
+				participant.getId(), relatedMicroDialogId);
+
+		for (val dialogMessage : dialogMessages) {
+			if (dialogMessage.getRelatedMicroDialogMessage() != null
+					&& dialogMessage
+							.getType() != DialogMessageTypes.MICRO_DIALOG_ACTIVATION
+					&& microDialogMessageIds.containsKey(dialogMessage
+							.getRelatedMicroDialogMessage().toHexString())) {
+				microDialogMessageIds.put(
+						dialogMessage.getRelatedMicroDialogMessage()
+								.toHexString(),
+						microDialogMessageIds.get(dialogMessage
+								.getRelatedMicroDialogMessage().toHexString())
+								+ 1);
+			}
+		}
+
+		// Randomize or sort, based on randomization group name
+		final Iterator<Map.Entry<String, Integer>> resortedMicroDialogMessageIdsEntrySet;
+		if (relatedMicroDialogMessage.getRandomizationGroup().toLowerCase()
+				.startsWith("r")) {
+			// Randomize entry set
+			resortedMicroDialogMessageIdsEntrySet = microDialogMessageIds
+					.entrySet().stream().collect(Collectors.collectingAndThen(
+							Collectors.toCollection(ArrayList::new), list -> {
+								Collections.shuffle(list);
+								return list;
+							}))
+					.iterator();
+		} else {
+			// Sort by usage amount to check less used first
+			resortedMicroDialogMessageIdsEntrySet = microDialogMessageIds
+					.entrySet().stream().sorted(Map.Entry.comparingByValue())
+					.collect(Collectors.toMap(Map.Entry::getKey,
+							Map.Entry::getValue, (e1, e2) -> e2,
+							LinkedHashMap::new))
+					.entrySet().iterator();
+		}
+
+		// Check all possible micro dialog messages until a fitting one is found
+		itemsLoop: while (resortedMicroDialogMessageIdsEntrySet.hasNext()) {
+			val microDialogMessageIdEntry = resortedMicroDialogMessageIdsEntrySet
+					.next();
+
+			// Handle message
+			val microDialogMessageToCheck = microDialogMessagesMap
+					.get(microDialogMessageIdEntry.getKey());
+
+			log.debug("Checking micro dialog message {}",
+					microDialogMessageToCheck.getId());
+
+			// Check rules of message for execution
+			val rules = databaseManagerService.findSortedModelObjects(
+					MicroDialogMessageRule.class,
+					Queries.MICRO_DIALOG_MESSAGE_RULE__BY_MICRO_DIALOG_MESSAGE,
+					Queries.MICRO_DIALOG_MESSAGE_RULE__SORT_BY_ORDER_ASC,
+					microDialogMessageToCheck.getId());
+
+			for (val rule : rules) {
+				val ruleResult = RuleEvaluator.evaluateRule(participant.getId(),
+						participant.getLanguage(), rule,
+						variablesWithValues.values());
+
+				if (!ruleResult.isEvaluatedSuccessful()) {
+					log.error("Error when validating rule: "
+							+ ruleResult.getErrorMessage());
+					continue;
+				}
+
+				// Check if true rule matches
+				if (!ruleResult.isRuleMatchesEquationSign()) {
+					log.debug("Rule does not match, so skip this message");
+					continue itemsLoop;
+				}
+			}
+
+			// Stop message check if message fits
+			microDialogMessageRandomizationResult
+					.setMicroDialogMessage(microDialogMessageToCheck);
+
+			return microDialogMessageRandomizationResult;
+		}
+
+		return microDialogMessageRandomizationResult;
 	}
 
 	/*

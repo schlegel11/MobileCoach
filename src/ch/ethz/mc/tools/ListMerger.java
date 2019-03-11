@@ -1,5 +1,6 @@
 package ch.ethz.mc.tools;
 
+/* ##LICENSE## */
 import java.util.ArrayList;
 import java.util.List;
 

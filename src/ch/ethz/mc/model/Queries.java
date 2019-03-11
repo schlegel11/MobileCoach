@@ -1,25 +1,6 @@
 package ch.ethz.mc.model;
 
-/*
- * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
- * initiative of the Institute of Technology Management at University of St.
- * Gallen and the Department of Management, Technology and Economics at ETH
- * Zurich
- * 
- * For details see README.md file in the root folder of this project.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+/* ##LICENSE## */
 /**
  * Contains all queries required to retrieve {@link ModelObject}s from the
  * database
@@ -77,6 +58,7 @@ public class Queries {
 	public static final String	MICRO_DIALOG__SORT_BY_ORDER_DESC																																												= "{'order':-1}";
 
 	public static final String	MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG																																											= "{'microDialog':#}";
+	public static final String	MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG_AND_RANDOMIZATION_GROUP																																					= "{'microDialog':#,'randomizationGroup':#}";
 	public static final String	MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG_AND_ORDER_LOWER																																							= "{'microDialog':#,'order':{$lt:#}}";
 	public static final String	MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG_AND_ORDER_HIGHER																																							= "{'microDialog':#,'order':{$gt:#}}";
 	public static final String	MICRO_DIALOG_MESSAGE__BY_LINKED_INTERMEDIATE_SURVEY																																								= "{'linkedIntermediateSurvey':#}";
@@ -209,6 +191,7 @@ public class Queries {
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_OR_STATUS_AND_NOT_AUTOMATICALLY_PROCESSABLE																															= "{'participant':#,$or:[{'status':#},{'status':#}],'answerNotAutomaticallyProcessable':#}";
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_STATUS_AND_SHOULD_BE_SENT_TIMESTAMP_LOWER																																	= "{'participant':#,'status':#,'shouldBeSentTimestamp':{$lt:#}}";
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_RELATED_MONITORING_MESSAGE																																					= "{'participant':#,'relatedMonitoringMessage':#}";
+	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_RELATED_MICRO_DIALOG																																							= "{'participant':#,'relatedMicroDialogForActivation':#}";
 	public static final String	DIALOG_MESSAGE__BY_PARTICIPANT_AND_CLIENT_ID																																									= "{'participant':#,'clientId':#}";
 	public static final String	DIALOG_MESSAGE__BY_STATUS																																														= "{'status':#}";
 	public static final String	DIALOG_MESSAGE__SORT_BY_ORDER_ASC																																												= "{'order':1}";
