@@ -60,7 +60,8 @@ public class Indices {
 	private static final String[]	dialogMessageIndices									= new String[] {
 			"{'participant':1,'status':1}", "{'participant':1,'order':1}",
 			"{'participant':1,'status':1,'shouldBeSentTimestamp':1}",
-			"{'participant':1,'clientId':1}" };
+			"{'participant':1,'clientId':1}",
+			"{'participant':1,'relatedMicroDialogForActivation':1}" };
 	private static final String[]	dialogOptionIndices										= new String[] {
 			"{'participant':1,'type':1}", "{'type':1,'data':1}" };
 	private static final String[]	dialogStatusIndices										= new String[] {
