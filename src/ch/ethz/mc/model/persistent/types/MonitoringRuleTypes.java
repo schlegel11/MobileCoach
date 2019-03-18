@@ -26,5 +26,5 @@ package ch.ethz.mc.model.persistent.types;
  * @author Andreas Filler
  */
 public enum MonitoringRuleTypes {
-	NORMAL, DAILY, PERIODIC, UNEXPECTED_MESSAGE, USER_INTENTION
+	NORMAL, DAILY, PERIODIC, UNEXPECTED_MESSAGE, USER_INTENTION, EXTERNAL_MESSAGE
 }

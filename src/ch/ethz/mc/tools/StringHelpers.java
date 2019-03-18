@@ -106,6 +106,10 @@ public class StringHelpers {
 					name.append(Messages.getAdminString(
 							AdminMessageStrings.UI_MODEL__UNEXPECTED_MESSAGE_RULE));
 					break;
+				case EXTERNAL_MESSAGE:
+					name.append(Messages.getAdminString(
+							AdminMessageStrings.UI_MODEL__EXTERNAL_MESSAGE_RULE));
+					break;
 				case USER_INTENTION:
 					name.append(Messages.getAdminString(
 							AdminMessageStrings.UI_MODEL__USER_INTENTION_RULE));

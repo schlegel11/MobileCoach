@@ -102,6 +102,8 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 			ThemeImageStrings.WATCH_ICON_SMALL);
 	private final ThemeResource		UNEXPECTED_MESSAGE_RULE_ICON	= new ThemeResource(
 			ThemeImageStrings.BUBBLE_ICON_SMALL);
+	private final ThemeResource		EXTERNAL_MESSAGE_RULE_ICON	= new ThemeResource(
+			ThemeImageStrings.BUBBLE_ICON_SMALL);
 	private final ThemeResource		INTENTION_RULE_ICON				= new ThemeResource(
 			ThemeImageStrings.SIGNS_ICON_SMALL);
 	private final ThemeResource		MESSAGE_RULE_ICON				= new ThemeResource(
@@ -485,6 +487,9 @@ public abstract class AbstractMonitoringRulesEditComponentWithController
 			} else if (monitoringRule
 					.getType() == MonitoringRuleTypes.UNEXPECTED_MESSAGE) {
 				icon = UNEXPECTED_MESSAGE_RULE_ICON;
+			} else if (monitoringRule
+					.getType() == MonitoringRuleTypes.EXTERNAL_MESSAGE) {
+				icon = EXTERNAL_MESSAGE_RULE_ICON;
 			} else if (monitoringRule
 					.getType() == MonitoringRuleTypes.USER_INTENTION) {
 				icon = INTENTION_RULE_ICON;
