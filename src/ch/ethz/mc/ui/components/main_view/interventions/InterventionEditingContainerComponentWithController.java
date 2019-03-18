@@ -34,6 +34,7 @@ import ch.ethz.mc.conf.ThemeImageStrings;
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.ui.components.main_view.interventions.access.AccessTabComponentWithController;
 import ch.ethz.mc.ui.components.main_view.interventions.basic_settings_and_modules.BasicSettingsAndModulesTabComponentWithController;
+import ch.ethz.mc.ui.components.main_view.interventions.external_services.ExternalServicesTabComponentWithController;
 import ch.ethz.mc.ui.components.main_view.interventions.micro_dialogs.MicroDialogsTabComponentWithController;
 import ch.ethz.mc.ui.components.main_view.interventions.monitoring_groups_and_messages.MonitoringMessageGroupsTabComponentWithController;
 import ch.ethz.mc.ui.components.main_view.interventions.participants.ParticipantsTabComponentWithController;
@@ -139,6 +140,12 @@ public class InterventionEditingContainerComponentWithController
 			addPointableTab(getContentTabSheet(),
 					new AccessTabComponentWithController(intervention),
 					AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__ACCESS_TAB,
+					ThemeImageStrings.COMPONENT_ICON);
+			
+			// Add external services tab
+			addPointableTab(getContentTabSheet(),
+					new ExternalServicesTabComponentWithController(intervention),
+					AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__EXTERNAL_SERVICES_TAB,
 					ThemeImageStrings.COMPONENT_ICON);
 		}
 
