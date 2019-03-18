@@ -64,6 +64,7 @@ public class DeepstreamConstants {
 	public static final String	PATH_MESSAGE_UPDATE					= "message-update/";
 	public static final String	PATH_DASHBOARD_UPDATE				= "dashboard-update/";
 	public static final String	PATH_LIST							= "list/";
+	public static final String	PATH_EXTERNAL_SERVICES				= "external-services/";
 
 	public static final String	NICKNAME							= "nickname";
 	public static final String	PARTICIPANT							= "participant";
