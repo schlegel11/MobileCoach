@@ -92,6 +92,7 @@ public class RESTManagerService extends Thread {
 	private final String							deepstreamSuperviserRole;
 	private final String							deepstreamTeamManagerRole;
 	private final String							deepstreamObserverRole;
+	private final String							externalServiceRole;
 	private final int								deepstreamMinClientVersion;
 	private final int								deepstreamMaxClientVersion;
 
@@ -121,6 +122,7 @@ public class RESTManagerService extends Thread {
 		deepstreamSuperviserRole = ImplementationConstants.DEEPSTREAM_SUPERVISOR_ROLE;
 		deepstreamTeamManagerRole = ImplementationConstants.DEEPSTREAM_TEAM_MANAGER_ROLE;
 		deepstreamObserverRole = ImplementationConstants.DEEPSTREAM_OBSERVER_ROLE;
+		externalServiceRole = ImplementationConstants.DEEPSTREAM_EXTERNAL_SERVICE_ROLE;
 		deepstreamMinClientVersion = Constants.getDeepstreamMinClientVersion();
 		deepstreamMaxClientVersion = Constants.getDeepstreamMaxClientVersion();
 
@@ -938,7 +940,8 @@ public class RESTManagerService extends Thread {
 			}
 		} else if (role.equals(deepstreamParticipantRole)
 				|| role.equals(deepstreamTeamManagerRole)
-				|| role.equals(deepstreamObserverRole)) {
+				|| role.equals(deepstreamObserverRole)
+				|| role.equals(externalServiceRole)) {
 			// Check participant or observer access
 			val dialogOption = databaseManagerService.findOneModelObject(
 					DialogOption.class, Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
