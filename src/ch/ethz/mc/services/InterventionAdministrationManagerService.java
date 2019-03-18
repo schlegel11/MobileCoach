@@ -45,10 +45,12 @@ import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
+import ch.ethz.mc.model.memory.ExternalServiceRegistration;
 import ch.ethz.mc.model.persistent.BackendUser;
 import ch.ethz.mc.model.persistent.BackendUserInterventionAccess;
 import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogStatus;
+import ch.ethz.mc.model.persistent.InterventionExternalService;
 import ch.ethz.mc.model.persistent.Feedback;
 import ch.ethz.mc.model.persistent.IntermediateSurveyAndFeedbackParticipantShortURL;
 import ch.ethz.mc.model.persistent.Intervention;
@@ -82,6 +84,7 @@ import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import ch.ethz.mc.model.persistent.types.TextFormatTypes;
 import ch.ethz.mc.modules.AbstractModule;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
+import ch.ethz.mc.services.internal.ExternalServicesManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
 import ch.ethz.mc.services.internal.ModelObjectExchangeService;
@@ -114,6 +117,7 @@ public class InterventionAdministrationManagerService {
 	private final FileStorageManagerService					fileStorageManagerService;
 	private final VariablesManagerService					variablesManagerService;
 	private final ModelObjectExchangeService				modelObjectExchangeService;
+	private final ExternalServicesManagerService			externalServicesManagerService;
 
 	private final SurveyAdministrationManagerService		screeningSurveyAdministrationManagerService;
 
@@ -124,7 +128,8 @@ public class InterventionAdministrationManagerService {
 			final FileStorageManagerService fileStorageManagerService,
 			final VariablesManagerService variablesManagerService,
 			final ModelObjectExchangeService modelObjectExchangeService,
-			final SurveyAdministrationManagerService screeningSurveyAdministrationManagerService)
+			final SurveyAdministrationManagerService screeningSurveyAdministrationManagerService,
+			final ExternalServicesManagerService externalServicesManagerService)
 			throws Exception {
 		$lock = MC.getInstance();
 
@@ -135,6 +140,7 @@ public class InterventionAdministrationManagerService {
 		this.variablesManagerService = variablesManagerService;
 		this.modelObjectExchangeService = modelObjectExchangeService;
 		this.screeningSurveyAdministrationManagerService = screeningSurveyAdministrationManagerService;
+		this.externalServicesManagerService = externalServicesManagerService;
 
 		log.info("Registering modules...");
 		// FIXME LONGTERM Also relevant for reimplementation of module system
@@ -151,13 +157,15 @@ public class InterventionAdministrationManagerService {
 			final FileStorageManagerService fileStorageManagerService,
 			final VariablesManagerService variablesManagerService,
 			final ModelObjectExchangeService modelObjectExchangeService,
-			final SurveyAdministrationManagerService screeningSurveyAdministrationManagerService)
+			final SurveyAdministrationManagerService screeningSurveyAdministrationManagerService,
+			final ExternalServicesManagerService externalServicesManagerService)
 			throws Exception {
 		if (instance == null) {
 			instance = new InterventionAdministrationManagerService(
 					databaseManagerService, fileStorageManagerService,
 					variablesManagerService, modelObjectExchangeService,
-					screeningSurveyAdministrationManagerService);
+					screeningSurveyAdministrationManagerService,
+					externalServicesManagerService);
 		}
 		return instance;
 	}
@@ -327,6 +335,8 @@ public class InterventionAdministrationManagerService {
 				MonitoringRuleTypes.UNEXPECTED_MESSAGE);
 		monitoringRuleCreate(intervention.getId(), null,
 				MonitoringRuleTypes.USER_INTENTION);
+		monitoringRuleCreate(intervention.getId(), null,
+				MonitoringRuleTypes.EXTERNAL_MESSAGE);
 
 		return intervention;
 	}
@@ -648,6 +658,44 @@ public class InterventionAdministrationManagerService {
 			final InterventionVariableWithValue variableToDelete) {
 
 		databaseManagerService.deleteModelObject(variableToDelete);
+	}
+	
+	// Intervention External Service
+	@Synchronized
+	public InterventionExternalService interventionExternalServiceCreate(
+			final String serviceName, final ObjectId interventionId)
+			throws NotificationMessageException {
+
+		val interventionExternalServices = databaseManagerService
+				.findModelObjects(InterventionExternalService.class,
+						Queries.INTERVENTION_EXTERNAL_SERVICE__BY_INTERVENTION_AND_NAME,
+						interventionId, serviceName);
+		if (interventionExternalServices.iterator().hasNext()) {
+			throw new NotificationMessageException(
+					AdminMessageStrings.NOTIFICATION__THE_GIVEN_EXTERNAL_SERVICE_NAME_IS_ALREADY_IN_USE);
+		}
+
+		ExternalServiceRegistration externalServiceRegistration = externalServicesManagerService
+				.createExternalService(interventionId, serviceName);
+
+		val interventionExternalService = new InterventionExternalService(
+				interventionId, serviceName, externalServiceRegistration.getToken());
+		// val interventionVariableWithValue = new
+		// InterventionVariableWithValue(
+		// interventionId, variableName, "0",
+		// InterventionVariableWithValuePrivacyTypes.PRIVATE,
+		// InterventionVariableWithValueAccessTypes.INTERNAL);
+
+		databaseManagerService.saveModelObject(interventionExternalService);
+
+		return interventionExternalService;
+	}
+	
+	@Synchronized
+	public void interventionExternalServiceDelete(
+			final InterventionExternalService externalService) {
+		externalServicesManagerService.deleteExternalService(externalService);
+		databaseManagerService.deleteModelObject(externalService);
 	}
 
 	// Monitoring Message Group
