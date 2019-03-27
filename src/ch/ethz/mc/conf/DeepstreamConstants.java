@@ -40,6 +40,12 @@ public class DeepstreamConstants {
 	public static final String	REST_FIELD_ROLE						= "role";
 	public static final String	REST_FIELD_INTERVENTION_PATTERN		= "intervention-pattern";
 	public static final String	REST_FIELD_INTERVENTION_PASSWORD	= "intervention-password";
+	
+	public static final String	REST_FIELD_SERVICE_ID				= "service-id";
+	public static final String	REST_FIELD_TOKEN					= "token";
+	public static final String	REST_FIELD_PARTICIPANTS				= "participants";
+	public static final String	REST_FIELD_VARIABLES				= "variables";
+
 
 	public static final String	STATUS_ANSWERED_BY_USER				= "ANSWERED_BY_USER";
 	public static final String	STATUS_NOT_ANSWERED_BY_USER			= "NOT_ANSWERED_BY_USER";

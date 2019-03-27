@@ -8,16 +8,12 @@ import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.TextArea;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.model.persistent.InterventionExternalService;
-import ch.ethz.mc.model.persistent.InterventionVariableWithValue;
-import ch.ethz.mc.model.persistent.types.InterventionVariableWithValueAccessTypes;
-import ch.ethz.mc.model.persistent.types.InterventionVariableWithValuePrivacyTypes;
 import ch.ethz.mc.model.ui.UIInterventionExternalService;
-import ch.ethz.mc.model.ui.UIInterventionVariable;
-import ch.ethz.mc.ui.NotificationMessageException;
 import ch.ethz.mc.ui.components.basics.ShortStringEditComponent;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
@@ -51,6 +47,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ExternalServicesTabComponentWithController extends ExternalServicesTabComponent {
 
+	private static final String SERVICE_ID_TOKEN_FORMATTER = "{\n  \"serviceId\": \"%s\",\n  \"token\": \"%s\"\n}";
 	private final Intervention										intervention;
 
 	private UIInterventionExternalService							selectedUIExternalService			= null;
@@ -70,12 +67,12 @@ public class ExternalServicesTabComponentWithController extends ExternalServices
 				.getExternalServicesTable();
 
 		// table content
-		val variablesOfIntervention = getInterventionAdministrationManagerService()
-				.getAllInterventionVariablesOfIntervention(
+		val externalServicesOfIntervention = getInterventionAdministrationManagerService()
+				.getAllExternalServicesOfIntervention(
 						intervention.getId());
 
 		beanContainer = createBeanContainerForModelObjects(
-				UIInterventionExternalService.class, variablesOfIntervention);
+				UIInterventionExternalService.class, externalServicesOfIntervention);
 
 		extrenalServicesTable.setContainerDataSource(beanContainer);
 		extrenalServicesTable.setSortContainerPropertyId(
@@ -103,6 +100,10 @@ public class ExternalServicesTabComponentWithController extends ExternalServices
 							extrenalServicesTable, UIInterventionExternalService.class,
 							objectId);
 					interventionExternalServicesEditComponent.setSomethingSelected();
+					
+					val selectedExternalService = selectedUIExternalService
+							.getRelatedModelObject(InterventionExternalService.class);
+					fillServiceIdTokenTextArea(selectedExternalService);
 				}
 			}
 		});
@@ -113,10 +114,20 @@ public class ExternalServicesTabComponentWithController extends ExternalServices
 				.addClickListener(buttonClickListener);
 		interventionExternalServicesEditComponent.getRenameButton()
 				.addClickListener(buttonClickListener);
-		interventionExternalServicesEditComponent.getEditButton()
-				.addClickListener(buttonClickListener);
 		interventionExternalServicesEditComponent.getDeleteButton()
 				.addClickListener(buttonClickListener);
+		interventionExternalServicesEditComponent.getRenewTokenButton()
+				.addClickListener(buttonClickListener);
+		interventionExternalServicesEditComponent.getActiveInactiveButton()
+				.addClickListener(buttonClickListener);
+	}
+	
+	private void fillServiceIdTokenTextArea(InterventionExternalService externalService) {
+		TextArea serviceIdTokenTextArea = getExternalServicesEditComponent().getServiceIdTokenTextArea();
+		serviceIdTokenTextArea.setReadOnly(false);
+		serviceIdTokenTextArea.setValue(
+				String.format(SERVICE_ID_TOKEN_FORMATTER, externalService.getServiceId(), externalService.getToken()));
+		serviceIdTokenTextArea.setReadOnly(true);
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
@@ -129,13 +140,16 @@ public class ExternalServicesTabComponentWithController extends ExternalServices
 				createExternalService();
 			} else if (event.getButton() == accessControlEditComponent
 					.getRenameButton()) {
-				renameVariable();
+				renameExternalService();
 			} else if (event.getButton() == accessControlEditComponent
-					.getEditButton()) {
-				editVariableValue();
-			}else if (event.getButton() == accessControlEditComponent
 					.getDeleteButton()) {
 				deleteExternalService();
+			} else if (event.getButton() == accessControlEditComponent
+					.getRenewTokenButton()) {
+				renewExternalServiceToken();
+			} else if (event.getButton() == accessControlEditComponent
+					.getActiveInactiveButton()) {
+				activeInactiveExternalService();
 			}
 		}
 	}
@@ -148,10 +162,10 @@ public class ExternalServicesTabComponentWithController extends ExternalServices
 				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
-						InterventionExternalService newVariable;
+						InterventionExternalService newExternalService;
 						try {
 							// Create new variable
-							newVariable = getInterventionAdministrationManagerService()
+							newExternalService = getInterventionAdministrationManagerService()
 									.interventionExternalServiceCreate(
 											getStringValue(),
 											intervention.getId());
@@ -161,39 +175,43 @@ public class ExternalServicesTabComponentWithController extends ExternalServices
 						}
 
 						// Adapt UI
-						beanContainer.addItem(newVariable.getId(),
+						beanContainer.addItem(newExternalService.getId(),
 								UIInterventionExternalService.class
-										.cast(newVariable.toUIModelObject()));
+										.cast(newExternalService.toUIModelObject()));
 						getExternalServicesEditComponent().getExternalServicesTable()
-								.select(newVariable.getId());
+								.select(newExternalService.getId());
+						val extrenalServicesTable = getExternalServicesEditComponent().getExternalServicesTable();
+						extrenalServicesTable.sort();
+						extrenalServicesTable.select(null);
+						extrenalServicesTable.select(newExternalService.getId());
+						
 						getAdminUI().showInformationNotification(
 								AdminMessageStrings.NOTIFICATION__EXTERNAL_SERVICE_CREATED);
-
 						closeWindow();
 					}
 				}, null);
 	}
 
-	public void renameVariable() {
-		log.debug("Rename variable");
+	public void renameExternalService() {
+		log.debug("Rename external service");
 
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_NAME_FOR_EXTERNAL_SERVICE,
 				selectedUIExternalService.getRelatedModelObject(
-						InterventionVariableWithValue.class).getName(),
+						InterventionExternalService.class).getName(),
 				null, new ShortStringEditComponent(),
 				new ExtendableButtonClickListener() {
 					@Override
 					public void buttonClick(final ClickEvent event) {
+						val selectedExternalService = selectedUIExternalService
+								.getRelatedModelObject(
+										InterventionExternalService.class);
 						try {
-							val selectedVariable = selectedUIExternalService
-									.getRelatedModelObject(
-											InterventionVariableWithValue.class);
 
 							// Change name
 							getInterventionAdministrationManagerService()
-									.interventionVariableWithValueSetName(
-											selectedVariable, getStringValue());
+									.interventionExternalServiceSetName(
+											selectedExternalService, getStringValue());
 						} catch (final Exception e) {
 							handleException(e);
 							return;
@@ -201,11 +219,15 @@ public class ExternalServicesTabComponentWithController extends ExternalServices
 
 						// Adapt UI
 						getStringItemProperty(selectedUIExternalServiceBeanItem,
-								UIInterventionVariable.NAME)
+								UIInterventionExternalService.NAME)
 										.setValue(selectedUIExternalService
 												.getRelatedModelObject(
-														InterventionVariableWithValue.class)
+														InterventionExternalService.class)
 												.getName());
+						val extrenalServicesTable = getExternalServicesEditComponent().getExternalServicesTable();
+						extrenalServicesTable.sort();
+						extrenalServicesTable.select(null);
+						extrenalServicesTable.select(selectedExternalService.getId());
 
 						getAdminUI().showInformationNotification(
 								AdminMessageStrings.NOTIFICATION__EXTERNAL_SERVICE_RENAMED);
@@ -215,46 +237,6 @@ public class ExternalServicesTabComponentWithController extends ExternalServices
 	}
 
 
-	public void editVariableValue() {
-		log.debug("Edit variable value");
-
-		showModalStringValueEditWindow(
-				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__ENTER_NEW_VALUE_FOR_VARIABLE,
-				selectedUIExternalService.getRelatedModelObject(
-						InterventionVariableWithValue.class).getValue(),
-				null, new ShortStringEditComponent(),
-				new ExtendableButtonClickListener() {
-					@Override
-					public void buttonClick(final ClickEvent event) {
-						try {
-							val selectedVariable = selectedUIExternalService
-									.getRelatedModelObject(
-											InterventionVariableWithValue.class);
-
-							// Change name
-							getInterventionAdministrationManagerService()
-									.interventionVariableWithValueSetValue(
-											selectedVariable, getStringValue());
-						} catch (final Exception e) {
-							handleException(e);
-							return;
-						}
-
-						// Adapt UI
-						getStringItemProperty(selectedUIExternalServiceBeanItem,
-								UIInterventionVariable.VALUE)
-										.setValue(selectedUIExternalService
-												.getRelatedModelObject(
-														InterventionVariableWithValue.class)
-												.getValue());
-
-						getAdminUI().showInformationNotification(
-								AdminMessageStrings.NOTIFICATION__VARIABLE_VALUE_CHANGED);
-						closeWindow();
-					}
-				}, null);
-	}
-
 	public void deleteExternalService() {
 		log.debug("Delete external service");
 		showConfirmationWindow(new ExtendableButtonClickListener() {
@@ -262,14 +244,14 @@ public class ExternalServicesTabComponentWithController extends ExternalServices
 			@Override
 			public void buttonClick(final ClickEvent event) {
 				try {
-					val selectedVariable = selectedUIExternalService
+					val selectedExternalService = selectedUIExternalService
 							.getRelatedModelObject(
 									InterventionExternalService.class);
 
 					// Delete external service
 					getInterventionAdministrationManagerService()
 							.interventionExternalServiceDelete(
-									selectedVariable);
+									selectedExternalService);
 				} catch (final Exception e) {
 					closeWindow();
 					handleException(e);
@@ -285,6 +267,66 @@ public class ExternalServicesTabComponentWithController extends ExternalServices
 				getAdminUI().showInformationNotification(
 						AdminMessageStrings.NOTIFICATION__EXTERNAL_SERVICE_DELETED);
 
+				closeWindow();
+			}
+		}, null);
+	}
+	
+	public void renewExternalServiceToken() {
+		log.debug("Renew token");
+		showConfirmationWindow(new ExtendableButtonClickListener() {
+			@Override
+			public void buttonClick(final ClickEvent event) {
+				try {
+					val selectedExternalService = selectedUIExternalService
+							.getRelatedModelObject(InterventionExternalService.class);
+
+					// Renew token
+					getInterventionAdministrationManagerService()
+							.interventionExternalServiceRenewToken(selectedExternalService);
+					
+					fillServiceIdTokenTextArea(selectedExternalService);
+				} catch (final Exception e) {
+					handleException(e);
+					return;
+				}
+
+				// Adapt UI
+				getStringItemProperty(selectedUIExternalServiceBeanItem, UIInterventionExternalService.TOKEN).setValue(
+						selectedUIExternalService.getRelatedModelObject(InterventionExternalService.class).getToken());
+				
+				getAdminUI()
+						.showInformationNotification(AdminMessageStrings.NOTIFICATION__EXTERNAL_SERVICE_TOKEN_RENEWED);
+				closeWindow();
+			}
+		}, null);
+	}
+	
+	public void activeInactiveExternalService() {
+		log.debug("Active/Inactive service");
+		showConfirmationWindow(new ExtendableButtonClickListener() {
+			@Override
+			public void buttonClick(final ClickEvent event) {
+				val selectedExternalService = selectedUIExternalService
+						.getRelatedModelObject(InterventionExternalService.class);
+				try {
+					// Change status
+					getInterventionAdministrationManagerService().interventionExternalServiceSetStatus(
+							selectedExternalService, !selectedExternalService.isActive());
+				} catch (final Exception e) {
+					handleException(e);
+					return;
+				}
+
+				// Adapt UI
+				removeAndAddModelObjectToBeanContainer(beanContainer, selectedExternalService);
+				val extrenalServicesTable = getExternalServicesEditComponent().getExternalServicesTable();
+				extrenalServicesTable.sort();
+				extrenalServicesTable.select(null);
+				extrenalServicesTable.select(selectedExternalService.getId());
+				
+				getAdminUI()
+						.showInformationNotification(AdminMessageStrings.NOTIFICATION__EXTERNAL_SERVICE_STATUS_CHANGED);
 				closeWindow();
 			}
 		}, null);

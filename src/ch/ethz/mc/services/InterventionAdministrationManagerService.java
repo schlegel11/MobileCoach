@@ -45,7 +45,7 @@ import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
-import ch.ethz.mc.model.memory.ExternalServiceRegistration;
+import ch.ethz.mc.model.memory.ExternalRegistration;
 import ch.ethz.mc.model.persistent.BackendUser;
 import ch.ethz.mc.model.persistent.BackendUserInterventionAccess;
 import ch.ethz.mc.model.persistent.DialogMessage;
@@ -662,29 +662,20 @@ public class InterventionAdministrationManagerService {
 	
 	// Intervention External Service
 	@Synchronized
-	public InterventionExternalService interventionExternalServiceCreate(
-			final String serviceName, final ObjectId interventionId)
-			throws NotificationMessageException {
+	public InterventionExternalService interventionExternalServiceCreate(final String serviceName,
+			final ObjectId interventionId) throws NotificationMessageException {
 
-		val interventionExternalServices = databaseManagerService
-				.findModelObjects(InterventionExternalService.class,
-						Queries.INTERVENTION_EXTERNAL_SERVICE__BY_INTERVENTION_AND_NAME,
-						interventionId, serviceName);
+		val interventionExternalServices = databaseManagerService.findModelObjects(InterventionExternalService.class,
+				Queries.INTERVENTION_EXTERNAL_SERVICE__BY_INTERVENTION_AND_NAME, interventionId, serviceName);
 		if (interventionExternalServices.iterator().hasNext()) {
 			throw new NotificationMessageException(
 					AdminMessageStrings.NOTIFICATION__THE_GIVEN_EXTERNAL_SERVICE_NAME_IS_ALREADY_IN_USE);
 		}
 
-		ExternalServiceRegistration externalServiceRegistration = externalServicesManagerService
-				.createExternalService(interventionId, serviceName);
+		ExternalRegistration externalRegistration = externalServicesManagerService.createExternalService(serviceName);
 
-		val interventionExternalService = new InterventionExternalService(
-				interventionId, serviceName, externalServiceRegistration.getToken());
-		// val interventionVariableWithValue = new
-		// InterventionVariableWithValue(
-		// interventionId, variableName, "0",
-		// InterventionVariableWithValuePrivacyTypes.PRIVATE,
-		// InterventionVariableWithValueAccessTypes.INTERNAL);
+		val interventionExternalService = new InterventionExternalService(interventionId,
+				externalRegistration.getExternalId(), serviceName, externalRegistration.getSecret(), true);
 
 		databaseManagerService.saveModelObject(interventionExternalService);
 
@@ -692,10 +683,49 @@ public class InterventionAdministrationManagerService {
 	}
 	
 	@Synchronized
+	public void interventionExternalServiceSetName(
+			final InterventionExternalService interventionExternalService,
+			final String newName) throws NotificationMessageException {
+
+		val interventionExternalServices = databaseManagerService.findModelObjects(InterventionExternalService.class,
+				Queries.INTERVENTION_EXTERNAL_SERVICE__BY_INTERVENTION_AND_NAME, interventionExternalService.getIntervention(), newName);
+		if (interventionExternalServices.iterator().hasNext()) {
+			throw new NotificationMessageException(
+					AdminMessageStrings.NOTIFICATION__THE_GIVEN_EXTERNAL_SERVICE_NAME_IS_ALREADY_IN_USE);
+		}
+
+		interventionExternalService.setName(newName);
+
+		databaseManagerService.saveModelObject(interventionExternalService);
+	}
+	
+	@Synchronized
 	public void interventionExternalServiceDelete(
 			final InterventionExternalService externalService) {
 		externalServicesManagerService.deleteExternalService(externalService);
 		databaseManagerService.deleteModelObject(externalService);
+	}
+	
+	@Synchronized
+	public void interventionExternalServiceRenewToken(final InterventionExternalService externalService)
+			throws NotificationMessageException {
+		String token = externalServicesManagerService.renewToken(externalService);
+
+		if (token == null) {
+			throw new NotificationMessageException(
+					AdminMessageStrings.NOTIFICATION__CAN_NOT_RENEW_EXTERNAL_SERVICE_TOKEN);
+		}
+		externalService.setToken(token);
+		databaseManagerService.saveModelObject(externalService);
+	}
+	
+	@Synchronized
+	public void interventionExternalServiceSetStatus(final InterventionExternalService externalService, final boolean newStatus)
+			throws NotificationMessageException {
+		
+		externalService.setActive(newStatus);
+		
+		databaseManagerService.saveModelObject(externalService);
 	}
 
 	// Monitoring Message Group
@@ -3032,6 +3062,16 @@ public class InterventionAdministrationManagerService {
 				Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION,
 				interventionId);
 	}
+	
+	@Synchronized
+	public Iterable<InterventionExternalService> getAllExternalServicesOfIntervention(
+			final ObjectId interventionId) {
+		
+		return databaseManagerService.findModelObjects(
+				InterventionExternalService.class,
+				Queries.INTERVENTION_EXTERNAL_SERVICE__BY_INTERVENTION,
+				interventionId);
+	}
 
 	@Synchronized
 	public Iterable<MonitoringMessageGroup> getAllMonitoringMessageGroupsOfIntervention(
@@ -3426,7 +3466,7 @@ public class InterventionAdministrationManagerService {
 				.getModelObjectById(Participant.class, participantId);
 
 		return variablesManagerService
-				.getAllVariablesWithValuesOfParticipantAndSystem(participant);
+				.getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(participant);
 	}
 
 	@Synchronized

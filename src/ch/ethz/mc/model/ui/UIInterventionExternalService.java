@@ -24,6 +24,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.model.persistent.InterventionExternalService;
 import ch.ethz.mc.model.persistent.InterventionVariableWithValue;
 
 import com.vaadin.data.fieldgroup.PropertyId;
@@ -33,23 +34,35 @@ import com.vaadin.data.fieldgroup.PropertyId;
 @EqualsAndHashCode(callSuper = false)
 public class UIInterventionExternalService extends UIModelObject {
 	// NOTE: The String values have to fit the name of the variables
+	public static final String	ID				= "id";
 	public static final String	NAME			= "name";
 	public static final String	TOKEN			= "token";
+	public static final String	STATUS			= "status";
 
+	@PropertyId(ID)
+	private String				id;
+	
 	@PropertyId(NAME)
 	private String				name;
 
 	@PropertyId(TOKEN)
 	private String				token;
+	
+	private boolean				booleanStatus;
+	
+	@PropertyId(STATUS)
+	private String				status;
 
 	public static Object[] getVisibleColumns() {
-		return new Object[] { NAME, TOKEN };
+		return new Object[] { NAME, ID, TOKEN, STATUS };
 	}
 
 	public static String[] getColumnHeaders() {
 		return new String[] {
 				localize(AdminMessageStrings.UI_COLUMNS__EXTERNAL_SERVICE_NAME),
-				localize(AdminMessageStrings.UI_COLUMNS__EXTERNAL_SERVICE_TOKEN)};
+				localize(AdminMessageStrings.UI_COLUMNS__EXTERNAL_SERVICE_ID),
+				localize(AdminMessageStrings.UI_COLUMNS__EXTERNAL_SERVICE_TOKEN),
+				localize(AdminMessageStrings.UI_COLUMNS__EXTERNAL_SERVICE_STATUS)};
 	}
 
 	public static String getSortColumn() {
@@ -58,7 +71,7 @@ public class UIInterventionExternalService extends UIModelObject {
 
 	@Override
 	public String toString() {
-		return getRelatedModelObject(InterventionVariableWithValue.class)
+		return getRelatedModelObject(InterventionExternalService.class)
 				.getName();
 	}
 }
