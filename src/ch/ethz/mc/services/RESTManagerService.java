@@ -38,6 +38,7 @@ import ch.ethz.mc.model.persistent.BackendUserInterventionAccess;
 import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.DialogStatus;
 import ch.ethz.mc.model.persistent.Intervention;
+import ch.ethz.mc.model.persistent.InterventionExternalService;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.ParticipantVariableWithValue;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
@@ -940,8 +941,7 @@ public class RESTManagerService extends Thread {
 			}
 		} else if (role.equals(deepstreamParticipantRole)
 				|| role.equals(deepstreamTeamManagerRole)
-				|| role.equals(deepstreamObserverRole)
-				|| role.equals(externalServiceRole)) {
+				|| role.equals(deepstreamObserverRole)) {
 			// Check participant or observer access
 			val dialogOption = databaseManagerService.findOneModelObject(
 					DialogOption.class, Queries.DIALOG_OPTION__BY_TYPE_AND_DATA,
@@ -1048,6 +1048,51 @@ public class RESTManagerService extends Thread {
 						username);
 				return false;
 			}
+		} else {
+			log.debug("Unauthorized access with wrong role {}", role);
+			return false;
+		}
+	}
+	
+	public boolean checkExternalServiceAccess(final int clientVersion, final String role, final String serviceId,
+			final String token) {
+
+		// Prevent access for too old or new clients
+		if (clientVersion < deepstreamMinClientVersion || clientVersion > deepstreamMaxClientVersion) {
+			return false;
+		}
+
+		// Prevent unauthorized access with empty values
+		if (StringUtils.isBlank(serviceId) || StringUtils.isBlank(role) || StringUtils.isBlank(token)) {
+			return false;
+		}
+
+		// Check access based on role
+		if (role.equals(externalServiceRole)) {
+
+			val externalService = databaseManagerService.findOneModelObject(InterventionExternalService.class,
+					Queries.INTERVENTION_EXTERNAL_SERVICE__BY_SERVICE_ID, serviceId);
+			if (externalService == null) {
+				log.debug("Service id {} not authorized for deepstream access: Service id not found", serviceId);
+				return false;
+			}
+			
+			if(!externalService.isActive()) {
+				log.debug("Service with id {} is inactive", serviceId);
+				return false;
+			}
+
+			if (deepstreamCommunicationService != null
+					&& deepstreamCommunicationService.checkExternalServiceToken(serviceId, token)) {
+				log.debug("Service {} with id {} authorized for deepstream access", externalService.getName(),
+						serviceId);
+				return true;
+			} else {
+				log.debug("Service {} with id {} not authorized for deepstream access: Wrong token",
+						externalService.getName(), serviceId);
+				return false;
+			}
+
 		} else {
 			log.debug("Unauthorized access with wrong role {}", role);
 			return false;
