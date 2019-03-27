@@ -31,6 +31,7 @@ import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.memory.RuleEvaluationResult;
 import ch.ethz.mc.model.persistent.Intervention;
+import ch.ethz.mc.model.persistent.InterventionExternalService;
 import ch.ethz.mc.model.persistent.MicroDialog;
 import ch.ethz.mc.model.persistent.MicroDialogDecisionPoint;
 import ch.ethz.mc.model.persistent.MicroDialogMessage;
@@ -86,6 +87,9 @@ public class RecursiveAbstractMonitoringRulesResolver {
 	// Relevant for all cases
 	private final Participant									participant;
 	private final Intervention									intervention;
+	
+	// Only relevant for external service message handling
+	private final InterventionExternalService 					interventionExternalService;
 
 	// Gives information which kinds of AbstractMonitoringRules this instance
 	// should handle
@@ -209,7 +213,8 @@ public class RecursiveAbstractMonitoringRulesResolver {
 			final ObjectId relatedMonitoringMessageForReplyRuleCaseId,
 			final ObjectId relatedMonitoringRuleForReplyRuleCaseId,
 			final boolean monitoringReplyRuleCase,
-			final ObjectId relatedMicroDialogDecisionPointForMicroDialogRuleCaseId) {
+			final ObjectId relatedMicroDialogDecisionPointForMicroDialogRuleCaseId,
+			final InterventionExternalService interventionExternalService) {
 		this.interventionExecutionManagerService = interventionExecutionManagerService;
 		this.databaseManagerService = databaseManagerService;
 		this.variablesManagerService = variablesManagerService;
@@ -220,6 +225,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				Intervention.class, participant.getIntervention());
 
 		this.executionCase = executionCase;
+		this.interventionExternalService = interventionExternalService;
 
 		iterationCache = new Hashtable<String, Integer>();
 		iterationLimitCache = new Hashtable<String, Integer>();
@@ -229,6 +235,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 			case MONITORING_RULES_PERIODIC:
 			case MONITORING_RULES_UNEXPECTED_MESSAGE:
 			case MONITORING_RULES_USER_INTENTION:
+			case MONITORING_RULES_EXTERNAL_MESSAGE:	
 				ONE_OF_MONITORING_RULES_CASES = true;
 				break;
 			case MONITORING_REPLY_RULES:
@@ -261,6 +268,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 			case MONITORING_RULES_PERIODIC:
 			case MONITORING_RULES_UNEXPECTED_MESSAGE:
 			case MONITORING_RULES_USER_INTENTION:
+			case MONITORING_RULES_EXTERNAL_MESSAGE:	
 				messageSendingResultForMonitoringRules = new ArrayList<RecursiveAbstractMonitoringRulesResolver.MessageSendingResultForMonitoringRule>();
 				abstractMonitoringRulesToCheckForMicroDialogActivation = new ArrayList<AbstractMonitoringRule>();
 				break;
@@ -284,6 +292,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 			case MONITORING_RULES_PERIODIC:
 			case MONITORING_RULES_UNEXPECTED_MESSAGE:
 			case MONITORING_RULES_USER_INTENTION:
+			case MONITORING_RULES_EXTERNAL_MESSAGE:	
 				resultsToCreateMessagesFor = messageSendingResultForMonitoringRules;
 				break;
 			case MONITORING_REPLY_RULES:
@@ -358,9 +367,9 @@ public class RecursiveAbstractMonitoringRulesResolver {
 
 				// Determine message text and answer type with options to send
 				val variablesWithValues = variablesManagerService
-						.getAllVariablesWithValuesOfParticipantAndSystem(
+						.getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
 								participant, determinedMonitoringMessageToSend,
-								null);
+								null, null);
 				val messageTextToSend = VariableStringReplacer
 						.findVariablesAndReplaceWithTextValues(
 								participant.getLanguage(),
@@ -473,6 +482,13 @@ public class RecursiveAbstractMonitoringRulesResolver {
 										intervention.getId(),
 										MonitoringRuleTypes.USER_INTENTION);
 						break;
+					case MONITORING_RULES_EXTERNAL_MESSAGE:
+						masterParent = databaseManagerService
+								.findOneModelObject(MonitoringRule.class,
+										Queries.MONITORING_RULE__BY_INTERVENTION_AND_TYPE,
+										intervention.getId(),
+										MonitoringRuleTypes.EXTERNAL_MESSAGE);
+						break;
 					case MONITORING_REPLY_RULES:
 						log.error(
 								"Reply rule request in monitoring rule exection: Should never happen!");
@@ -494,6 +510,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 					case MONITORING_RULES_PERIODIC:
 					case MONITORING_RULES_UNEXPECTED_MESSAGE:
 					case MONITORING_RULES_USER_INTENTION:
+					case MONITORING_RULES_EXTERNAL_MESSAGE:	
 						// Already solved above
 						break;
 					case MONITORING_REPLY_RULES:
@@ -535,6 +552,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				case MONITORING_RULES_PERIODIC:
 				case MONITORING_RULES_UNEXPECTED_MESSAGE:
 				case MONITORING_RULES_USER_INTENTION:
+				case MONITORING_RULES_EXTERNAL_MESSAGE:	
 					rulesOnCurrentLevel = databaseManagerService
 							.findSortedModelObjects(MonitoringRule.class,
 									Queries.MONITORING_RULE__BY_INTERVENTION_AND_PARENT,
@@ -597,8 +615,8 @@ public class RecursiveAbstractMonitoringRulesResolver {
 								.get(nextRuleId);
 					} else {
 						val variablesWithValues = variablesManagerService
-								.getAllVariablesWithValuesOfParticipantAndSystem(
-										participant);
+								.getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
+										participant, interventionExternalService);
 
 						ruleResult = RuleEvaluator.evaluateRule(
 								participant.getId(), participant.getLanguage(),
@@ -733,8 +751,8 @@ public class RecursiveAbstractMonitoringRulesResolver {
 			ruleResult = preEvaluatedRuleResult;
 		} else {
 			val variablesWithValues = variablesManagerService
-					.getAllVariablesWithValuesOfParticipantAndSystem(
-							participant);
+					.getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
+							participant, interventionExternalService);
 
 			ruleResult = RuleEvaluator.evaluateRule(participant.getId(),
 					participant.getLanguage(), rule,
@@ -786,6 +804,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				case MONITORING_RULES_PERIODIC:
 				case MONITORING_RULES_UNEXPECTED_MESSAGE:
 				case MONITORING_RULES_USER_INTENTION:
+				case MONITORING_RULES_EXTERNAL_MESSAGE:	
 					// Rule "solves" case
 					if (((MonitoringRule) rule).isMarkCaseAsSolvedWhenTrue()) {
 						log.debug(
@@ -908,6 +927,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				case MONITORING_RULES_PERIODIC:
 				case MONITORING_RULES_UNEXPECTED_MESSAGE:
 				case MONITORING_RULES_USER_INTENTION:
+				case MONITORING_RULES_EXTERNAL_MESSAGE:	
 				case MONITORING_REPLY_RULES:
 					break;
 				case MICRO_DIALOG_DECISION_POINT:

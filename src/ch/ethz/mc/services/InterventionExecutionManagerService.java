@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -36,6 +37,9 @@ import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.IteratorUtils;
@@ -51,12 +55,14 @@ import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.memory.DialogMessageWithSenderIdentification;
+import ch.ethz.mc.model.memory.ExternalServiceMessage;
 import ch.ethz.mc.model.memory.ReceivedMessage;
 import ch.ethz.mc.model.persistent.DashboardMessage;
 import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.DialogStatus;
 import ch.ethz.mc.model.persistent.Intervention;
+import ch.ethz.mc.model.persistent.InterventionExternalService;
 import ch.ethz.mc.model.persistent.MediaObject;
 import ch.ethz.mc.model.persistent.MediaObjectParticipantShortURL;
 import ch.ethz.mc.model.persistent.MicroDialog;
@@ -1317,7 +1323,7 @@ public class InterventionExecutionManagerService {
 							dialogMessage.getRelatedMonitoringMessage(),
 							dialogMessage
 									.getRelatedMonitoringRuleForReplyRules(),
-							userAnswered, null);
+							userAnswered, null, null);
 
 					recursiveRuleResolver.resolve();
 				} catch (final Exception e) {
@@ -1467,7 +1473,7 @@ public class InterventionExecutionManagerService {
 						participant,
 						periodicCheck ? EXECUTION_CASE.MONITORING_RULES_PERIODIC
 								: EXECUTION_CASE.MONITORING_RULES_DAILY,
-						null, null, false, null);
+						null, null, false, null, null);
 
 				recursiveRuleResolver.resolve();
 			} catch (final Exception e) {
@@ -1604,7 +1610,7 @@ public class InterventionExecutionManagerService {
 			}
 		}
 	}
-
+	
 	/**
 	 * Handles all received messages
 	 * 
@@ -1701,6 +1707,11 @@ public class InterventionExecutionManagerService {
 
 			val participant = databaseManagerService.getModelObjectById(
 					Participant.class, dialogOption.getParticipant());
+			
+			val externalService = databaseManagerService.findOneModelObject(
+					InterventionExternalService.class,
+					Queries.INTERVENTION_EXTERNAL_SERVICE__BY_SERVICE_ID,
+					receivedMessage.getExternalServiceId());
 
 			try {
 				if (isTypeIntention) {
@@ -1749,10 +1760,12 @@ public class InterventionExecutionManagerService {
 				recursiveRuleResolver = new RecursiveAbstractMonitoringRulesResolver(
 						this, databaseManagerService, variablesManagerService,
 						participant,
-						isTypeIntention
+						receivedMessage.isExternalService() ? 
+								EXECUTION_CASE.MONITORING_RULES_EXTERNAL_MESSAGE 
+								: isTypeIntention
 								? EXECUTION_CASE.MONITORING_RULES_USER_INTENTION
 								: EXECUTION_CASE.MONITORING_RULES_UNEXPECTED_MESSAGE,
-						null, null, false, null);
+						null, null, false, null, externalService);
 
 				recursiveRuleResolver.resolve();
 			} catch (final Exception e) {
@@ -2231,7 +2244,7 @@ public class InterventionExecutionManagerService {
 					if (variablesRequireRefresh
 							|| variablesWithValues == null) {
 						variablesWithValues = variablesManagerService
-								.getAllVariablesWithValuesOfParticipantAndSystem(
+								.getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
 										participant);
 						variablesRequireRefresh = false;
 					}
@@ -2255,8 +2268,8 @@ public class InterventionExecutionManagerService {
 
 				// Determine message text and answer type with options to send
 				val variablesWithValuesForMessageGeneration = variablesManagerService
-						.getAllVariablesWithValuesOfParticipantAndSystem(
-								participant, null, microDialogMessage);
+						.getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
+								participant, null, microDialogMessage, null);
 				val messageTextToSend = VariableStringReplacer
 						.findVariablesAndReplaceWithTextValues(
 								participant.getLanguage(),
@@ -2340,7 +2353,7 @@ public class InterventionExecutionManagerService {
 							this, databaseManagerService,
 							variablesManagerService, participant,
 							EXECUTION_CASE.MICRO_DIALOG_DECISION_POINT, null,
-							null, false, microDialogDecisionPoint.getId());
+							null, false, microDialogDecisionPoint.getId(), null);
 
 					recursiveRuleResolver.resolve();
 				} catch (final Exception e) {
@@ -2556,7 +2569,7 @@ public class InterventionExecutionManagerService {
 						for (val rule : rules) {
 							if (variablesWithValues == null) {
 								variablesWithValues = variablesManagerService
-										.getAllVariablesWithValuesOfParticipantAndSystem(
+										.getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
 												participant);
 							}
 
@@ -2613,7 +2626,7 @@ public class InterventionExecutionManagerService {
 			final boolean advisorMessage,
 			final String messageWithPlaceholders) {
 		val variablesWithValues = variablesManagerService
-				.getAllVariablesWithValuesOfParticipantAndSystem(participant);
+				.getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(participant);
 
 		// Determine message text to send
 		val messageTextToSend = VariableStringReplacer
@@ -2656,8 +2669,8 @@ public class InterventionExecutionManagerService {
 
 		// Determine message text and answer type with options to send
 		val variablesWithValues = variablesManagerService
-				.getAllVariablesWithValuesOfParticipantAndSystem(participant,
-						determinedMonitoringMessageToSend, null);
+				.getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(participant,
+						determinedMonitoringMessageToSend, null, null);
 		val messageTextToSend = VariableStringReplacer
 				.findVariablesAndReplaceWithTextValues(
 						participant.getLanguage(),

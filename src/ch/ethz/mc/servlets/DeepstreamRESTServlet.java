@@ -146,65 +146,31 @@ public class DeepstreamRESTServlet extends HttpServlet {
 						.get(DeepstreamConstants.REST_FIELD_INTERVENTION_PATTERN)
 						.getAsString();
 			}
-			val interventionPassword = authData
-					.get(DeepstreamConstants.REST_FIELD_INTERVENTION_PASSWORD)
-					.getAsString();
+			
+			String interventionPassword = null;
+			if (authData.has(DeepstreamConstants.REST_FIELD_INTERVENTION_PASSWORD)) {
+				interventionPassword = authData.get(DeepstreamConstants.REST_FIELD_INTERVENTION_PASSWORD).getAsString();
+			}
+			
+			// Service fields
+			String serviceId = null;
+			if(authData.has(DeepstreamConstants.REST_FIELD_SERVICE_ID)) {
+				serviceId = authData
+						.get(DeepstreamConstants.REST_FIELD_SERVICE_ID)
+						.getAsString();
+			}
+			String token = null;
+			if(authData.has(DeepstreamConstants.REST_FIELD_TOKEN)) {
+				token = authData
+						.get(DeepstreamConstants.REST_FIELD_TOKEN)
+						.getAsString();
+			}
 
-			if (user == null) {
-				// Try to register
-				val externalRegistration = restManagerService
-						.createDeepstreamUser(nickname, relatedParticipant,
-								interventionPattern, interventionPassword,
-								role);
-
-				if (externalRegistration == null) {
-					log.warn(
-							"Could not create participant/supervisor for deepstream access");
-
-					response.sendError(HttpServletResponse.SC_FORBIDDEN);
-					return;
-				}
-
-				user = externalRegistration.getExternalId();
-
-				// Send response
-				val responseServerData = new JsonObject();
-				responseServerData
-						.addProperty(DeepstreamConstants.REST_FIELD_USER, user);
-				responseServerData
-						.addProperty(DeepstreamConstants.REST_FIELD_ROLE, role);
-
-				val responseClientData = new JsonObject();
-				responseClientData.addProperty(
-						DeepstreamConstants.REST_FIELD_USER,
-						externalRegistration.getExternalId());
-				responseClientData.addProperty(
-						DeepstreamConstants.REST_FIELD_SECRET,
-						externalRegistration.getSecret());
-
-				val responseData = new JsonObject();
-				responseData.addProperty(DeepstreamConstants.DS_FIELD_USERNAME,
-						user + " " + role);
-				responseData.add(DeepstreamConstants.DS_FIELD_CLIENT_DATA,
-						responseClientData);
-				responseData.add(DeepstreamConstants.DS_FIELD_SERVER_DATA,
-						responseServerData);
-
-				val responseAsBytes = gson.toJson(responseData)
-						.getBytes(Charsets.UTF_8);
-
-				response.setContentType(MediaType.APPLICATION_JSON);
-				response.setContentLength(responseAsBytes.length);
-
-				response.getOutputStream().write(responseAsBytes);
-			} else {
+			if (serviceId != null) {
 				// Check access
-				log.debug(
-						"Checking deepstream access for {} with role {} and password {}",
-						user, role, interventionPassword);
-				val accessGranted = restManagerService.checkDeepstreamAccess(
-						clientVersion, user, secret, role,
-						interventionPassword);
+				log.debug("Checking deepstream access for external service {}", serviceId);
+				val accessGranted = restManagerService.checkExternalServiceAccess(clientVersion, role, serviceId,
+						token);
 
 				if (!accessGranted) {
 					response.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -213,24 +179,91 @@ public class DeepstreamRESTServlet extends HttpServlet {
 
 				// Send response
 				val responseServerData = new JsonObject();
-				responseServerData
-						.addProperty(DeepstreamConstants.REST_FIELD_USER, user);
-				responseServerData
-						.addProperty(DeepstreamConstants.REST_FIELD_ROLE, role);
+				responseServerData.addProperty(DeepstreamConstants.REST_FIELD_SERVICE_ID, serviceId);
+				responseServerData.addProperty(DeepstreamConstants.REST_FIELD_ROLE, role);
 
+				val responseClientData = new JsonObject();
+				responseClientData.addProperty(DeepstreamConstants.REST_FIELD_SERVICE_ID, serviceId);
+				
 				val responseData = new JsonObject();
-				responseData.addProperty(DeepstreamConstants.DS_FIELD_USERNAME,
-						user + " " + role);
-				responseData.add(DeepstreamConstants.DS_FIELD_SERVER_DATA,
-						responseServerData);
+				responseData.addProperty(DeepstreamConstants.DS_FIELD_USERNAME, serviceId + " " + role);
+				responseData.add(DeepstreamConstants.DS_FIELD_CLIENT_DATA, responseClientData);
+				responseData.add(DeepstreamConstants.DS_FIELD_SERVER_DATA, responseServerData);
 
-				val responseAsBytes = gson.toJson(responseData)
-						.getBytes(Charsets.UTF_8);
+				val responseAsBytes = gson.toJson(responseData).getBytes(Charsets.UTF_8);
 
 				response.setContentType(MediaType.APPLICATION_JSON);
 				response.setContentLength(responseAsBytes.length);
 
 				response.getOutputStream().write(responseAsBytes);
+				
+
+			} else {
+
+				if (user == null) {
+					// Try to register
+					val externalRegistration = restManagerService.createDeepstreamUser(nickname, relatedParticipant,
+							interventionPattern, interventionPassword, role);
+
+					if (externalRegistration == null) {
+						log.warn("Could not create participant/supervisor for deepstream access");
+
+						response.sendError(HttpServletResponse.SC_FORBIDDEN);
+						return;
+					}
+
+					user = externalRegistration.getExternalId();
+
+					// Send response
+					val responseServerData = new JsonObject();
+					responseServerData.addProperty(DeepstreamConstants.REST_FIELD_USER, user);
+					responseServerData.addProperty(DeepstreamConstants.REST_FIELD_ROLE, role);
+
+					val responseClientData = new JsonObject();
+					responseClientData.addProperty(DeepstreamConstants.REST_FIELD_USER,
+							externalRegistration.getExternalId());
+					responseClientData.addProperty(DeepstreamConstants.REST_FIELD_SECRET,
+							externalRegistration.getSecret());
+
+					val responseData = new JsonObject();
+					responseData.addProperty(DeepstreamConstants.DS_FIELD_USERNAME, user + " " + role);
+					responseData.add(DeepstreamConstants.DS_FIELD_CLIENT_DATA, responseClientData);
+					responseData.add(DeepstreamConstants.DS_FIELD_SERVER_DATA, responseServerData);
+
+					val responseAsBytes = gson.toJson(responseData).getBytes(Charsets.UTF_8);
+
+					response.setContentType(MediaType.APPLICATION_JSON);
+					response.setContentLength(responseAsBytes.length);
+
+					response.getOutputStream().write(responseAsBytes);
+				} else {
+					// Check access
+					log.debug("Checking deepstream access for {} with role {} and password {}", user, role,
+							interventionPassword);
+					val accessGranted = restManagerService.checkDeepstreamAccess(clientVersion, user, secret, role,
+							interventionPassword);
+
+					if (!accessGranted) {
+						response.sendError(HttpServletResponse.SC_FORBIDDEN);
+						return;
+					}
+
+					// Send response
+					val responseServerData = new JsonObject();
+					responseServerData.addProperty(DeepstreamConstants.REST_FIELD_USER, user);
+					responseServerData.addProperty(DeepstreamConstants.REST_FIELD_ROLE, role);
+
+					val responseData = new JsonObject();
+					responseData.addProperty(DeepstreamConstants.DS_FIELD_USERNAME, user + " " + role);
+					responseData.add(DeepstreamConstants.DS_FIELD_SERVER_DATA, responseServerData);
+
+					val responseAsBytes = gson.toJson(responseData).getBytes(Charsets.UTF_8);
+
+					response.setContentType(MediaType.APPLICATION_JSON);
+					response.setContentLength(responseAsBytes.length);
+
+					response.getOutputStream().write(responseAsBytes);
+				}
 			}
 		} catch (final Exception e) {
 			log.warn("Could not register or authorize for deepstream access: ",

@@ -832,7 +832,7 @@ public class SurveyExecutionManagerService {
 
 			// Retrieve all required variables to generate slide
 			final Hashtable<String, AbstractVariableWithValue> variablesWithValues = variablesManagerService
-					.getAllVariablesWithValuesOfParticipantAndSystem(
+					.getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
 							participant);
 
 			// Check variable
@@ -1339,7 +1339,7 @@ public class SurveyExecutionManagerService {
 			// Retrieve all required variables to execute
 			// rules
 			Hashtable<String, AbstractVariableWithValue> variablesWithValues = variablesManagerService
-					.getAllVariablesWithValuesOfParticipantAndSystem(
+					.getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
 							participant);
 
 			// Executing slide rules
@@ -1448,7 +1448,7 @@ public class SurveyExecutionManagerService {
 
 					log.debug("Refrehsing variables");
 					variablesWithValues = variablesManagerService
-							.getAllVariablesWithValuesOfParticipantAndSystem(
+							.getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
 									participant);
 				}
 
@@ -1601,7 +1601,7 @@ public class SurveyExecutionManagerService {
 		// Retrieve all required variables to generate slide and execute
 		// rules
 		final val variablesWithValues = variablesManagerService
-				.getAllVariablesWithValuesOfParticipantAndSystem(participant);
+				.getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(participant);
 
 		final val nextSlide = getNextFeedbackSlide(participant.getId(),
 				participant.getLanguage(), formerSlide,

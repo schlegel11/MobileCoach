@@ -47,6 +47,7 @@ import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.DialogStatus;
 import ch.ethz.mc.model.persistent.IntermediateSurveyAndFeedbackParticipantShortURL;
 import ch.ethz.mc.model.persistent.Intervention;
+import ch.ethz.mc.model.persistent.InterventionExternalService;
 import ch.ethz.mc.model.persistent.InterventionVariableWithValue;
 import ch.ethz.mc.model.persistent.MicroDialog;
 import ch.ethz.mc.model.persistent.MicroDialogDecisionPoint;
@@ -66,6 +67,7 @@ import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValueAccessTypes;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValuePrivacyTypes;
 import ch.ethz.mc.services.types.SystemVariables;
+import ch.ethz.mc.services.types.SystemVariables.READ_ONLY_EXTERNAL_SERVICE_VARIABLES;
 import ch.ethz.mc.services.types.SystemVariables.READ_ONLY_PARTICIPANT_VARIABLES;
 import ch.ethz.mc.services.types.SystemVariables.READ_ONLY_SYSTEM_VARIABLES;
 import ch.ethz.mc.services.types.SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES;
@@ -136,6 +138,10 @@ public class VariablesManagerService {
 				.values()) {
 			writeProtectedReservedVariableNames.add(variable.toVariableName());
 		}
+		for (val variable : SystemVariables.READ_ONLY_EXTERNAL_SERVICE_VARIABLES
+				.values()) {
+			writeProtectedReservedVariableNames.add(variable.toVariableName());
+		}
 
 		writableReservedVariableNames = new HashSet<String>();
 		for (val variable : SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES
@@ -200,16 +206,23 @@ public class VariablesManagerService {
 	/*
 	 * Methods for execution
 	 */
-	public Hashtable<String, AbstractVariableWithValue> getAllVariablesWithValuesOfParticipantAndSystem(
+	public Hashtable<String, AbstractVariableWithValue> getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
 			final Participant participant) {
-		return getAllVariablesWithValuesOfParticipantAndSystem(participant,
-				null, null);
+		return getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(participant,
+				null, null, null);
+	}
+	
+	public Hashtable<String, AbstractVariableWithValue> getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
+			final Participant participant, final InterventionExternalService externalService) {
+		return getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(participant,
+				null, null, externalService);
 	}
 
-	public Hashtable<String, AbstractVariableWithValue> getAllVariablesWithValuesOfParticipantAndSystem(
+	public Hashtable<String, AbstractVariableWithValue> getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
 			final Participant participant,
 			final MonitoringMessage relatedMonitoringMessage,
-			final MicroDialogMessage relatedMicroDialogMessage) {
+			final MicroDialogMessage relatedMicroDialogMessage,
+			final InterventionExternalService externalService) {
 		val variablesWithValues = new Hashtable<String, AbstractVariableWithValue>();
 
 		// Add all read/write participant variables
@@ -321,6 +334,18 @@ public class VariablesManagerService {
 					break;
 			}
 		}
+		
+		// Add all read only external service variables
+		for (val variable : SystemVariables.READ_ONLY_EXTERNAL_SERVICE_VARIABLES
+				.values()) {
+			val readOnlyExternalServiceVariableValue = getReadOnlyExternalServiceVariableValue(
+					externalService, variable);
+
+			if (readOnlyExternalServiceVariableValue != null) {
+				addToHashtable(variablesWithValues, variable.toVariableName(),
+						readOnlyExternalServiceVariableValue);
+			}
+		}
 
 		return variablesWithValues;
 	}
@@ -374,7 +399,7 @@ public class VariablesManagerService {
 							&& (participantToCheck = databaseManagerService
 									.getModelObjectById(Participant.class,
 											participantToCheckId)) != null) {
-						val variablesOfParticipantToCheck = getAllVariablesWithValuesOfParticipantAndSystem(
+						val variablesOfParticipantToCheck = getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
 								participantToCheck);
 						if (variablesOfParticipantToCheck
 								.containsKey(variableName)
@@ -643,6 +668,19 @@ public class VariablesManagerService {
 
 				return "0.0";
 
+		}
+		return null;
+	}
+	
+	private String getReadOnlyExternalServiceVariableValue(final InterventionExternalService externalService,
+			final READ_ONLY_EXTERNAL_SERVICE_VARIABLES variable) {
+		if (externalService != null) {
+			switch (variable) {
+			case externalServiceId:
+				return externalService.getServiceId();
+			case externalServiceName:
+				return externalService.getName();
+			}
 		}
 		return null;
 	}
@@ -1892,6 +1930,23 @@ public class VariablesManagerService {
 
 			return true;
 		}
+	}
+	
+	@Synchronized
+	public void writeInterventionVariableValueForExternalService(final ObjectId serviceId, final String variableName,
+			String variableValue) throws WriteProtectedVariableException {
+		
+		val externalService = databaseManagerService.findOneModelObject(InterventionExternalService.class,
+				Queries.INTERVENTION_EXTERNAL_SERVICE__BY_SERVICE_ID, serviceId);
+		
+		val interventionVariable = databaseManagerService
+				.findOneModelObject(InterventionVariableWithValue.class,
+						Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME,
+						externalService.getIntervention(), variableName);
+		
+		interventionVariable.setValue(variableValue);
+
+		databaseManagerService.saveModelObject(interventionVariable);
 	}
 
 	/*

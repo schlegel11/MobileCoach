@@ -63,12 +63,15 @@ import com.google.gson.JsonObject;
 import com.twilio.Twilio;
 import com.twilio.type.PhoneNumber;
 
+import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.Queries;
+import ch.ethz.mc.model.memory.ExternalServiceMessage;
 import ch.ethz.mc.model.memory.ReceivedMessage;
 import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogOption;
+import ch.ethz.mc.model.persistent.InterventionExternalService;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogMessageTypes;
@@ -113,6 +116,7 @@ public class CommunicationManagerService {
 
 	private InterventionExecutionManagerService		interventionExecutionManagerService;
 	private final VariablesManagerService			variablesManagerService;
+	private final DatabaseManagerService			databaseManagerService;
 
 	private final Session							incomingMailSession;
 	private final Session							outgoingMailSession;
@@ -141,11 +145,13 @@ public class CommunicationManagerService {
 	private final ConcurrentHashMap<String, Long>	lastTeamManagerNotificationsCache;
 
 	private CommunicationManagerService(
-			final VariablesManagerService variablesManagerService)
+			final VariablesManagerService variablesManagerService,
+			final DatabaseManagerService databaseManagerService)
 			throws Exception {
 		log.info("Preparing service...");
 
 		this.variablesManagerService = variablesManagerService;
+		this.databaseManagerService = databaseManagerService;
 
 		runningAsyncSendingThreads = new ArrayList<AsyncSendingThread>();
 
@@ -266,10 +272,11 @@ public class CommunicationManagerService {
 	}
 
 	public static CommunicationManagerService prepare(
-			final VariablesManagerService variablesManagerService)
+			final VariablesManagerService variablesManagerService,
+			final DatabaseManagerService databaseManagerService)
 			throws Exception {
 		if (instance == null) {
-			instance = new CommunicationManagerService(variablesManagerService);
+			instance = new CommunicationManagerService(variablesManagerService, databaseManagerService);
 		}
 
 		return instance;
@@ -521,6 +528,7 @@ public class CommunicationManagerService {
 			try {
 				deepstreamCommunicationService
 						.getReceivedMessages(receivedMessages);
+				receiveMessagesFromExternalService(receivedMessages);
 			} catch (final Exception e) {
 				log.warn("Could not receive message using deepstream: {}",
 						e.getMessage());
@@ -532,6 +540,63 @@ public class CommunicationManagerService {
 		 */
 
 		return receivedMessages;
+	}
+	
+	private void receiveMessagesFromExternalService(final ArrayList<ReceivedMessage> receivedMessages) {
+
+		List<ExternalServiceMessage> externalServiceMessages = new ArrayList<>();
+		deepstreamCommunicationService.getReceivedExternalServiceMessages(externalServiceMessages);
+
+		for (ExternalServiceMessage externalServiceMessage : externalServiceMessages) {
+
+			val externalService = databaseManagerService.findOneModelObject(InterventionExternalService.class,
+					Queries.INTERVENTION_EXTERNAL_SERVICE__BY_SERVICE_ID, externalServiceMessage.getServiceId());
+			if (externalService == null) {
+				// error
+				return;
+			}
+			if (externalServiceMessage.getParticipants().isEmpty()) {
+				val participants = databaseManagerService.findModelObjects(Participant.class,
+						Queries.PARTICIPANT__BY_INTERVENTION, externalService.getIntervention());
+				participants
+						.forEach(participant -> externalServiceMessage.addParticipant(participant.getId().toString()));
+			}
+
+			for (String participantId : externalServiceMessage.getParticipants()) {
+
+				//TODO Check valid ObjectId
+				val participant = databaseManagerService.getModelObjectById(Participant.class,
+						new ObjectId(participantId));
+				if (participant != null && participant.getIntervention().equals(externalService.getIntervention())) {
+
+					val dialogOptions = databaseManagerService.findModelObjects(DialogOption.class,
+							Queries.DIALOG_OPTION__BY_PARTICIPANT, participant.getId());
+					
+					val receivedMessage = new ReceivedMessage();
+					receivedMessage.setTypeIntention(false);
+					receivedMessage.setRelatedMessageIdBasedOnOrder(-1);
+					receivedMessage.setReceivedTimestamp(InternalDateTime.currentTimeMillis());
+					receivedMessage.setExternalServiceId(externalServiceMessage.getServiceId());
+					receivedMessage.setExternalService(true);
+					receivedMessage.setMessage("");
+
+					for (DialogOption dialogOption : dialogOptions) {
+						receivedMessage.setSender(dialogOption.getData());
+						
+						if (dialogOption.getType() == DialogOptionTypes.EXTERNAL_ID) {
+							receivedMessage.setType(DialogOptionTypes.EXTERNAL_ID);
+							break;
+						} else if (dialogOption.getType() == DialogOptionTypes.SUPERVISOR_EXTERNAL_ID) {
+							receivedMessage.setType(DialogOptionTypes.SUPERVISOR_EXTERNAL_ID);
+							break;
+						} else {
+							receivedMessage.setType(dialogOption.getType());
+						}
+					}
+					receivedMessages.add(receivedMessage);
+				}
+			}
+		}
 	}
 
 	/**
@@ -1114,7 +1179,7 @@ public class CommunicationManagerService {
 							log.debug(
 									"Sending notification for new message to team manager");
 							val variablesWithValues = variablesManagerService
-									.getAllVariablesWithValuesOfParticipantAndSystem(
+									.getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
 											participant);
 
 							val message = VariableStringReplacer

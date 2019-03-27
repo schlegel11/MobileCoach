@@ -1,10 +1,7 @@
 package ch.ethz.mc.services.internal;
 
-import org.bson.types.ObjectId;
-
-import ch.ethz.mc.model.memory.ExternalServiceRegistration;
+import ch.ethz.mc.model.memory.ExternalRegistration;
 import ch.ethz.mc.model.persistent.InterventionExternalService;
-import ch.ethz.mc.tools.RuleEvaluator;
 import lombok.Getter;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -49,16 +46,20 @@ public class ExternalServicesManagerService {
 		log.info("Stopped.");
 	}
 
-	public ExternalServiceRegistration createExternalService(final ObjectId interventionId, final String serviceName) {
+	public ExternalRegistration createExternalService(final String serviceName) {
 
 		val serviceRegistration = deepstreamCommunicationService
-				.registerExternalService(interventionId, serviceName);
+				.registerExternalService(serviceName);
 
 		return serviceRegistration;
 	}
 	
 	public void deleteExternalService(final InterventionExternalService externalService) {
 		deepstreamCommunicationService.deleteExternalService(externalService);
+	}
+	
+	public String renewToken(final InterventionExternalService externalService) {
+		return deepstreamCommunicationService.renewExternalServiceToken(externalService);
 	}
 
 }

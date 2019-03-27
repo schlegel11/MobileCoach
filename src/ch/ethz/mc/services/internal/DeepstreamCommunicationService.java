@@ -26,9 +26,11 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -44,8 +46,9 @@ import com.google.gson.JsonPrimitive;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.DeepstreamConstants;
 import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.model.memory.ExternalServiceMessage;
 import ch.ethz.mc.model.memory.ExternalRegistration;
-import ch.ethz.mc.model.memory.ExternalServiceRegistration;
+import ch.ethz.mc.model.memory.ExternalServiceVariable;
 import ch.ethz.mc.model.memory.ReceivedMessage;
 import ch.ethz.mc.model.memory.SystemLoad;
 import ch.ethz.mc.model.persistent.DialogMessage;
@@ -111,6 +114,7 @@ public class DeepstreamCommunicationService extends Thread
 	private final int								substringLength;
 
 	private final List<ReceivedMessage>				receivedMessages;
+	private final List<ExternalServiceMessage>		receivedExternalServiceMessages;
 
 	private DeepstreamClient						client				= null;
 	private final String							host;
@@ -184,6 +188,7 @@ public class DeepstreamCommunicationService extends Thread
 				.length();
 
 		receivedMessages = new ArrayList<ReceivedMessage>();
+		receivedExternalServiceMessages = new ArrayList<>();
 	}
 
 	public static DeepstreamCommunicationService prepare(
@@ -750,6 +755,19 @@ public class DeepstreamCommunicationService extends Thread
 			receivedMessages.clear();
 		}
 	}
+	
+	/**
+	 * Get all external service messages received by deepstream since the last check
+	 * 
+	 * @param receivedMessages
+	 */
+	public void getReceivedExternalServiceMessages(
+			final List<ExternalServiceMessage> receivedMessages) {
+		synchronized (receivedExternalServiceMessages) {
+			receivedMessages.addAll(receivedExternalServiceMessages);
+			receivedExternalServiceMessages.clear();
+		}
+	}
 
 	/**
 	 * Check secret of user using deepstream
@@ -822,6 +840,53 @@ public class DeepstreamCommunicationService extends Thread
 		log.debug("Secret check for {} returns {}",
 				participantOrSupervisorIdentifier, true);
 		return true;
+	}
+	
+	public boolean checkExternalServiceToken(final String serviceId, final String token) {
+		log.debug("Checking service token for {}", serviceId);
+
+		Record record = null;
+		try {
+			String secretFromRecord;
+			synchronized (client) {
+
+				String recordName = DeepstreamConstants.PATH_EXTERNAL_SERVICES + serviceId;
+				HasResult hasResult = client.record.has(recordName);
+				if (!hasResult.hasError() && hasResult.getResult()) {
+					record = client.record.getRecord(recordName);
+
+					secretFromRecord = record.get(DeepstreamConstants.TOKEN).getAsString();
+				} else {
+					log.debug("Token check for service {} returns {}", serviceId, false);
+					return false;
+				}
+			}
+
+			if (StringUtils.isBlank(secretFromRecord)) {
+				log.debug("Token check for service {} returns {}", serviceId, false);
+				return false;
+			}
+
+			if (secretFromRecord.equals(token)) {
+				log.debug("Token check for service {} returns {}", serviceId, true);
+				return true;
+			} else {
+				log.debug("Token check for service {} returns {}", serviceId, false);
+				return false;
+			}
+		} catch (final Exception e) {
+			log.warn("Could not check token of service {}", serviceId);
+		} finally {
+			if (record != null) {
+				try {
+					record.discard();
+				} catch (final Exception e) {
+					log.warn("Could not discard record on token check");
+				}
+			}
+		}
+		log.debug("Token check for service {} returns {}", serviceId, false);
+		return false;
 	}
 
 	/**
@@ -938,8 +1003,7 @@ public class DeepstreamCommunicationService extends Thread
 				secret);
 	}
 
-	public ExternalServiceRegistration registerExternalService(
-			final ObjectId interventionId, final String externalServiceName) {
+	public ExternalRegistration registerExternalService(final String externalServiceName) {
 
 		log.debug("Trying to register external service for {}",
 				externalServiceName);
@@ -953,8 +1017,7 @@ public class DeepstreamCommunicationService extends Thread
 				token = RandomStringUtils.randomAlphanumeric(128);
 				externalServiceId = client.getUid();
 				record = client.record
-						.getRecord(DeepstreamConstants.PATH_EXTERNAL_SERVICES
-								+ interventionId.toString() + "/" + externalServiceName);
+						.getRecord(DeepstreamConstants.PATH_EXTERNAL_SERVICES + externalServiceId);
 				record.set(DeepstreamConstants.TOKEN, token);
 				record.set(DeepstreamConstants.ROLE, externalServiceRole);
 			} finally {
@@ -970,45 +1033,50 @@ public class DeepstreamCommunicationService extends Thread
 		}
 		log.debug("External service registered for {}", externalServiceName);
 
-		return new ExternalServiceRegistration(interventionId, token);
+		return new ExternalRegistration(externalServiceId, token);
 	}
 	
-	public void deleteExternalService(
-			final InterventionExternalService externalService) {
+	public void deleteExternalService(final InterventionExternalService externalService) {
 
-		log.debug("Trying to delete external service {}",
-				externalService.getName());
+		log.debug("Trying to delete external service {}", externalService.getName());
 
 		Record record = null;
 		synchronized (client) {
-			try {
+			String recordName = DeepstreamConstants.PATH_EXTERNAL_SERVICES + externalService.getServiceId();
 
-				String recordName = DeepstreamConstants.PATH_EXTERNAL_SERVICES
-						+ externalService.getId() + "/"
-						+ externalService.getName();
+			HasResult hasResult = client.record.has(recordName);
+			if (!hasResult.hasError() && hasResult.getResult()) {
 
-				HasResult hasResult = client.record.has(recordName);
-				if (!hasResult.hasError() && hasResult.getResult()) {
-
-					record = client.record.getRecord(recordName);
-					record.delete();
-					if (!record.isDestroyed()) {
-						log.warn("External service cloud not be destroyed",
-								externalService.getName());
-					}
-				}
-			} finally {
-				if (record != null) {
-					try {
-						record.discard();
-					} catch (final Exception e) {
-						log.warn(
-								"Could not discard record on external service registration");
-					}
-				}
+				record = client.record.getRecord(recordName);
+				record.delete();
+				log.debug("External service {} deleted", externalService.getName());
+			} else {
+				log.warn("External service record {} could not be deleted", recordName);
 			}
 		}
-		log.debug("External service {} deleted", externalService.getName());
+	}
+	
+	public String renewExternalServiceToken(final InterventionExternalService externalService) {
+
+		log.debug("Trying to renew token from external service {}", externalService.getName());
+
+		Record record = null;
+		String token = null;
+		synchronized (client) {
+			String recordName = DeepstreamConstants.PATH_EXTERNAL_SERVICES + externalService.getServiceId();
+
+			HasResult hasResult = client.record.has(recordName);
+			if (!hasResult.hasError() && hasResult.getResult()) {
+				token = RandomStringUtils.randomAlphanumeric(128);
+
+				record = client.record.getRecord(recordName);
+				record.set(DeepstreamConstants.TOKEN, token);
+				log.debug("Token renewed from external service {}", externalService.getName());
+			} else {
+				log.warn("External service record {} could not be retrieved. Can't renew token", recordName);
+			}
+		}
+		return token;
 	}
 
 	/**
@@ -1521,6 +1589,40 @@ public class DeepstreamCommunicationService extends Thread
 									e.getMessage());
 						}
 					});
+			client.rpc.provide("external-message", (rpcName, data, rpcResponse) -> {
+				final JsonObject jsonData = (JsonObject) gson.toJsonTree(data);
+
+				try {
+					val serviceId = jsonData.get(DeepstreamConstants.REST_FIELD_SERVICE_ID).getAsString();
+					val jsonVariables = jsonData.get(DeepstreamConstants.REST_FIELD_VARIABLES).getAsJsonObject();
+					List<String> participants = new ArrayList<>();
+					if (jsonData.has(DeepstreamConstants.REST_FIELD_PARTICIPANTS)) {
+						val participantJsonArray = jsonData.get(DeepstreamConstants.REST_FIELD_PARTICIPANTS)
+								.getAsJsonArray();
+						participantJsonArray.forEach(jsonElement -> participants.add(jsonElement.getAsString()));
+					}
+
+					List<ExternalServiceVariable> variables = new ArrayList<>();
+					for (Map.Entry<String, JsonElement> entry : jsonVariables.entrySet()) {
+						String name = entry.getKey();
+						JsonElement element = entry.getValue();
+
+						variables.add(new ExternalServiceVariable(name, element.getAsString()));
+					}
+
+					final boolean receivedSuccessful = receiveExternalServiceMessage(serviceId, participants,
+							variables);
+
+					if (receivedSuccessful) {
+						rpcResponse.send(new JsonPrimitive(true));
+					} else {
+						rpcResponse.send(new JsonPrimitive(false));
+					}
+				} catch (final Exception e) {
+					log.warn("Error when receiving external service message: {}", e.getMessage());
+					rpcResponse.send(new JsonPrimitive(false));
+				}
+			});
 		}
 	}
 
@@ -1625,6 +1727,23 @@ public class DeepstreamCommunicationService extends Thread
 		} else {
 			return false;
 		}
+	}
+	
+	private boolean receiveExternalServiceMessage(final String serviceId, final List<String> participants, final List<ExternalServiceVariable> variables) {
+		
+		log.debug("Received external message for service {}", serviceId);
+	
+		val externalServiceMessage = new ExternalServiceMessage();
+		externalServiceMessage.setServiceId(serviceId);
+		externalServiceMessage.addAllParticipants(participants);
+		
+		if(externalServiceMessage.addAllVariables(variables)) {
+			synchronized (receivedExternalServiceMessages) {
+				receivedExternalServiceMessages.add(externalServiceMessage);
+			}
+			return true;
+		}
+		return false;
 	}
 
 	/**
