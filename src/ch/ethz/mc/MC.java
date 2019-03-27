@@ -127,7 +127,7 @@ public class MC implements ServletContextListener {
 			// Internal services which internally require started controller
 			// services
 			communicationManagerService = CommunicationManagerService
-					.prepare(variablesManagerService);
+					.prepare(variablesManagerService, databaseManagerService);
 			externalServicesManagerService = ExternalServicesManagerService
 					.start(communicationManagerService
 							.getDeepstreamCommunicationService());
