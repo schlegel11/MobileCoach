@@ -1,9 +1,5 @@
 package ch.ethz.mc.model.memory;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.services.internal.CommunicationManagerService;
 /*
