@@ -8,11 +8,14 @@ import org.bson.types.ObjectId;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.ui.UIInterventionExternalService;
 import ch.ethz.mc.model.ui.UIInterventionVariable;
 import ch.ethz.mc.model.ui.UIModelObject;
+import ch.ethz.mc.services.internal.DeepstreamCommunicationService;
+import ch.ethz.mc.services.internal.ExternalServicesManagerService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -78,19 +81,14 @@ public class InterventionExternalService extends ModelObject {
 
 		return variable;
 	}
-
-	/**
-	 * Will recursively collect all related {@link ModelObject} for export
-	 *
-	 * @param exportList
-	 *            The {@link ModelObject} itself and all related
-	 *            {@link ModelObject}s
-	 */
+	
 	@Override
-	@JsonIgnore
-	protected void collectThisAndRelatedModelObjectsForExport(
-			final List<ModelObject> exportList) {
-		exportList.add(this);
-	}
+	protected void performOnDelete() {
+		val externalServicesManagerService = ExternalServicesManagerService
+				.getInstance();
 
+		if (externalServicesManagerService != null) {
+			externalServicesManagerService.deleteExternalService(this);
+		}
+	}
 }

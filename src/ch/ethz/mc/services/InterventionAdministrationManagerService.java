@@ -702,7 +702,6 @@ public class InterventionAdministrationManagerService {
 	@Synchronized
 	public void interventionExternalServiceDelete(
 			final InterventionExternalService externalService) {
-		externalServicesManagerService.deleteExternalService(externalService);
 		databaseManagerService.deleteModelObject(externalService);
 	}
 	
