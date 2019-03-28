@@ -347,7 +347,8 @@ public class RecursiveAbstractMonitoringRulesResolver {
 						.determineMessageOfMessageGroupToSend(participant,
 								monitoringMessageGroup,
 								relatedMonitoringMessageForReplyRuleCase,
-								ONE_OF_MONITORING_RULES_CASES);
+								ONE_OF_MONITORING_RULES_CASES,
+								interventionExternalService);
 				if (determinedMonitoringMessageToSend == null) {
 					log.warn(
 							"There are no more messages left in message group {} to send a message to participant {}",

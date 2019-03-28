@@ -305,6 +305,13 @@ public class DialogMessage extends ModelObject {
 	@Getter
 	@Setter
 	private boolean						manuallySent;
+	
+	/**
+	 * Optional external service id if message are related to an external service action
+	 */
+	@Getter
+	@Setter
+	private ObjectId					externalService;
 
 	/**
 	 * Create a {@link UIDialogMessageWithParticipantForResults} with the
