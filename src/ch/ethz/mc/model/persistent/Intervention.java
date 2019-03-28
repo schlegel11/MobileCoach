@@ -271,6 +271,13 @@ public class Intervention extends ModelObject {
 		val screeningSurveysToDelete = ModelObject.find(ScreeningSurvey.class,
 				Queries.SCREENING_SURVEY__BY_INTERVENTION, getId());
 		ModelObject.delete(screeningSurveysToDelete);
+		
+		// Delete intervention external services
+		val interventionExternalServicesToDelete = ModelObject.find(
+				InterventionExternalService.class,
+				Queries.INTERVENTION_EXTERNAL_SERVICE__BY_INTERVENTION,
+				getId());
+		ModelObject.delete(interventionExternalServicesToDelete);
 	}
 
 	/*
