@@ -91,12 +91,12 @@ public class InterventionEditingContainerComponentWithController
 				ThemeImageStrings.COMPONENT_ICON);
 
 		// Add intervention screening surveys tab
-		registerToSetEditingDependingOnMessaging(
-				addPointableTab(getContentTabSheet(),
-						new InterventionScreeningSurveysTabComponentWithController(
-								intervention),
-						AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__SCREENING_SURVEYS_TAB,
-						ThemeImageStrings.COMPONENT_ICON));
+		registerToSetEditingDependingOnMessaging(addPointableTab(
+				getContentTabSheet(),
+				new InterventionScreeningSurveysTabComponentWithController(
+						intervention),
+				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__SCREENING_SURVEYS_TAB,
+				ThemeImageStrings.COMPONENT_ICON));
 
 		// Add intervention participants tab
 		addPointableTab(getContentTabSheet(),
@@ -105,35 +105,33 @@ public class InterventionEditingContainerComponentWithController
 				ThemeImageStrings.COMPONENT_ICON);
 
 		// Add intervention variables tab
-		registerToSetEditingDependingOnMessaging(
-				addPointableTab(getContentTabSheet(),
-						new VariablesTabComponentWithController(intervention),
-						AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__VARIABLES_TAB,
-						ThemeImageStrings.COMPONENT_ICON));
+		registerToSetEditingDependingOnMessaging(addPointableTab(
+				getContentTabSheet(),
+				new VariablesTabComponentWithController(intervention),
+				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__VARIABLES_TAB,
+				ThemeImageStrings.COMPONENT_ICON));
 
 		// Add monitoring rules tab
-		registerToSetEditingDependingOnMessaging(
-				addPointableTab(getContentTabSheet(),
-						new MonitoringRulesEditComponentWithController(
-								intervention),
-						AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__RULES_TAB,
-						ThemeImageStrings.COMPONENT_ICON));
+		registerToSetEditingDependingOnMessaging(addPointableTab(
+				getContentTabSheet(),
+				new MonitoringRulesEditComponentWithController(intervention),
+				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__RULES_TAB,
+				ThemeImageStrings.COMPONENT_ICON));
 
 		// Add monitoring message groups tab
-		registerToSetEditingDependingOnMessaging(
-				addPointableTab(getContentTabSheet(),
-						new MonitoringMessageGroupsTabComponentWithController(
-								intervention),
-						AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__MESSAGE_GROUPS_TAB,
-						ThemeImageStrings.COMPONENT_ICON));
+		registerToSetEditingDependingOnMessaging(addPointableTab(
+				getContentTabSheet(),
+				new MonitoringMessageGroupsTabComponentWithController(
+						intervention),
+				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__MESSAGE_GROUPS_TAB,
+				ThemeImageStrings.COMPONENT_ICON));
 
 		// Add micro dialogs tab
-		registerToSetEditingDependingOnMessaging(
-				addPointableTab(getContentTabSheet(),
-						new MicroDialogsTabComponentWithController(
-								intervention),
-						AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__MICRO_DIALOGS_TAB,
-						ThemeImageStrings.COMPONENT_ICON));
+		registerToSetEditingDependingOnMessaging(addPointableTab(
+				getContentTabSheet(),
+				new MicroDialogsTabComponentWithController(intervention),
+				AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__MICRO_DIALOGS_TAB,
+				ThemeImageStrings.COMPONENT_ICON));
 
 		if (getUISession().isAdmin()) {
 			// Add intervention access tab
@@ -141,12 +139,14 @@ public class InterventionEditingContainerComponentWithController
 					new AccessTabComponentWithController(intervention),
 					AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__ACCESS_TAB,
 					ThemeImageStrings.COMPONENT_ICON);
-			
+
 			// Add external services tab
-			addPointableTab(getContentTabSheet(),
-					new ExternalServicesTabComponentWithController(intervention),
+			registerToSetEditingDependingOnMessaging(addPointableTab(
+					getContentTabSheet(),
+					new ExternalServicesTabComponentWithController(
+							intervention),
 					AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__EXTERNAL_SERVICES_TAB,
-					ThemeImageStrings.COMPONENT_ICON);
+					ThemeImageStrings.COMPONENT_ICON));
 		}
 
 	}
@@ -174,6 +174,9 @@ public class InterventionEditingContainerComponentWithController
 		if (selectedTab instanceof ParticipantsTabComponentWithController) {
 			val interventionParticipantsTabWithController = (ParticipantsTabComponentWithController) selectedTab;
 			interventionParticipantsTabWithController.adjust();
+		} else if (selectedTab instanceof ExternalServicesTabComponentWithController) {
+			val externalServicesTabComponentWithController = (ExternalServicesTabComponentWithController) selectedTab;
+			externalServicesTabComponentWithController.adjust();
 		}
 	}
 }
