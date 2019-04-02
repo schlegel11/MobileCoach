@@ -29,6 +29,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import lombok.Getter;
 import lombok.Synchronized;
@@ -1069,18 +1072,23 @@ public class VariablesManagerService {
 
 	public Set<String> getAllInterventionVariableNamesOfIntervention(
 			final ObjectId interventionId) {
-		val variables = new HashSet<String>();
+
+		return getAllInterventionVariableNamesOfInterventionAndCondition(
+				interventionId, variable -> true);
+	}
+	
+	public Set<String> getAllInterventionVariableNamesOfInterventionAndCondition(
+			final ObjectId interventionId,
+			final Predicate<InterventionVariableWithValue> condition) {
 
 		val variableModelObjects = databaseManagerService.findModelObjects(
 				InterventionVariableWithValue.class,
 				Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION,
 				interventionId);
 
-		for (val variableModelObject : variableModelObjects) {
-			variables.add(variableModelObject.getName());
-		}
-
-		return variables;
+		return StreamSupport.stream(variableModelObjects.spliterator(), false)
+				.filter(condition).map(variable -> variable.getName())
+				.collect(Collectors.toSet());
 	}
 
 	public Set<String> getAllSurveyVariableNamesOfIntervention(
@@ -1930,23 +1938,6 @@ public class VariablesManagerService {
 
 			return true;
 		}
-	}
-	
-	@Synchronized
-	public void writeInterventionVariableValueForExternalService(final ObjectId serviceId, final String variableName,
-			String variableValue) throws WriteProtectedVariableException {
-		
-		val externalService = databaseManagerService.findOneModelObject(InterventionExternalService.class,
-				Queries.INTERVENTION_EXTERNAL_SERVICE__BY_SERVICE_ID, serviceId);
-		
-		val interventionVariable = databaseManagerService
-				.findOneModelObject(InterventionVariableWithValue.class,
-						Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME,
-						externalService.getIntervention(), variableName);
-		
-		interventionVariable.setValue(variableValue);
-
-		databaseManagerService.saveModelObject(interventionVariable);
 	}
 
 	/*
