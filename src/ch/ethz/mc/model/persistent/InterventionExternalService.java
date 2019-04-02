@@ -1,20 +1,13 @@
 package ch.ethz.mc.model.persistent;
 
-import java.util.List;
-
-import org.apache.bcel.generic.GETSTATIC;
 import org.bson.types.ObjectId;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import ch.ethz.mc.conf.AdminMessageStrings;
-import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.ModelObject;
+import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.ui.UIInterventionExternalService;
-import ch.ethz.mc.model.ui.UIInterventionVariable;
 import ch.ethz.mc.model.ui.UIModelObject;
-import ch.ethz.mc.services.internal.DeepstreamCommunicationService;
 import ch.ethz.mc.services.internal.ExternalServicesManagerService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,7 +22,7 @@ public class InterventionExternalService extends ModelObject {
 	private static final long serialVersionUID = 1310200817438821553L;
 	
 	/**
-	 * {@link Intervention} to which this service and its token belong to
+	 * {@link Intervention} to which this service belongs to
 	 */
 	@Getter
 	@Setter
@@ -74,12 +67,12 @@ public class InterventionExternalService extends ModelObject {
 	 */
 	@Override
 	public UIModelObject toUIModelObject() {
-		final val variable = new UIInterventionExternalService(getServiceId(), getName(), getToken(), active,
+		final val externalService = new UIInterventionExternalService(getServiceId(), getName(), getToken(), active,
 				active ? Messages.getAdminString(AdminMessageStrings.UI_MODEL__ACTIVE)
 						: Messages.getAdminString(AdminMessageStrings.UI_MODEL__INACTIVE));
-		variable.setRelatedModelObject(this);
+		externalService.setRelatedModelObject(this);
 
-		return variable;
+		return externalService;
 	}
 	
 	@Override
@@ -88,7 +81,15 @@ public class InterventionExternalService extends ModelObject {
 				.getInstance();
 
 		if (externalServicesManagerService != null) {
-			externalServicesManagerService.deleteExternalService(this);
+			externalServicesManagerService.deleteExternalServiceOnDeepstream(this);
 		}
+		
+		// Delete intervention external service mappings
+		val interventionExternalServiceMappingsToDelete = ModelObject.find(
+				InterventionExternalServiceFieldVariableMapping.class,
+				Queries.INTERVENTION_EXTERNAL_SERVICE_FIELD_VARIABLE_MAPPING__BY_INTERVENTION_EXTERNAL_SERVICE,
+				getId());
+		ModelObject.delete(interventionExternalServiceMappingsToDelete);
+		
 	}
 }
