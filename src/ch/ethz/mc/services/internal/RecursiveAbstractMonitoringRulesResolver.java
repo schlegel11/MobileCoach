@@ -370,7 +370,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				val variablesWithValues = variablesManagerService
 						.getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
 								participant, determinedMonitoringMessageToSend,
-								null, null);
+								null, interventionExternalService);
 				val messageTextToSend = VariableStringReplacer
 						.findVariablesAndReplaceWithTextValues(
 								participant.getLanguage(),
