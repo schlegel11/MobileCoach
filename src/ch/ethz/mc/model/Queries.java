@@ -53,6 +53,9 @@ public class Queries {
 	public static final String	INTERVENTION_EXTERNAL_SERVICE__BY_INTERVENTION																																									= "{'intervention':#}";
 	public static final String	INTERVENTION_EXTERNAL_SERVICE__BY_INTERVENTION_AND_NAME																																							= "{'intervention':#,'name':#}";
 	public static final String	INTERVENTION_EXTERNAL_SERVICE__BY_SERVICE_ID																																									= "{'serviceId':#}";
+	
+	public static final String	INTERVENTION_EXTERNAL_SERVICE_FIELD_VARIABLE_MAPPING__BY_INTERVENTION_EXTERNAL_SERVICE																															= "{'interventionExternalService':#}";
+	public static final String	INTERVENTION_EXTERNAL_SERVICE_FIELD_VARIABLE_MAPPING__BY_INTERVENTION_EXTERNAL_SERVICE_AND_JSON_FIELD_NAME																										= "{'interventionExternalService':#,'jsonFieldName':#}";
 
 	public static final String	MONITORING_MESSAGE_GROUP__BY_INTERVENTION																																										= "{'intervention':#}";
 	public static final String	MONITORING_MESSAGE_GROUP__BY_INTERVENTION_AND_ORDER_LOWER																																						= "{'intervention':#,'order':{$lt:#}}";
