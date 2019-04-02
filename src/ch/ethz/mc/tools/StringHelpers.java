@@ -31,7 +31,10 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
@@ -71,6 +74,10 @@ public class StringHelpers {
 			"HH:mm");
 
 	private static Gson				gson							= new Gson();
+	
+	private static Gson 			gsonPretty 						= new GsonBuilder().setPrettyPrinting().create();
+	
+	private static JsonParser 		jsonParser 						= new JsonParser();
 
 	/**
 	 * Creates a readable name representation of a rule's name
@@ -479,5 +486,25 @@ public class StringHelpers {
 		}
 
 		return text;
+	}
+	
+	/**
+	 * Creates a pretty printed JSON {@link String} from {@link JsonObject}.
+	 * 
+	 * @param jsonObject
+	 * @return
+	 */
+	public static String createPrettyPrintedJSON(final JsonObject jsonObject) {
+		return gsonPretty.toJson(jsonObject);
+	}
+
+	/**
+	 * Creates a pretty printed JSON {@link String} from JSON {@link String}.
+	 * 
+	 * @param json
+	 * @return
+	 */
+	public static String createPrettyPrintedJSON(final String json) {
+		return createPrettyPrintedJSON(jsonParser.parse(json).getAsJsonObject());
 	}
 }

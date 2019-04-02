@@ -1,20 +1,5 @@
 package ch.ethz.mc.ui.components.main_view.interventions.external_services;
 
-import org.bson.types.ObjectId;
-
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.BeanContainer;
-import com.vaadin.data.util.BeanItem;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.TextArea;
-
-import ch.ethz.mc.conf.AdminMessageStrings;
-import ch.ethz.mc.model.persistent.Intervention;
-import ch.ethz.mc.model.persistent.InterventionExternalService;
-import ch.ethz.mc.model.ui.UIInterventionExternalService;
-import ch.ethz.mc.ui.components.basics.ShortStringEditComponent;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -35,6 +20,27 @@ import ch.ethz.mc.ui.components.basics.ShortStringEditComponent;
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+import org.bson.types.ObjectId;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.BeanContainer;
+import com.vaadin.data.util.BeanItem;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+
+import ch.ethz.mc.conf.AdminMessageStrings;
+import ch.ethz.mc.conf.Constants;
+import ch.ethz.mc.conf.DeepstreamConstants;
+import ch.ethz.mc.conf.ImplementationConstants;
+import ch.ethz.mc.model.persistent.Intervention;
+import ch.ethz.mc.model.persistent.InterventionExternalService;
+import ch.ethz.mc.model.persistent.InterventionExternalServiceFieldVariableMapping;
+import ch.ethz.mc.model.ui.UIInterventionExternalService;
+import ch.ethz.mc.model.ui.UIInterventionExternalServiceFieldVariableMapping;
+import ch.ethz.mc.ui.components.basics.ShortStringEditComponent;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
@@ -47,7 +53,6 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ExternalServicesTabComponentWithController extends ExternalServicesTabComponent {
 
-	private static final String SERVICE_ID_TOKEN_FORMATTER = "{\n  \"serviceId\": \"%s\",\n  \"token\": \"%s\"\n}";
 	private final Intervention										intervention;
 
 	private UIInterventionExternalService							selectedUIExternalService			= null;
@@ -103,7 +108,8 @@ public class ExternalServicesTabComponentWithController extends ExternalServices
 					
 					val selectedExternalService = selectedUIExternalService
 							.getRelatedModelObject(InterventionExternalService.class);
-					fillServiceIdTokenTextArea(selectedExternalService);
+					fillLoginJsonTextArea(selectedExternalService);
+					fillExternalMessageJsonTextArea(selectedExternalService);
 				}
 			}
 		});
@@ -118,16 +124,42 @@ public class ExternalServicesTabComponentWithController extends ExternalServices
 				.addClickListener(buttonClickListener);
 		interventionExternalServicesEditComponent.getRenewTokenButton()
 				.addClickListener(buttonClickListener);
+		interventionExternalServicesEditComponent.getFieldVariableMappingButton()
+				.addClickListener(buttonClickListener);
 		interventionExternalServicesEditComponent.getActiveInactiveButton()
 				.addClickListener(buttonClickListener);
 	}
 	
-	private void fillServiceIdTokenTextArea(InterventionExternalService externalService) {
-		TextArea serviceIdTokenTextArea = getExternalServicesEditComponent().getServiceIdTokenTextArea();
-		serviceIdTokenTextArea.setReadOnly(false);
-		serviceIdTokenTextArea.setValue(
-				String.format(SERVICE_ID_TOKEN_FORMATTER, externalService.getServiceId(), externalService.getToken()));
-		serviceIdTokenTextArea.setReadOnly(true);
+	private void fillLoginJsonTextArea(InterventionExternalService externalService) {
+		val jsonObject = new JsonObject();
+		jsonObject.addProperty(DeepstreamConstants.REST_FIELD_CLIENT_VERSION,
+				Constants.getDeepstreamMaxClientVersion());
+		jsonObject.addProperty(DeepstreamConstants.REST_FIELD_SERVICE_ID, externalService.getServiceId());
+		jsonObject.addProperty(DeepstreamConstants.REST_FIELD_ROLE,
+				ImplementationConstants.DEEPSTREAM_EXTERNAL_SERVICE_ROLE);
+		jsonObject.addProperty(DeepstreamConstants.REST_FIELD_TOKEN, externalService.getToken());
+		
+		getExternalServicesEditComponent().setLoginJsonTextAreaContent(jsonObject);
+	}
+	
+	private void fillExternalMessageJsonTextArea(InterventionExternalService externalService) {
+		val jsonObject = new JsonObject();
+		jsonObject.addProperty(DeepstreamConstants.REST_FIELD_SERVICE_ID, externalService.getServiceId());
+		jsonObject.add(DeepstreamConstants.REST_FIELD_PARTICIPANTS, new JsonArray());
+
+		val mappings = getInterventionAdministrationManagerService()
+				.getAllExternalServiceFieldVariableMappingsOfExternalService(externalService.getId());
+		val jsonVariableMappings = new JsonObject();
+		for (InterventionExternalServiceFieldVariableMapping mapping : mappings) {
+			val uiMappingModel = UIInterventionExternalServiceFieldVariableMapping.class
+					.cast(mapping.toUIModelObject());
+
+			jsonVariableMappings.addProperty(uiMappingModel.getJsonFieldName(),
+					uiMappingModel.getVariableWithValueName());
+		}
+		jsonObject.add(DeepstreamConstants.REST_FIELD_VARIABLES, jsonVariableMappings);
+
+		getExternalServicesEditComponent().setExternalMessageJsonTextAreaContent(jsonObject);
 	}
 
 	private class ButtonClickListener implements Button.ClickListener {
@@ -150,8 +182,25 @@ public class ExternalServicesTabComponentWithController extends ExternalServices
 			} else if (event.getButton() == accessControlEditComponent
 					.getActiveInactiveButton()) {
 				activeInactiveExternalService();
+			} else if (event.getButton() == accessControlEditComponent
+					.getFieldVariableMappingButton()) {
+				openFieldVariableMappings();
 			}
 		}
+	}
+	
+	public void adjust() {
+		if(selectedUIExternalService == null) {
+			return;
+		}
+		
+		log.debug("Refresh JSON text areas for external service");
+		
+		val selectedExternalService = selectedUIExternalService
+				.getRelatedModelObject(InterventionExternalService.class);
+		
+		fillLoginJsonTextArea(selectedExternalService);
+		fillExternalMessageJsonTextArea(selectedExternalService);
 	}
 
 	public void createExternalService() {
@@ -164,7 +213,7 @@ public class ExternalServicesTabComponentWithController extends ExternalServices
 					public void buttonClick(final ClickEvent event) {
 						InterventionExternalService newExternalService;
 						try {
-							// Create new variable
+							// Create new external service
 							newExternalService = getInterventionAdministrationManagerService()
 									.interventionExternalServiceCreate(
 											getStringValue(),
@@ -285,7 +334,7 @@ public class ExternalServicesTabComponentWithController extends ExternalServices
 					getInterventionAdministrationManagerService()
 							.interventionExternalServiceRenewToken(selectedExternalService);
 					
-					fillServiceIdTokenTextArea(selectedExternalService);
+					fillLoginJsonTextArea(selectedExternalService);
 				} catch (final Exception e) {
 					handleException(e);
 					return;
@@ -330,6 +379,23 @@ public class ExternalServicesTabComponentWithController extends ExternalServices
 				closeWindow();
 			}
 		}, null);
+	}
+	
+	public void openFieldVariableMappings() {
+		val selectedExternalService = selectedUIExternalService
+				.getRelatedModelObject(InterventionExternalService.class);
+
+		log.debug("Open field variable mappings of external service {}", selectedExternalService.getServiceId());
+
+		showModalClosableEditWindow(AdminMessageStrings.MAPPINGS__TITLE,
+				new ExternalServicesFieldVariableMappingComponentWithController(selectedExternalService),
+				new ExtendableButtonClickListener() {
+					@Override
+					public void buttonClick(ClickEvent event) {
+						fillExternalMessageJsonTextArea(selectedExternalService);
+						closeWindow();
+					}
+				}, selectedExternalService.getName());
 	}
 
 }
