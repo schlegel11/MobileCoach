@@ -1,9 +1,12 @@
 package ch.ethz.mc.model.memory;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
+import ch.ethz.mc.model.rest.Variable;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -24,7 +27,7 @@ public class ExternalServiceMessage {
 	private final Set<String> participants = new HashSet<>();
 	
 	@Getter
-	private final Set<ExternalServiceVariable> variables = new HashSet<>();
+	private final Map<String, Variable> variables = new HashMap<>();
 	
 	public boolean addParticipant(String participant) {
 		return participants.add(participant);
@@ -34,7 +37,7 @@ public class ExternalServiceMessage {
 		return this.participants.addAll(participants);
 	}
 	
-	public boolean addAllVariables(Collection<ExternalServiceVariable> variables) {
-		return this.variables.addAll(variables);
+	public void putAllVariables(Map<String, Variable> variables) {
+		this.variables.putAll(variables);
 	}
 }
