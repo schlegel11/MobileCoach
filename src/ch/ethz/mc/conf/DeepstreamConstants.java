@@ -64,6 +64,7 @@ public class DeepstreamConstants {
 	public static final String	RPC_USER_VARIABLE					= "user-variable";
 	public static final String	RPC_MESSAGE_DIFF					= "message-diff";
 	public static final String	RPC_DASHBOARD_DIFF					= "dashboard-diff";
+	public static final String	RPC_EXTERNAL_MESSAGE				= "external-message";
 
 	public static final String	PATH_MESSAGES						= "messages/";
 	public static final String	PATH_DASHBOARD						= "dashboard/";
