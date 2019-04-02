@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -37,9 +36,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.IteratorUtils;
@@ -55,7 +51,6 @@ import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.memory.DialogMessageWithSenderIdentification;
-import ch.ethz.mc.model.memory.ExternalServiceMessage;
 import ch.ethz.mc.model.memory.ReceivedMessage;
 import ch.ethz.mc.model.persistent.DashboardMessage;
 import ch.ethz.mc.model.persistent.DialogMessage;
@@ -84,6 +79,7 @@ import ch.ethz.mc.model.persistent.types.DialogMessageTypes;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.model.persistent.types.PushNotificationTypes;
 import ch.ethz.mc.model.persistent.types.TextFormatTypes;
+import ch.ethz.mc.model.rest.Variable;
 import ch.ethz.mc.services.internal.CommunicationManagerService;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
@@ -1716,6 +1712,7 @@ public class InterventionExecutionManagerService {
 					InterventionExternalService.class,
 					Queries.INTERVENTION_EXTERNAL_SERVICE__BY_SERVICE_ID,
 					receivedMessage.getExternalServiceId());
+			val isExternalService = receivedMessage.isExternalService();
 
 			try {
 				if (isTypeIntention) {
@@ -1746,11 +1743,25 @@ public class InterventionExecutionManagerService {
 									.toVariableName(),
 							rawMessageValue, true, false);
 				}
+				
+				if(isExternalService) {
+					for (Variable variable : receivedMessage.getExternalServiceVariables()) {
+						val writable = variablesManagerService.checkVariableForServiceWriting(participant.getId(), variable.getVariable());
+						
+						if(writable) {
+							variablesManagerService.externallyWriteVariableForParticipant(participant.getId(), variable.getVariable(), variable.getValue(), false, true);
+						}else {
+							//error
+						}
+					}
+				}
+				
+				
 			} catch (final Exception e) {
 				log.error(
 						"Could not store value '{}' of {} message for participant {}: {}",
 						rawMessageValue,
-						isTypeIntention ? "intention" : "unexpected",
+						isExternalService ? "external service" : isTypeIntention ? "intention" : "unexpected",
 						participant.getId(), e.getMessage());
 				return null;
 			}
@@ -1764,7 +1775,7 @@ public class InterventionExecutionManagerService {
 				recursiveRuleResolver = new RecursiveAbstractMonitoringRulesResolver(
 						this, databaseManagerService, variablesManagerService,
 						participant,
-						receivedMessage.isExternalService() ? 
+						isExternalService ? 
 								EXECUTION_CASE.MONITORING_RULES_EXTERNAL_MESSAGE 
 								: isTypeIntention
 								? EXECUTION_CASE.MONITORING_RULES_USER_INTENTION
