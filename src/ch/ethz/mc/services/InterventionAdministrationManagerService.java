@@ -51,6 +51,7 @@ import ch.ethz.mc.model.persistent.BackendUserInterventionAccess;
 import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogStatus;
 import ch.ethz.mc.model.persistent.InterventionExternalService;
+import ch.ethz.mc.model.persistent.InterventionExternalServiceFieldVariableMapping;
 import ch.ethz.mc.model.persistent.Feedback;
 import ch.ethz.mc.model.persistent.IntermediateSurveyAndFeedbackParticipantShortURL;
 import ch.ethz.mc.model.persistent.Intervention;
@@ -672,7 +673,7 @@ public class InterventionAdministrationManagerService {
 					AdminMessageStrings.NOTIFICATION__THE_GIVEN_EXTERNAL_SERVICE_NAME_IS_ALREADY_IN_USE);
 		}
 
-		ExternalRegistration externalRegistration = externalServicesManagerService.createExternalService(serviceName);
+		ExternalRegistration externalRegistration = externalServicesManagerService.createExternalServiceForDeepstream(serviceName);
 
 		val interventionExternalService = new InterventionExternalService(interventionId,
 				externalRegistration.getExternalId(), serviceName, externalRegistration.getSecret(), true);
@@ -725,6 +726,84 @@ public class InterventionAdministrationManagerService {
 		externalService.setActive(newStatus);
 		
 		databaseManagerService.saveModelObject(externalService);
+	}
+	
+	// Intervention External Service Field Variable Mapping
+	@Synchronized
+	public InterventionExternalServiceFieldVariableMapping interventionExternalServiceFieldVariableMappingCreate(
+			final InterventionExternalService interventionExternalService, final String jsonFieldName,
+			final String interventionVariableWithValueName) throws NotificationMessageException {
+
+		val interventionExternalServiceFieldVariableMappings = databaseManagerService.findModelObjects(
+				InterventionExternalServiceFieldVariableMapping.class,
+				Queries.INTERVENTION_EXTERNAL_SERVICE_FIELD_VARIABLE_MAPPING__BY_INTERVENTION_EXTERNAL_SERVICE_AND_JSON_FIELD_NAME,
+				interventionExternalService.getId(), jsonFieldName);
+		if (interventionExternalServiceFieldVariableMappings.iterator().hasNext()) {
+			throw new NotificationMessageException(
+					AdminMessageStrings.NOTIFICATION__THE_GIVEN_EXTERNAL_SERVICE_MAPPING_FIELD_NAME_IS_ALREADY_IN_USE);
+		}
+
+		val interventionVariable = databaseManagerService.findOneModelObject(InterventionVariableWithValue.class,
+				Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME,
+				interventionExternalService.getIntervention(), interventionVariableWithValueName);
+		if (interventionVariable == null) {
+			throw new NotificationMessageException(
+					AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_WAS_NOT_FOUND);
+		}
+
+		val interventionExternalServiceFieldVariableMapping = new InterventionExternalServiceFieldVariableMapping(
+				interventionExternalService.getId(), jsonFieldName, interventionVariable.getId());
+
+		databaseManagerService.saveModelObject(interventionExternalServiceFieldVariableMapping);
+
+		return interventionExternalServiceFieldVariableMapping;
+	}
+	
+	@Synchronized
+	public void interventionExternalServiceFieldVariableMappingSetJsonFieldName(
+			final InterventionExternalServiceFieldVariableMapping interventionExternalServiceFieldVariableMapping,
+			final String newName) throws NotificationMessageException {
+
+		val interventionExternalServiceFieldVariableMappings = databaseManagerService.findModelObjects(
+				InterventionExternalServiceFieldVariableMapping.class,
+				Queries.INTERVENTION_EXTERNAL_SERVICE_FIELD_VARIABLE_MAPPING__BY_INTERVENTION_EXTERNAL_SERVICE_AND_JSON_FIELD_NAME,
+				interventionExternalServiceFieldVariableMapping.getInterventionExternalService(), newName);
+		if (interventionExternalServiceFieldVariableMappings.iterator().hasNext()) {
+			throw new NotificationMessageException(
+					AdminMessageStrings.NOTIFICATION__THE_GIVEN_EXTERNAL_SERVICE_MAPPING_FIELD_NAME_IS_ALREADY_IN_USE);
+		}
+		
+		interventionExternalServiceFieldVariableMapping.setJsonFieldName(newName);
+
+		databaseManagerService.saveModelObject(interventionExternalServiceFieldVariableMapping);
+	}
+	
+	@Synchronized
+	public void interventionExternalServiceFieldVariableMappingSetInterventionVariableWithName(
+			final InterventionExternalServiceFieldVariableMapping interventionExternalServiceFieldVariableMapping,
+			final String newName) throws NotificationMessageException {
+		
+		val interventionExternalService = databaseManagerService.getModelObjectById(InterventionExternalService.class,
+				interventionExternalServiceFieldVariableMapping.getInterventionExternalService());
+
+		val interventionVariable = databaseManagerService.findOneModelObject(
+				InterventionVariableWithValue.class,
+				Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME,
+				interventionExternalService.getIntervention(), newName);
+		if (interventionVariable == null) {
+			throw new NotificationMessageException(
+					AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_WAS_NOT_FOUND);
+		}
+
+		interventionExternalServiceFieldVariableMapping.setInterventionVariableWithValue(interventionVariable.getId());
+
+		databaseManagerService.saveModelObject(interventionExternalServiceFieldVariableMapping);
+	}
+	
+	@Synchronized
+	public void interventionExternalServiceFieldVariableMappingDelete(
+			final InterventionExternalServiceFieldVariableMapping interventionExternalServiceFieldVariableMapping) {
+		databaseManagerService.deleteModelObject(interventionExternalServiceFieldVariableMapping);
 	}
 
 	// Monitoring Message Group
@@ -3071,6 +3150,16 @@ public class InterventionAdministrationManagerService {
 				Queries.INTERVENTION_EXTERNAL_SERVICE__BY_INTERVENTION,
 				interventionId);
 	}
+	
+	@Synchronized
+	public Iterable<InterventionExternalServiceFieldVariableMapping> getAllExternalServiceFieldVariableMappingsOfExternalService(
+			final ObjectId externalServiceId) {
+		
+		return databaseManagerService.findModelObjects(
+				InterventionExternalServiceFieldVariableMapping.class,
+				Queries.INTERVENTION_EXTERNAL_SERVICE_FIELD_VARIABLE_MAPPING__BY_INTERVENTION_EXTERNAL_SERVICE,
+				externalServiceId);
+	}
 
 	@Synchronized
 	public Iterable<MonitoringMessageGroup> getAllMonitoringMessageGroupsOfIntervention(
@@ -3440,6 +3529,23 @@ public class InterventionAdministrationManagerService {
 		variables.addAll(variablesManagerService
 				.getAllMicroDialogRuleVariableNamesOfIntervention(
 						interventionId));
+
+		Collections.sort(variables);
+
+		return variables;
+	}
+	
+	@Synchronized
+	public List<String> getAllInterventionVariablesManageableByServiceOrLessRestrictive(
+			final ObjectId interventionId) {
+		val variables = new ArrayList<String>();
+
+		variables.addAll(variablesManagerService
+				.getAllInterventionVariableNamesOfInterventionAndCondition(
+						interventionId,
+						variable -> variable.getAccessType()
+								.isAllowedAtGivenOrLessRestrictiveAccessType(
+										InterventionVariableWithValueAccessTypes.MANAGEABLE_BY_SERVICE)));
 
 		Collections.sort(variables);
 
