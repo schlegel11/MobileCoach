@@ -93,7 +93,7 @@ public class RESTManagerService extends Thread {
 	private final String							deepstreamSuperviserRole;
 	private final String							deepstreamTeamManagerRole;
 	private final String							deepstreamObserverRole;
-	private final String							externalServiceRole;
+	private final String							deepstreamExternalServiceRole;
 	private final int								deepstreamMinClientVersion;
 	private final int								deepstreamMaxClientVersion;
 
@@ -123,7 +123,7 @@ public class RESTManagerService extends Thread {
 		deepstreamSuperviserRole = ImplementationConstants.DEEPSTREAM_SUPERVISOR_ROLE;
 		deepstreamTeamManagerRole = ImplementationConstants.DEEPSTREAM_TEAM_MANAGER_ROLE;
 		deepstreamObserverRole = ImplementationConstants.DEEPSTREAM_OBSERVER_ROLE;
-		externalServiceRole = ImplementationConstants.DEEPSTREAM_EXTERNAL_SERVICE_ROLE;
+		deepstreamExternalServiceRole = ImplementationConstants.DEEPSTREAM_EXTERNAL_SERVICE_ROLE;
 		deepstreamMinClientVersion = Constants.getDeepstreamMinClientVersion();
 		deepstreamMaxClientVersion = Constants.getDeepstreamMaxClientVersion();
 
@@ -1068,7 +1068,7 @@ public class RESTManagerService extends Thread {
 		}
 
 		// Check access based on role
-		if (role.equals(externalServiceRole)) {
+		if (role.equals(deepstreamExternalServiceRole)) {
 
 			val externalService = databaseManagerService.findOneModelObject(InterventionExternalService.class,
 					Queries.INTERVENTION_EXTERNAL_SERVICE__BY_SERVICE_ID, serviceId);
