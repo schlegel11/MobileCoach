@@ -109,6 +109,7 @@ public class ExternalServicesTabComponentWithController extends ExternalServices
 					val selectedExternalService = selectedUIExternalService
 							.getRelatedModelObject(InterventionExternalService.class);
 					fillLoginJsonTextArea(selectedExternalService);
+					fillLoginHttpAuthTextArea(selectedExternalService);
 					fillExternalMessageJsonTextArea(selectedExternalService);
 				}
 			}
@@ -140,6 +141,14 @@ public class ExternalServicesTabComponentWithController extends ExternalServices
 		jsonObject.addProperty(DeepstreamConstants.REST_FIELD_TOKEN, externalService.getToken());
 		
 		getExternalServicesEditComponent().setLoginJsonTextAreaContent(jsonObject);
+	}
+	
+	private void fillLoginHttpAuthTextArea(
+			InterventionExternalService externalService) {
+		getExternalServicesEditComponent().setLoginHttpAuthTextAreaContent(
+				Constants.getDeepstreamMaxClientVersion(),
+				ImplementationConstants.DEEPSTREAM_EXTERNAL_SERVICE_ROLE,
+				externalService.getServiceId(), externalService.getToken());
 	}
 	
 	private void fillExternalMessageJsonTextArea(InterventionExternalService externalService) {
@@ -200,6 +209,7 @@ public class ExternalServicesTabComponentWithController extends ExternalServices
 				.getRelatedModelObject(InterventionExternalService.class);
 		
 		fillLoginJsonTextArea(selectedExternalService);
+		fillLoginHttpAuthTextArea(selectedExternalService);
 		fillExternalMessageJsonTextArea(selectedExternalService);
 	}
 
@@ -335,6 +345,7 @@ public class ExternalServicesTabComponentWithController extends ExternalServices
 							.interventionExternalServiceRenewToken(selectedExternalService);
 					
 					fillLoginJsonTextArea(selectedExternalService);
+					fillLoginHttpAuthTextArea(selectedExternalService);
 				} catch (final Exception e) {
 					handleException(e);
 					return;
