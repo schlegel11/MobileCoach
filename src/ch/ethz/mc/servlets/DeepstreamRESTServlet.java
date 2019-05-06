@@ -36,7 +36,9 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.protocol.HTTP;
 
+import com.google.common.net.HttpHeaders;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -46,6 +48,7 @@ import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.DeepstreamConstants;
 import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.services.RESTManagerService;
+import io.netty.handler.codec.http.HttpConstants;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
@@ -88,6 +91,37 @@ public class DeepstreamRESTServlet extends HttpServlet {
 
 		log.info("Servlet initialized.");
 	}
+	
+	private JsonObject httpAuthTokenToJson(final String token) {
+
+		String[] splitedToken = token.split(";");
+		val authData = new JsonObject();
+
+		if (splitedToken.length != 4) {
+			log.warn(
+					"Wrong HTTP token length. Expected 4 properties separated by semicolon, found {}",
+					splitedToken.length);
+			return authData;
+		}
+		authData.addProperty(DeepstreamConstants.REST_FIELD_CLIENT_VERSION, splitedToken[0]);
+		authData.addProperty(DeepstreamConstants.REST_FIELD_ROLE, splitedToken[1]);
+		authData.addProperty(DeepstreamConstants.REST_FIELD_SERVICE_ID, splitedToken[2]);
+		authData.addProperty(DeepstreamConstants.REST_FIELD_TOKEN, splitedToken[3]);
+
+		return authData;
+	}
+	
+	private boolean isWebSocketConnection(final JsonObject jsonObject) {
+
+		val connectionData = (JsonObject) jsonObject
+				.get(DeepstreamConstants.DS_FIELD_CONNECTION_DATA);
+		val headers = (JsonObject) connectionData
+				.get(DeepstreamConstants.DS_FIELD_HEADERS);
+		
+		return headers.has(HttpHeaders.UPGRADE.toLowerCase())
+				&& headers.get(HttpHeaders.UPGRADE.toLowerCase()).getAsString()
+						.equals(DeepstreamConstants.DS_FIELD_WEBSOCKET);
+	}
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
@@ -109,9 +143,15 @@ public class DeepstreamRESTServlet extends HttpServlet {
 			final JsonElement jsonElement = gson.fromJson(stringPayload,
 					JsonElement.class);
 			final JsonObject jsonObjectPayload = jsonElement.getAsJsonObject();
-
-			val authData = (JsonObject) jsonObjectPayload
+			
+			JsonObject authData = (JsonObject) jsonObjectPayload
 					.get(DeepstreamConstants.DS_FIELD_AUTH_DATA);
+			
+			if (!isWebSocketConnection(jsonObjectPayload)) {
+				authData = httpAuthTokenToJson(
+						authData.get(DeepstreamConstants.REST_FIELD_TOKEN)
+								.getAsString());
+			}
 
 			val clientVersion = authData
 					.get(DeepstreamConstants.REST_FIELD_CLIENT_VERSION)

@@ -28,9 +28,12 @@ package ch.ethz.mc.conf;
  */
 public class DeepstreamConstants {
 	public static final String	DS_FIELD_USERNAME					= "username";
+	public static final String	DS_FIELD_CONNECTION_DATA			= "connectionData";
 	public static final String	DS_FIELD_AUTH_DATA					= "authData";
 	public static final String	DS_FIELD_CLIENT_DATA				= "clientData";
 	public static final String	DS_FIELD_SERVER_DATA				= "serverData";
+	public static final String	DS_FIELD_HEADERS					= "headers";
+	public static final String	DS_FIELD_WEBSOCKET					= "websocket";
 
 	public static final String	REST_FIELD_PARTICIPANT				= "participant";
 	public static final String	REST_FIELD_NICKNAME					= "nickname";
