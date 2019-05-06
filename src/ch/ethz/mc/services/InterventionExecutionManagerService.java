@@ -1744,14 +1744,25 @@ public class InterventionExecutionManagerService {
 							rawMessageValue, true, false);
 				}
 				
-				if(isExternalService) {
-					for (Variable variable : receivedMessage.getExternalServiceVariables()) {
-						val writable = variablesManagerService.checkVariableForServiceWriting(participant.getId(), variable.getVariable());
-						
-						if(writable) {
-							variablesManagerService.externallyWriteVariableForParticipant(participant.getId(), variable.getVariable(), variable.getValue(), false, true);
-						}else {
-							//error
+				if (isExternalService) {
+					for (Variable variable : receivedMessage
+							.getExternalServiceVariables()) {
+						val writable = variablesManagerService
+								.checkVariableForServiceWriting(
+										participant.getId(),
+										variable.getVariable());
+
+						if (writable) {
+							variablesManagerService
+									.externallyWriteVariableForParticipant(
+											participant.getId(),
+											variable.getVariable(),
+											variable.getValue(), false, true);
+						} else {
+							log.warn(
+									"Variable {} for service id {} is not writable (e.g. due to access rights) and default value will be used.",
+									variable.getVariable(),
+									externalService.getServiceId());
 						}
 					}
 				}

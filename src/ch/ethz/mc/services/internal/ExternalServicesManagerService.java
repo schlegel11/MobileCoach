@@ -114,28 +114,30 @@ public class ExternalServicesManagerService {
 			for (String participantId : externalServiceMessage
 					.getParticipants()) {
 
-				// TODO Check valid ObjectId
 				if (!ObjectId.isValid(participantId)) {
-					log.error(
-							"Participant id {} is not valid. Message for service id {} can not be processed.",
-							participantId, externalService.getServiceId());
+					log.warn(
+							"Participant id {} is not valid. Message with service id {} can not be processed for participant id {}.",
+							participantId, externalService.getServiceId(),
+							participantId);
 					continue;
 				}
 				val participant = databaseManagerService.getModelObjectById(
 						Participant.class, new ObjectId(participantId));
 
 				if (participant == null) {
-					log.error(
-							"Participant with id {} not found. Message for service id {} can not be processed.",
-							participantId, externalService.getServiceId());
+					log.warn(
+							"Participant with id {} not found. Message with service id {} can not be processed for participant id {}.",
+							participantId, externalService.getServiceId(),
+							participantId);
 					continue;
 				}
 
 				if (!participant.getIntervention()
 						.equals(externalService.getIntervention())) {
-					log.error(
-							"Participant with id {} is not in the same intervention as the external service. Message for service id {} can not be processed.",
-							participantId, externalService.getServiceId());
+					log.warn(
+							"Participant with id {} is not in the same intervention as the external service. Message with service id {} can not be processed for participant id {}.",
+							participantId, externalService.getServiceId(),
+							participantId);
 					continue;
 				}
 
@@ -153,6 +155,14 @@ public class ExternalServicesManagerService {
 									InterventionVariableWithValue.class,
 									variableMapping
 											.getInterventionVariableWithValue());
+
+					if (interventionVariable == null) {
+						log.warn(
+								"Mapped intervention variable for field {} not found. Mapping is ignored for message with service id {}.",
+								variableMapping.getJsonFieldName(),
+								externalService.getServiceId());
+						continue;
+					}
 
 					val externalServiceVariable = externalServiceMessage
 							.getVariables()
