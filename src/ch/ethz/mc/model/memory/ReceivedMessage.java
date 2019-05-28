@@ -93,17 +93,17 @@ public class ReceivedMessage {
 
 	@Getter
 	@Setter
-	private String					externalServiceId;
+	private String					externalSystemId;
 
 	@Getter
 	@Setter
-	private boolean					externalService;
+	private boolean					externalSystem;
 
 	@Getter
-	private final List<Variable>	externalServiceVariables	= new ArrayList<>();
+	private final List<Variable>	externalSystemVariables	= new ArrayList<>();
 
-	public boolean addExternalServiceVariable(Variable variable) {
-		return externalServiceVariables.add(variable);
+	public boolean addExternalSystemVariable(Variable variable) {
+		return externalSystemVariables.add(variable);
 	}
 
 }

@@ -50,8 +50,8 @@ import ch.ethz.mc.model.persistent.BackendUser;
 import ch.ethz.mc.model.persistent.BackendUserInterventionAccess;
 import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogStatus;
-import ch.ethz.mc.model.persistent.InterventionExternalService;
-import ch.ethz.mc.model.persistent.InterventionExternalServiceFieldVariableMapping;
+import ch.ethz.mc.model.persistent.InterventionExternalSystem;
+import ch.ethz.mc.model.persistent.InterventionExternalSystemFieldVariableMapping;
 import ch.ethz.mc.model.persistent.Feedback;
 import ch.ethz.mc.model.persistent.IntermediateSurveyAndFeedbackParticipantShortURL;
 import ch.ethz.mc.model.persistent.Intervention;
@@ -85,7 +85,7 @@ import ch.ethz.mc.model.persistent.types.RuleEquationSignTypes;
 import ch.ethz.mc.model.persistent.types.TextFormatTypes;
 import ch.ethz.mc.modules.AbstractModule;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
-import ch.ethz.mc.services.internal.ExternalServicesManagerService;
+import ch.ethz.mc.services.internal.ExternalSystemsManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService.FILE_STORES;
 import ch.ethz.mc.services.internal.ModelObjectExchangeService;
@@ -118,7 +118,7 @@ public class InterventionAdministrationManagerService {
 	private final FileStorageManagerService					fileStorageManagerService;
 	private final VariablesManagerService					variablesManagerService;
 	private final ModelObjectExchangeService				modelObjectExchangeService;
-	private final ExternalServicesManagerService			externalServicesManagerService;
+	private final ExternalSystemsManagerService			externalSystemsManagerService;
 
 	private final SurveyAdministrationManagerService		screeningSurveyAdministrationManagerService;
 
@@ -130,7 +130,7 @@ public class InterventionAdministrationManagerService {
 			final VariablesManagerService variablesManagerService,
 			final ModelObjectExchangeService modelObjectExchangeService,
 			final SurveyAdministrationManagerService screeningSurveyAdministrationManagerService,
-			final ExternalServicesManagerService externalServicesManagerService)
+			final ExternalSystemsManagerService externalSystemsManagerService)
 			throws Exception {
 		$lock = MC.getInstance();
 
@@ -141,7 +141,7 @@ public class InterventionAdministrationManagerService {
 		this.variablesManagerService = variablesManagerService;
 		this.modelObjectExchangeService = modelObjectExchangeService;
 		this.screeningSurveyAdministrationManagerService = screeningSurveyAdministrationManagerService;
-		this.externalServicesManagerService = externalServicesManagerService;
+		this.externalSystemsManagerService = externalSystemsManagerService;
 
 		log.info("Registering modules...");
 		// FIXME LONGTERM Also relevant for reimplementation of module system
@@ -159,14 +159,14 @@ public class InterventionAdministrationManagerService {
 			final VariablesManagerService variablesManagerService,
 			final ModelObjectExchangeService modelObjectExchangeService,
 			final SurveyAdministrationManagerService screeningSurveyAdministrationManagerService,
-			final ExternalServicesManagerService externalServicesManagerService)
+			final ExternalSystemsManagerService externalSystemsManagerService)
 			throws Exception {
 		if (instance == null) {
 			instance = new InterventionAdministrationManagerService(
 					databaseManagerService, fileStorageManagerService,
 					variablesManagerService, modelObjectExchangeService,
 					screeningSurveyAdministrationManagerService,
-					externalServicesManagerService);
+					externalSystemsManagerService);
 		}
 		return instance;
 	}
@@ -661,149 +661,149 @@ public class InterventionAdministrationManagerService {
 		databaseManagerService.deleteModelObject(variableToDelete);
 	}
 	
-	// Intervention External Service
+	// Intervention External System
 	@Synchronized
-	public InterventionExternalService interventionExternalServiceCreate(final String serviceName,
+	public InterventionExternalSystem interventionExternalSystemCreate(final String systemName,
 			final ObjectId interventionId) throws NotificationMessageException {
 
-		val interventionExternalServices = databaseManagerService.findModelObjects(InterventionExternalService.class,
-				Queries.INTERVENTION_EXTERNAL_SERVICE__BY_INTERVENTION_AND_NAME, interventionId, serviceName);
-		if (interventionExternalServices.iterator().hasNext()) {
+		val interventionExternalSystems = databaseManagerService.findModelObjects(InterventionExternalSystem.class,
+				Queries.INTERVENTION_EXTERNAL_SYSTEM__BY_INTERVENTION_AND_NAME, interventionId, systemName);
+		if (interventionExternalSystems.iterator().hasNext()) {
 			throw new NotificationMessageException(
-					AdminMessageStrings.NOTIFICATION__THE_GIVEN_EXTERNAL_SERVICE_NAME_IS_ALREADY_IN_USE);
+					AdminMessageStrings.NOTIFICATION__THE_GIVEN_EXTERNAL_SYSTEM_NAME_IS_ALREADY_IN_USE);
 		}
 
-		ExternalRegistration externalRegistration = externalServicesManagerService.createExternalServiceForDeepstream(serviceName);
+		ExternalRegistration externalRegistration = externalSystemsManagerService.createExternalSystemForDeepstream(systemName);
 
-		val interventionExternalService = new InterventionExternalService(interventionId,
-				externalRegistration.getExternalId(), serviceName, externalRegistration.getSecret(), true);
+		val interventionExternalSystem = new InterventionExternalSystem(interventionId,
+				externalRegistration.getExternalId(), systemName, externalRegistration.getSecret(), true);
 
-		databaseManagerService.saveModelObject(interventionExternalService);
+		databaseManagerService.saveModelObject(interventionExternalSystem);
 
-		return interventionExternalService;
+		return interventionExternalSystem;
 	}
 	
 	@Synchronized
-	public void interventionExternalServiceSetName(
-			final InterventionExternalService interventionExternalService,
+	public void interventionExternalSystemSetName(
+			final InterventionExternalSystem interventionExternalSystem,
 			final String newName) throws NotificationMessageException {
 
-		val interventionExternalServices = databaseManagerService.findModelObjects(InterventionExternalService.class,
-				Queries.INTERVENTION_EXTERNAL_SERVICE__BY_INTERVENTION_AND_NAME, interventionExternalService.getIntervention(), newName);
-		if (interventionExternalServices.iterator().hasNext()) {
+		val interventionExternalSystems = databaseManagerService.findModelObjects(InterventionExternalSystem.class,
+				Queries.INTERVENTION_EXTERNAL_SYSTEM__BY_INTERVENTION_AND_NAME, interventionExternalSystem.getIntervention(), newName);
+		if (interventionExternalSystems.iterator().hasNext()) {
 			throw new NotificationMessageException(
-					AdminMessageStrings.NOTIFICATION__THE_GIVEN_EXTERNAL_SERVICE_NAME_IS_ALREADY_IN_USE);
+					AdminMessageStrings.NOTIFICATION__THE_GIVEN_EXTERNAL_SYSTEM_NAME_IS_ALREADY_IN_USE);
 		}
 
-		interventionExternalService.setName(newName);
+		interventionExternalSystem.setName(newName);
 
-		databaseManagerService.saveModelObject(interventionExternalService);
+		databaseManagerService.saveModelObject(interventionExternalSystem);
 	}
 	
 	@Synchronized
-	public void interventionExternalServiceDelete(
-			final InterventionExternalService externalService) {
-		databaseManagerService.deleteModelObject(externalService);
+	public void interventionExternalSystemDelete(
+			final InterventionExternalSystem externalSystem) {
+		databaseManagerService.deleteModelObject(externalSystem);
 	}
 	
 	@Synchronized
-	public void interventionExternalServiceRenewToken(final InterventionExternalService externalService)
+	public void interventionExternalSystemRenewToken(final InterventionExternalSystem externalSystem)
 			throws NotificationMessageException {
-		String token = externalServicesManagerService.renewToken(externalService);
+		String token = externalSystemsManagerService.renewToken(externalSystem);
 
 		if (token == null) {
 			throw new NotificationMessageException(
-					AdminMessageStrings.NOTIFICATION__CAN_NOT_RENEW_EXTERNAL_SERVICE_TOKEN);
+					AdminMessageStrings.NOTIFICATION__CAN_NOT_RENEW_EXTERNAL_SYSTEM_TOKEN);
 		}
-		externalService.setToken(token);
-		databaseManagerService.saveModelObject(externalService);
+		externalSystem.setToken(token);
+		databaseManagerService.saveModelObject(externalSystem);
 	}
 	
 	@Synchronized
-	public void interventionExternalServiceSetStatus(final InterventionExternalService externalService, final boolean newStatus)
+	public void interventionExternalSystemSetStatus(final InterventionExternalSystem externalSystem, final boolean newStatus)
 			throws NotificationMessageException {
 		
-		externalService.setActive(newStatus);
+		externalSystem.setActive(newStatus);
 		
-		databaseManagerService.saveModelObject(externalService);
+		databaseManagerService.saveModelObject(externalSystem);
 	}
 	
-	// Intervention External Service Field Variable Mapping
+	// Intervention External System Field Variable Mapping
 	@Synchronized
-	public InterventionExternalServiceFieldVariableMapping interventionExternalServiceFieldVariableMappingCreate(
-			final InterventionExternalService interventionExternalService, final String jsonFieldName,
+	public InterventionExternalSystemFieldVariableMapping interventionExternalSystemFieldVariableMappingCreate(
+			final InterventionExternalSystem interventionExternalSystem, final String fieldName,
 			final String interventionVariableWithValueName) throws NotificationMessageException {
 
-		val interventionExternalServiceFieldVariableMappings = databaseManagerService.findModelObjects(
-				InterventionExternalServiceFieldVariableMapping.class,
-				Queries.INTERVENTION_EXTERNAL_SERVICE_FIELD_VARIABLE_MAPPING__BY_INTERVENTION_EXTERNAL_SERVICE_AND_JSON_FIELD_NAME,
-				interventionExternalService.getId(), jsonFieldName);
-		if (interventionExternalServiceFieldVariableMappings.iterator().hasNext()) {
+		val interventionExternalSystemFieldVariableMappings = databaseManagerService.findModelObjects(
+				InterventionExternalSystemFieldVariableMapping.class,
+				Queries.INTERVENTION_EXTERNAL_SYSTEM_FIELD_VARIABLE_MAPPING__BY_INTERVENTION_EXTERNAL_SYSTEM_AND_FIELD_NAME,
+				interventionExternalSystem.getId(), fieldName);
+		if (interventionExternalSystemFieldVariableMappings.iterator().hasNext()) {
 			throw new NotificationMessageException(
-					AdminMessageStrings.NOTIFICATION__THE_GIVEN_EXTERNAL_SERVICE_MAPPING_FIELD_NAME_IS_ALREADY_IN_USE);
+					AdminMessageStrings.NOTIFICATION__THE_GIVEN_EXTERNAL_SYSTEM_MAPPING_FIELD_NAME_IS_ALREADY_IN_USE);
 		}
 
 		val interventionVariable = databaseManagerService.findOneModelObject(InterventionVariableWithValue.class,
 				Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME,
-				interventionExternalService.getIntervention(), interventionVariableWithValueName);
+				interventionExternalSystem.getIntervention(), interventionVariableWithValueName);
 		if (interventionVariable == null) {
 			throw new NotificationMessageException(
 					AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_WAS_NOT_FOUND);
 		}
 
-		val interventionExternalServiceFieldVariableMapping = new InterventionExternalServiceFieldVariableMapping(
-				interventionExternalService.getId(), jsonFieldName, interventionVariable.getId());
+		val interventionExternalSystemFieldVariableMapping = new InterventionExternalSystemFieldVariableMapping(
+				interventionExternalSystem.getId(), fieldName, interventionVariable.getId());
 
-		databaseManagerService.saveModelObject(interventionExternalServiceFieldVariableMapping);
+		databaseManagerService.saveModelObject(interventionExternalSystemFieldVariableMapping);
 
-		return interventionExternalServiceFieldVariableMapping;
+		return interventionExternalSystemFieldVariableMapping;
 	}
 	
 	@Synchronized
-	public void interventionExternalServiceFieldVariableMappingSetJsonFieldName(
-			final InterventionExternalServiceFieldVariableMapping interventionExternalServiceFieldVariableMapping,
+	public void interventionExternalSystemFieldVariableMappingSetFieldName(
+			final InterventionExternalSystemFieldVariableMapping interventionExternalSystemFieldVariableMapping,
 			final String newName) throws NotificationMessageException {
 
-		val interventionExternalServiceFieldVariableMappings = databaseManagerService.findModelObjects(
-				InterventionExternalServiceFieldVariableMapping.class,
-				Queries.INTERVENTION_EXTERNAL_SERVICE_FIELD_VARIABLE_MAPPING__BY_INTERVENTION_EXTERNAL_SERVICE_AND_JSON_FIELD_NAME,
-				interventionExternalServiceFieldVariableMapping.getInterventionExternalService(), newName);
-		if (interventionExternalServiceFieldVariableMappings.iterator().hasNext()) {
+		val interventionExternalSystemFieldVariableMappings = databaseManagerService.findModelObjects(
+				InterventionExternalSystemFieldVariableMapping.class,
+				Queries.INTERVENTION_EXTERNAL_SYSTEM_FIELD_VARIABLE_MAPPING__BY_INTERVENTION_EXTERNAL_SYSTEM_AND_FIELD_NAME,
+				interventionExternalSystemFieldVariableMapping.getInterventionExternalSystem(), newName);
+		if (interventionExternalSystemFieldVariableMappings.iterator().hasNext()) {
 			throw new NotificationMessageException(
-					AdminMessageStrings.NOTIFICATION__THE_GIVEN_EXTERNAL_SERVICE_MAPPING_FIELD_NAME_IS_ALREADY_IN_USE);
+					AdminMessageStrings.NOTIFICATION__THE_GIVEN_EXTERNAL_SYSTEM_MAPPING_FIELD_NAME_IS_ALREADY_IN_USE);
 		}
 		
-		interventionExternalServiceFieldVariableMapping.setJsonFieldName(newName);
+		interventionExternalSystemFieldVariableMapping.setFieldName(newName);
 
-		databaseManagerService.saveModelObject(interventionExternalServiceFieldVariableMapping);
+		databaseManagerService.saveModelObject(interventionExternalSystemFieldVariableMapping);
 	}
 	
 	@Synchronized
-	public void interventionExternalServiceFieldVariableMappingSetInterventionVariableWithName(
-			final InterventionExternalServiceFieldVariableMapping interventionExternalServiceFieldVariableMapping,
+	public void interventionExternalSystemFieldVariableMappingSetInterventionVariableWithName(
+			final InterventionExternalSystemFieldVariableMapping interventionExternalSystemFieldVariableMapping,
 			final String newName) throws NotificationMessageException {
 		
-		val interventionExternalService = databaseManagerService.getModelObjectById(InterventionExternalService.class,
-				interventionExternalServiceFieldVariableMapping.getInterventionExternalService());
+		val interventionExternalSystem = databaseManagerService.getModelObjectById(InterventionExternalSystem.class,
+				interventionExternalSystemFieldVariableMapping.getInterventionExternalSystem());
 
 		val interventionVariable = databaseManagerService.findOneModelObject(
 				InterventionVariableWithValue.class,
 				Queries.INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME,
-				interventionExternalService.getIntervention(), newName);
+				interventionExternalSystem.getIntervention(), newName);
 		if (interventionVariable == null) {
 			throw new NotificationMessageException(
 					AdminMessageStrings.NOTIFICATION__THE_GIVEN_VARIABLE_NAME_WAS_NOT_FOUND);
 		}
 
-		interventionExternalServiceFieldVariableMapping.setInterventionVariableWithValue(interventionVariable.getId());
+		interventionExternalSystemFieldVariableMapping.setInterventionVariableWithValue(interventionVariable.getId());
 
-		databaseManagerService.saveModelObject(interventionExternalServiceFieldVariableMapping);
+		databaseManagerService.saveModelObject(interventionExternalSystemFieldVariableMapping);
 	}
 	
 	@Synchronized
-	public void interventionExternalServiceFieldVariableMappingDelete(
-			final InterventionExternalServiceFieldVariableMapping interventionExternalServiceFieldVariableMapping) {
-		databaseManagerService.deleteModelObject(interventionExternalServiceFieldVariableMapping);
+	public void interventionExternalSystemFieldVariableMappingDelete(
+			final InterventionExternalSystemFieldVariableMapping interventionExternalSystemFieldVariableMapping) {
+		databaseManagerService.deleteModelObject(interventionExternalSystemFieldVariableMapping);
 	}
 
 	// Monitoring Message Group
@@ -3142,23 +3142,23 @@ public class InterventionAdministrationManagerService {
 	}
 	
 	@Synchronized
-	public Iterable<InterventionExternalService> getAllExternalServicesOfIntervention(
+	public Iterable<InterventionExternalSystem> getAllExternalSystemsOfIntervention(
 			final ObjectId interventionId) {
 		
 		return databaseManagerService.findModelObjects(
-				InterventionExternalService.class,
-				Queries.INTERVENTION_EXTERNAL_SERVICE__BY_INTERVENTION,
+				InterventionExternalSystem.class,
+				Queries.INTERVENTION_EXTERNAL_SYSTEM__BY_INTERVENTION,
 				interventionId);
 	}
 	
 	@Synchronized
-	public Iterable<InterventionExternalServiceFieldVariableMapping> getAllExternalServiceFieldVariableMappingsOfExternalService(
-			final ObjectId externalServiceId) {
+	public Iterable<InterventionExternalSystemFieldVariableMapping> getAllExternalSystemFieldVariableMappingsOfExternalSystem(
+			final ObjectId externalSystemId) {
 		
 		return databaseManagerService.findModelObjects(
-				InterventionExternalServiceFieldVariableMapping.class,
-				Queries.INTERVENTION_EXTERNAL_SERVICE_FIELD_VARIABLE_MAPPING__BY_INTERVENTION_EXTERNAL_SERVICE,
-				externalServiceId);
+				InterventionExternalSystemFieldVariableMapping.class,
+				Queries.INTERVENTION_EXTERNAL_SYSTEM_FIELD_VARIABLE_MAPPING__BY_INTERVENTION_EXTERNAL_SYSTEM,
+				externalSystemId);
 	}
 
 	@Synchronized
@@ -3571,7 +3571,7 @@ public class InterventionAdministrationManagerService {
 				.getModelObjectById(Participant.class, participantId);
 
 		return variablesManagerService
-				.getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(participant);
+				.getAllVariablesWithValuesOfParticipantAndSystemAndExternalSystem(participant);
 	}
 
 	@Synchronized

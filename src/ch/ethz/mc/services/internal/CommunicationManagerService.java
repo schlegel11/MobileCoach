@@ -133,7 +133,7 @@ public class CommunicationManagerService {
 	private final String							smsUserPassword;
 
 	private TWILIOMessageRetrievalServiceV02		twilioMessageRetrievalService	= null;
-	private ExternalServicesManagerService			externalServicesManagerService	= null;
+	private ExternalSystemsManagerService			externalSystemsManagerService	= null;
 
 	private final DocumentBuilderFactory			documentBuilderFactory;
 	private final SimpleDateFormat					receiverDateFormat;
@@ -529,8 +529,8 @@ public class CommunicationManagerService {
 			}
 		}
 		
-		// Add external service messages
-		receiveMessagesFromExternalService(receivedMessages);
+		// Add external system messages
+		receiveMessagesFromExternalSystem(receivedMessages);
 
 		/*
 		 * Messages from other services could be retrieved here
@@ -539,21 +539,21 @@ public class CommunicationManagerService {
 		return receivedMessages;
 	}
 
-	private void receiveMessagesFromExternalService(
+	private void receiveMessagesFromExternalSystem(
 			final ArrayList<ReceivedMessage> receivedMessages) {
 		try {
-			if (externalServicesManagerService == null) {
-				externalServicesManagerService = ExternalServicesManagerService
+			if (externalSystemsManagerService == null) {
+				externalSystemsManagerService = ExternalSystemsManagerService
 						.getInstance();
 			}
 
-			if (externalServicesManagerService != null && externalServicesManagerService
+			if (externalSystemsManagerService != null && externalSystemsManagerService
 					.getReceivedMessages(receivedMessages)) {
-				log.debug("Retrieving messages from external service...");
+				log.debug("Retrieving messages from external system...");
 			}
 
 		} catch (final Exception e) {
-			log.error("Could not retrieve messages from external service: {}",
+			log.error("Could not retrieve messages from external system: {}",
 					e.getMessage());
 		}
 	}
@@ -1138,7 +1138,7 @@ public class CommunicationManagerService {
 							log.debug(
 									"Sending notification for new message to team manager");
 							val variablesWithValues = variablesManagerService
-									.getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
+									.getAllVariablesWithValuesOfParticipantAndSystemAndExternalSystem(
 											participant);
 
 							val message = VariableStringReplacer

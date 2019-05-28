@@ -96,9 +96,9 @@ public class SystemVariables {
 		}
 	}
 	
-	public enum READ_ONLY_EXTERNAL_SERVICE_VARIABLES {
-		externalServiceName,
-		externalServiceId;
+	public enum READ_ONLY_EXTERNAL_SYSTEM_VARIABLES {
+		externalSystemName,
+		externalSystemId;
 
 		public String toVariableName() {
 			return ImplementationConstants.VARIABLE_PREFIX + toString();

@@ -57,7 +57,7 @@ import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.DialogStatus;
 import ch.ethz.mc.model.persistent.Intervention;
-import ch.ethz.mc.model.persistent.InterventionExternalService;
+import ch.ethz.mc.model.persistent.InterventionExternalSystem;
 import ch.ethz.mc.model.persistent.MediaObject;
 import ch.ethz.mc.model.persistent.MediaObjectParticipantShortURL;
 import ch.ethz.mc.model.persistent.MicroDialog;
@@ -1642,6 +1642,7 @@ public class InterventionExecutionManagerService {
 
 		// Check type
 		val isTypeIntention = receivedMessage.isTypeIntention();
+		val isExternalSystem = receivedMessage.isExternalSystem();
 
 		// Create values
 		String rawMessageValue;
@@ -1696,7 +1697,7 @@ public class InterventionExecutionManagerService {
 		if (dialogMessage == null) {
 			log.debug(
 					"Received an {} message from '{}', store it, mark it accordingly and execute rules",
-					isTypeIntention ? "intention" : "unexpected",
+					isExternalSystem ? "external system" : isTypeIntention ? "intention" : "unexpected",
 					receivedMessage.getSender());
 
 			val dialogMessageCreated = dialogMessageCreateAsUnexpectedReceivedOrIntention(
@@ -1708,11 +1709,10 @@ public class InterventionExecutionManagerService {
 			val participant = databaseManagerService.getModelObjectById(
 					Participant.class, dialogOption.getParticipant());
 			
-			val externalService = databaseManagerService.findOneModelObject(
-					InterventionExternalService.class,
-					Queries.INTERVENTION_EXTERNAL_SERVICE__BY_SERVICE_ID,
-					receivedMessage.getExternalServiceId());
-			val isExternalService = receivedMessage.isExternalService();
+			val externalSystem = databaseManagerService.findOneModelObject(
+					InterventionExternalSystem.class,
+					Queries.INTERVENTION_EXTERNAL_SYSTEM__BY_SYSTEM_ID,
+					receivedMessage.getExternalSystemId());
 
 			try {
 				if (isTypeIntention) {
@@ -1744,9 +1744,9 @@ public class InterventionExecutionManagerService {
 							rawMessageValue, true, false);
 				}
 				
-				if (isExternalService) {
+				if (isExternalSystem) {
 					for (Variable variable : receivedMessage
-							.getExternalServiceVariables()) {
+							.getExternalSystemVariables()) {
 						val writable = variablesManagerService
 								.checkVariableForServiceWriting(
 										participant.getId(),
@@ -1760,9 +1760,9 @@ public class InterventionExecutionManagerService {
 											variable.getValue(), false, true);
 						} else {
 							log.warn(
-									"Variable {} for service id {} is not writable (e.g. due to access rights) and default value will be used.",
+									"Variable {} for system id {} is not writable (e.g. due to access rights) and default value will be used.",
 									variable.getVariable(),
-									externalService.getServiceId());
+									externalSystem.getSystemId());
 						}
 					}
 				}
@@ -1772,13 +1772,13 @@ public class InterventionExecutionManagerService {
 				log.error(
 						"Could not store value '{}' of {} message for participant {}: {}",
 						rawMessageValue,
-						isExternalService ? "external service" : isTypeIntention ? "intention" : "unexpected",
+						isExternalSystem ? "external system" : isTypeIntention ? "intention" : "unexpected",
 						participant.getId(), e.getMessage());
 				return null;
 			}
 
 			log.debug("Caring for {} message rules resolving",
-					isTypeIntention ? "intention" : "unexpected");
+					isExternalSystem ? "external system" : isTypeIntention ? "intention" : "unexpected");
 
 			// Resolve rules
 			RecursiveAbstractMonitoringRulesResolver recursiveRuleResolver;
@@ -1786,18 +1786,18 @@ public class InterventionExecutionManagerService {
 				recursiveRuleResolver = new RecursiveAbstractMonitoringRulesResolver(
 						this, databaseManagerService, variablesManagerService,
 						participant,
-						isExternalService ? 
+						isExternalSystem ? 
 								EXECUTION_CASE.MONITORING_RULES_EXTERNAL_MESSAGE 
 								: isTypeIntention
 								? EXECUTION_CASE.MONITORING_RULES_USER_INTENTION
 								: EXECUTION_CASE.MONITORING_RULES_UNEXPECTED_MESSAGE,
-						null, null, false, null, externalService);
+						null, null, false, null, externalSystem);
 
 				recursiveRuleResolver.resolve();
 			} catch (final Exception e) {
 				log.error(
 						"Could not resolve {} message rules for participant {}: {}",
-						isTypeIntention ? "intention" : "unexpected",
+						isExternalSystem ? "external system" : isTypeIntention ? "intention" : "unexpected",
 						participant.getId(), e.getMessage());
 				return null;
 			}
@@ -1818,7 +1818,7 @@ public class InterventionExecutionManagerService {
 				if (messageToSendTask.getMessageTextToSend() != null) {
 					log.debug(
 							"Preparing message on {} message for sending to participant",
-							isTypeIntention ? "intention" : "unexpected");
+							isExternalSystem ? "external system" : isTypeIntention ? "intention" : "unexpected");
 
 					val monitoringRule = (MonitoringRule) messageToSendTask
 							.getAbstractMonitoringRuleRequiredToPrepareMessage();
@@ -1876,7 +1876,7 @@ public class InterventionExecutionManagerService {
 									? monitoringRule.isSendMessageToSupervisor()
 									: false,
 							monitoringMessageExpectsAnswer, false, false, 0,
-							externalService == null ? null : externalService.getId());
+							externalSystem == null ? null : externalSystem.getId());
 				}
 			}
 
@@ -1916,7 +1916,7 @@ public class InterventionExecutionManagerService {
 						timeToSendMessageInMillis, null, null,
 						microDialogActivation.getMiroDialogToActivate(), null,
 						false, false, false, false, 0,
-						externalService == null ? null : externalService.getId());
+						externalSystem == null ? null : externalSystem.getId());
 			}
 
 			return dialogMessageCreated;
@@ -2274,7 +2274,7 @@ public class InterventionExecutionManagerService {
 					if (variablesRequireRefresh
 							|| variablesWithValues == null) {
 						variablesWithValues = variablesManagerService
-								.getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
+								.getAllVariablesWithValuesOfParticipantAndSystemAndExternalSystem(
 										participant);
 						variablesRequireRefresh = false;
 					}
@@ -2298,7 +2298,7 @@ public class InterventionExecutionManagerService {
 
 				// Determine message text and answer type with options to send
 				val variablesWithValuesForMessageGeneration = variablesManagerService
-						.getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
+						.getAllVariablesWithValuesOfParticipantAndSystemAndExternalSystem(
 								participant, null, microDialogMessage, null);
 				val messageTextToSend = VariableStringReplacer
 						.findVariablesAndReplaceWithTextValues(
@@ -2489,7 +2489,7 @@ public class InterventionExecutionManagerService {
 			final MonitoringMessageGroup messageGroup,
 			final MonitoringMessage relatedMonitoringMessageForReplyRuleCase,
 			final boolean isMonitoringRule,
-			final InterventionExternalService interventionExternalService) {
+			final InterventionExternalSystem interventionExternalService) {
 		val iterableMessages = databaseManagerService.findSortedModelObjects(
 				MonitoringMessage.class,
 				Queries.MONITORING_MESSAGE__BY_MONITORING_MESSAGE_GROUP,
@@ -2602,7 +2602,7 @@ public class InterventionExecutionManagerService {
 						for (val rule : rules) {
 							if (variablesWithValues == null) {
 								variablesWithValues = variablesManagerService
-										.getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
+										.getAllVariablesWithValuesOfParticipantAndSystemAndExternalSystem(
 												participant, interventionExternalService);
 							}
 
@@ -2659,7 +2659,7 @@ public class InterventionExecutionManagerService {
 			final boolean advisorMessage,
 			final String messageWithPlaceholders) {
 		val variablesWithValues = variablesManagerService
-				.getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(participant);
+				.getAllVariablesWithValuesOfParticipantAndSystemAndExternalSystem(participant);
 
 		// Determine message text to send
 		val messageTextToSend = VariableStringReplacer
@@ -2702,7 +2702,7 @@ public class InterventionExecutionManagerService {
 
 		// Determine message text and answer type with options to send
 		val variablesWithValues = variablesManagerService
-				.getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(participant,
+				.getAllVariablesWithValuesOfParticipantAndSystemAndExternalSystem(participant,
 						determinedMonitoringMessageToSend, null, null);
 		val messageTextToSend = VariableStringReplacer
 				.findVariablesAndReplaceWithTextValues(

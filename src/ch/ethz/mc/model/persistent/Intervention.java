@@ -274,8 +274,8 @@ public class Intervention extends ModelObject {
 		
 		// Delete intervention external services
 		val interventionExternalServicesToDelete = ModelObject.find(
-				InterventionExternalService.class,
-				Queries.INTERVENTION_EXTERNAL_SERVICE__BY_INTERVENTION,
+				InterventionExternalSystem.class,
+				Queries.INTERVENTION_EXTERNAL_SYSTEM__BY_INTERVENTION,
 				getId());
 		ModelObject.delete(interventionExternalServicesToDelete);
 	}

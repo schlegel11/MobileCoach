@@ -50,7 +50,7 @@ import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.DialogStatus;
 import ch.ethz.mc.model.persistent.IntermediateSurveyAndFeedbackParticipantShortURL;
 import ch.ethz.mc.model.persistent.Intervention;
-import ch.ethz.mc.model.persistent.InterventionExternalService;
+import ch.ethz.mc.model.persistent.InterventionExternalSystem;
 import ch.ethz.mc.model.persistent.InterventionVariableWithValue;
 import ch.ethz.mc.model.persistent.MicroDialog;
 import ch.ethz.mc.model.persistent.MicroDialogDecisionPoint;
@@ -70,7 +70,7 @@ import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValueAccessTypes;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValuePrivacyTypes;
 import ch.ethz.mc.services.types.SystemVariables;
-import ch.ethz.mc.services.types.SystemVariables.READ_ONLY_EXTERNAL_SERVICE_VARIABLES;
+import ch.ethz.mc.services.types.SystemVariables.READ_ONLY_EXTERNAL_SYSTEM_VARIABLES;
 import ch.ethz.mc.services.types.SystemVariables.READ_ONLY_PARTICIPANT_VARIABLES;
 import ch.ethz.mc.services.types.SystemVariables.READ_ONLY_SYSTEM_VARIABLES;
 import ch.ethz.mc.services.types.SystemVariables.READ_WRITE_PARTICIPANT_VARIABLES;
@@ -141,7 +141,7 @@ public class VariablesManagerService {
 				.values()) {
 			writeProtectedReservedVariableNames.add(variable.toVariableName());
 		}
-		for (val variable : SystemVariables.READ_ONLY_EXTERNAL_SERVICE_VARIABLES
+		for (val variable : SystemVariables.READ_ONLY_EXTERNAL_SYSTEM_VARIABLES
 				.values()) {
 			writeProtectedReservedVariableNames.add(variable.toVariableName());
 		}
@@ -209,23 +209,23 @@ public class VariablesManagerService {
 	/*
 	 * Methods for execution
 	 */
-	public Hashtable<String, AbstractVariableWithValue> getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
+	public Hashtable<String, AbstractVariableWithValue> getAllVariablesWithValuesOfParticipantAndSystemAndExternalSystem(
 			final Participant participant) {
-		return getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(participant,
+		return getAllVariablesWithValuesOfParticipantAndSystemAndExternalSystem(participant,
 				null, null, null);
 	}
 	
-	public Hashtable<String, AbstractVariableWithValue> getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
-			final Participant participant, final InterventionExternalService externalService) {
-		return getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(participant,
-				null, null, externalService);
+	public Hashtable<String, AbstractVariableWithValue> getAllVariablesWithValuesOfParticipantAndSystemAndExternalSystem(
+			final Participant participant, final InterventionExternalSystem externalSystem) {
+		return getAllVariablesWithValuesOfParticipantAndSystemAndExternalSystem(participant,
+				null, null, externalSystem);
 	}
 
-	public Hashtable<String, AbstractVariableWithValue> getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
+	public Hashtable<String, AbstractVariableWithValue> getAllVariablesWithValuesOfParticipantAndSystemAndExternalSystem(
 			final Participant participant,
 			final MonitoringMessage relatedMonitoringMessage,
 			final MicroDialogMessage relatedMicroDialogMessage,
-			final InterventionExternalService externalService) {
+			final InterventionExternalSystem externalSystem) {
 		val variablesWithValues = new Hashtable<String, AbstractVariableWithValue>();
 
 		// Add all read/write participant variables
@@ -338,15 +338,15 @@ public class VariablesManagerService {
 			}
 		}
 		
-		// Add all read only external service variables
-		for (val variable : SystemVariables.READ_ONLY_EXTERNAL_SERVICE_VARIABLES
+		// Add all read only external system variables
+		for (val variable : SystemVariables.READ_ONLY_EXTERNAL_SYSTEM_VARIABLES
 				.values()) {
-			val readOnlyExternalServiceVariableValue = getReadOnlyExternalServiceVariableValue(
-					externalService, variable);
+			val readOnlyExternalSystemVariableValue = getReadOnlyExternalSystemVariableValue(
+					externalSystem, variable);
 
-			if (readOnlyExternalServiceVariableValue != null) {
+			if (readOnlyExternalSystemVariableValue != null) {
 				addToHashtable(variablesWithValues, variable.toVariableName(),
-						readOnlyExternalServiceVariableValue);
+						readOnlyExternalSystemVariableValue);
 			}
 		}
 
@@ -402,7 +402,7 @@ public class VariablesManagerService {
 							&& (participantToCheck = databaseManagerService
 									.getModelObjectById(Participant.class,
 											participantToCheckId)) != null) {
-						val variablesOfParticipantToCheck = getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
+						val variablesOfParticipantToCheck = getAllVariablesWithValuesOfParticipantAndSystemAndExternalSystem(
 								participantToCheck);
 						if (variablesOfParticipantToCheck
 								.containsKey(variableName)
@@ -675,14 +675,14 @@ public class VariablesManagerService {
 		return null;
 	}
 	
-	private String getReadOnlyExternalServiceVariableValue(final InterventionExternalService externalService,
-			final READ_ONLY_EXTERNAL_SERVICE_VARIABLES variable) {
-		if (externalService != null) {
+	private String getReadOnlyExternalSystemVariableValue(final InterventionExternalSystem externalSystem,
+			final READ_ONLY_EXTERNAL_SYSTEM_VARIABLES variable) {
+		if (externalSystem != null) {
 			switch (variable) {
-			case externalServiceId:
-				return externalService.getServiceId();
-			case externalServiceName:
-				return externalService.getName();
+			case externalSystemId:
+				return externalSystem.getSystemId();
+			case externalSystemName:
+				return externalSystem.getName();
 			}
 		}
 		return null;

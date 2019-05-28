@@ -45,13 +45,13 @@ import com.google.gson.JsonPrimitive;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.DeepstreamConstants;
 import ch.ethz.mc.conf.ImplementationConstants;
-import ch.ethz.mc.model.memory.ExternalServiceMessage;
+import ch.ethz.mc.model.memory.ExternalSystemMessage;
 import ch.ethz.mc.model.memory.ExternalRegistration;
 import ch.ethz.mc.model.memory.ReceivedMessage;
 import ch.ethz.mc.model.memory.SystemLoad;
 import ch.ethz.mc.model.persistent.DialogMessage;
 import ch.ethz.mc.model.persistent.DialogOption;
-import ch.ethz.mc.model.persistent.InterventionExternalService;
+import ch.ethz.mc.model.persistent.InterventionExternalSystem;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.types.DialogMessageStatusTypes;
 import ch.ethz.mc.model.persistent.types.DialogMessageTypes;
@@ -106,14 +106,14 @@ public class DeepstreamCommunicationService extends Thread
 	private final Set<String>						loggedInSupervisors;
 	private final Set<String>						loggedInTeamManagers;
 	private final Set<String>						loggedInObservers;
-	private final Set<String>						loggedInExternalServices;
+	private final Set<String>						loggedInExternalSystems;
 
 	private final Hashtable<String, Integer>		allUsersVisibleMessagesSentSinceLastLogout;
 
 	private final int								substringLength;
 
 	private final List<ReceivedMessage>				receivedMessages;
-	private final List<ExternalServiceMessage>		receivedExternalServiceMessages;
+	private final List<ExternalSystemMessage>		receivedExternalSystemMessages;
 
 	private DeepstreamClient						client				= null;
 	private final String							host;
@@ -130,7 +130,7 @@ public class DeepstreamCommunicationService extends Thread
 	private final String							supervisorRole;
 	private final String							teamManagerRole;
 	private final String							observerRole;
-	private final String							externalServiceRole;
+	private final String							externalSystemRole;
 
 	private DeepstreamCommunicationService(final String deepstreamHost,
 			final String deepstreamServerPassword,
@@ -143,7 +143,7 @@ public class DeepstreamCommunicationService extends Thread
 		loggedInSupervisors = new HashSet<String>();
 		loggedInTeamManagers = new HashSet<String>();
 		loggedInObservers = new HashSet<String>();
-		loggedInExternalServices = new HashSet<String>();
+		loggedInExternalSystems = new HashSet<String>();
 
 		allUsersVisibleMessagesSentSinceLastLogout = new Hashtable<String, Integer>();
 
@@ -166,7 +166,7 @@ public class DeepstreamCommunicationService extends Thread
 		supervisorRole = ImplementationConstants.DEEPSTREAM_SUPERVISOR_ROLE;
 		teamManagerRole = ImplementationConstants.DEEPSTREAM_TEAM_MANAGER_ROLE;
 		observerRole = ImplementationConstants.DEEPSTREAM_OBSERVER_ROLE;
-		externalServiceRole = ImplementationConstants.DEEPSTREAM_EXTERNAL_SERVICE_ROLE;
+		externalSystemRole = ImplementationConstants.DEEPSTREAM_EXTERNAL_SYSTEM_ROLE;
 
 		loginData = new JsonObject();
 		loginData.addProperty(DeepstreamConstants.REST_FIELD_CLIENT_VERSION,
@@ -187,7 +187,7 @@ public class DeepstreamCommunicationService extends Thread
 				.length();
 
 		receivedMessages = new ArrayList<ReceivedMessage>();
-		receivedExternalServiceMessages = new ArrayList<>();
+		receivedExternalSystemMessages = new ArrayList<>();
 	}
 
 	public static DeepstreamCommunicationService prepare(
@@ -254,8 +254,8 @@ public class DeepstreamCommunicationService extends Thread
 						loggedInObservers.size());
 				systemLoad.setLoggedInUsers(
 						ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
-								+ externalServiceRole,
-						loggedInExternalServices.size());
+								+ externalSystemRole,
+						loggedInExternalSystems.size());
 			}
 		}
 
@@ -756,16 +756,16 @@ public class DeepstreamCommunicationService extends Thread
 	}
 
 	/**
-	 * Get all external service messages received by deepstream since the last
+	 * Get all external system messages received by deepstream since the last
 	 * check
 	 * 
 	 * @param receivedMessages
 	 */
-	public void getReceivedExternalServiceMessages(
-			final List<ExternalServiceMessage> receivedMessages) {
-		synchronized (receivedExternalServiceMessages) {
-			receivedMessages.addAll(receivedExternalServiceMessages);
-			receivedExternalServiceMessages.clear();
+	public void getReceivedExternalSystemMessages(
+			final List<ExternalSystemMessage> receivedMessages) {
+		synchronized (receivedExternalSystemMessages) {
+			receivedMessages.addAll(receivedExternalSystemMessages);
+			receivedExternalSystemMessages.clear();
 		}
 	}
 
@@ -842,17 +842,17 @@ public class DeepstreamCommunicationService extends Thread
 		return true;
 	}
 
-	public boolean checkExternalServiceToken(final String serviceId,
+	public boolean checkExternalSystemToken(final String systemId,
 			final String token) {
-		log.debug("Checking service token for {}", serviceId);
+		log.debug("Checking system token for {}", systemId);
 
 		Record record = null;
 		try {
 			String secretFromRecord;
 			synchronized (client) {
 
-				String recordName = DeepstreamConstants.PATH_EXTERNAL_SERVICES
-						+ serviceId;
+				String recordName = DeepstreamConstants.PATH_EXTERNAL_SYSTEMS
+						+ systemId;
 				HasResult hasResult = client.record.has(recordName);
 				if (!hasResult.hasError() && hasResult.getResult()) {
 					record = client.record.getRecord(recordName);
@@ -860,29 +860,29 @@ public class DeepstreamCommunicationService extends Thread
 					secretFromRecord = record.get(DeepstreamConstants.TOKEN)
 							.getAsString();
 				} else {
-					log.debug("Token check for service {} returns {}",
-							serviceId, false);
+					log.debug("Token check for system {} returns {}",
+							systemId, false);
 					return false;
 				}
 			}
 
 			if (StringUtils.isBlank(secretFromRecord)) {
-				log.debug("Token check for service {} returns {}", serviceId,
+				log.debug("Token check for system {} returns {}", systemId,
 						false);
 				return false;
 			}
 
 			if (secretFromRecord.equals(token)) {
-				log.debug("Token check for service {} returns {}", serviceId,
+				log.debug("Token check for system {} returns {}", systemId,
 						true);
 				return true;
 			} else {
-				log.debug("Token check for service {} returns {}", serviceId,
+				log.debug("Token check for system {} returns {}", systemId,
 						false);
 				return false;
 			}
 		} catch (final Exception e) {
-			log.warn("Could not check token of service {}", serviceId);
+			log.warn("Could not check token of system {}", systemId);
 		} finally {
 			if (record != null) {
 				try {
@@ -892,7 +892,7 @@ public class DeepstreamCommunicationService extends Thread
 				}
 			}
 		}
-		log.debug("Token check for service {} returns {}", serviceId, false);
+		log.debug("Token check for system {} returns {}", systemId, false);
 		return false;
 	}
 
@@ -1010,77 +1010,77 @@ public class DeepstreamCommunicationService extends Thread
 				secret);
 	}
 
-	public ExternalRegistration registerExternalService(
-			final String externalServiceName) {
+	public ExternalRegistration registerExternalSystem(
+			final String externalSystemName) {
 
-		log.debug("Trying to register external service for {}",
-				externalServiceName);
+		log.debug("Trying to register external system for {}",
+				externalSystemName);
 
 		Record record = null;
-		String externalServiceId;
+		String externalSystemId;
 		String token;
 		synchronized (client) {
 			try {
 
 				token = RandomStringUtils.randomAlphanumeric(128);
-				externalServiceId = client.getUid();
+				externalSystemId = client.getUid();
 				record = client.record
-						.getRecord(DeepstreamConstants.PATH_EXTERNAL_SERVICES
-								+ externalServiceId);
+						.getRecord(DeepstreamConstants.PATH_EXTERNAL_SYSTEMS
+								+ externalSystemId);
 				record.set(DeepstreamConstants.TOKEN, token);
-				record.set(DeepstreamConstants.ROLE, externalServiceRole);
+				record.set(DeepstreamConstants.ROLE, externalSystemRole);
 			} finally {
 				if (record != null) {
 					try {
 						record.discard();
 					} catch (final Exception e) {
 						log.warn(
-								"Could not discard record on external service registration");
+								"Could not discard record on external system registration");
 					}
 				}
 			}
 		}
-		log.debug("External service registered for {}", externalServiceName);
+		log.debug("External system registered for {}", externalSystemName);
 
-		return new ExternalRegistration(externalServiceId, token);
+		return new ExternalRegistration(externalSystemId, token);
 	}
 
-	public void deleteExternalService(
-			final InterventionExternalService externalService) {
+	public void deleteExternalSystem(
+			final InterventionExternalSystem externalSystem) {
 
-		log.debug("Trying to delete external service {}",
-				externalService.getName());
+		log.debug("Trying to delete external system {}",
+				externalSystem.getName());
 
 		Record record = null;
 		synchronized (client) {
-			String recordName = DeepstreamConstants.PATH_EXTERNAL_SERVICES
-					+ externalService.getServiceId();
+			String recordName = DeepstreamConstants.PATH_EXTERNAL_SYSTEMS
+					+ externalSystem.getSystemId();
 
 			HasResult hasResult = client.record.has(recordName);
 			if (!hasResult.hasError() && hasResult.getResult()) {
 
 				record = client.record.getRecord(recordName);
 				record.delete();
-				log.debug("External service {} deleted",
-						externalService.getName());
+				log.debug("External system {} deleted",
+						externalSystem.getName());
 			} else {
-				log.warn("External service record {} could not be deleted",
+				log.warn("External system record {} could not be deleted",
 						recordName);
 			}
 		}
 	}
 
-	public String renewExternalServiceToken(
-			final InterventionExternalService externalService) {
+	public String renewExternalSystemToken(
+			final InterventionExternalSystem externalSystem) {
 
-		log.debug("Trying to renew token from external service {}",
-				externalService.getName());
+		log.debug("Trying to renew token from external system {}",
+				externalSystem.getName());
 
 		Record record = null;
 		String token = null;
 		synchronized (client) {
-			String recordName = DeepstreamConstants.PATH_EXTERNAL_SERVICES
-					+ externalService.getServiceId();
+			String recordName = DeepstreamConstants.PATH_EXTERNAL_SYSTEMS
+					+ externalSystem.getSystemId();
 
 			HasResult hasResult = client.record.has(recordName);
 			if (!hasResult.hasError() && hasResult.getResult()) {
@@ -1088,11 +1088,11 @@ public class DeepstreamCommunicationService extends Thread
 
 				record = client.record.getRecord(recordName);
 				record.set(DeepstreamConstants.TOKEN, token);
-				log.debug("Token renewed from external service {}",
-						externalService.getName());
+				log.debug("Token renewed from external system {}",
+						externalSystem.getName());
 			} else {
 				log.warn(
-						"External service record {} could not be retrieved. Can't renew token",
+						"External system record {} could not be retrieved. Can't renew token",
 						recordName);
 			}
 		}
@@ -1250,12 +1250,12 @@ public class DeepstreamCommunicationService extends Thread
 				synchronized (loggedInSupervisors) {
 					synchronized (loggedInTeamManagers) {
 						synchronized (loggedInObservers) {
-							synchronized (loggedInExternalServices) {
+							synchronized (loggedInExternalSystems) {
 								loggedInParticipants.clear();
 								loggedInSupervisors.clear();
 								loggedInTeamManagers.clear();
 								loggedInObservers.clear();
-								loggedInExternalServices.clear();
+								loggedInExternalSystems.clear();
 
 								for (val userAndRole : client.presence
 										.getAll()) {
@@ -1284,8 +1284,8 @@ public class DeepstreamCommunicationService extends Thread
 									} else if (role.equals(teamManagerRole)) {
 										loggedInTeamManagers.add(user);
 									} else if (role
-											.equals(externalServiceRole)) {
-										loggedInExternalServices.add(user);
+											.equals(externalSystemRole)) {
+										loggedInExternalSystems.add(user);
 									}
 								}
 
@@ -1314,8 +1314,8 @@ public class DeepstreamCommunicationService extends Thread
 					loggedInObservers.size());
 			systemLoad.setLoggedInUsers(
 					ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
-							+ externalServiceRole,
-					loggedInExternalServices.size());
+							+ externalSystemRole,
+					loggedInExternalSystems.size());
 
 			startupComplete = true;
 			reconnecting = false;
@@ -1615,8 +1615,8 @@ public class DeepstreamCommunicationService extends Thread
 								.toJsonTree(data);
 
 						try {
-							val serviceId = jsonData.get(
-									DeepstreamConstants.REST_FIELD_SERVICE_ID)
+							val systemId = jsonData.get(
+									DeepstreamConstants.REST_FIELD_SYSTEM_ID)
 									.getAsString();
 							val jsonVariables = jsonData.get(
 									DeepstreamConstants.REST_FIELD_VARIABLES)
@@ -1642,8 +1642,8 @@ public class DeepstreamCommunicationService extends Thread
 										element.getAsString()));
 							}
 
-							final boolean receivedSuccessful = receiveExternalServiceMessage(
-									serviceId, participants, variables);
+							final boolean receivedSuccessful = receiveExternalSystemMessage(
+									systemId, participants, variables);
 
 							if (receivedSuccessful) {
 								rpcResponse.send(new JsonPrimitive(true));
@@ -1652,7 +1652,7 @@ public class DeepstreamCommunicationService extends Thread
 							}
 						} catch (final Exception e) {
 							log.warn(
-									"Error when receiving external service message: {}",
+									"Error when receiving external system message: {}",
 									e.getMessage());
 							rpcResponse.send(new JsonPrimitive(false));
 						}
@@ -1763,23 +1763,23 @@ public class DeepstreamCommunicationService extends Thread
 		}
 	}
 
-	private boolean receiveExternalServiceMessage(final String serviceId,
+	private boolean receiveExternalSystemMessage(final String systemId,
 			final List<String> participants,
 			final Map<String, Variable> variables) {
 
-		log.debug("Received external message for service {}", serviceId);
+		log.debug("Received external message for system {}", systemId);
 		
-		if(StringUtils.isBlank(serviceId)) {
+		if(StringUtils.isBlank(systemId)) {
 			return false;
 		}
 
-		val externalServiceMessage = new ExternalServiceMessage();
-		externalServiceMessage.setServiceId(serviceId);
-		externalServiceMessage.addAllParticipants(participants);
-		externalServiceMessage.putAllVariables(variables);
+		val externalSystemMessage = new ExternalSystemMessage();
+		externalSystemMessage.setSystemId(systemId);
+		externalSystemMessage.addAllParticipants(participants);
+		externalSystemMessage.putAllVariables(variables);
 
-			synchronized (receivedExternalServiceMessages) {
-				receivedExternalServiceMessages.add(externalServiceMessage);
+			synchronized (receivedExternalSystemMessages) {
+				receivedExternalSystemMessages.add(externalSystemMessage);
 			}
 		return true;
 	}
@@ -2083,8 +2083,8 @@ public class DeepstreamCommunicationService extends Thread
 			loggedInTeamManagers.add(user);
 		} else if (role.equals(observerRole)) {
 			loggedInObservers.add(user);
-		} else if (role.equals(externalServiceRole)) {
-			loggedInExternalServices.add(user);
+		} else if (role.equals(externalSystemRole)) {
+			loggedInExternalSystems.add(user);
 		}
 	}
 
@@ -2116,8 +2116,8 @@ public class DeepstreamCommunicationService extends Thread
 			loggedInTeamManagers.remove(user);
 		} else if (role.equals(observerRole)) {
 			loggedInObservers.remove(user);
-		} else if (role.equals(externalServiceRole)) {
-			loggedInExternalServices.remove(user);
+		} else if (role.equals(externalSystemRole)) {
+			loggedInExternalSystems.remove(user);
 		}
 	}
 

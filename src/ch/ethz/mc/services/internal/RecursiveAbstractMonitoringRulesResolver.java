@@ -31,7 +31,7 @@ import ch.ethz.mc.conf.ImplementationConstants;
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.memory.RuleEvaluationResult;
 import ch.ethz.mc.model.persistent.Intervention;
-import ch.ethz.mc.model.persistent.InterventionExternalService;
+import ch.ethz.mc.model.persistent.InterventionExternalSystem;
 import ch.ethz.mc.model.persistent.MicroDialog;
 import ch.ethz.mc.model.persistent.MicroDialogDecisionPoint;
 import ch.ethz.mc.model.persistent.MicroDialogMessage;
@@ -89,7 +89,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 	private final Intervention									intervention;
 	
 	// Only relevant for external service message handling
-	private final InterventionExternalService 					interventionExternalService;
+	private final InterventionExternalSystem 					interventionExternalSystem;
 
 	// Gives information which kinds of AbstractMonitoringRules this instance
 	// should handle
@@ -214,7 +214,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 			final ObjectId relatedMonitoringRuleForReplyRuleCaseId,
 			final boolean monitoringReplyRuleCase,
 			final ObjectId relatedMicroDialogDecisionPointForMicroDialogRuleCaseId,
-			final InterventionExternalService interventionExternalService) {
+			final InterventionExternalSystem interventionExternalSystem) {
 		this.interventionExecutionManagerService = interventionExecutionManagerService;
 		this.databaseManagerService = databaseManagerService;
 		this.variablesManagerService = variablesManagerService;
@@ -225,7 +225,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 				Intervention.class, participant.getIntervention());
 
 		this.executionCase = executionCase;
-		this.interventionExternalService = interventionExternalService;
+		this.interventionExternalSystem = interventionExternalSystem;
 
 		iterationCache = new Hashtable<String, Integer>();
 		iterationLimitCache = new Hashtable<String, Integer>();
@@ -348,7 +348,7 @@ public class RecursiveAbstractMonitoringRulesResolver {
 								monitoringMessageGroup,
 								relatedMonitoringMessageForReplyRuleCase,
 								ONE_OF_MONITORING_RULES_CASES,
-								interventionExternalService);
+								interventionExternalSystem);
 				if (determinedMonitoringMessageToSend == null) {
 					log.warn(
 							"There are no more messages left in message group {} to send a message to participant {}",
@@ -368,9 +368,9 @@ public class RecursiveAbstractMonitoringRulesResolver {
 
 				// Determine message text and answer type with options to send
 				val variablesWithValues = variablesManagerService
-						.getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
+						.getAllVariablesWithValuesOfParticipantAndSystemAndExternalSystem(
 								participant, determinedMonitoringMessageToSend,
-								null, interventionExternalService);
+								null, interventionExternalSystem);
 				val messageTextToSend = VariableStringReplacer
 						.findVariablesAndReplaceWithTextValues(
 								participant.getLanguage(),
@@ -616,8 +616,8 @@ public class RecursiveAbstractMonitoringRulesResolver {
 								.get(nextRuleId);
 					} else {
 						val variablesWithValues = variablesManagerService
-								.getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
-										participant, interventionExternalService);
+								.getAllVariablesWithValuesOfParticipantAndSystemAndExternalSystem(
+										participant, interventionExternalSystem);
 
 						ruleResult = RuleEvaluator.evaluateRule(
 								participant.getId(), participant.getLanguage(),
@@ -752,8 +752,8 @@ public class RecursiveAbstractMonitoringRulesResolver {
 			ruleResult = preEvaluatedRuleResult;
 		} else {
 			val variablesWithValues = variablesManagerService
-					.getAllVariablesWithValuesOfParticipantAndSystemAndExternalService(
-							participant, interventionExternalService);
+					.getAllVariablesWithValuesOfParticipantAndSystemAndExternalSystem(
+							participant, interventionExternalSystem);
 
 			ruleResult = RuleEvaluator.evaluateRule(participant.getId(),
 					participant.getLanguage(), rule,

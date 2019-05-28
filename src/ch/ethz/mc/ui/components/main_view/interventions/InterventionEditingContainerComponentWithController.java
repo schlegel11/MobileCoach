@@ -34,7 +34,7 @@ import ch.ethz.mc.conf.ThemeImageStrings;
 import ch.ethz.mc.model.persistent.Intervention;
 import ch.ethz.mc.ui.components.main_view.interventions.access.AccessTabComponentWithController;
 import ch.ethz.mc.ui.components.main_view.interventions.basic_settings_and_modules.BasicSettingsAndModulesTabComponentWithController;
-import ch.ethz.mc.ui.components.main_view.interventions.external_services.ExternalServicesTabComponentWithController;
+import ch.ethz.mc.ui.components.main_view.interventions.external_systems.ExternalSystemsTabComponentWithController;
 import ch.ethz.mc.ui.components.main_view.interventions.micro_dialogs.MicroDialogsTabComponentWithController;
 import ch.ethz.mc.ui.components.main_view.interventions.monitoring_groups_and_messages.MonitoringMessageGroupsTabComponentWithController;
 import ch.ethz.mc.ui.components.main_view.interventions.participants.ParticipantsTabComponentWithController;
@@ -140,12 +140,12 @@ public class InterventionEditingContainerComponentWithController
 					AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__ACCESS_TAB,
 					ThemeImageStrings.COMPONENT_ICON);
 
-			// Add external services tab
+			// Add external systems tab
 			registerToSetEditingDependingOnMessaging(addPointableTab(
 					getContentTabSheet(),
-					new ExternalServicesTabComponentWithController(
+					new ExternalSystemsTabComponentWithController(
 							intervention),
-					AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__EXTERNAL_SERVICES_TAB,
+					AdminMessageStrings.INTERVENTION_EDITING_CONTAINER__EXTERNAL_SYSTEMS_TAB,
 					ThemeImageStrings.COMPONENT_ICON));
 		}
 
@@ -174,9 +174,9 @@ public class InterventionEditingContainerComponentWithController
 		if (selectedTab instanceof ParticipantsTabComponentWithController) {
 			val interventionParticipantsTabWithController = (ParticipantsTabComponentWithController) selectedTab;
 			interventionParticipantsTabWithController.adjust();
-		} else if (selectedTab instanceof ExternalServicesTabComponentWithController) {
-			val externalServicesTabComponentWithController = (ExternalServicesTabComponentWithController) selectedTab;
-			externalServicesTabComponentWithController.adjust();
+		} else if (selectedTab instanceof ExternalSystemsTabComponentWithController) {
+			val externalSystemsTabComponentWithController = (ExternalSystemsTabComponentWithController) selectedTab;
+			externalSystemsTabComponentWithController.adjust();
 		}
 	}
 }

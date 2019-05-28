@@ -7,7 +7,7 @@ import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.model.ModelObject;
 import ch.ethz.mc.model.persistent.concepts.AbstractVariableWithValue;
 import ch.ethz.mc.model.persistent.types.InterventionVariableWithValueAccessTypes;
-import ch.ethz.mc.model.ui.UIInterventionExternalServiceFieldVariableMapping;
+import ch.ethz.mc.model.ui.UIInterventionExternalSystemFieldVariableMapping;
 import ch.ethz.mc.model.ui.UIModelObject;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,17 +18,17 @@ import lombok.val;
 
 @NoArgsConstructor
 @AllArgsConstructor
-public class InterventionExternalServiceFieldVariableMapping
+public class InterventionExternalSystemFieldVariableMapping
 		extends ModelObject {
 	private static final long	serialVersionUID	= 2961832517704835697L;
 
 	/**
-	 * {@link InterventionExternalService} to which this mapping belongs to
+	 * {@link InterventionExternalSystem} to which this mapping belongs to
 	 */
 	@Getter
 	@Setter
 	@NonNull
-	private ObjectId			interventionExternalService;
+	private ObjectId			interventionExternalSystem;
 
 	/**
 	 * The JSON field name of a received service message which is mapped to a
@@ -37,11 +37,11 @@ public class InterventionExternalServiceFieldVariableMapping
 	@Getter
 	@Setter
 	@NonNull
-	private String				jsonFieldName;
+	private String				fieldName;
 
 	/**
 	 * The {@link InterventionVariableWithValue} which receives the value of the
-	 * {@link #jsonFieldName}
+	 * {@link #fieldName}
 	 */
 	@Getter
 	@Setter
@@ -74,10 +74,10 @@ public class InterventionExternalServiceFieldVariableMapping
 			variableWithValueName = interventionVariableWithValue.getName();
 		}
 
-		final val externalServiceMapping = new UIInterventionExternalServiceFieldVariableMapping(
-				getJsonFieldName(), variableWithValueName);
-		externalServiceMapping.setRelatedModelObject(this);
+		final val externalSystemMapping = new UIInterventionExternalSystemFieldVariableMapping(
+				getFieldName(), variableWithValueName);
+		externalSystemMapping.setRelatedModelObject(this);
 
-		return externalServiceMapping;
+		return externalSystemMapping;
 	}
 }

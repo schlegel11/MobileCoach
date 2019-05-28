@@ -44,7 +44,7 @@ public class DeepstreamConstants {
 	public static final String	REST_FIELD_INTERVENTION_PATTERN		= "intervention-pattern";
 	public static final String	REST_FIELD_INTERVENTION_PASSWORD	= "intervention-password";
 	
-	public static final String	REST_FIELD_SERVICE_ID				= "serviceId";
+	public static final String	REST_FIELD_SYSTEM_ID				= "systemId";
 	public static final String	REST_FIELD_TOKEN					= "token";
 	public static final String	REST_FIELD_PARTICIPANTS				= "participants";
 	public static final String	REST_FIELD_VARIABLES				= "variables";
@@ -74,7 +74,7 @@ public class DeepstreamConstants {
 	public static final String	PATH_MESSAGE_UPDATE					= "message-update/";
 	public static final String	PATH_DASHBOARD_UPDATE				= "dashboard-update/";
 	public static final String	PATH_LIST							= "list/";
-	public static final String	PATH_EXTERNAL_SERVICES				= "external-services/";
+	public static final String	PATH_EXTERNAL_SYSTEMS				= "external-systems/";
 
 	public static final String	NICKNAME							= "nickname";
 	public static final String	PARTICIPANT							= "participant";

@@ -7,11 +7,11 @@ import org.bson.types.ObjectId;
 
 import ch.ethz.mc.model.Queries;
 import ch.ethz.mc.model.memory.ExternalRegistration;
-import ch.ethz.mc.model.memory.ExternalServiceMessage;
+import ch.ethz.mc.model.memory.ExternalSystemMessage;
 import ch.ethz.mc.model.memory.ReceivedMessage;
 import ch.ethz.mc.model.persistent.DialogOption;
-import ch.ethz.mc.model.persistent.InterventionExternalService;
-import ch.ethz.mc.model.persistent.InterventionExternalServiceFieldVariableMapping;
+import ch.ethz.mc.model.persistent.InterventionExternalSystem;
+import ch.ethz.mc.model.persistent.InterventionExternalSystemFieldVariableMapping;
 import ch.ethz.mc.model.persistent.InterventionVariableWithValue;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
@@ -22,20 +22,20 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * Manages all defined external services for a specific intervention.
+ * Manages all defined external systems for a specific intervention.
  *
  * @author Marcel Schlegel
  */
 @Log4j2
-public class ExternalServicesManagerService {
+public class ExternalSystemsManagerService {
 
 	@Getter
-	private static ExternalServicesManagerService	instance	= null;
+	private static ExternalSystemsManagerService	instance	= null;
 
 	private final DatabaseManagerService			databaseManagerService;
 	private final DeepstreamCommunicationService	deepstreamCommunicationService;
 
-	private ExternalServicesManagerService(
+	private ExternalSystemsManagerService(
 			final DatabaseManagerService databaseManagerService,
 			final DeepstreamCommunicationService deepstreamCommunicationService) {
 
@@ -47,12 +47,12 @@ public class ExternalServicesManagerService {
 		log.info("Started.");
 	}
 
-	public static ExternalServicesManagerService start(
+	public static ExternalSystemsManagerService start(
 			final DatabaseManagerService databaseManagerService,
 			final DeepstreamCommunicationService deepstreamCommunicationService)
 			throws Exception {
 		if (instance == null) {
-			instance = new ExternalServicesManagerService(
+			instance = new ExternalSystemsManagerService(
 					databaseManagerService, deepstreamCommunicationService);
 		}
 		return instance;
@@ -64,60 +64,60 @@ public class ExternalServicesManagerService {
 		log.info("Stopped.");
 	}
 
-	public ExternalRegistration createExternalServiceForDeepstream(
-			final String serviceName) {
+	public ExternalRegistration createExternalSystemForDeepstream(
+			final String systemName) {
 
-		val serviceRegistration = deepstreamCommunicationService
-				.registerExternalService(serviceName);
+		val systemRegistration = deepstreamCommunicationService
+				.registerExternalSystem(systemName);
 
-		return serviceRegistration;
+		return systemRegistration;
 	}
 
-	public void deleteExternalServiceOnDeepstream(
-			final InterventionExternalService externalService) {
-		deepstreamCommunicationService.deleteExternalService(externalService);
+	public void deleteExternalSystemOnDeepstream(
+			final InterventionExternalSystem externalSystem) {
+		deepstreamCommunicationService.deleteExternalSystem(externalSystem);
 	}
 
 	public String renewToken(
-			final InterventionExternalService externalService) {
+			final InterventionExternalSystem externalSystem) {
 		return deepstreamCommunicationService
-				.renewExternalServiceToken(externalService);
+				.renewExternalSystemToken(externalSystem);
 	}
 
 	public boolean getReceivedMessages(
 			final ArrayList<ReceivedMessage> receivedMessages) {
 
-		List<ExternalServiceMessage> externalServiceMessages = new ArrayList<>();
+		List<ExternalSystemMessage> externalSystemMessages = new ArrayList<>();
 		deepstreamCommunicationService
-				.getReceivedExternalServiceMessages(externalServiceMessages);
+				.getReceivedExternalSystemMessages(externalSystemMessages);
 
-		for (ExternalServiceMessage externalServiceMessage : externalServiceMessages) {
+		for (ExternalSystemMessage externalSystemMessage : externalSystemMessages) {
 
-			val externalService = databaseManagerService.findOneModelObject(
-					InterventionExternalService.class,
-					Queries.INTERVENTION_EXTERNAL_SERVICE__BY_SERVICE_ID,
-					externalServiceMessage.getServiceId());
-			if (externalService == null) {
+			val externalSystem = databaseManagerService.findOneModelObject(
+					InterventionExternalSystem.class,
+					Queries.INTERVENTION_EXTERNAL_SYSTEM__BY_SYSTEM_ID,
+					externalSystemMessage.getSystemId());
+			if (externalSystem == null) {
 				log.error(
-						"There exists no external service with service id {}. Message can not be processed.",
-						externalServiceMessage.getServiceId());
+						"There exists no external system with system id {}. Message can not be processed.",
+						externalSystemMessage.getSystemId());
 				continue;
 			}
-			if (externalServiceMessage.getParticipants().isEmpty()) {
+			if (externalSystemMessage.getParticipants().isEmpty()) {
 				val participants = databaseManagerService.findModelObjects(
 						Participant.class, Queries.PARTICIPANT__BY_INTERVENTION,
-						externalService.getIntervention());
-				participants.forEach(participant -> externalServiceMessage
+						externalSystem.getIntervention());
+				participants.forEach(participant -> externalSystemMessage
 						.addParticipant(participant.getId().toString()));
 			}
 
-			for (String participantId : externalServiceMessage
+			for (String participantId : externalSystemMessage
 					.getParticipants()) {
 
 				if (!ObjectId.isValid(participantId)) {
 					log.warn(
-							"Participant id {} is not valid. Message with service id {} can not be processed for participant id {}.",
-							participantId, externalService.getServiceId(),
+							"Participant id {} is not valid. Message with system id {} can not be processed for participant id {}.",
+							participantId, externalSystem.getSystemId(),
 							participantId);
 					continue;
 				}
@@ -126,17 +126,17 @@ public class ExternalServicesManagerService {
 
 				if (participant == null) {
 					log.warn(
-							"Participant with id {} not found. Message with service id {} can not be processed for participant id {}.",
-							participantId, externalService.getServiceId(),
+							"Participant with id {} not found. Message with system id {} can not be processed for participant id {}.",
+							participantId, externalSystem.getSystemId(),
 							participantId);
 					continue;
 				}
 
 				if (!participant.getIntervention()
-						.equals(externalService.getIntervention())) {
+						.equals(externalSystem.getIntervention())) {
 					log.warn(
-							"Participant with id {} is not in the same intervention as the external service. Message with service id {} can not be processed for participant id {}.",
-							participantId, externalService.getServiceId(),
+							"Participant with id {} is not in the same intervention as the external system. Message with system id {} can not be processed for participant id {}.",
+							participantId, externalSystem.getSystemId(),
 							participantId);
 					continue;
 				}
@@ -144,11 +144,11 @@ public class ExternalServicesManagerService {
 				val receivedMessage = new ReceivedMessage();
 
 				val variableMappings = databaseManagerService.findModelObjects(
-						InterventionExternalServiceFieldVariableMapping.class,
-						Queries.INTERVENTION_EXTERNAL_SERVICE_FIELD_VARIABLE_MAPPING__BY_INTERVENTION_EXTERNAL_SERVICE,
-						externalService.getId());
+						InterventionExternalSystemFieldVariableMapping.class,
+						Queries.INTERVENTION_EXTERNAL_SYSTEM_FIELD_VARIABLE_MAPPING__BY_INTERVENTION_EXTERNAL_SYSTEM,
+						externalSystem.getId());
 
-				for (InterventionExternalServiceFieldVariableMapping variableMapping : variableMappings) {
+				for (InterventionExternalSystemFieldVariableMapping variableMapping : variableMappings) {
 
 					val interventionVariable = databaseManagerService
 							.getModelObjectById(
@@ -158,26 +158,26 @@ public class ExternalServicesManagerService {
 
 					if (interventionVariable == null) {
 						log.warn(
-								"Mapped intervention variable for field {} not found. Mapping is ignored for message with service id {}.",
-								variableMapping.getJsonFieldName(),
-								externalService.getServiceId());
+								"Mapped intervention variable for field {} not found. Mapping is ignored for message with system id {}.",
+								variableMapping.getFieldName(),
+								externalSystem.getSystemId());
 						continue;
 					}
 
-					val externalServiceVariable = externalServiceMessage
+					val externalSystemVariable = externalSystemMessage
 							.getVariables()
-							.get(variableMapping.getJsonFieldName());
+							.get(variableMapping.getFieldName());
 
-					Variable externalServiceVariableWithInterventionVariableName = new Variable(
+					Variable externalSystemVariableWithInterventionVariableName = new Variable(
 							interventionVariable.getName(),
-							externalServiceVariable == null
+							externalSystemVariable == null
 									// Intervention variable value as
 									// default
 									? interventionVariable.getValue()
-									: externalServiceVariable.getValue());
+									: externalSystemVariable.getValue());
 
-					receivedMessage.addExternalServiceVariable(
-							externalServiceVariableWithInterventionVariableName);
+					receivedMessage.addExternalSystemVariable(
+							externalSystemVariableWithInterventionVariableName);
 				}
 
 				val dialogOptions = databaseManagerService.findModelObjects(
@@ -188,9 +188,9 @@ public class ExternalServicesManagerService {
 				receivedMessage.setRelatedMessageIdBasedOnOrder(-1);
 				receivedMessage.setReceivedTimestamp(
 						InternalDateTime.currentTimeMillis());
-				receivedMessage.setExternalServiceId(
-						externalServiceMessage.getServiceId());
-				receivedMessage.setExternalService(true);
+				receivedMessage.setExternalSystemId(
+						externalSystemMessage.getSystemId());
+				receivedMessage.setExternalSystem(true);
 				receivedMessage.setMessage("");
 
 				for (DialogOption dialogOption : dialogOptions) {
@@ -212,7 +212,7 @@ public class ExternalServicesManagerService {
 				receivedMessages.add(receivedMessage);
 			}
 		}
-		return !externalServiceMessages.isEmpty();
+		return !externalSystemMessages.isEmpty();
 	}
 
 }

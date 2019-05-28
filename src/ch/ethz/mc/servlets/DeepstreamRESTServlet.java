@@ -105,7 +105,7 @@ public class DeepstreamRESTServlet extends HttpServlet {
 		}
 		authData.addProperty(DeepstreamConstants.REST_FIELD_CLIENT_VERSION, splitedToken[0]);
 		authData.addProperty(DeepstreamConstants.REST_FIELD_ROLE, splitedToken[1]);
-		authData.addProperty(DeepstreamConstants.REST_FIELD_SERVICE_ID, splitedToken[2]);
+		authData.addProperty(DeepstreamConstants.REST_FIELD_SYSTEM_ID, splitedToken[2]);
 		authData.addProperty(DeepstreamConstants.REST_FIELD_TOKEN, splitedToken[3]);
 
 		return authData;
@@ -192,11 +192,11 @@ public class DeepstreamRESTServlet extends HttpServlet {
 				interventionPassword = authData.get(DeepstreamConstants.REST_FIELD_INTERVENTION_PASSWORD).getAsString();
 			}
 			
-			// Service fields
-			String serviceId = null;
-			if(authData.has(DeepstreamConstants.REST_FIELD_SERVICE_ID)) {
-				serviceId = authData
-						.get(DeepstreamConstants.REST_FIELD_SERVICE_ID)
+			// System fields
+			String systemId = null;
+			if(authData.has(DeepstreamConstants.REST_FIELD_SYSTEM_ID)) {
+				systemId = authData
+						.get(DeepstreamConstants.REST_FIELD_SYSTEM_ID)
 						.getAsString();
 			}
 			String token = null;
@@ -206,10 +206,10 @@ public class DeepstreamRESTServlet extends HttpServlet {
 						.getAsString();
 			}
 
-			if (serviceId != null) {
+			if (systemId != null) {
 				// Check access
-				log.debug("Checking deepstream access for external service {}", serviceId);
-				val accessGranted = restManagerService.checkExternalServiceAccess(clientVersion, role, serviceId,
+				log.debug("Checking deepstream access for external system {}", systemId);
+				val accessGranted = restManagerService.checkExternalSystemAccess(clientVersion, role, systemId,
 						token);
 
 				if (!accessGranted) {
@@ -219,14 +219,14 @@ public class DeepstreamRESTServlet extends HttpServlet {
 
 				// Send response
 				val responseServerData = new JsonObject();
-				responseServerData.addProperty(DeepstreamConstants.REST_FIELD_SERVICE_ID, serviceId);
+				responseServerData.addProperty(DeepstreamConstants.REST_FIELD_SYSTEM_ID, systemId);
 				responseServerData.addProperty(DeepstreamConstants.REST_FIELD_ROLE, role);
 
 				val responseClientData = new JsonObject();
-				responseClientData.addProperty(DeepstreamConstants.REST_FIELD_SERVICE_ID, serviceId);
+				responseClientData.addProperty(DeepstreamConstants.REST_FIELD_SYSTEM_ID, systemId);
 				
 				val responseData = new JsonObject();
-				responseData.addProperty(DeepstreamConstants.DS_FIELD_USERNAME, serviceId + " " + role);
+				responseData.addProperty(DeepstreamConstants.DS_FIELD_USERNAME, systemId + " " + role);
 				responseData.add(DeepstreamConstants.DS_FIELD_CLIENT_DATA, responseClientData);
 				responseData.add(DeepstreamConstants.DS_FIELD_SERVER_DATA, responseServerData);
 

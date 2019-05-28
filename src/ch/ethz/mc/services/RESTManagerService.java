@@ -38,7 +38,7 @@ import ch.ethz.mc.model.persistent.BackendUserInterventionAccess;
 import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.DialogStatus;
 import ch.ethz.mc.model.persistent.Intervention;
-import ch.ethz.mc.model.persistent.InterventionExternalService;
+import ch.ethz.mc.model.persistent.InterventionExternalSystem;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.ParticipantVariableWithValue;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
@@ -123,7 +123,7 @@ public class RESTManagerService extends Thread {
 		deepstreamSuperviserRole = ImplementationConstants.DEEPSTREAM_SUPERVISOR_ROLE;
 		deepstreamTeamManagerRole = ImplementationConstants.DEEPSTREAM_TEAM_MANAGER_ROLE;
 		deepstreamObserverRole = ImplementationConstants.DEEPSTREAM_OBSERVER_ROLE;
-		deepstreamExternalServiceRole = ImplementationConstants.DEEPSTREAM_EXTERNAL_SERVICE_ROLE;
+		deepstreamExternalServiceRole = ImplementationConstants.DEEPSTREAM_EXTERNAL_SYSTEM_ROLE;
 		deepstreamMinClientVersion = Constants.getDeepstreamMinClientVersion();
 		deepstreamMaxClientVersion = Constants.getDeepstreamMaxClientVersion();
 
@@ -1054,7 +1054,7 @@ public class RESTManagerService extends Thread {
 		}
 	}
 	
-	public boolean checkExternalServiceAccess(final int clientVersion, final String role, final String serviceId,
+	public boolean checkExternalSystemAccess(final int clientVersion, final String role, final String systemId,
 			final String token) {
 
 		// Prevent access for too old or new clients
@@ -1063,33 +1063,33 @@ public class RESTManagerService extends Thread {
 		}
 
 		// Prevent unauthorized access with empty values
-		if (StringUtils.isBlank(serviceId) || StringUtils.isBlank(role) || StringUtils.isBlank(token)) {
+		if (StringUtils.isBlank(systemId) || StringUtils.isBlank(role) || StringUtils.isBlank(token)) {
 			return false;
 		}
 
 		// Check access based on role
 		if (role.equals(deepstreamExternalServiceRole)) {
 
-			val externalService = databaseManagerService.findOneModelObject(InterventionExternalService.class,
-					Queries.INTERVENTION_EXTERNAL_SERVICE__BY_SERVICE_ID, serviceId);
-			if (externalService == null) {
-				log.debug("Service id {} not authorized for deepstream access: Service id not found", serviceId);
+			val externalSystem = databaseManagerService.findOneModelObject(InterventionExternalSystem.class,
+					Queries.INTERVENTION_EXTERNAL_SYSTEM__BY_SYSTEM_ID, systemId);
+			if (externalSystem == null) {
+				log.debug("System id {} not authorized for deepstream access: System id not found", systemId);
 				return false;
 			}
 			
-			if(!externalService.isActive()) {
-				log.debug("Service with id {} is inactive", serviceId);
+			if(!externalSystem.isActive()) {
+				log.debug("System with id {} is inactive", systemId);
 				return false;
 			}
 
 			if (deepstreamCommunicationService != null
-					&& deepstreamCommunicationService.checkExternalServiceToken(serviceId, token)) {
-				log.debug("Service {} with id {} authorized for deepstream access", externalService.getName(),
-						serviceId);
+					&& deepstreamCommunicationService.checkExternalSystemToken(systemId, token)) {
+				log.debug("System {} with id {} authorized for deepstream access", externalSystem.getName(),
+						systemId);
 				return true;
 			} else {
-				log.debug("Service {} with id {} not authorized for deepstream access: Wrong token",
-						externalService.getName(), serviceId);
+				log.debug("System {} with id {} not authorized for deepstream access: Wrong token",
+						externalSystem.getName(), systemId);
 				return false;
 			}
 

@@ -12,16 +12,16 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Message from an external service
+ * Message from an external system
  * 
  * @author Marcel Schlegel
  */
 @ToString
-public class ExternalServiceMessage {
+public class ExternalSystemMessage {
 
 	@Getter
 	@Setter
-	private String serviceId;
+	private String systemId;
 	
 	@Getter
 	private final Set<String> participants = new HashSet<>();
