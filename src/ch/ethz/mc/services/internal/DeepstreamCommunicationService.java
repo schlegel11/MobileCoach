@@ -1775,6 +1775,7 @@ public class DeepstreamCommunicationService extends Thread
 		log.debug("Received external message for system {}", systemId);
 		
 		if(StringUtils.isBlank(systemId)) {
+			log.info("No systemId was send. Returning false.");
 			return false;
 		}
 
