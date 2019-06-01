@@ -45,9 +45,9 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * Extends the intervention variables tab component with a controller
+ * Extends the external systems tab component with a controller.
  *
- * @author Andreas Filler
+ * @author Marcel Schlegel
  */
 @SuppressWarnings("serial")
 @Log4j2
@@ -391,7 +391,7 @@ public class ExternalSystemsTabComponentWithController extends ExternalSystemsTa
 			}
 		}, null);
 	}
-	
+	// Build JSON object
 	public void openFieldVariableMappings() {
 		val selectedExternalSystem = selectedUIExternalSystem
 				.getRelatedModelObject(InterventionExternalSystem.class);

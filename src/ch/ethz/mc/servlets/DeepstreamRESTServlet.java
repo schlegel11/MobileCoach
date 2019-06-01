@@ -147,7 +147,9 @@ public class DeepstreamRESTServlet extends HttpServlet {
 			JsonObject authData = (JsonObject) jsonObjectPayload
 					.get(DeepstreamConstants.DS_FIELD_AUTH_DATA);
 			
+			// Check for HTTP login.
 			if (!isWebSocketConnection(jsonObjectPayload)) {
+				// Create from HTTP token a JSON document.
 				authData = httpAuthTokenToJson(
 						authData.get(DeepstreamConstants.REST_FIELD_TOKEN)
 								.getAsString());

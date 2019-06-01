@@ -1057,19 +1057,20 @@ public class RESTManagerService extends Thread {
 	public boolean checkExternalSystemAccess(final int clientVersion, final String role, final String systemId,
 			final String token) {
 
-		// Prevent access for too old or new clients
+		// Prevent access for too old or new clients.
 		if (clientVersion < deepstreamMinClientVersion || clientVersion > deepstreamMaxClientVersion) {
 			return false;
 		}
 
-		// Prevent unauthorized access with empty values
+		// Prevent unauthorized access with empty values.
 		if (StringUtils.isBlank(systemId) || StringUtils.isBlank(role) || StringUtils.isBlank(token)) {
 			return false;
 		}
 
-		// Check access based on role
+		// Check access based on role.
 		if (role.equals(deepstreamExternalServiceRole)) {
 
+			// Check if systemId exists.
 			val externalSystem = databaseManagerService.findOneModelObject(InterventionExternalSystem.class,
 					Queries.INTERVENTION_EXTERNAL_SYSTEM__BY_SYSTEM_ID, systemId);
 			if (externalSystem == null) {
@@ -1077,11 +1078,13 @@ public class RESTManagerService extends Thread {
 				return false;
 			}
 			
+			// Check if external system is active.
 			if(!externalSystem.isActive()) {
 				log.debug("System with id {} is inactive", systemId);
 				return false;
 			}
 
+			// Validate token saved in record with path: "external-systems/[systemId]".
 			if (deepstreamCommunicationService != null
 					&& deepstreamCommunicationService.checkExternalSystemToken(systemId, token)) {
 				log.debug("System {} with id {} authorized for deepstream access", externalSystem.getName(),

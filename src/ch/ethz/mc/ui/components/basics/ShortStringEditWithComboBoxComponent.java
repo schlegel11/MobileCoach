@@ -22,7 +22,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * Provides a short string edit {@link TextField} with a {@link ComboBox} for variables window
+ * Provides a short string edit {@link TextField} with a {@link ComboBox} for variables window.
  *
  * @author Marcel Schlegel
  */

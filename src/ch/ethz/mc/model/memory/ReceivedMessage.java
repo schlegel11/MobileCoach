@@ -1,6 +1,7 @@
 package ch.ethz.mc.model.memory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 /*
  * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
  * initiative of the Institute of Technology Management at University of St.
@@ -104,6 +105,10 @@ public class ReceivedMessage {
 
 	public boolean addExternalSystemVariable(Variable variable) {
 		return externalSystemVariables.add(variable);
+	}
+	
+	public boolean addAllExternalSystemVariables(Collection<Variable> variables) {
+		return externalSystemVariables.addAll(variables);
 	}
 
 }

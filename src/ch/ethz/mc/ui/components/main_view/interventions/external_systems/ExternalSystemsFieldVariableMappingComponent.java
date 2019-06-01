@@ -14,6 +14,11 @@ import ch.ethz.mc.ui.components.AbstractClosableEditComponent;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+/**
+ * Provides the external system variable mapping component.
+ *
+ * @author Marcel Schlegel
+ */
 @SuppressWarnings("serial")
 @Data
 @EqualsAndHashCode(callSuper = false)

@@ -675,6 +675,7 @@ public class VariablesManagerService {
 		return null;
 	}
 	
+	// Get the variable value by the given externalSystem.
 	private String getReadOnlyExternalSystemVariableValue(final InterventionExternalSystem externalSystem,
 			final READ_ONLY_EXTERNAL_SYSTEM_VARIABLES variable) {
 		if (externalSystem != null) {

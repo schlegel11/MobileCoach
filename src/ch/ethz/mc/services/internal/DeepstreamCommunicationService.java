@@ -1012,7 +1012,7 @@ public class DeepstreamCommunicationService extends Thread
 
 	public ExternalRegistration registerExternalSystem(
 			final String externalSystemName) {
-
+		
 		log.debug("Trying to register external system for {}",
 				externalSystemName);
 
@@ -1021,15 +1021,17 @@ public class DeepstreamCommunicationService extends Thread
 		String token;
 		synchronized (client) {
 			try {
-
+				// Generate token and UID.
 				token = RandomStringUtils.randomAlphanumeric(128);
 				externalSystemId = client.getUid();
+				// Write token and role to record with path: "external-systems/[systemId]".
 				record = client.record
 						.getRecord(DeepstreamConstants.PATH_EXTERNAL_SYSTEMS
 								+ externalSystemId);
 				record.set(DeepstreamConstants.TOKEN, token);
 				record.set(DeepstreamConstants.ROLE, externalSystemRole);
 			} finally {
+				// If something goes wrong discard record.
 				if (record != null) {
 					try {
 						record.discard();
@@ -1609,12 +1611,14 @@ public class DeepstreamCommunicationService extends Thread
 									e.getMessage());
 						}
 					});
+			// Provide external-message RPC method.
 			client.rpc.provide(DeepstreamConstants.RPC_EXTERNAL_MESSAGE,
 					(rpcName, data, rpcResponse) -> {
 						final JsonObject jsonData = (JsonObject) gson
 								.toJsonTree(data);
 
 						try {
+							// Collect all method parameters.
 							val systemId = jsonData.get(
 									DeepstreamConstants.REST_FIELD_SYSTEM_ID)
 									.getAsString();
@@ -1632,6 +1636,7 @@ public class DeepstreamCommunicationService extends Thread
 												jsonElement.getAsString()));
 							}
 
+							// Collect all key-value variable pairs.
 							Map<String, Variable> variables = new HashMap<>();
 							for (Map.Entry<String, JsonElement> entry : jsonVariables
 									.entrySet()) {
@@ -1641,7 +1646,7 @@ public class DeepstreamCommunicationService extends Thread
 								variables.put(name, new Variable(name,
 										element.getAsString()));
 							}
-
+							// Create a ExternalSystemMessage and add it to the received messages.
 							final boolean receivedSuccessful = receiveExternalSystemMessage(
 									systemId, participants, variables);
 

@@ -18,7 +18,7 @@ import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * Extends the intervention variables tab component with a controller
+ * Extends the external system variable mapping component with a controller
  *
  * @author Marcel Schlegel
  */
