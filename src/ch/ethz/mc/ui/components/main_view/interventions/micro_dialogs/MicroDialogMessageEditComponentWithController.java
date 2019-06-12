@@ -1,5 +1,6 @@
 package ch.ethz.mc.ui.components.main_view.interventions.micro_dialogs;
 
+/* ##LICENSE## */
 import org.bson.types.ObjectId;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -22,26 +23,6 @@ import ch.ethz.mc.ui.components.basics.LocalizedPlaceholderStringEditComponent;
 import ch.ethz.mc.ui.components.basics.MediaObjectIntegrationComponentWithController.MediaObjectCreationOrDeleteionListener;
 import ch.ethz.mc.ui.components.basics.ShortPlaceholderStringEditComponent;
 import ch.ethz.mc.ui.components.basics.ShortStringEditComponent;
-/*
- * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
- * initiative of the Institute of Technology Management at University of St.
- * Gallen and the Department of Management, Technology and Economics at ETH
- * Zurich
- * 
- * For details see README.md file in the root folder of this project.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
@@ -145,6 +126,8 @@ public class MicroDialogMessageEditComponentWithController
 		getStoreVariableTextFieldComponent().getButton()
 				.addClickListener(buttonClickListener);
 		getMessageKeyTextFieldComponent().getButton()
+				.addClickListener(buttonClickListener);
+		getRandomizationGroupTextFieldComponent().getButton()
 				.addClickListener(buttonClickListener);
 		getAnswerOptionsTextFieldComponent().getButton()
 				.addClickListener(buttonClickListener);
@@ -335,6 +318,22 @@ public class MicroDialogMessageEditComponentWithController
 					}
 				});
 
+		val answerCanBeCancelledCheckBox = getAnswerCanBeCancelledCheckBox();
+		answerCanBeCancelledCheckBox
+				.setValue(microDialogMessage.isAnswerCanBeCancelled());
+
+		answerCanBeCancelledCheckBox
+				.addValueChangeListener(new ValueChangeListener() {
+
+					@Override
+					public void valueChange(final ValueChangeEvent event) {
+						getInterventionAdministrationManagerService()
+								.microDialogMessageSetAnswerCanBeCancelledCheckBox(
+										microDialogMessage, (boolean) event
+												.getProperty().getValue());
+					}
+				});
+
 		val messageBlocksMicroDialogUntilAnsweredCheckBox = getMessageBlocksMicroDialogUntilAnsweredCheckBox();
 		messageBlocksMicroDialogUntilAnsweredCheckBox.setValue(
 				microDialogMessage.isMessageBlocksMicroDialogUntilAnswered());
@@ -359,28 +358,32 @@ public class MicroDialogMessageEditComponentWithController
 				.setValue(microDialogMessage.getStoreValueToVariableWithName());
 		getMessageKeyTextFieldComponent()
 				.setValue(microDialogMessage.getNonUniqueKey());
+		getRandomizationGroupTextFieldComponent()
+				.setValue(microDialogMessage.getRandomizationGroup());
+		getRandomizationGroupTextFieldComponent()
+				.setValue(microDialogMessage.getRandomizationGroup());
 		getAnswerOptionsTextFieldComponent().setValue(microDialogMessage
 				.getAnswerOptionsWithPlaceholders().toString());
 		getNoReplyTextFieldComponent()
 				.setValue(microDialogMessage.getNoReplyValue());
 
-		// TODO Aktivierungen und Deaktivierungen stimmen ncoh nicht, auch nicht
-		// mit Check-Status
-		// Außerdem noch Icon
-
 		if (microDialogMessage.isCommandMessage()) {
 			getMessageExpectsAnswerCheckBox().setEnabled(false);
+			getAnswerCanBeCancelledCheckBox().setEnabled(false);
 		} else {
 			getMessageExpectsAnswerCheckBox().setEnabled(true);
+			getAnswerCanBeCancelledCheckBox().setEnabled(true);
 		}
 
 		if (microDialogMessage.isMessageExpectsAnswer()) {
 			getMessageBlocksMicroDialogUntilAnsweredCheckBox().setEnabled(true);
+			getAnswerCanBeCancelledCheckBox().setEnabled(true);
 			getAnswerGridLayout().setEnabled(true);
 			getMinutesUntilHandledAsNotAnsweredSlider().setEnabled(true);
 		} else {
 			getMessageBlocksMicroDialogUntilAnsweredCheckBox()
 					.setEnabled(false);
+			getAnswerCanBeCancelledCheckBox().setEnabled(false);
 			getAnswerGridLayout().setEnabled(false);
 			getMinutesUntilHandledAsNotAnsweredSlider().setEnabled(false);
 		}
@@ -455,6 +458,10 @@ public class MicroDialogMessageEditComponentWithController
 			} else if (event.getButton() == getMessageKeyTextFieldComponent()
 					.getButton()) {
 				editMessageKey();
+			} else if (event
+					.getButton() == getRandomizationGroupTextFieldComponent()
+							.getButton()) {
+				editRandomizationGroup();
 			} else if (event.getButton() == getAnswerOptionsTextFieldComponent()
 					.getButton()) {
 				editAnswerOptionsWithPlaceholder();
@@ -545,19 +552,17 @@ public class MicroDialogMessageEditComponentWithController
 
 	public void editMessageKey() {
 		log.debug("Edit message key");
-		val allPossibleMessageVariables = getInterventionAdministrationManagerService()
-				.getAllWritableMessageVariablesOfIntervention(interventionId);
+
 		showModalStringValueEditWindow(
 				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_MESSAGE_KEY,
-				microDialogMessage.getNonUniqueKey(),
-				allPossibleMessageVariables,
-				new ShortPlaceholderStringEditComponent(),
+				microDialogMessage.getNonUniqueKey(), null,
+				new ShortStringEditComponent(),
 				new ExtendableButtonClickListener() {
 
 					@Override
 					public void buttonClick(final ClickEvent event) {
 						try {
-							// Change store result to variable
+							// Change message key
 							getInterventionAdministrationManagerService()
 									.microDialogMessageSetNonUniqueKey(
 											microDialogMessage,
@@ -574,8 +579,38 @@ public class MicroDialogMessageEditComponentWithController
 				}, null);
 	}
 
+	public void editRandomizationGroup() {
+		log.debug("Edit randomization group");
+
+		showModalStringValueEditWindow(
+				AdminMessageStrings.ABSTRACT_STRING_EDITOR_WINDOW__EDIT_RANDOMIZATION_GROUP,
+				microDialogMessage.getRandomizationGroup(), null,
+				new ShortStringEditComponent(),
+				new ExtendableButtonClickListener() {
+
+					@Override
+					public void buttonClick(final ClickEvent event) {
+						try {
+							// Change randomization group
+							getInterventionAdministrationManagerService()
+									.microDialogMessageSetRandomizationGroup(
+											microDialogMessage,
+											getStringValue());
+						} catch (final Exception e) {
+							handleException(e);
+							return;
+						}
+
+						adjust();
+
+						closeWindow();
+					}
+				}, null);
+	}
+
 	public void editAnswerOptionsWithPlaceholder() {
 		log.debug("Edit answer options with placeholder");
+
 		val allPossibleMessageVariables = getInterventionAdministrationManagerService()
 				.getAllPossibleMessageVariablesOfIntervention(interventionId);
 		showModalLStringValueEditWindow(

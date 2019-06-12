@@ -1,25 +1,6 @@
 package ch.ethz.mc.tools;
 
-/*
- * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
- * initiative of the Institute of Technology Management at University of St.
- * Gallen and the Department of Management, Technology and Economics at ETH
- * Zurich
- * 
- * For details see README.md file in the root folder of this project.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+/* ##LICENSE## */
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -31,6 +12,7 @@ import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 
 import javax.script.ScriptEngineManager;
 
@@ -38,6 +20,11 @@ import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Days;
+import org.joda.time.Months;
+import org.joda.time.Years;
 
 import com.fathzer.soft.javaluator.AbstractEvaluator;
 import com.fathzer.soft.javaluator.DoubleEvaluator;
@@ -520,7 +507,11 @@ public class RuleEvaluator {
 					}
 					break;
 				case CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_TRUE_IF_ZERO:
+				case CALCULATE_DATE_DIFFERENCE_IN_MONTHS_AND_TRUE_IF_ZERO:
+				case CALCULATE_DATE_DIFFERENCE_IN_YEARS_AND_TRUE_IF_ZERO:
 				case CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_ALWAYS_TRUE:
+				case CALCULATE_DATE_DIFFERENCE_IN_MONTHS_AND_ALWAYS_TRUE:
+				case CALCULATE_DATE_DIFFERENCE_IN_YEARS_AND_ALWAYS_TRUE:
 					calendarDiff1 = StringHelpers
 							.createInternalDateCalendarRepresentation(
 									ruleEvaluationResult.getTextRuleValue());
@@ -539,20 +530,42 @@ public class RuleEvaluator {
 							calendarDiff1.get(Calendar.MILLISECOND));
 					calendarDiff2.setTimeZone(calendarDiff1.getTimeZone());
 
-					final int calcDaysDiff = calculateDaysBetweenDates(
-							calendarDiff1, calendarDiff2);
-					log.debug("Difference is {}", calcDaysDiff);
+					final int calcUnitsDiff;
+					switch (rule.getRuleEquationSign()) {
+						case CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_ALWAYS_TRUE:
+						case CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_TRUE_IF_ZERO:
+							calcUnitsDiff = calculateDaysBetweenDates(
+									calendarDiff1, calendarDiff2);
+							break;
+						case CALCULATE_DATE_DIFFERENCE_IN_MONTHS_AND_ALWAYS_TRUE:
+						case CALCULATE_DATE_DIFFERENCE_IN_MONTHS_AND_TRUE_IF_ZERO:
+							calcUnitsDiff = calculateMonthsBetweenDates(
+									calendarDiff1, calendarDiff2);
+							break;
+						case CALCULATE_DATE_DIFFERENCE_IN_YEARS_AND_ALWAYS_TRUE:
+						case CALCULATE_DATE_DIFFERENCE_IN_YEARS_AND_TRUE_IF_ZERO:
+							calcUnitsDiff = calculateYearsBetweenDates(
+									calendarDiff1, calendarDiff2);
+							break;
+						default:
+							// Not possible
+							calcUnitsDiff = 0;
+							break;
+					}
+					log.debug("Difference is {}", calcUnitsDiff);
 
-					if (calcDaysDiff == 0) {
+					if (calcUnitsDiff == 0) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					} else if (rule
-							.getRuleEquationSign() == RuleEquationSignTypes.CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_ALWAYS_TRUE) {
+							.getRuleEquationSign() == RuleEquationSignTypes.CALCULATE_DATE_DIFFERENCE_IN_DAYS_AND_ALWAYS_TRUE
+							|| rule.getRuleEquationSign() == RuleEquationSignTypes.CALCULATE_DATE_DIFFERENCE_IN_MONTHS_AND_ALWAYS_TRUE
+							|| rule.getRuleEquationSign() == RuleEquationSignTypes.CALCULATE_DATE_DIFFERENCE_IN_YEARS_AND_ALWAYS_TRUE) {
 						ruleEvaluationResult.setRuleMatchesEquationSign(true);
 					}
 
-					ruleEvaluationResult.setCalculatedRuleValue(calcDaysDiff);
+					ruleEvaluationResult.setCalculatedRuleValue(calcUnitsDiff);
 					ruleEvaluationResult
-							.setTextRuleValue(String.valueOf(calcDaysDiff));
+							.setTextRuleValue(String.valueOf(calcUnitsDiff));
 					break;
 				case STARTS_ITERATION_FROM_X_UP_TO_Y_AND_RESULT_IS_CURRENT:
 				case STARTS_REVERSE_ITERATION_FROM_X_DOWN_TO_Y_AND_RESULT_IS_CURRENT:
@@ -638,40 +651,79 @@ public class RuleEvaluator {
 	 */
 	private static int calculateDaysBetweenDates(final Calendar date1,
 			final Calendar date2) {
-		Calendar calendar1 = (Calendar) date1.clone();
-		Calendar calendar2 = (Calendar) date2.clone();
+		final Calendar calendar1 = (Calendar) date1.clone();
+		final Calendar calendar2 = (Calendar) date2.clone();
 
-		if (calendar1.get(Calendar.YEAR) == calendar2.get(Calendar.YEAR)) {
-			return calendar2.get(Calendar.DAY_OF_YEAR)
-					- calendar1.get(Calendar.DAY_OF_YEAR);
-		} else {
-			boolean swapped = false;
-			if (calendar2.get(Calendar.YEAR) > calendar1.get(Calendar.YEAR)) {
-				final Calendar temp = calendar1;
-				calendar1 = calendar2;
-				calendar2 = temp;
-				swapped = true;
-			}
-			int additonalDays = 0;
+		final TimeZone timeZone1 = calendar1.getTimeZone();
+		final TimeZone timeZone2 = calendar2.getTimeZone();
 
-			final int dayOfYear1 = calendar1.get(Calendar.DAY_OF_YEAR);
+		final DateTimeZone jodaTimeZone1 = DateTimeZone
+				.forID(timeZone1.getID());
+		final DateTimeZone jodaTimeZone2 = DateTimeZone
+				.forID(timeZone2.getID());
 
-			while (calendar1.get(Calendar.YEAR) > calendar2
-					.get(Calendar.YEAR)) {
-				calendar1.add(Calendar.YEAR, -1);
+		final DateTime dateTime1 = new DateTime(calendar1.getTimeInMillis(),
+				jodaTimeZone1);
+		final DateTime dateTime2 = new DateTime(calendar2.getTimeInMillis(),
+				jodaTimeZone2);
 
-				additonalDays += calendar1
-						.getActualMaximum(Calendar.DAY_OF_YEAR);
-			}
+		return Days.daysBetween(dateTime1, dateTime2).getDays();
+	}
 
-			if (!swapped) {
-				return -1 * (additonalDays - calendar2.get(Calendar.DAY_OF_YEAR)
-						+ dayOfYear1);
-			} else {
-				return additonalDays - calendar2.get(Calendar.DAY_OF_YEAR)
-						+ dayOfYear1;
-			}
-		}
+	/**
+	 * Calculate date difference in months between two dates
+	 *
+	 * @param date1
+	 * @param date2
+	 * @return
+	 */
+	private static int calculateMonthsBetweenDates(final Calendar date1,
+			final Calendar date2) {
+		final Calendar calendar1 = (Calendar) date1.clone();
+		final Calendar calendar2 = (Calendar) date2.clone();
+
+		final TimeZone timeZone1 = calendar1.getTimeZone();
+		final TimeZone timeZone2 = calendar2.getTimeZone();
+
+		final DateTimeZone jodaTimeZone1 = DateTimeZone
+				.forID(timeZone1.getID());
+		final DateTimeZone jodaTimeZone2 = DateTimeZone
+				.forID(timeZone2.getID());
+
+		final DateTime dateTime1 = new DateTime(calendar1.getTimeInMillis(),
+				jodaTimeZone1);
+		final DateTime dateTime2 = new DateTime(calendar2.getTimeInMillis(),
+				jodaTimeZone2);
+
+		return Months.monthsBetween(dateTime1, dateTime2).getMonths();
+	}
+
+	/**
+	 * Calculate date difference in years between two dates
+	 *
+	 * @param date1
+	 * @param date2
+	 * @return
+	 */
+	private static int calculateYearsBetweenDates(final Calendar date1,
+			final Calendar date2) {
+		final Calendar calendar1 = (Calendar) date1.clone();
+		final Calendar calendar2 = (Calendar) date2.clone();
+
+		final TimeZone timeZone1 = calendar1.getTimeZone();
+		final TimeZone timeZone2 = calendar2.getTimeZone();
+
+		final DateTimeZone jodaTimeZone1 = DateTimeZone
+				.forID(timeZone1.getID());
+		final DateTimeZone jodaTimeZone2 = DateTimeZone
+				.forID(timeZone2.getID());
+
+		final DateTime dateTime1 = new DateTime(calendar1.getTimeInMillis(),
+				jodaTimeZone1);
+		final DateTime dateTime2 = new DateTime(calendar2.getTimeInMillis(),
+				jodaTimeZone2);
+
+		return Years.yearsBetween(dateTime1, dateTime2).getYears();
 	}
 
 	/**

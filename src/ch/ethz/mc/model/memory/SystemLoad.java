@@ -1,5 +1,6 @@
 package ch.ethz.mc.model.memory;
 
+/* ##LICENSE## */
 import java.util.ArrayList;
 import java.util.Hashtable;
 

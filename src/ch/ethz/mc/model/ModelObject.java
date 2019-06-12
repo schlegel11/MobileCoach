@@ -1,25 +1,6 @@
 package ch.ethz.mc.model;
 
-/*
- * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
- * initiative of the Institute of Technology Management at University of St.
- * Gallen and the Department of Management, Technology and Economics at ETH
- * Zurich
- * 
- * For details see README.md file in the root folder of this project.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+/* ##LICENSE## */
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
@@ -43,7 +24,6 @@ import ch.ethz.mc.services.internal.FileStorageManagerService;
 import ch.ethz.mc.tools.CustomObjectMapper;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
@@ -331,7 +311,6 @@ public abstract class ModelObject extends AbstractSerializableTable
 	 *         {@link Iterable} or <code>null</code> if not found
 	 */
 	@JsonIgnore
-	@Synchronized
 	protected static final <ModelObjectSubclass extends ModelObject> ModelObjectSubclass findOne(
 			final Class<ModelObjectSubclass> clazz, final String query,
 			final Object... parameters) {
@@ -376,7 +355,6 @@ public abstract class ModelObject extends AbstractSerializableTable
 	 *         {@link Iterable} or <code>null</code> if not found
 	 */
 	@JsonIgnore
-	@Synchronized
 	protected static final <ModelObjectSubclass extends ModelObject> ModelObjectSubclass findOneSorted(
 			final Class<ModelObjectSubclass> clazz, final String query,
 			final String sort, final Object... parameters) {
@@ -428,7 +406,6 @@ public abstract class ModelObject extends AbstractSerializableTable
 	 *         {@link Iterable} (which contains no items if none has been found)
 	 */
 	@JsonIgnore
-	@Synchronized
 	protected static final <ModelObjectSubclass extends ModelObject> Iterable<ModelObjectSubclass> find(
 			final Class<ModelObjectSubclass> clazz, final String query,
 			final Object... parameters) {
@@ -469,7 +446,6 @@ public abstract class ModelObject extends AbstractSerializableTable
 	 *         {@link Iterable} (which contains no items if none has been found)
 	 */
 	@JsonIgnore
-	@Synchronized
 	protected static final Iterable<ObjectId> findIds(
 			final Class<? extends ModelObject> clazz, final String query,
 			final Object... parameters) {
@@ -515,7 +491,6 @@ public abstract class ModelObject extends AbstractSerializableTable
 	 *         {@link Iterable} (which contains no items if none has been found)
 	 */
 	@JsonIgnore
-	@Synchronized
 	protected static final <ModelObjectSubclass extends ModelObject> Iterable<ModelObjectSubclass> findSorted(
 			final Class<ModelObjectSubclass> clazz, final String query,
 			final String sort, final Object... parameters) {

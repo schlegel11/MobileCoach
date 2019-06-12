@@ -1,25 +1,6 @@
 package ch.ethz.mc.tools;
 
-/*
- * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
- * initiative of the Institute of Technology Management at University of St.
- * Gallen and the Department of Management, Technology and Economics at ETH
- * Zurich
- * 
- * For details see README.md file in the root folder of this project.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+/* ##LICENSE## */
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
@@ -409,12 +390,22 @@ public class StringHelpers {
 	 * @return
 	 */
 	public static String parseColonSeparatedMultiLineStringToJSON(
-			final LString text, final Locale language,
-			final Collection<AbstractVariableWithValue> variablesWithValues) {
+			final LString textToParse, final Locale language,
+			final Collection<AbstractVariableWithValue> variablesWithValues,
+			boolean allowRawReplacement) {
+
+		String text;
+		if (allowRawReplacement) {
+			text = VariableStringReplacer.findVariablesAndReplaceWithTextValues(
+					language, textToParse.get(language), variablesWithValues,
+					"");
+		} else {
+			text = textToParse.get(language);
+		}
 
 		val jsonOuterArray = new JsonArray();
 
-		for (val line : text.get(language).split("\n", -1)) {
+		for (val line : text.split("\n", -1)) {
 			if (!StringUtils.isBlank(line)) {
 				val jsonArray = new JsonArray();
 
@@ -423,7 +414,7 @@ public class StringHelpers {
 					String name = line.substring(0, indexOfColon);
 					String value = line.substring(indexOfColon + 1);
 
-					if (name.contains(
+					if (!allowRawReplacement && name.contains(
 							ImplementationConstants.VARIABLE_PREFIX)) {
 						name = VariableStringReplacer
 								.findVariablesAndReplaceWithTextValues(language,
@@ -431,7 +422,7 @@ public class StringHelpers {
 					}
 					jsonArray.add(name);
 
-					if (value.contains(
+					if (!allowRawReplacement && value.contains(
 							ImplementationConstants.VARIABLE_PREFIX)) {
 						value = VariableStringReplacer
 								.findVariablesAndReplaceWithTextValues(language,
@@ -439,7 +430,7 @@ public class StringHelpers {
 					}
 					jsonArray.add(value);
 				} else {
-					if (line.contains(
+					if (!allowRawReplacement && line.contains(
 							ImplementationConstants.VARIABLE_PREFIX)) {
 						jsonArray.add(VariableStringReplacer
 								.findVariablesAndReplaceWithTextValues(language,

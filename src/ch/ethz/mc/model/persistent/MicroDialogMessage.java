@@ -1,25 +1,6 @@
 package ch.ethz.mc.model.persistent;
 
-/*
- * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
- * initiative of the Institute of Technology Management at University of St.
- * Gallen and the Department of Management, Technology and Economics at ETH
- * Zurich
- * 
- * For details see README.md file in the root folder of this project.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+/* ##LICENSE## */
 import java.util.List;
 
 import org.bson.types.ObjectId;
@@ -107,6 +88,14 @@ public class MicroDialogMessage extends ModelObject
 	private String				nonUniqueKey;
 
 	/**
+	 * <strong>OPTIONAL:</strong> The randomization group of the
+	 * {@link MicroDialogMessage}
+	 */
+	@Getter
+	@Setter
+	private String				randomizationGroup;
+
+	/**
 	 * <strong>OPTIONAL:</strong> The {@link MediaObject} used/presented in this
 	 * {@link MicroDialogMessage}
 	 */
@@ -130,6 +119,15 @@ public class MicroDialogMessage extends ModelObject
 	@Getter
 	@Setter
 	private boolean				messageExpectsAnswer;
+
+	/**
+	 * Defines if the answer can be cancelled, e.g. by showing an X beside the
+	 * answer to enable the user to skip it
+	 *
+	 */
+	@Getter
+	@Setter
+	private boolean				answerCanBeCancelled;
 
 	/**
 	 * Defines if the {@link MicroDialogMessage} should be sticky within the
@@ -257,6 +255,7 @@ public class MicroDialogMessage extends ModelObject
 								AdminMessageStrings.UI_MODEL__YES)
 						: Messages.getAdminString(
 								AdminMessageStrings.UI_MODEL__NO),
+				randomizationGroup != null ? randomizationGroup : "",
 				linkedMediaObject != null
 						? Messages.getAdminString(
 								AdminMessageStrings.UI_MODEL__YES)

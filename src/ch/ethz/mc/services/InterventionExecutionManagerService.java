@@ -1,41 +1,28 @@
 package ch.ethz.mc.services;
 
-/*
- * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
- * initiative of the Institute of Technology Management at University of St.
- * Gallen and the Department of Management, Technology and Economics at ETH
- * Zurich
- * 
- * For details see README.md file in the root folder of this project.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+/* ##LICENSE## */
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.IteratorUtils;
@@ -43,6 +30,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
+import org.graphstream.graph.implementations.SingleGraph;
 
 import ch.ethz.mc.MC;
 import ch.ethz.mc.conf.AdminMessageStrings;
@@ -93,7 +81,9 @@ import ch.ethz.mc.tools.RuleEvaluator;
 import ch.ethz.mc.tools.StringHelpers;
 import ch.ethz.mc.tools.VariableStringReplacer;
 import ch.ethz.mc.ui.NotificationMessageException;
+import lombok.AllArgsConstructor;
 import lombok.Cleanup;
+import lombok.Data;
 import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -131,6 +121,13 @@ public class InterventionExecutionManagerService {
 	private final MonitoringSchedulingWorker			monitoringSchedulingWorker;
 
 	private final HashSet<String>						priorityParticipantsIds;
+
+	@Data
+	@AllArgsConstructor
+	private class MicroDialogMessageRandomizationResult {
+		MicroDialogMessage	microDialogMessage;
+		int					highestOrder;
+	}
 
 	private InterventionExecutionManagerService(
 			final DatabaseManagerService databaseManagerService,
@@ -325,7 +322,8 @@ public class InterventionExecutionManagerService {
 			final MicroDialog relatedMicroDialogForActivation,
 			final MicroDialogMessage relatedMicroDialogMessage,
 			final boolean supervisorMessage, final boolean answerExpected,
-			final boolean isSticky, final boolean deactivatesAllOpenQuestions,
+			final boolean answerCanBeCancelled, final boolean isSticky,
+			final boolean deactivatesAllOpenQuestions,
 			final int minutesUntilHandledAsNotAnswered) {
 		log.debug("Create message and prepare for sending");
 		val dialogMessage = new DialogMessage(participant.getId(), 0,
@@ -334,8 +332,9 @@ public class InterventionExecutionManagerService {
 				DialogMessageStatusTypes.PREPARED_FOR_SENDING, type, null,
 				message, message, textFormatType, answerType, answerOptions,
 				null, null, null, null, null, timestampToSendMessage, -1,
-				supervisorMessage, answerExpected, isSticky,
-				deactivatesAllOpenQuestions, -1, -1, null, null, false,
+				supervisorMessage, answerExpected, answerCanBeCancelled,
+				isSticky, deactivatesAllOpenQuestions, -1, -1, null, null,
+				false,
 				relatedMonitoringRule == null ? null
 						: relatedMonitoringRule.getId(),
 				relatedMonitoringMessage == null ? null
@@ -700,7 +699,7 @@ public class InterventionExecutionManagerService {
 						: DialogMessageStatusTypes.RECEIVED_UNEXPECTEDLY,
 				type, receivedMessage.getClientId(), "", "",
 				TextFormatTypes.PLAIN, null, null, null, null, null, null, null,
-				-1, -1, false, false, false, false, -1,
+				-1, -1, false, false, false, false, false, -1,
 				receivedMessage.getReceivedTimestamp(), answerCleaned,
 				answerRaw, isTypeIntention ? false : true, null, null, null,
 				null, false, false);
@@ -995,7 +994,6 @@ public class InterventionExecutionManagerService {
 	 * @param periodicScheduling
 	 * @return
 	 */
-	@Synchronized
 	private boolean performMessagingForParticipant(
 			final ObjectId participantIdToCheck,
 			final boolean periodicScheduling) {
@@ -1370,7 +1368,7 @@ public class InterventionExecutionManagerService {
 										? monitoringReplyRule
 												.isSendMessageToSupervisor()
 										: false,
-								false, false, false, 0);
+								false, false, false, false, 0);
 					}
 				}
 
@@ -1387,7 +1385,7 @@ public class InterventionExecutionManagerService {
 							false, InternalDateTime.currentTimeMillis(), null,
 							null,
 							microDialogActivation.getMiroDialogToActivate(),
-							null, false, false, false, false, 0);
+							null, false, false, false, false, false, 0);
 				}
 			} else if (relatedMicroDialogMessage != null) {
 				log.debug("Caring for further micro dialog handling");
@@ -1553,7 +1551,7 @@ public class InterventionExecutionManagerService {
 												.isSendMessageToSupervisor()
 										: false,
 								monitoringMessageExpectsAnswer, false, false,
-								0);
+								false, 0);
 					}
 				}
 
@@ -1594,7 +1592,7 @@ public class InterventionExecutionManagerService {
 							TextFormatTypes.PLAIN, AnswerTypes.CUSTOM, null,
 							false, timeToSendMessageInMillis, null, null,
 							microDialogActivation.getMiroDialogToActivate(),
-							null, false, false, false, false, 0);
+							null, false, false, false, false, false, 0);
 				}
 
 				if (!periodicCheck) {
@@ -1836,7 +1834,8 @@ public class InterventionExecutionManagerService {
 							monitoringRule != null
 									? monitoringRule.isSendMessageToSupervisor()
 									: false,
-							monitoringMessageExpectsAnswer, false, false, 0);
+							monitoringMessageExpectsAnswer, false, false, false,
+							0);
 				}
 			}
 
@@ -1875,7 +1874,7 @@ public class InterventionExecutionManagerService {
 						TextFormatTypes.PLAIN, AnswerTypes.CUSTOM, null, false,
 						timeToSendMessageInMillis, null, null,
 						microDialogActivation.getMiroDialogToActivate(), null,
-						false, false, false, false, 0);
+						false, false, false, false, false, 0);
 			}
 
 			return dialogMessageCreated;
@@ -2181,7 +2180,7 @@ public class InterventionExecutionManagerService {
 		itemsLoop: do {
 			iteration++;
 
-			val microDialogMessage = databaseManagerService
+			MicroDialogMessage microDialogMessage = databaseManagerService
 					.findOneSortedModelObject(MicroDialogMessage.class,
 							Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG_AND_ORDER_HIGHER,
 							Queries.MICRO_DIALOG_MESSAGE__SORT_BY_ORDER_ASC,
@@ -2215,19 +2214,11 @@ public class InterventionExecutionManagerService {
 			}
 
 			if (handleMessage) {
-				// Handle message
-				currentOrder = microDialogMessage.getOrder();
-				log.debug("Checking micro dialog message {}",
-						microDialogMessage.getId());
-
-				// Check rules of message for execution
-				val rules = databaseManagerService.findSortedModelObjects(
-						MicroDialogMessageRule.class,
-						Queries.MICRO_DIALOG_MESSAGE_RULE__BY_MICRO_DIALOG_MESSAGE,
-						Queries.MICRO_DIALOG_MESSAGE_RULE__SORT_BY_ORDER_ASC,
-						microDialogMessage.getId());
-
-				for (val rule : rules) {
+				// Evaluate next fitting message in case of randomization,
+				// otherwise directly check message
+				if (!StringUtils
+						.isBlank(microDialogMessage.getRandomizationGroup())) {
+					// (Re-)retrieve variables if necessary
 					if (variablesRequireRefresh
 							|| variablesWithValues == null) {
 						variablesWithValues = variablesManagerService
@@ -2236,20 +2227,58 @@ public class InterventionExecutionManagerService {
 						variablesRequireRefresh = false;
 					}
 
-					val ruleResult = RuleEvaluator.evaluateRule(
-							participant.getId(), participant.getLanguage(),
-							rule, variablesWithValues.values());
+					// Determine appropriate message
+					val microDialogMessageRandomizationResult = determineNextFittingMicroDialogMessageInRandomizationGroup(
+							microDialogId, microDialogMessage, participant,
+							variablesWithValues);
 
-					if (!ruleResult.isEvaluatedSuccessful()) {
-						log.error("Error when validating rule: "
-								+ ruleResult.getErrorMessage());
-						continue;
-					}
+					microDialogMessage = microDialogMessageRandomizationResult
+							.getMicroDialogMessage();
+					currentOrder = microDialogMessageRandomizationResult
+							.getHighestOrder();
 
-					// Check if true rule matches
-					if (!ruleResult.isRuleMatchesEquationSign()) {
-						log.debug("Rule does not match, so skip this message");
+					// Continue loop if no message fits at all
+					if (microDialogMessage == null) {
 						continue itemsLoop;
+					}
+				} else {
+					// Handle message
+					currentOrder = microDialogMessage.getOrder();
+					log.debug("Checking micro dialog message {}",
+							microDialogMessage.getId());
+
+					// Check rules of message for execution
+					val rules = databaseManagerService.findSortedModelObjects(
+							MicroDialogMessageRule.class,
+							Queries.MICRO_DIALOG_MESSAGE_RULE__BY_MICRO_DIALOG_MESSAGE,
+							Queries.MICRO_DIALOG_MESSAGE_RULE__SORT_BY_ORDER_ASC,
+							microDialogMessage.getId());
+
+					for (val rule : rules) {
+						if (variablesRequireRefresh
+								|| variablesWithValues == null) {
+							variablesWithValues = variablesManagerService
+									.getAllVariablesWithValuesOfParticipantAndSystem(
+											participant);
+							variablesRequireRefresh = false;
+						}
+
+						val ruleResult = RuleEvaluator.evaluateRule(
+								participant.getId(), participant.getLanguage(),
+								rule, variablesWithValues.values());
+
+						if (!ruleResult.isEvaluatedSuccessful()) {
+							log.error("Error when validating rule: "
+									+ ruleResult.getErrorMessage());
+							continue;
+						}
+
+						// Check if true rule matches
+						if (!ruleResult.isRuleMatchesEquationSign()) {
+							log.debug(
+									"Rule does not match, so skip this message");
+							continue itemsLoop;
+						}
 					}
 				}
 
@@ -2279,7 +2308,8 @@ public class InterventionExecutionManagerService {
 												.getAnswerOptionsWithPlaceholders(),
 										participant.getLanguage(),
 										variablesWithValuesForMessageGeneration
-												.values());
+												.values(),
+										answerTypeToSend.isRawKeyValueBased());
 					} else {
 						answerOptionsToSend = VariableStringReplacer
 								.findVariablesAndReplaceWithTextValues(
@@ -2317,6 +2347,7 @@ public class InterventionExecutionManagerService {
 						lastMessageSent, null, null, microDialog,
 						microDialogMessage, false,
 						microDialogMessage.isMessageExpectsAnswer(),
+						microDialogMessage.isAnswerCanBeCancelled(),
 						microDialogMessage.isMessageIsSticky(),
 						microDialogMessage
 								.isMessageDeactivatesAllOpenQuestions(),
@@ -2387,7 +2418,7 @@ public class InterventionExecutionManagerService {
 							nextMicroDialog.getName(), TextFormatTypes.PLAIN,
 							AnswerTypes.CUSTOM, null, false, lastMessageSent,
 							null, null, nextMicroDialog, null, false, false,
-							false, false, 0);
+							false, false, false, 0);
 				}
 
 				// Variables need to be refreshed after performing rules
@@ -2407,6 +2438,11 @@ public class InterventionExecutionManagerService {
 		}
 	}
 
+	/**
+	 * Switch off monitoring for given participant
+	 * 
+	 * @param participantId
+	 */
 	@Synchronized
 	private void dialogStatusSetDataForMonitoringNotAvailable(
 			final ObjectId participantId) {
@@ -2417,6 +2453,138 @@ public class InterventionExecutionManagerService {
 		dialogStatus.setDataForMonitoringParticipationAvailable(false);
 
 		databaseManagerService.saveModelObject(dialogStatus);
+	}
+
+	/**
+	 * Tries to evaluate the next fitting {@link MicroDialogMessage} fitting to
+	 * the participant's history and the belonging randomization group
+	 * 
+	 * @param relatedMicroDialogId
+	 * @param relatedMicroDialogMessage
+	 * @param participant
+	 * @param variablesWithValues
+	 * @return
+	 */
+	private MicroDialogMessageRandomizationResult determineNextFittingMicroDialogMessageInRandomizationGroup(
+			final ObjectId relatedMicroDialogId,
+			final MicroDialogMessage relatedMicroDialogMessage,
+			final Participant participant,
+			final Hashtable<String, AbstractVariableWithValue> variablesWithValues) {
+
+		// Prepare results object
+		val microDialogMessageRandomizationResult = new MicroDialogMessageRandomizationResult(
+				null, relatedMicroDialogMessage.getOrder());
+
+		// Collect former micro dialog messages and their usage amounts
+		val microDialogMessages = databaseManagerService.findSortedModelObjects(
+				MicroDialogMessage.class,
+				Queries.MICRO_DIALOG_MESSAGE__BY_MICRO_DIALOG_AND_RANDOMIZATION_GROUP,
+				Queries.MICRO_DIALOG_MESSAGE__SORT_BY_ORDER_ASC,
+				relatedMicroDialogId,
+				relatedMicroDialogMessage.getRandomizationGroup());
+
+		val microDialogMessageIds = new LinkedHashMap<String, Integer>();
+		val microDialogMessagesMap = new HashMap<String, MicroDialogMessage>();
+		microDialogMessages.forEach(microDialogMessage -> {
+			microDialogMessageIds.put(microDialogMessage.getId().toHexString(),
+					0);
+			microDialogMessagesMap.put(microDialogMessage.getId().toHexString(),
+					microDialogMessage);
+
+			if (microDialogMessageRandomizationResult
+					.getHighestOrder() < microDialogMessage.getOrder()) {
+				microDialogMessageRandomizationResult
+						.setHighestOrder(microDialogMessage.getOrder());
+			}
+		});
+
+		val dialogMessages = databaseManagerService.findModelObjects(
+				DialogMessage.class,
+				Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_RELATED_MICRO_DIALOG,
+				participant.getId(), relatedMicroDialogId);
+
+		for (val dialogMessage : dialogMessages) {
+			if (dialogMessage.getRelatedMicroDialogMessage() != null
+					&& dialogMessage
+							.getType() != DialogMessageTypes.MICRO_DIALOG_ACTIVATION
+					&& microDialogMessageIds.containsKey(dialogMessage
+							.getRelatedMicroDialogMessage().toHexString())) {
+				microDialogMessageIds.put(
+						dialogMessage.getRelatedMicroDialogMessage()
+								.toHexString(),
+						microDialogMessageIds.get(dialogMessage
+								.getRelatedMicroDialogMessage().toHexString())
+								+ 1);
+			}
+		}
+
+		// Randomize or sort, based on randomization group name
+		final Iterator<Map.Entry<String, Integer>> resortedMicroDialogMessageIdsEntrySet;
+		if (relatedMicroDialogMessage.getRandomizationGroup().toLowerCase()
+				.startsWith("r")) {
+			// Randomize entry set
+			resortedMicroDialogMessageIdsEntrySet = microDialogMessageIds
+					.entrySet().stream().collect(Collectors.collectingAndThen(
+							Collectors.toCollection(ArrayList::new), list -> {
+								Collections.shuffle(list);
+								return list;
+							}))
+					.iterator();
+		} else {
+			// Sort by usage amount to check less used first
+			resortedMicroDialogMessageIdsEntrySet = microDialogMessageIds
+					.entrySet().stream().sorted(Map.Entry.comparingByValue())
+					.collect(Collectors.toMap(Map.Entry::getKey,
+							Map.Entry::getValue, (e1, e2) -> e2,
+							LinkedHashMap::new))
+					.entrySet().iterator();
+		}
+
+		// Check all possible micro dialog messages until a fitting one is found
+		itemsLoop: while (resortedMicroDialogMessageIdsEntrySet.hasNext()) {
+			val microDialogMessageIdEntry = resortedMicroDialogMessageIdsEntrySet
+					.next();
+
+			// Handle message
+			val microDialogMessageToCheck = microDialogMessagesMap
+					.get(microDialogMessageIdEntry.getKey());
+
+			log.debug("Checking micro dialog message {}",
+					microDialogMessageToCheck.getId());
+
+			// Check rules of message for execution
+			val rules = databaseManagerService.findSortedModelObjects(
+					MicroDialogMessageRule.class,
+					Queries.MICRO_DIALOG_MESSAGE_RULE__BY_MICRO_DIALOG_MESSAGE,
+					Queries.MICRO_DIALOG_MESSAGE_RULE__SORT_BY_ORDER_ASC,
+					microDialogMessageToCheck.getId());
+
+			for (val rule : rules) {
+				val ruleResult = RuleEvaluator.evaluateRule(participant.getId(),
+						participant.getLanguage(), rule,
+						variablesWithValues.values());
+
+				if (!ruleResult.isEvaluatedSuccessful()) {
+					log.error("Error when validating rule: "
+							+ ruleResult.getErrorMessage());
+					continue;
+				}
+
+				// Check if true rule matches
+				if (!ruleResult.isRuleMatchesEquationSign()) {
+					log.debug("Rule does not match, so skip this message");
+					continue itemsLoop;
+				}
+			}
+
+			// Stop message check if message fits
+			microDialogMessageRandomizationResult
+					.setMicroDialogMessage(microDialogMessageToCheck);
+
+			return microDialogMessageRandomizationResult;
+		}
+
+		return microDialogMessageRandomizationResult;
 	}
 
 	/*
@@ -2626,7 +2794,7 @@ public class InterventionExecutionManagerService {
 				DialogMessageTypes.PLAIN, messageTextToSend,
 				TextFormatTypes.PLAIN, null, null, true,
 				InternalDateTime.currentTimeMillis(), null, null, null, null,
-				advisorMessage, false, false, false, 0);
+				advisorMessage, false, false, false, false, 0);
 	}
 
 	/**
@@ -2677,7 +2845,8 @@ public class InterventionExecutionManagerService {
 								determinedMonitoringMessageToSend
 										.getAnswerOptionsWithPlaceholders(),
 								participant.getLanguage(),
-								variablesWithValues.values());
+								variablesWithValues.values(),
+								answerTypeToSend.isRawKeyValueBased());
 			} else {
 				answerOptionsToSend = VariableStringReplacer
 						.findVariablesAndReplaceWithTextValues(
@@ -2697,7 +2866,7 @@ public class InterventionExecutionManagerService {
 				answerOptionsToSend, true, InternalDateTime.currentTimeMillis(),
 				null, determinedMonitoringMessageToSend, null, null,
 				advisorMessage, monitoringMessageGroup.isMessagesExpectAnswer(),
-				false, false, minutesUntilHandledAsNotAnswered);
+				false, false, false, minutesUntilHandledAsNotAnswered);
 	}
 
 	/**
@@ -2831,10 +3000,12 @@ public class InterventionExecutionManagerService {
 	/**
 	 * Create a statistics file
 	 * 
+	 * Important: For performance reasons this method is NOT synchronized
+	 * anymore.
+	 * 
 	 * @param statisticsFile
 	 * @throws IOException
 	 */
-	@Synchronized
 	public void createStatistics(final File statisticsFile) throws IOException {
 		final Properties statistics = new Properties() {
 			private static final long serialVersionUID = -478652106406702866L;
@@ -2846,94 +3017,302 @@ public class InterventionExecutionManagerService {
 			}
 		};
 
-		statistics.setProperty("created",
-				StringHelpers.createDailyUniqueIndex());
 		val activeInterventions = databaseManagerService.findModelObjects(
 				Intervention.class, Queries.INTERVENTION__ACTIVE_TRUE);
 
 		int activeInterventionsCount = 0;
+		int validParticipants;
+		int invalidParticipants;
 		// Create statistics of all active interventions
 		for (val intervention : activeInterventions) {
+			// Calender instance to be used several times
+			val calendar = Calendar.getInstance();
+
 			activeInterventionsCount++;
+			validParticipants = 0;
+			invalidParticipants = 0;
+
+			// Prepare graph
+			val graph = new SingleGraph(intervention.getName(), false, true);
 
 			// Check all relevant participants
 			val participants = databaseManagerService.findModelObjects(
-					Participant.class,
-					Queries.PARTICIPANT__BY_INTERVENTION_AND_MONITORING_ACTIVE_TRUE,
+					Participant.class, Queries.PARTICIPANT__BY_INTERVENTION,
 					intervention.getId());
 
 			// Message counts
 			int totalSentMessages = 0;
+			int totalSentCommands = 0;
 			int totalReceivedMessages = 0;
+			int totalReceivedIntentions = 0;
 			int totalDeactivatedMessages = 0;
 			int answeredQuestions = 0;
 			int unansweredQuestions = 0;
 			int mediaObjectsViewed = 0;
+			int totalActivatedMicroDialogs = 0;
+			long secondsUsageTotal = 0l;
+			long secondsUsageAverage = 0l;
+			final HashMap<String, Integer> microDialogsWithRate = new HashMap<String, Integer>();
+			final HashMap<String, Integer[]> microDialogMessagesWithRates = new HashMap<String, Integer[]>();
+			final HashMap<String, Integer> languages = new HashMap<String, Integer>();
+			final HashMap<String, Integer> platforms = new HashMap<String, Integer>();
+			final long[][] participantCreationDistribution = new long[7][24];
+			final long[][] participantActivityDistribution = new long[7][24];
 
-			for (val participant : participants) {
-				val dialogMessages = databaseManagerService.findModelObjects(
-						DialogMessage.class,
-						Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_MESSAGE_TYPE,
-						participant.getId(), false);
-				for (val dialogMessage : dialogMessages) {
-					switch (dialogMessage.getStatus()) {
-						case IN_CREATION:
-							break;
-						case PREPARED_FOR_SENDING:
-							break;
-						case RECEIVED_UNEXPECTEDLY:
-							totalReceivedMessages++;
-							break;
-						case RECEIVED_AS_INTENTION:
-							totalReceivedMessages++;
-							break;
-						case SENDING:
-							break;
-						case SENT_AND_ANSWERED_AND_PROCESSED:
-							totalSentMessages++;
-							totalReceivedMessages++;
-							answeredQuestions++;
-							break;
-						case SENT_AND_ANSWERED_BY_PARTICIPANT:
-							totalSentMessages++;
-							totalReceivedMessages++;
-							answeredQuestions++;
-							break;
-						case SENT_AND_NOT_ANSWERED_AND_PROCESSED:
-							totalSentMessages++;
-							unansweredQuestions++;
-							break;
-						case SENT_AND_WAITING_FOR_ANSWER:
-							totalSentMessages++;
-							break;
-						case SENT_BUT_NOT_WAITING_FOR_ANSWER:
-							totalSentMessages++;
-							break;
-						case SENT_AND_WAITED_FOR_ANSWER_BUT_DEACTIVATED:
-							totalSentMessages++;
-							totalDeactivatedMessages++;
-							break;
+			for (val participantToCheck : participants) {
+				synchronized ($lock) {
+					val participant = databaseManagerService.getModelObjectById(
+							Participant.class, participantToCheck.getId());
+					if (participant == null) {
+						continue;
+					} else if (!participant.isMonitoringActive()) {
+						invalidParticipants++;
+						continue;
+					} else {
+						validParticipants++;
 					}
 
-					if (dialogMessage.isMediaContentViewed()) {
-						mediaObjectsViewed++;
+					String lastOpenOrUnansweredMicroDialogMessageId = null;
+
+					// Analyze basic values
+					secondsUsageTotal += (participant.getLastLogoutTimestamp()
+							- participant.getCreatedTimestamp()) / 1000;
+					languages
+							.put(participant.getLanguage().getDisplayLanguage(),
+									languages
+											.getOrDefault(
+													participant.getLanguage()
+															.getDisplayLanguage(),
+													0)
+											+ 1);
+
+					calendar.setTimeInMillis(
+							participantToCheck.getCreatedTimestamp());
+					participantCreationDistribution[calendar
+							.get(Calendar.DAY_OF_WEEK) == 1
+									? 6
+									: calendar.get(Calendar.DAY_OF_WEEK)
+											- 2][calendar.get(
+													Calendar.HOUR_OF_DAY)]++;
+
+					// Analyze messages
+					val dialogMessages = databaseManagerService
+							.findSortedModelObjects(DialogMessage.class,
+									Queries.DIALOG_MESSAGE__BY_PARTICIPANT_AND_MESSAGE_TYPE,
+									Queries.DIALOG_MESSAGE__SORT_BY_ORDER_ASC,
+									participant.getId(), false);
+
+					String formerMicroDialogId = null;
+
+					for (val dialogMessage : dialogMessages) {
+						switch (dialogMessage.getStatus()) {
+							case IN_CREATION:
+								break;
+							case PREPARED_FOR_SENDING:
+								break;
+							case RECEIVED_UNEXPECTEDLY:
+								totalReceivedMessages++;
+								break;
+							case RECEIVED_AS_INTENTION:
+								totalReceivedIntentions++;
+								if (dialogMessage.getAnswerReceived()
+										.startsWith("platform\n")) {
+									val platform = dialogMessage
+											.getAnswerReceived().split("\n")[1];
+									platforms.put(platform,
+											platforms.getOrDefault(platform, 0)
+													+ 1);
+								}
+								break;
+							case SENDING:
+								break;
+							case SENT_AND_ANSWERED_AND_PROCESSED:
+								totalSentMessages += dialogMessage.getMessage()
+										.split(ImplementationConstants.PLACEHOLDER_NEW_MESSAGE_APP_IDENTIFIER).length;
+								totalReceivedMessages++;
+								answeredQuestions++;
+								break;
+							case SENT_AND_ANSWERED_BY_PARTICIPANT:
+								totalSentMessages += dialogMessage.getMessage()
+										.split(ImplementationConstants.PLACEHOLDER_NEW_MESSAGE_APP_IDENTIFIER).length;
+								totalReceivedMessages++;
+								answeredQuestions++;
+								break;
+							case SENT_AND_NOT_ANSWERED_AND_PROCESSED:
+								totalSentMessages += dialogMessage.getMessage()
+										.split(ImplementationConstants.PLACEHOLDER_NEW_MESSAGE_APP_IDENTIFIER).length;
+								unansweredQuestions++;
+								break;
+							case SENT_AND_WAITING_FOR_ANSWER:
+								totalSentMessages += dialogMessage.getMessage()
+										.split(ImplementationConstants.PLACEHOLDER_NEW_MESSAGE_APP_IDENTIFIER).length;
+								break;
+							case SENT_BUT_NOT_WAITING_FOR_ANSWER:
+								switch (dialogMessage.getType()) {
+									case COMMAND:
+										totalSentCommands++;
+										break;
+									case PLAIN:
+										totalSentMessages += dialogMessage
+												.getMessage()
+												.split(ImplementationConstants.PLACEHOLDER_NEW_MESSAGE_APP_IDENTIFIER).length;
+										break;
+									case MICRO_DIALOG_ACTIVATION:
+										totalActivatedMicroDialogs++;
+										val microDialogId = dialogMessage
+												.getRelatedMicroDialogForActivation()
+												.toHexString();
+										microDialogsWithRate.put(microDialogId,
+												microDialogsWithRate
+														.getOrDefault(
+																microDialogId,
+																0)
+														+ 1);
+
+										if (formerMicroDialogId != null) {
+											val edge = graph.addEdge(
+													formerMicroDialogId + "-"
+															+ microDialogId,
+													formerMicroDialogId,
+													microDialogId, true);
+											if (edge.getAttribute(
+													"label") == null) {
+												edge.setAttribute("label", 1);
+											} else {
+												edge.setAttribute("label",
+														(int) edge.getAttribute(
+																"label") + 1);
+											}
+										} else {
+											graph.addNode(microDialogId);
+										}
+										formerMicroDialogId = microDialogId;
+									default:
+										break;
+								}
+								break;
+							case SENT_AND_WAITED_FOR_ANSWER_BUT_DEACTIVATED:
+								totalSentMessages += dialogMessage.getMessage()
+										.split(ImplementationConstants.PLACEHOLDER_NEW_MESSAGE_APP_IDENTIFIER).length;
+								unansweredQuestions++;
+								totalDeactivatedMessages++;
+								break;
+						}
+
+						switch (dialogMessage.getStatus()) {
+							case IN_CREATION:
+							case PREPARED_FOR_SENDING:
+							case RECEIVED_AS_INTENTION:
+							case SENDING:
+							case SENT_AND_NOT_ANSWERED_AND_PROCESSED:
+							case SENT_BUT_NOT_WAITING_FOR_ANSWER:
+							case SENT_AND_WAITED_FOR_ANSWER_BUT_DEACTIVATED:
+							case SENT_AND_WAITING_FOR_ANSWER:
+								break;
+							case RECEIVED_UNEXPECTEDLY:
+							case SENT_AND_ANSWERED_AND_PROCESSED:
+							case SENT_AND_ANSWERED_BY_PARTICIPANT:
+								calendar.setTimeInMillis(dialogMessage
+										.getAnswerReceivedTimestamp());
+								participantActivityDistribution[calendar
+										.get(Calendar.DAY_OF_WEEK) == 1
+												? 6
+												: calendar
+														.get(Calendar.DAY_OF_WEEK)
+														- 2][calendar.get(
+																Calendar.HOUR_OF_DAY)]++;
+								break;
+						}
+
+						if (dialogMessage.isMessageExpectsAnswer()
+								&& dialogMessage
+										.getRelatedMicroDialogMessage() != null) {
+							val microDialogMessageId = dialogMessage
+									.getRelatedMicroDialogMessage()
+									.toHexString();
+
+							val values = microDialogMessagesWithRates
+									.getOrDefault(microDialogMessageId,
+											new Integer[] { 0, 0, 0, 0 });
+
+							switch (dialogMessage.getStatus()) {
+								case SENT_AND_WAITING_FOR_ANSWER:
+									lastOpenOrUnansweredMicroDialogMessageId = microDialogMessageId;
+									break;
+								case SENT_AND_ANSWERED_BY_PARTICIPANT:
+								case SENT_AND_ANSWERED_AND_PROCESSED:
+									values[0]++;
+									break;
+								case SENT_AND_NOT_ANSWERED_AND_PROCESSED:
+									lastOpenOrUnansweredMicroDialogMessageId = microDialogMessageId;
+									values[1]++;
+									break;
+								case SENT_AND_WAITED_FOR_ANSWER_BUT_DEACTIVATED:
+									lastOpenOrUnansweredMicroDialogMessageId = microDialogMessageId;
+									values[2]++;
+									break;
+								default:
+									break;
+							}
+
+							microDialogMessagesWithRates
+									.put(microDialogMessageId, values);
+						}
+
+						if (dialogMessage.isMediaContentViewed()) {
+							mediaObjectsViewed++;
+						}
+					}
+
+					if (lastOpenOrUnansweredMicroDialogMessageId != null) {
+						val values = microDialogMessagesWithRates.getOrDefault(
+								lastOpenOrUnansweredMicroDialogMessageId,
+								new Integer[] { 0, 0, 0, 0 });
+
+						values[3]++;
+
+						microDialogMessagesWithRates.put(
+								lastOpenOrUnansweredMicroDialogMessageId,
+								values);
 					}
 				}
 			}
 
+			if (validParticipants > 0) {
+				secondsUsageAverage = secondsUsageTotal / validParticipants;
+			}
+
 			// Write values
+			statistics.setProperty("created",
+					StringHelpers.createDailyUniqueIndex());
 			statistics.setProperty(
 					"intervention." + intervention.getId().toString() + ".name",
 					intervention.getName());
 
 			statistics.setProperty(
 					"intervention." + intervention.getId().toString()
+							+ ".validParticipants",
+					String.valueOf(validParticipants));
+			statistics.setProperty(
+					"intervention." + intervention.getId().toString()
+							+ ".invalidParticipants",
+					String.valueOf(invalidParticipants));
+			statistics.setProperty(
+					"intervention." + intervention.getId().toString()
 							+ ".totalSentMessages",
 					String.valueOf(totalSentMessages));
 			statistics.setProperty(
 					"intervention." + intervention.getId().toString()
+							+ ".totalSentCommands",
+					String.valueOf(totalSentCommands));
+			statistics.setProperty(
+					"intervention." + intervention.getId().toString()
 							+ ".totalReceivedMessages",
 					String.valueOf(totalReceivedMessages));
+			statistics.setProperty(
+					"intervention." + intervention.getId().toString()
+							+ ".totalReceivedIntentions",
+					String.valueOf(totalReceivedIntentions));
 			statistics.setProperty(
 					"intervention." + intervention.getId().toString()
 							+ ".totalDeactivatedMessages",
@@ -2950,6 +3329,164 @@ public class InterventionExecutionManagerService {
 					"intervention." + intervention.getId().toString()
 							+ ".mediaObjectsViewed",
 					String.valueOf(mediaObjectsViewed));
+			statistics.setProperty(
+					"intervention." + intervention.getId().toString()
+							+ ".totalActivatedMicroDialogs",
+					String.valueOf(totalActivatedMicroDialogs));
+			statistics.setProperty(
+					"intervention." + intervention.getId().toString()
+							+ ".secondsUsageTotal",
+					String.valueOf(secondsUsageTotal));
+			statistics.setProperty(
+					"intervention." + intervention.getId().toString()
+							+ ".secondsUsageAverage",
+					String.valueOf(secondsUsageAverage));
+			statistics.setProperty(
+					"intervention." + intervention.getId().toString()
+							+ ".participantCreationDistribution",
+					Arrays.deepToString(participantCreationDistribution));
+			statistics.setProperty(
+					"intervention." + intervention.getId().toString()
+							+ ".participantActivityDistribution",
+					Arrays.deepToString(participantActivityDistribution));
+
+			for (val microDialogWithRate : microDialogsWithRate.entrySet()) {
+				val microDialog = databaseManagerService.getModelObjectById(
+						MicroDialog.class,
+						new ObjectId(microDialogWithRate.getKey()));
+
+				if (microDialog != null) {
+					graph.getNode(microDialogWithRate.getKey())
+							.addAttribute("label", microDialog.getName() + " ("
+									+ microDialogWithRate.getValue() + ")");
+					statistics.setProperty("intervention."
+							+ intervention.getId().toString() + ".md."
+							+ microDialogWithRate.getKey() + ".Name",
+							microDialog.getName());
+					statistics.setProperty(
+							"intervention." + intervention.getId().toString()
+									+ ".md." + microDialogWithRate.getKey()
+									+ ".Value",
+							String.valueOf(microDialogWithRate.getValue()));
+				} else {
+					graph.getNode(microDialogWithRate.getKey())
+							.addAttribute("label", "-DELETED-" + " ("
+									+ microDialogWithRate.getValue() + ")");
+					statistics.setProperty("intervention."
+							+ intervention.getId().toString() + ".md."
+							+ microDialogWithRate.getKey() + ".Name",
+							"ALREADY DELETED");
+					statistics.setProperty(
+							"intervention." + intervention.getId().toString()
+									+ ".md." + microDialogWithRate.getKey()
+									+ ".Value",
+							String.valueOf(microDialogWithRate.getValue()));
+				}
+			}
+
+			for (val microDialogMessageWithRates : microDialogMessagesWithRates
+					.entrySet()) {
+				val microDialogMessage = databaseManagerService
+						.getModelObjectById(MicroDialogMessage.class,
+								new ObjectId(
+										microDialogMessageWithRates.getKey()));
+
+				if (microDialogMessage != null) {
+					statistics.setProperty(
+							"intervention." + intervention.getId().toString()
+									+ ".md."
+									+ microDialogMessage.getMicroDialog()
+											.toHexString()
+									+ ".m."
+									+ microDialogMessage.getId().toHexString()
+									+ ".Order",
+							String.valueOf(microDialogMessage.getOrder()));
+					statistics.setProperty(
+							"intervention." + intervention.getId().toString()
+									+ ".md."
+									+ microDialogMessage.getMicroDialog()
+											.toHexString()
+									+ ".m."
+									+ microDialogMessage.getId().toHexString()
+									+ ".Question",
+							microDialogMessage.getTextWithPlaceholders().get(
+									Constants.getInterventionLocales()[0]));
+					statistics.setProperty(
+							"intervention." + intervention.getId().toString()
+									+ ".md."
+									+ microDialogMessage.getMicroDialog()
+											.toHexString()
+									+ ".m."
+									+ microDialogMessage.getId().toHexString()
+									+ ".Type",
+							microDialogMessage.getAnswerType().toString());
+					statistics.setProperty(
+							"intervention." + intervention.getId().toString()
+									+ ".md."
+									+ microDialogMessage.getMicroDialog()
+											.toHexString()
+									+ ".m."
+									+ microDialogMessage.getId().toHexString()
+									+ ".AnswerOptions",
+							microDialogMessage
+									.getAnswerOptionsWithPlaceholders()
+									.get(Constants
+											.getInterventionLocales()[0]));
+					statistics.setProperty(
+							"intervention." + intervention.getId().toString()
+									+ ".md."
+									+ microDialogMessage.getMicroDialog()
+											.toHexString()
+									+ ".m."
+									+ microDialogMessage.getId().toHexString()
+									+ ".Answered",
+							String.valueOf(
+									microDialogMessageWithRates.getValue()[0]));
+					statistics.setProperty(
+							"intervention." + intervention.getId().toString()
+									+ ".md."
+									+ microDialogMessage.getMicroDialog()
+											.toHexString()
+									+ ".m."
+									+ microDialogMessage.getId().toHexString()
+									+ ".Unanswered",
+							String.valueOf(
+									microDialogMessageWithRates.getValue()[1]));
+					statistics.setProperty(
+							"intervention." + intervention.getId().toString()
+									+ ".md."
+									+ microDialogMessage.getMicroDialog()
+											.toHexString()
+									+ ".m."
+									+ microDialogMessage.getId().toHexString()
+									+ ".Deactivated",
+							String.valueOf(
+									microDialogMessageWithRates.getValue()[2]));
+					statistics.setProperty(
+							"intervention." + intervention.getId().toString()
+									+ ".md."
+									+ microDialogMessage.getMicroDialog()
+											.toHexString()
+									+ ".m."
+									+ microDialogMessage.getId().toHexString()
+									+ ".EndPoint",
+							String.valueOf(
+									microDialogMessageWithRates.getValue()[3]));
+				}
+			}
+
+			for (val language : languages.entrySet()) {
+				statistics.setProperty(
+						"intervention." + intervention.getId().toString()
+								+ ".language." + language.getKey(),
+						String.valueOf(language.getValue()));
+			}
+			for (val platform : platforms.entrySet()) {
+				statistics.setProperty(
+						"intervention." + intervention.getId().toString()
+								+ ".platform." + platform.getKey(),
+						String.valueOf(platform.getValue()));
+			}
 		}
 
 		statistics.setProperty("activeInterventions",
@@ -3349,7 +3886,6 @@ public class InterventionExecutionManagerService {
 	 *
 	 * @return
 	 */
-	@Synchronized
 	private List<ObjectId> getParticipantIdsWithMessagesWaitingToBeSent() {
 		val participantsWithMessagesWaitingToBeSend = new ArrayList<ObjectId>();
 
@@ -3541,7 +4077,6 @@ public class InterventionExecutionManagerService {
 	 *
 	 * @return
 	 */
-	@Synchronized
 	private List<Participant> getAllParticipantsRelevantForAnsweredInTimeChecksAndMonitoringScheduling() {
 		val relevantParticipants = new ArrayList<Participant>();
 

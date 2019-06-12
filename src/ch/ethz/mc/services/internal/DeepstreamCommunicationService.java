@@ -1,26 +1,7 @@
 package ch.ethz.mc.services.internal;
 
+/* ##LICENSE## */
 import java.io.File;
-/*
- * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
- * initiative of the Institute of Technology Management at University of St.
- * Gallen and the Department of Management, Technology and Economics at ETH
- * Zurich
- * 
- * For details see README.md file in the root folder of this project.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -369,9 +350,8 @@ public class DeepstreamCommunicationService extends Thread
 													+ "[ ]?",
 											"")
 									.replaceAll(
-											"[ ]?" + ImplementationConstants.PLACEHOLDER_LINKED_SURVEY
-													+ "[ ]?",
-											""));
+											ImplementationConstants.PLACEHOLDER_LINKED_SURVEY,
+											dialogMessage.getSurveyLink()));
 				} else {
 					messageObject.addProperty(
 							DeepstreamConstants.SERVER_MESSAGE,
@@ -400,6 +380,8 @@ public class DeepstreamCommunicationService extends Thread
 						timestamp);
 				messageObject.addProperty(DeepstreamConstants.EXPECTS_ANSWER,
 						dialogMessage.isMessageExpectsAnswer());
+				messageObject.addProperty(DeepstreamConstants.CAN_BE_CANCELLED,
+						dialogMessage.isAnswerCanBeCancelled());
 				messageObject.addProperty(DeepstreamConstants.LAST_MODIFIED,
 						timestamp);
 				messageObject.addProperty(DeepstreamConstants.STICKY,
@@ -1390,6 +1372,48 @@ public class DeepstreamCommunicationService extends Thread
 							rpcResponse.send(new JsonPrimitive(false));
 						}
 					});
+			// Can only be called by a "participant" (role)
+			client.rpc.provide(DeepstreamConstants.RPC_USER_VARIABLES,
+					(rpcName, data, rpcResponse) -> {
+						final JsonObject jsonData = (JsonObject) gson
+								.toJsonTree(data);
+
+						try {
+							val entrySet = jsonData
+									.getAsJsonObject(
+											DeepstreamConstants.VARIABLES)
+									.entrySet();
+
+							final String[] variables = new String[entrySet
+									.size()];
+							final String[] values = new String[entrySet.size()];
+
+							val entrySetIterator = entrySet.iterator();
+							int i = 0;
+							while (entrySetIterator.hasNext()) {
+								val entry = entrySetIterator.next();
+								variables[i] = entry.getKey();
+								values[i] = entry.getValue().getAsString();
+								i++;
+							}
+
+							final boolean variablesStored = writeVariableValues(
+									jsonData.get(DeepstreamConstants.USER)
+											.getAsString(),
+									variables, values);
+
+							if (variablesStored) {
+								rpcResponse.send(new JsonPrimitive(true));
+							} else {
+								rpcResponse.send(new JsonPrimitive(false));
+							}
+						} catch (final Exception e) {
+							log.warn(
+									"Error when writing variable values for participant: {}",
+									e.getMessage());
+							rpcResponse.send(new JsonPrimitive(false));
+						}
+					});
 			// Can be called by a "participant" or "supervisor" (role)
 			client.rpc.provide(DeepstreamConstants.RPC_MESSAGE_DIFF,
 					(rpcName, data, rpcResponse) -> {
@@ -1681,6 +1705,37 @@ public class DeepstreamCommunicationService extends Thread
 						variable, value);
 
 		if (variableStored) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * @param participantId
+	 * @param variables
+	 * @param values
+	 * @return
+	 */
+	private boolean writeVariableValues(final String participantId,
+			final String[] variables, final String[] values) {
+		log.debug("Received new values for variables {} for participant {}",
+				variables, participantId);
+
+		boolean variablesStored = true;
+
+		for (int i = 0; i < variables.length; i++) {
+			if (!interventionExecutionManagerService
+					.participantAdjustVariableValueExternallyBasedOnDialogOptionTypeAndData(
+							DialogOptionTypes.EXTERNAL_ID,
+							ImplementationConstants.DIALOG_OPTION_IDENTIFIER_FOR_DEEPSTREAM
+									+ participantId,
+							variables[i], values[i])) {
+				variablesStored = false;
+			}
+		}
+
+		if (variablesStored) {
 			return true;
 		} else {
 			return false;

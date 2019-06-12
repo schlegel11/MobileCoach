@@ -1,5 +1,6 @@
 package ch.ethz.mc.model.persistent;
 
+/* ##LICENSE## */
 import org.bson.types.ObjectId;
 
 import ch.ethz.mc.model.ModelObject;

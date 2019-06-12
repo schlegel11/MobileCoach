@@ -1,25 +1,6 @@
 package ch.ethz.mc.services;
 
-/*
- * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
- * initiative of the Institute of Technology Management at University of St.
- * Gallen and the Department of Management, Technology and Economics at ETH
- * Zurich
- * 
- * For details see README.md file in the root folder of this project.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+/* ##LICENSE## */
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -1256,7 +1237,8 @@ public class InterventionAdministrationManagerService {
 			final ObjectId microDialogId) {
 		val microDialogMessage = new MicroDialogMessage(microDialogId, 0,
 				new LString(), TextFormatTypes.PLAIN, false, null, null, null,
-				false, false, false, false, null, null, AnswerTypes.FREE_TEXT,
+				null, false, false, false, false, false, null, null,
+				AnswerTypes.FREE_TEXT,
 				ImplementationConstants.DEFAULT_MINUTES_UNTIL_MESSAGE_IS_HANDLED_AS_UNANSWERED,
 				new LString(),
 				GlobalUniqueIdGenerator.createSimpleGlobalUniqueId());
@@ -1338,6 +1320,15 @@ public class InterventionAdministrationManagerService {
 			final MicroDialogMessage microDialogMessage,
 			final boolean messageExpectsAnswer) {
 		microDialogMessage.setMessageExpectsAnswer(messageExpectsAnswer);
+
+		databaseManagerService.saveModelObject(microDialogMessage);
+	}
+
+	@Synchronized
+	public void microDialogMessageSetAnswerCanBeCancelledCheckBox(
+			final MicroDialogMessage microDialogMessage,
+			final boolean answerCanBeCancelled) {
+		microDialogMessage.setAnswerCanBeCancelled(answerCanBeCancelled);
 
 		databaseManagerService.saveModelObject(microDialogMessage);
 	}
@@ -1430,6 +1421,22 @@ public class InterventionAdministrationManagerService {
 	}
 
 	@Synchronized
+	public void microDialogMessageSetRandomizationGroup(
+			final MicroDialogMessage microDialogMessage,
+			final String randomizationGroup)
+			throws NotificationMessageException {
+		if (StringUtils.isBlank(randomizationGroup)) {
+			microDialogMessage.setRandomizationGroup(null);
+
+			databaseManagerService.saveModelObject(microDialogMessage);
+		} else {
+			microDialogMessage.setRandomizationGroup(randomizationGroup);
+
+			databaseManagerService.saveModelObject(microDialogMessage);
+		}
+	}
+
+	@Synchronized
 	public void microDialogMessageSetNoReplyValue(
 			final MicroDialogMessage microDialogMessage,
 			final String newValue) {
@@ -1509,7 +1516,8 @@ public class InterventionAdministrationManagerService {
 
 	@Synchronized
 	public MicroDialogMessage microDialogMessageImport(final File file,
-			final boolean duplicate) throws FileNotFoundException, IOException {
+			final boolean duplicate, final MicroDialog newBelongingMicroDialog)
+			throws FileNotFoundException, IOException {
 		val importedModelObjects = modelObjectExchangeService
 				.importModelObjects(file,
 						ModelObjectExchangeFormatTypes.MICRO_DIALOG_MESSAGE);
@@ -1522,6 +1530,15 @@ public class InterventionAdministrationManagerService {
 					// Recreate I18n identifier
 					microDialogMessage.setI18nIdentifier(GlobalUniqueIdGenerator
 							.createSimpleGlobalUniqueId());
+				}
+
+				if (newBelongingMicroDialog != null
+						&& !microDialogMessage.getMicroDialog()
+								.equals(newBelongingMicroDialog.getId())) {
+					// Micro dialog message has been copy & pasted to other
+					// micro dialog
+					microDialogMessage
+							.setMicroDialog(newBelongingMicroDialog.getId());
 				}
 
 				// Adjust order
@@ -1708,14 +1725,29 @@ public class InterventionAdministrationManagerService {
 
 	@Synchronized
 	public MicroDialogDecisionPoint microDialogDecisionPointImport(
-			final File file) throws FileNotFoundException, IOException {
+			final File file, final MicroDialog newBelongingMicroDialog)
+			throws FileNotFoundException, IOException {
 		val importedModelObjects = modelObjectExchangeService
 				.importModelObjects(file,
 						ModelObjectExchangeFormatTypes.MICRO_DIALOG_DECISION_POINT);
 
+		boolean copyCase = false;
+		MicroDialogDecisionPoint newMicroDialogDecisionPoint = null;
+
 		for (val modelObject : importedModelObjects) {
 			if (modelObject instanceof MicroDialogDecisionPoint) {
 				val microDialogDecisionPoint = (MicroDialogDecisionPoint) modelObject;
+
+				if (newBelongingMicroDialog != null
+						&& !microDialogDecisionPoint.getMicroDialog()
+								.equals(newBelongingMicroDialog.getId())) {
+					// Micro dialog decision point has been copy & pasted to
+					// other micro dialog
+					microDialogDecisionPoint
+							.setMicroDialog(newBelongingMicroDialog.getId());
+
+					copyCase = true;
+				}
 
 				// Adjust order
 				int newOrder = 0;
@@ -1743,11 +1775,21 @@ public class InterventionAdministrationManagerService {
 				databaseManagerService
 						.saveModelObject(microDialogDecisionPoint);
 
-				return microDialogDecisionPoint;
+				newMicroDialogDecisionPoint = microDialogDecisionPoint;
+			}
+
+			if (modelObject instanceof MicroDialogRule && copyCase) {
+				val microDialogRule = (MicroDialogRule) modelObject;
+
+				microDialogRule.setNextMicroDialogWhenTrue(null);
+				microDialogRule.setNextMicroDialogMessageWhenTrue(null);
+				microDialogRule.setNextMicroDialogMessageWhenFalse(null);
+
+				databaseManagerService.saveModelObject(microDialogRule);
 			}
 		}
 
-		return null;
+		return newMicroDialogDecisionPoint;
 	}
 
 	@Synchronized
