@@ -8,7 +8,7 @@ This can be set in the "JRE" tab when configuring an ANT task in the eclipse GUI
 
 -->
 
-<project name="Pathmate Cloud Platform WAR-file creation" basedir="." default="war" xmlns:ivy="antlib:org.apache.ivy.ant">
+<project name="MobileCoach WAR-file creation" basedir="." default="war" xmlns:ivy="antlib:org.apache.ivy.ant">
 	<description>
 		MobileCoach WAR creation
 	</description>
