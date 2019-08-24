@@ -2300,7 +2300,7 @@ public class InterventionExecutionManagerService {
 						if (variablesRequireRefresh
 								|| variablesWithValues == null) {
 							variablesWithValues = variablesManagerService
-									.getAllVariablesWithValuesOfParticipantAndSystem(
+									.getAllVariablesWithValuesOfParticipantAndSystemAndExternalSystem(
 											participant);
 							variablesRequireRefresh = false;
 						}

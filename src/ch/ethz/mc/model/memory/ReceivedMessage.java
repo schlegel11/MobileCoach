@@ -1,9 +1,8 @@
 package ch.ethz.mc.model.memory;
 
-/* ##LICENSE## */
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
 import ch.ethz.mc.model.rest.Variable;
