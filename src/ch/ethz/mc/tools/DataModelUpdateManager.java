@@ -1,25 +1,6 @@
 package ch.ethz.mc.tools;
 
-/*
- * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
- * initiative of the Institute of Technology Management at University of St.
- * Gallen and the Department of Management, Technology and Economics at ETH
- * Zurich
- * 
- * For details see README.md file in the root folder of this project.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+/* ##LICENSE## */
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -155,6 +136,12 @@ public class DataModelUpdateManager {
 					break;
 				case 46:
 					updateToVersion46();
+					break;
+				case 47:
+					updateToVersion47();
+					break;
+				case 48:
+					updateToVersion48();
 					break;
 			}
 
@@ -846,6 +833,34 @@ public class DataModelUpdateManager {
 				.with(Queries.UPDATE_VERSION_46__DIALOG_MESSAGE__CHANGE_1);
 		dialogMessageCollection.update(Queries.ALL).multi()
 				.with(Queries.UPDATE_VERSION_46__DIALOG_MESSAGE__CHANGE_2);
+
+	}
+
+	/**
+	 * Changes for version 47:
+	 */
+	private static void updateToVersion47() {
+		val microDialogMessageCollection = jongo
+				.getCollection("MicroDialogMessage");
+
+		microDialogMessageCollection.update(Queries.ALL).multi().with(
+				Queries.UPDATE_VERSION_47__MICRO_DIALOG_MESSAGE__CHANGE_1);
+	}
+
+	/**
+	 * Changes for version 46:
+	 */
+	private static void updateToVersion48() {
+		val microDialogMessageCollection = jongo
+				.getCollection("MicroDialogMessage");
+
+		microDialogMessageCollection.update(Queries.ALL).multi().with(
+				Queries.UPDATE_VERSION_48__MICRO_DIALOG_MESSAGE__CHANGE_1);
+
+		val dialogMessageCollection = jongo.getCollection("DialogMessage");
+
+		dialogMessageCollection.update(Queries.ALL).multi()
+				.with(Queries.UPDATE_VERSION_48__DIALOG_MESSAGE__CHANGE_1);
 
 	}
 }

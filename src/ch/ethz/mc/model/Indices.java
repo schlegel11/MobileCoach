@@ -1,25 +1,6 @@
 package ch.ethz.mc.model;
 
-/*
- * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
- * initiative of the Institute of Technology Management at University of St.
- * Gallen and the Department of Management, Technology and Economics at ETH
- * Zurich
- * 
- * For details see README.md file in the root folder of this project.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+/* ##LICENSE## */
 import java.util.Hashtable;
 
 import ch.ethz.mc.model.persistent.BackendUser;
@@ -60,7 +41,8 @@ public class Indices {
 	private static final String[]	dialogMessageIndices									= new String[] {
 			"{'participant':1,'status':1}", "{'participant':1,'order':1}",
 			"{'participant':1,'status':1,'shouldBeSentTimestamp':1}",
-			"{'participant':1,'clientId':1}" };
+			"{'participant':1,'clientId':1}",
+			"{'participant':1,'relatedMicroDialogForActivation':1}" };
 	private static final String[]	dialogOptionIndices										= new String[] {
 			"{'participant':1,'type':1}", "{'type':1,'data':1}" };
 	private static final String[]	dialogStatusIndices										= new String[] {
@@ -77,7 +59,7 @@ public class Indices {
 	private static final String[]	participantVariableWithValuesIndices					= new String[] {
 			"{'participant':1}", "{'participant':1,'name':1}" };
 	private static final String[]	interventionVariableWithValuesIndices					= new String[] {
-			"{'intervention':1}" };
+			"{'intervention':1}", "{'intervention':1,'name':1}" };
 
 	private static final String[]	monitoringRuleIndices									= new String[] {
 			"{'intervention':1,'isSubRuleOfMonitoringRule':1}",

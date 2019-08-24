@@ -1,5 +1,6 @@
 package ch.ethz.mc.tools;
 
+/* ##LICENSE## */
 import ch.ethz.mc.model.persistent.types.MediaObjectTypes;
 
 /**

@@ -55,6 +55,9 @@ rpc:
   "user-variable":
     provide: "user.data.role === 'server'"
     request: "user.data.role === 'participant' && user.data.user === data.user"
+  "user-variables":
+    provide: "user.data.role === 'server'"
+    request: "user.data.role === 'participant' && user.data.user === data.user"
   "rest-token":
     provide: "user.data.role === 'server'"
     request: "user.data.role === 'participant' && user.data.user === data.user"

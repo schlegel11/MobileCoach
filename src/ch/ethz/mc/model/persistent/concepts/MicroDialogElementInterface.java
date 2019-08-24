@@ -1,5 +1,6 @@
 package ch.ethz.mc.model.persistent.concepts;
 
+/* ##LICENSE## */
 import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;

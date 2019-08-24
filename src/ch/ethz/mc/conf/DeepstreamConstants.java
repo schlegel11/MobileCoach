@@ -1,25 +1,6 @@
 package ch.ethz.mc.conf;
 
-/*
- * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
- * initiative of the Institute of Technology Management at University of St.
- * Gallen and the Department of Management, Technology and Economics at ETH
- * Zurich
- * 
- * For details see README.md file in the root folder of this project.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+/* ##LICENSE## */
 
 /**
  * Contains some implementation specific constants for Deepstream
@@ -65,6 +46,7 @@ public class DeepstreamConstants {
 	public static final String	RPC_DASHBOARD_MESSAGE				= "dashboard-message";
 	public static final String	RPC_USER_INTENTION					= "user-intention";
 	public static final String	RPC_USER_VARIABLE					= "user-variable";
+	public static final String	RPC_USER_VARIABLES					= "user-variables";
 	public static final String	RPC_MESSAGE_DIFF					= "message-diff";
 	public static final String	RPC_DASHBOARD_DIFF					= "dashboard-diff";
 	public static final String	RPC_EXTERNAL_MESSAGE				= "external-message";
@@ -91,6 +73,7 @@ public class DeepstreamConstants {
 	public static final String	PLATFORM							= "platform";
 	public static final String	TOKEN								= "token";
 	public static final String	VARIABLE							= "variable";
+	public static final String	VARIABLES							= "variables";
 	public static final String	VALUE								= "value";
 	public static final String	SERVER_TIMESTAMP					= "server-timestamp";
 	public static final String	RELATED_MESSAGE_ID					= "related-message-id";
@@ -105,6 +88,7 @@ public class DeepstreamConstants {
 	public static final String	DEACTIVATION						= "deactivation";
 	public static final String	CONTAINS_SURVEY						= "contains-survey";
 	public static final String	EXPECTS_ANSWER						= "expects-answer";
+	public static final String	CAN_BE_CANCELLED					= "can-be-cancelled";
 	public static final String	MESSAGE_TIMESTAMP					= "message-timestamp";
 	public static final String	SERVER_MESSAGE						= "server-message";
 	public static final String	FORMAT								= "format";

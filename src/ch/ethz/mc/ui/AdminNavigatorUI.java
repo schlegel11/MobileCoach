@@ -1,5 +1,8 @@
 package ch.ethz.mc.ui;
 
+/* ##LICENSE## */
+import java.io.File;
+
 import com.vaadin.annotations.Theme;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.ViewChangeListener;
@@ -18,29 +21,11 @@ import ch.ethz.mc.conf.AdminMessageStrings;
 import ch.ethz.mc.conf.Constants;
 import ch.ethz.mc.conf.Messages;
 import ch.ethz.mc.services.internal.LockingService;
+import ch.ethz.mc.services.types.ModelObjectExchangeFormatTypes;
 import ch.ethz.mc.ui.views.ErrorView;
 import ch.ethz.mc.ui.views.LoginView;
 import ch.ethz.mc.ui.views.MainView;
-/*
- * © 2013-2017 Center for Digital Health Interventions, Health-IS Lab a joint
- * initiative of the Institute of Technology Management at University of St.
- * Gallen and the Department of Management, Technology and Economics at ETH
- * Zurich
- * 
- * For details see README.md file in the root folder of this project.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+import lombok.Getter;
 import lombok.Synchronized;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -56,9 +41,18 @@ import lombok.extern.log4j.Log4j2;
 public class AdminNavigatorUI extends UI
 		implements ViewChangeListener, DetachListener {
 
-	private UISession uiSession;
+	private UISession						uiSession;
+
+	@Getter
+	private File							clipboard;
+
+	@Getter
+	private ModelObjectExchangeFormatTypes	clipboardExchangeFormatType;
 
 	public AdminNavigatorUI() {
+		clipboard = null;
+		clipboardExchangeFormatType = null;
+
 		val session = VaadinSession.getCurrent().getSession();
 		log.debug("Creating new UI Session object based on session {}",
 				session.getId());
@@ -166,6 +160,8 @@ public class AdminNavigatorUI extends UI
 				session.getId());
 		uiSession = new UISession(session);
 		uiSession.setBaseURL(baseURL);
+
+		cleanupClipboard();
 	}
 
 	public void showInformationNotification(final AdminMessageStrings message,
@@ -273,6 +269,28 @@ public class AdminNavigatorUI extends UI
 	public void detach(final DetachEvent event) {
 		log.debug("View detached");
 
+		cleanupClipboard();
+
 		getLockingService().releaseLockOfUISession(getUISession());
+	}
+
+	public void setClipboard(final File newClipboard,
+			final ModelObjectExchangeFormatTypes newClipboardExchangeFormatType) {
+		cleanupClipboard();
+
+		clipboard = newClipboard;
+		clipboardExchangeFormatType = newClipboardExchangeFormatType;
+	}
+
+	private void cleanupClipboard() {
+		if (clipboard != null) {
+			try {
+				clipboard.delete();
+			} catch (final Exception e) {
+				clipboard.deleteOnExit();
+			}
+			clipboard = null;
+		}
+		clipboardExchangeFormatType = null;
 	}
 }
