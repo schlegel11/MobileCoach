@@ -9,9 +9,12 @@ package ch.ethz.mc.conf;
  */
 public class DeepstreamConstants {
 	public static final String	DS_FIELD_USERNAME					= "username";
+	public static final String	DS_FIELD_CONNECTION_DATA			= "connectionData";
 	public static final String	DS_FIELD_AUTH_DATA					= "authData";
 	public static final String	DS_FIELD_CLIENT_DATA				= "clientData";
 	public static final String	DS_FIELD_SERVER_DATA				= "serverData";
+	public static final String	DS_FIELD_HEADERS					= "headers";
+	public static final String	DS_FIELD_WEBSOCKET					= "websocket";
 
 	public static final String	REST_FIELD_PARTICIPANT				= "participant";
 	public static final String	REST_FIELD_NICKNAME					= "nickname";
@@ -21,6 +24,12 @@ public class DeepstreamConstants {
 	public static final String	REST_FIELD_ROLE						= "role";
 	public static final String	REST_FIELD_INTERVENTION_PATTERN		= "intervention-pattern";
 	public static final String	REST_FIELD_INTERVENTION_PASSWORD	= "intervention-password";
+	
+	public static final String	REST_FIELD_SYSTEM_ID				= "systemId";
+	public static final String	REST_FIELD_TOKEN					= "token";
+	public static final String	REST_FIELD_PARTICIPANTS				= "participants";
+	public static final String	REST_FIELD_VARIABLES				= "variables";
+
 
 	public static final String	STATUS_ANSWERED_BY_USER				= "ANSWERED_BY_USER";
 	public static final String	STATUS_NOT_ANSWERED_BY_USER			= "NOT_ANSWERED_BY_USER";
@@ -40,12 +49,14 @@ public class DeepstreamConstants {
 	public static final String	RPC_USER_VARIABLES					= "user-variables";
 	public static final String	RPC_MESSAGE_DIFF					= "message-diff";
 	public static final String	RPC_DASHBOARD_DIFF					= "dashboard-diff";
+	public static final String	RPC_EXTERNAL_MESSAGE				= "external-message";
 
 	public static final String	PATH_MESSAGES						= "messages/";
 	public static final String	PATH_DASHBOARD						= "dashboard/";
 	public static final String	PATH_MESSAGE_UPDATE					= "message-update/";
 	public static final String	PATH_DASHBOARD_UPDATE				= "dashboard-update/";
 	public static final String	PATH_LIST							= "list/";
+	public static final String	PATH_EXTERNAL_SYSTEMS				= "external-systems/";
 
 	public static final String	NICKNAME							= "nickname";
 	public static final String	PARTICIPANT							= "participant";

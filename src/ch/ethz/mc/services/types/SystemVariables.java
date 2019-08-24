@@ -76,6 +76,15 @@ public class SystemVariables {
 			return ImplementationConstants.VARIABLE_PREFIX + toString();
 		}
 	}
+	
+	public enum READ_ONLY_EXTERNAL_SYSTEM_VARIABLES {
+		externalSystemName,
+		externalSystemId;
+
+		public String toVariableName() {
+			return ImplementationConstants.VARIABLE_PREFIX + toString();
+		}
+	}
 
 	public static final String[]	EXTERNALLY_READABLE_SYSTEM_VARIABLE_NAMES		= new String[] {
 			READ_ONLY_SYSTEM_VARIABLES.systemHourOfDay.toVariableName(),

@@ -13,6 +13,7 @@ import ch.ethz.mc.services.SurveyAdministrationManagerService;
 import ch.ethz.mc.services.SurveyExecutionManagerService;
 import ch.ethz.mc.services.internal.CommunicationManagerService;
 import ch.ethz.mc.services.internal.DatabaseManagerService;
+import ch.ethz.mc.services.internal.ExternalSystemsManagerService;
 import ch.ethz.mc.services.internal.FileStorageManagerService;
 import ch.ethz.mc.services.internal.ImageCachingService;
 import ch.ethz.mc.services.internal.LockingService;
@@ -52,6 +53,8 @@ public class MC implements ServletContextListener {
 
 	@Getter
 	LockingService								lockingService;
+	
+	ExternalSystemsManagerService				externalServicesManagerService;
 
 	// Controller services
 	@Getter
@@ -106,6 +109,9 @@ public class MC implements ServletContextListener {
 			// services
 			communicationManagerService = CommunicationManagerService
 					.prepare(variablesManagerService);
+			externalServicesManagerService = ExternalSystemsManagerService
+					.start(databaseManagerService, communicationManagerService
+							.getDeepstreamCommunicationService());
 
 			// Controller services
 			surveyAdministrationManagerService = SurveyAdministrationManagerService
@@ -115,7 +121,7 @@ public class MC implements ServletContextListener {
 			interventionAdministrationManagerService = InterventionAdministrationManagerService
 					.start(databaseManagerService, fileStorageManagerService,
 							variablesManagerService, modelObjectExchangeService,
-							surveyAdministrationManagerService);
+							surveyAdministrationManagerService, externalServicesManagerService);
 			surveyExecutionManagerService = SurveyExecutionManagerService.start(
 					databaseManagerService, fileStorageManagerService,
 					variablesManagerService,
@@ -169,6 +175,7 @@ public class MC implements ServletContextListener {
 			interventionAdministrationManagerService.stop();
 			modelObjectExchangeService.stop();
 			communicationManagerService.stop();
+			externalServicesManagerService.stop();
 			variablesManagerService.stop();
 			imageCachingService.stop();
 			fileStorageManagerService.stop();

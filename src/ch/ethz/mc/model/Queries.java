@@ -30,6 +30,13 @@ public class Queries {
 
 	public static final String	INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION																																								= "{'intervention':#}";
 	public static final String	INTERVENTION_VARIABLE_WITH_VALUE__BY_INTERVENTION_AND_NAME																																						= "{'intervention':#,'name':#}";
+	
+	public static final String	INTERVENTION_EXTERNAL_SYSTEM__BY_INTERVENTION																																									= "{'intervention':#}";
+	public static final String	INTERVENTION_EXTERNAL_SYSTEM__BY_INTERVENTION_AND_NAME																																							= "{'intervention':#,'name':#}";
+	public static final String	INTERVENTION_EXTERNAL_SYSTEM__BY_SYSTEM_ID																																										= "{'systemId':#}";
+	
+	public static final String	INTERVENTION_EXTERNAL_SYSTEM_FIELD_VARIABLE_MAPPING__BY_INTERVENTION_EXTERNAL_SYSTEM																															= "{'interventionExternalSystem':#}";
+	public static final String	INTERVENTION_EXTERNAL_SYSTEM_FIELD_VARIABLE_MAPPING__BY_INTERVENTION_EXTERNAL_SYSTEM_AND_FIELD_NAME																												= "{'interventionExternalSystem':#,'fieldName':#}";
 
 	public static final String	MONITORING_MESSAGE_GROUP__BY_INTERVENTION																																										= "{'intervention':#}";
 	public static final String	MONITORING_MESSAGE_GROUP__BY_INTERVENTION_AND_ORDER_LOWER																																						= "{'intervention':#,'order':{$lt:#}}";

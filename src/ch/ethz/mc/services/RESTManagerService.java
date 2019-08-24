@@ -19,6 +19,7 @@ import ch.ethz.mc.model.persistent.BackendUserInterventionAccess;
 import ch.ethz.mc.model.persistent.DialogOption;
 import ch.ethz.mc.model.persistent.DialogStatus;
 import ch.ethz.mc.model.persistent.Intervention;
+import ch.ethz.mc.model.persistent.InterventionExternalSystem;
 import ch.ethz.mc.model.persistent.Participant;
 import ch.ethz.mc.model.persistent.ParticipantVariableWithValue;
 import ch.ethz.mc.model.persistent.types.DialogOptionTypes;
@@ -73,6 +74,7 @@ public class RESTManagerService extends Thread {
 	private final String							deepstreamSuperviserRole;
 	private final String							deepstreamTeamManagerRole;
 	private final String							deepstreamObserverRole;
+	private final String							deepstreamExternalServiceRole;
 	private final int								deepstreamMinClientVersion;
 	private final int								deepstreamMaxClientVersion;
 
@@ -102,6 +104,7 @@ public class RESTManagerService extends Thread {
 		deepstreamSuperviserRole = ImplementationConstants.DEEPSTREAM_SUPERVISOR_ROLE;
 		deepstreamTeamManagerRole = ImplementationConstants.DEEPSTREAM_TEAM_MANAGER_ROLE;
 		deepstreamObserverRole = ImplementationConstants.DEEPSTREAM_OBSERVER_ROLE;
+		deepstreamExternalServiceRole = ImplementationConstants.DEEPSTREAM_EXTERNAL_SYSTEM_ROLE;
 		deepstreamMinClientVersion = Constants.getDeepstreamMinClientVersion();
 		deepstreamMaxClientVersion = Constants.getDeepstreamMaxClientVersion();
 
@@ -1026,6 +1029,54 @@ public class RESTManagerService extends Thread {
 						username);
 				return false;
 			}
+		} else {
+			log.debug("Unauthorized access with wrong role {}", role);
+			return false;
+		}
+	}
+	
+	public boolean checkExternalSystemAccess(final int clientVersion, final String role, final String systemId,
+			final String token) {
+
+		// Prevent access for too old or new clients.
+		if (clientVersion < deepstreamMinClientVersion || clientVersion > deepstreamMaxClientVersion) {
+			return false;
+		}
+
+		// Prevent unauthorized access with empty values.
+		if (StringUtils.isBlank(systemId) || StringUtils.isBlank(role) || StringUtils.isBlank(token)) {
+			return false;
+		}
+
+		// Check access based on role.
+		if (role.equals(deepstreamExternalServiceRole)) {
+
+			// Check if systemId exists.
+			val externalSystem = databaseManagerService.findOneModelObject(InterventionExternalSystem.class,
+					Queries.INTERVENTION_EXTERNAL_SYSTEM__BY_SYSTEM_ID, systemId);
+			if (externalSystem == null) {
+				log.debug("System id {} not authorized for deepstream access: System id not found", systemId);
+				return false;
+			}
+			
+			// Check if external system is active.
+			if(!externalSystem.isActive()) {
+				log.debug("System with id {} is inactive", systemId);
+				return false;
+			}
+
+			// Validate token saved in record with path: "external-systems/[systemId]".
+			if (deepstreamCommunicationService != null
+					&& deepstreamCommunicationService.checkExternalSystemToken(systemId, token)) {
+				log.debug("System {} with id {} authorized for deepstream access", externalSystem.getName(),
+						systemId);
+				return true;
+			} else {
+				log.debug("System {} with id {} not authorized for deepstream access: Wrong token",
+						externalSystem.getName(), systemId);
+				return false;
+			}
+
 		} else {
 			log.debug("Unauthorized access with wrong role {}", role);
 			return false;
